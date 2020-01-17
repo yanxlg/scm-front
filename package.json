@@ -47,16 +47,20 @@
         "mockjs": "^1.1.0"
     },
     "lint-staged": {
-        "*.{ts,tsx}": [
-            "tslint --fix",
+        "**/*.less": "stylelint --syntax less",
+        "**/*.{js,jsx,tsx,ts,less,md,json}": [
+            "prettier --write",
             "git add"
         ],
-        "*.{js,jsx}": [
-            "eslint --fix",
-            "git add"
-        ]
+        "**/*.{js,jsx}": "npm run lint-staged:js",
+        "**/*.{js,ts,tsx}": "npm run lint-staged:js"
     },
     "engines": {
         "node": ">=8.0.0"
-    }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 10"
+    ]
 }
