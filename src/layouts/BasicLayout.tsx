@@ -10,6 +10,7 @@ import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.svg';
 import MenuData from "@/config/menu.json";
+import "@/styles/menu.less";
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -40,7 +41,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                         return defaultDom;
                     }
 
-                    return <Link to={menuItemProps.path}>{defaultDom}</Link>;
+                    return <Link to={menuItemProps.path!}>{defaultDom}</Link>;
                 }}
                 breadcrumbRender={(routers = []) => {
                     return [
@@ -67,6 +68,9 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                 footerRender={false}
                 menuDataRender={() =>MenuData}
                 rightContentRender={rightProps => <RightContent {...rightProps} />}
+                fixSiderbar={true}
+                fixedHeader={true}
+                links={[<div key="1" className="menu-link">草稿箱（9999999）</div>]}
                 {...props}
             >
                 {children}
@@ -74,6 +78,8 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
         );
     }
 }
+
+
 
 export default connect(({ global }: ConnectState) => ({
     collapsed: global.collapsed,

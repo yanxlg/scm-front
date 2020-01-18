@@ -2,19 +2,59 @@
     {
         "path": "/",
         "name": "首页",
+        "icon": "dashboard"
+    },
+    {
+        "path": "/task",
+        "name": "任务中心",
         "icon": "dashboard",
         "children": [
             {
-                "path": "/dashboard/analysis",
-                "name": "analysis"
+                "path": "/task/config",
+                "name": "任务配置"
             },
             {
-                "path": "/dashboard/monitor",
-                "name": "monitor"
+                "path": "/task/list",
+                "name": "任务列表"
+            }
+        ]
+    },
+    {
+        "path": "/goods",
+        "name": "商品中心",
+        "icon": "dashboard",
+        "children": [
+            {
+                "path": "/goods/local",
+                "name": "本地产品库"
             },
             {
-                "path": "/dashboard/workplace",
-                "name": "workplace"
+                "path": "/goods/vova",
+                "name": "VoVa产品库"
+            }
+        ]
+    },
+    {
+        "path": "/order",
+        "name": "订单管理",
+        "icon": "dashboard"
+    },
+    {
+        "path": "/setting",
+        "name": "基本设置",
+        "icon": "dashboard",
+        "children": [
+            {
+                "path": "/setting/connect",
+                "name": "店铺关联"
+            },
+            {
+                "path": "/setting/price",
+                "name": "价格上浮设置"
+            },
+            {
+                "path": "/setting/address",
+                "name": "中转仓地址设置"
             }
         ]
     }
