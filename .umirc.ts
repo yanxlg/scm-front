@@ -1,10 +1,13 @@
 import { IConfig } from 'umi-types';
 const shajs = require('sha.js');
+import path from "path";
+const eslint = require('eslint');
 
 // ref: https://umijs.org/config/
 const config: IConfig = {
     treeShaking: true,
     hash:true,
+    devtool: process.env.NODE_ENV !== 'production' ? 'source-map' : false,
     cssLoaderOptions: {
         modules: false, // false 不起作用
         getLocalIdent: (
@@ -35,7 +38,7 @@ const config: IConfig = {
             dva: true,
             dynamicImport: { webpackChunkName: true },
             title: '供应链管理中台',
-            dll: true,
+            dll: process.env.NODE_ENV === 'production',
             locale: {
                 enable: false,
                 default: 'zh-CN',
@@ -59,6 +62,21 @@ const config: IConfig = {
             pathRewrite: { '^/api': '' },
         },
     },
+    chainWebpack(config, { webpack }) {
+        const appSrc = path.resolve(process.cwd(),"src");
+        const umi = path.resolve(process.cwd(),"src/pages/.umi");
+        config.module.rule("lint").test(/\.(js|mjs|jsx|ts|tsx)$/)
+            .include.add(appSrc).end()
+            .exclude.add(umi).end()
+            .enforce("pre")
+            .use("eslint-loader")
+            .loader("eslint-loader")
+            .options({
+                cache: true,
+                resolvePluginsRelativeTo: __dirname,
+                useEslintrc: true,
+            });
+    }
 };
 
 export default config;

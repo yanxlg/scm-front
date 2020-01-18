@@ -1,5 +1,6 @@
 @headerHeight:60px;
 
+@import "./variable";
 
 .main{
     position: absolute;
@@ -317,5 +318,57 @@
         height:40px;
         border: none;
         outline: none;
+    }
+}
+
+
+
+
+
+///////////////////////////////////index 样式////////////////////////////////////////////////////
+.container{
+    padding:20px 30px;
+}
+
+.padding{
+    &-none{
+        padding: 0;
+    }
+}
+
+.tabs-margin-none{
+    .ant-tabs-bar{
+        margin-bottom: 0;
+    }
+}
+
+.block{
+    display: block!important;
+}
+
+
+.vertical{
+    &-middle{
+        vertical-align: middle;
+    }
+}
+
+
+.select{
+    &-default{
+        width: @inputWidth!important;
+    }
+}
+
+
+.input{
+    &-default{
+        width: @inputWidth;
+    }
+    &-large{
+        width: @inputLargeWidth;
+    }
+    &-small{
+        width: @inputSmallWidth;
     }
 }
