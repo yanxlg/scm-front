@@ -1,17 +1,12 @@
+@cardSpacing:20px;
+@colonSpacing:10px;
+@btnDefaultWidth:80px;
+
 .config{
     &-card{
-        margin-top: 20px;
+        margin-top: @cardSpacing;
     }
     &-colon{
-        margin: 0 10px;
-    }
-    &-btn{
-        &-default{
-            min-width: 80px;
-            height: 46px;
-            & ~ & {
-                margin-left: 20px;
-            }
-        }
+        margin: 0 @colonSpacing;
     }
 }
