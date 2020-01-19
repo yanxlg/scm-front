@@ -1,12 +1,57 @@
 @cardSpacing:20px;
 @colonSpacing:10px;
 @btnDefaultWidth:80px;
+@textAreaHeight:280px;
+@consoleWidth:280px;
+
 
 .config{
     &-card{
-        margin-top: @cardSpacing;
+        margin-top: @cardSpacing!important;
     }
     &-colon{
         margin: 0 @colonSpacing;
+    }
+    &-textarea{
+        min-height: @textAreaHeight!important;
+    }
+    &-modal{
+        &-title{
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            & ~ & {
+                margin-top: 16px;
+            }
+        }
+        &-btn{
+            width: 140px;
+            margin: 20px auto 0;
+            display: block;
+        }
+        &-tip{
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    }
+    &-console{
+        width: @consoleWidth;
+        margin-left: 20px;
+        &-tip{
+            color: #999;
+            margin-top: 10px;
+        }
+        &-content{
+            height: ~'calc(100vh - 500px)';
+        }
+    }
+    &-task{
+        &-label{
+            & ~ &{
+                margin-top: 8px;
+            }
+        }
     }
 }

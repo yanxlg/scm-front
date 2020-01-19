@@ -5,7 +5,7 @@ import {
     FormComponentProps,
     ValidationRule,
     FormProps,
-    GetFieldDecoratorOptions,
+    GetFieldDecoratorOptions, ValidateFieldsOptions,
 } from 'antd/lib/form/Form';
 
 class FormItem extends React.PureComponent<ProFormItemProps, any> {
@@ -89,16 +89,17 @@ class BaseForm<T extends FormComponentProps, S = {}, SS = any> extends React.Pur
         return error ? { help: error } : { help: '' };
     };
     getValues = (fieldsName?: string[]) => this.props.form.getFieldsValue(fieldsName);
-    validate = ()=>{
+    validate = (options?: ValidateFieldsOptions)=>{
         return new Promise((resolve,reject)=>{
             this.props.form.validateFieldsAndScroll(
                 {
                     first: true,
                     force: true,
+                    ...options
                 },
                 (err, values) => {
                     if (!err) {
-                        resolve();
+                        resolve(values);
                     }else{
                         reject()
                     }
@@ -127,7 +128,7 @@ class Form extends React.PureComponent<ProFormProps, any> {
     static Item = FormItem;
     static create = AntdForm.create;
     componentDidMount() {
-        const { initValidate } = this.props;
+/*        const { initValidate } = this.props;
         if (initValidate && this.props.form) {
             this.props.form.validateFieldsAndScroll(
                 {
@@ -136,7 +137,7 @@ class Form extends React.PureComponent<ProFormProps, any> {
                 },
                 () => {},
             );
-        }
+        }*/
     }
 
     render() {

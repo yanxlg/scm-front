@@ -1,52 +1,23 @@
 import React from 'react';
-import { Form } from '@/components/Form';
-import {Bind} from 'lodash-decorators';
-import { FormComponentProps } from 'antd/lib/form';
-import { Button, Card, Icon, Input, Modal, Radio, Select, Tooltip } from 'antd';
 import "@/styles/config.less";
-import "@/styles/form.less";
-import "@/styles/modal.less";
+import { Button, Card, Icon, Input, Modal, Radio, Select, Tooltip } from 'antd';
+import { FormComponentProps } from 'antd/lib/form';
+import { Form } from '@/components/Form';
+import { Bind } from 'lodash-decorators';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { IFormData } from '@/pages/task/components/HotGather';
 
 
-export declare interface IFormData {
-    scope?: "fullStack"|"shop";
-    shopId?:string;
-    level1?:string;
-    level2?:string;
-    sortType?:string;
-    keywords?:string;
-    taskType?:"once"|"timer";
-    taskInterval?:"day"|"sec";
-    salesMin?:number;
-    salesMax?:number;
-    stockMin?:number;
-    stockMax?:number;
-    skuMin?:number;
-    skuMax?:number;
-    commentsNum?:number;
-    priceMin?:number;
-    priceMax?:number;
-    pages?:number;
-    count?:number;
-    onceStartTime?:string;
-    timerStartTime?:string;
-    timerEndTime?:string;
-    day?:number;
-    second?:number;
-    taskName?:string;
-}
-
-declare interface IHotGatherProps extends FormComponentProps<IFormData>{
+declare interface IHotTaskResultProps extends FormComponentProps<IFormData>{
 
 }
 
 const Option = Select.Option;
 
-class _HotGather extends Form.BaseForm<IHotGatherProps>{
+class _HotTaskResult extends Form.BaseForm<IHotTaskResultProps>{
     @Bind
-    private onStartGather(){
+    private onSave(){
         this.validate({
             scroll:{
                 offsetTop:80
@@ -62,7 +33,7 @@ class _HotGather extends Form.BaseForm<IHotGatherProps>{
         });
     }
     @Bind
-    private onAcquisitionRack(){
+    private onNewTask(){
         this.validate({
             scroll:{
                 offsetTop:80
@@ -82,6 +53,24 @@ class _HotGather extends Form.BaseForm<IHotGatherProps>{
         const {scope, taskType, taskInterval} = formData;
         return (
             <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
+                <div className="config-task-label">
+                    任务ID：987
+                </div>
+                <div className="config-task-label">
+                    任务状态: 执行中
+                </div>
+                <div className="config-task-label">
+                    执行成功：3次
+                </div>
+                <div className="config-task-label">
+                    执行失败：1次
+                </div>
+                <div>
+                    任务名称：
+                </div>
+                <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name="taskName" label="任务名称">
+                    <Input className="input-default"/>
+                </Form.Item>
                 <Card className="config-card" title={<span className="ant-form-item-required">任务范围：</span>}>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="scope" initialValue="fullStack">
                         <Radio.Group>
@@ -222,15 +211,12 @@ class _HotGather extends Form.BaseForm<IHotGatherProps>{
                         </Radio.Group>
                     </Form.Item>
                 </Card>
-                <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name="taskName" label="任务名称">
-                    <Input className="input-default"/>
-                </Form.Item>
                 <div className="form-item">
-                    <Button type="primary" className="btn-default" onClick={this.onStartGather}>
-                        开始采集
+                    <Button type="primary" className="btn-default" onClick={this.onSave}>
+                        保存
                     </Button>
-                    <Button type="primary" className="btn-default" onClick={this.onAcquisitionRack}>
-                        一键采集上架
+                    <Button type="primary" className="btn-default" onClick={this.onNewTask}>
+                        创建新任务
                     </Button>
                 </div>
             </Form>
@@ -238,7 +224,6 @@ class _HotGather extends Form.BaseForm<IHotGatherProps>{
     }
 }
 
-const HotGather = Form.create<IHotGatherProps>()(_HotGather);
+const HotTaskResult = Form.create<IHotTaskResultProps>()(_HotTaskResult);
 
-
-export default HotGather;
+export {HotTaskResult};
