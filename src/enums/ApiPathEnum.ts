@@ -7,6 +7,8 @@ enum ApiPathEnum {
     CancelOrder="/api/order/cancelPurchaseOrder",
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
+    // 商品中心相关接口
+    getGoodsList="/goods/list",
 }
 
 export { ApiPathEnum };
