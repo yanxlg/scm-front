@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import HotGather from '@/pages/task/components/HotGather';
 import "@/styles/index.less";
 import URLGather from '@/pages/task/components/URLGather';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
 
 const { TabPane } = Tabs;
 
@@ -11,14 +12,14 @@ const Config:React.FC = (props:{})=>{
     const onChange = useCallback((activeKey:string)=>setActiveKey(activeKey),[]);
     return useMemo(()=>{
         return (
-            <div className="container">
-                <Tabs className="tabs-margin-none" onChange={onChange} activeKey={activeKey} type="card" children={
-                    [
-                        <TabPane tab="热销款采集" key="1"><HotGather/></TabPane>,
-                        <TabPane tab="指定URL采集" key="2"><URLGather/></TabPane>
-                    ]
-                }/>
-            </div>
+          <div className="container">
+              <Tabs className="tabs-margin-none" onChange={onChange} activeKey={activeKey} type="card" children={
+                  [
+                      <TabPane tab="热销款采集" key="1"><HotGather/></TabPane>,
+                      <TabPane tab="指定URL采集" key="2"><URLGather/></TabPane>
+                  ]
+              }/>
+          </div>
         )
     },[activeKey,props]);
 };
