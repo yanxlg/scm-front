@@ -2,7 +2,8 @@
 @colonSpacing:10px;
 @btnDefaultWidth:80px;
 @textAreaHeight:280px;
-@consoleWidth:280px;
+@consoleModalWidth:500px;
+@consoleModalHeight:400px;
 
 
 .config{
@@ -37,14 +38,16 @@
         }
     }
     &-console{
-        width: @consoleWidth;
-        margin-left: 20px;
-        &-tip{
-            color: #999;
-            margin-top: 10px;
+        &-title{
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        &-modal{
+            width: @consoleModalWidth!important;
         }
         &-content{
-            height: ~'calc(100vh - 500px)';
+            height: @consoleModalHeight;
         }
     }
     &-task{

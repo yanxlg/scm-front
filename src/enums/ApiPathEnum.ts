@@ -1,3 +1,5 @@
+
+
 enum ApiPathEnum {
     Login = '/api/login/login',
     GetOrderList="/api/order/list",
@@ -7,6 +9,12 @@ enum ApiPathEnum {
     CancelOrder="/api/order/cancelPurchaseOrder",
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
+
+
+
+
+
+    QueryTaskList="/v1/task/list",
 }
 
 export { ApiPathEnum };

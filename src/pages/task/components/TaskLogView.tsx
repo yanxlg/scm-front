@@ -1,22 +1,105 @@
-import React from 'react';
-import "@/styles/config.less";
-import { Card, Checkbox } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import React, { useEffect, useMemo, useState } from 'react';
+import '@/styles/config.less';
+import {Table } from 'antd';
+import { ColumnProps } from 'antd/lib/table';
 
-class TaskLogView extends React.PureComponent{
-    render(){
-        return (
-          <div className="config-console">
-              <Card title="任务执行日志">
-                  <div className="config-console-content"/>
-              </Card>
-              <Checkbox>窗口模式</Checkbox>
-              <div className="config-console-tip">
-                  执行任务过程中，支持文本展示及窗口展示，勾选【窗口模式】即可查看机器人实时操作
-              </div>
-          </div>
-        )
-    }
+
+declare interface ITaskLogViewProps {
+    taskId: string;
 }
+
+declare interface ILogItem {
+    task_time:string;
+    status:string;
+}
+
+const columns:ColumnProps<ILogItem>[] = [ {
+    title: '序号',
+    width: '100px',
+    dataIndex: 'index',
+    fixed: 'left',
+    align: 'center',
+    render: (text: string, record: any, index: number) => index + 1,
+},{
+    title: '任务时间',
+    width: '126px',
+    dataIndex: 'task_time',
+    align: 'center',
+},{
+    title: '任务状态',
+    width: '126px',
+    dataIndex: 'status',
+    align: 'center',
+}];
+
+const TaskLogView: React.FC<ITaskLogViewProps> = ({ taskId }) => {
+    const [loading, setLoading] = useState(true);
+    const [dataSet,setDataSet] = useState<ILogItem[]>([]);
+    useEffect(() => {
+        // 获取数据
+        setTimeout(()=>{
+            setLoading(false);
+            setDataSet([{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            },{
+                task_time:"212",
+                status:"22"
+            }]);
+        },3000)
+    }, []);
+    return useMemo(() => {
+        return (
+          <div className="config-console-content">
+              <div className="config-console-title">
+                  任务日志
+              </div>
+              <Table
+                  className="config-card"
+                  rowKey="order_goods_sn"
+                  columns={columns}
+                  dataSource={dataSet}
+                  pagination={false}
+                  loading={loading}
+                  scroll={{ y: 280 }}
+              />
+          </div>
+        );
+    }, [loading,dataSet]);
+};
+
 
 export default TaskLogView;

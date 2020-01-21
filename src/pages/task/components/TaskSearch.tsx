@@ -4,15 +4,15 @@ import { Input, Select } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import "@/styles/config.less";
 
-declare interface IFormData {
-    taskId?:string;
-    taskName?:string;
-    scope?:string;
-    taskStatus?:string;
-    startTime?:string;
-    endTime?:string;
-    createStartTime?:string;
-    createEndTime?:string;
+export declare interface IFormData {
+    task_id?:string;
+    task_name?:string;
+    task_range?:string;
+    task_status?:string;
+    task_begin_time?:string;
+    task_end_time?:string;
+    task_create_time1?:string;
+    task_create_time2?:string;
 }
 
 declare interface ITaskSearchProps extends FormComponentProps<IFormData>{
@@ -26,20 +26,20 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps>{
         return (
             <React.Fragment>
                 <Form className="config-card" layout="inline" autoComplete={'off'}>
-                    <Form.Item form={form} name="taskId" label="任务ID">
+                    <Form.Item form={form} name="task_id" label="任务ID">
                         <Input className="input-default" />
                     </Form.Item>
-                    <Form.Item form={form} name="taskName" label="任务名称">
+                    <Form.Item form={form} name="task_name" label="任务名称">
                         <Input className="input-default" />
                     </Form.Item>
-                    <Form.Item form={form} name="scope" label="任务范围">
+                    <Form.Item form={form} name="task_range" label="任务范围">
                         <Select className="select-default">
                             <Option value="1">女装</Option>
                             <Option value="2">男装</Option>
                             <Option value="3">鞋子</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item form={form} name="taskStatus" label="任务状态">
+                    <Form.Item form={form} name="task_status" label="任务状态">
                         <Select className="select-default">
                             <Option value="1">女装</Option>
                             <Option value="2">男装</Option>
@@ -47,20 +47,20 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps>{
                         </Select>
                     </Form.Item>
                     <div className="inline-block">
-                        <Form.Item className="margin-none" form={form} name="startTime" label="任务开始时间">
+                        <Form.Item className="margin-none" form={form} name="task_begin_time" label="任务开始时间">
                             <Input className="input-small"/>
                         </Form.Item>
                         <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="endTime">
+                        <Form.Item form={form} name="task_end_time">
                             <Input className="input-small"/>
                         </Form.Item>
                     </div>
                     <div className="inline-block">
-                        <Form.Item className="margin-none" form={form} name="createStartTime" label="任务创建时间">
+                        <Form.Item className="margin-none" form={form} name="task_create_time1" label="任务创建时间">
                             <Input className="input-small"/>
                         </Form.Item>
                         <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="createEndTime">
+                        <Form.Item form={form} name="task_create_time2">
                             <Input className="input-small"/>
                         </Form.Item>
                     </div>
