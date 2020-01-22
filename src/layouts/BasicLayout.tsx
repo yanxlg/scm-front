@@ -54,12 +54,13 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                 }}
                 itemRender={(route, params, routes) => {
                     const last = routes.indexOf(route) === routes.length - 1;
+                    const first = routes.indexOf(route) === 0;
 
                     if (route.path === '/') {
                         return null;
                     } // 删除首页
 
-                    return !last ? (
+                    return !last&&!first ? (
                         <Link to={route.path}>{route.breadcrumbName}</Link>
                     ) : (
                         <span>{route.breadcrumbName}</span>

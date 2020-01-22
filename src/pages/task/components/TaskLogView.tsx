@@ -5,7 +5,7 @@ import { ColumnProps } from 'antd/lib/table';
 
 
 declare interface ITaskLogViewProps {
-    taskId: string;
+    task_Id: number;
 }
 
 declare interface ILogItem {
@@ -32,7 +32,7 @@ const columns:ColumnProps<ILogItem>[] = [ {
     align: 'center',
 }];
 
-const TaskLogView: React.FC<ITaskLogViewProps> = ({ taskId }) => {
+const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
     const [loading, setLoading] = useState(true);
     const [dataSet,setDataSet] = useState<ILogItem[]>([]);
     useEffect(() => {

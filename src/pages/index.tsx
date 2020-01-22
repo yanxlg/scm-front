@@ -1010,7 +1010,7 @@ class Index extends React.PureComponent<{}, IIndexState> {
                                 onShowSizeChange={this.onShowSizeChange}
                                 showSizeChanger={true}
                                 showQuickJumper={{
-                                    goButton: <Button className="button-go">Go</Button>,
+                                    goButton: <Button className="btn-go">Go</Button>,
                                 }}
                                 showLessItems={true}
                                 showTotal={Index.showTotal}
@@ -1039,7 +1039,7 @@ class Index extends React.PureComponent<{}, IIndexState> {
                                 onShowSizeChange={this.onShowSizeChange}
                                 showSizeChanger={true}
                                 showQuickJumper={{
-                                    goButton: <Button className="button-go">Go</Button>,
+                                    goButton: <Button className="btn-go">Go</Button>,
                                 }}
                                 showLessItems={true}
                                 showTotal={Index.showTotal}

@@ -9,7 +9,8 @@ const config: IConfig = {
     hash:true,
     devtool: process.env.NODE_ENV !== 'production' ? 'source-map' : false,
     cssLoaderOptions: {
-        modules: false, // false 不起作用
+        modules: false,
+        localsConvention: 'camelCase',// scope支持camel转换
         getLocalIdent: (
             context: {
                 resourcePath: string;

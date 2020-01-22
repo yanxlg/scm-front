@@ -2,7 +2,8 @@ import React from 'react';
 import { Form } from '@/components/Form';
 import { Input, Select } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import "@/styles/config.less";
+import '@/styles/config.less';
+import { TaskStatus } from '@/enums/ConfigEnum';
 
 export declare interface IFormData {
     task_id?:string;
@@ -15,14 +16,15 @@ export declare interface IFormData {
     task_create_time2?:string;
 }
 
-declare interface ITaskSearchProps extends FormComponentProps<IFormData>{
+declare interface ITaskSearchProps extends FormComponentProps<IFormData> {
+    task_status:TaskStatus;
 }
 
 const Option = Select.Option;
 
 class _TaskSearch extends Form.BaseForm<ITaskSearchProps>{
     render(){
-        const {form} = this.props;
+        const {form,task_status} = this.props;
         return (
             <React.Fragment>
                 <Form className="config-card" layout="inline" autoComplete={'off'}>
@@ -39,13 +41,17 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps>{
                             <Option value="3">鞋子</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item form={form} name="task_status" label="任务状态">
-                        <Select className="select-default">
-                            <Option value="1">女装</Option>
-                            <Option value="2">男装</Option>
-                            <Option value="3">鞋子</Option>
-                        </Select>
-                    </Form.Item>
+                    {
+                        task_status===TaskStatus.All&&(
+                            <Form.Item form={form} name="task_status" label="任务状态">
+                                <Select className="select-default">
+                                    <Option value="1">女装</Option>
+                                    <Option value="2">男装</Option>
+                                    <Option value="3">鞋子</Option>
+                                </Select>
+                            </Form.Item>
+                        )
+                    }
                     <div className="inline-block">
                         <Form.Item className="margin-none" form={form} name="task_begin_time" label="任务开始时间">
                             <Input className="input-small"/>

@@ -49,7 +49,7 @@
         "icon": "dashboard",
         "children": [
             {
-                "path": "/setting/connect",
+                "path": "/setting/store",
                 "name": "店铺关联"
             },
             {
