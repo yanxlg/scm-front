@@ -12,3 +12,10 @@ export async function getGoodsList(params: IFilterParams) {
         params: params
     });
 }
+
+export async function getGoodsVersionList(params: IFilterParams) {
+    return request.get(ApiPathEnum.getGoodsVersionList, {
+        requestType: 'form',
+        params: params
+    });
+}
