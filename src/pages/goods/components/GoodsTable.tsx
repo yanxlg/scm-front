@@ -3,28 +3,31 @@ import React from 'react';
 import { Table, Checkbox, Pagination, Input, Button } from 'antd';
 import ZoomImage from '@/components/ZoomImage';
 
+import { cloneDeep } from 'lodash';
 import { BindAll } from 'lodash-decorators';
 import { ColumnProps } from 'antd/es/table';
-import { IDataItem } from '../local';
+import { IRowDataItem, ISaleItem, IScmSkuStyle, ISkuImgItem } from '../local';
 
 declare interface GoodsTableProps {
-    goodsList: IDataItem[];
+    goodsList: IRowDataItem[];
     collapseGoods(parentId: string, status: boolean): void;
+    toggleImgEditDialog(status: boolean, imgList?: ISkuImgItem[]): void;
 }
 
 @BindAll()
 class GoodsTable extends React.PureComponent<GoodsTableProps> {
 
-    private columns: ColumnProps<IDataItem>[] = [
+    private columns: ColumnProps<IRowDataItem>[] = [
         {
             key: 'x',
             title: <Checkbox />,
             // dataIndex: 'a1',
             align: 'center',
             width: 60,
-            render: (value: string, row: IDataItem, index: number) => {
+            render: (value: string, row: IRowDataItem, index: number) => {
                 return {
-                    children: row.isParent ? <Checkbox /> : null,
+                    // children: row._isParent ? <Checkbox /> : null,
+                    children: <Checkbox />,
                     props: {
                         rowSpan: row._rowspan || 0
                     }
@@ -32,21 +35,252 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             }
         },
         {
-            key: 'a1',
-            title: '中台商品ID',
-            dataIndex: 'a1',
+            key: 'commodityId',
+            title: 'Commodity ID',
+            dataIndex: 'commodityId',
             align: 'center',
-            width: 120,
-            render: (value: string, row: IDataItem, index: number) => {
+            width: 130,
+            render: (value: string, row: IRowDataItem, index: number) => {
                 // console.log('1111', row);
+                // {
+                //     row._isParent 
+                //     ? <Button size="small" onClick={() => this.props.collapseGoods(row.parentId, !row.isCollapse)}>{row.isCollapse ? '收起' : '展开'}</Button> 
+                //     : null
+                // }
                 return {
                     children: (
                         <>
                             <div>{value}</div>
+                        </>
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
+        },
+        {
+            key: 'productId',
+            title: 'Product_ID',
+            dataIndex: 'productId',
+            align: 'center',
+            width: 130,
+            render: this.mergeCell
+        },
+        {
+            key: 'goodsImg',
+            title: '商品图片',
+            dataIndex: 'goodsImg',
+            align: 'center',
+            width: 100,
+            render: (value: string, row: IRowDataItem, index: number) => {
+                return {
+                    children: (
+                        <>
+                            <ZoomImage className="goods-local-img" src={row.goodsImg} />
+                            <Button 
+                                className="goods-local-img-edit" 
+                                size="small"
+                                onClick={() => this.clickImgEdit(row.skuImage)}
+                            >编辑</Button>
+                        </>
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
+        },
+        {
+            key: 'title',
+            title: '标题',
+            dataIndex: 'title',
+            align: 'center',
+            width: 200,
+            render: this.mergeCell
+        },
+        {
+            key: 'description',
+            title: '描述',
+            dataIndex: 'description',
+            align: 'center',
+            width: 200,
+            render: this.mergeCell
+        },
+        
+        {
+            key: 'firstCatagory',
+            title: '一级类目',
+            dataIndex: 'firstCatagory',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'secondCatagory',
+            title: '二级类目',
+            dataIndex: 'secondCatagory',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'thirdCatagory',
+            title: '三级类目',
+            dataIndex: 'thirdCatagory',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'skuNumber',
+            title: 'sku数量',
+            dataIndex: 'skuNumber',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'scmSkuSn',
+            title: '中台sku sn',
+            dataIndex: 'scmSkuSn',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'scmSkuStyle',
+            title: '规格',
+            dataIndex: 'scmSkuStyle',
+            align: 'center',
+            width: 120,
+            render: (value: IScmSkuStyle, row: IRowDataItem, index: number) => {
+                return (
+                    <>
+                        {
+                           value.size ? <div>Size: {value.size}</div> : null}
+                        {
+                           value.color ? <div>Color: {value.color}</div> : null}
+                    </>
+                )
+            }
+        },
+        {
+            key: 'scmSkuPrice',
+            title: '价格',
+            dataIndex: 'scmSkuPrice',
+            align: 'center',
+            width: 100
+        },
+        {
+            key: 'scmSkuShoppingFee',
+            title: '运费',
+            dataIndex: 'scmSkuShoppingFee',
+            align: 'center',
+            width: 100
+        },
+        {
+            key: 'scmSkuWeight',
+            title: '重量',
+            dataIndex: 'scmSkuWeight',
+            align: 'center',
+            width: 100,
+            // render: (value: string, row: IRowDataItem, index: number) => {
+            //     return <Input value={value}/>
+            // }
+        },
+        {
+            key: 'scmSkuInventory',
+            title: '库存',
+            dataIndex: 'scmSkuInventory',
+            align: 'center',
+            width: 100,
+        },   
+        // {
+        //     key: 'scmSkuShoppingTime',
+        //     title: '发货时间',
+        //     dataIndex: 'scmSkuShoppingTime',
+        //     align: 'center',
+        //     width: 100
+        // },
+        
+        {
+            key: 'salesVolume',
+            title: '销量',
+            dataIndex: 'salesVolume',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'comments',
+            title: '评价数量',
+            dataIndex: 'comments',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'brand',
+            title: '品牌',
+            dataIndex: 'brand',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'storeId',
+            title: '店铺 id',
+            dataIndex: 'storeId',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'storeName',
+            title: '店铺名称',
+            dataIndex: 'storeName',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'wormTaskId',
+            title: '爬虫任务 id',
+            dataIndex: 'wormTaskId',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        {
+            key: 'wormGoodsId',
+            title: '爬虫商品ID',
+            dataIndex: 'wormGoodsId',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell
+        },
+        // {
+        //     key: 'isOnSale',
+        //     title: '是否可上架',
+        //     dataIndex: 'isOnSale',
+        //     align: 'center',
+        //     width: 100,
+        //     render: this.mergeCell
+        // },
+        {
+            key: 'onSaleInfo',
+            title: '上架渠道',
+            dataIndex: 'onSaleInfo',
+            align: 'center',
+            width: 100,
+            render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
+                return {
+                    children: (
+                        <>
                             {
-                                row.isParent 
-                                ? <Button size="small" onClick={() => this.props.collapseGoods(row.parentId, !row.isCollapse)}>{row.isCollapse ? '收起' : '展开'}</Button> 
-                                : null
+                                value.map((item: ISaleItem) => (
+                                    <div>{item.onSaleChannel}: {item.onSaleTime}</div>
+                                ))
                             }
                         </>
                     ),
@@ -57,233 +291,32 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             }
         },
         {
-            key: 'a2',
-            title: '商品图片',
-            dataIndex: 'a2',
-            align: 'center',
-            width: 100,
-            render: (value: string, row: IDataItem, index: number) => {
-                return {
-                    children: <ZoomImage className="goods-local-img" src={row.a2} />,
-                    props: {
-                        rowSpan: row._rowspan || 0
-                    }
-                };
-            }
-        },
-        {
-            key: 'a3',
-            title: '任务 id',
-            dataIndex: 'a3',
+            key: 'wormTime',
+            title: '更新时间',
+            dataIndex: 'wormTime',
             align: 'center',
             width: 100,
             render: this.mergeCell
         },
+
         {
-            key: 'a4',
-            title: '爬虫商品ID',
-            dataIndex: 'a4',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a5',
-            title: '采集平台',
-            dataIndex: 'a5',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a6',
-            title: '标题',
-            dataIndex: 'a6',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a7',
-            title: '描述',
-            dataIndex: 'a7',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a8',
-            title: 'sku数量',
-            dataIndex: 'a8',
-            align: 'center',
-            width: 160,
-            render: (value: string, row: IDataItem, index: number) => {
-                return <Input value={value}/>
-            }
-        },
-        {
-            key: 'a9',
-            title: '中台sku id',
-            dataIndex: 'a9',
-            align: 'center',
-            width: 160,
-            render: (value: string, row: IDataItem, index: number) => {
-                return <Input value={value}/>
-            }
-        },
-        {
-            key: 'a10',
-            title: '规格',
-            dataIndex: 'a10',
-            align: 'center',
-            width: 100,
-            render: (value: string, row: IDataItem, index: number) => {
-                return <Input value={value}/>
-            }
-        },
-        {
-            key: 'a11',
-            title: '价格',
-            dataIndex: 'a11',
-            align: 'center',
-            width: 100,
-            render: (value: string, row: IDataItem, index: number) => {
-                return <Input value={value}/>
-            }
-        },
-        {
-            key: 'a12',
-            title: '重量',
-            dataIndex: 'a12',
-            align: 'center',
-            width: 100,
-            render: (value: string, row: IDataItem, index: number) => {
-                return <Input value={value}/>
-            }
-        },
-        {
-            key: 'a13',
-            title: '库存',
-            dataIndex: 'a13',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },   
-        {
-            key: 'a14',
-            title: '发货时间',
-            dataIndex: 'a14',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a15',
-            title: '运费',
-            dataIndex: 'a15',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a16',
-            title: '销量',
-            dataIndex: 'a16',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a17',
-            title: '评价数量',
-            dataIndex: 'a17',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },{
-            key: 'a18',
-            title: '一级类目',
-            dataIndex: 'a18',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a19',
-            title: '二级类目',
-            dataIndex: 'a19',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a20',
-            title: '品牌',
-            dataIndex: 'a20',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a21',
-            title: '店铺 id',
-            dataIndex: 'a21',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a22',
-            title: '店铺名称',
-            dataIndex: 'a22',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a23',
-            title: '采集时间',
-            dataIndex: 'a23',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a24',
-            title: '上架状态',
-            dataIndex: 'a24',
-            align: 'center',
-            width: 100,
-            render: this.mergeCell
-        },
-        {
-            key: 'a25',
+            key: 'wormGoodsInfoLink',
             title: '链接',
-            dataIndex: 'a25',
+            dataIndex: 'wormGoodsInfoLink',
             align: 'center',
             width: 100,
             render: this.mergeCell
-        },
-        {
-            key: '',
-            title: '操作',
-            // dataIndex: 'a25',
-            align: 'center',
-            width: 240,
-            render: (value: string, row: IDataItem, index: number) => {
-                return (
-                    <>
-                        <Button size="small">上架</Button>
-                        <Button size="small">编辑</Button>
-                        <Button size="small">版本跟踪</Button>
-                    </>
-                )
-            }
-        },
+        }
     ];
 
+    // 图片编辑
+    private clickImgEdit = (imgList: ISkuImgItem[]) => {
+        // console.log('clickImgEdit', rowData);
+        this.props.toggleImgEditDialog(true, imgList);
+    }
+
     // 合并单元格
-    private mergeCell(value: string, row: IDataItem, index: number) {
+    private mergeCell(value: string, row: IRowDataItem, index: number) {
         return {
             children: value,
             props: {
@@ -299,11 +332,12 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
     
 
     // 控制表格隐藏行
-    private toggleRow(record: IDataItem) {
-        return {
-            hidden: record._hidden
-        }
-    }
+    // private toggleRow(record: IRowDataItem) {
+    //     return {
+    //         hidden: record._hidden,
+    //         className: '1211'
+    //     }
+    // }
 
     render() {
 
@@ -327,7 +361,7 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
                 />
                 <Table
                     bordered={true}
-                    // rowKey="order_goods_sn"
+                    rowKey="scmSkuSn"
                     className="goods-local-table"
                     // bordered={true}
                     // rowSelection={rowSelection}
@@ -336,7 +370,7 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
                     scroll={{ x: true }}
                     pagination={false}
                     // loading={dataLoading}
-                    onRow={this.toggleRow}
+                    // onRow={this.toggleRow}
                 />
             </>
             
