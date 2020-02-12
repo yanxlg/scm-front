@@ -37,21 +37,23 @@ data:
         listen 80 default_server;
         listen [::]:80 default_server;
         access_log  /var/log/nginx/access.log  apache_format;
-        set $prjroot /var/www/http/atrium/front/;
-        root $prjroot/dist;
+        set $prjroot /usr/share/nginx/html;
+        root $prjroot/;
         index index.html;
-        access_log  logs/access-atrium-front.log main;
-
+        location ~ /version {
+            root $prjroot/;
+            add_header Content-Type text/plain;
+        }
         location / {
-                    try_files $uri $uri/ /index.php$is_args$args;
-            }
-
-        add_header Access-Control-Allow-Origin *;
-
-        #error_page 404  "${web_root}error.php?act=p404";
-        #error_page 404  "${web_root}index.php";
+            try_files $uri $uri/ /index.html;
         }
 
+        location /api/{
+            add_header Access-Control-Allow-Origin *;
+            rewrite ^/api(.*)$ /$1 break;
+            proxy_pass https://scm-front-t.vova.com.hk/;
+        }
+    }
 ---
 apiVersion: apps/v1
 kind: Deployment
