@@ -1,8 +1,8 @@
-import { message, notification } from 'antd';
 /**
  * request 网络请求工具
  * 更详细的 api 文档: https://github.com/umijs/umi-request
  */
+import { message, notification } from 'antd';
 import { extend, RequestOptionsInit, ResponseError } from 'umi-request';
 import { router } from 'umi';
 import { parse, stringify } from 'querystring';
@@ -40,60 +40,68 @@ const codeMessage:{[key:number]:string} = {
 };
 
 export const apiCodeMessage = {
-    success: "success",
+    success: 200,
 };
 
 /**
  * 异常处理程序
  */
-const errorHandler = (error: { response: Response; data: any }) => {
-    const { response, data } = error;
-    if (response && response.status) {
-        if (response.status !== 200) {
-            if(response.status === 401){
-                const msg = '身份已过期，需要重新登录';
-                newMessage(msg);
-                const { redirect } = getPageQuery();
-                if (window.location.pathname !== '/login' && !redirect) {
-                    router.replace({
-                        pathname: '/login',
-                        search: stringify({
-                            redirect: window.location.href,
-                        }),
+
+export function errorHandlerFactory(skipError: boolean = false) {
+    const errorHandler = (error: { response: Response; data: any ;request:{
+            url: string;
+            options: RequestOptionsInit;
+        }}) => {
+        const { response, data} = error;
+        if (response && response.status) {
+            if (response.status !== 200) {
+                if(response.status === 401){
+                    const msg = '身份已过期，需要重新登录';
+                    newMessage(msg);
+                    const { redirect } = getPageQuery();
+                    if (window.location.pathname !== '/login' && !redirect) {
+                        router.replace({
+                            pathname: '/login',
+                            search: stringify({
+                                redirect: window.location.href,
+                            }),
+                        });
+                    }
+                }else{
+                    const errorText = codeMessage[response.status] || response.statusText;
+                    const { status, url } = response;
+                    notification.error({
+                        message: `请求错误 ${status}: ${url}`,
+                        description: errorText,
                     });
                 }
-            }else{
-                const errorText = codeMessage[response.status] || response.statusText;
-                const { status, url } = response;
-                notification.error({
-                    message: `请求错误 ${status}: ${url}`,
-                    description: errorText,
-                });
+            } else {
+                if (!skipError&&(!data || data.code !== apiCodeMessage.success)) {
+                    const msg = (data && data.message) || '接口异常';
+                    newMessage(msg);
+                }
+                return Promise.reject(data); // 所有错误传递到onrejected中，业务层可以进一步处理
             }
-        } else {
-            if (!data || data.code !== apiCodeMessage.success) {
-                const msg = (data && data.message) || '接口异常';
-                newMessage(msg);
-            }
-            return Promise.reject(data); // 所有错误传递到onrejected中，业务层可以进一步处理
+        } else if (!response) {
+            notification.error({
+                description: '您的网络发生异常，无法连接服务器',
+                message: '网络异常',
+            });
         }
-    } else if (!response) {
-        notification.error({
-            description: '您的网络发生异常，无法连接服务器',
-            message: '网络异常',
+        return Promise.reject({
+            status: response.status,
+            msg: response.statusText,
         });
-    }
-    return Promise.reject({
-        status: response.status,
-        msg: response.statusText,
-    });
-};
+    };
+    return errorHandler;
+}
+
 
 /**
  * 配置request请求时的默认参数
  */
 const request = extend({
-    errorHandler, // 默认错误处理
+    errorHandler:errorHandlerFactory(), // 默认错误处理
     credentials: 'include', // 默认请求是否带上cookie
 });
 
@@ -104,12 +112,18 @@ request.interceptors.response.use(async (response: Response, options: RequestOpt
             // code !== 0 当作error处理
             if (!data || data.code !== apiCodeMessage.success) {
                 // @ts-ignore
-                return Promise.reject(new ResponseError<any>(response, 'data Error', data, null, 'DataError')); // invalid user 不传递到业务层
+                return Promise.reject(new ResponseError<any>(response, 'data Error', data, {
+                    url:response.url,
+                    options
+                }, 'DataError')); // invalid user 不传递到业务层
             }
             return response;
         } catch (error) {
             // @ts-ignore
-            return Promise.reject(new ResponseError<any>(response, 'parse Error', null, null, 'ParseError')); // invalid user 不传递到业务层
+            return Promise.reject(new ResponseError<any>(response, 'parse Error', null, {
+                url:response.url,
+                options
+            }, 'ParseError')); // invalid user 不传递到业务层
         }
     }
     return response;

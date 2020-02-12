@@ -16,6 +16,10 @@
             {
                 "path": "/task/list",
                 "name": "任务列表"
+            },
+            {
+                "path": "/task/drafts",
+                "name": "草稿箱"
             }
         ]
     },
@@ -48,7 +52,7 @@
         "icon": "dashboard",
         "children": [
             {
-                "path": "/setting/connect",
+                "path": "/setting/store",
                 "name": "店铺关联"
             },
             {

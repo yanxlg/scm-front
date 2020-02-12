@@ -1,41 +1,27 @@
-import React from 'react';
-import { Card, Tabs } from 'antd';
-import {Bind} from 'lodash-decorators';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Tabs } from 'antd';
 import HotGather from '@/pages/task/components/HotGather';
 import "@/styles/index.less";
-
-declare interface IConfigState {
-    activeKey?:string;
-}
+import URLGather from '@/pages/task/components/URLGather';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
 
 const { TabPane } = Tabs;
 
-class Config extends React.PureComponent<{},IConfigState>{
-    constructor(props:{}){
-        super(props);
-        this.state={
-            activeKey:"1"
-        }
-    }
-    @Bind
-    private onChange(activeKey:string){
-        this.setState({
-            activeKey
-        })
-    }
-    render(){
-        const {activeKey} = this.state;
+const Config:React.FC = (props:{})=>{
+    const [activeKey,setActiveKey] = useState("1");
+    const onChange = useCallback((activeKey:string)=>setActiveKey(activeKey),[]);
+    return useMemo(()=>{
         return (
           <div className="container">
-              <Tabs className="tabs-margin-none" onChange={this.onChange} activeKey={activeKey} type="card" children={
+              <Tabs className="tabs-margin-none" onChange={onChange} activeKey={activeKey} type="card" children={
                   [
-                      <TabPane tab="pdd热销款采集" key="1"><HotGather/></TabPane>,
-                      <TabPane tab="pdd/1688指定URL采集" key="2">Content of Tab Pane 1</TabPane>
+                      <TabPane tab="热销款采集" key="1"><HotGather/></TabPane>,
+                      <TabPane tab="指定URL采集" key="2"><URLGather/></TabPane>
                   ]
               }/>
           </div>
         )
-    }
-}
+    },[activeKey,props]);
+};
 
 export default Config;

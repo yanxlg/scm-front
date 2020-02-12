@@ -10,6 +10,8 @@ import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.svg';
 import MenuData from "@/config/menu.json";
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
 import "@/styles/menu.less";
 
 export interface BasicLayoutProps extends ProLayoutProps {
@@ -18,6 +20,10 @@ export interface BasicLayoutProps extends ProLayoutProps {
     };
     dispatch: Dispatch;
 }
+
+
+let timer:number|undefined = undefined;
+NProgress.configure({ showSpinner: false });
 
 class BasicLayout extends React.PureComponent<BasicLayoutProps>{
     private handleMenuCollapse = (payload: boolean): void => {
@@ -29,6 +35,18 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
             });
         }
     };
+    public static getDerivedStateFromProps(nextProps:BasicLayoutProps){
+        if(timer){
+            clearTimeout(timer);
+            timer = undefined;
+            NProgress.remove();
+        }
+        NProgress.start();
+        NProgress.inc();
+        timer=window.setTimeout(()=>{
+            NProgress.done();
+        },200+Math.floor(Math.random()*300));
+    }
     render(){
         const {children,dispatch,...props} = this.props;
         return (
@@ -54,12 +72,13 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                 }}
                 itemRender={(route, params, routes) => {
                     const last = routes.indexOf(route) === routes.length - 1;
+                    const first = routes.indexOf(route) === 0;
 
                     if (route.path === '/') {
                         return null;
                     } // 删除首页
 
-                    return !last ? (
+                    return !last&&!first ? (
                         <Link to={route.path}>{route.breadcrumbName}</Link>
                     ) : (
                         <span>{route.breadcrumbName}</span>

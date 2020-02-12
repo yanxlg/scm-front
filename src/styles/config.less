@@ -1,5 +1,78 @@
+@cardSpacing:20px;
+@colonSpacing:10px;
+@btnDefaultWidth:80px;
+@textAreaHeight:280px;
+@consoleModalWidth:500px;
+@consoleModalHeight:400px;
+
+
 .config{
     &-card{
-        margin-top: 20px;
+        margin-top: @cardSpacing!important;
+    }
+    &-colon{
+        margin: 0 @colonSpacing;
+    }
+    &-textarea{
+        min-height: @textAreaHeight!important;
+    }
+    &-modal{
+        &-title{
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            & ~ & {
+                margin-top: 16px;
+            }
+        }
+        &-btn{
+            width: 140px;
+            margin: 20px auto 0;
+            display: block;
+        }
+        &-tip{
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        &-hot{
+            width: 80%!important;
+            .ant-modal-content{
+                max-height: ~'calc(100vh - 200px)';
+                overflow: auto;
+            }
+        }
+    }
+    &-console{
+        &-title{
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        &-modal{
+            width: @consoleModalWidth!important;
+        }
+        &-content{
+            height: @consoleModalHeight;
+        }
+    }
+    &-task{
+        &-label{
+            & ~ &{
+                margin-top: 8px;
+            }
+        }
+    }
+    &-input{
+        &-pages{
+            width: 186px!important;
+        }
+        &-count{
+            width: 186px!important;
+        }
+    }
+    &-ques{
+        margin-left: 8px;
     }
 }

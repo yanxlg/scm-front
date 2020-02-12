@@ -1,5 +1,24 @@
+@import '~antd/es/form/style/index';
+
 .form{
     &-item{
         margin-top: 20px;
+        &-block{
+            display: block!important;
+            margin-right:0!important;
+            .@{form-prefix-cls}-item-control-wrapper{
+                display: block!important;
+            }
+        }
+    }
+    &-help{
+        &-absolute{
+            .@{form-prefix-cls}-item-with-help{
+                margin-bottom: 0!important;
+            }
+            .@{form-prefix-cls}-explain{
+                position: absolute!important;
+            }
+        }
     }
 }
