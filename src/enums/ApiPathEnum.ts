@@ -11,6 +11,10 @@ enum ApiPathEnum {
     getGoodsList="/v1/goods/list",
     putGoodsPicEdit="/v1/goods/pic/edit",
     postGoodsPicUpload="/v1/goods/pic/upload",
+    getGoodsOnsale="/v1/goods/onsale",
+    getGoodsDelete="/v1/goods/delete",
+    putGoodsEdit="/v1/goods/edits",
+    getGoodsSales="/v1/goods/sales",
     getGoodsVersionList="/goodsVersion/list",
 }
 

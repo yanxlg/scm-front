@@ -1,28 +1,46 @@
 import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 
-declare interface IFilterParams {
+export declare interface IFilterParams {
     page: number;
     page_count: number;
-    task_number?: string;       // 任务 id
-    store_id?: string;          // 店铺 ID
-    scm_goods_sn?: string;      // 中台商品 SN
-    first_catagory?: string;    // 一级类目
-    second_catagory?: string;   // 二级类目
-    sale_status?: string;       // 上架状态
-    min_sale?: number;          // 销量最小
-    max_sale?: number;          // 销量最大值
-    min_inventory?: number;     // 库存最小值
-    max_inventory?: number;     // 库存最大值
-    min_sku?: number;           // sku数量最小值
-    max_sku?: number;           // sku最大值
-    min_price?: number;         // 价格范围最小值
-    max_price?: number;         // 价格范围最大值
-    min_comment?: number;       // 评论数量最小值
+    task_number?: string;                // 任务 id
+    store_id?: string;                   // 店铺 ID
+    commodity_id?: string;               // Commodity_ID
+    inventory_status?: string;           // 库存
+    version_status?: string;             // 版本更新
+    first_catagory?: string;             // 一级类目
+    second_catagory?: string;            // 二级类目
+    third_catagory?: string;             // 三级类目
+    min_sale?: number | undefined;       // 销量最小
+    max_sale?: number | undefined;       // 销量最大值
+    min_sku?: number | undefined;        // sku数量最小值
+    max_sku?: number | undefined;        // sku最大值
+    min_price?: number | undefined;      // 价格范围最小值
+    max_price?: number | undefined;      // 价格范围最大值
+    min_comment?: number | undefined;    // 评论数量最小值
 }
 
 declare interface IImgEditData {
     pic: string[];
+}
+
+declare interface IOnsaleParams {
+    scm_goods_id: string[];
+}
+
+declare interface IGoodsDeleteParams {
+    product_ids: string[];
+}
+
+declare interface IGoodsEditData {
+    product_id: string;
+    title?: string;
+    description?: string;
+}
+
+declare interface IGoodsSalesParams {
+    product_id: string;
 }
 
 export async function getGoodsList(params: IFilterParams) {
@@ -51,4 +69,32 @@ export async function getGoodsVersionList(params: IFilterParams) {
         requestType: 'form',
         params: params
     });
+}
+
+// 一键上架
+export async function getGoodsOnsale(params: IOnsaleParams) {
+    return request.get(ApiPathEnum.getGoodsOnsale, {
+        params
+    })
+}
+
+// 删除
+export async function getGoodsDelete(params: IGoodsDeleteParams) {
+    return request.get(ApiPathEnum.getGoodsDelete, {
+        params
+    })
+}
+
+// 商品编辑
+export async function putGoodsEdit(data: IGoodsEditData) {
+    return request.put(ApiPathEnum.putGoodsEdit, {
+        data
+    })
+}
+
+// 查询商品上架信息
+export async function getGoodsSales(params: IGoodsSalesParams) {
+    return request.get(ApiPathEnum.getGoodsSales, {
+        params
+    })
 }

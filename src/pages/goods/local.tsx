@@ -1,18 +1,29 @@
 import React from 'react';
+import { Pagination } from 'antd'; 
 
 import LocalSearch from './components/LocalSearch';
 import GoodsTable from './components/GoodsTable';
-import UpdateDialog from './components/UpdateDialog';
+// import UpdateDialog from './components/UpdateDialog';
 import ImportGoodsDialog from './components/ImportGoodsDialog';
-import ShelvesDialog from './components/ShelvesDialog';
+import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
 import TranslationDialog from './components/TranslationDialog';
 import ImgEditDialog from './components/ImgEditDialog';
 // good-local.less
 import '../../styles/goods-local.less';
 
 import {
-    getGoodsList
+    getGoodsList,
+    getGoodsOnsale,
+    getGoodsDelete,
+    getGoodsSales,
+    IFilterParams
 } from '@/services/goods';
+import { message } from 'antd';
+
+declare interface IPageData {
+    page?: number;
+    page_count?: number;
+}
 
 declare interface ITranslateItem {
     language: string;
@@ -39,16 +50,9 @@ declare interface IScmSkuItem {
     scmSkuShoppingFee: number;
 }
 
-export declare interface ISkuImgItem {
-    imgId: string;
-    imgUrl: string;
-}
-
 declare interface IBaseData {
-    // scmGoodsSn: string;
-    // scmGoodsId: number;
     commodityId: string;
-    productId: number;
+    productId: string;
     goodsImg: string;
     wormTaskId: number;
     wormGoodsId: number;
@@ -68,7 +72,7 @@ declare interface IBaseData {
     storeName: string;
     wormTime: number;
     wormGoodsInfoLink: string;
-    skuImage: ISkuImgItem[];
+    skuImage: string[];
 }
 
 declare interface IDataItem extends IBaseData {
@@ -87,6 +91,7 @@ export declare interface IRowDataItem extends IBaseData {
     // _isCollapse?: boolean;
     // _hidden?: boolean;
     _rowspan?: number;
+    // _checked?: boolean;
 }
 
 declare interface IIndexState {
@@ -95,12 +100,24 @@ declare interface IIndexState {
     shelvesDialogStatus: boolean;
     translationDialogStatus: boolean;
     imgEditDialogStatus: boolean;
+    // 按钮加载中状态
+    searchLoading: boolean;
+    onsaleLoading: boolean;
+    deleteLoading: boolean;
     // updateType: string;
+    page: number;
+    page_count: number;
+    activeProductId: string;
     goodsList: IRowDataItem[];
-    activeImgList: ISkuImgItem[];
+    activeImgList: string[];
+    selectedRowKeys: string[];
+    rowKeys: string[];
+    saleStatusList: ISaleStatausItem[];
 }
 
 class Local extends React.PureComponent<{}, IIndexState> {
+
+    localSearchRef: LocalSearch | null =  null
 
     constructor(props: {}) {
         super(props);
@@ -110,23 +127,18 @@ class Local extends React.PureComponent<{}, IIndexState> {
             shelvesDialogStatus: false,
             translationDialogStatus: false,
             imgEditDialogStatus: false,
+            onsaleLoading: false,
+            deleteLoading: false,
+            searchLoading: false,
             // updateType: 'weight',
+            page: 1,
+            page_count: 10,
+            activeProductId: '',
             goodsList: [],
-            activeImgList: [
-                // {
-                //     imgId: '1',
-                //     imgUrl: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg'
-                // },
-                // {
-                //     imgId: '2',
-                //     imgUrl: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg'
-                // },
-                // {
-                //     imgId: '3',
-                //     imgUrl: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-                // }
-            ],
-
+            activeImgList: [],
+            selectedRowKeys: [],
+            rowKeys: [],
+            saleStatusList: []
         };
     }
 
@@ -135,29 +147,63 @@ class Local extends React.PureComponent<{}, IIndexState> {
         // console.log(this.props);
     }
 
-    private onSearch() {
-        return getGoodsList({
-            page: 1,
-            page_count: 10
-        }).then((res) => {
+    private onSearch = (searchData?: IPageData) => {
+        this.setState({
+            searchLoading: true
+        });
+        const { page, page_count } = this.state;
+        let params: IFilterParams = {
+            page,
+            page_count
+        };
+        if (this.localSearchRef) {
+            params = Object.assign(params, this.localSearchRef.state);
+        }
+        if (searchData) {
+            params = Object.assign(params, searchData);
+        }
+        return getGoodsList(params).then((res) => {
             // console.log(res)
             const { list } = res.data;
             // console.log(111111, this.addRowSpanData(list));
             this.setState({
+                page: params.page,
+                page_count: params.page_count,
                 goodsList: this.addRowSpanData(list)
             });
         }).finally(() => {
-            // this.setState({
-            //     dataLoading: false,
-            //     searchLoading:false
-            // });
+            this.setState({
+                searchLoading: false
+            });
         });
         
+    }
+
+    // 设置选择行
+    private changeSelectedRowKeys = (keys: string[]) => {
+        this.setState({
+            selectedRowKeys: keys 
+        })
+    }
+
+    // 编辑标题和描述成功改变goodsList
+    private changeGoodsList = (productId: string, type: 'title' | 'desc', text: string) => {
+        const { goodsList } = this.state;
+        this.setState({
+            goodsList: [...goodsList].map(item => {
+                const ret = {...item}
+                if (item.productId === productId) {
+                    ret[type === 'title' ? 'title' : 'description'] = text;
+                }
+                return ret;
+            })
+        })
     }
 
     // 处理表格数据，用于合并单元格
     private addRowSpanData(list: IDataItem[]): IRowDataItem[] {
         let ret: IRowDataItem[] = [];
+        let rowKeys: string[] = [];
         // let goodsId: string | number = 0;
         for (let i = 0, len = list.length; i < len; i++) {
             const { scmSkuInfo, ...rest } = list[i];
@@ -168,6 +214,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 }
                 if (index === 0) {
                     rowDataItem._rowspan = scmSkuInfo.length;
+                    rowKeys.push(rowDataItem.productId);
                 }
                 // rowDataItem._isCollapse = false;
                 // rowDataItem._isParent = true;
@@ -175,6 +222,9 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 ret.push(rowDataItem);
             })
         }
+        this.setState({
+            rowKeys
+        })
         // console.log('1111', ret);
         return ret;
         // return list
@@ -217,6 +267,27 @@ class Local extends React.PureComponent<{}, IIndexState> {
         })
     }
 
+    // 查询商品上下架记录
+    searchGoodsSale = (productId: string) => {
+        getGoodsSales({
+            product_id: productId
+        }).then(res => {
+            // console.log('productId', productId, res);
+            this.toggleShelvesDialog(true);
+            this.setState({
+                // (item, index, list) 
+                saleStatusList: res.data.map((item: ISaleStatausItem, index: number, list: ISaleStatausItem[]) => {
+                    item.order = list.length - index;
+                    return item
+                })
+            })
+        }).catch(err => {
+
+        })
+        
+        
+    }
+
     // 翻译弹框
     toggleTranslationDialog = (status: boolean) => {
         this.setState({
@@ -225,16 +296,195 @@ class Local extends React.PureComponent<{}, IIndexState> {
     }
 
     // 编辑图片弹框
-    toggleImgEditDialog = (status: boolean, imgList?: ISkuImgItem[]) => {
+    toggleImgEditDialog = (status: boolean, imgList?: string[], productId?: string) => {
         this.setState({
             imgEditDialogStatus: status,
-            activeImgList: imgList || []
+            activeImgList: imgList || [],
+            activeProductId: productId || ''
+        });
+    }
+
+    // 图片更新之后同步到goodsList
+    updateGoodsListImg = (imgList: string[], productId: string) => {
+        const { goodsList } = this.state;
+        this.setState({
+            goodsList: goodsList.map(item => {
+                if (item.productId !== productId) {
+                    return item;
+                };
+                const ret = {...item};
+                ret.skuImage = imgList;
+                return ret;
+            })
         })
+    }
+
+    // 一键上架
+    getGoodsOnsale = () => {
+        const { selectedRowKeys } = this.state;
+        if (!selectedRowKeys.length) {
+            return message.error('一键上架需要选择商品');
+        }
+        this.setState({
+            onsaleLoading: true
+        })
+        getGoodsOnsale({scm_goods_id: selectedRowKeys}).then(res => {
+            // console.log('getGoodsOnsale');
+            this.setState({
+                onsaleLoading: false
+            })
+        }).catch(err => {
+            // console.log('getGoodsOnsale ERR');
+            this.setState({
+                onsaleLoading: false
+            })
+        })
+    }
+
+    // 删除
+    getGoodsDelete = () => {
+        const { selectedRowKeys } = this.state;
+        if (!selectedRowKeys.length) {
+            return message.error('删除需要选择商品');
+        }
+        this.setState({
+            deleteLoading: true
+        })
+        getGoodsDelete({product_ids: selectedRowKeys}).then(res => {
+            // console.log('getGoodsDelete');
+            this.setState({
+                deleteLoading: false
+            })
+        }).catch(err => {
+            // console.log('getGoodsDelete ERR');
+            this.setState({
+                deleteLoading: false
+            })
+        })
+    }
+
+    onChangePage = (page: number) => {
+        this.onSearch({
+            page
+        });
+    }
+    
+    pageCountChange = (current: number, size: number) => {
+        this.onSearch({
+            page_count: size
+        });
+    }
+
+    // 生成表格
+    downloadExcel = () => {
+        const { goodsList } = this.state;
+        // console.log('downloadExcel', goodsList);
+        const titleList = [
+            'Commodity ID',
+            'Product ID',
+            '商品图片',
+            '标题',
+            '描述',
+            '一级类目',
+            '二级类目',
+            '三级类目',
+            'sku数量',
+            '中台sku sn',
+            '规格',
+            '价格',
+            '运费',
+            '重量',
+            '库存',
+            '销量',
+            '评价数量',
+            '品牌',
+            '店铺 id',
+            '店铺名称',
+            '爬虫任务 id',
+            '爬虫商品ID',
+            '上架渠道',
+            '更新时间',
+            '链接'
+        ];
+        let str = titleList.join(',') + '\n';
+        goodsList.forEach(item => {
+            const {
+                commodityId,
+                productId,
+                goodsImg,
+                title,
+                description,
+                firstCatagory,
+                secondCatagory,
+                thirdCatagory,
+                skuNumber,
+                scmSkuSn,
+                scmSkuStyle,
+                scmSkuPrice,
+                scmSkuShoppingFee,
+                scmSkuWeight,
+                scmSkuInventory,
+                salesVolume,
+                comments,
+                brand,
+                storeId,
+                storeName,
+                wormTaskId,
+                wormGoodsId,
+                onSaleInfo,
+                wormTime,
+                wormGoodsInfoLink,
+                _rowspan
+            } = item;
+            // 规格
+            let skuStr = '';
+            skuStr += scmSkuStyle.size ? ('Size: ' + scmSkuStyle.size + '\t') : ''
+            skuStr += scmSkuStyle.color ? ('Color: ' + scmSkuStyle.color) : ''
+            str += (_rowspan ? commodityId : '') + ',';
+            str += (_rowspan ? productId : '') + ',';
+            str += (_rowspan ? goodsImg : '') + ',';
+            str += (_rowspan ? title : '') + ',';
+            str += (_rowspan ? description : '') + ',';
+            str += (_rowspan ? firstCatagory : '') + ',';
+            str += (_rowspan ? secondCatagory : '') + ',';
+            str += (_rowspan ? thirdCatagory : '') + ',';
+            str += (_rowspan ? skuNumber : '') + ',';
+            str += scmSkuSn + ',';
+            str += skuStr + ',';
+            str += scmSkuPrice + ',';
+            str += scmSkuShoppingFee + ',';
+            str += scmSkuWeight + ',';
+            str += scmSkuInventory + ',';
+            str += (_rowspan ? salesVolume : '') + ',';
+            str += (_rowspan ? comments : '') + ',';
+            str += (_rowspan ? brand : '') + ',';
+            str += (_rowspan ? storeId : '') + ',';
+            str += (_rowspan ? storeName : '') + ',';
+            str += (_rowspan ? wormTaskId : '') + ',';
+            str += (_rowspan ? wormGoodsId : '') + ',';
+            str += (_rowspan ? onSaleInfo.map(item => item.onSaleChannel).join('、') : '') + ',';
+            str += (_rowspan ? wormTime : '') + ',';
+            str += (_rowspan ? wormGoodsInfoLink : '') + '\n';
+            
+        })
+        let blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+        //解决中文乱码问题
+        blob =  new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
+        const object_url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = object_url;
+        link.download =  "商品.xls";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     render() {
 
-        const { 
+        const {
+            page,
+            page_count, 
+            activeProductId,
             goodsList,
             activeImgList,
             // updateType,
@@ -242,18 +492,48 @@ class Local extends React.PureComponent<{}, IIndexState> {
             importGoodsDialogStatus, 
             shelvesDialogStatus,
             translationDialogStatus,
-            imgEditDialogStatus
+            imgEditDialogStatus,
+            selectedRowKeys,
+            rowKeys,
+            onsaleLoading,
+            deleteLoading,
+            searchLoading,
+            saleStatusList
         } = this.state;
 
         return (
             <div className="goods-local">
                 <LocalSearch 
                     // toggleUpdateDialog={this.toggleUpdateDialog}
+                    ref={node => (this.localSearchRef = node)}
+                    searchLoading={searchLoading}
+                    onsaleLoading={onsaleLoading}
+                    deleteLoading={deleteLoading}
+                    onSearch={this.onSearch}
+                    getGoodsOnsale={this.getGoodsOnsale}
+                    getGoodsDelete={this.getGoodsDelete}
+                    downloadExcel={this.downloadExcel}
                 />
-                <GoodsTable 
+                <Pagination
+                    className="goods-local-pagination"
+                    total={500}
+                    current={page}
+                    pageSize={page_count}
+                    showSizeChanger={true}
+                    showQuickJumper={true}
+                    onChange={this.onChangePage}
+                    onShowSizeChange={this.pageCountChange}
+                />
+                <GoodsTable
+                    searchLoading={searchLoading}
                     goodsList={goodsList}
+                    selectedRowKeys={selectedRowKeys}
+                    rowKeys={rowKeys}
                     collapseGoods={this.collapseGoods}
                     toggleImgEditDialog={this.toggleImgEditDialog}
+                    changeSelectedRowKeys={this.changeSelectedRowKeys}
+                    changeGoodsList={this.changeGoodsList}
+                    searchGoodsSale={this.searchGoodsSale}
                 />
                 {/* <UpdateDialog 
                     visible={updateDialogStatus}
@@ -263,16 +543,19 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 <ImportGoodsDialog visible={importGoodsDialogStatus} toggleImportGoodsDialog={this.toggleImportGoodsDialog}/>
                 <ShelvesDialog 
                     visible={shelvesDialogStatus}
+                    saleStatusList={saleStatusList}
                     toggleShelvesDialog={this.toggleShelvesDialog}
                 />
-                <TranslationDialog
+                {/* <TranslationDialog
                     visible={translationDialogStatus}
                     toggleTranslationDialog={this.toggleTranslationDialog}
-                />
+                /> */}
                 <ImgEditDialog
                     visible={imgEditDialogStatus}
+                    productId={activeProductId}
                     imgList={activeImgList}
                     toggleImgEditDialog={this.toggleImgEditDialog}
+                    updateGoodsListImg={this.updateGoodsListImg}
                 />
             </div>
         )

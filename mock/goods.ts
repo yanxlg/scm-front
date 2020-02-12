@@ -38,10 +38,8 @@ const Mock = require('mockjs');
 
 const list = [
     {
-        // scmGoodsSn: 'scmGoodsSn',
-        // scmGoodsId: 111,
         commodityId: '111',
-        productId: 111111,
+        productId: '111111',
         goodsImg: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
         wormTaskId: 111,
         wormGoodsId: 111,
@@ -110,25 +108,16 @@ const list = [
         wormTime: 111,
         wormGoodsInfoLink: 'wormGoodsInfoLink',
         skuImage: [
-            {
-                imgId: '1',
-                imgUrl: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg'
-            },
-            {
-                imgId: '2',
-                imgUrl: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg'
-            },
-            {
-                imgId: '3',
-                imgUrl: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-            }
+            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+            '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
         ]
     },
     {
-        // scmGoodsSn: 'scmGoodsSn',
-        // scmGoodsId: 111,
         commodityId: '111',
-        productId: 222222,
+        productId: '222222',
+        // commodityId: '111',
+        // productId: 222222,
         goodsImg: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
         wormTaskId: 111,
         wormGoodsId: 111,
@@ -197,25 +186,14 @@ const list = [
         wormTime: 111,
         wormGoodsInfoLink: 'wormGoodsInfoLink',
         skuImage: [
-            {
-                imgId: '1',
-                imgUrl: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg'
-            },
-            {
-                imgId: '2',
-                imgUrl: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg'
-            },
-            {
-                imgId: '3',
-                imgUrl: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-            }
+            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+            '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
         ]
     },
     {
-        // scmGoodsSn: 'scmGoodsSn',
-        // scmGoodsId: 111,
         commodityId: '111',
-        productId: 333333,
+        productId: '333333',
         goodsImg: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
         wormTaskId: 111,
         wormGoodsId: 111,
@@ -284,18 +262,9 @@ const list = [
         wormTime: 111,
         wormGoodsInfoLink: 'wormGoodsInfoLink',
         skuImage: [
-            {
-                imgId: '1',
-                imgUrl: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg'
-            },
-            {
-                imgId: '2',
-                imgUrl: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg'
-            },
-            {
-                imgId: '3',
-                imgUrl: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-            }
+            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+            '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
         ]
     },
 ]
@@ -306,7 +275,8 @@ export default {
         // console.log(req)
         const { page, page_count } = req.query;
         // console.log('1111', page, page_count)
-        res.status(200).send({
+        setTimeout(() => {
+            res.status(200).send({
                 code: 'success',
                 msg: '',
                 data: {
@@ -318,8 +288,9 @@ export default {
                     //     Number(page_count) * (Number(page)),
                     // )
                 },
-            },
-        );
+            });
+        }, 2000)
+        
     },
     'PUT /v1/goods/pic/edit': (req: Request, res: Response) => {
         const { pic } = req.query;
@@ -336,9 +307,64 @@ export default {
             code: 'success',
             msg: '',
             data: {
-                imgId: '4',
-                imgUrl: '//image-tb.vova.com/image/262_262/filler/00/43/43b20914df9aaf70d450472529aa0043.jpg'
+                url: '//image-tb.vova.com/image/262_262/filler/00/43/43b20914df9aaf70d450472529aa0043.jpg'
             }
         })
+    },
+    'GET /v1/goods/onsale': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                    code: 'success',
+                    msg: '',
+                    data: {},
+                },
+            );
+        }, 2000)
+        
+    },
+    'GET /v1/goods/delete': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                    code: 'success',
+                    msg: '',
+                    data: {},
+                },
+            );
+        }, 2000)
+    },
+    'PUT /v1/goods/edits': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                    code: 'success',
+                    msg: '',
+                    data: {},
+                },
+            );
+        }, 200)
+        
+    },
+    'GET /v1/goods/sales': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                    code: 'success',
+                    msg: '',
+                    data: [
+                        {
+                            channel: 'VOVA',
+                            onsale_time: 111,
+                            product_id: '111',
+                            onsaleStatus: '1'
+                        },
+                        {
+                            channel: 'VOVA',
+                            onsale_time: 111,
+                            product_id: '111',
+                            onsaleStatus: '1'
+                        }
+                    ],
+                },
+            );
+        }, 200)
+        
     },
 };
