@@ -76,7 +76,7 @@ pipeline {
                                branches: [[name: "$refspec"]],
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
                     sh """export KUBECONFIG=~/.kube/vv-servicet-v1-config; \
-                          kubectl apply -f stages/manifests/scm-front-svc-test.yaml; \
+                          kubectl apply -f stages/manifests/test/scm-front-test.yaml; \
                           kubectl get pod -n default | grep 'trigram-scm-front-page' | awk '{print \$1}' \
                               | while read podName; do kubectl get pod \$podName -n default -o yaml \
                               | kubectl replace --force -f -; done; \
