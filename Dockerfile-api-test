@@ -1,0 +1,3 @@
+FROM node:latest
+
+ADD dist /usr/share/nginx/html
