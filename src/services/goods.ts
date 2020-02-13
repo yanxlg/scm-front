@@ -43,6 +43,12 @@ declare interface IGoodsSalesParams {
     product_id: string;
 }
 
+declare interface IGoodsVersionParams {
+    start_time: string;
+    end_time: string;
+    commodity_id: number;
+}
+
 export async function getGoodsList(params: IFilterParams) {
     return request.get(ApiPathEnum.getGoodsList, {
         // requestType: 'form',
@@ -62,13 +68,6 @@ export async function postGoodsPicUpload(data: any) {
     return request.post(ApiPathEnum.postGoodsPicUpload, {
         data
     })
-}
-
-export async function getGoodsVersionList(params: IFilterParams) {
-    return request.get(ApiPathEnum.getGoodsVersionList, {
-        requestType: 'form',
-        params: params
-    });
 }
 
 // 一键上架
@@ -97,4 +96,11 @@ export async function getGoodsSales(params: IGoodsSalesParams) {
     return request.get(ApiPathEnum.getGoodsSales, {
         params
     })
+}
+
+// 
+export async function getGoodsVersion(params: IGoodsVersionParams) {
+    return request.get(ApiPathEnum.getGoodsVersion, {
+        params: params
+    });
 }

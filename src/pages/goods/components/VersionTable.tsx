@@ -1,38 +1,33 @@
 import React from 'react';
-import { DatePicker, Button, Pagination, Table } from 'antd';
+import { Button, Pagination, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+import { IGoodsVersionRowItem, IGoodsImgs } from '../version';
 
 import VersionImgDialog from './VersionImgDialog';
 
-import {
-    getGoodsVersionList
-} from '@/services/goods';
-
-const { RangePicker } = DatePicker;
-
-declare interface IDataItem {
-    [key: string]: any;
+declare interface IVersionTableProps {
+    loading: boolean;
+    versionGoodsList: IGoodsVersionRowItem[]
 }
 
 declare interface VersionTableState {
-    goodsList: IDataItem[];
     versionImgDialogStatus: boolean;
+    activeRow: IGoodsVersionRowItem | null;
 }
 
-class VersionTable extends React.PureComponent<{}, VersionTableState> {
+class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableState> {
 
-    private columns: ColumnProps<IDataItem>[] = [
+    private columns: ColumnProps<IGoodsVersionRowItem>[] = [
         {
-            key: 'a1',
-            width: 120,
-            title: '商品图片',
-            dataIndex: 'a1',
+            key: 'x',
+            width: 100,
+            title: '操作',
+            dataIndex: 'product_id',
             align: 'center',
-            render: (value: string, row: IDataItem, index: number) => {
+            render: (value: string, row: IGoodsVersionRowItem, index: number) => {
                 const children = (
                     <div>
-                        <img src={value}/>
-                        <Button type="link" block={true}>查看详情</Button>
+                        xxx
                     </div>
                 )
                 return {
@@ -44,171 +39,304 @@ class VersionTable extends React.PureComponent<{}, VersionTableState> {
             }
         },
         {
-            key: 'a2',
+            key: 'product_id',
+            width: 100,
+            title: 'Product ID',
+            dataIndex: 'product_id',
+            align: 'center',
+            render: this.mergeCell
+        },
+        {
+            key: 'up_shelf_channel',
+            width: 100,
+            title: '上架渠道',
+            dataIndex: 'up_shelf_channel',
+            align: 'center',
+            render: this.mergeCell
+        },
+        {
+            key: 'goods_imgs',
+            width: 120,
+            title: '商品图片',
+            dataIndex: 'goods_imgs',
+            align: 'center',
+            render: (value: IGoodsImgs, row: IGoodsVersionRowItem) => {
+                let isChange = false;
+                const { main_image_url: mainImg, sub_image: subImgs } = value;
+                if (row._prevVersion) {
+                    const { main_image_url: prevMainImg, sub_image: prevSubImgs } = row._prevVersion.goods_imgs;
+                    if (mainImg !== prevMainImg) {
+                        isChange = true;
+                    }
+                    if (subImgs.length !== prevSubImgs.length) {
+                        isChange = true;
+                    } else {
+                        subImgs.forEach((item, index) => {
+                            if (item.sub_image_url !== prevSubImgs[index].sub_image_url) {
+                                isChange = true;
+                            }
+                        })
+                    }
+
+                }
+                const children = (
+                    <div>
+                        <img src={value.main_image_url}/>
+                        <Button 
+                            type="link"
+                            className={isChange ? 'red' : ''}  
+                            block={true}
+                            onClick={() => this.showImgs(row)}
+                        >查看详情</Button>
+                    </div>
+                )
+                return {
+                    children,
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
+        },
+        {
+            key: 'goods_title',
             width: 200,
             title: '商品标题',
-            dataIndex: 'a2',
+            dataIndex: 'goods_title',
             align: 'center',
-            render: this.mergeCell
+            render: (value: string, row: IGoodsVersionRowItem) => {
+                let children = null;
+                if (row._prevVersion) {
+                    if (row._prevVersion.goods_title === value) {
+                        children = <div className="text-left">原标题: {value}</div>
+                    } else {
+                        children = (
+                            <>
+                                <div className="text-left">原标题: {row._prevVersion.goods_title}</div>
+                                <div className="text-left red">新标题: {value}</div>
+                            </>
+                        )
+                    }
+                } else {
+                    children = <div className="text-left red">新标题: {value}</div>
+                }
+                return {
+                    children,
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
         },
         {
-            key: 'a3',
+            key: 'goods_description',
             width: 200,
             title: '商品描述',
-            dataIndex: 'a3',
+            dataIndex: 'goods_description',
             align: 'center',
-            render: this.mergeCell
+            render: (value: string, row: IGoodsVersionRowItem) => {
+                let children = null;
+                if (row._prevVersion) {
+                    if (row._prevVersion.goods_description === value) {
+                        children = <div className="text-left">原描述: {value}</div>
+                    } else {
+                        children = (
+                            <>
+                                <div className="text-left">原描述: {row._prevVersion.goods_description}</div>
+                                <div className="text-left red">新描述: {value}</div>
+                            </>
+                        )
+                    }
+                } else {
+                    children = <div className="text-left red">新描述: {value}</div>
+                }
+                return {
+                    children,
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
         },
         {
-            key: 'a4',
+            key: 'middle_sku_id',
             width: 120,
-            title: '中台 sku id',
-            dataIndex: 'a4',
+            title: '中台sku ID',
+            dataIndex: 'middle_sku_id',
             align: 'center',
         },
         {
-            key: 'a5',
+            key: 'source_sku_id',
             width: 120,
-            title: '源sku id',
-            dataIndex: 'a5',
+            title: '源sku ID',
+            dataIndex: 'source_sku_id',
             align: 'center',
         },
         {
-            key: 'a6',
+            key: 'specs',
             width: 140,
             title: '规格',
-            dataIndex: 'a6',
+            dataIndex: 'specs',
             align: 'center',
-            render: (value: string, row: IDataItem, index: number) => {
+            render: (value: string, row: IGoodsVersionRowItem) => {
                 return (
                     <div className="border text-left">
-                        <div className="nowrap">Size: M</div>
-                        <div className="nowrap">Color: Blue</div>
+                        <div className="nowrap">{value.split(',')}</div>
                     </div>
                 )
             }
         },
         {
-            key: 'a7',
-            width: 120,
+            key: 'price',
+            width: 140,
             title: '价格',
-            dataIndex: 'a7',
+            dataIndex: 'price',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'price', '价格')
         },
         {
-            key: 'a8',
+            key: 'price1',
             width: 120,
             title: '价格变化',
-            dataIndex: 'a8',
+            // dataIndex: 'price',
             align: 'center',
-            render: this.borderCell
+            render: (a1, row: IGoodsVersionRowItem) => {
+                const value = row.price;
+                let children = null;
+                if (row._prevVersion && row._prevVersion.price !== value) {
+                    const prevPrice = row._prevVersion.price;
+                    const num = value - prevPrice;
+                    // 
+                    children = <div><span className="red">{num > 0 ? '↑' : '↓'}</span> {Math.abs(prevPrice - value)}</div>
+                } else {
+                    children = <div>-</div>
+                }
+                return <div className="border">{children}</div>
+            }
         },
         {
-            key: 'a9',
+            key: 'weight',
             width: 120,
             title: '重量',
-            dataIndex: 'a9',
+            dataIndex: 'weight',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'weight', '重量')
         },
         {
-            key: 'a10',
+            key: 'stock',
             width: 120,
             title: '库存',
-            dataIndex: 'a10',
+            dataIndex: 'stock',
             align: 'center',
-            render: this.borderCell
-        },
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'stock', '库存')
+        },     
         {
-            key: 'a11',
-            width: 120,
-            title: '发货时间',
-            dataIndex: 'a11',
-            align: 'center',
-            render: this.borderCell
-        },
-        {
-            key: 'a12',
+            key: 'shipping_fee',
             width: 120,
             title: '运费',
-            dataIndex: 'a12',
+            dataIndex: 'shipping_fee',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'shipping_fee', '运费')
         },
         {
-            key: 'a13',
+            key: 'sales_volume',
             width: 120,
             title: '销量',
-            dataIndex: 'a13',
+            dataIndex: 'sales_volume',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'sales_volume', '销量')
         },
         {
-            key: 'a14',
-            width: 120,
+            key: 'evaluation_quantity',
+            width: 160,
             title: '评价数量',
-            dataIndex: 'a14',
+            dataIndex: 'evaluation_quantity',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'evaluation_quantity', '评论数')
         },
         {
-            key: 'a15',
+            key: 'category_one_level',
             width: 120,
             title: '一级类目',
-            dataIndex: 'a15',
+            dataIndex: 'category_one_level',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'category_one_level', '类目')
         },
         {
-            key: 'a16',
+            key: 'category_two_level',
             width: 120,
             title: '二级类目',
-            dataIndex: 'a16',
+            dataIndex: 'category_two_level',
             align: 'center',
-            render: this.borderCell
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'category_two_level', '类目')
         },
         {
-            key: 'a17',
+            key: 'category_three_level',
+            width: 120,
+            title: '三级类目',
+            dataIndex: 'category_three_level',
+            align: 'center',
+            render: (value: number, row: IGoodsVersionRowItem) => this.compareVersion(value, row, 'category_three_level', '类目')
+        },
+        {
+            key: 'change_time',
             width: 120,
             title: '变更时间',
-            dataIndex: 'a17',
+            dataIndex: 'change_time',
             align: 'center',
             render: this.mergeAndBorderCell
         },
         {
-            key: 'a18',
+            key: 'change_operator',
             width: 120,
             title: '变更人',
-            dataIndex: 'a18',
-            align: 'center',
-            render: this.mergeAndBorderCell
-        },
-        {
-            key: 'a19',
-            width: 120,
-            title: '商品版本号',
-            dataIndex: 'a19',
+            dataIndex: 'change_operator',
             align: 'center',
             render: this.mergeAndBorderCell
         }
     ]
 
-    constructor(props: {}) {
+    constructor(props: IVersionTableProps) {
         super(props);
         this.state = {
-            goodsList: [],
-            versionImgDialogStatus: true,
+            versionImgDialogStatus: false,
+            activeRow: null
         }
     }
 
-    componentDidMount(): void {
-        this.onSearch();
-        // console.log(this.props);
+    // 版本数据对比
+    private compareVersion = (value: number, row: IGoodsVersionRowItem, key: string, desc: string) => {
+        let children = null;
+        if (row._prevVersion) {
+            const prevValue = row._prevVersion[key as 'shipping_fee'];
+            if (prevValue === value) {
+                children = <div>原{desc}: {value}</div>
+            } else {
+                children = (
+                    <>
+                        <div>原{desc}: {prevValue}</div>
+                        <div className="red">新{desc}: {value}</div>
+                    </>
+                )
+            }
+        } else {
+            children = <div className="red">新{desc}: {value}</div>
+        }
+        return <div className="border text-left">{children}</div>
+    }
+
+    // 展示图片弹框
+    showImgs = (rowData: IGoodsVersionRowItem) => {
+        // console.log('showImgs', rowData);
+        this.setState({
+            activeRow: rowData
+        }, () => {
+            this.toggleVersionImgDialog(true);
+        })
     }
 
     // 合并单元格
-    private mergeCell(value: string, row: IDataItem, index: number) {
+    private mergeCell(value: string, row: IGoodsVersionRowItem, index: number) {
         return {
             children: value,
             props: {
@@ -218,7 +346,7 @@ class VersionTable extends React.PureComponent<{}, VersionTableState> {
     }
 
     // 表格内容展示加边框
-    private borderCell(value: string, row: IDataItem, index: number) {
+    private borderCell(value: string, row: IGoodsVersionRowItem, index: number) {
         return (
             <div className="border">
                 <div className="nowrap">{value}</div>
@@ -227,7 +355,7 @@ class VersionTable extends React.PureComponent<{}, VersionTableState> {
     }
 
     // 合并单元格和展示边框
-    private mergeAndBorderCell(value: string, row: IDataItem, index: number) {
+    private mergeAndBorderCell(value: string, row: IGoodsVersionRowItem, index: number) {
         return {
             children: (
                 <div className="border">
@@ -240,38 +368,7 @@ class VersionTable extends React.PureComponent<{}, VersionTableState> {
         };
     }
 
-    // 处理表格数据，用于合并单元格
-    private addRowSpanData(list: IDataItem[]): IDataItem[] {
-        let ret: IDataItem[] = [];
-        let goodsId: string | number = 0;
-        for (let i = 0, len = list.length; i < len; i++) {
-            let currentItem = list[i];
-            if (goodsId !== currentItem.id) {
-                goodsId = currentItem.id;
-                currentItem._rowspan = list.filter(item => item.id === goodsId).length;
-            }
-            ret.push(currentItem);
-        }
-        return ret;
-    }
-
-    private onSearch = () => {
-        return getGoodsVersionList({
-            page: 1,
-            size: 3
-        }).then((res) => {
-            // console.log(res)
-            const { list } = res.data;
-            this.setState({
-                goodsList: this.addRowSpanData(list)
-            });
-        }).finally(() => {
-            // this.setState({
-            //     dataLoading: false,
-            //     searchLoading:false
-            // });
-        });
-    }
+    
 
     private toggleVersionImgDialog = (status: boolean) => {
         this.setState({
@@ -281,29 +378,24 @@ class VersionTable extends React.PureComponent<{}, VersionTableState> {
 
     render() {
 
-        const { goodsList, versionImgDialogStatus } = this.state;
+        const { versionGoodsList, loading } = this.props;
+        const { versionImgDialogStatus, activeRow } = this.state;
 
         return (
             <>
-                <div className="goods-version-filter">
-                    <div className="left-item">
-                        <span className="">商品调价跟踪</span>
-                        <RangePicker className="date"/>
-                        <Button>导出至Excel</Button>
-                    </div>
-                    <Pagination size="small" total={50} showSizeChanger={true} showQuickJumper={true} />
-                </div>
                 <Table
                     bordered={true}
-                    // rowKey='id'
+                    rowKey='middle_sku_id'
                     className="goods-version-table"
+                    loading={loading}
                     scroll={{ x: true }}
                     pagination={false}
                     columns={this.columns}
-                    dataSource={goodsList}
+                    dataSource={versionGoodsList}
                 />
                 <VersionImgDialog
                     visible={versionImgDialogStatus}
+                    activeRow={activeRow}
                     toggleVersionImgDialog={this.toggleVersionImgDialog}
                 />
             </>

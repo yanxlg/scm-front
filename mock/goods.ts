@@ -269,6 +269,180 @@ const list = [
     },
 ]
 
+const versionInfo = {
+    goods_title: '商品标题',
+    goods_url: '源商品链接',
+    main_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+    goods_id: 888888,
+    source_goods_id: 999999,
+    flatform: '源平台',
+    collection_time: '采集时间',
+    category_one_level: '一级类目',
+    category_two_level: '二级类目',
+    category_tree_level: '三级类目',
+    goods_version_list: [
+        {
+            product_id: 111111,
+            up_shelf_channel: '上架渠道',
+            goods_imgs: {
+                version: 111111,
+                main_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                sub_image: [
+                    {
+                        sub_image_url: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+                        sku_id: '11'
+                    } 
+                ]
+            },
+            goods_title: '商品标题111',
+            goods_description: '商品描述111',
+            sku: [
+                {
+                    middle_sku_id: 11,
+                    source_sku_id: 11,
+                    specs: '规格',
+                    price: 101,
+                    weight: 10,
+                    stock: 100,
+                    shipping_fee: 1,
+                    sales_volume: 1000,
+                    evaluation_quantity: 10000,
+                    category_one_level: '一级类目',
+                    category_two_level: '二级类目',
+                    category_three_level: '三级类目',
+                    change_time: '变更时间',
+                    change_operator: '变更人'
+                },
+                {
+                    middle_sku_id: 22,
+                    source_sku_id: 22,
+                    specs: '规格',
+                    price: 111,
+                    weight: 11,
+                    stock: 101,
+                    shipping_fee: 2,
+                    sales_volume: 1001,
+                    evaluation_quantity: 10001,
+                    category_one_level: '一级类目',
+                    category_two_level: '二级类目',
+                    category_three_level: '三级类目',
+                    change_time: '变更时间',
+                    change_operator: '变更人'
+                },
+            ]
+        },
+        {
+            product_id: 222222,
+            up_shelf_channel: '上架渠道',
+            goods_imgs: {
+                version: 222222,
+                main_image_url: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+                sub_image: [
+                    {
+                        sub_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                        sku_id: '11'
+                    },
+                    {
+                        sub_image_url: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
+                        sku_id: '22'
+                    }   
+                ]
+            },
+            goods_title: '商品标题',
+            goods_description: '商品描述',
+            sku: [
+                {
+                    middle_sku_id: 33,
+                    source_sku_id: 33,
+                    specs: '规格',
+                    price: 10,
+                    weight: 10,
+                    stock: 100,
+                    shipping_fee: 1,
+                    sales_volume: 1000,
+                    evaluation_quantity: 10000,
+                    category_one_level: '一级类目',
+                    category_two_level: '二级类目',
+                    category_three_level: '三级类目',
+                    change_time: '变更时间',
+                    change_operator: '变更人'
+                },
+                {
+                    middle_sku_id: 44,
+                    source_sku_id: 44,
+                    specs: '规格',
+                    price: 11,
+                    weight: 11,
+                    stock: 101,
+                    shipping_fee: 2,
+                    sales_volume: 1001,
+                    evaluation_quantity: 10001,
+                    category_one_level: '一级类目',
+                    category_two_level: '二级类目',
+                    category_three_level: '三级类目',
+                    change_time: '变更时间',
+                    change_operator: '变更人'
+                },
+            ]
+        },
+        {
+            product_id: 333333,
+            up_shelf_channel: '上架渠道',
+            goods_imgs: {
+                version: 333333,
+                main_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                sub_image: [
+                    // {
+                    //     sub_image_url: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+                    //     sku_id: '11'
+                    // },
+                    // {
+                    //     sub_image_url: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
+                    //     sku_id: '22'
+                    // }   
+                ]
+            },
+            goods_title: '商品标题',
+            goods_description: '商品描述',
+            sku: [
+                {
+                    middle_sku_id: 55,
+                    source_sku_id: 55,
+                    specs: '规格',
+                    price: 10,
+                    weight: 10,
+                    stock: 100,
+                    shipping_fee: 1,
+                    sales_volume: 1000,
+                    evaluation_quantity: 10000,
+                    category_one_level: '一级类目',
+                    category_two_level: '二级类目',
+                    category_three_level: '三级类目',
+                    change_time: '变更时间',
+                    change_operator: '变更人'
+                },
+                {
+                    middle_sku_id: 66,
+                    source_sku_id: 66,
+                    specs: '规格',
+                    price: 11,
+                    weight: 11,
+                    stock: 101,
+                    shipping_fee: 2,
+                    sales_volume: 1001,
+                    evaluation_quantity: 10001,
+                    category_one_level: '一级类目',
+                    category_two_level: '二级类目',
+                    category_three_level: '三级类目',
+                    change_time: '变更时间',
+                    change_operator: '变更人'
+                },
+                
+            ],
+        }
+    ]
+}
+
 
 export default {
     'GET /v1/goods/list': (req: Request, res: Response) => {
@@ -366,5 +540,15 @@ export default {
             );
         }, 200)
         
+    },
+    'GET /v1/goods_version': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                    code: 'success',
+                    msg: '',
+                    data: versionInfo,
+                },
+            );
+        }, 500)
     },
 };
