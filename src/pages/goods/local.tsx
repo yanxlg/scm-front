@@ -7,7 +7,7 @@ import GoodsTable from './components/GoodsTable';
 import ImportGoodsDialog from './components/ImportGoodsDialog';
 import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
 import ImgEditDialog from './components/ImgEditDialog';
-import ExcelDialog from './components/ExcelDialog';
+import ExcelDialog from './components/ExcelDialogV1';
 // good-local.less
 import '../../styles/goods-local.less';
 
