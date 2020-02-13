@@ -572,9 +572,23 @@ class Local extends React.PureComponent<{}, IIndexState> {
         });
     }
 
+    // 获取下载表格数据
+    getExcelData = (count: number) => {
+        getGoodsList({
+            page: count + 1,
+            page_count: 10000
+        }).then((res) => {
+            const { list } = res.data;
+            this.toggleExcelDialog(false);
+            this.downloadExcel(this.addRowSpanData(list));
+
+        }).catch(err => {
+            message.error('获取下载表格数据失败！');
+        })
+    }
+
     // 生成表格
-    downloadExcel = () => {
-        const { goodsList } = this.state;
+    downloadExcel = (goodsList: IRowDataItem[]) => {
         // console.log('downloadExcel', goodsList);
         const titleList = [
             'Commodity ID',
@@ -642,9 +656,9 @@ class Local extends React.PureComponent<{}, IIndexState> {
             str += (_rowspan ? goodsImg : '') + ',';
             str += (_rowspan ? title : '') + ',';
             str += (_rowspan ? description : '') + ',';
-            str += (_rowspan ? firstCatagory : '') + ',';
-            str += (_rowspan ? secondCatagory : '') + ',';
-            str += (_rowspan ? thirdCatagory : '') + ',';
+            str += (_rowspan ? firstCatagory.name : '') + ',';
+            str += (_rowspan ? secondCatagory.name : '') + ',';
+            str += (_rowspan ? thirdCatagory.name : '') + ',';
             str += (_rowspan ? skuNumber : '') + ',';
             str += scmSkuSn + ',';
             str += skuStr + ',';
@@ -759,6 +773,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 <ExcelDialog
                     visible={excelDialogStataus}
                     allCount={allCount}
+                    getExcelData={this.getExcelData}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
             </div>

@@ -7,6 +7,7 @@ declare interface IExcelDialogProps {
     visible: boolean;
     allCount: number;
     // saleStatusList: ISaleStatausItem[];
+    getExcelData(count: number): void;
     toggleExcelDialog(status: boolean): void;
 }
 
@@ -26,6 +27,11 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
 
     private handleCancel = () => {
         this.props.toggleExcelDialog(false);
+    }
+
+    private handleOk = () => {
+        const { val } = this.state;
+        this.props.getExcelData(val);
     }
 
     private onChange = (e: RadioChangeEvent) => {
@@ -54,6 +60,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
                 visible={visible}
                 width={660}
                 onCancel={this.handleCancel}
+                onOk={this.handleOk}
             >
                 <div>
                     <Radio.Group onChange={this.onChange} value={val}>

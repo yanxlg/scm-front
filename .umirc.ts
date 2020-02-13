@@ -60,7 +60,7 @@ const config: IConfig = {
             target: 'https://pos-t.vova.com.hk/',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
-        }
+        },
     },
     chainWebpack(config, { webpack }) {
         const appSrc = path.resolve(process.cwd(),"src");
