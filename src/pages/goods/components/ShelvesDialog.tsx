@@ -3,84 +3,52 @@ import { Modal, Table } from 'antd';
 
 import { ColumnProps } from 'antd/es/table';
 
-export declare interface IShelvesDataItem {
-    [key: string]: any;
+export declare interface ISaleStatausItem {
+    order?: number;
+    channel: string;
+    onsale_time: number;
+    product_id: string;
+    onsaleStatus: string;
 }
 
 declare interface ShelvesDialogProps {
     visible: boolean;
+    saleStatusList: ISaleStatausItem[];
     toggleShelvesDialog(status: boolean): void;
 }
 
-const list: IShelvesDataItem[] = [
-    {
-        a1: '序号',
-        a2: '2020-01-18 06:06:06',
-        a3: 'VOVA',
-        a4: '224455',
-        a5: '下架'
-    },
-    {
-        a1: '序号',
-        a2: '2020-01-18 06:06:06',
-        a3: 'VOVA',
-        a4: '224455',
-        a5: '下架'
-    },
-    {
-        a1: '序号',
-        a2: '2020-01-18 06:06:06',
-        a3: 'VOVA',
-        a4: '224455',
-        a5: '下架'
-    },
-    {
-        a1: '序号',
-        a2: '2020-01-18 06:06:06',
-        a3: 'VOVA',
-        a4: '224455',
-        a5: '下架'
-    },
-    {
-        a1: '序号',
-        a2: '2020-01-18 06:06:06',
-        a3: 'VOVA',
-        a4: '224455',
-        a5: '下架'
-    },
-]
 
 class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
 
-    private columns: ColumnProps<IShelvesDataItem>[] = [
+    private columns: ColumnProps<ISaleStatausItem>[] = [
         {
-            key: 'a1',
+            key: 'order',
             title: '序号',
-            dataIndex: 'a1',
+            dataIndex: 'order',
             align: 'center'
         },
         {
-            key: 'a2',
+            key: 'onsale_time',
             title: '时间',
-            dataIndex: 'a2',
+            dataIndex: 'onsale_time',
             align: 'center'
         },
         {
-            key: 'a3',
+            key: 'channel',
             title: '销售平台',
-            dataIndex: 'a3',
+            dataIndex: 'channel',
             align: 'center'
         },
         {
-            key: 'a4',
+            key: 'product_id',
             title: '中台商品ID',
-            dataIndex: 'a4',
+            dataIndex: 'product_id',
             align: 'center'
         },
         {
-            key: 'a5',
+            key: 'onsaleStatus',
             title: '操作',
-            dataIndex: 'a5',
+            dataIndex: 'onsaleStatus',
             align: 'center'
         }
     ]
@@ -91,8 +59,8 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
 
     render() {
 
-        const { visible } = this.props;
-
+        const { visible, saleStatusList } = this.props;
+        const pagination = saleStatusList.length > 5 ? {} : false;
         return (
             <Modal
                 title="上架状态记录"
@@ -103,8 +71,8 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             >
                 <Table
                     bordered={true}
-                    
-                    dataSource={list}
+                    pagination={pagination}
+                    dataSource={saleStatusList}
                     columns={this.columns}
                 />
             </Modal>

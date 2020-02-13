@@ -1,33 +1,68 @@
 
-import React from 'react';
-import { Table, Checkbox, Pagination, Input, Button } from 'antd';
+import React, { ChangeEvent } from 'react';
+import { Table, Checkbox, Button, Input, Select, message } from 'antd';
+import Link from 'umi/link';
 import ZoomImage from '@/components/ZoomImage';
 
-import { cloneDeep } from 'lodash';
-import { BindAll } from 'lodash-decorators';
 import { ColumnProps } from 'antd/es/table';
-import { IRowDataItem, ISaleItem, IScmSkuStyle, ISkuImgItem } from '../local';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox'
+import { IRowDataItem, ISaleItem, IScmSkuStyle, ICatagoryData, ICategoryItem } from '../local';
 
-declare interface GoodsTableProps {
+const { Option } = Select;
+
+declare interface IGoodsTableProps {
+    searchLoading: boolean;
+    selectedRowKeys: string[];
+    rowKeys: string[];
     goodsList: IRowDataItem[];
-    collapseGoods(parentId: string, status: boolean): void;
-    toggleImgEditDialog(status: boolean, imgList?: ISkuImgItem[]): void;
+    editGoodsList: IRowDataItem[];
+    allCatagoryList: ICategoryItem[];
+    toggleImgEditDialog(status: boolean, imgList?: string[], productId?: string): void;
+    changeSelectedRowKeys(rowKeys: string[]): void;
+    searchGoodsSale(productId: string): void;
+    changeEditGoodsList(productId: string, type: string, val: any): void;
+    getCurrentCatagory(firstId: number, secondId?: number): ICategoryItem[];
 }
 
-@BindAll()
-class GoodsTable extends React.PureComponent<GoodsTableProps> {
+declare interface IGoodsTableState {
+    indeterminate: boolean;
+    checkAll: boolean;
+}
+
+class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState> {
+
+    constructor(props: IGoodsTableProps) {
+        super(props);
+        this.state = {
+            indeterminate: false,
+            checkAll: false
+        }
+    }
 
     private columns: ColumnProps<IRowDataItem>[] = [
         {
             key: 'x',
-            title: <Checkbox />,
+            title: () => (
+                <Checkbox
+                    indeterminate={this.state.indeterminate} 
+                    checked={this.state.checkAll}
+                    onChange={this.onCheckAllChange}
+                />
+            ),
             // dataIndex: 'a1',
             align: 'center',
             width: 60,
             render: (value: string, row: IRowDataItem, index: number) => {
+                const { selectedRowKeys } = this.props;
+                const { productId } = row;
                 return {
                     // children: row._isParent ? <Checkbox /> : null,
-                    children: <Checkbox />,
+                    children: (
+                        <Checkbox 
+                            checked={selectedRowKeys.indexOf(productId)>-1} 
+                            onChange={() => this.selectedRow(productId)}
+                        />
+                    ),
                     props: {
                         rowSpan: row._rowspan || 0
                     }
@@ -40,18 +75,10 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             dataIndex: 'commodityId',
             align: 'center',
             width: 130,
-            render: (value: string, row: IRowDataItem, index: number) => {
-                // console.log('1111', row);
-                // {
-                //     row._isParent 
-                //     ? <Button size="small" onClick={() => this.props.collapseGoods(row.parentId, !row.isCollapse)}>{row.isCollapse ? '收起' : '展开'}</Button> 
-                //     : null
-                // }
+            render: (value: string, row: IRowDataItem) => {
                 return {
                     children: (
-                        <>
-                            <div>{value}</div>
-                        </>
+                        <Link to={`/goods/version?id=${value}`}>{value}</Link>
                     ),
                     props: {
                         rowSpan: row._rowspan || 0
@@ -61,7 +88,7 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
         },
         {
             key: 'productId',
-            title: 'Product_ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 130,
@@ -77,11 +104,11 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
                 return {
                     children: (
                         <>
-                            <ZoomImage className="goods-local-img" src={row.goodsImg} />
+                            <ZoomImage className="goods-local-img" src={row.skuImage[0]} />
                             <Button 
                                 className="goods-local-img-edit" 
                                 size="small"
-                                onClick={() => this.clickImgEdit(row.skuImage)}
+                                onClick={() => this.clickImgEdit(row.skuImage, row.productId)}
                             >编辑</Button>
                         </>
                     ),
@@ -97,7 +124,21 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             dataIndex: 'title',
             align: 'center',
             width: 200,
-            render: this.mergeCell
+            render: (value: string, row: IRowDataItem) => {
+                const { editGoodsList } = this.props;
+                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                return {
+                    children: index > -1 ? (
+                        <Input 
+                            value={editGoodsList[index].title}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.changeEditGoodsList(row.productId, 'title', e.target.value)}
+                        />
+                    ) : (<div>{value}</div>),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                }
+            }
         },
         {
             key: 'description',
@@ -105,7 +146,21 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             dataIndex: 'description',
             align: 'center',
             width: 200,
-            render: this.mergeCell
+            render: (value: string, row: IRowDataItem) => {
+                const { editGoodsList } = this.props;
+                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                return {
+                    children: index > -1 ? (
+                        <Input 
+                            value={editGoodsList[index].description}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.changeEditGoodsList(row.productId, 'description', e.target.value)}
+                        />
+                    ) : (<div>{value}</div>),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                }
+            }
         },
         
         {
@@ -114,7 +169,29 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             dataIndex: 'firstCatagory',
             align: 'center',
             width: 100,
-            render: this.mergeCell
+            render: (value: ICatagoryData, row: IRowDataItem) => {
+                const { editGoodsList, allCatagoryList } = this.props;
+                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const currentEditGoods = editGoodsList[index];
+                return {
+                    children: index > -1 ? (
+                        <Select 
+                            className=""
+                            value={currentEditGoods.firstCatagory.id + ''}
+                            onChange={(val: string) => this.props.changeEditGoodsList(row.productId, 'firstCatagory', val)}
+                        >
+                            {
+                                allCatagoryList.map(item => (
+                                    <Option key={item.id + ''} value={item.id + ''}>{item.name}</Option>
+                                ))
+                            }
+                        </Select>
+                    ) : (<div>{value.name}</div>),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                }
+            }
         },
         {
             key: 'secondCatagory',
@@ -122,7 +199,34 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             dataIndex: 'secondCatagory',
             align: 'center',
             width: 100,
-            render: this.mergeCell
+            render: (value: ICatagoryData, row: IRowDataItem) => {
+                const { editGoodsList, allCatagoryList } = this.props;
+                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const currentEditGoods = editGoodsList[index];
+                let catagoryList: ICategoryItem[] = [];
+                if (currentEditGoods) {
+                    catagoryList = this.props.getCurrentCatagory(currentEditGoods.firstCatagory.id);
+                }
+                return {
+                    children: index > -1 ? (
+                        <Select 
+                            className=""
+                            value={currentEditGoods.secondCatagory.id + ''}
+                            onChange={(val: string) => this.props.changeEditGoodsList(row.productId, 'secondCatagory', val)}
+                        >
+                            <Option value="-1">请选择</Option>
+                            {
+                                catagoryList.map(item => (
+                                    <Option key={item.id + ''} value={item.id + ''}>{item.name}</Option>
+                                ))
+                            }
+                        </Select>
+                    ) : (<div>{value.name}</div>),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                }
+            }
         },
         {
             key: 'thirdCatagory',
@@ -130,7 +234,35 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             dataIndex: 'thirdCatagory',
             align: 'center',
             width: 100,
-            render: this.mergeCell
+            render: (value: ICatagoryData, row: IRowDataItem) => {
+                const { editGoodsList, allCatagoryList } = this.props;
+                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const currentEditGoods = editGoodsList[index];
+                let catagoryList: ICategoryItem[] = [];
+                if (currentEditGoods) {
+                    const { firstCatagory, secondCatagory } = currentEditGoods;
+                    catagoryList = this.props.getCurrentCatagory(firstCatagory.id, secondCatagory.id);
+                }
+                return {
+                    children: index > -1 ? (
+                        <Select 
+                            className=""
+                            value={currentEditGoods.thirdCatagory.id + ''}
+                            onChange={(val: string) => this.props.changeEditGoodsList(row.productId, 'thirdCatagory', val)}
+                        >
+                             <Option value="-1">请选择</Option>
+                            {
+                                catagoryList.map(item => (
+                                    <Option key={item.id + ''} value={item.id + ''}>{item.name}</Option>
+                                ))
+                            }
+                        </Select>
+                    ) : (<div>{value.name}</div>),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                }
+            }
         },
         {
             key: 'skuNumber',
@@ -276,13 +408,11 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
             render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
                 return {
                     children: (
-                        <>
+                        <Button type="link" onClick={() => this.props.searchGoodsSale(row.productId)}>
                             {
-                                value.map((item: ISaleItem) => (
-                                    <div>{item.onSaleChannel}: {item.onSaleTime}</div>
-                                ))
+                                value.map((item: ISaleItem) => item.onSaleChannel).join('、')
                             }
-                        </>
+                        </Button>
                     ),
                     props: {
                         rowSpan: row._rowspan || 0
@@ -309,10 +439,52 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
         }
     ];
 
+    // 取消全选
+    cancelCheckAll = () => {
+        this.setState({
+            indeterminate: false,
+            checkAll: false
+        })
+    }
+
+    // 点击全选
+    private onCheckAllChange = (e: CheckboxChangeEvent) => {
+        // console.log(1111, );
+        // checkedList: e.target.checked ? plainOptions : [],
+        // indeterminate: false,
+        // checkAll: e.target.checked,
+        const checked = e.target.checked;
+        const { rowKeys } = this.props;
+        this.setState({
+            indeterminate: false,
+            checkAll: checked
+        });
+        this.props.changeSelectedRowKeys(checked ? [...rowKeys] : []);
+    }
+
+    // 选择商品行
+    private selectedRow = (id: string) => {
+        // console.log('selectedRow', id);
+        const { selectedRowKeys, rowKeys } = this.props;
+        const copySelectedRowKeys = [...selectedRowKeys];
+        const index = copySelectedRowKeys.indexOf(id);
+        if ( index === -1 ) {
+            copySelectedRowKeys.push(id);
+        } else {
+            copySelectedRowKeys.splice(index, 1);
+        }
+        const len = copySelectedRowKeys.length;
+        this.setState({
+            indeterminate: len > 0 && len !== rowKeys.length,
+            checkAll: len === rowKeys.length
+        })
+        this.props.changeSelectedRowKeys(copySelectedRowKeys);
+    }
+
     // 图片编辑
-    private clickImgEdit = (imgList: ISkuImgItem[]) => {
+    private clickImgEdit = (imgList: string[], productId: string) => {
         // console.log('clickImgEdit', rowData);
-        this.props.toggleImgEditDialog(true, imgList);
+        this.props.toggleImgEditDialog(true, imgList, productId);
     }
 
     // 合并单元格
@@ -325,55 +497,19 @@ class GoodsTable extends React.PureComponent<GoodsTableProps> {
         };
     }
 
-    private onSelectChange(selectedRowKeys: number[] | string[]) {
-        // this.setState({ selectedRowKeys: selectedRowKeys as number[] });
-    };
-
-    
-
-    // 控制表格隐藏行
-    // private toggleRow(record: IRowDataItem) {
-    //     return {
-    //         hidden: record._hidden,
-    //         className: '1211'
-    //     }
-    // }
-
     render() {
-
-        // const rowSelection = {
-        //     fixed: true,
-        //     columnWidth: '60px',
-        //     // selectedRowKeys: selectedRowKeys,
-        //     onChange: this.onSelectChange,
-        //     render: this.mergeCell
-        // };
-
-        const { goodsList } = this.props;
-        // console.log('goodsList', goodsList);
+        const { goodsList, searchLoading } = this.props;
         return (
-            <>
-                <Pagination
-                    className="goods-local-pagination"
-                    total={500} 
-                    showSizeChanger={true} 
-                    showQuickJumper={true} 
-                />
-                <Table
-                    bordered={true}
-                    rowKey="scmSkuSn"
-                    className="goods-local-table"
-                    // bordered={true}
-                    // rowSelection={rowSelection}
-                    columns={this.columns}
-                    dataSource={goodsList}
-                    scroll={{ x: true }}
-                    pagination={false}
-                    // loading={dataLoading}
-                    // onRow={this.toggleRow}
-                />
-            </>
-            
+            <Table
+                bordered={true}
+                rowKey="scmSkuSn"
+                className="goods-local-table"
+                columns={this.columns}
+                dataSource={goodsList}
+                scroll={{ x: true }}
+                pagination={false}
+                loading={searchLoading}
+            />
         )
     }
 }

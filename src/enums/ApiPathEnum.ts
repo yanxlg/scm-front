@@ -14,16 +14,17 @@ enum ApiPathEnum {
     putGoodsPicEdit="/v1/goods/pic/edit",
     postGoodsPicUpload="/v1/goods/pic/upload",
     getGoodsVersionList="/goodsVersion/list",
-
-
-
-
-
     QueryTaskList="/v1/task/list",
     AddPDDHotTask="/v1/task/spider/pdd_hotsale",
     AddPDDURLTask="/v1/task/spider/url",
     DeleteTask = "/v1/task/delete",
     QueryTaskDetail="/v1/task/detail",
+    getGoodsOnsale="/v1/goods/onsale",
+    getGoodsDelete="/v1/goods/delete",
+    putGoodsEdit="/v1/goods/edits",
+    getGoodsSales="/v1/goods/sales",
+    getGoodsVersion="/v1/goods_version",
+    getCatagoryList="/v1/catagory/list"
 }
 
 export { ApiPathEnum };
