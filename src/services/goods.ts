@@ -33,10 +33,16 @@ declare interface IGoodsDeleteParams {
     product_ids: string[];
 }
 
+export declare interface IGoodsEditDataItem {
+    productId: string;
+    title: string;
+    description: string;
+    firstCatagory: number;
+    secondCatagory: number;
+    thirdCatagory: number;
+}
 declare interface IGoodsEditData {
-    product_id: string;
-    title?: string;
-    description?: string;
+    modify_data: IGoodsEditDataItem[];
 }
 
 declare interface IGoodsSalesParams {
@@ -98,9 +104,14 @@ export async function getGoodsSales(params: IGoodsSalesParams) {
     })
 }
 
-// 
+// 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {
     return request.get(ApiPathEnum.getGoodsVersion, {
         params: params
     });
+}
+
+// 获取所有
+export async function getCatagoryList() {
+    return request.get(ApiPathEnum.getCatagoryList);
 }

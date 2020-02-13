@@ -16,7 +16,7 @@ enum ApiPathEnum {
     putGoodsEdit="/v1/goods/edits",
     getGoodsSales="/v1/goods/sales",
     getGoodsVersion="/v1/goods_version",
-    
+    getCatagoryList="/v1/catagory/list"
 }
 
 export { ApiPathEnum };

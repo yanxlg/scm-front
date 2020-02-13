@@ -36,6 +36,77 @@ const Mock = require('mockjs');
 //     ],
 // });
 
+const allCatagory = [
+    {
+        id: 1,
+        name: '手机',
+        children: [
+            {
+                id: 11,
+                name: '苹果',
+                children: [
+                    {
+                        id: 111,
+                        name: '苹果6'
+                    },
+                    {
+                        id: 112,
+                        name: '苹果7'
+                    },
+                ]
+            },
+            {
+                id: 12,
+                name: '华为',
+                children: [
+                    {
+                        id: 121,
+                        name: '华为P20'
+                    },
+                    {
+                        id: 122,
+                        name: '华为P30'
+                    },
+                ]
+            }
+        ]
+    },
+    {
+        id: 2,
+        name: '衣服',
+        children: [
+            {
+                id: 21,
+                name: '男装',
+                children: [
+                    {
+                        id: 211,
+                        name: '男装1'
+                    },
+                    {
+                        id: 212,
+                        name: '男装2'
+                    },
+                ]
+            },
+            {
+                id: 22,
+                name: '女装',
+                children: [
+                    {
+                        id: 221,
+                        name: '女装1'
+                    },
+                    {
+                        id: 222,
+                        name: '女装2'
+                    },
+                ]
+            }
+        ]
+    }
+]
+
 const list = [
     {
         commodityId: '111',
@@ -99,9 +170,18 @@ const list = [
         ],
         salesVolume: 111,
         comments: 111,
-        firstCatagory: 'firstCatagory',
-        secondCatagory: 'secondCatagory',
-        thirdCatagory: 'thirdCatagory',
+        firstCatagory: {
+            id: 1,
+            name: '手机'
+        },
+        secondCatagory: {
+            id: 11,
+            name: '苹果'
+        },
+        thirdCatagory: {
+            id: 111,
+            name: '苹果6'
+        },
         brand: 'brand',
         storeId: 'storeId',
         storeName: 'storeName',
@@ -111,7 +191,8 @@ const list = [
             '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
             '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
             '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-        ]
+        ],
+        hasNewVersion: 0
     },
     {
         commodityId: '111',
@@ -177,9 +258,18 @@ const list = [
         ],
         salesVolume: 111,
         comments: 111,
-        firstCatagory: 'firstCatagory',
-        secondCatagory: 'secondCatagory',
-        thirdCatagory: 'thirdCatagory',
+        firstCatagory: {
+            id: 1,
+            name: '手机'
+        },
+        secondCatagory: {
+            id: 11,
+            name: '苹果'
+        },
+        thirdCatagory: {
+            id: 111,
+            name: '苹果6'
+        },
         brand: 'brand',
         storeId: 'storeId',
         storeName: 'storeName',
@@ -189,7 +279,8 @@ const list = [
             '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
             '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
             '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-        ]
+        ],
+        hasNewVersion: 1
     },
     {
         commodityId: '111',
@@ -253,9 +344,18 @@ const list = [
         ],
         salesVolume: 111,
         comments: 111,
-        firstCatagory: 'firstCatagory',
-        secondCatagory: 'secondCatagory',
-        thirdCatagory: 'thirdCatagory',
+        firstCatagory: {
+            id: 1,
+            name: '手机'
+        },
+        secondCatagory: {
+            id: 11,
+            name: '苹果'
+        },
+        thirdCatagory: {
+            id: 111,
+            name: '苹果6'
+        },
         brand: 'brand',
         storeId: 'storeId',
         storeName: 'storeName',
@@ -265,7 +365,8 @@ const list = [
             '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
             '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
             '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
-        ]
+        ],
+        hasNewVersion: 1
     },
 ]
 
@@ -443,7 +544,6 @@ const versionInfo = {
     ]
 }
 
-
 export default {
     'GET /v1/goods/list': (req: Request, res: Response) => {
         // console.log(req)
@@ -454,7 +554,7 @@ export default {
                 code: 'success',
                 msg: '',
                 data: {
-                    allCount: 10,
+                    allCount: 58888,
                     // list.data
                     'list': list
                     // .slice(
@@ -550,5 +650,15 @@ export default {
                 },
             );
         }, 500)
+    },
+    'GET /v1/catagory/list': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                    code: 'success',
+                    msg: '',
+                    data: allCatagory,
+                },
+            );
+        }, 100)
     },
 };
