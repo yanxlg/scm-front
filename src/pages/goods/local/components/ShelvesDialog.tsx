@@ -3,12 +3,14 @@ import { Modal, Table } from 'antd';
 
 import { ColumnProps } from 'antd/es/table';
 
+import { formatDate } from '@/utils/date';
+
 export declare interface ISaleStatausItem {
     order?: number;
     channel: string;
     onsale_time: number;
     product_id: string;
-    onsaleStatus: string;
+    onsale_status: number;
 }
 
 declare interface ShelvesDialogProps {
@@ -31,7 +33,8 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             key: 'onsale_time',
             title: '时间',
             dataIndex: 'onsale_time',
-            align: 'center'
+            align: 'center',
+            render: (val: number) =>  formatDate(new Date(val), 'yyyy-MM-dd')
         },
         {
             key: 'channel',
@@ -46,10 +49,11 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             align: 'center'
         },
         {
-            key: 'onsaleStatus',
+            key: 'onsale_status',
             title: '操作',
-            dataIndex: 'onsaleStatus',
-            align: 'center'
+            dataIndex: 'onsale_status',
+            align: 'center',
+            render: (value: number) => value === 0 ? '下架' : '上架'
         }
     ]
 

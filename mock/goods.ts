@@ -545,13 +545,13 @@ const versionInfo = {
 }
 
 export default {
-    'GET /v1/goods/list': (req: Request, res: Response) => {
+    'POST /v1/goods/list': (req: Request, res: Response) => {
         // console.log(req)
         const { page, page_count } = req.query;
         // console.log('1111', page, page_count)
         setTimeout(() => {
             res.status(200).send({
-                code: 'success',
+                code: 200,
                 msg: '',
                 data: {
                     allCount: 58888,

@@ -9,10 +9,11 @@ import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
 import ImgEditDialog from './components/ImgEditDialog';
 import ExcelDialog from './components/ExcelDialog';
 // good-local.less
-import '../../styles/goods-local.less';
+import '../../../styles/goods-local.less';
 
 import {
     getGoodsList,
+    postGoodsExports,
     getGoodsOnsale,
     getGoodsDelete,
     getGoodsSales,
@@ -38,63 +39,59 @@ declare interface ITranslateItem {
 }
 
 export declare interface ISaleItem {
-    onSaleChannel: string;
-    onSaleTime: number;
+    onsale_channel: string;
+    onsale_time: number;
 }
 
-export declare interface IScmSkuStyle {
+export declare interface ISkuStyle {
     size?: string;
     color?: string;
 }
 
-declare interface IScmSkuItem {
-    scmSkuSn: string;
-    scmSkuStyle: IScmSkuStyle;
-    scmSkuPrice: number;
-    scmSkuWeight: number;
-    scmSkuInventory: number;
-    scmSkuShoppingTime: number;
-    scmSkuShoppingFee: number;
+declare interface ISkuItem {
+    sku_sn: string;
+    sku_style: ISkuStyle;
+    sku_price: number;
+    sku_weight: number;
+    sku_inventory: number;
+    sku_shopping_fee: number;
 }
 
 declare interface IBaseData {
-    commodityId: string;
-    productId: string;
-    goodsImg: string;
-    wormTaskId: number;
-    wormGoodsId: number;
-    isOnSale: number;
-    translateInfo: ITranslateItem[];
-    onSaleInfo: ISaleItem[];
+    commodity_id: string;
+    product_id: string;
+    goods_img: string;
     title: string;
     description: string;
-    skuNumber: number;
-    salesVolume: number;
+    first_catagory: ICatagoryData;
+    second_catagory: ICatagoryData;
+    third_catagory: ICatagoryData;
+    sku_number: number;
+    sku_image: string[];
+    sales_volume: number;
     comments: number;
-    firstCatagory: ICatagoryData;
-    secondCatagory: ICatagoryData;
-    thirdCatagory: ICatagoryData;
     brand: string;
-    storeId: string;
-    storeName: string;
-    wormTime: number;
-    wormGoodsInfoLink: string;
-    skuImage: string[];
-    hasNewVersion: number;
+    store_id: string;
+    store_name: string;
+    worm_task_id: number;
+    worm_goods_id: number;
+    onsale_info: ISaleItem[];
+    update_time: number;
+    worm_goodsinfo_link: string;
+    hasnew_version: number;
 }
 
 declare interface IDataItem extends IBaseData {
-    scmSkuInfo: IScmSkuItem[];
+    sku_info: ISkuItem[];
 }
 
 export declare interface IRowDataItem extends IBaseData {
-    scmSkuSn: string;
-    scmSkuStyle: IScmSkuStyle;
-    scmSkuPrice: number;
-    scmSkuWeight: number;
-    scmSkuInventory: number;
-    scmSkuShoppingTime: number;
-    scmSkuShoppingFee: number;
+    sku_sn: string;
+    sku_style: ISkuStyle;
+    sku_price: number;
+    sku_weight: number;
+    sku_inventory: number;
+    sku_shopping_fee: number;
     _rowspan?: number;
 }
 
@@ -118,7 +115,7 @@ declare interface IIndexState {
     page: number;
     page_count: number;
     allCount: number;
-    activeProductId: string;
+    activeproduct_id: string;
     goodsList: IRowDataItem[];
     activeImgList: string[];
     selectedRowKeys: string[];
@@ -151,7 +148,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
             page: 1,
             page_count: 30,
             allCount: 0,
-            activeProductId: '',
+            activeproduct_id: '',
             goodsList: [],
             activeImgList: [],
             selectedRowKeys: [],
@@ -225,10 +222,10 @@ class Local extends React.PureComponent<{}, IIndexState> {
         });
         return getGoodsList(params).then((res) => {
             // console.log(res)
-            const { list, allCount } = res.data;
+            const { list, all_count } = res.data;
             // console.log(111111, this.addRowSpanData(list));
             this.setState({
-                allCount,
+                allCount: all_count,
                 page: params.page,
                 page_count: params.page_count,
                 isEditing: false,
@@ -275,8 +272,8 @@ class Local extends React.PureComponent<{}, IIndexState> {
         const { selectedRowKeys, goodsList } = this.state;
         if (selectedRowKeys.length) {
             const editGoodsList: IRowDataItem[] = [];
-            selectedRowKeys.forEach(productId => {
-                const index = goodsList.findIndex(goodsItem => productId === goodsItem.productId);
+            selectedRowKeys.forEach(product_id => {
+                const index = goodsList.findIndex(goodsItem => product_id === goodsItem.product_id);
                 editGoodsList.push(goodsList[index]);
             });
             // console.log('setEditGoodsList', selectedRowKeys, editGoodsList);
@@ -290,39 +287,39 @@ class Local extends React.PureComponent<{}, IIndexState> {
     }
 
     // 改变编辑中的商品数据
-    changeEditGoodsList = (productId: string, type: string, val: string) => {
+    changeEditGoodsList = (product_id: string, type: string, val: string) => {
         const { editGoodsList } = this.state;
         this.setState({
             editGoodsList: editGoodsList.map(item => {
-                if (item.productId === productId) {
+                if (item.product_id === product_id) {
                     const ret = { ...item }
                     // type为title,description,
                     if (['title', 'description'].indexOf(type) > -1) {
                         ret[type as 'title' | 'description'] = val;
-                    } else if (type === 'firstCatagory') {
-                        ret.firstCatagory = {
+                    } else if (type === 'first_catagory') {
+                        ret.first_catagory = {
                             id: Number(val),
                             name: ''
                         }
-                        ret.secondCatagory = {
+                        ret.second_catagory = {
                             id: -1,
                             name: ''
                         }
-                        ret.thirdCatagory = {
+                        ret.third_catagory = {
                             id: -1,
                             name: ''
                         }
-                    } else if (type === 'secondCatagory') {
-                        ret.secondCatagory = {
+                    } else if (type === 'second_catagory') {
+                        ret.second_catagory = {
                             id: Number(val),
                             name: ''
                         }
-                        ret.thirdCatagory = {
+                        ret.third_catagory = {
                             id: -1,
                             name: ''
                         }
-                    } else if (type === 'thirdCatagory') {
-                        ret.thirdCatagory = {
+                    } else if (type === 'third_catagory') {
+                        ret.third_catagory = {
                             id: Number(val),
                             name: ''
                         }
@@ -354,39 +351,39 @@ class Local extends React.PureComponent<{}, IIndexState> {
         for (let i = 0; i < editGoodsList.length; i++) {
             const currentGoods = editGoodsList[i];
             const {
-                productId,
+                product_id,
                 title,
                 description,
-                firstCatagory,
-                secondCatagory,
-                thirdCatagory
+                first_catagory,
+                second_catagory,
+                third_catagory
             } = currentGoods
-            if (secondCatagory.id === -1 || thirdCatagory.id === -1) {
-                return message.error(`商品${productId}类目信息缺失！`);
+            if (second_catagory.id === -1 || third_catagory.id === -1) {
+                return message.error(`商品${product_id}类目信息缺失！`);
             }
             // 找出编辑过的数据
-            const index = goodsList.findIndex(item => item.productId === productId);
+            const index = goodsList.findIndex(item => item.product_id === product_id);
             const {
                 title: rawTitle,
                 description: rawDescription,
-                firstCatagory: rawFirstCatagory,
-                secondCatagory: rawSecondCatagory,
-                thirdCatagory: rawThirdCatagory
+                first_catagory: rawFirstCatagory,
+                second_catagory: rawSecondCatagory,
+                third_catagory: rawThirdCatagory
             } = goodsList[index];
             if (
                 title !== rawTitle ||
                 description !== rawDescription ||
-                firstCatagory.id !== rawFirstCatagory.id ||
-                secondCatagory.id !== rawSecondCatagory.id ||
-                thirdCatagory.id !== rawThirdCatagory.id
+                first_catagory.id !== rawFirstCatagory.id ||
+                second_catagory.id !== rawSecondCatagory.id ||
+                third_catagory.id !== rawThirdCatagory.id
             ) {
                 hasEditList.push({
-                    productId,
+                    product_id,
                     title,
                     description,
-                    firstCatagory: firstCatagory.id,
-                    secondCatagory: secondCatagory.id,
-                    thirdCatagory: thirdCatagory.id
+                    first_catagory: first_catagory.id,
+                    second_catagory: second_catagory.id,
+                    third_catagory: third_catagory.id
                 });
             }
         }
@@ -395,6 +392,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 modify_data: hasEditList
             }).then(res => {
                 // console.log('putGoodsEdit', res);
+                message.error('编辑商品信息成功');
                 this.onSearch();
                 this.setState({
                     isEditing: false,
@@ -421,15 +419,15 @@ class Local extends React.PureComponent<{}, IIndexState> {
         let rowKeys: string[] = [];
         // let goodsId: string | number = 0;
         for (let i = 0, len = list.length; i < len; i++) {
-            const { scmSkuInfo, ...rest } = list[i];
-            scmSkuInfo.forEach((item, index) => {
+            const { sku_info, ...rest } = list[i];
+            sku_info.forEach((item, index) => {
                 let rowDataItem: IRowDataItem = {
                     ...rest,
                     ...item
                 }
                 if (index === 0) {
-                    rowDataItem._rowspan = scmSkuInfo.length;
-                    rowKeys.push(rowDataItem.productId);
+                    rowDataItem._rowspan = sku_info.length;
+                    rowKeys.push(rowDataItem.product_id);
                 }
                 // rowDataItem._isCollapse = false;
                 // rowDataItem._isParent = true;
@@ -460,11 +458,11 @@ class Local extends React.PureComponent<{}, IIndexState> {
     }
 
     // 查询商品上下架记录
-    searchGoodsSale = (productId: string) => {
+    searchGoodsSale = (product_id: string) => {
         getGoodsSales({
-            product_id: productId
+            product_id: product_id
         }).then(res => {
-            // console.log('productId', productId, res);
+            // console.log('product_id', product_id, res);
             this.toggleShelvesDialog(true);
             this.setState({
                 // (item, index, list) 
@@ -481,25 +479,25 @@ class Local extends React.PureComponent<{}, IIndexState> {
     }
 
     // 编辑图片弹框
-    toggleImgEditDialog = (status: boolean, imgList?: string[], productId?: string) => {
+    toggleImgEditDialog = (status: boolean, imgList?: string[], product_id?: string) => {
         this.setState({
             imgEditDialogStatus: status,
             activeImgList: imgList || [],
-            activeProductId: productId || ''
+            activeproduct_id: product_id || ''
         });
     }
 
     // 图片更新之后同步到goodsList
-    updateGoodsListImg = (imgList: string[], productId: string) => {
+    updateGoodsListImg = (imgList: string[], product_id: string) => {
         const { goodsList } = this.state;
         this.setState({
             goodsList: goodsList.map(item => {
-                if (item.productId !== productId) {
+                if (item.product_id !== product_id) {
                     return item;
                 };
                 const ret = {...item};
-                ret.skuImage = imgList;
-                return ret;
+                ret.sku_image = imgList;
+                return ret
             })
         })
     }
@@ -538,6 +536,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
         this.setState({
             deleteLoading: true
         })
+        // console.log('selectedRowKeys', selectedRowKeys);
         getGoodsDelete({product_ids: selectedRowKeys}).then(res => {
             this.setState({
                 deleteLoading: false
@@ -574,120 +573,15 @@ class Local extends React.PureComponent<{}, IIndexState> {
 
     // 获取下载表格数据
     getExcelData = (count: number) => {
-        getGoodsList({
+        postGoodsExports({
             page: count + 1,
             page_count: 10000
-        }).then((res) => {
-            const { list } = res.data;
-            this.toggleExcelDialog(false);
-            this.downloadExcel(this.addRowSpanData(list));
-
         }).catch(err => {
-            message.error('获取下载表格数据失败！');
-        })
-    }
-
-    // 生成表格
-    downloadExcel = (goodsList: IRowDataItem[]) => {
-        // console.log('downloadExcel', goodsList);
-        const titleList = [
-            'Commodity ID',
-            'Product ID',
-            '商品图片',
-            '标题',
-            '描述',
-            '一级类目',
-            '二级类目',
-            '三级类目',
-            'sku数量',
-            '中台sku sn',
-            '规格',
-            '价格',
-            '运费',
-            '重量',
-            '库存',
-            '销量',
-            '评价数量',
-            '品牌',
-            '店铺 id',
-            '店铺名称',
-            '爬虫任务 id',
-            '爬虫商品ID',
-            '上架渠道',
-            '更新时间',
-            '链接'
-        ];
-        let str = titleList.join(',') + '\n';
-        goodsList.forEach(item => {
-            const {
-                commodityId,
-                productId,
-                goodsImg,
-                title,
-                description,
-                firstCatagory,
-                secondCatagory,
-                thirdCatagory,
-                skuNumber,
-                scmSkuSn,
-                scmSkuStyle,
-                scmSkuPrice,
-                scmSkuShoppingFee,
-                scmSkuWeight,
-                scmSkuInventory,
-                salesVolume,
-                comments,
-                brand,
-                storeId,
-                storeName,
-                wormTaskId,
-                wormGoodsId,
-                onSaleInfo,
-                wormTime,
-                wormGoodsInfoLink,
-                _rowspan
-            } = item;
-            // 规格
-            let skuStr = '';
-            skuStr += scmSkuStyle.size ? ('Size: ' + scmSkuStyle.size + '\t') : ''
-            skuStr += scmSkuStyle.color ? ('Color: ' + scmSkuStyle.color) : ''
-            str += (_rowspan ? commodityId : '') + ',';
-            str += (_rowspan ? productId : '') + ',';
-            str += (_rowspan ? goodsImg : '') + ',';
-            str += (_rowspan ? title : '') + ',';
-            str += (_rowspan ? description : '') + ',';
-            str += (_rowspan ? firstCatagory.name : '') + ',';
-            str += (_rowspan ? secondCatagory.name : '') + ',';
-            str += (_rowspan ? thirdCatagory.name : '') + ',';
-            str += (_rowspan ? skuNumber : '') + ',';
-            str += scmSkuSn + ',';
-            str += skuStr + ',';
-            str += scmSkuPrice + ',';
-            str += scmSkuShoppingFee + ',';
-            str += scmSkuWeight + ',';
-            str += scmSkuInventory + ',';
-            str += (_rowspan ? salesVolume : '') + ',';
-            str += (_rowspan ? comments : '') + ',';
-            str += (_rowspan ? brand : '') + ',';
-            str += (_rowspan ? storeId : '') + ',';
-            str += (_rowspan ? storeName : '') + ',';
-            str += (_rowspan ? wormTaskId : '') + ',';
-            str += (_rowspan ? wormGoodsId : '') + ',';
-            str += (_rowspan ? onSaleInfo.map(item => item.onSaleChannel).join('、') : '') + ',';
-            str += (_rowspan ? wormTime : '') + ',';
-            str += (_rowspan ? wormGoodsInfoLink : '') + '\n';
-            
-        })
-        let blob = new Blob([str], {type: "text/plain;charset=utf-8"});
-        //解决中文乱码问题
-        blob =  new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
-        const object_url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = object_url;
-        link.download =  "商品.xls";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            // console.log('postGoodsExports err', err);
+            message.error('导出表格失败！');
+        }).finally(() => {
+            this.toggleExcelDialog(false);
+        });
     }
 
     render() {
@@ -696,7 +590,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
             page,
             page_count, 
             allCount,
-            activeProductId,
+            activeproduct_id,
             goodsList,
             activeImgList,
             importGoodsDialogStatus, 
@@ -765,7 +659,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 />
                 <ImgEditDialog
                     visible={imgEditDialogStatus}
-                    productId={activeProductId}
+                    product_id={activeproduct_id}
                     imgList={activeImgList}
                     toggleImgEditDialog={this.toggleImgEditDialog}
                     updateGoodsListImg={this.updateGoodsListImg}

@@ -33,11 +33,13 @@
                 "name": "本地产品库"
             },
             {
-                "path": "/goods/vova",
-                "name": "VoVa产品库"
+                "path": "/goods/local/version",
+                "name": "商品版本",
+                "hideInMenu": true
             },
             {
-                "path": "/goods/version"
+                "path": "/goods/vova",
+                "name": "VoVa产品库"
             }
         ]
     },
