@@ -64,7 +64,6 @@ export async function addPddURLTask(params: IPddURLTaskParams) {
             ...params,
             version:"1.0",
             platform:"PDD",
-            spider_sub_cat_id:1
         },
         errorHandler:errorHandlerFactory(true)
     });
@@ -85,4 +84,14 @@ export async function queryTaskDetail(task_Id: number) {
             task_Id
         }
     })
+}
+
+
+export async function queryCategory() {
+    return request.get(ApiPathEnum.QueryPDDCategory)
+}
+
+
+export async function querySortCondition() {
+    return request.get(ApiPathEnum.QueryPDDSortCondition)
 }
