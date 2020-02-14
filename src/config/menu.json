@@ -29,7 +29,7 @@
         "icon": "dashboard",
         "children": [
             {
-                "path": "/goods/local",
+                "path": "/products",
                 "name": "本地产品库"
             },
             {

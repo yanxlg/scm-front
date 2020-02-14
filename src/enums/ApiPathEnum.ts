@@ -19,6 +19,9 @@ enum ApiPathEnum {
     AddPDDURLTask="/v1/task/spider/url",
     DeleteTask = "/v1/task/delete",
     QueryTaskDetail="/v1/task/detail",
+    QueryGoodsVersion = "/v1/vova_goods/version",
+    QueryGoodsDetail="/v1/vova_goods/detail",
+    EditGoodsDetail="/v1/vova_goods/edits",
 }
 
 export { ApiPathEnum };
