@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button, Pagination, Table } from 'antd';
+import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { IGoodsVersionRowItem, IGoodsImgs } from '../version';
+import { IGoodsVersionRowItem, IGoodsImgs, IOperations } from '../version';
 
 import VersionImgDialog from './VersionImgDialog';
 
@@ -19,15 +19,20 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
 
     private columns: ColumnProps<IGoodsVersionRowItem>[] = [
         {
-            key: 'x',
-            width: 100,
+            key: 'operations',
+            width: 160,
             title: '操作',
-            dataIndex: 'product_id',
+            dataIndex: 'operations',
             align: 'center',
-            render: (value: string, row: IGoodsVersionRowItem, index: number) => {
+            render: (value: IOperations, row: IGoodsVersionRowItem) => {
                 const children = (
+                    // can_apply: boolean;
+                    // can_ignore: boolean;
+                    // is_current_version: boolean;
                     <div>
-                        xxx
+                        {value.can_apply ? <Button className="btn" type="primary" size="small">应用</Button> : null}
+                        {value.can_ignore ? <Button className="btn" type="primary" size="small">忽略</Button> : null}
+                        {value.is_current_version ? <Button ghost={true} className="btn" type="primary" size="small">当前版本</Button> : null}
                     </div>
                 )
                 return {

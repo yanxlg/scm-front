@@ -40,7 +40,7 @@ const codeMessage:{[key:number]:string} = {
 };
 
 export const apiCodeMessage = {
-    success: "success",
+    success: 200,
 };
 
 /**

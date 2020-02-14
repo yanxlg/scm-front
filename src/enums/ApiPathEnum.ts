@@ -8,15 +8,18 @@ enum ApiPathEnum {
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
     // 商品中心相关接口
-    getGoodsList="/v1/goods/list",
-    putGoodsPicEdit="/v1/goods/pic/edit",
-    postGoodsPicUpload="/v1/goods/pic/upload",
-    getGoodsOnsale="/v1/goods/onsale",
-    getGoodsDelete="/v1/goods/delete",
-    putGoodsEdit="/v1/goods/edits",
-    getGoodsSales="/v1/goods/sales",
-    getGoodsVersion="/v1/goods_version",
-    getCatagoryList="/v1/catagory/list"
+    getGoodsList="/api/v1/goods/list",
+    postGoodsExports="/api/v1/goods/exports",
+    putGoodsPicEdit="/api/v1/goods/pic/edit",
+    postGoodsPicUpload="/api/v1/goods/pic/upload",
+    getGoodsOnsale="/api/v1/goods/onsale",
+    getGoodsDelete="/api/v1/goods/delete",
+    putGoodsEdit="/api/v1/goods/edits",
+    getGoodsSales="/api/v1/goods/sales",
+    getCatagoryList="/api/v1/catagory/list",
+    getGoodsVersion="/api/v1/goods/version",
+    postGoodsVersionExport="/api/v1/goods/version_export",
+    
 }
 
 export { ApiPathEnum };

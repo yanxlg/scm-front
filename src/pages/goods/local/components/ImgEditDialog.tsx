@@ -11,9 +11,9 @@ import {
 declare interface ImgEditDialogProps {
     visible: boolean;
     imgList: string[];
-    productId: string;
-    toggleImgEditDialog(status: boolean, imgList?: string[], productId?: string): void;
-    updateGoodsListImg(imgList: string[], productId: string): void;
+    product_id: string;
+    toggleImgEditDialog(status: boolean, imgList?: string[], product_id?: string): void;
+    updateGoodsListImg(imgList: string[], product_id: string): void;
 }
 
 declare interface ImgEditDialogState {
@@ -79,8 +79,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             pic: imgList.map(item => item)
         }).then(res => {
             // console.log('putGoodsPicEdit', imgList)
-            this.props.toggleImgEditDialog(true, imgList, this.props.productId);
-            this.props.updateGoodsListImg(imgList, this.props.productId);
+            this.props.toggleImgEditDialog(true, imgList, this.props.product_id);
+            this.props.updateGoodsListImg(imgList, this.props.product_id);
             message.success('图片编辑成功！');
         }).catch(err => {
             message.success('图片编辑失败！');
@@ -104,7 +104,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     private uploadImg = (info: UploadChangeParam) => {
         const { loading } = this.state;
-        const { imgList, productId } = this.props;
+        const { imgList, product_id } = this.props;
         if (!loading) {
             this.setState({
                 loading: true
@@ -117,28 +117,32 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 const _URL = window.URL || window.webkitURL;
                 const img = new Image();
                 img.onload = () => {
-                    // console.log(img.width, img.height, productId);
+                    // console.log(img.width, img.height, product_id);
                     formData.append('width', img.width + '');
                     formData.append('height', img.height + '');
                     formData.append('position', imgList.length + '');
-                    formData.append('product_id', productId);
-                    formData.append('alt', productId);
+                    formData.append('product_id', product_id);
+                    formData.append('alt', product_id);
                     postGoodsPicUpload(formData).then(res => {
                         // console.log('postGoodsPicUpload', res);
                         message.success('图片上传成功');
                         this.setState({
                             loading: false
-                        })
+                        });
                         this.props.toggleImgEditDialog(true, [
                             ...imgList,
                             res.data.url
-                        ], productId);
+                        ], product_id);
                         this.props.updateGoodsListImg([
                             ...imgList,
                             res.data.url
-                        ], productId);
+                        ], product_id);
                     }).catch(err => {
                         // console.log('postGoodsPicUpload', err);
+                        message.error('图片上传失败！');
+                        this.setState({
+                            loading: false
+                        });
                     })
                 };
                 img.src = _URL.createObjectURL(file);

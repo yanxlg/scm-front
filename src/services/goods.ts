@@ -25,21 +25,21 @@ declare interface IImgEditData {
     pic: string[];
 }
 
-declare interface IOnsaleParams {
+declare interface IOnsaleData {
     scm_goods_id: string[];
 }
 
-declare interface IGoodsDeleteParams {
+declare interface IGoodsDeleteData {
     product_ids: string[];
 }
 
 export declare interface IGoodsEditDataItem {
-    productId: string;
+    product_id: string;
     title: string;
     description: string;
-    firstCatagory: number;
-    secondCatagory: number;
-    thirdCatagory: number;
+    first_catagory: number;
+    second_catagory: number;
+    third_catagory: number;
 }
 declare interface IGoodsEditData {
     modify_data: IGoodsEditDataItem[];
@@ -55,16 +55,41 @@ declare interface IGoodsVersionParams {
     commodity_id: number;
 }
 
+declare interface IVersionExportData {
+    commodity_id: number;
+}
+
 export async function getGoodsList(params: IFilterParams) {
-    return request.get(ApiPathEnum.getGoodsList, {
+    return request.post(ApiPathEnum.getGoodsList, {
         // requestType: 'form',
-        params: params
+        data: params
+    });
+}
+
+export async function postGoodsExports(data: IFilterParams) {
+    return request.post(ApiPathEnum.postGoodsExports, {
+        // requestType: 'form',
+        data,
+        responseType:"blob",
+        parseResponse:false
+    }).then((response)=>{
+        const disposition = response.headers.get('content-disposition');
+        const fileName = decodeURI(disposition.substring(disposition.indexOf('filename=')+9, disposition.length));
+        response.blob().then((blob:Blob)=>{
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        })
     });
 }
 
 export async function putGoodsPicEdit(data: IImgEditData) {
     return request.put(ApiPathEnum.putGoodsPicEdit, {
-        requestType: 'form',
+        requestType: 'json',
         data
     })
 }
@@ -77,16 +102,18 @@ export async function postGoodsPicUpload(data: any) {
 }
 
 // 一键上架
-export async function getGoodsOnsale(params: IOnsaleParams) {
-    return request.get(ApiPathEnum.getGoodsOnsale, {
-        params
+export async function getGoodsOnsale(data: IOnsaleData) {
+    return request.post(ApiPathEnum.getGoodsOnsale, {
+        data
     })
 }
 
 // 删除
-export async function getGoodsDelete(params: IGoodsDeleteParams) {
-    return request.get(ApiPathEnum.getGoodsDelete, {
-        params
+export async function getGoodsDelete(data: IGoodsDeleteData) {
+    // console.log('data', data);
+    return request.post(ApiPathEnum.getGoodsDelete, {
+        requestType: 'json',
+        data
     })
 }
 
@@ -104,6 +131,11 @@ export async function getGoodsSales(params: IGoodsSalesParams) {
     })
 }
 
+// 获取所有
+export async function getCatagoryList() {
+    return request.get(ApiPathEnum.getCatagoryList);
+}
+
 // 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {
     return request.get(ApiPathEnum.getGoodsVersion, {
@@ -111,7 +143,24 @@ export async function getGoodsVersion(params: IGoodsVersionParams) {
     });
 }
 
-// 获取所有
-export async function getCatagoryList() {
-    return request.get(ApiPathEnum.getCatagoryList);
+// 下载商品版本excel
+export async function postGoodsVersionExport(data: IVersionExportData) {
+    return request.post(ApiPathEnum.postGoodsVersionExport, {
+        // requestType: 'form',
+        data,
+        responseType:"blob",
+        parseResponse:false
+    }).then((response)=>{
+        const disposition = response.headers.get('content-disposition');
+        const fileName = decodeURI(disposition.substring(disposition.indexOf('filename=')+9, disposition.length));
+        response.blob().then((blob:Blob)=>{
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        })
+    });
 }

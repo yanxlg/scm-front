@@ -2,7 +2,7 @@ import React, { ChangeEvent } from 'react';
 import { Input, InputNumber, Select, Button } from 'antd';
 // import { ClickParam } from 'antd/lib/menu';
 
-import { ICategoryItem } from '../local'
+import { ICategoryItem } from '../index'
 
 const { Option } = Select;
 
@@ -86,7 +86,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         })
     }
 
-    private setCommodityId = (e: ChangeEvent<HTMLInputElement>) => {
+    private setcommodity_id = (e: ChangeEvent<HTMLInputElement>) => {
         this.setState({
             commodity_id: e.target.value 
         })
@@ -248,7 +248,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         placeholder="请输入Commodity ID"
                         name="commodity_id"
                         value={commodity_id}
-                        onChange={this.setCommodityId}
+                        onChange={this.setcommodity_id}
                     />
                 </div>
                 <div className="local-search-item">

@@ -6,9 +6,12 @@ import ZoomImage from '@/components/ZoomImage';
 
 import { ColumnProps } from 'antd/es/table';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import { IRowDataItem, ISaleItem, IScmSkuStyle, ICatagoryData, ICategoryItem } from '../local';
+import { IRowDataItem, ISaleItem, ISkuStyle, ICatagoryData, ICategoryItem } from '../index';
+
+import { formatDate } from '@/utils/date';
 
 const { Option } = Select;
+const { TextArea } = Input;
 
 declare interface IGoodsTableProps {
     searchLoading: boolean;
@@ -17,10 +20,10 @@ declare interface IGoodsTableProps {
     goodsList: IRowDataItem[];
     editGoodsList: IRowDataItem[];
     allCatagoryList: ICategoryItem[];
-    toggleImgEditDialog(status: boolean, imgList?: string[], productId?: string): void;
+    toggleImgEditDialog(status: boolean, imgList?: string[], product_id?: string): void;
     changeSelectedRowKeys(rowKeys: string[]): void;
-    searchGoodsSale(productId: string): void;
-    changeEditGoodsList(productId: string, type: string, val: any): void;
+    searchGoodsSale(product_id: string): void;
+    changeEditGoodsList(product_id: string, type: string, val: any): void;
     getCurrentCatagory(firstId: number, secondId?: number): ICategoryItem[];
 }
 
@@ -54,13 +57,13 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             width: 60,
             render: (value: string, row: IRowDataItem, index: number) => {
                 const { selectedRowKeys } = this.props;
-                const { productId } = row;
+                const { product_id } = row;
                 return {
                     // children: row._isParent ? <Checkbox /> : null,
                     children: (
                         <Checkbox 
-                            checked={selectedRowKeys.indexOf(productId)>-1} 
-                            onChange={() => this.selectedRow(productId)}
+                            checked={selectedRowKeys.indexOf(product_id)>-1} 
+                            onChange={() => this.selectedRow(product_id)}
                         />
                     ),
                     props: {
@@ -70,15 +73,15 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'commodityId',
+            key: 'commodity_id',
             title: 'Commodity ID',
-            dataIndex: 'commodityId',
+            dataIndex: 'commodity_id',
             align: 'center',
             width: 130,
             render: (value: string, row: IRowDataItem) => {
                 return {
                     children: (
-                        <Link to={`/goods/version?id=${value}`}>{value}</Link>
+                        <Link to={`/goods/local/version?id=${value}`}>{value}</Link>
                     ),
                     props: {
                         rowSpan: row._rowspan || 0
@@ -87,28 +90,37 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'productId',
+            key: 'product_id',
             title: 'Product ID',
-            dataIndex: 'productId',
+            dataIndex: 'product_id',
             align: 'center',
             width: 130,
-            render: this.mergeCell
+            render: (value: string, row: IRowDataItem) => {
+                return {
+                    children: (
+                        <div className={row.hasnew_version ? 'red' : ''}>{value}</div>
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
         },
         {
-            key: 'goodsImg',
+            key: 'goods_img',
             title: '商品图片',
-            dataIndex: 'goodsImg',
+            dataIndex: 'goods_img',
             align: 'center',
             width: 100,
             render: (value: string, row: IRowDataItem, index: number) => {
                 return {
                     children: (
                         <>
-                            <ZoomImage className="goods-local-img" src={row.skuImage[0]} />
+                            <ZoomImage className="goods-local-img" src={row.sku_image[0]} />
                             <Button 
                                 className="goods-local-img-edit" 
                                 size="small"
-                                onClick={() => this.clickImgEdit(row.skuImage, row.productId)}
+                                onClick={() => this.clickImgEdit(row.sku_image, row.product_id)}
                             >编辑</Button>
                         </>
                     ),
@@ -126,14 +138,15 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             width: 200,
             render: (value: string, row: IRowDataItem) => {
                 const { editGoodsList } = this.props;
-                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 return {
                     children: index > -1 ? (
-                        <Input 
+                        <TextArea
+                            autoSize={true} 
                             value={editGoodsList[index].title}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.changeEditGoodsList(row.productId, 'title', e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => this.props.changeEditGoodsList(row.product_id, 'title', e.target.value)}
                         />
-                    ) : (<div>{value}</div>),
+                    ) : (<div className="text">{value}</div>),
                     props: {
                         rowSpan: row._rowspan || 0
                     }
@@ -148,14 +161,15 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             width: 200,
             render: (value: string, row: IRowDataItem) => {
                 const { editGoodsList } = this.props;
-                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 return {
                     children: index > -1 ? (
-                        <Input 
+                        <TextArea
+                            autoSize={true}
                             value={editGoodsList[index].description}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => this.props.changeEditGoodsList(row.productId, 'description', e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => this.props.changeEditGoodsList(row.product_id, 'description', e.target.value)}
                         />
-                    ) : (<div>{value}</div>),
+                    ) : ((<div className="text">{value}</div>)),
                     props: {
                         rowSpan: row._rowspan || 0
                     }
@@ -164,21 +178,21 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         
         {
-            key: 'firstCatagory',
+            key: 'first_catagory',
             title: '一级类目',
-            dataIndex: 'firstCatagory',
+            dataIndex: 'first_catagory',
             align: 'center',
             width: 100,
             render: (value: ICatagoryData, row: IRowDataItem) => {
                 const { editGoodsList, allCatagoryList } = this.props;
-                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 const currentEditGoods = editGoodsList[index];
                 return {
                     children: index > -1 ? (
                         <Select 
                             className=""
-                            value={currentEditGoods.firstCatagory.id + ''}
-                            onChange={(val: string) => this.props.changeEditGoodsList(row.productId, 'firstCatagory', val)}
+                            value={currentEditGoods.first_catagory.id + ''}
+                            onChange={(val: string) => this.props.changeEditGoodsList(row.product_id, 'first_catagory', val)}
                         >
                             {
                                 allCatagoryList.map(item => (
@@ -194,25 +208,25 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'secondCatagory',
+            key: 'second_catagory',
             title: '二级类目',
-            dataIndex: 'secondCatagory',
+            dataIndex: 'second_catagory',
             align: 'center',
             width: 100,
             render: (value: ICatagoryData, row: IRowDataItem) => {
                 const { editGoodsList, allCatagoryList } = this.props;
-                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 const currentEditGoods = editGoodsList[index];
                 let catagoryList: ICategoryItem[] = [];
                 if (currentEditGoods) {
-                    catagoryList = this.props.getCurrentCatagory(currentEditGoods.firstCatagory.id);
+                    catagoryList = this.props.getCurrentCatagory(currentEditGoods.first_catagory.id);
                 }
                 return {
                     children: index > -1 ? (
                         <Select 
                             className=""
-                            value={currentEditGoods.secondCatagory.id + ''}
-                            onChange={(val: string) => this.props.changeEditGoodsList(row.productId, 'secondCatagory', val)}
+                            value={currentEditGoods.second_catagory.id + ''}
+                            onChange={(val: string) => this.props.changeEditGoodsList(row.product_id, 'second_catagory', val)}
                         >
                             <Option value="-1">请选择</Option>
                             {
@@ -229,26 +243,26 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'thirdCatagory',
+            key: 'third_catagory',
             title: '三级类目',
-            dataIndex: 'thirdCatagory',
+            dataIndex: 'third_catagory',
             align: 'center',
             width: 100,
             render: (value: ICatagoryData, row: IRowDataItem) => {
                 const { editGoodsList, allCatagoryList } = this.props;
-                const index = editGoodsList.findIndex(item => row.productId === item.productId);
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 const currentEditGoods = editGoodsList[index];
                 let catagoryList: ICategoryItem[] = [];
                 if (currentEditGoods) {
-                    const { firstCatagory, secondCatagory } = currentEditGoods;
-                    catagoryList = this.props.getCurrentCatagory(firstCatagory.id, secondCatagory.id);
+                    const { first_catagory, second_catagory } = currentEditGoods;
+                    catagoryList = this.props.getCurrentCatagory(first_catagory.id, second_catagory.id);
                 }
                 return {
                     children: index > -1 ? (
                         <Select 
                             className=""
-                            value={currentEditGoods.thirdCatagory.id + ''}
-                            onChange={(val: string) => this.props.changeEditGoodsList(row.productId, 'thirdCatagory', val)}
+                            value={currentEditGoods.third_catagory.id + ''}
+                            onChange={(val: string) => this.props.changeEditGoodsList(row.product_id, 'third_catagory', val)}
                         >
                              <Option value="-1">请选择</Option>
                             {
@@ -265,27 +279,27 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'skuNumber',
+            key: 'sku_number',
             title: 'sku数量',
-            dataIndex: 'skuNumber',
+            dataIndex: 'sku_number',
             align: 'center',
             width: 100,
             render: this.mergeCell
         },
         {
-            key: 'scmSkuSn',
+            key: 'sku_sn',
             title: '中台sku sn',
-            dataIndex: 'scmSkuSn',
+            dataIndex: 'sku_sn',
             align: 'center',
             width: 120
         },
         {
-            key: 'scmSkuStyle',
+            key: 'sku_style',
             title: '规格',
-            dataIndex: 'scmSkuStyle',
+            dataIndex: 'sku_style',
             align: 'center',
             width: 120,
-            render: (value: IScmSkuStyle, row: IRowDataItem, index: number) => {
+            render: (value: ISkuStyle, row: IRowDataItem, index: number) => {
                 return (
                     <>
                         {
@@ -297,23 +311,23 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'scmSkuPrice',
+            key: 'sku_price',
             title: '价格',
-            dataIndex: 'scmSkuPrice',
+            dataIndex: 'sku_price',
             align: 'center',
             width: 100
         },
         {
-            key: 'scmSkuShoppingFee',
+            key: 'sku_shopping_fee',
             title: '运费',
-            dataIndex: 'scmSkuShoppingFee',
+            dataIndex: 'sku_shopping_fee',
             align: 'center',
             width: 100
         },
         {
-            key: 'scmSkuWeight',
+            key: 'sku_weight',
             title: '重量',
-            dataIndex: 'scmSkuWeight',
+            dataIndex: 'sku_weight',
             align: 'center',
             width: 100,
             // render: (value: string, row: IRowDataItem, index: number) => {
@@ -321,9 +335,9 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             // }
         },
         {
-            key: 'scmSkuInventory',
+            key: 'sku_inventory',
             title: '库存',
-            dataIndex: 'scmSkuInventory',
+            dataIndex: 'sku_inventory',
             align: 'center',
             width: 100,
         },   
@@ -336,9 +350,9 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         // },
         
         {
-            key: 'salesVolume',
+            key: 'sales_volume',
             title: '销量',
-            dataIndex: 'salesVolume',
+            dataIndex: 'sales_volume',
             align: 'center',
             width: 100,
             render: this.mergeCell
@@ -360,35 +374,35 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             render: this.mergeCell
         },
         {
-            key: 'storeId',
+            key: 'store_id',
             title: '店铺 id',
-            dataIndex: 'storeId',
+            dataIndex: 'store_id',
             align: 'center',
             width: 100,
             render: this.mergeCell
         },
         {
-            key: 'storeName',
+            key: 'store_name',
             title: '店铺名称',
-            dataIndex: 'storeName',
+            dataIndex: 'store_name',
             align: 'center',
             width: 100,
             render: this.mergeCell
         },
         {
-            key: 'wormTaskId',
-            title: '爬虫任务 id',
-            dataIndex: 'wormTaskId',
+            key: 'worm_task_id',
+            title: '爬虫任务ID',
+            dataIndex: 'worm_task_id',
             align: 'center',
-            width: 100,
+            width: 120,
             render: this.mergeCell
         },
         {
-            key: 'wormGoodsId',
+            key: 'worm_goods_id',
             title: '爬虫商品ID',
-            dataIndex: 'wormGoodsId',
+            dataIndex: 'worm_goods_id',
             align: 'center',
-            width: 100,
+            width: 120,
             render: this.mergeCell
         },
         // {
@@ -400,17 +414,17 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         //     render: this.mergeCell
         // },
         {
-            key: 'onSaleInfo',
+            key: 'onsale_info',
             title: '上架渠道',
-            dataIndex: 'onSaleInfo',
+            dataIndex: 'onsale_info',
             align: 'center',
             width: 100,
             render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
                 return {
                     children: (
-                        <Button type="link" onClick={() => this.props.searchGoodsSale(row.productId)}>
+                        <Button type="link" onClick={() => this.props.searchGoodsSale(row.product_id)}>
                             {
-                                value.map((item: ISaleItem) => item.onSaleChannel).join('、')
+                                value.map((item: ISaleItem) => item.onsale_channel).join('、')
                             }
                         </Button>
                     ),
@@ -421,21 +435,35 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             }
         },
         {
-            key: 'wormTime',
+            key: 'update_time',
             title: '更新时间',
-            dataIndex: 'wormTime',
+            dataIndex: 'update_time',
             align: 'center',
-            width: 100,
-            render: this.mergeCell
+            width: 120,
+            render: (value: number, row: IRowDataItem) => {
+                return {
+                    children: <div>{formatDate(new Date(value), 'yyyy-MM-dd')}</div>,
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
         },
 
         {
-            key: 'wormGoodsInfoLink',
+            key: 'worm_goodsinfo_link',
             title: '链接',
-            dataIndex: 'wormGoodsInfoLink',
+            dataIndex: 'worm_goodsinfo_link',
             align: 'center',
-            width: 100,
-            render: this.mergeCell
+            width: 200,
+            render: (value: string, row: IRowDataItem) => {
+                return {
+                    children: <a href={value} target="_blank">{value}</a>,
+                    props: {
+                        rowSpan: row._rowspan || 0
+                    }
+                };
+            }
         }
     ];
 
@@ -482,9 +510,9 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
     }
 
     // 图片编辑
-    private clickImgEdit = (imgList: string[], productId: string) => {
+    private clickImgEdit = (imgList: string[], product_id: string) => {
         // console.log('clickImgEdit', rowData);
-        this.props.toggleImgEditDialog(true, imgList, productId);
+        this.props.toggleImgEditDialog(true, imgList, product_id);
     }
 
     // 合并单元格
@@ -502,7 +530,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         return (
             <Table
                 bordered={true}
-                rowKey="scmSkuSn"
+                rowKey="sku_sn"
                 className="goods-local-table"
                 columns={this.columns}
                 dataSource={goodsList}

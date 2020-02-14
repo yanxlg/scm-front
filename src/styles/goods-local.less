@@ -2,6 +2,17 @@
     padding: 20px;
     &-table {
         margin-top: 20px;
+        .text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* autoprefixer: ignore next */
+            -webkit-box-orient: vertical;
+        }
+        .red {
+            color: red;
+        }
     }
     &-pagination {
         margin-top: 20px;
