@@ -60,7 +60,12 @@ export async function addPddHotTask(params: IPddHotTaskParams) {
 
 export async function addPddURLTask(params: IPddURLTaskParams) {
     return request.post(ApiPathEnum.AddPDDURLTask, {
-        data: params,
+        data: {
+            ...params,
+            version:"1.0",
+            platform:"PDD",
+            spider_sub_cat_id:1
+        },
         errorHandler:errorHandlerFactory(true)
     });
 }

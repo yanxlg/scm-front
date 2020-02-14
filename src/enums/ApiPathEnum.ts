@@ -17,14 +17,15 @@ enum ApiPathEnum {
 
     // vova商品库相关接口''
     getVovaGoodsList="/v1/vova_goods/list",
-    
+
 
     // 任务中心相关接口
-    QueryTaskList="/v1/task/list",
-    AddPDDHotTask="/v1/task/spider/pdd_hotsale",
-    AddPDDURLTask="/v1/task/spider/url",
-    DeleteTask = "/v1/task/delete",
-    QueryTaskDetail="/v1/task/detail",
+    QueryTaskList="/api/v1/task/list",
+    AddPDDHotTask="/api/v1/task/spider/pdd_hotsale",
+    AddPDDURLTask="/api/v1/task/spider/url",
+    DeleteTask = "/api/v1/task/delete",
+    QueryTaskDetail="/api/v1/task/detail",
+
     QueryGoodsVersion = "/v1/vova_goods/version",
     QueryGoodsDetail="/v1/vova_goods/detail",
     EditGoodsDetail="/v1/vova_goods/edits",

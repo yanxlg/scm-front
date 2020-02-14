@@ -151,6 +151,34 @@ class _URLGather extends Form.BaseForm<IURLGatherProps,IHotGatherState>{
     private onAcquisitionRack(){
         this.onGather(true);
     }
+    @Bind
+    private disabledStartDate(startTime:Moment|null){
+        const {form} = this.props;
+        const endTime = form.getFieldValue("task_end_time");
+        if (!startTime) {
+            return false;
+        }
+        const startValue = startTime.valueOf();
+        const currentValue = moment().valueOf();
+        if(!endTime){
+            return startValue < currentValue;
+        }
+        return startValue > endTime.valueOf() || startValue < currentValue;
+    }
+    @Bind
+    private disabledEndDate(endTime:Moment|null){
+        const {form} = this.props;
+        const startTime = form.getFieldValue("timerStartTime");
+        if (!endTime) {
+            return false;
+        }
+        const endValue = endTime.valueOf();
+        const currentValue = moment().valueOf();
+        if(!startTime){
+            return endValue < currentValue;
+        }
+        return startTime.valueOf() > endValue || endValue < currentValue;
+    }
     render(){
         const {form, taskId} = this.props;
         const edit = taskId!==void 0;
@@ -178,13 +206,9 @@ class _URLGather extends Form.BaseForm<IURLGatherProps,IHotGatherState>{
                     )
                 }
                 <Form layout="inline" autoComplete={'off'}>
-                    {
-                        edit&&(
-                            <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name="task_name" label="任务名称">
-                                <Input className="input-default"/>
-                            </Form.Item>
-                        )
-                    }
+                    <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name="task_name" label="任务名称">
+                        <Input className="input-default"/>
+                    </Form.Item>
                     <Form.Item className="config-card form-item-block" validateTrigger={'onBlur'} form={form} name="urls">
                         <Input.TextArea spellCheck={'false'} className="config-textarea" placeholder="请输入PDD商品详情链接，一行一个，多个URL以回车隔开"/>
                     </Form.Item>
@@ -204,20 +228,20 @@ class _URLGather extends Form.BaseForm<IURLGatherProps,IHotGatherState>{
                                         定时任务
                                     </Radio>
                                     <Form.Item className="vertical-middle" validateTrigger={'onBlur'} form={form} label="开始时间" name="timerStartTime">
-                                        <DatePicker showTime={true} disabled={task_type!==TaskType.interval}/>
+                                        <DatePicker showTime={true} disabled={task_type!==TaskType.interval} disabledDate={this.disabledStartDate}/>
                                     </Form.Item>
                                     <Form.Item className="vertical-middle" validateTrigger={'onBlur'} form={form} label="结束时间" name="task_end_time">
-                                        <DatePicker showTime={true} disabled={task_type!==TaskType.interval}/>
+                                        <DatePicker showTime={true} disabled={task_type!==TaskType.interval} disabledDate={this.disabledEndDate}/>
                                     </Form.Item>
-                                    <Form.Item className="vertical-middle" validateTrigger={'onBlur'} form={form} label="任务间隔" name="taskIntervalType" initialValue="day">
+                                    <Form.Item className="vertical-middle" validateTrigger={'onBlur'} form={form} label="任务间隔" name="taskIntervalType" initialValue={TaskIntervalType.day}>
                                         <Radio.Group disabled={task_type!==TaskType.interval}>
-                                            <Radio value="day">
+                                            <Radio value={TaskIntervalType.day}>
                                                 <Form.Item className="vertical-middle" validateTrigger={'onBlur'} form={form} name="day">
                                                     <InputNumber min={0} className="input-small input-handler" formatter={numberFormatter} disabled={task_type!==TaskType.interval||taskIntervalType!==TaskIntervalType.day}/>
                                                 </Form.Item>
                                                 天
                                             </Radio>
-                                            <Radio value="src">
+                                            <Radio value={TaskIntervalType.second}>
                                                 <Form.Item className="vertical-middle" validateTrigger={'onBlur'} form={form} name="second">
                                                     <InputNumber min={0} className="input-small input-handler" formatter={numberFormatter} disabled={task_type!==TaskType.interval||taskIntervalType!==TaskIntervalType.second}/>
                                                 </Form.Item>
@@ -229,13 +253,6 @@ class _URLGather extends Form.BaseForm<IURLGatherProps,IHotGatherState>{
                             </Radio.Group>
                         </Form.Item>
                     </Card>
-                    {
-                        !edit&&(
-                            <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name="task_name" label="任务名称">
-                                <Input className="input-default"/>
-                            </Form.Item>
-                        )
-                    }
                     <div className="form-item">
                         <Button loading={gatherLoading} type="primary" className="btn-default" onClick={this.onStartGather}>
                             {

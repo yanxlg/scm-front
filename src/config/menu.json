@@ -19,7 +19,8 @@
             },
             {
                 "path": "/task/drafts",
-                "name": "草稿箱"
+                "name": "草稿箱",
+                "hideInMenu": true
             }
         ]
     },
