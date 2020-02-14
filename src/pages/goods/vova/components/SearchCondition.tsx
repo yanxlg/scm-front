@@ -47,7 +47,11 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                 </div>
                 <div className="form-item">
                     <Form.Item validateTrigger={'onBlur'} form={form} name="volume" label="销量">
-                        <Input className="input-small input-handler" style={{width: 130}} placeholder="日销量大于10" />
+                        <Select className="select-default" defaultValue="">
+                            <Option value="">日销量大于10</Option>
+                            <Option value="1">日销量大于100</Option>
+                            <Option value="2">日销量大于500</Option>
+                        </Select>
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
                         <Input className="input-small input-handler" style={{width: 130}} />

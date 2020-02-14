@@ -9,7 +9,8 @@ import { Form } from '@/components/Form';
 import SearchCondition from '@/pages/goods/vova/components/SearchCondition';
 import DataStatusUpdate from '@/pages/goods/vova/components/DataStatusUpdate';
 import GoodsTable from '@/pages/goods/vova/components/GoodsTable';
-import { getVovaGoodsList } from '@/services/VovaGoodsService';
+import { PropertyItem } from '@/pages/goods/vova/components/DataStatusUpdate';
+import { getVovaGoodsList, getChangedProperties } from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
 
@@ -19,6 +20,7 @@ declare interface IPros extends FormComponentProps<any> {
 
 declare interface IState {
     goodsList: Array<IRowDataItem>;
+    propertyList: PropertyItem[];
     dataLoading: Boolean;
     searchLoading: Boolean;
     allCount: number;
@@ -51,9 +53,21 @@ class _Index extends Form.BaseForm<IPros, IState> {
         super(props);
         this.state = {
             goodsList: [],
+            propertyList: [],
             dataLoading: false,
             searchLoading: false,
-        }
+            allCount: 0,
+        };
+    }
+
+    componentDidMount() {
+        getChangedProperties().then(res => {
+            if (res.code === 0) {
+                this.setState({
+                    propertyList: res.data.changed_property_list
+                });
+            }
+        })
     }
 
     onSearch = ():void => {
@@ -69,7 +83,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
                 this.setState({
                     goodsList: data.list,
                     allCount: data.all_count
-                })
+                });
             }
         }).finally(() => {
             this.setState({
@@ -86,12 +100,12 @@ class _Index extends Form.BaseForm<IPros, IState> {
 
     render() {
         const { form } = this.props;
-        const { goodsList, allCount } = this.state;
+        const { goodsList, propertyList, allCount } = this.state;
         return (
             <div className="container">
                 <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
                     <SearchCondition form={form} onSearch={this.onSearch} />
-                    <DataStatusUpdate />
+                    <DataStatusUpdate propertyList={propertyList} />
                     <GoodsTable 
                         goodsList={goodsList}
                         allCount={allCount}
