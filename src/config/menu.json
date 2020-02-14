@@ -29,12 +29,17 @@
         "icon": "dashboard",
         "children": [
             {
-                "path": "/products",
+                "path": "/goods/local",
                 "name": "本地产品库"
             },
             {
                 "path": "/goods/vova",
                 "name": "VoVa产品库"
+            },
+            {
+                "path": "/goods/vova/version",
+                "name": "商品版本更新",
+                "hideInMenu": true
             },
             {
                 "path": "/goods/version"

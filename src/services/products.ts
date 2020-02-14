@@ -1,6 +1,6 @@
 import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
-import { IFormData } from '@/pages/products/components/VersionSearch';
+import { IFormData } from '@/pages/goods/vova/components/VersionSearch';
 
 export async function queryGoodsVersion(params?: IFormData) {
     return request.get(ApiPathEnum.QueryGoodsVersion, {

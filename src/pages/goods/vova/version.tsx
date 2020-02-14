@@ -1,11 +1,10 @@
 import React from 'react';
-import VersionSearch, { IFormData } from '@/pages/products/components/VersionSearch';
+import VersionSearch, { IFormData } from '@/pages/goods/vova/components/VersionSearch';
 import { Button, Card, Checkbox, Divider, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnProps } from 'antd/lib/table/interface';
 import { Bind } from 'lodash-decorators';
 import { queryGoodsVersion } from '@/services/products';
-
 
 declare interface ITableItem {
     vova_virtual_id: number;

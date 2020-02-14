@@ -12,6 +12,8 @@ import GoodsTable from '@/pages/goods/vova/components/GoodsTable';
 import { getVovaGoodsList } from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
+import { Modal } from 'antd';
+import ProductEditModal from '@/pages/goods/vova/components/ProductEditModal';
 
 declare interface IPros extends FormComponentProps<any> {
 
@@ -80,9 +82,16 @@ class _Index extends Form.BaseForm<IPros, IState> {
     }
 
     // 查看详情弹窗
-    toggleDetailDialog = (commodityId: string) => {
-
-    }
+    toggleDetailDialog = (product_id: number) => {
+        Modal.info({
+            className:"product-modal modal-empty",
+            icon:null,
+            title:"查看/编辑商品详情",
+            cancelText:null,
+            okText:null,
+            content:<ProductEditModal product_id={product_id} channel="vova"/>,
+        })
+    };
 
     render() {
         const { form } = this.props;
@@ -92,7 +101,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
                 <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
                     <SearchCondition form={form} onSearch={this.onSearch} />
                     <DataStatusUpdate />
-                    <GoodsTable 
+                    <GoodsTable
                         goodsList={goodsList}
                         allCount={allCount}
                         toggleDetailDialog={this.toggleDetailDialog}

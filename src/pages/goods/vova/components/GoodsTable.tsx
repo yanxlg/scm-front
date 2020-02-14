@@ -7,7 +7,7 @@ import { IRowDataItem } from '@/pages/goods/vova/index';
 declare interface GoodsTableProps {
     goodsList: IRowDataItem[];
     allCount: number;
-    toggleDetailDialog(commodityId: string): void;
+    toggleDetailDialog(product_id: number): void;
 }
 export default class GoodsTable extends PureComponent<GoodsTableProps> {
     private columns: ColumnProps<IRowDataItem>[] = [
@@ -89,7 +89,7 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
                 return {
                     children: (
                         <>
-                            <Button onClick={() => { this.toggleDetailDialog(row.commodity_id) }}>查看详情</Button>
+                            <Button onClick={() => { this.toggleDetailDialog(row.product_id) }}>查看详情</Button>
                         </>
                     )
                 };
@@ -165,13 +165,14 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
     onShelves = (row: IRowDataItem) => {
 
     }
-    
+
     offShelves = (row: IRowDataItem) => {
 
     }
 
-    toggleDetailDialog = (commodityId: string) => {
-
+    toggleDetailDialog = (product_id: number) => {
+        const {toggleDetailDialog} = this.props;
+        toggleDetailDialog(product_id);
     }
 
     private mergeCell(value: string, row: IRowDataItem, index: number) {
@@ -202,9 +203,9 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
                 />
                 <Pagination
                     className="goods-vova-pagination"
-                    total={allCount || 1} 
-                    showSizeChanger={true} 
-                    showQuickJumper={true} 
+                    total={allCount || 1}
+                    showSizeChanger={true}
+                    showQuickJumper={true}
                 />
             </>
         )
