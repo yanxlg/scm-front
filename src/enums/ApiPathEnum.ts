@@ -9,6 +9,11 @@ enum ApiPathEnum {
     CancelOrder="/api/order/cancelPurchaseOrder",
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
+    // 商品中心相关接口
+    getGoodsList="/v1/goods/list",
+    putGoodsPicEdit="/v1/goods/pic/edit",
+    postGoodsPicUpload="/v1/goods/pic/upload",
+    getGoodsVersionList="/goodsVersion/list",
 
 
 

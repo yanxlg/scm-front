@@ -35,6 +35,9 @@
             {
                 "path": "/goods/vova",
                 "name": "VoVa产品库"
+            },
+            {
+                "path": "/goods/version"
             }
         ]
     },
