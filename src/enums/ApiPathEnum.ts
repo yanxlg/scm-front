@@ -15,10 +15,11 @@ enum ApiPathEnum {
     postGoodsPicUpload="/v1/goods/pic/upload",
     getGoodsVersionList="/goodsVersion/list",
 
+    // vova商品库相关接口''
+    getVovaGoodsList="/v1/vova_goods/list",
+    
 
-
-
-
+    // 任务中心相关接口
     QueryTaskList="/v1/task/list",
     AddPDDHotTask="/v1/task/spider/pdd_hotsale",
     AddPDDURLTask="/v1/task/spider/url",
