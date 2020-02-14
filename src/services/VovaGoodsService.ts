@@ -20,3 +20,7 @@ export async function getVovaGoodsList(params: IFilterParams) {
         params: params
     });
 }
+
+export async function getChangedProperties() {
+    return request.get(ApiPathEnum.getChangedProperties);
+}

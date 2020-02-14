@@ -17,7 +17,7 @@ enum ApiPathEnum {
 
     // vova商品库相关接口''
     getVovaGoodsList="/v1/vova_goods/list",
-
+    getChangedProperties="/1/vova_goods/changed_property",
 
     // 任务中心相关接口
     QueryTaskList="/api/v1/task/list",
