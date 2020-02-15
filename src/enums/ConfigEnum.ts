@@ -6,17 +6,11 @@ export enum TaskRange {
     store,
 }
 
-//================TODO 后续要调整
 export enum TaskType {
     once=1,
     interval
 }
 
-export const TaskTypeList:{[key:number]:string} = {
-    1:"单次任务",
-    2:"定时任务"
-};
-//=================
 
 export enum TaskIntervalType{
     day,
