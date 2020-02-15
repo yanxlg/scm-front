@@ -114,10 +114,12 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
             task_end_time,
             ...extra
         } = values;
+        // 如果单次任务且无时间，则需要设置is_immediately_execute为true
         return {
             ...extra,
             urls: stringifyText(urls),
             task_type,
+            is_immediately_execute: task_type === TaskType.once && !onceStartTime,
             task_start_time:
                 task_type === TaskType.once
                     ? onceStartTime?.valueOf() ?? undefined

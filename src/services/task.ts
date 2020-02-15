@@ -52,7 +52,11 @@ export async function getTaskList(params:ITaskListSearch) {
 
 export async function addPddHotTask(params: IPddHotTaskParams) {
     return request.post(ApiPathEnum.AddPDDHotTask, {
-        data: params,
+        data: {
+            ...params,
+            version:"1.0",
+            platform:"PDD"
+        },
         errorHandler:errorHandlerFactory(true)
     });
 }
