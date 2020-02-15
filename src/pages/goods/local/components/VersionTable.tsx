@@ -32,7 +32,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     // is_current_version: boolean;
                     <div>
                         {value.can_apply ? (
-<<<<<<< HEAD
                             <Button
                                 className="btn"
                                 type="primary"
@@ -49,22 +48,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                             >忽略</Button>
                         ) : null}
                         {value.is_current_version ? <Button ghost={true} className="btn" type="primary" size="small">当前版本</Button> : null}
-=======
-                            <Button className="btn" type="primary" size="small">
-                                应用
-                            </Button>
-                        ) : null}
-                        {value.can_ignore ? (
-                            <Button className="btn" type="primary" size="small">
-                                忽略
-                            </Button>
-                        ) : null}
-                        {value.is_current_version ? (
-                            <Button ghost={true} className="btn" type="primary" size="small">
-                                当前版本
-                            </Button>
-                        ) : null}
->>>>>>> feature/xlyan/3016
                     </div>
                 );
                 return {

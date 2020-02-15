@@ -178,6 +178,7 @@ export async function postGoodsIgnoreVersion(data: IProductId) {
     return request.post(ApiPathEnum.postGoodsIgnoreVersion, {
         data
     })
+}
 
 export async function exportVovaGoodsVersion(data?:IFormData) {
     return request.post(ApiPathEnum.ExportVovaGoodsVersion, {
@@ -201,5 +202,4 @@ export async function exportVovaGoodsVersion(data?:IFormData) {
             link.remove();
         })
     });
->>>>>>> feature/xlyan/3016
 }

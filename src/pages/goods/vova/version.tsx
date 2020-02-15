@@ -47,7 +47,7 @@ declare interface IVersionState {
     };
 }
 
-All();
+@BindAll()
 class Version extends React.PureComponent<{}, IVersionState> {
     constructor(props: {}) {
         super(props);
