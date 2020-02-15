@@ -137,15 +137,15 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
         {
             key: 'operation',
             title: '操作',
-            dataIndex: 'operation',
+            dataIndex: 'product_status',
             align: 'center',
             width: 100,
-            render: (value: string, row: IRowDataItem, index: number) => {
+            render: row => {
                 return {
                     children: (
                         <>
-                            <Button className="shelves-btn" onClick={() => { this.onShelves(row) }}>上架</Button>
-                            <Button className="unshelves-btn" onClick={() => { this.offShelves(row) }}>下架</Button>
+                            <Button className="shelves-btn" onClick={() => { this.onShelves(row) }} disabled={row != 3 ? true : false}>上架</Button>
+                            <Button className="unshelves-btn" onClick={() => { this.offShelves(row) }} disabled={row != 1 ? true : false}>下架</Button>
                         </>
                     )
                 };
@@ -163,7 +163,7 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
                 sale_domain: 'vova'
             }
         } as any).then(res => {
-            if (res === 200) {
+            if (res.code === 200) {
                 message.success('上架成功');
             } else {
                 message.error('上架失败');
@@ -181,7 +181,7 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
                 sale_domain: 'vova'
             }
         } as any).then(res => {
-            if (res === 200) {
+            if (res.code === 200) {
                 message.success('下架成功');
             } else {
                 message.error('下架失败');

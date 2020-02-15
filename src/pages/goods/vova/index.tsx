@@ -9,12 +9,19 @@ import { Form } from '@/components/Form';
 import SearchCondition from './components/SearchCondition';
 import DataStatusUpdate from './components/DataStatusUpdate';
 import GoodsTable from './components/GoodsTable';
+import ExcelDialog from './components/ExcelDialog';
 import { PropertyItem } from './components/DataStatusUpdate';
 import { SelectOptionsItem } from './components/SearchCondition';
-import { getVovaGoodsList, getVovaChangedProperties, getSearchConditionOptions } from '@/services/VovaGoodsService';
+import {
+    IFilterParams,
+    getVovaGoodsList,
+    getVovaChangedProperties,
+    getSearchConditionOptions,
+    postVovaGoodsListExport
+} from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
-import { Modal } from 'antd';
+import { Modal, message } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
 
 declare interface IPros extends FormComponentProps<any> {
@@ -25,11 +32,10 @@ declare interface IState {
     goodsList: Array<IRowDataItem>;
     propertyList: PropertyItem[];
     searchOptions: SelectOptionsItem[];
-    dataLoading: Boolean;
-    searchLoading: Boolean;
+    dataLoading: boolean;
+    searchLoading: boolean;
     allCount: number;
-    page: number,
-    pageCount: number;
+    excelDialogStataus: boolean;
 }
 
 declare interface IBaseData {
@@ -57,6 +63,7 @@ export declare interface IRowDataItem extends IBaseData {
 }
 
 class _Index extends Form.BaseForm<IPros, IState> {
+    goodsTableRef: GoodsTable | null = null;
     constructor(props: IPros) {
         super(props);
         this.state = {
@@ -66,8 +73,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
             dataLoading: false,
             searchLoading: false,
             allCount: 0,
-            page: 1,
-            pageCount: 10,
+            excelDialogStataus: false,
         };
     }
 
@@ -91,18 +97,38 @@ class _Index extends Form.BaseForm<IPros, IState> {
 
     onSearch = (current?: number, size?: number) => {
         const { dataLoading } = this.state;
+        const { form } = this.props;
+        const formData = form.getFieldsValue()
         if (dataLoading) return;
         this.setState({
-            page: current || 1,
-            pageCount: size || 10,
             dataLoading: true,
             searchLoading: true
         });
-        getVovaGoodsList({
-            page: current,
-            page_count: size,
-            ...this.props.form.getFieldsValue() as any
-        }).then(res => {
+        let param: IFilterParams = {} as IFilterParams;
+        if (this.goodsTableRef) {
+            const { page, pageCount } = this.goodsTableRef.state;
+            param = {
+                page: current || page || 1,
+                page_count: size || pageCount || 10,
+            };
+        }
+        if (formData.time) {
+            param = Object.assign(param, {
+                onshelf_time_satrt: parseInt(formData.time[0]._d.getTime() / 1000),
+                onshelf_time_end: parseInt(formData.time[1]._d.getTime() / 1000),
+            });
+        }
+        param = Object.assign(param, {
+            commodity_id: formData.commodity_id,
+            vova_virtual_id: formData.vova_virtual_id,
+            product_id: formData.product_id,
+            level_one_category: formData.level_one_category,
+            level_two_category: formData.level_two_category,
+            sales_volume: formData.sales_volume,
+            shop_name: formData.shop_name,
+            product_status: formData.product_status,
+        })
+        getVovaGoodsList(param).then(res => {
             if (res.code === 200) {
                 const data = res.data
                 this.setState({
@@ -118,6 +144,46 @@ class _Index extends Form.BaseForm<IPros, IState> {
         })
     }
 
+    // 显示下载弹框
+    toggleExcelDialog = (status: boolean) => {
+        this.setState({
+            excelDialogStataus: status,
+        });
+    };
+
+    getExcelData = (count: number) => {
+        const formData = this.props.form.getFieldsValue();
+        let param: IFilterParams = {} as IFilterParams;
+        if (this.goodsTableRef) {
+            const { pageCount } = this.goodsTableRef.state;
+            param = {
+                page: count || 1,
+                page_count: pageCount || 10,
+            };
+        }
+        if (formData.time) {
+            param = Object.assign(param, {
+                onshelf_time_satrt: parseInt(formData.time[0]._d.getTime() / 1000),
+                onshelf_time_end: parseInt(formData.time[1]._d.getTime() / 1000),
+            });
+        }
+        param = Object.assign(param, {
+            commodity_id: formData.commodity_id,
+            vova_virtual_id: formData.vova_virtual_id,
+            product_id: formData.product_id,
+            level_one_category: formData.level_one_category,
+            level_two_category: formData.level_two_category,
+            sales_volume: formData.sales_volume,
+            shop_name: formData.shop_name,
+            product_status: formData.product_status,
+        })
+        postVovaGoodsListExport(param).catch(err => {
+            message.error('导出表格失败！');
+        }).finally(() => {
+            this.toggleExcelDialog(false);
+        });
+    }
+
     // 查看详情弹窗
     toggleDetailDialog = (row: IRowDataItem) => {
         Modal.info({
@@ -130,31 +196,30 @@ class _Index extends Form.BaseForm<IPros, IState> {
         });
     }
 
-    setPage = (page: number) => {
-        this.setState({
-            page: page,
-        })
-    }
-
-    setPageCount = (pageCount: number) => {
-        this.setState({
-            pageCount: pageCount,
-        })
-    }
-
     render() {
         const { form } = this.props;
-        const { goodsList, propertyList, allCount, searchOptions } = this.state;
+        const { goodsList, propertyList, allCount, searchOptions, excelDialogStataus } = this.state;
         return (
             <div className="container">
                 <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
-                    <SearchCondition form={form} onSearch={this.onSearch} searchOptions={searchOptions} />
+                    <SearchCondition 
+                        form={form}
+                        onSearch={this.onSearch}
+                        toggleExcelDialog={this.toggleExcelDialog}
+                        searchOptions={searchOptions} />
                     <DataStatusUpdate propertyList={propertyList} />
                     <GoodsTable
+                        ref={node => (this.goodsTableRef = node)}
                         goodsList={goodsList}
                         allCount={allCount}
                         toggleDetailDialog={this.toggleDetailDialog}
                         onSearch={this.onSearch}
+                    />
+                    <ExcelDialog
+                        visible={excelDialogStataus}
+                        allCount={allCount}
+                        getExcelData={this.getExcelData}
+                        toggleExcelDialog={this.toggleExcelDialog}
                     />
                 </Form>
             </div>

@@ -6,6 +6,7 @@ import { Form } from '@/components/Form';
 declare interface SdProps extends FormComponentProps<any> {
     searchOptions: SelectOptionsItem[];
     onSearch: Function;
+    toggleExcelDialog: Function;
 }
 
 declare interface SdState {
@@ -83,8 +84,8 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
     }
 
     // 导出
-    onExport = () => {
-
+    toggleExcelDialog = () => {
+        this.props.toggleExcelDialog(true);
     }
 
     // 选中一级类目
@@ -92,7 +93,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
         const { searchOptions } = this.props;
         const levelTwoOptions = searchOptions.filter(item => {
             return item.id === value;
-        })[0].children;
+        })[0].children as SelectOptionsItem;
         this.setState({
             levelTwoOptions: levelTwoOptions
         });
@@ -118,7 +119,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     </Form.Item>
                 </div>
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="volume" label="销量">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="sales_volume" label="销量">
                         <Select className="select-default">
                             {
                                 volumes.map(item => (
@@ -130,7 +131,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="category_level_one" label="一级类目">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_one_category" label="一级类目">
                         <Select className="select-default" onChange={this.onLevelOneChange}>
                             {
                                 searchOptions.map(item => (
@@ -139,7 +140,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="category_level_two" label="二级类目">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_two_category" label="二级类目">
                         <Select className="select-default">
                             {
                                 levelTwoOptions.map(item => (
@@ -150,7 +151,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     </Form.Item>
                 </div>
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="goods_id" label="商品状态">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="product_status" label="商品状态">
                         <Select className="select-default">
                             {
                                 goodsStatus.map(item => (
@@ -162,7 +163,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     <Button type="primary" className="btn-default" onClick={this.onSearch}>
                         查询
                     </Button>
-                    <Button type="primary" className="btn-default" onClick={this.onExport}>
+                    <Button type="primary" className="btn-default" onClick={this.toggleExcelDialog}>
                         导出
                     </Button>
                 </div>
