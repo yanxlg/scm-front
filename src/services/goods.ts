@@ -23,7 +23,8 @@ export declare interface IFilterParams {
 }
 
 declare interface IImgEditData {
-    pic: string[];
+    pic_url: string[];
+    product_id: string;
 }
 
 declare interface IOnsaleData {
