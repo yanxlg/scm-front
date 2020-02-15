@@ -10,7 +10,8 @@ import SearchCondition from '@/pages/goods/vova/components/SearchCondition';
 import DataStatusUpdate from '@/pages/goods/vova/components/DataStatusUpdate';
 import GoodsTable from '@/pages/goods/vova/components/GoodsTable';
 import { PropertyItem } from '@/pages/goods/vova/components/DataStatusUpdate';
-import { getVovaGoodsList, getChangedProperties } from '@/services/VovaGoodsService';
+import { SelectOptionsItem } from '@/pages/goods/vova/components/SearchCondition';
+import { getVovaGoodsList, getVovaChangedProperties, getSearchConditionOptions } from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
 
@@ -21,6 +22,7 @@ declare interface IPros extends FormComponentProps<any> {
 declare interface IState {
     goodsList: Array<IRowDataItem>;
     propertyList: PropertyItem[];
+    searchOptions: SelectOptionsItem[];
     dataLoading: Boolean;
     searchLoading: Boolean;
     allCount: number;
@@ -58,6 +60,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
         this.state = {
             goodsList: [],
             propertyList: [],
+            searchOptions: [],
             dataLoading: false,
             searchLoading: false,
             allCount: 0,
@@ -67,16 +70,23 @@ class _Index extends Form.BaseForm<IPros, IState> {
     }
 
     componentDidMount() {
-        getChangedProperties().then(res => {
+        getSearchConditionOptions().then(res => {
+            if (res.code === 200) {
+                this.setState({
+                    searchOptions: res.data
+                });
+            }
+        });
+        getVovaChangedProperties().then(res => {
             if (res.code === 200) {
                 this.setState({
                     propertyList: res.data.changed_property_list
                 });
             }
-        })
+        });
     }
 
-    onSearch = (current: number, size: number):void => {
+    onSearch = (current: number, size: number) => {
         const { dataLoading } = this.state;
         if (dataLoading) return;
         this.setState({
@@ -124,11 +134,11 @@ class _Index extends Form.BaseForm<IPros, IState> {
 
     render() {
         const { form } = this.props;
-        const { goodsList, propertyList, allCount } = this.state;
+        const { goodsList, propertyList, allCount, searchOptions } = this.state;
         return (
             <div className="container">
                 <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
-                    <SearchCondition form={form} onSearch={this.onSearch} />
+                    <SearchCondition form={form} onSearch={this.onSearch} searchOptions={searchOptions} />
                     <DataStatusUpdate propertyList={propertyList} />
                     <GoodsTable 
                         goodsList={goodsList}

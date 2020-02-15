@@ -13,8 +13,11 @@ enum ApiPathEnum {
     getGoodsVersionList="/goodsVersion/list",
 
     // vova商品库相关接口''
-    getVovaGoodsList="/v1/vova_goods/list",
-    getChangedProperties="/v1/vova_goods/changed_property",
+    getVovaGoodsList="/api/v1/vova_goods/list",
+    getSearchConditionOptions="/api/v1/vova_goods/catagory/list",
+    getVovaChangedProperties="/api/v1/vova_goods/changed_property",
+    putVovaGoodsSales="/api/v1/vova_goods/sales",
+    postVovaGoodsListExport="/api/v1/vova_goods/exports",
 
     // 任务中心相关接口
 

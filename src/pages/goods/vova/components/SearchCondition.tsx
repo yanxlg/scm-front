@@ -2,13 +2,24 @@ import React, { PureComponent } from 'react'
 import { Button, Card, Input, DatePicker, Select, InputNumber, Col } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { Form } from '@/components/Form';
-import { numberFormatter } from '@/utils/common';
 
 declare interface SdProps extends FormComponentProps<any> {
+    searchOptions: SelectOptionsItem[];
     onSearch: Function;
 }
 
 declare interface SdState {
+    levelTwoOptions: SelectOptionsItem[];
+}
+
+declare interface SdState {
+
+}
+
+export declare interface SelectOptionsItem {
+    id: string;
+    name: string;
+    children: SelectOptionsItem[];
 }
 
 const { RangePicker } = DatePicker;
@@ -17,18 +28,34 @@ const Option = Select.Option;
 export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
     constructor(props: SdProps) {
         super(props);
+        this.state = {
+            levelTwoOptions: []
+        };
     }
 
     onSearch = () => {
         this.props.onSearch();
     }
 
+    // 导出
     onExport = () => {
 
     }
 
+    // 选中一级类目
+    onLevelOneChange = value => {
+        const { searchOptions } = this.props;
+        const levelTwoOptions = searchOptions.filter(item => {
+            return item.id === value;
+        })[0].children;
+        this.setState({
+            levelTwoOptions: levelTwoOptions
+        });
+    }
+
     render() {
-        const { form } = this.props;
+        const { form, searchOptions } = this.props;
+        const { levelTwoOptions } = this.state;
         return (
             <Card className="condition-card">
                 <div className="form-item">
@@ -57,17 +84,21 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="category_level_one" label="一级类目">
-                        <Select className="select-default">
-                            <Option value="1">女装</Option>
-                            <Option value="2">男装</Option>
-                            <Option value="3">鞋子</Option>
+                        <Select className="select-default" onChange={this.onLevelOneChange}>
+                            {
+                                searchOptions.map(item => (
+                                    <Option value={item.id}>{item.name}</Option>
+                                ))
+                            }
                         </Select>
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="category_level_two" label="二级类目">
                         <Select className="select-default">
-                            <Option value="1">女装</Option>
-                            <Option value="2">男装</Option>
-                            <Option value="3">鞋子</Option>
+                            {
+                                levelTwoOptions.map(item => (
+                                    <Option value={item.id}>{item.name}</Option>
+                                ))
+                            }
                         </Select>
                     </Form.Item>
                 </div>

@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react'
-import { Table, Checkbox, Pagination, Input, Button } from 'antd';
+import { Table, message, Button } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { IRowDataItem } from '@/pages/goods/vova/index';
+import { putVovaGoodsSales } from '@/services/VovaGoodsService';
 
 declare interface GoodsTableProps {
     goodsList: IRowDataItem[];
@@ -143,12 +144,40 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
         }
     ];
 
+    // 上架操作
     onShelves = (row: IRowDataItem) => {
-
+        putVovaGoodsSales({
+            type: 'onsale',
+            info: {
+                product_id: row.product_id,
+                commodity_id: row.commodity_id,
+                sale_domain: 'vova'
+            }
+        } as any).then(res => {
+            if (res === 200) {
+                message.success('上架成功');
+            } else {
+                message.error('上架失败');
+            }
+        })
     }
     
+    // 下架操作
     offShelves = (row: IRowDataItem) => {
-
+        putVovaGoodsSales({
+            type: 'offsale',
+            info: {
+                product_id: row.product_id,
+                commodity_id: row.commodity_id,
+                sale_domain: 'vova'
+            }
+        } as any).then(res => {
+            if (res === 200) {
+                message.success('下架成功');
+            } else {
+                message.error('下架失败');
+            }
+        })
     }
 
     toggleDetailDialog = (row: IRowDataItem) => {

@@ -33,7 +33,7 @@ const data = Mock.mock({
 })
 
 export default {
-    'GET /v1/vova_goods/list': (req: Request, res: Response) => {
+    'GET api/v1/vova_goods/list': (req: Request, res: Response) => {
         res.status(200).send({
                 code: 200,
                 msg: '',
@@ -44,7 +44,7 @@ export default {
             },
         );
     },
-    'GET /v1/vova_goods/changed_property': (req: Request, res: Response) => {
+    'GET api/v1/vova_goods/changed_property': (req: Request, res: Response) => {
         res.status(200).send({
                 code: 200,
                 msg: '',
