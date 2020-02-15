@@ -169,7 +169,7 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
         return {
             range: range === TaskRange.fullStack ? range : TaskRange.store,
             shopId: range !== TaskRange.fullStack ? range : undefined,
-            task_end_time: task_end_time ? moment(task_end_time) : undefined,
+            task_end_time: task_end_time ? moment(task_end_time*1000) : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
                     ? TaskIntervalType.day
@@ -177,11 +177,11 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                 : TaskIntervalType.day,
             onceStartTime:
                 task_type === TaskType.once && task_start_time
-                    ? moment(task_start_time)
+                    ? moment(task_start_time*1000)
                     : undefined,
             timerStartTime:
                 task_type === TaskType.interval && task_start_time
-                    ? moment(task_start_time)
+                    ? moment(task_start_time*1000)
                     : undefined,
             task_type,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
@@ -211,8 +211,8 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
             is_immediately_execute: task_type === TaskType.once && !onceStartTime,
             task_start_time:
                 task_type === TaskType.once
-                    ? onceStartTime?.valueOf() ?? undefined
-                    : timerStartTime?.valueOf() ?? undefined,
+                    ? onceStartTime?.unix() ?? undefined
+                    : timerStartTime?.unix() ?? undefined,
             ...(task_type === TaskType.once
                 ? {}
                 : {
@@ -221,7 +221,7 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                               ? second
                               : day * 60 * 60 * 24,
                   }),
-            task_end_time: task_end_time?.valueOf() ?? undefined,
+            task_end_time: task_end_time?.unix() ?? undefined,
         };
     }
 

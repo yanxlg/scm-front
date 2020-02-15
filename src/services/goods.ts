@@ -206,6 +206,15 @@ export async function exportVovaGoodsVersion(data?:IFormData) {
 
 
 
-export async function activeVovaGoodsVersion() {
-    return request.get(ApiPathEnum.ActiveVovaGoodsVersion);
+export async function activeVovaGoodsVersion(product_id:number) {
+    return request.post(ApiPathEnum.ActiveVovaGoodsVersion,{
+        data:{
+            product_id
+        }
+    });
+}
+
+
+export async function clearGoodsVersionRecord() {
+    return request.post(ApiPathEnum.ClearGoodsVersionRecord);
 }

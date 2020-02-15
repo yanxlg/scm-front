@@ -5,7 +5,7 @@ import '@/styles/product.less';
 import { ColumnProps } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
 import { queryGoodsVersion } from '@/services/products';
-import { activeVovaGoodsVersion, exportVovaGoodsVersion } from '@/services/goods';
+import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion } from '@/services/goods';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -32,6 +32,7 @@ declare interface ITableItem {
 declare interface IVersionState {
     selectedRowKeys: Set<number>;
     dataLoading: boolean;
+    clearLoading:boolean;
     dataSet: ITableItem[];
     attributes?: {
         price: number;
@@ -55,6 +56,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
             selectedRowKeys: new Set(),
             dataLoading: false,
             dataSet: [],
+            clearLoading:false
         };
     }
 
@@ -153,8 +155,22 @@ class Version extends React.PureComponent<{}, IVersionState> {
             };
         });
     }
+
+    private clearRecord(){
+        this.setState({clearLoading:true});
+        clearGoodsVersionRecord().then(()=>{
+            this.setState({
+                clearLoading:false,
+                attributes:undefined
+            })
+        }).catch(()=>{
+            this.setState({
+                clearLoading:false
+            })
+        })
+    }
     render() {
-        const { selectedRowKeys, dataLoading, attributes, dataSet: data } = this.state;
+        const { selectedRowKeys, dataLoading, attributes, dataSet: data,clearLoading } = this.state;
 
         const { dataSet, keys } = this.combineDataSet(data);
         const selectedSize = selectedRowKeys.size;
@@ -369,7 +385,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
                     <div className="product-text">下架（{attributes?.lower_shelf ?? 0}）</div>
                     <div className="product-text">上架（{attributes?.upper_shelf ?? 0}）</div>
                     <div className="product-text">SKU对应图片（{attributes?.sku_pics ?? 0}）</div>
-                    <Button type="primary">所有更新信息已查看</Button>
+                    <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
                 </Card>
 
                 <Table
