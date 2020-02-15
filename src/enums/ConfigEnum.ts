@@ -1,12 +1,22 @@
+import { Select } from 'antd';
+import React from 'react';
+
 export enum TaskRange {
     fullStack,
     store,
 }
 
+//================TODO 后续要调整
 export enum TaskType {
     once=1,
     interval
 }
+
+export const TaskTypeList:{[key:number]:string} = {
+    1:"单次任务",
+    2:"定时任务"
+};
+//=================
 
 export enum TaskIntervalType{
     day,
@@ -28,3 +38,17 @@ export enum TaskGoodsArea {
     AllOnShelves,
     HasSales
 }
+
+
+export const TaskRangeList:{[key:number]:string}={
+    1:"指定URL",
+    2:"全站",
+    3:"指定店铺"
+};
+
+export const TaskStatusList:{[key:number]:string}={
+    0:"未执行",
+    1:"执行中",
+    2:"已执行",
+    3:"执行失败"
+};

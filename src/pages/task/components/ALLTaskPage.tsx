@@ -8,7 +8,7 @@ import '@/styles/table.less';
 import { getTaskList, deleteTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskStatus } from '@/enums/ConfigEnum';
+import { TaskRangeList, TaskStatus, TaskStatusList, TaskType, TaskTypeList } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
@@ -136,12 +136,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'task_range',
                 width: '182px',
                 align: 'center',
+                render:(text:number)=>TaskRangeList[text]
             },
             {
                 title: '任务类型',
                 dataIndex: 'task_type',
                 width: '223px',
                 align: 'center',
+                render:(text:number)=>TaskTypeList[text]
             },
             {
                 title: '开始时间',
@@ -154,6 +156,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'status',
                 width: '100px',
                 align: 'center',
+                render:(text:number)=>TaskStatusList[text]
             },
             {
                 title: '创建时间',
