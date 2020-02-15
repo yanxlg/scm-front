@@ -32,7 +32,7 @@ enum ApiPathEnum {
     QueryGoodsVersion = "/api/v1/vova_goods/version",
     QueryGoodsDetail="/api/v1/vova_goods/detail",
     EditGoodsDetail="/api/v1/vova_goods/edits",
-
+    ClearGoodsVersionRecord="/api/v1/vova_goods/readed_property",
 
     getGoodsList="/api/v1/goods/list",
     postGoodsExports="/api/v1/goods/exports",
