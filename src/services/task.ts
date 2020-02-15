@@ -99,3 +99,12 @@ export async function queryCategory() {
 export async function querySortCondition() {
     return request.get(ApiPathEnum.QueryPDDSortCondition)
 }
+
+
+export async function queryTaskLog(task_id:number) {
+    return request.get(ApiPathEnum.QueryTaskLog,{
+        params:{
+            task_id
+        }
+    })
+}
