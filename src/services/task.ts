@@ -82,10 +82,10 @@ export async function deleteTasks(task_ids:string) {
 }
 
 
-export async function queryTaskDetail(task_Id: number) {
+export async function queryTaskDetail(task_id: number) {
     return request.get(ApiPathEnum.QueryTaskDetail,{
         params:{
-            task_Id
+            task_id
         }
     })
 }

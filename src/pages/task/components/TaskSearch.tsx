@@ -3,7 +3,7 @@ import { Form } from '@/components/Form';
 import { DatePicker, Input, Select } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import '@/styles/config.less';
-import { TaskStatus, TaskType } from '@/enums/ConfigEnum';
+import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import { Bind } from 'lodash-decorators';
 import moment, { Moment } from 'moment';
 
@@ -66,6 +66,18 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
     }
     render() {
         const { form, task_status } = this.props;
+
+        const taskRangeSelections=[];
+        for (let key in TaskRangeList){
+            const value = Number(key);
+            taskRangeSelections.push(<Option key={value} value={value}>{TaskRangeList[value]}</Option>);
+        }
+        const taskStatusSelections=[];
+        for (let key in TaskStatusList){
+            const value = Number(key);
+            taskStatusSelections.push(<Option key={value} value={value}>{TaskStatusList[value]}</Option>);
+        }
+
         return (
             <React.Fragment>
                 <Form className="config-card" layout="inline" autoComplete={'off'}>
@@ -77,18 +89,17 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
                     </Form.Item>
                     <Form.Item form={form} name="task_range" label="任务范围" initialValue={1}>
                         <Select className="select-equal-date">
-                            <Option value={1}>指定URL</Option>
-                            <Option value={2}>全站</Option>
-                            <Option value={3}>指定店铺</Option>
+                            {
+                                taskRangeSelections
+                            }
                         </Select>
                     </Form.Item>
                     {task_status === TaskStatus.All && (
                         <Form.Item form={form} name="task_status" label="任务状态" initialValue={0}>
                             <Select className="select-equal-date">
-                                <Option value={0}>未执行</Option>
-                                <Option value={1}>执行中</Option>
-                                <Option value={2}>已执行</Option>
-                                <Option value={3}>执行失败</Option>
+                                {
+                                    taskStatusSelections
+                                }
                             </Select>
                         </Form.Item>
                     )}
