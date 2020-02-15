@@ -81,20 +81,21 @@ class _Index extends Form.BaseForm<IPros, IState> {
                 });
             }
         });
+        this.onSearch();
     }
 
-    onSearch = (current: number, size: number) => {
+    onSearch = (current?: number, size?: number) => {
         const { dataLoading } = this.state;
         if (dataLoading) return;
         this.setState({
-            page: current,
-            pageCount: size,
+            page: current || 1,
+            pageCount: size || 10,
             dataLoading: true,
             searchLoading: true
         });
         getVovaGoodsList({
-            page: current || 1,
-            page_count: size || 10,
+            page: current,
+            page_count: size,
             ...this.props.form.getFieldsValue() as any
         }).then(res => {
             if (res.code === 200) {
