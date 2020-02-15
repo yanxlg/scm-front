@@ -83,15 +83,6 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         }).catch(err => {
             message.success('图片编辑失败！');
         })
-            .then(res => {
-                // console.log('putGoodsPicEdit', imgList)
-                this.props.toggleImgEditDialog(true, imgList, this.props.product_id);
-                this.props.updateGoodsListImg(imgList, this.props.product_id);
-                message.success('图片编辑成功！');
-            })
-            .catch(err => {
-                message.success('图片编辑失败！');
-            });
     };
 
     // RcFile
