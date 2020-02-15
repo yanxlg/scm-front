@@ -1,11 +1,11 @@
 import React from 'react';
 import VersionSearch, { IFormData } from '@/pages/goods/vova/components/VersionSearch';
-import { Button, Card, Checkbox, Divider, Table } from 'antd';
+import { Button, Card, Checkbox, Divider, message, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnProps } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
 import { queryGoodsVersion } from '@/services/products';
-import { exportVovaGoodsVersion } from '@/services/goods';
+import { activeVovaGoodsVersion, exportVovaGoodsVersion } from '@/services/goods';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -82,6 +82,12 @@ class Version extends React.PureComponent<{}, IVersionState> {
 
     private exportGoodsVersion(params?: IFormData) {
         return exportVovaGoodsVersion(params);
+    }
+
+    private activeGoodsVersion(){
+        return activeVovaGoodsVersion().then(()=>{
+            message.success("应用新版本成功!");
+        })
     }
 
     private combineDataSet(dataSet: ITableItem[]) {
@@ -328,10 +334,10 @@ class Version extends React.PureComponent<{}, IVersionState> {
             },
             {
                 title: '操作',
-                dataIndex: 'action',
+                dataIndex: 'is_version_applied',
                 render: (text, record, index) => {
                     return {
-                        children: text,
+                        children: text === 1?"已使用":"",
                         props: {
                             rowSpan: record.rowSpan || 0,
                         },
@@ -343,7 +349,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
             <div className="container">
                 <Card>
                     <VersionSearch
-                        onActive={() => Promise.resolve()}
+                        onActive={this.activeGoodsVersion}
                         onExport={this.exportGoodsVersion}
                         onSearch={this.queryData}
                     />

@@ -1,8 +1,3 @@
-/**
- * Routes:
- *   - ./src/routes/PrivateRoute.tsx
- */
-
 import React from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 import { Form } from '@/components/Form';
