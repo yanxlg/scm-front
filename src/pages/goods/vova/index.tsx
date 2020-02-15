@@ -24,9 +24,13 @@ declare interface IState {
     dataLoading: Boolean;
     searchLoading: Boolean;
     allCount: number;
+    page: number,
+    pageCount: number;
 }
 
 declare interface IBaseData {
+    page: number;
+    pageCount: number;
     commodity_id: string;
     vova_virtual_id: string;
     product_id: string;
@@ -57,12 +61,14 @@ class _Index extends Form.BaseForm<IPros, IState> {
             dataLoading: false,
             searchLoading: false,
             allCount: 0,
+            page: 1,
+            pageCount: 10,
         };
     }
 
     componentDidMount() {
         getChangedProperties().then(res => {
-            if (res.code === 0) {
+            if (res.code === 200) {
                 this.setState({
                     propertyList: res.data.changed_property_list
                 });
@@ -70,15 +76,21 @@ class _Index extends Form.BaseForm<IPros, IState> {
         })
     }
 
-    onSearch = ():void => {
+    onSearch = (current: number, size: number):void => {
         const { dataLoading } = this.state;
         if (dataLoading) return;
         this.setState({
+            page: current,
+            pageCount: size,
             dataLoading: true,
             searchLoading: true
         });
-        getVovaGoodsList(this.props.form as any).then(res => {
-            if (res.code === 0) {
+        getVovaGoodsList({
+            page: current || 1,
+            page_count: size || 10,
+            ...this.props.form.getFieldsValue() as any
+        }).then(res => {
+            if (res.code === 200) {
                 const data = res.data
                 this.setState({
                     goodsList: data.list,
@@ -94,8 +106,20 @@ class _Index extends Form.BaseForm<IPros, IState> {
     }
 
     // 查看详情弹窗
-    toggleDetailDialog = (commodityId: string) => {
+    toggleDetailDialog = (row: IRowDataItem) => {
 
+    }
+
+    setPage = (page: number) => {
+        this.setState({
+            page: page,
+        })
+    }
+
+    setPageCount = (pageCount: number) => {
+        this.setState({
+            pageCount: pageCount,
+        })
     }
 
     render() {
@@ -110,6 +134,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
                         goodsList={goodsList}
                         allCount={allCount}
                         toggleDetailDialog={this.toggleDetailDialog}
+                        onSearch={this.onSearch}
                     />
                 </Form>
             </div>

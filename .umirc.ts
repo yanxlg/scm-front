@@ -58,7 +58,7 @@ const config: IConfig = {
     ],
     proxy: {
         '/api': {
-            target: 'https://pos-t.vova.com.hk/',
+            target: 'https://scm-t.vova.com.hk/',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
         },

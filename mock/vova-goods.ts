@@ -15,7 +15,7 @@ const data = Mock.mock({
             average_score: 4.5,
             sales_volume: 3000,
             product_detail: '',
-            'product_status|1': `['已上架','待架','已下架']`,
+            'product_status|+1': ['已上架','待架','已下架'],
             shipping_refund_rate: '@float(0, 100)%',
             non_shipping_refund_rate: '@float(0, 100)%',
             vova_product_link: '',
@@ -24,7 +24,7 @@ const data = Mock.mock({
             sku_pics: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg'
         }
     ],
-    'changed_property_list|1': [
+    'changed_property_list|1-15': [
         {
             'property|+1': ['上架', '下架', '价格'],
             'count|1-1000': 1,
@@ -35,7 +35,7 @@ const data = Mock.mock({
 export default {
     'GET /v1/vova_goods/list': (req: Request, res: Response) => {
         res.status(200).send({
-                code: 0,
+                code: 200,
                 msg: '',
                 data: {
                     allCount: 10,
@@ -46,7 +46,7 @@ export default {
     },
     'GET /v1/vova_goods/changed_property': (req: Request, res: Response) => {
         res.status(200).send({
-                code: 0,
+                code: 200,
                 msg: '',
                 data: {
                     changed_property_list: data.changed_property_list

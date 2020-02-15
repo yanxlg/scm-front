@@ -2,6 +2,8 @@ import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 
 export declare interface IFilterParams {
+    page: number;
+    page_count: number;
     onshelf_time_satrt: number;
     onshelf_time_end: number;
     commodity_id: string;          // commodity_id
