@@ -49,7 +49,8 @@ enum ApiPathEnum {
     postGoodsIgnoreVersion="/api/v1/goods/ignore_version",
 
 
-    ExportVovaGoodsVersion="/api/v1/vova_goods/version_exports"
+    ExportVovaGoodsVersion="/api/v1/vova_goods/version_exports",
+    ActiveVovaGoodsVersion="/api/v1/vova_goods/apply_version",
 }
 
 export { ApiPathEnum };

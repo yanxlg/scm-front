@@ -204,3 +204,9 @@ export async function exportVovaGoodsVersion(data?:IFormData) {
         })
     });
 }
+
+
+
+export async function activeVovaGoodsVersion() {
+    return request.get(ApiPathEnum.ActiveVovaGoodsVersion);
+}
