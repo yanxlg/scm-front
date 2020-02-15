@@ -1,5 +1,3 @@
-
-
 enum ApiPathEnum {
     Login = '/api/login/login',
     GetOrderList="/api/order/list",
@@ -9,10 +7,8 @@ enum ApiPathEnum {
     CancelOrder="/api/order/cancelPurchaseOrder",
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
+
     // 商品中心相关接口
-    getGoodsList="/v1/goods/list",
-    putGoodsPicEdit="/v1/goods/pic/edit",
-    postGoodsPicUpload="/v1/goods/pic/upload",
     getGoodsVersionList="/goodsVersion/list",
 
     // vova商品库相关接口''
@@ -32,6 +28,19 @@ enum ApiPathEnum {
     QueryGoodsVersion = "/v1/vova_goods/version",
     QueryGoodsDetail="/v1/vova_goods/detail",
     EditGoodsDetail="/v1/vova_goods/edits",
+
+    getGoodsList="/api/v1/goods/list",
+    postGoodsExports="/api/v1/goods/exports",
+    putGoodsPicEdit="/api/v1/goods/pic/edit",
+    postGoodsPicUpload="/api/v1/goods/pic/upload",
+    getGoodsOnsale="/api/v1/goods/onsale",
+    getGoodsDelete="/api/v1/goods/delete",
+    putGoodsEdit="/api/v1/goods/edits",
+    getGoodsSales="/api/v1/goods/sales",
+    getCatagoryList="/api/v1/catagory/list",
+    getGoodsVersion="/api/v1/goods/version",
+    postGoodsVersionExport="/api/v1/goods/version_export",
+
 }
 
 export { ApiPathEnum };
