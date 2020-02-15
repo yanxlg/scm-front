@@ -97,15 +97,12 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                 </button>
                 <div className="form-item">
                     <label className="ant-form-item-label">商品&emsp;ID：{product_id}</label>
-                    <span className="product-modal-value">1111</span>
                 </div>
                 <div className="form-item">
                     <label className="ant-form-item-label">商品名称：{product_name}</label>
-                    <span className="product-modal-value">1111</span>
                 </div>
                 <div className="form-item">
                     <label className="ant-form-item-label">商品描述：{product_description}</label>
-                    <span className="product-modal-value">1111</span>
                 </div>
                 <div className="form-item">
                     <label className="ant-form-item-label">商品主图：</label>

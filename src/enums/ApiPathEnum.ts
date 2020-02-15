@@ -29,9 +29,9 @@ enum ApiPathEnum {
     QueryPDDSortCondition = "/api/v1/spider/pdd_sort_type",
     QueryTaskLog="/api/v1/task/exec_log",
 
-    QueryGoodsVersion = "/v1/vova_goods/version",
-    QueryGoodsDetail="/v1/vova_goods/detail",
-    EditGoodsDetail="/v1/vova_goods/edits",
+    QueryGoodsVersion = "/api/v1/vova_goods/version",
+    QueryGoodsDetail="/api/v1/vova_goods/detail",
+    EditGoodsDetail="/api/v1/vova_goods/edits",
 
 
     getGoodsList="/api/v1/goods/list",
