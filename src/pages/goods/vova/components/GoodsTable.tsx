@@ -7,7 +7,7 @@ import { putVovaGoodsSales } from '@/services/VovaGoodsService';
 declare interface GoodsTableProps {
     goodsList: IRowDataItem[];
     allCount: number;
-    toggleDetailDialog(commodityId: string): void;
+    toggleDetailDialog(row: IRowDataItem): void;
     page: number;
     pageCount: number;
     onSearch: Function;
