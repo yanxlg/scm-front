@@ -52,7 +52,11 @@ export async function getTaskList(params:ITaskListSearch) {
 
 export async function addPddHotTask(params: IPddHotTaskParams) {
     return request.post(ApiPathEnum.AddPDDHotTask, {
-        data: params,
+        data: {
+            ...params,
+            version:"1.0",
+            platform:"PDD"
+        },
         errorHandler:errorHandlerFactory(true)
     });
 }
@@ -60,7 +64,11 @@ export async function addPddHotTask(params: IPddHotTaskParams) {
 
 export async function addPddURLTask(params: IPddURLTaskParams) {
     return request.post(ApiPathEnum.AddPDDURLTask, {
-        data: params,
+        data: {
+            ...params,
+            version:"1.0",
+            platform:"PDD",
+        },
         errorHandler:errorHandlerFactory(true)
     });
 }
@@ -78,6 +86,25 @@ export async function queryTaskDetail(task_Id: number) {
     return request.get(ApiPathEnum.QueryTaskDetail,{
         params:{
             task_Id
+        }
+    })
+}
+
+
+export async function queryCategory() {
+    return request.get(ApiPathEnum.QueryPDDCategory)
+}
+
+
+export async function querySortCondition() {
+    return request.get(ApiPathEnum.QueryPDDSortCondition)
+}
+
+
+export async function queryTaskLog(task_id:number) {
+    return request.get(ApiPathEnum.QueryTaskLog,{
+        params:{
+            task_id
         }
     })
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pagination, message } from 'antd'; 
+import { Pagination, message } from 'antd';
 
 import LocalSearch from './components/LocalSearch';
 import GoodsTable from './components/GoodsTable';
@@ -20,8 +20,9 @@ import {
     IFilterParams,
     getCatagoryList,
     putGoodsEdit,
-    IGoodsEditDataItem
+    IGoodsEditDataItem,
 } from '@/services/goods';
+import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
     page?: number;
@@ -98,7 +99,7 @@ export declare interface IRowDataItem extends IBaseData {
 export declare interface ICategoryItem {
     id: number;
     name: string;
-    children?: ICategoryItem[]
+    children?: ICategoryItem[];
 }
 
 declare interface IIndexState {
@@ -126,16 +127,18 @@ declare interface IIndexState {
     editGoodsList: IRowDataItem[];
 }
 
-const pageSizeOptions = ['30', '50', '100', '200']
+const pageSizeOptions = ['30', '50', '100', '200'];
 
-class Local extends React.PureComponent<{}, IIndexState> {
+type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
-    localSearchRef: LocalSearch | null =  null;
+class Local extends React.PureComponent<LocalPageProps, IIndexState> {
+    localSearchRef: LocalSearch | null = null;
 
     goodsTableRef: GoodsTable | null = null;
 
-    constructor(props: {}) {
+    constructor(props: LocalPageProps) {
         super(props);
+
         this.state = {
             importGoodsDialogStatus: false,
             shelvesDialogStatus: false,
@@ -155,7 +158,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
             rowKeys: [],
             saleStatusList: [],
             allCatagoryList: [],
-            editGoodsList: []
+            editGoodsList: [],
         };
     }
 
@@ -168,24 +171,17 @@ class Local extends React.PureComponent<{}, IIndexState> {
     // 取消选中的商品
     cancelSelectedRow = () => {
         this.setState({
-            selectedRowKeys: []
+            selectedRowKeys: [],
         });
         if (this.goodsTableRef) {
             // console.log(this.localSearchRef);
             this.goodsTableRef.cancelCheckAll();
         }
-    }
+    };
 
     // 校验 sku数量、价格范围、销量 区间是否正常
     validateRange = (searhParam: any): boolean => {
-        const {
-            min_sku,
-            max_sku,
-            min_price,
-            max_price,
-            min_sale,
-            max_sale
-        } = searhParam;
+        const { min_sku, max_sku, min_price, max_price, min_sale, max_sale } = searhParam;
         if (min_sku >= 0 && max_sku >= 0 && min_sku - max_sku > 0) {
             message.error('sku数量最小值大于最大值！');
             return false;
@@ -199,16 +195,20 @@ class Local extends React.PureComponent<{}, IIndexState> {
             return false;
         }
         return true;
-    }
+    };
 
     private onSearch = (searchData?: IPageData, isRefresh?: boolean) => {
         const { page, page_count } = this.state;
         let params: IFilterParams = {
             page,
-            page_count
+            page_count,
         };
         if (this.localSearchRef) {
-            const { secondCatagoryList, thirdCatagoryList, ...searhParams } = this.localSearchRef.state;
+            const {
+                secondCatagoryList,
+                thirdCatagoryList,
+                ...searhParams
+            } = this.localSearchRef.state;
             if (!this.validateRange(searhParams)) {
                 return;
             }
@@ -218,54 +218,57 @@ class Local extends React.PureComponent<{}, IIndexState> {
             params = Object.assign(params, searchData);
         }
         this.setState({
-            searchLoading: true
+            searchLoading: true,
         });
-        return getGoodsList(params).then((res) => {
-            // console.log(res)
-            const { list, all_count } = res.data;
-            // console.log(111111, this.addRowSpanData(list));
-            this.setState({
-                allCount: all_count,
-                page: params.page,
-                page_count: params.page_count,
-                isEditing: false,
-                editGoodsList: [],
-                goodsList: this.addRowSpanData(list)
+        return getGoodsList(params)
+            .then(res => {
+                // console.log(res)
+                const { list, all_count } = res.data;
+                // console.log(111111, this.addRowSpanData(list));
+                this.setState({
+                    allCount: all_count,
+                    page: params.page,
+                    page_count: params.page_count,
+                    isEditing: false,
+                    editGoodsList: [],
+                    goodsList: this.addRowSpanData(list),
+                });
+                if (!isRefresh) {
+                    this.cancelSelectedRow();
+                }
+            })
+            .finally(() => {
+                this.setState({
+                    searchLoading: false,
+                });
             });
-            if (!isRefresh) {
-                this.cancelSelectedRow();
-            }
-        }).finally(() => {
-            this.setState({
-                searchLoading: false
-            });
-        });
-        
-    }
+    };
 
     private getCatagoryList = () => {
-        getCatagoryList().then(res => {
-            // console.log('getCatagoryList', res);
-            this.setState({
-                allCatagoryList: res.data
+        getCatagoryList()
+            .then(res => {
+                // console.log('getCatagoryList', res);
+                this.setState({
+                    allCatagoryList: res.data,
+                });
             })
-        }).catch(err => {
-            message.error('获取所有类目失败');
-        })
-    }
+            .catch(err => {
+                message.error('获取所有类目失败');
+            });
+    };
 
     // 找到当前类目
     private getCurrentCatagory = (firstId: number, secondId?: number): ICategoryItem[] => {
         const { allCatagoryList } = this.state;
-        let ret: ICategoryItem[] = []
+        let ret: ICategoryItem[] = [];
         const firstIndex = allCatagoryList.findIndex(item => item.id === firstId);
-        ret = allCatagoryList[firstIndex].children as ICategoryItem[]
+        ret = allCatagoryList[firstIndex].children as ICategoryItem[];
         if (secondId) {
             const secondIndex = ret.findIndex(item => item.id === secondId);
-            ret = ret[secondIndex] ? (ret[secondIndex].children as ICategoryItem[]) : []
+            ret = ret[secondIndex] ? (ret[secondIndex].children as ICategoryItem[]) : [];
         }
-        return ret
-    }
+        return ret;
+    };
 
     // 设置正在编辑的商品
     setEditGoodsList = () => {
@@ -279,12 +282,12 @@ class Local extends React.PureComponent<{}, IIndexState> {
             // console.log('setEditGoodsList', selectedRowKeys, editGoodsList);
             this.setState({
                 editGoodsList,
-                isEditing: true
-            })
+                isEditing: true,
+            });
         } else {
-            message.error('请选择需要编辑的商品！')
+            message.error('请选择需要编辑的商品！');
         }
-    }
+    };
 
     // 改变编辑中的商品数据
     changeEditGoodsList = (product_id: string, type: string, val: string) => {
@@ -292,45 +295,45 @@ class Local extends React.PureComponent<{}, IIndexState> {
         this.setState({
             editGoodsList: editGoodsList.map(item => {
                 if (item.product_id === product_id) {
-                    const ret = { ...item }
+                    const ret = { ...item };
                     // type为title,description,
                     if (['title', 'description'].indexOf(type) > -1) {
                         ret[type as 'title' | 'description'] = val;
                     } else if (type === 'first_catagory') {
                         ret.first_catagory = {
                             id: Number(val),
-                            name: ''
-                        }
+                            name: '',
+                        };
                         ret.second_catagory = {
                             id: -1,
-                            name: ''
-                        }
+                            name: '',
+                        };
                         ret.third_catagory = {
                             id: -1,
-                            name: ''
-                        }
+                            name: '',
+                        };
                     } else if (type === 'second_catagory') {
                         ret.second_catagory = {
                             id: Number(val),
-                            name: ''
-                        }
+                            name: '',
+                        };
                         ret.third_catagory = {
                             id: -1,
-                            name: ''
-                        }
+                            name: '',
+                        };
                     } else if (type === 'third_catagory') {
                         ret.third_catagory = {
                             id: Number(val),
-                            name: ''
-                        }
+                            name: '',
+                        };
                     }
-                    
+
                     return ret;
                 }
                 return item;
-            })
+            }),
         });
-    }
+    };
 
     // 取消、保存
     toggleEdit = (status: boolean) => {
@@ -339,10 +342,10 @@ class Local extends React.PureComponent<{}, IIndexState> {
         } else {
             this.setState({
                 isEditing: false,
-                editGoodsList: []
-            })
+                editGoodsList: [],
+            });
         }
-    }
+    };
 
     // 检查类目修改正确和找到修改的数据发送请求
     validateAndPutEditGoods = () => {
@@ -356,8 +359,8 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 description,
                 first_catagory,
                 second_catagory,
-                third_catagory
-            } = currentGoods
+                third_catagory,
+            } = currentGoods;
             if (second_catagory.id === -1 || third_catagory.id === -1) {
                 return message.error(`商品${product_id}类目信息缺失！`);
             }
@@ -368,7 +371,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 description: rawDescription,
                 first_catagory: rawFirstCatagory,
                 second_catagory: rawSecondCatagory,
-                third_catagory: rawThirdCatagory
+                third_catagory: rawThirdCatagory,
             } = goodsList[index];
             if (
                 title !== rawTitle ||
@@ -383,35 +386,37 @@ class Local extends React.PureComponent<{}, IIndexState> {
                     description,
                     first_catagory: first_catagory.id,
                     second_catagory: second_catagory.id,
-                    third_catagory: third_catagory.id
+                    third_catagory: third_catagory.id,
                 });
             }
         }
         if (hasEditList.length) {
             putGoodsEdit({
-                modify_data: hasEditList
-            }).then(res => {
-                // console.log('putGoodsEdit', res);
-                message.error('编辑商品信息成功');
-                this.onSearch();
-                this.setState({
-                    isEditing: false,
-                    editGoodsList: []
-                });
-            }).catch(() => {
-                // console.log('putGoodsEdit', res);
-                message.error('编辑商品信息失败');
+                modify_data: hasEditList,
             })
+                .then(res => {
+                    // console.log('putGoodsEdit', res);
+                    message.error('编辑商品信息成功');
+                    this.onSearch();
+                    this.setState({
+                        isEditing: false,
+                        editGoodsList: [],
+                    });
+                })
+                .catch(() => {
+                    // console.log('putGoodsEdit', res);
+                    message.error('编辑商品信息失败');
+                });
         }
         // console.log('editGoodsList', hasEditList);
-    }
+    };
 
     // 设置选择行
     private changeSelectedRowKeys = (keys: string[]) => {
         this.setState({
-            selectedRowKeys: keys 
-        })
-    }
+            selectedRowKeys: keys,
+        });
+    };
 
     // 处理表格数据，用于合并单元格
     private addRowSpanData(list: IDataItem[]): IRowDataItem[] {
@@ -423,8 +428,8 @@ class Local extends React.PureComponent<{}, IIndexState> {
             sku_info.forEach((item, index) => {
                 let rowDataItem: IRowDataItem = {
                     ...rest,
-                    ...item
-                }
+                    ...item,
+                };
                 if (index === 0) {
                     rowDataItem._rowspan = sku_info.length;
                     rowKeys.push(rowDataItem.product_id);
@@ -433,11 +438,11 @@ class Local extends React.PureComponent<{}, IIndexState> {
                 // rowDataItem._isParent = true;
                 // rowDataItem._hidden = false;
                 ret.push(rowDataItem);
-            })
+            });
         }
         this.setState({
-            rowKeys
-        })
+            rowKeys,
+        });
         // console.log('1111', ret);
         return ret;
         // return list
@@ -446,46 +451,46 @@ class Local extends React.PureComponent<{}, IIndexState> {
     // 导入商品弹框
     toggleImportGoodsDialog = (status: boolean) => {
         this.setState({
-            importGoodsDialogStatus: status
+            importGoodsDialogStatus: status,
         });
-    }
+    };
 
     // 上架状态记录弹框
     toggleShelvesDialog = (status: boolean) => {
         this.setState({
-            shelvesDialogStatus: status
-        })
-    }
+            shelvesDialogStatus: status,
+        });
+    };
 
     // 查询商品上下架记录
     searchGoodsSale = (product_id: string) => {
         getGoodsSales({
-            product_id: product_id
-        }).then(res => {
-            // console.log('product_id', product_id, res);
-            this.toggleShelvesDialog(true);
-            this.setState({
-                // (item, index, list) 
-                saleStatusList: res.data.map((item: ISaleStatausItem, index: number, list: ISaleStatausItem[]) => {
-                    item.order = list.length - index;
-                    return item
-                })
-            })
-        }).catch(err => {
-
+            product_id: product_id,
         })
-        
-        
-    }
+            .then(res => {
+                // console.log('product_id', product_id, res);
+                this.toggleShelvesDialog(true);
+                this.setState({
+                    // (item, index, list)
+                    saleStatusList: res.data.map(
+                        (item: ISaleStatausItem, index: number, list: ISaleStatausItem[]) => {
+                            item.order = list.length - index;
+                            return item;
+                        },
+                    ),
+                });
+            })
+            .catch(err => {});
+    };
 
     // 编辑图片弹框
     toggleImgEditDialog = (status: boolean, imgList?: string[], product_id?: string) => {
         this.setState({
             imgEditDialogStatus: status,
             activeImgList: imgList || [],
-            activeproduct_id: product_id || ''
+            activeproduct_id: product_id || '',
         });
-    }
+    };
 
     // 图片更新之后同步到goodsList
     updateGoodsListImg = (imgList: string[], product_id: string) => {
@@ -494,13 +499,13 @@ class Local extends React.PureComponent<{}, IIndexState> {
             goodsList: goodsList.map(item => {
                 if (item.product_id !== product_id) {
                     return item;
-                };
-                const ret = {...item};
+                }
+                const ret = { ...item };
                 ret.sku_image = imgList;
-                return ret
-            })
-        })
-    }
+                return ret;
+            }),
+        });
+    };
 
     // 一键上架
     getGoodsOnsale = () => {
@@ -509,23 +514,25 @@ class Local extends React.PureComponent<{}, IIndexState> {
             return message.error('一键上架需要选择商品');
         }
         this.setState({
-            onsaleLoading: true
-        })
-        getGoodsOnsale({scm_goods_id: selectedRowKeys}).then(res => {
-            // console.log('getGoodsOnsale');
-            this.setState({
-                onsaleLoading: false
+            onsaleLoading: true,
+        });
+        getGoodsOnsale({ scm_goods_id: selectedRowKeys })
+            .then(res => {
+                // console.log('getGoodsOnsale');
+                this.setState({
+                    onsaleLoading: false,
+                });
+                this.onSearch();
+                message.success('一键上架成功');
+            })
+            .catch(err => {
+                // console.log('getGoodsOnsale ERR');
+                this.setState({
+                    onsaleLoading: false,
+                });
+                message.error('一键上架失败');
             });
-            this.onSearch();
-            message.success('一键上架成功');
-        }).catch(err => {
-            // console.log('getGoodsOnsale ERR');
-            this.setState({
-                onsaleLoading: false
-            });
-            message.error('一键上架失败');
-        })
-    }
+    };
 
     // 删除
     getGoodsDelete = () => {
@@ -534,66 +541,69 @@ class Local extends React.PureComponent<{}, IIndexState> {
             return message.error('删除需要选择商品');
         }
         this.setState({
-            deleteLoading: true
-        })
+            deleteLoading: true,
+        });
         // console.log('selectedRowKeys', selectedRowKeys);
-        getGoodsDelete({product_ids: selectedRowKeys}).then(res => {
-            this.setState({
-                deleteLoading: false
+        getGoodsDelete({ product_ids: selectedRowKeys })
+            .then(res => {
+                this.setState({
+                    deleteLoading: false,
+                });
+                this.onSearch();
+                message.success('商品删除成功！');
+            })
+            .catch(err => {
+                // console.log('getGoodsDelete ERR');
+                this.setState({
+                    deleteLoading: false,
+                });
+                message.success('商品删除失败！');
             });
-            this.onSearch();
-            message.success('商品删除成功！');
-        }).catch(err => {
-            // console.log('getGoodsDelete ERR');
-            this.setState({
-                deleteLoading: false
-            });
-            message.success('商品删除失败！');
-        })
-    }
+    };
 
     onChangePage = (page: number) => {
         this.onSearch({
-            page
+            page,
         });
-    }
-    
+    };
+
     pageCountChange = (current: number, size: number) => {
         this.onSearch({
-            page_count: size
+            page_count: size,
         });
-    }
+    };
 
     // 显示下载弹框
     toggleExcelDialog = (status: boolean) => {
         this.setState({
-            excelDialogStataus: status
+            excelDialogStataus: status,
         });
-    }
+    };
 
     // 获取下载表格数据
     getExcelData = (count: number) => {
         postGoodsExports({
             page: count + 1,
-            page_count: 10000
-        }).catch(err => {
-            // console.log('postGoodsExports err', err);
-            message.error('导出表格失败！');
-        }).finally(() => {
-            this.toggleExcelDialog(false);
-        });
-    }
+            page_count: 10000,
+        })
+            .catch(err => {
+                // console.log('postGoodsExports err', err);
+                message.error('导出表格失败！');
+            })
+            .finally(() => {
+                this.toggleExcelDialog(false);
+            });
+    };
 
     render() {
-
         const {
             page,
-            page_count, 
+            page_count,
             allCount,
             activeproduct_id,
             goodsList,
             activeImgList,
-            importGoodsDialogStatus, 
+            importGoodsDialogStatus,
             shelvesDialogStatus,
             imgEditDialogStatus,
             excelDialogStataus,
@@ -605,12 +615,15 @@ class Local extends React.PureComponent<{}, IIndexState> {
             saleStatusList,
             allCatagoryList,
             isEditing,
-            editGoodsList
+            editGoodsList,
         } = this.state;
+
+        const task_id = this.props.location.state?.task_id;
 
         return (
             <div className="goods-local">
-                <LocalSearch 
+                <LocalSearch
+                    task_id={task_id}
                     // toggleUpdateDialog={this.toggleUpdateDialog}
                     ref={node => (this.localSearchRef = node)}
                     isEditing={isEditing}
@@ -651,8 +664,11 @@ class Local extends React.PureComponent<{}, IIndexState> {
                     changeEditGoodsList={this.changeEditGoodsList}
                     getCurrentCatagory={this.getCurrentCatagory}
                 />
-                <ImportGoodsDialog visible={importGoodsDialogStatus} toggleImportGoodsDialog={this.toggleImportGoodsDialog}/>
-                <ShelvesDialog 
+                <ImportGoodsDialog
+                    visible={importGoodsDialogStatus}
+                    toggleImportGoodsDialog={this.toggleImportGoodsDialog}
+                />
+                <ShelvesDialog
                     visible={shelvesDialogStatus}
                     saleStatusList={saleStatusList}
                     toggleShelvesDialog={this.toggleShelvesDialog}
@@ -671,7 +687,7 @@ class Local extends React.PureComponent<{}, IIndexState> {
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
             </div>
-        )
+        );
     }
 }
 

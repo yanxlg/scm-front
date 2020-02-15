@@ -42,7 +42,13 @@
     &-default{
         width: @inputWidth!important;
     }
+    &-equal{
+        &-date{
+            width: @inputEqualDateSelectorWidth!important;
+        }
+    }
 }
+
 
 
 .input{
@@ -60,9 +66,25 @@
             display: none;
         }
     }
+    &-equal{
+        &-date{
+            width: @inputEqualDateSelectorWidth;
+        }
+    }
+}
+
+.picker{
+    &-small{
+        width: @pickerSmallWidth;
+    }
 }
 
 .btn{
+    &-group{
+        & ~ & {
+            margin-left: @btnDefaultSpacing;
+        }
+    }
     &-default{
         min-width: @btnDefaultWidth;
         height: @btnDefaultHeight;

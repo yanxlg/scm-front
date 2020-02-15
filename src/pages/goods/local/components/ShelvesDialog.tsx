@@ -19,50 +19,47 @@ declare interface ShelvesDialogProps {
     toggleShelvesDialog(status: boolean): void;
 }
 
-
 class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
-
     private columns: ColumnProps<ISaleStatausItem>[] = [
         {
             key: 'order',
             title: '序号',
             dataIndex: 'order',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'onsale_time',
             title: '时间',
             dataIndex: 'onsale_time',
             align: 'center',
-            render: (val: number) =>  formatDate(new Date(val), 'yyyy-MM-dd')
+            render: (val: number) => formatDate(new Date(val), 'yyyy-MM-dd'),
         },
         {
             key: 'channel',
             title: '销售平台',
             dataIndex: 'channel',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'product_id',
             title: '中台商品ID',
             dataIndex: 'product_id',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'onsale_status',
             title: '操作',
             dataIndex: 'onsale_status',
             align: 'center',
-            render: (value: number) => value === 0 ? '下架' : '上架'
-        }
-    ]
+            render: (value: number) => (value === 0 ? '下架' : '上架'),
+        },
+    ];
 
     private handleCancel = () => {
         this.props.toggleShelvesDialog(false);
-    }
+    };
 
     render() {
-
         const { visible, saleStatusList } = this.props;
         const pagination = saleStatusList.length > 5 ? {} : false;
         return (
@@ -80,7 +77,7 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
                     columns={this.columns}
                 />
             </Modal>
-        )
+        );
     }
 }
 
