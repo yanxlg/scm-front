@@ -8,12 +8,16 @@ enum ApiPathEnum {
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
 
+
     // 商品中心相关接口
     getGoodsVersionList="/goodsVersion/list",
 
     // vova商品库相关接口''
-    getVovaGoodsList="/v1/vova_goods/list",
-    getChangedProperties="/1/vova_goods/changed_property",
+    getVovaGoodsList="/api/v1/vova_goods/list",
+    getSearchConditionOptions="/api/v1/vova_goods/catagory/list",
+    getVovaChangedProperties="/api/v1/vova_goods/changed_property",
+    putVovaGoodsSales="/api/v1/vova_goods/sales",
+    postVovaGoodsListExport="/api/v1/vova_goods/exports",
 
     // 任务中心相关接口
     QueryTaskList="/api/v1/task/list",
@@ -28,6 +32,7 @@ enum ApiPathEnum {
     QueryGoodsVersion = "/v1/vova_goods/version",
     QueryGoodsDetail="/v1/vova_goods/detail",
     EditGoodsDetail="/v1/vova_goods/edits",
+
 
     getGoodsList="/api/v1/goods/list",
     postGoodsExports="/api/v1/goods/exports",
