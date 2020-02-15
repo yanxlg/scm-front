@@ -143,7 +143,6 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'task_type',
                 width: '223px',
                 align: 'center',
-                render:(text:number)=>TaskTypeList[text]
             },
             {
                 title: '开始时间',
