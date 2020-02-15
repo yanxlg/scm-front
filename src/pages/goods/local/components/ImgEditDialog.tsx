@@ -75,8 +75,10 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     // 删除或者调整图片位置
     private putGoodsPicEdit = (imgList: string[]) => {
+        const { product_id } = this.props;
         putGoodsPicEdit({
-            pic: imgList.map(item => item)
+            product_id,
+            pic_url: imgList.map(item => item)
         }).then(res => {
             // console.log('putGoodsPicEdit', imgList)
             this.props.toggleImgEditDialog(true, imgList, this.props.product_id);
@@ -120,7 +122,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     // console.log(img.width, img.height, product_id);
                     formData.append('width', img.width + '');
                     formData.append('height', img.height + '');
-                    formData.append('position', imgList.length + '');
+                    formData.append('position', imgList.length + 1 + '');
                     formData.append('product_id', product_id);
                     formData.append('alt', product_id);
                     postGoodsPicUpload(formData).then(res => {
