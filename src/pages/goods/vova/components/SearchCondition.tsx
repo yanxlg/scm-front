@@ -13,13 +13,14 @@ declare interface SdState {
 }
 
 declare interface SdState {
-
+    volumes: Array<SelectOptionsItem>;
+    goodsStatus: Array<SelectOptionsItem>;
 }
 
 export declare interface SelectOptionsItem {
     id: string;
     name: string;
-    children: SelectOptionsItem[];
+    children?: SelectOptionsItem[];
 }
 
 const { RangePicker } = DatePicker;
@@ -29,7 +30,51 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
     constructor(props: SdProps) {
         super(props);
         this.state = {
-            levelTwoOptions: []
+            levelTwoOptions: [],
+            volumes: [{
+                id: '1',
+                name: '日销量大于10',
+            }, {
+                id: '2',
+                name: '日销量大于50',
+            }, {
+                id: '3',
+                name: '日销量大于100',
+            }, {
+                id: '4',
+                name: '周销量大于100',
+            }, {
+                id: '5',
+                name: '周销量大于200',
+            }, {
+                id: '6',
+                name: '周销量大于500',
+            }, {
+                id: '7',
+                name: '月销量大于100',
+            }, {
+                id: '8',
+                name: '月销量大于500',
+            }, {
+                id: '9',
+                name: '月销量大于100',
+            }, {
+                id: '100',
+                name: 'all',
+            }],
+            goodsStatus: [{
+                id: '1',
+                name: '已上架',
+            }, {
+                id: '2',
+                name: '待上架',
+            }, {
+                id: '3',
+                name: '已下架',
+            }, {
+                id: '100',
+                name: 'all',
+            }]
         };
     }
 
@@ -55,7 +100,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
 
     render() {
         const { form, searchOptions } = this.props;
-        const { levelTwoOptions } = this.state;
+        const { volumes, goodsStatus, levelTwoOptions } = this.state;
         return (
             <Card className="condition-card">
                 <div className="form-item">
@@ -75,9 +120,11 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                 <div className="form-item">
                     <Form.Item validateTrigger={'onBlur'} form={form} name="volume" label="销量">
                         <Select className="select-default">
-                            <Option value="">日销量大于10</Option>
-                            <Option value="1">日销量大于100</Option>
-                            <Option value="2">日销量大于500</Option>
+                            {
+                                volumes.map(item => (
+                                    <Option value={item.id}>{item.name}</Option>
+                                ))
+                            }
                         </Select>
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
@@ -105,9 +152,11 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                 <div className="form-item">
                     <Form.Item validateTrigger={'onBlur'} form={form} name="goods_id" label="商品状态">
                         <Select className="select-default">
-                            <Option value="1">all</Option>
-                            <Option value="2">在架</Option>
-                            <Option value="3">已下架</Option>
+                            {
+                                goodsStatus.map(item => (
+                                    <Option value={item.id}>{item.name}</Option>
+                                ))
+                            }
                         </Select>
                     </Form.Item>
                     <Button type="primary" className="btn-default" onClick={this.onSearch}>

@@ -117,6 +117,15 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
             dataIndex: 'product_status',
             align: 'center',
             width: 100,
+            render: row => {
+                if (row == 1) {
+                    return (<span>已上架</span>);
+                } else if (row == 2) {
+                    return (<span>待上架</span>);
+                } else if (row == 3) {
+                    return (<span>已下架</span>);
+                }
+            }
         },
         {
             key: 'vovaProductLink',
