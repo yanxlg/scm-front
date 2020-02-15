@@ -1,0 +1,594 @@
+import React, { ChangeEvent } from 'react';
+import { Table, Checkbox, Button, Input, Select, message } from 'antd';
+import Link from 'umi/link';
+import ZoomImage from '@/components/ZoomImage';
+
+import { ColumnProps } from 'antd/es/table';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { IRowDataItem, ISaleItem, ISkuStyle, ICatagoryData, ICategoryItem } from '../index';
+
+import { formatDate } from '@/utils/date';
+
+const { Option } = Select;
+const { TextArea } = Input;
+
+declare interface IGoodsTableProps {
+    searchLoading: boolean;
+    selectedRowKeys: string[];
+    rowKeys: string[];
+    goodsList: IRowDataItem[];
+    editGoodsList: IRowDataItem[];
+    allCatagoryList: ICategoryItem[];
+    toggleImgEditDialog(status: boolean, imgList?: string[], product_id?: string): void;
+    changeSelectedRowKeys(rowKeys: string[]): void;
+    searchGoodsSale(product_id: string): void;
+    changeEditGoodsList(product_id: string, type: string, val: any): void;
+    getCurrentCatagory(firstId: number, secondId?: number): ICategoryItem[];
+}
+
+declare interface IGoodsTableState {
+    indeterminate: boolean;
+    checkAll: boolean;
+}
+
+class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState> {
+    constructor(props: IGoodsTableProps) {
+        super(props);
+        this.state = {
+            indeterminate: false,
+            checkAll: false,
+        };
+    }
+
+    private columns: ColumnProps<IRowDataItem>[] = [
+        {
+            key: 'x',
+            title: () => (
+                <Checkbox
+                    indeterminate={this.state.indeterminate}
+                    checked={this.state.checkAll}
+                    onChange={this.onCheckAllChange}
+                />
+            ),
+            // dataIndex: 'a1',
+            align: 'center',
+            width: 60,
+            render: (value: string, row: IRowDataItem, index: number) => {
+                const { selectedRowKeys } = this.props;
+                const { product_id } = row;
+                return {
+                    // children: row._isParent ? <Checkbox /> : null,
+                    children: (
+                        <Checkbox
+                            checked={selectedRowKeys.indexOf(product_id) > -1}
+                            onChange={() => this.selectedRow(product_id)}
+                        />
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'commodity_id',
+            title: 'Commodity ID',
+            dataIndex: 'commodity_id',
+            align: 'center',
+            width: 130,
+            render: (value: string, row: IRowDataItem) => {
+                return {
+                    children: <Link to={`/goods/local/version?id=${value}`}>{value}</Link>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'product_id',
+            title: 'Product ID',
+            dataIndex: 'product_id',
+            align: 'center',
+            width: 130,
+            render: (value: string, row: IRowDataItem) => {
+                return {
+                    children: <div className={row.hasnew_version ? 'red' : ''}>{value}</div>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'goods_img',
+            title: '商品图片',
+            dataIndex: 'goods_img',
+            align: 'center',
+            width: 100,
+            render: (value: string, row: IRowDataItem, index: number) => {
+                return {
+                    children: (
+                        <>
+                            <ZoomImage className="goods-local-img" src={row.sku_image[0]} />
+                            <Button
+                                className="goods-local-img-edit"
+                                size="small"
+                                onClick={() => this.clickImgEdit(row.sku_image, row.product_id)}
+                            >
+                                编辑
+                            </Button>
+                        </>
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'title',
+            title: '标题',
+            dataIndex: 'title',
+            align: 'center',
+            width: 200,
+            render: (value: string, row: IRowDataItem) => {
+                const { editGoodsList } = this.props;
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
+                return {
+                    children:
+                        index > -1 ? (
+                            <TextArea
+                                autoSize={true}
+                                value={editGoodsList[index].title}
+                                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                                    this.props.changeEditGoodsList(
+                                        row.product_id,
+                                        'title',
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                        ) : (
+                            <div className="text">{value}</div>
+                        ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'description',
+            title: '描述',
+            dataIndex: 'description',
+            align: 'center',
+            width: 200,
+            render: (value: string, row: IRowDataItem) => {
+                const { editGoodsList } = this.props;
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
+                return {
+                    children:
+                        index > -1 ? (
+                            <TextArea
+                                autoSize={true}
+                                value={editGoodsList[index].description}
+                                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                                    this.props.changeEditGoodsList(
+                                        row.product_id,
+                                        'description',
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                        ) : (
+                            <div className="text">{value}</div>
+                        ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+
+        {
+            key: 'first_catagory',
+            title: '一级类目',
+            dataIndex: 'first_catagory',
+            align: 'center',
+            width: 100,
+            render: (value: ICatagoryData, row: IRowDataItem) => {
+                const { editGoodsList, allCatagoryList } = this.props;
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
+                const currentEditGoods = editGoodsList[index];
+                return {
+                    children:
+                        index > -1 ? (
+                            <Select
+                                className=""
+                                value={currentEditGoods.first_catagory.id + ''}
+                                onChange={(val: string) =>
+                                    this.props.changeEditGoodsList(
+                                        row.product_id,
+                                        'first_catagory',
+                                        val,
+                                    )
+                                }
+                            >
+                                {allCatagoryList.map(item => (
+                                    <Option key={item.id + ''} value={item.id + ''}>
+                                        {item.name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        ) : (
+                            <div>{value.name}</div>
+                        ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'second_catagory',
+            title: '二级类目',
+            dataIndex: 'second_catagory',
+            align: 'center',
+            width: 100,
+            render: (value: ICatagoryData, row: IRowDataItem) => {
+                const { editGoodsList, allCatagoryList } = this.props;
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
+                const currentEditGoods = editGoodsList[index];
+                let catagoryList: ICategoryItem[] = [];
+                if (currentEditGoods) {
+                    catagoryList = this.props.getCurrentCatagory(
+                        currentEditGoods.first_catagory.id,
+                    );
+                }
+                return {
+                    children:
+                        index > -1 ? (
+                            <Select
+                                className=""
+                                value={currentEditGoods.second_catagory.id + ''}
+                                onChange={(val: string) =>
+                                    this.props.changeEditGoodsList(
+                                        row.product_id,
+                                        'second_catagory',
+                                        val,
+                                    )
+                                }
+                            >
+                                <Option value="-1">请选择</Option>
+                                {catagoryList.map(item => (
+                                    <Option key={item.id + ''} value={item.id + ''}>
+                                        {item.name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        ) : (
+                            <div>{value.name}</div>
+                        ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'third_catagory',
+            title: '三级类目',
+            dataIndex: 'third_catagory',
+            align: 'center',
+            width: 100,
+            render: (value: ICatagoryData, row: IRowDataItem) => {
+                const { editGoodsList, allCatagoryList } = this.props;
+                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
+                const currentEditGoods = editGoodsList[index];
+                let catagoryList: ICategoryItem[] = [];
+                if (currentEditGoods) {
+                    const { first_catagory, second_catagory } = currentEditGoods;
+                    catagoryList = this.props.getCurrentCatagory(
+                        first_catagory.id,
+                        second_catagory.id,
+                    );
+                }
+                return {
+                    children:
+                        index > -1 ? (
+                            <Select
+                                className=""
+                                value={currentEditGoods.third_catagory.id + ''}
+                                onChange={(val: string) =>
+                                    this.props.changeEditGoodsList(
+                                        row.product_id,
+                                        'third_catagory',
+                                        val,
+                                    )
+                                }
+                            >
+                                <Option value="-1">请选择</Option>
+                                {catagoryList.map(item => (
+                                    <Option key={item.id + ''} value={item.id + ''}>
+                                        {item.name}
+                                    </Option>
+                                ))}
+                            </Select>
+                        ) : (
+                            <div>{value.name}</div>
+                        ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'sku_number',
+            title: 'sku数量',
+            dataIndex: 'sku_number',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
+        {
+            key: 'sku_sn',
+            title: '中台sku sn',
+            dataIndex: 'sku_sn',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'sku_style',
+            title: '规格',
+            dataIndex: 'sku_style',
+            align: 'center',
+            width: 120,
+            render: (value: ISkuStyle, row: IRowDataItem, index: number) => {
+                return (
+                    <>
+                        {value.size ? <div>Size: {value.size}</div> : null}
+                        {value.color ? <div>Color: {value.color}</div> : null}
+                    </>
+                );
+            },
+        },
+        {
+            key: 'sku_price',
+            title: '价格',
+            dataIndex: 'sku_price',
+            align: 'center',
+            width: 100,
+        },
+        {
+            key: 'sku_shopping_fee',
+            title: '运费',
+            dataIndex: 'sku_shopping_fee',
+            align: 'center',
+            width: 100,
+        },
+        {
+            key: 'sku_weight',
+            title: '重量',
+            dataIndex: 'sku_weight',
+            align: 'center',
+            width: 100,
+            // render: (value: string, row: IRowDataItem, index: number) => {
+            //     return <Input value={value}/>
+            // }
+        },
+        {
+            key: 'sku_inventory',
+            title: '库存',
+            dataIndex: 'sku_inventory',
+            align: 'center',
+            width: 100,
+        },
+        // {
+        //     key: 'scmSkuShoppingTime',
+        //     title: '发货时间',
+        //     dataIndex: 'scmSkuShoppingTime',
+        //     align: 'center',
+        //     width: 100
+        // },
+
+        {
+            key: 'sales_volume',
+            title: '销量',
+            dataIndex: 'sales_volume',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
+        {
+            key: 'comments',
+            title: '评价数量',
+            dataIndex: 'comments',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
+        {
+            key: 'brand',
+            title: '品牌',
+            dataIndex: 'brand',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
+        {
+            key: 'store_id',
+            title: '店铺 id',
+            dataIndex: 'store_id',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
+        {
+            key: 'store_name',
+            title: '店铺名称',
+            dataIndex: 'store_name',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
+        {
+            key: 'worm_task_id',
+            title: '爬虫任务ID',
+            dataIndex: 'worm_task_id',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        {
+            key: 'worm_goods_id',
+            title: '爬虫商品ID',
+            dataIndex: 'worm_goods_id',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        // {
+        //     key: 'isOnSale',
+        //     title: '是否可上架',
+        //     dataIndex: 'isOnSale',
+        //     align: 'center',
+        //     width: 100,
+        //     render: this.mergeCell
+        // },
+        {
+            key: 'onsale_info',
+            title: '上架渠道',
+            dataIndex: 'onsale_info',
+            align: 'center',
+            width: 100,
+            render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
+                return {
+                    children: (
+                        <Button
+                            type="link"
+                            onClick={() => this.props.searchGoodsSale(row.product_id)}
+                        >
+                            {value.map((item: ISaleItem) => item.onsale_channel).join('、')}
+                        </Button>
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'update_time',
+            title: '更新时间',
+            dataIndex: 'update_time',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IRowDataItem) => {
+                return {
+                    children: <div>{formatDate(new Date(value), 'yyyy-MM-dd')}</div>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+
+        {
+            key: 'worm_goodsinfo_link',
+            title: '链接',
+            dataIndex: 'worm_goodsinfo_link',
+            align: 'center',
+            width: 200,
+            render: (value: string, row: IRowDataItem) => {
+                return {
+                    children: (
+                        <a href={value} target="_blank">
+                            {value}
+                        </a>
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+    ];
+
+    // 取消全选
+    cancelCheckAll = () => {
+        this.setState({
+            indeterminate: false,
+            checkAll: false,
+        });
+    };
+
+    // 点击全选
+    private onCheckAllChange = (e: CheckboxChangeEvent) => {
+        // console.log(1111, );
+        // checkedList: e.target.checked ? plainOptions : [],
+        // indeterminate: false,
+        // checkAll: e.target.checked,
+        const checked = e.target.checked;
+        const { rowKeys } = this.props;
+        this.setState({
+            indeterminate: false,
+            checkAll: checked,
+        });
+        this.props.changeSelectedRowKeys(checked ? [...rowKeys] : []);
+    };
+
+    // 选择商品行
+    private selectedRow = (id: string) => {
+        // console.log('selectedRow', id);
+        const { selectedRowKeys, rowKeys } = this.props;
+        const copySelectedRowKeys = [...selectedRowKeys];
+        const index = copySelectedRowKeys.indexOf(id);
+        if (index === -1) {
+            copySelectedRowKeys.push(id);
+        } else {
+            copySelectedRowKeys.splice(index, 1);
+        }
+        const len = copySelectedRowKeys.length;
+        this.setState({
+            indeterminate: len > 0 && len !== rowKeys.length,
+            checkAll: len === rowKeys.length,
+        });
+        this.props.changeSelectedRowKeys(copySelectedRowKeys);
+    };
+
+    // 图片编辑
+    private clickImgEdit = (imgList: string[], product_id: string) => {
+        // console.log('clickImgEdit', rowData);
+        this.props.toggleImgEditDialog(true, imgList, product_id);
+    };
+
+    // 合并单元格
+    private mergeCell(value: string, row: IRowDataItem, index: number) {
+        return {
+            children: value,
+            props: {
+                rowSpan: row._rowspan || 0,
+            },
+        };
+    }
+
+    render() {
+        const { goodsList, searchLoading } = this.props;
+        return (
+            <Table
+                bordered={true}
+                rowKey="sku_sn"
+                className="goods-local-table"
+                columns={this.columns}
+                dataSource={goodsList}
+                scroll={{ x: true }}
+                pagination={false}
+                loading={searchLoading}
+            />
+        );
+    }
+}
+
+export default GoodsTable;

@@ -9,17 +9,15 @@ declare interface ImportGoodsDialogProps {
 }
 
 class ImportGoodsDialog extends React.PureComponent<ImportGoodsDialogProps> {
-
     private handleOk = () => {
         this.props.toggleImportGoodsDialog(false);
-    }
+    };
 
     private handleCancel = () => {
         this.props.toggleImportGoodsDialog(false);
-    }
+    };
 
     render() {
-
         const { visible } = this.props;
 
         return (
@@ -32,13 +30,13 @@ class ImportGoodsDialog extends React.PureComponent<ImportGoodsDialogProps> {
             >
                 <Dragger>
                     <div className="">
-                        <Icon type="cloud-download" style={{fontSize: 40, color: '#1890ff'}}/>
+                        <Icon type="cloud-download" style={{ fontSize: 40, color: '#1890ff' }} />
                         <p>点击选择或拖拽上传</p>
                     </div>
                 </Dragger>
                 <Progress percent={50} status="active" />
             </Modal>
-        )
+        );
     }
 }
 

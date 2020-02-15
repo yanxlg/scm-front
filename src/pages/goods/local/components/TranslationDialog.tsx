@@ -10,51 +10,46 @@ declare interface TranslationDialogState {
     settingVisible: boolean;
 }
 
-class TranslationDialog extends React.PureComponent<TranslationDialogProps, TranslationDialogState> {
-
+class TranslationDialog extends React.PureComponent<
+    TranslationDialogProps,
+    TranslationDialogState
+> {
     constructor(props: TranslationDialogProps) {
         super(props);
         this.state = {
-            settingVisible: false
-        }
+            settingVisible: false,
+        };
     }
 
     private handleOk = () => {
         this.props.toggleTranslationDialog(false);
-    }
+    };
 
     private handleCancel = () => {
         this.props.toggleTranslationDialog(false);
-    }
+    };
 
-    private changeTextType = () => {
+    private changeTextType = () => {};
 
-    }
-
-    private changeTargetLang = () => {
-
-    }
+    private changeTargetLang = () => {};
 
     private toggleSetting = (status: boolean) => {
         this.setState({
-            settingVisible: status
-        })
-    }
+            settingVisible: status,
+        });
+    };
 
     private handleSettingOk = () => {
         this.toggleSetting(false);
-    }
+    };
 
     private handleSettingCancel = () => {
         this.toggleSetting(false);
-    }
+    };
 
-    private changeTranslationMethods = () => {
-
-    }
+    private changeTranslationMethods = () => {};
 
     render() {
-
         const { visible } = this.props;
         const { settingVisible } = this.state;
 
@@ -70,7 +65,11 @@ class TranslationDialog extends React.PureComponent<TranslationDialogProps, Tran
                     <div className="goods-local-translation">
                         <div className="item">
                             <p className="label">翻译文本:</p>
-                            <Radio.Group className="radio-group" onChange={this.changeTextType} value={1}>
+                            <Radio.Group
+                                className="radio-group"
+                                onChange={this.changeTextType}
+                                value={1}
+                            >
                                 <Radio value={1}>标题</Radio>
                                 <Radio value={2}>描述</Radio>
                                 <Radio value={3}>规格文本</Radio>
@@ -78,7 +77,11 @@ class TranslationDialog extends React.PureComponent<TranslationDialogProps, Tran
                         </div>
                         <div className="item">
                             <p className="label">目标语言:</p>
-                            <Radio.Group className="radio-group" onChange={this.changeTargetLang} value={0}>
+                            <Radio.Group
+                                className="radio-group"
+                                onChange={this.changeTargetLang}
+                                value={0}
+                            >
                                 <Radio value={1}>标题</Radio>
                                 <Radio value={2}>描述</Radio>
                                 <Radio value={3}>规格文本</Radio>
@@ -94,10 +97,15 @@ class TranslationDialog extends React.PureComponent<TranslationDialogProps, Tran
                                 <Radio value={1}>标题</Radio>
                                 <Radio value={2}>描述</Radio>
                                 <Radio value={3}>规格文本</Radio>
-
                             </Radio.Group>
                         </div>
-                        <Button className="btn" type="link" onClick={() => this.toggleSetting(true)}>翻译设置</Button>
+                        <Button
+                            className="btn"
+                            type="link"
+                            onClick={() => this.toggleSetting(true)}
+                        >
+                            翻译设置
+                        </Button>
                     </div>
                 </Modal>
                 <Modal
@@ -107,7 +115,11 @@ class TranslationDialog extends React.PureComponent<TranslationDialogProps, Tran
                     onOk={this.handleSettingOk}
                     onCancel={this.handleSettingCancel}
                 >
-                    <Radio.Group className="goods-local-translation-setting" onChange={this.changeTranslationMethods} value={1}>
+                    <Radio.Group
+                        className="goods-local-translation-setting"
+                        onChange={this.changeTranslationMethods}
+                        value={1}
+                    >
                         <Radio className="radio-item" value={1}>
                             Google Translation (Public)
                         </Radio>
@@ -123,8 +135,7 @@ class TranslationDialog extends React.PureComponent<TranslationDialogProps, Tran
                     </Radio.Group>
                 </Modal>
             </>
-            
-        )
+        );
     }
 }
 
