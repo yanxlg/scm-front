@@ -1,5 +1,6 @@
 import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
+import { IFormData } from '@/pages/goods/vova/components/VersionSearch';
 
 export declare interface IFilterParams {
     page: number;
@@ -148,6 +149,31 @@ export async function postGoodsVersionExport(data: IVersionExportData) {
     return request.post(ApiPathEnum.postGoodsVersionExport, {
         // requestType: 'form',
         data,
+        responseType:"blob",
+        parseResponse:false
+    }).then((response)=>{
+        const disposition = response.headers.get('content-disposition');
+        const fileName = decodeURI(disposition.substring(disposition.indexOf('filename=')+9, disposition.length));
+        response.blob().then((blob:Blob)=>{
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        })
+    });
+}
+
+
+export async function exportVovaGoodsVersion(data?:IFormData) {
+    return request.post(ApiPathEnum.ExportVovaGoodsVersion, {
+        data:{
+            start_time:data?.onshelf_time_satrt,
+            end_time:data?.onshelf_time_end,
+            virtual_id:data?.vova_virtual_id
+        },
         responseType:"blob",
         parseResponse:false
     }).then((response)=>{

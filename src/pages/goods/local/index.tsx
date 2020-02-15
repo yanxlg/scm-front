@@ -22,6 +22,7 @@ import {
     putGoodsEdit,
     IGoodsEditDataItem,
 } from '@/services/goods';
+import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
     page?: number;
@@ -128,13 +129,16 @@ declare interface IIndexState {
 
 const pageSizeOptions = ['30', '50', '100', '200'];
 
-class Local extends React.PureComponent<{}, IIndexState> {
+type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
+
+class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     localSearchRef: LocalSearch | null = null;
 
     goodsTableRef: GoodsTable | null = null;
 
-    constructor(props: {}) {
+    constructor(props: LocalPageProps) {
         super(props);
+
         this.state = {
             importGoodsDialogStatus: false,
             shelvesDialogStatus: false,
@@ -614,9 +618,12 @@ class Local extends React.PureComponent<{}, IIndexState> {
             editGoodsList,
         } = this.state;
 
+        const task_id = this.props.location.state?.task_id;
+
         return (
             <div className="goods-local">
                 <LocalSearch
+                    task_id={task_id}
                     // toggleUpdateDialog={this.toggleUpdateDialog}
                     ref={node => (this.localSearchRef = node)}
                     isEditing={isEditing}

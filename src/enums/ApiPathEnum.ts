@@ -41,6 +41,7 @@ enum ApiPathEnum {
     getGoodsVersion="/api/v1/goods/version",
     postGoodsVersionExport="/api/v1/goods/version_export",
 
+    ExportVovaGoodsVersion="/api/v1/vova_goods/version_exports",
 }
 
 export { ApiPathEnum };
