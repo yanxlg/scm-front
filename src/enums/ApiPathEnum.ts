@@ -9,6 +9,13 @@ enum ApiPathEnum {
     CancelOrder="/api/order/cancelPurchaseOrder",
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
+
+    QueryTaskList="/v1/task/list",
+    AddPDDHotTask="/v1/task/spider/pdd_hotsale",
+    AddPDDURLTask="/v1/task/spider/url",
+    DeleteTask = "/v1/task/delete",
+    QueryTaskDetail="/v1/task/detail",
+
     // 商品中心相关接口
     getGoodsList="/api/v1/goods/list",
     postGoodsExports="/api/v1/goods/exports",
@@ -21,13 +28,8 @@ enum ApiPathEnum {
     getCatagoryList="/api/v1/catagory/list",
     getGoodsVersion="/api/v1/goods/version",
     postGoodsVersionExport="/api/v1/goods/version_export",
-
-    QueryTaskList="/v1/task/list",
-    AddPDDHotTask="/v1/task/spider/pdd_hotsale",
-    AddPDDURLTask="/v1/task/spider/url",
-    DeleteTask = "/v1/task/delete",
-    QueryTaskDetail="/v1/task/detail",
-    
+    postGoodsApplyVersion="/api/v1/goods/apply_version",
+    postGoodsIgnoreVersion="/api/v1/goods/ignore_version",
 
 }
 

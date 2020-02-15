@@ -7,7 +7,8 @@ import VersionImgDialog from './VersionImgDialog';
 
 declare interface IVersionTableProps {
     loading: boolean;
-    versionGoodsList: IGoodsVersionRowItem[]
+    versionGoodsList: IGoodsVersionRowItem[];
+    operationVersion(product_id: number, type: string): void;
 }
 
 declare interface VersionTableState {
@@ -25,13 +26,28 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'operations',
             align: 'center',
             render: (value: IOperations, row: IGoodsVersionRowItem) => {
+                const { operationVersion } = this.props;
                 const children = (
                     // can_apply: boolean;
                     // can_ignore: boolean;
                     // is_current_version: boolean;
                     <div>
-                        {value.can_apply ? <Button className="btn" type="primary" size="small">应用</Button> : null}
-                        {value.can_ignore ? <Button className="btn" type="primary" size="small">忽略</Button> : null}
+                        {value.can_apply ? (
+                            <Button 
+                                className="btn" 
+                                type="primary" 
+                                size="small"
+                                onClick={() => operationVersion(row.product_id, 'apply')}
+                            >应用</Button>
+                        ) : null}
+                        {value.can_ignore ? (
+                            <Button 
+                                className="btn" 
+                                type="primary" 
+                                size="small"
+                                onClick={() => operationVersion(row.product_id, 'ignore')}
+                            >忽略</Button>
+                        ) : null}
                         {value.is_current_version ? <Button ghost={true} className="btn" type="primary" size="small">当前版本</Button> : null}
                     </div>
                 )

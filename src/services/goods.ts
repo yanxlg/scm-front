@@ -45,7 +45,7 @@ declare interface IGoodsEditData {
     modify_data: IGoodsEditDataItem[];
 }
 
-declare interface IGoodsSalesParams {
+declare interface IProductId {
     product_id: string;
 }
 
@@ -125,7 +125,7 @@ export async function putGoodsEdit(data: IGoodsEditData) {
 }
 
 // 查询商品上架信息
-export async function getGoodsSales(params: IGoodsSalesParams) {
+export async function getGoodsSales(params: IProductId) {
     return request.get(ApiPathEnum.getGoodsSales, {
         params
     })
@@ -163,4 +163,18 @@ export async function postGoodsVersionExport(data: IVersionExportData) {
             link.remove();
         })
     });
+}
+
+// 应用版本
+export async function postGoodsApplyVersion(data: IProductId) {
+    return request.post(ApiPathEnum.postGoodsApplyVersion, {
+        data
+    })
+}
+
+// 忽略版本
+export async function postGoodsIgnoreVersion(data: IProductId) {
+    return request.post(ApiPathEnum.postGoodsIgnoreVersion, {
+        data
+    })
 }
