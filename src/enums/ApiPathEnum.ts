@@ -10,9 +10,6 @@ enum ApiPathEnum {
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
     // 商品中心相关接口
-    getGoodsList="/v1/goods/list",
-    putGoodsPicEdit="/v1/goods/pic/edit",
-    postGoodsPicUpload="/v1/goods/pic/upload",
     getGoodsVersionList="/goodsVersion/list",
 
     // vova商品库相关接口''
@@ -20,11 +17,28 @@ enum ApiPathEnum {
     getChangedProperties="/v1/vova_goods/changed_property",
 
     // 任务中心相关接口
+
     QueryTaskList="/v1/task/list",
     AddPDDHotTask="/v1/task/spider/pdd_hotsale",
     AddPDDURLTask="/v1/task/spider/url",
     DeleteTask = "/v1/task/delete",
     QueryTaskDetail="/v1/task/detail",
+
+    // 商品中心相关接口
+    getGoodsList="/api/v1/goods/list",
+    postGoodsExports="/api/v1/goods/exports",
+    putGoodsPicEdit="/api/v1/goods/pic/edit",
+    postGoodsPicUpload="/api/v1/goods/pic/upload",
+    getGoodsOnsale="/api/v1/goods/onsale",
+    getGoodsDelete="/api/v1/goods/delete",
+    putGoodsEdit="/api/v1/goods/edits",
+    getGoodsSales="/api/v1/goods/sales",
+    getCatagoryList="/api/v1/catagory/list",
+    getGoodsVersion="/api/v1/goods/version",
+    postGoodsVersionExport="/api/v1/goods/version_export",
+    postGoodsApplyVersion="/api/v1/goods/apply_version",
+    postGoodsIgnoreVersion="/api/v1/goods/ignore_version",
+
 }
 
 export { ApiPathEnum };

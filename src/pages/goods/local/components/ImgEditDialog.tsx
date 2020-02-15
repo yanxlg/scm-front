@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal, Icon, Upload, message, Popconfirm } from 'antd';
 import { RcFile } from 'antd/lib/upload';
-import { ISkuImgItem } from '../local';
 import { UploadChangeParam } from 'antd/lib/upload'
 
 import {
@@ -11,8 +10,10 @@ import {
 
 declare interface ImgEditDialogProps {
     visible: boolean;
-    imgList: ISkuImgItem[];
-    toggleImgEditDialog(status: boolean, imgList?: ISkuImgItem[]): void;
+    imgList: string[];
+    product_id: string;
+    toggleImgEditDialog(status: boolean, imgList?: string[], product_id?: string): void;
+    updateGoodsListImg(imgList: string[], product_id: string): void;
 }
 
 declare interface ImgEditDialogState {
@@ -38,7 +39,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         this.props.toggleImgEditDialog(false);
     }
 
-    private dragstart = (item: ISkuImgItem) => {
+    private dragstart = (item: string) => {
         // console.log('dragstart', item);
         this.startItem = item;
     }
@@ -47,10 +48,10 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         e.preventDefault();
     }
 
-    private drop = (item: ISkuImgItem) => {
+    private drop = (item: string) => {
         // console.log('drop', item);
         const { imgList } = this.props;
-        const startIndex = imgList.findIndex(currentItem => currentItem.imgId === this.startItem.imgId);
+        const startIndex = imgList.findIndex(currentItem => currentItem === this.startItem);
         const endIndex = imgList.findIndex(str => str === item);
         const copyImgList = [...imgList]
         // 元素互换位置
@@ -63,22 +64,23 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         }
     }
 
-    private confirmDelete = (item: ISkuImgItem) => {
+    private confirmDelete = (item: string) => {
         // console.log('confirmDelete', item);
         const { imgList } = this.props;
-        const index = imgList.findIndex(currentItem => currentItem.imgId === item.imgId);
+        const index = imgList.findIndex(currentItem => currentItem === item);
         const copyImgList = [...imgList];
         copyImgList.splice(index, 1);
         this.putGoodsPicEdit(copyImgList);
     }
 
     // 删除或者调整图片位置
-    private putGoodsPicEdit = (imgList: ISkuImgItem[]) => {
+    private putGoodsPicEdit = (imgList: string[]) => {
         putGoodsPicEdit({
-            pic: imgList.map(item => item.imgId)
+            pic: imgList.map(item => item)
         }).then(res => {
             // console.log('putGoodsPicEdit', imgList)
-            this.props.toggleImgEditDialog(true, imgList);
+            this.props.toggleImgEditDialog(true, imgList, this.props.product_id);
+            this.props.updateGoodsListImg(imgList, this.props.product_id);
             message.success('图片编辑成功！');
         }).catch(err => {
             message.success('图片编辑失败！');
@@ -102,26 +104,49 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     private uploadImg = (info: UploadChangeParam) => {
         const { loading } = this.state;
+        const { imgList, product_id } = this.props;
         if (!loading) {
             this.setState({
                 loading: true
             }, () => {
                 // console.log('uploadImg', info);
                 const formData = new FormData();
-                formData.append('file', info.file.originFileObj as Blob);
-                postGoodsPicUpload(formData).then(res => {
-                    // console.log('postGoodsPicUpload', res);
-                    message.success('图片上传成功');
-                    this.setState({
-                        loading: false
+                const file = info.file.originFileObj;
+                formData.append('file', file as Blob);
+                // 获取图片的原始宽高
+                const _URL = window.URL || window.webkitURL;
+                const img = new Image();
+                img.onload = () => {
+                    // console.log(img.width, img.height, product_id);
+                    formData.append('width', img.width + '');
+                    formData.append('height', img.height + '');
+                    formData.append('position', imgList.length + '');
+                    formData.append('product_id', product_id);
+                    formData.append('alt', product_id);
+                    postGoodsPicUpload(formData).then(res => {
+                        // console.log('postGoodsPicUpload', res);
+                        message.success('图片上传成功');
+                        this.setState({
+                            loading: false
+                        });
+                        this.props.toggleImgEditDialog(true, [
+                            ...imgList,
+                            res.data.url
+                        ], product_id);
+                        this.props.updateGoodsListImg([
+                            ...imgList,
+                            res.data.url
+                        ], product_id);
+                    }).catch(err => {
+                        // console.log('postGoodsPicUpload', err);
+                        message.error('图片上传失败！');
+                        this.setState({
+                            loading: false
+                        });
                     })
-                    this.props.toggleImgEditDialog(true, [
-                        ...this.props.imgList,
-                        res.data
-                    ]);
-                }).catch(err => {
-                    // console.log('postGoodsPicUpload', err);
-                })
+                };
+                img.src = _URL.createObjectURL(file);
+               
             })
         }
         
@@ -149,7 +174,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         <p>主图</p>
                         <div className="img-box">
                             <img 
-                                src={imgList[0].imgUrl}
+                                src={imgList[0]}
                                 onDragOver={this.dragover}
                                 onDrop={() => this.drop(imgList[0])}
                             />
@@ -161,9 +186,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             {
                                 imgList.slice(1).map(item => {
                                     return (
-                                        <div key={item.imgId} className="img-box item">
+                                        <div key={item} className="img-box item">
                                             <img 
-                                                src={item.imgUrl}
+                                                src={item}
                                                 onDragStart={() => this.dragstart(item)}
                                                 onDragOver={this.dragover}
                                                 onDrop={() => this.drop(item)}

@@ -18,7 +18,7 @@ export declare interface IFilterParams {
 
 
 export async function getVovaGoodsList(params: IFilterParams) {
-    return request.get(ApiPathEnum.getVovaGoodsList, {
+    return request.post(ApiPathEnum.getVovaGoodsList, {
         params: params
     });
 }

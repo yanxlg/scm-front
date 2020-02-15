@@ -1,31 +1,50 @@
 import React, { ChangeEvent } from 'react';
-import { Input, InputNumber, Select, Button, Menu, Dropdown, Icon } from 'antd';
-import { ClickParam } from 'antd/lib/menu';
+import { Input, InputNumber, Select, Button } from 'antd';
+// import { ClickParam } from 'antd/lib/menu';
+
+import { ICategoryItem } from '../index'
 
 const { Option } = Select;
 
+declare interface IPageData {
+    page?: number;
+    page_count?: number;
+}
+
 declare interface ILocalSearchProps {
     // toggleUpdateDialog(status: boolean, type?: string): void;
+    isEditing: boolean;
+    searchLoading: boolean;
+    onsaleLoading: boolean;
+    deleteLoading: boolean;
+    allCatagoryList: ICategoryItem[];
+    onSearch(params?: IPageData, isRefresh?: boolean): void;
+    getGoodsOnsale(): void;
+    getGoodsDelete(): void;
+    toggleExcelDialog(status: boolean): void;
+    setEditGoodsList(): void;
+    getCurrentCatagory(firstId: number, secondId?: number): ICategoryItem[];
+    toggleEdit(status: boolean): void;
 }
 
 declare interface ILocalSearchState {
     task_number: string;                // 任务 id
     store_id: string;                   // 店铺 ID
-    scm_goods_sn: string;               // 中台商品 SN
+    commodity_id: string;               // Commodity_ID
+    inventory_status: string;           // 库存
+    version_status: string;             // 版本更新
     first_catagory: string;             // 一级类目
     second_catagory: string;            // 二级类目
-    third_catagory: string;             // 三级类目
-    sale_status: string;                // 上架状态
+    third_catagory: string;            // 三级类目
     min_sale: number | undefined;       // 销量最小
     max_sale: number | undefined;       // 销量最大值
-    min_inventory: number | undefined;  // 库存最小值
     min_sku: number | undefined;        // sku数量最小值
+    max_sku: number | undefined;        // sku最大值
     min_price: number | undefined;      // 价格范围最小值
     max_price: number | undefined;      // 价格范围最大值
     min_comment: number | undefined;    // 评论数量最小值
-    max_inventory: number | undefined;  // 库存最大值
-    max_sku: number | undefined;        // sku最大值
-    // [key: string]: any;
+    secondCatagoryList: ICategoryItem[];
+    thirdCatagoryList: ICategoryItem[];
 }
 
 // <{}, ILocalSearchState>
@@ -37,20 +56,21 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.state = {
             task_number: '',
             store_id: '',
-            scm_goods_sn: '',
+            commodity_id: '',
+            inventory_status: '',
+            version_status: '',
             first_catagory: '',
             second_catagory: '',
             third_catagory: '',
-            sale_status: '',
-            min_sale: undefined,
-            max_sale: undefined,
-            min_inventory: undefined,
-            max_inventory: undefined,
             min_sku: undefined,
             max_sku: undefined,
             min_price: undefined,
             max_price: undefined,
-            min_comment: undefined
+            min_sale: undefined,
+            max_sale: undefined,
+            min_comment: undefined,
+            secondCatagoryList: [],
+            thirdCatagoryList: []
         };
     }
 
@@ -66,33 +86,47 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         })
     }
 
-    private setScmGoodsSn = (e: ChangeEvent<HTMLInputElement>) => {
+    private setcommodity_id = (e: ChangeEvent<HTMLInputElement>) => {
         this.setState({
-            scm_goods_sn: e.target.value 
+            commodity_id: e.target.value 
+        })
+    }
+
+    private setInventoryStatus = (val: string) => {
+        this.setState({
+            inventory_status: val
+        })
+    }
+
+    private setVersionStatus = (val: string) => {
+        this.setState({
+            version_status: val
         })
     }
 
     private setFirstCatagory = (val: string) => {
+        // console.log('setFirstCatagory', val);
         this.setState({
-            first_catagory: val
-        })
+            first_catagory: val,
+            secondCatagoryList: val ? this.props.getCurrentCatagory(Number(val)) : [],
+            thirdCatagoryList: [],
+            second_catagory: '',
+            third_catagory: ''
+        });
     }
 
     private setSecondCatagory = (val: string) => {
+        const { first_catagory } = this.state; 
         this.setState({
-            second_catagory: val
+            second_catagory: val,
+            thirdCatagoryList: val ? this.props.getCurrentCatagory(Number(first_catagory), Number(val)) : [],
+            third_catagory: ''
         })
     }
 
     private setThirdCatagory = (val: string) => {
         this.setState({
             third_catagory: val
-        })
-    }
-
-    private setSaleStatus = (val: string) => {
-        this.setState({
-            sale_status: val
         })
     }
 
@@ -105,18 +139,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
     private setMaxSale = (val: number | undefined) => {
         this.setState({
             max_sale: val
-        })
-    }
-
-    private setMinInventory = (val: number | undefined) => {
-        this.setState({
-            min_inventory: val
-        })
-    }
-
-    private setMaxInventory = (val: number | undefined) => {
-        this.setState({
-            max_inventory: val
         })
     }
 
@@ -152,30 +174,50 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
 
     onSearch = () => {
         // console.log('onSearch', this.state);
+        this.props.onSearch();
     }
 
-    // handleMenuClick = (e: ClickParam) => {
-    //     console.log('handleMenuClick', e)
-    //     this.props.toggleUpdateDialog(true, e.key)
-    // }
+    refreshPage = () => {
+        this.props.onSearch({}, true);
+    }
+
+    getGoodsOnsale = () => {
+        this.props.getGoodsOnsale();
+    }
+
+    getGoodsDelete = () => {
+        this.props.getGoodsDelete();
+    }
 
     render() {
+
+        const {
+            isEditing, 
+            onsaleLoading, 
+            deleteLoading,
+            searchLoading,
+            allCatagoryList,
+        } = this.props;
+
         const {
             task_number,
             store_id,
-            scm_goods_sn,
+            commodity_id,
+            inventory_status,
+            version_status,
             first_catagory,
             second_catagory,
             third_catagory,
-            sale_status
+            min_sku,
+            max_sku,
+            min_price,
+            max_price,
+            min_sale,
+            max_sale,
+            min_comment,
+            secondCatagoryList,
+            thirdCatagoryList
         } = this.state
-
-        // const menu = (
-        //     <Menu onClick={this.handleMenuClick}>
-        //       <Menu.Item key="weight">修改重量</Menu.Item>
-        //       <Menu.Item key="price">修改价格</Menu.Item>
-        //     </Menu>
-        // );
 
         return (
             <div className="local-search">
@@ -204,31 +246,33 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <Input 
                         className="local-search-item-input" 
                         placeholder="请输入Commodity ID"
-                        name="scm_goods_sn"
-                        value={scm_goods_sn}
-                        onChange={this.setScmGoodsSn}
+                        name="commodity_id"
+                        value={commodity_id}
+                        onChange={this.setcommodity_id}
                     />
                 </div>
                 <div className="local-search-item">
                     <span className="local-search-label">库存</span>
                     <Select 
                         className="local-search-item-select"
-                        value=""
+                        value={inventory_status}
+                        onChange={this.setInventoryStatus}
                     >
                         <Option value="">全部</Option>
-                        <Option value="0">不可销售</Option>
-                        <Option value="1">可销售</Option>
+                        <Option value="1">不可销售</Option>
+                        <Option value="2">可销售</Option>
                     </Select>
                 </div>
                 <div className="local-search-item">
                     <span className="local-search-label">版本更新</span>
                     <Select 
                         className="local-search-item-select"
-                        value=""
+                        value={version_status}
+                        onChange={this.setVersionStatus}
                     >
                         <Option value="">全部</Option>
-                        <Option value="1">有新版本更新</Option>
-                        <Option value="0">无新版本更新</Option>
+                        <Option value="2">有新版本更新</Option>
+                        <Option value="1">无新版本更新</Option>
                     </Select>
                 </div>
                 <div className="local-search-item">
@@ -239,7 +283,13 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onChange={this.setFirstCatagory}
                     >
                         <Option value="">全部</Option>
-                        <Option value="1">xxx</Option>
+                        {/* <Option value="1">xxx</Option> */}
+                        {
+                            allCatagoryList.map(item => (
+                                <Option key={item.id + ''} value={item.id + ''}>{item.name}</Option>
+                            ))
+                        }
+                        
                     </Select>
                 </div>
                 <div className="local-search-item">
@@ -250,7 +300,11 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onChange={this.setSecondCatagory}
                     >
                         <Option value="">全部</Option>
-                        <Option value="1">xxx</Option>
+                        {
+                            secondCatagoryList.map(item => (
+                                <Option key={item.id + ''} value={item.id + ''}>{item.name}</Option>
+                            ))
+                        }
                     </Select>
                 </div>
                 <div className="local-search-item">
@@ -261,43 +315,27 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onChange={this.setThirdCatagory}
                     >
                         <Option value="">全部</Option>
-                        <Option value="1">xxx</Option>
+                        {
+                            thirdCatagoryList.map(item => (
+                                <Option key={item.id + ''} value={item.id + ''}>{item.name}</Option>
+                            ))
+                        }
                     </Select>
                 </div>
-                {/* <div className="local-search-item">
-                    <span className="local-search-label">上架状态</span>
-                    <Select 
-                        className="local-search-item-select" 
-                        value={sale_status}
-                        onChange={this.setSaleStatus}
-                    >
-                        <Option value="">全部</Option>
-                        <Option value="1">是</Option>
-                        <Option value="0">否</Option>
-                    </Select>
-                </div> */}
-                
-                {/* <div className="local-search-item">
-                    <span className="local-search-label">库存</span>
-                    <InputNumber 
-                        className="local-search-item-input-min"
-                        onChange={this.setMinInventory} 
-                    />
-                    <span className="local-search-item-join">-</span>
-                    <InputNumber 
-                        className="local-search-item-input-min" 
-                        onChange={this.setMaxInventory}
-                    />
-                </div> */}
+               
                 <div className="local-search-item">
                     <span className="local-search-label">sku数量</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={min_sku}
                         onChange={this.setMinSku}
                     />
                     <span className="local-search-item-join">-</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={max_sku}
                         onChange={this.setMaxSku}
                     />
                 </div>
@@ -305,11 +343,15 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <span className="local-search-label">价格范围（￥）</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={min_price}
                         onChange={this.setMinPrice}
                     />
                     <span className="local-search-item-join">-</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={max_price}
                         onChange={this.setMaxPrice}
                     />
                 </div>
@@ -317,11 +359,15 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <span className="local-search-label">销量</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={min_sale}
                         onChange={this.setMinSale}
                     />
                     <span className="local-search-item-join">-</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={max_sale}
                         onChange={this.setMaxSale}
                     />
                 </div>
@@ -329,6 +375,8 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <span className="local-search-label">评论数量>=</span>
                     <InputNumber 
                         className="local-search-item-input-min"
+                        min={0}
+                        value={min_comment}
                         onChange={this.setMinComment}
                     />
                 </div>
@@ -336,38 +384,64 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <Button
                         type="primary" 
                         className="local-search-item-btn"
+                        loading={searchLoading}
                         onClick={this.onSearch}
                     >查询</Button>
                 </div>
                 <div className="local-search-item">
-                    <Button type="primary" className="local-search-item-btn">一键上架</Button>
-                </div>
-                {/* <div className="local-search-item">
-                    <Dropdown 
+                    <Button 
+                        type="primary" 
                         className="local-search-item-btn"
-                        placement="bottomCenter"
-                        overlay={menu}
-                    >
-                        <Button>
-                            批量编辑 <Icon type="down" />
-                        </Button>
-                    </Dropdown>
-                </div> */}
-                <div className="local-search-item">
-                    <Button className="local-search-item-btn">导入商品</Button>
+                        loading={onsaleLoading}
+                        onClick={this.getGoodsOnsale}
+                    >一键上架</Button>
                 </div>
                 <div className="local-search-item">
-                    <Button className="local-search-item-btn">删除</Button>
+                    {
+                        isEditing ? (
+                            <>
+                                <Button 
+                                    className="local-search-item-small-btn"
+                                    size="small"
+                                    onClick={() => this.props.toggleEdit(false)}
+                                >取消</Button>
+                                <Button
+                                    type="primary"
+                                    className="local-search-item-small-btn"
+                                    size="small"
+                                    onClick={() => this.props.toggleEdit(true)}
+                                >保存</Button>
+                            </>
+                            
+                        ) : (
+                            <Button 
+                                className="local-search-item-btn"
+                                onClick={this.props.setEditGoodsList}
+                            >编辑</Button>
+                        )
+
+                    }
+                    
                 </div>
                 <div className="local-search-item">
-                    <Button className="local-search-item-btn">刷新</Button>
+                    <Button 
+                        className="local-search-item-btn"
+                        loading={deleteLoading}
+                        onClick={this.getGoodsDelete}
+                    >删除</Button>
                 </div>
                 <div className="local-search-item">
-                    <Button className="local-search-item-btn">导出至Excel</Button>
+                    <Button 
+                        className="local-search-item-btn"
+                        onClick={this.refreshPage}
+                    >刷新</Button>
                 </div>
-                {/* <div className="local-search-item">
-                    <Button className="local-search-item-btn" style={{width: 160}}>下载商品导入模板</Button>
-                </div> */}
+                <div className="local-search-item">
+                    <Button 
+                        className="local-search-item-btn"
+                        onClick={() => this.props.toggleExcelDialog(true)}
+                    >导出至Excel</Button>
+                </div>
             </div>
         )
     }
