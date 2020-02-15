@@ -19,6 +19,8 @@ enum ApiPathEnum {
     getCatagoryList="/api/v1/catagory/list",
     getGoodsVersion="/api/v1/goods/version",
     postGoodsVersionExport="/api/v1/goods/version_export",
+    postGoodsApplyVersion="/api/v1/goods/apply_version",
+    postGoodsIgnoreVersion="/api/v1/goods/ignore_version"
     
 }
 

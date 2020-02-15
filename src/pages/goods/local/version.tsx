@@ -9,7 +9,9 @@ import '../../../styles/goods-version.less';
 
 import {
     getGoodsVersion,
-    postGoodsVersionExport
+    postGoodsVersionExport,
+    postGoodsApplyVersion,
+    postGoodsIgnoreVersion
 } from '@/services/goods';
 import { formatDate } from '@/utils/date'
 
@@ -204,6 +206,36 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         });
     }
 
+    // 操作版本
+    operationVersion = (product_id: number, type: string) => {
+        type === 'apply' ? this.postGoodsApplyVersion(product_id) : this.postGoodsIgnoreVersion(product_id);
+    }
+
+    // 应用版本
+    postGoodsApplyVersion = (product_id: number) => {
+        postGoodsApplyVersion({
+            product_id: product_id + ''
+        }).then(res => {
+            message.success(`${product_id}应用成功`);
+            this.onSearch();
+        }).catch(err => {
+            message.error(`${product_id}应用失败`);
+        })
+    }
+
+    // 忽略版本
+    postGoodsIgnoreVersion = (product_id: number) => {
+        postGoodsApplyVersion({
+            product_id: product_id + ''
+        }).then(res => {
+            message.success(`${product_id}忽略成功`);
+            this.onSearch();
+        }).catch(err => {
+            message.success(`${product_id}忽略失败`);
+            this.onSearch();
+        })
+    }
+
     render() {
 
         const {
@@ -261,6 +293,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 <VersionTable
                     loading={loading} 
                     versionGoodsList={versionGoodsList}
+                    operationVersion={this.operationVersion}
                 />
             </div>
         )
