@@ -271,8 +271,8 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onChange={this.setVersionStatus}
                     >
                         <Option value="">全部</Option>
-                        <Option value="2">有新版本更新</Option>
-                        <Option value="1">无新版本更新</Option>
+                        <Option value="1">有新版本更新</Option>
+                        <Option value="2">无新版本更新</Option>
                     </Select>
                 </div>
                 <div className="local-search-item">
