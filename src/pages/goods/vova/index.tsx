@@ -6,14 +6,16 @@
 import React from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 import { Form } from '@/components/Form';
-import SearchCondition from '@/pages/goods/vova/components/SearchCondition';
-import DataStatusUpdate from '@/pages/goods/vova/components/DataStatusUpdate';
-import GoodsTable from '@/pages/goods/vova/components/GoodsTable';
-import { PropertyItem } from '@/pages/goods/vova/components/DataStatusUpdate';
-import { SelectOptionsItem } from '@/pages/goods/vova/components/SearchCondition';
+import SearchCondition from './components/SearchCondition';
+import DataStatusUpdate from './components/DataStatusUpdate';
+import GoodsTable from './components/GoodsTable';
+import { PropertyItem } from './components/DataStatusUpdate';
+import { SelectOptionsItem } from './components/SearchCondition';
 import { getVovaGoodsList, getVovaChangedProperties, getSearchConditionOptions } from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
+import { Modal } from 'antd';
+import ProductEditModal from './components/ProductEditModal';
 
 declare interface IPros extends FormComponentProps<any> {
 
@@ -117,7 +119,14 @@ class _Index extends Form.BaseForm<IPros, IState> {
 
     // 查看详情弹窗
     toggleDetailDialog = (row: IRowDataItem) => {
-
+        Modal.info({
+            className: 'product-modal modal-empty',
+            icon: null,
+            title: '查看/编辑商品详情',
+            cancelText: null,
+            okText: null,
+            content: <ProductEditModal product_id={row.product_id} channel="vova" />,
+        });
     }
 
     setPage = (page: number) => {
@@ -140,7 +149,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
                 <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
                     <SearchCondition form={form} onSearch={this.onSearch} searchOptions={searchOptions} />
                     <DataStatusUpdate propertyList={propertyList} />
-                    <GoodsTable 
+                    <GoodsTable
                         goodsList={goodsList}
                         allCount={allCount}
                         toggleDetailDialog={this.toggleDetailDialog}

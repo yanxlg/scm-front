@@ -21,3 +21,10 @@ export enum TaskStatus{
     Executed,
     Failed
 }
+
+
+export enum TaskGoodsArea {
+    All,
+    AllOnShelves,
+    HasSales
+}

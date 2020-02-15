@@ -1,5 +1,3 @@
-
-
 enum ApiPathEnum {
     Login = '/api/login/login',
     GetOrderList="/api/order/list",
@@ -9,6 +7,8 @@ enum ApiPathEnum {
     CancelOrder="/api/order/cancelPurchaseOrder",
     ModifyMark="/api/order/modifyRemark",
     ManualCreatePurchaseOrder="/api/order/manualCreatePurchaseOrder",
+
+
     // 商品中心相关接口
     getGoodsVersionList="/goodsVersion/list",
 
@@ -20,14 +20,20 @@ enum ApiPathEnum {
     postVovaGoodsListExport="/api/v1/vova_goods/exports",
 
     // 任务中心相关接口
+    QueryTaskList="/api/v1/task/list",
+    AddPDDHotTask="/api/v1/task/spider/pdd_hotsale",
+    AddPDDURLTask="/api/v1/task/spider/url",
+    DeleteTask = "/api/v1/task/delete",
+    QueryTaskDetail="/api/v1/task/detail",
+    QueryPDDCategory = "/api/v1/spider/pdd_category",
+    QueryPDDSortCondition = "/api/v1/spider/pdd_sort_type",
+    QueryTaskLog="/api/v1/task/exec_log",
 
-    QueryTaskList="/v1/task/list",
-    AddPDDHotTask="/v1/task/spider/pdd_hotsale",
-    AddPDDURLTask="/v1/task/spider/url",
-    DeleteTask = "/v1/task/delete",
-    QueryTaskDetail="/v1/task/detail",
+    QueryGoodsVersion = "/api/v1/vova_goods/version",
+    QueryGoodsDetail="/api/v1/vova_goods/detail",
+    EditGoodsDetail="/api/v1/vova_goods/edits",
 
-    // 商品中心相关接口
+
     getGoodsList="/api/v1/goods/list",
     postGoodsExports="/api/v1/goods/exports",
     putGoodsPicEdit="/api/v1/goods/pic/edit",
@@ -42,6 +48,8 @@ enum ApiPathEnum {
     postGoodsApplyVersion="/api/v1/goods/apply_version",
     postGoodsIgnoreVersion="/api/v1/goods/ignore_version",
 
+
+    ExportVovaGoodsVersion="/api/v1/vova_goods/version_exports"
 }
 
 export { ApiPathEnum };

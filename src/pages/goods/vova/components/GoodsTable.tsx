@@ -170,7 +170,7 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
             }
         })
     }
-    
+
     // 下架操作
     offShelves = (row: IRowDataItem) => {
         putVovaGoodsSales({

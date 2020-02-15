@@ -11,9 +11,9 @@ import {
     getGoodsVersion,
     postGoodsVersionExport,
     postGoodsApplyVersion,
-    postGoodsIgnoreVersion
+    postGoodsIgnoreVersion,
 } from '@/services/goods';
-import { formatDate } from '@/utils/date'
+import { formatDate } from '@/utils/date';
 
 const { RangePicker } = DatePicker;
 
@@ -65,7 +65,7 @@ declare interface IGoodsVersionItemBase {
 }
 
 declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
-    sku: ISkuItem[]
+    sku: ISkuItem[];
 }
 
 export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {
@@ -95,8 +95,7 @@ declare interface IVersionState {
 }
 
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
-
-    id: number = 0
+    id: number = 0;
 
     constructor(props: IVersionProps) {
         super(props);
@@ -115,9 +114,9 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 collection_time: '',
                 category_one_level: '',
                 category_two_level: '',
-                category_tree_level: ''
+                category_tree_level: '',
             },
-            versionGoodsList: []
+            versionGoodsList: [],
         };
     }
 
@@ -130,28 +129,27 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     private onSearch = () => {
         const { start_time, end_time } = this.state;
         this.setState({
-            loading: true
-        })
+            loading: true,
+        });
         return getGoodsVersion({
             start_time,
             end_time,
-            commodity_id: this.id
-        }).then((res) => {
-            const { 
-                goods_version_list,
-                ...rest
-            } = res.data;
-            
-            this.setState({
-                versionGoodsList: this.addRowSpanData(goods_version_list),
-                currentInfo: rest
+            commodity_id: this.id,
+        })
+            .then(res => {
+                const { goods_version_list, ...rest } = res.data;
+
+                this.setState({
+                    versionGoodsList: this.addRowSpanData(goods_version_list),
+                    currentInfo: rest,
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
             });
-        }).finally(() => {
-            this.setState({
-                loading: false
-            });
-        });
-    }
+    };
 
     // 处理表格数据，用于合并单元格
     private addRowSpanData(list: IGoodsVersionItem[]): IGoodsVersionRowItem[] {
@@ -162,15 +160,15 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             sku.forEach((skuItem, skuIndex) => {
                 const retItem: IGoodsVersionRowItem = {
                     ...rest,
-                    ...skuItem
-                }
+                    ...skuItem,
+                };
                 if (index !== len - 1) {
                     const prev = list[index + 1];
                     const { sku: prevSku, ...prevRest } = prev;
                     retItem._prevVersion = {
                         ...prevRest,
-                        ...prevSku[skuIndex]
-                    }
+                        ...prevSku[skuIndex],
+                    };
                     // list[index + 1].sku[skuIndex];
                 }
                 if (skuIndex === 0) {
@@ -187,64 +185,65 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     private selectedDate = (dates: RangePickerValue) => {
         // console.log(dates[0].format('YYYY-MM-DD'), dates[1].format('YYYY-MM-DD'));
         if (dates[0] && dates[1]) {
-            this.setState({
-                start_time: dates[0] ? dates[0].format('YYYY-MM-DD') : '',
-                end_time: dates[1] ? dates[1].format('YYYY-MM-DD') : ''
-            }, () => {
-                this.onSearch();
-            })
+            this.setState(
+                {
+                    start_time: dates[0] ? dates[0].format('YYYY-MM-DD') : '',
+                    end_time: dates[1] ? dates[1].format('YYYY-MM-DD') : '',
+                },
+                () => {
+                    this.onSearch();
+                },
+            );
         }
-        
-    }
+    };
 
     // 生成表格
     downloadExcel = () => {
         postGoodsVersionExport({
-            commodity_id: this.id
+            commodity_id: this.id,
         }).catch(err => {
             message.error('下载表格失败');
         });
-    }
+    };
 
     // 操作版本
     operationVersion = (product_id: number, type: string) => {
-        type === 'apply' ? this.postGoodsApplyVersion(product_id) : this.postGoodsIgnoreVersion(product_id);
-    }
+        type === 'apply'
+            ? this.postGoodsApplyVersion(product_id)
+            : this.postGoodsIgnoreVersion(product_id);
+    };
 
     // 应用版本
     postGoodsApplyVersion = (product_id: number) => {
         postGoodsApplyVersion({
-            product_id: product_id + ''
-        }).then(res => {
-            message.success(`${product_id}应用成功`);
-            this.onSearch();
-        }).catch(err => {
-            message.error(`${product_id}应用失败`);
+            product_id: product_id + '',
         })
-    }
+            .then(res => {
+                message.success(`${product_id}应用成功`);
+                this.onSearch();
+            })
+            .catch(err => {
+                message.error(`${product_id}应用失败`);
+            });
+    };
 
     // 忽略版本
     postGoodsIgnoreVersion = (product_id: number) => {
         postGoodsApplyVersion({
-            product_id: product_id + ''
-        }).then(res => {
-            message.success(`${product_id}忽略成功`);
-            this.onSearch();
-        }).catch(err => {
-            message.success(`${product_id}忽略失败`);
-            this.onSearch();
+            product_id: product_id + '',
         })
-    }
+            .then(res => {
+                message.success(`${product_id}忽略成功`);
+                this.onSearch();
+            })
+            .catch(err => {
+                message.success(`${product_id}忽略失败`);
+                this.onSearch();
+            });
+    };
 
     render() {
-
-        const {
-            loading,
-            start_time,
-            end_time,
-            currentInfo,
-            versionGoodsList
-        } = this.state;
+        const { loading, start_time, end_time, currentInfo, versionGoodsList } = this.state;
 
         const {
             goods_title,
@@ -256,7 +255,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             collection_time,
             category_one_level,
             category_two_level,
-            category_tree_level
+            category_tree_level,
         } = currentInfo;
 
         return (
@@ -265,7 +264,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     <img src={main_image_url} />
                     <div className="info">
                         <p>
-                            商品标题：{goods_title}<a href={goods_url} target="_blank">【查看源商品】</a>
+                            商品标题：{goods_title}
+                            <a href={goods_url} target="_blank">
+                                【查看源商品】
+                            </a>
                         </p>
                         <p>
                             <span>中台商品ID：{goods_id}</span>
@@ -274,16 +276,21 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                             <span>采集时间：{collection_time}</span>
                         </p>
                         <p>
-                            <span>类目：{category_one_level}/{category_two_level}/{category_tree_level}</span>
+                            <span>
+                                类目：{category_one_level}/{category_two_level}/
+                                {category_tree_level}
+                            </span>
                         </p>
                     </div>
                 </div>
                 <div className="goods-version-filter">
                     <div className="left-item">
                         <span className="">商品调价跟踪</span>
-                        <RangePicker 
+                        <RangePicker
                             className="date"
-                            defaultValue={start_time ? [moment(start_time), moment(end_time)] : [null, null]}
+                            defaultValue={
+                                start_time ? [moment(start_time), moment(end_time)] : [null, null]
+                            }
                             onChange={this.selectedDate}
                         />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
@@ -291,12 +298,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     {/* <Pagination size="small" total={50} showSizeChanger={true} showQuickJumper={true} /> */}
                 </div>
                 <VersionTable
-                    loading={loading} 
+                    loading={loading}
                     versionGoodsList={versionGoodsList}
                     operationVersion={this.operationVersion}
                 />
             </div>
-        )
+        );
     }
 }
 
