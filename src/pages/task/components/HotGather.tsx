@@ -221,7 +221,7 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                               ? second
                               : day * 60 * 60 * 24,
                   }),
-            task_end_time: task_end_time?.unix() ?? undefined,
+            task_end_time: task_type === TaskType.interval?task_end_time?.unix() ?? undefined:undefined,
         };
     }
 
