@@ -12,7 +12,6 @@ import {
 import '@/styles/setting.less';
 import '@/styles/form.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
 import { addPddHotTask } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import { numberFormatter } from '@/utils/common';
@@ -85,7 +84,10 @@ class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
                 Modal.info({
                     content:<GatherSuccessModal taskId={task_id} onClick={()=>{
                         Modal.destroyAll();
-                        alert("任务详情");
+
+
+
+
                     }}/>,
                     className:"modal-empty",
                     icon:null,
