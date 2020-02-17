@@ -1,6 +1,5 @@
 import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
-import { IApiParams, IFormData } from '@/pages/goods/vova/components/VersionSearch';
 
 export declare interface IFilterParams {
     page: number;

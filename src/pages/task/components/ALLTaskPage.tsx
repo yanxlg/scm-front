@@ -8,7 +8,7 @@ import '@/styles/table.less';
 import { getTaskList, deleteTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskRangeList, TaskStatus, TaskStatusList, TaskType, TaskTypeList } from '@/enums/ConfigEnum';
+import { TaskRangeList, TaskStatus, TaskStatusList } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
@@ -72,7 +72,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page_number = this.state.pageNumber,
             searchLoading = false,
         } = params;
-        const values = this.searchRef.current!.getValues();
+        const values = this.searchRef.current!.getFieldsValue();
         this.setState({
             dataLoading: true,
             searchLoading,

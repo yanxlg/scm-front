@@ -4,14 +4,8 @@ import { Button, DatePicker, Input } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import '@/styles/config.less';
 import { BindAll } from 'lodash-decorators';
-import { Moment } from 'moment';
 import { transEndDate, transStartDate } from '@/utils/date';
 
-export declare interface IFormData {
-    start_time?: Moment;
-    end_time?: Moment;
-    virtual_id?: string;
-}
 
 export declare interface IApiParams{
     start_time?: number;
@@ -19,7 +13,7 @@ export declare interface IApiParams{
     virtual_id?: string;
 }
 
-declare interface IVersionSearchProps extends FormComponentProps<IFormData> {
+declare interface IVersionSearchProps extends FormComponentProps<IApiParams> {
     onSearch: (params: IApiParams) => Promise<any>;
     onExport: (params: IApiParams) => Promise<any>;
     onActive: (params: IApiParams) => Promise<any>;

@@ -3,19 +3,21 @@ import { Form } from '@/components/Form';
 import { DatePicker, Input, Select } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import '@/styles/config.less';
+import '@/styles/task.less';
 import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import { Bind } from 'lodash-decorators';
-import moment, { Moment } from 'moment';
+import { Moment } from 'moment';
+import { transEndDate, transStartDate } from '@/utils/date';
 
 export declare interface IFormData {
     task_id?: string;
     task_name?: string;
     task_range?: string;
     task_status?: string;
-    task_begin_time?: string;
-    task_end_time?: string;
-    task_create_time1?: string;
-    task_create_time2?: string;
+    task_begin_time?: number;
+    task_end_time?: number;
+    task_create_time1?: number;
+    task_create_time2?: number;
 }
 
 declare interface ITaskSearchProps extends FormComponentProps<IFormData> {
@@ -64,6 +66,19 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
         }
         return startTime.valueOf() > endTime.valueOf();
     }
+
+    @Bind
+    public getFieldsValue(fieldsName?:string[]){
+        const {form} = this.props;
+        const {task_begin_time,task_end_time,task_create_time1,task_create_time2,...extra} = form.getFieldsValue(fieldsName);
+        return {
+            ...extra,
+            task_begin_time:transStartDate(task_begin_time),
+            task_end_time:transEndDate(task_end_time),
+            task_create_time1:transStartDate(task_create_time1),
+            task_create_time2:transEndDate(task_create_time2)
+        }
+    }
     render() {
         const { form, task_status } = this.props;
 
@@ -81,7 +96,7 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
         return (
             <React.Fragment>
                 <Form className="config-card" layout="inline" autoComplete={'off'}>
-                    <Form.Item form={form} name="task_id" label="任务&emsp;ID">
+                    <Form.Item form={form} name="task_id" label={<span>任务<span className="task-justify-1">ID</span></span>}>
                         <Input className="input-equal-date" />
                     </Form.Item>
                     <Form.Item form={form} name="task_name" label="任务名称">
@@ -111,14 +126,14 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
                             label="开始时间"
                         >
                             <DatePicker
-                                className="input-small"
+                                className="picker-small"
                                 disabledDate={this.disabledStartDate}
                             />
                         </Form.Item>
                         <span className="ant-col ant-form-item-label config-colon">-</span>
                         <Form.Item form={form} name="task_end_time">
                             <DatePicker
-                                className="input-small"
+                                className="picker-small"
                                 disabledDate={this.disabledEndDate}
                             />
                         </Form.Item>
@@ -131,14 +146,14 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
                             label="创建时间"
                         >
                             <DatePicker
-                                className="input-small"
+                                className="picker-small"
                                 disabledDate={this.disabledCreateStartDate}
                             />
                         </Form.Item>
                         <span className="ant-col ant-form-item-label config-colon">-</span>
                         <Form.Item form={form} name="task_create_time2">
                             <DatePicker
-                                className="input-small"
+                                className="picker-small"
                                 disabledDate={this.disabledCreateEndDate}
                             />
                         </Form.Item>
