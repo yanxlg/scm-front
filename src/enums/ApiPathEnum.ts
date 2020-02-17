@@ -51,6 +51,10 @@ enum ApiPathEnum {
 
     ExportVovaGoodsVersion="/api/v1/vova_goods/version_exports",
     ActiveVovaGoodsVersion="/api/v1/vova_goods/apply_version",
+
+    // 订单管理
+    getProductOrderList="/v1/order/list",
+    getOrderGoodsDetail="/v1/order/goods_detail"
 }
 
 export { ApiPathEnum };
