@@ -256,7 +256,12 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                 taskId={task_id}
                                 onClick={() => {
                                     Modal.destroyAll();
-                                    alert('任务详情');
+                                    Modal.info({
+                                        content: <HotGather taskId={task_id} />,
+                                        className: 'modal-empty config-modal-hot',
+                                        icon: null,
+                                        maskClosable: true,
+                                    });
                                 }}
                             />
                         ),

@@ -168,7 +168,12 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                 taskId={task_id}
                                 onClick={() => {
                                     Modal.destroyAll();
-                                    alert('任务详情');
+                                    Modal.info({
+                                        content: <URLGather taskId={task_id} />,
+                                        className: 'modal-empty config-modal-hot',
+                                        icon: null,
+                                        maskClosable: true,
+                                    });
                                 }}
                             />
                         ),

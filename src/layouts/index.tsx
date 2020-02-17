@@ -2,7 +2,8 @@ import React from 'react';
 import BasicLayout from './BasicLayout';
 
 export default function(props:any) {
-    if (props.location.pathname === '/login') {
+    const pathname = props.location.pathname;
+    if (pathname === '/login' || pathname === "/404" || pathname === "/500") {
         return props.children;
     }
     return (
