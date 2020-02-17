@@ -89,13 +89,25 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
 
     // 选中一级类目
     onLevelOneChange = value => {
-        const { searchOptions } = this.props;
-        const levelTwoOptions = searchOptions.filter(item => {
-            return item.id === value;
-        })[0].children as SelectOptionsItem;
-        this.setState({
-            levelTwoOptions: levelTwoOptions
-        });
+        if (value) {
+            const { searchOptions } = this.props;
+            const levelTwoOptions = searchOptions.filter(item => {
+                return item.id === value;
+            })[0].children as SelectOptionsItem;
+            this.setState({
+                levelTwoOptions: levelTwoOptions
+            });
+        } else {
+            this.setState({
+                levelTwoOptions: []
+            });
+            this.props.form.setFieldsValue({
+                level_two_category: ''
+              });
+        }
+        
+        
+        
     }
 
     validateEndTime = (current, type) => {
@@ -170,8 +182,9 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_one_category" label="一级类目">
+                    <Form.Item validateTrigger={'onBlur'} form={form} initialValue="" name="level_one_category" label="一级类目">
                         <Select className="select-default" onChange={this.onLevelOneChange}>
+                            <Option value="">全部</Option>
                             {
                                 searchOptions.map(item => (
                                     <Option value={item.id}>{item.name}</Option>
@@ -179,8 +192,9 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_two_category" label="二级类目">
+                    <Form.Item validateTrigger={'onBlur'} initialValue="" form={form} name="level_two_category" label="二级类目">
                         <Select className="select-default">
+                            <Option value="">全部</Option>
                             {
                                 levelTwoOptions.map(item => (
                                     <Option value={item.id}>{item.name}</Option>

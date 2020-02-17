@@ -127,7 +127,7 @@ declare interface IIndexState {
     editGoodsList: IRowDataItem[];
 }
 
-const pageSizeOptions = ['30', '50', '100', '200'];
+const pageSizeOptions = ['50', '100', '500', '1000'];
 
 type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
@@ -149,7 +149,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             searchLoading: false,
             isEditing: false,
             page: 1,
-            page_count: 30,
+            page_count: 50,
             allCount: 0,
             activeproduct_id: '',
             goodsList: [],

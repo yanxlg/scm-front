@@ -17,7 +17,7 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
         super(props);
         this.state = {
             page: 1,
-            pageCount: 10,
+            pageCount: 50,
         };
     }
 
@@ -214,8 +214,8 @@ export default class GoodsTable extends PureComponent<GoodsTableProps> {
                     dataSource={goodsList}
                     scroll={{ x: true }}
                     pagination={{
-                        pageSize: pageCount || 10,
-                        pageSizeOptions: ['10', '50', '100', '200', '500', '1000', '10000'],
+                        pageSize: pageCount || 50,
+                        pageSizeOptions: ['50', '100', '500', '1000'],
                         onShowSizeChange: (current: number, size: number) => {
                             this.onSizeChange(current, size);
                         },
