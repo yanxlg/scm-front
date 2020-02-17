@@ -6,6 +6,7 @@ import { Form } from '@/components/Form';
 declare interface SdProps extends FormComponentProps<any> {
     searchOptions: SelectOptionsItem[];
     onSearch: Function;
+    toggleExcelDialog: Function;
 }
 
 declare interface SdState {
@@ -23,7 +24,6 @@ export declare interface SelectOptionsItem {
     children?: SelectOptionsItem[];
 }
 
-const { RangePicker } = DatePicker;
 const Option = Select.Option;
 
 export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
@@ -83,8 +83,8 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
     }
 
     // 导出
-    onExport = () => {
-
+    toggleExcelDialog = () => {
+        this.props.toggleExcelDialog(true);
     }
 
     // 选中一级类目
@@ -92,21 +92,61 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
         const { searchOptions } = this.props;
         const levelTwoOptions = searchOptions.filter(item => {
             return item.id === value;
-        })[0].children;
+        })[0].children as SelectOptionsItem;
         this.setState({
             levelTwoOptions: levelTwoOptions
         });
     }
 
+    validateEndTime = (current, type) => {
+        
+    }
+
     render() {
         const { form, searchOptions } = this.props;
         const { volumes, goodsStatus, levelTwoOptions } = this.state;
+        const { onshelf_time_satrt, onshelf_time_end } = form.getFieldsValue();
         return (
             <Card className="condition-card">
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="time" label="时间">
-                        <RangePicker showTime={true} format="YYYY-MM-DD HH:mm:ss" />
-                    </Form.Item>
+                    <div className="inline-block">
+                        {/* <DatePicker
+                            showTime={true}
+                            format="YYYY-MM-DD HH:mm:ss"
+                        /> */}
+                        <Form.Item
+                            className="margin-none"
+                            form={form}
+                            name="onshelf_time_satrt"
+                            label="时间"
+                        >
+                            <DatePicker
+                                showTime={true}
+                                disabledDate={currentDate =>
+                                    currentDate
+                                        ? onshelf_time_end
+                                            ? currentDate.isAfter(onshelf_time_end)
+                                            : false
+                                        : false
+                                }
+                                className="picker-small"
+                            />
+                        </Form.Item>
+                        <span className="ant-col ant-form-item-label config-colon">-</span>
+                        <Form.Item form={form} name="onshelf_time_end">
+                            <DatePicker
+                                showTime={true}
+                                disabledDate={currentDate =>
+                                    currentDate
+                                        ? onshelf_time_satrt
+                                            ? currentDate.isBefore(onshelf_time_satrt)
+                                            : false
+                                        : false
+                                }
+                                className="picker-small"
+                            />
+                        </Form.Item>
+                    </div>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="commondity_id" label="Commodity_ID">
                         <Input className="input-default input-handler" />
                     </Form.Item>
@@ -118,7 +158,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     </Form.Item>
                 </div>
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="volume" label="销量">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="sales_volume" label="销量">
                         <Select className="select-default">
                             {
                                 volumes.map(item => (
@@ -130,7 +170,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="category_level_one" label="一级类目">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_one_category" label="一级类目">
                         <Select className="select-default" onChange={this.onLevelOneChange}>
                             {
                                 searchOptions.map(item => (
@@ -139,7 +179,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="category_level_two" label="二级类目">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_two_category" label="二级类目">
                         <Select className="select-default">
                             {
                                 levelTwoOptions.map(item => (
@@ -150,7 +190,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     </Form.Item>
                 </div>
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="goods_id" label="商品状态">
+                    <Form.Item validateTrigger={'onBlur'} form={form} name="product_status" label="商品状态">
                         <Select className="select-default">
                             {
                                 goodsStatus.map(item => (
@@ -162,7 +202,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     <Button type="primary" className="btn-default" onClick={this.onSearch}>
                         查询
                     </Button>
-                    <Button type="primary" className="btn-default" onClick={this.onExport}>
+                    <Button type="primary" className="btn-default" onClick={this.toggleExcelDialog}>
                         导出
                     </Button>
                 </div>

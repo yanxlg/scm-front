@@ -221,7 +221,7 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                               ? second
                               : day * 60 * 60 * 24,
                   }),
-            task_end_time: task_end_time?.unix() ?? undefined,
+            task_end_time: task_type === TaskType.interval?task_end_time?.unix() ?? undefined:undefined,
         };
     }
 
@@ -256,7 +256,12 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                 taskId={task_id}
                                 onClick={() => {
                                     Modal.destroyAll();
-                                    alert('任务详情');
+                                    Modal.info({
+                                        content: <HotGather taskId={task_id} />,
+                                        className: 'modal-empty config-modal-hot',
+                                        icon: null,
+                                        maskClosable: true,
+                                    });
                                 }}
                             />
                         ),

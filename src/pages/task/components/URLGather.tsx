@@ -11,6 +11,7 @@ import { numberFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { DatePickerWithTime } from '@/components/DatePickerWithTime';
 
 declare interface IFormData {
     urls?: string;
@@ -36,6 +37,9 @@ declare interface IHotGatherState {
     successTimes?: number;
     failTimes?: number;
 }
+
+
+
 
 class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
     constructor(props: IURLGatherProps) {
@@ -133,7 +137,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                               ? second
                               : day * 60 * 60 * 24,
                   }),
-            task_end_time: task_end_time?.unix() ?? undefined,
+            task_end_time: task_type === TaskType.interval?task_end_time?.unix() ?? undefined:undefined,
         };
     }
 
@@ -168,7 +172,12 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                 taskId={task_id}
                                 onClick={() => {
                                     Modal.destroyAll();
-                                    alert('任务详情');
+                                    Modal.info({
+                                        content: <URLGather taskId={task_id} />,
+                                        className: 'modal-empty config-modal-hot',
+                                        icon: null,
+                                        maskClosable: true,
+                                    });
                                 }}
                             />
                         ),
@@ -245,7 +254,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
         const { form, taskId } = this.props;
         const edit = taskId !== void 0;
         const formData = form.getFieldsValue();
-        const { task_type, taskIntervalType } = formData;
+        const { task_type, taskIntervalType , timerStartTime} = formData;
         const {
             gatherLoading,
             groundLoading,
@@ -326,6 +335,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                         label="开始时间"
                                         name="timerStartTime"
                                     >
+                                        {/*<DatePickerWithTime disabled={task_type !== TaskType.interval} disabledDate={this.disabledStartDate}/>*/}
                                         <DatePicker
                                             showTime={true}
                                             disabled={task_type !== TaskType.interval}

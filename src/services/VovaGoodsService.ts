@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 
-export declare interface IFilterParam {
+export declare interface IFilterParams {
     page: number;
     page_count: number;
     onshelf_time_satrt: number;
@@ -30,9 +30,10 @@ declare interface IExportData {
 }
 
 // 查询vova商品列表数据
-export async function getVovaGoodsList(params: IFilterParam) {
+export async function getVovaGoodsList(data: IFilterParams) {
     return request.post(ApiPathEnum.getVovaGoodsList, {
-        params: params
+        requestType: 'json',
+        data
     });
 }
 
@@ -53,8 +54,8 @@ export async function putVovaGoodsSales(data: goodsSalesParam) {
 }
 
 // 下载vova商品列表excel
-export async function postVovaGoodsListExport(data: IExportData) {
-    return request.post(ApiPathEnum.postGoodsVersionExport, {
+export async function postVovaGoodsListExport(data: IFilterParams) {
+    return request.post(ApiPathEnum.postVovaGoodsListExport, {
         data,
         responseType:"blob",
         parseResponse: false

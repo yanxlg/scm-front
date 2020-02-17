@@ -6,7 +6,7 @@ import '@/styles/form.less';
 import { Button, Icon, InputNumber, Modal } from 'antd';
 import { numberFormatter } from '@/utils/common';
 import { Bind } from 'lodash-decorators';
-import { editGoodsDetail, queryGoodsDetail } from '@/services/products';
+import { editGoodsDetail, queryGoodsDetail } from '@/services/vova';
 
 declare interface ISku {
     sku_name: string;

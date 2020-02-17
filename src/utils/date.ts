@@ -1,3 +1,5 @@
+import { Moment } from 'moment';
+
 export function formatDate(date: Date, fmt: string): string {
 	if (/(y+)/.test(fmt)) {
 		fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
@@ -20,4 +22,20 @@ export function formatDate(date: Date, fmt: string): string {
 
 function padLeftZero(str: string) {
 	return ('00' + str).substr(str.length);
+}
+
+
+export function transStartDate(moment?:Moment) {
+    // 日期转换成unix
+    return moment?moment.hour(0).minute(0).second(0).unix():moment;
+}
+
+
+export function transEndDate(moment?:Moment) {
+    return moment?moment.add(1,'d').hour(0).minute(0).second(0).unix():moment;
+}
+
+
+function transApiDate(unix:number) {
+
 }
