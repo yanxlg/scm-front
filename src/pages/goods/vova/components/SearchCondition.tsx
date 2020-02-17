@@ -24,7 +24,6 @@ export declare interface SelectOptionsItem {
     children?: SelectOptionsItem[];
 }
 
-const { RangePicker } = DatePicker;
 const Option = Select.Option;
 
 export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
@@ -99,15 +98,55 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
         });
     }
 
+    validateEndTime = (current, type) => {
+        
+    }
+
     render() {
         const { form, searchOptions } = this.props;
         const { volumes, goodsStatus, levelTwoOptions } = this.state;
+        const { onshelf_time_satrt, onshelf_time_end } = form.getFieldsValue();
         return (
             <Card className="condition-card">
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="time" label="时间">
-                        <RangePicker showTime={true} format="YYYY-MM-DD HH:mm:ss" />
-                    </Form.Item>
+                    <div className="inline-block">
+                        {/* <DatePicker
+                            showTime={true}
+                            format="YYYY-MM-DD HH:mm:ss"
+                        /> */}
+                        <Form.Item
+                            className="margin-none"
+                            form={form}
+                            name="onshelf_time_satrt"
+                            label="时间"
+                        >
+                            <DatePicker
+                                showTime={true}
+                                disabledDate={currentDate =>
+                                    currentDate
+                                        ? onshelf_time_end
+                                            ? currentDate.isAfter(onshelf_time_end)
+                                            : false
+                                        : false
+                                }
+                                className="picker-small"
+                            />
+                        </Form.Item>
+                        <span className="ant-col ant-form-item-label config-colon">-</span>
+                        <Form.Item form={form} name="onshelf_time_end">
+                            <DatePicker
+                                showTime={true}
+                                disabledDate={currentDate =>
+                                    currentDate
+                                        ? onshelf_time_satrt
+                                            ? currentDate.isBefore(onshelf_time_satrt)
+                                            : false
+                                        : false
+                                }
+                                className="picker-small"
+                            />
+                        </Form.Item>
+                    </div>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="commondity_id" label="Commodity_ID">
                         <Input className="input-default input-handler" />
                     </Form.Item>

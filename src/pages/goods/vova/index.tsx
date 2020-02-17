@@ -107,10 +107,10 @@ class _Index extends Form.BaseForm<IPros, IState> {
                 page_count: size || pageCount || 10,
             };
         }
-        if (formData.time) {
+        if (formData.onshelf_time_satrt && formData.onshelf_time_end) {
             param = Object.assign(param, {
-                onshelf_time_satrt: parseInt(formData.time[0]._d.getTime() / 1000),
-                onshelf_time_end: parseInt(formData.time[1]._d.getTime() / 1000),
+                onshelf_time_satrt: parseInt(formData.onshelf_time_satrt._d.getTime() / 1000),
+                onshelf_time_end: parseInt(formData.onshelf_time_end._d.getTime() / 1000),
             });
         }
         param = Object.assign(param, {
@@ -156,10 +156,10 @@ class _Index extends Form.BaseForm<IPros, IState> {
                 page_count: pageCount || 10,
             };
         }
-        if (formData.time) {
+        if (formData.onshelf_time_satrt && formData.onshelf_time_end) {
             param = Object.assign(param, {
-                onshelf_time_satrt: parseInt(formData.time[0]._d.getTime() / 1000),
-                onshelf_time_end: parseInt(formData.time[1]._d.getTime() / 1000),
+                onshelf_time_satrt: parseInt(formData.onshelf_time_satrt._d.getTime() / 1000),
+                onshelf_time_end: parseInt(formData.onshelf_time_end._d.getTime() / 1000),
             });
         }
         param = Object.assign(param, {
