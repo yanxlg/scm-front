@@ -207,11 +207,12 @@ export async function exportVovaGoodsVersion(data?:IFormData) {
 
 
 
-export async function activeVovaGoodsVersion(product_id:number) {
+export async function activeVovaGoodsVersion(params:Array<{
+    virtual_id:number,
+    product_id:number
+}>) {
     return request.post(ApiPathEnum.ActiveVovaGoodsVersion,{
-        data:{
-            product_id
-        }
+        data:params
     });
 }
 

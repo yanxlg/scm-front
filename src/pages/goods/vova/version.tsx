@@ -87,7 +87,18 @@ class Version extends React.PureComponent<{}, IVersionState> {
     }
 
     private activeGoodsVersion(){
-        return activeVovaGoodsVersion().then(()=>{
+        const {selectedRowKeys,dataSet} = this.state;
+        let params:Array<{
+            virtual_id:number,
+            product_id:number
+        }>=[];
+        selectedRowKeys.forEach(product_id=>{
+            params.push({
+                product_id:product_id,
+                virtual_id:dataSet.find(item=>item.product_id===product_id)!.vova_virtual_id
+            })
+        });
+        return activeVovaGoodsVersion(params).then(()=>{
             message.success("应用新版本成功!");
         })
     }
