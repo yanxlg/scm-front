@@ -1,11 +1,10 @@
 import React from 'react';
-import VersionSearch, { IFormData } from '@/pages/goods/vova/components/VersionSearch';
+import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
 import { Button, Card, Checkbox, Divider, message, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnProps } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
-import { queryGoodsVersion } from '@/services/products';
-import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion } from '@/services/goods';
+import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion, queryGoodsVersion } from '@/services/vova';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -64,7 +63,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
         this.queryData();
     }
 
-    private queryData(params?: IFormData) {
+    private queryData(params?: IApiParams) {
         this.setState({
             dataLoading: true,
         });
@@ -82,7 +81,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
             });
     }
 
-    private exportGoodsVersion(params?: IFormData) {
+    private exportGoodsVersion(params?: IApiParams) {
         return exportVovaGoodsVersion(params);
     }
 

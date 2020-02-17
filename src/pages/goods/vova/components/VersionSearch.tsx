@@ -1,21 +1,28 @@
 import React from 'react';
 import { Form } from '@/components/Form';
-import { Button, DatePicker, Input, Select } from 'antd';
+import { Button, DatePicker, Input } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import '@/styles/config.less';
-import { Bind } from 'lodash-decorators';
+import { BindAll } from 'lodash-decorators';
 import { Moment } from 'moment';
+import { transEndDate, transStartDate } from '@/utils/date';
 
 export declare interface IFormData {
-    onshelf_time_satrt?: Moment;
-    onshelf_time_end?: Moment;
-    vova_virtual_id?: string;
+    start_time?: Moment;
+    end_time?: Moment;
+    virtual_id?: string;
+}
+
+export declare interface IApiParams{
+    start_time?: number;
+    end_time?: number;
+    virtual_id?: string;
 }
 
 declare interface IVersionSearchProps extends FormComponentProps<IFormData> {
-    onSearch: (params: IFormData) => Promise<any>;
-    onExport: (params: IFormData) => Promise<any>;
-    onActive: (params: IFormData) => Promise<any>;
+    onSearch: (params: IApiParams) => Promise<any>;
+    onExport: (params: IApiParams) => Promise<any>;
+    onActive: (params: IApiParams) => Promise<any>;
 }
 
 declare interface IVersionSearchState {
@@ -24,6 +31,8 @@ declare interface IVersionSearchState {
     activeLoading: boolean;
 }
 
+
+@BindAll()
 class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchState> {
     constructor(props: IVersionSearchProps) {
         super(props);
@@ -34,10 +43,9 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
         };
     }
 
-    @Bind
     private onSearch() {
-        const { onSearch, form } = this.props;
-        const values = form.getFieldsValue();
+        const { onSearch } = this.props;
+        const values = this.convertFromData();
         this.setState({
             searchLoading: true,
         });
@@ -48,10 +56,9 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
         });
     }
 
-    @Bind
     private onExport() {
-        const { onExport, form } = this.props;
-        const values = form.getFieldsValue();
+        const { onExport } = this.props;
+        const values = this.convertFromData();
         this.setState({
             exportLoading: true,
         });
@@ -62,10 +69,9 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
         });
     }
 
-    @Bind
     private onActive() {
-        const { onActive, form } = this.props;
-        const values = form.getFieldsValue();
+        const { onActive } = this.props;
+        const values = this.convertFromData();
         this.setState({
             activeLoading: true,
         });
@@ -76,19 +82,20 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
         });
     }
 
-    @Bind
-    private range(start: number, end: number) {
-        const result = [];
-        for (let i = start; i < end; i++) {
-            result.push(i);
+    private convertFromData(){
+        const {form} = this.props;
+        const {start_time,end_time,...extra} = form.getFieldsValue();
+        return {
+            ...extra,
+            start_time:transStartDate(start_time),
+            end_time:transEndDate(end_time)
         }
-        return result;
     }
 
     render() {
         const { form } = this.props;
         const { searchLoading, exportLoading, activeLoading } = this.state;
-        const { onshelf_time_satrt, onshelf_time_end } = form.getFieldsValue();
+        const { start_time, end_time } = form.getFieldsValue();
         return (
             <React.Fragment>
                 <Form layout="inline" autoComplete={'off'}>
@@ -96,14 +103,14 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                         <Form.Item
                             className="margin-none"
                             form={form}
-                            name="onshelf_time_satrt"
+                            name="start_time"
                             label="时间"
                         >
                             <DatePicker
                                 disabledDate={currentDate =>
                                     currentDate
-                                        ? onshelf_time_end
-                                            ? currentDate.isAfter(onshelf_time_end)
+                                        ? end_time
+                                            ? currentDate.isAfter(end_time)
                                             : false
                                         : false
                                 }
@@ -111,12 +118,12 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                             />
                         </Form.Item>
                         <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="onshelf_time_end">
+                        <Form.Item form={form} name="end_time">
                             <DatePicker
                                 disabledDate={currentDate =>
                                     currentDate
-                                        ? onshelf_time_satrt
-                                            ? currentDate.isBefore(onshelf_time_satrt)
+                                        ? start_time
+                                            ? currentDate.isBefore(start_time)
                                             : false
                                         : false
                                 }
@@ -124,7 +131,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                             />
                         </Form.Item>
                     </div>
-                    <Form.Item form={form} name="vova_virtual_id" label="虚拟ID">
+                    <Form.Item form={form} name="virtual_id" label="虚拟ID">
                         <Input className="input-default" />
                     </Form.Item>
                     <Button
