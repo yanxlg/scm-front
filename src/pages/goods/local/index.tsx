@@ -22,6 +22,7 @@ import {
     putGoodsEdit,
     IGoodsEditDataItem,
 } from '@/services/goods';
+import { strToNumber } from '@/utils/common'
 import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
@@ -207,12 +208,30 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             const {
                 secondCatagoryList,
                 thirdCatagoryList,
+                task_number,
+                store_id,
+                commodity_id,
+                inventory_status,
+                version_status,
+                first_catagory,
+                second_catagory,
+                third_catagory,
                 ...searhParams
             } = this.localSearchRef.state;
             if (!this.validateRange(searhParams)) {
                 return;
             }
-            params = Object.assign(params, searhParams);
+            // 转换数据格式
+            params = Object.assign(params, searhParams, {
+                inventory_status: strToNumber(inventory_status),
+                version_status: strToNumber(version_status),
+                first_catagory: strToNumber(first_catagory),
+                second_catagory: strToNumber(second_catagory),
+                third_catagory: strToNumber(third_catagory),
+                task_number: task_number.split(',').filter(item => item.trim()),
+                store_id: store_id.split(',').filter(item => item.trim()),
+                commodity_id: store_id.split(',').map(item => Number(item.trim())).filter(item => item),
+            });
         }
         if (searchData) {
             params = Object.assign(params, searchData);
