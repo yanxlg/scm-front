@@ -52,12 +52,13 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
     private queryDetail() {
         const { product_id, channel, form } = this.props;
         queryGoodsDetail({ product_id, channel }).then(({ data = {} }) => {
-            form.setFieldsValue({
-                sku_list: data.sku_list,
-            });
             this.setState({
                 loading: false,
                 ...data,
+            },()=>{
+                form.setFieldsValue({
+                    sku_list: data.sku_list,
+                });
             });
         });
     }
@@ -86,8 +87,7 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
     }
     render() {
         const { form } = this.props;
-        const { product_id, product_name, main_image, product_description } = this.state;
-        const sku_list = form.getFieldValue('sku_list') || [];
+        const { product_id, product_name, main_image, product_description,sku_list=[] } = this.state;
         return (
             <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
                 <button className="ant-modal-close block" onClick={this.onClose}>
@@ -106,16 +106,20 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                 </div>
                 <div className="form-item">
                     <label className="ant-form-item-label">商品主图：</label>
-                    <img src={main_image} className="product-modal-avatar" alt="avatar" />
+                    {
+                        main_image
+                            ?
+                            <img src={main_image} className="product-modal-avatar" alt="avatar" />:<div className="product-modal-avatar"/>
+                    }
                 </div>
                 {sku_list.map((sku: ISku, index: number) => {
                     return (
-                        <div className="form-item" key={sku.sku_name + index}>
-                            <div className="inline-block ant-form-item-label">
+                        <div className="form-item flex flex-align" key={sku.sku_name + index}>
+                            <div className="inline-block ant-form-item-label product-modal-item product-modal-name" title={sku.sku_name}>
                                 <label title="sku名称">sku名称</label>
                                 {sku.sku_name}
                             </div>
-                            <div className="inline-block ant-form-item-label">
+                            <div className="inline-block ant-form-item-label product-modal-item product-modal-avatar-wrap">
                                 <label title="对应图片">对应图片</label>
                                 <img
                                     src={sku.sku_image}
@@ -123,16 +127,18 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                                     alt="avatar"
                                 />
                             </div>
-                            <div className="inline-block ant-form-item-label">
+                            <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
                                 <label title="商品规格">商品规格</label>
-                                color:{sku.specs.color}
-                                size:{sku.specs.size}
+                                <div title={`color:${sku.specs?.color??""};size:${sku.specs?.size??""}`} className="product-modal-specs-ellipse">
+                                    color:{sku.specs?.color}<br/>
+                                    size:{sku.specs?.size}
+                                </div>
                             </div>
                             <Form.Item
-                                className="inline-block"
+                                className="inline-block product-modal-item"
                                 validateTrigger={'onBlur'}
                                 form={form}
-                                name="sku[index].price"
+                                name={`sku_list[${index}].price`}
                                 label="价格"
                             >
                                 <InputNumber
@@ -145,7 +151,7 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                                 className="inline-block"
                                 validateTrigger={'onBlur'}
                                 form={form}
-                                name="sku[index].freight"
+                                name={`sku_list[${index}].freight`}
                                 label="运费"
                             >
                                 <InputNumber
@@ -158,7 +164,7 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                                 className="inline-block"
                                 validateTrigger={'onBlur'}
                                 form={form}
-                                name="sku[index].storage"
+                                name={`sku_list[${index}].storage`}
                                 label="库存"
                             >
                                 <InputNumber
@@ -170,6 +176,7 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                         </div>
                     );
                 })}
+
                 <Button type="primary" className="float-right" onClick={this.onSubmit}>
                     确定
                 </Button>
