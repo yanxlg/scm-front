@@ -51,53 +51,36 @@ class DatePickerWithTime extends React.PureComponent<IDatePickerWithTimeProps,ID
         }
     }
 
-    private getCurrentHour(){
-
-    }
-
-    private getCurrentMinute(){
-
-    }
-
-    private getCurrentSecond(){
-
-    }
-
-    @Bind
-    private onOpenChange(open:boolean){
-        alert("111");
-        if(open){
-            const {minTime,maxTime} = this.props;
-            const minHour = minTime?.hour()??0;
-            const maxHour = maxTime?.hour()??23;
-            const now = moment();
-
-            const hour = this.state.hour||now.hour();
-            const minute = this.state.minute||now.minute();
-            const second = this.state.second||now.second();
-
-
-            return {
-                hourRange:range(0,minHour).concat(range(maxHour,23)),
-            }
-        }
-    }
     @Bind
     private onPanelChange(value:Moment|null,mode: DatePickerMode){
         if(mode === "time"){
             const {value} = this.props;
             const defaultOpenValue = moment();
             const currentValue = value||defaultOpenValue;
+            const copy = defaultOpenValue.clone();
             const hour = currentValue.hour();
             const minute = currentValue.minute();
-            const second = currentValue.second();
             const {minTime,maxTime} = this.props;
-            const minHour = minTime?.hour()??0;
-            const maxHour = maxTime?.hour()??23;
+
+            const minDate = minTime?.isAfter(copy)?minTime:copy;
+
+            const maxUnix = maxTime?.unix();
+
+            const minUnix = minDate?.unix();
+
+            const minHour = minUnix?Math.max(minUnix/3600 - copy.hour(0).minute(0).second(0).unix()/3600,0)-1:0;
+            const maxHour = maxUnix?Math.min(maxUnix/3600 - copy.hour(0).minute(0).second(0).unix()/3600,23):23;
+            const maxMinute = maxUnix?Math.min(maxUnix/60 - copy.hour(hour).minute(0).second(0).unix()/60,59):59;
+            const maxSecond = maxUnix?Math.min(maxUnix - copy.hour(hour).minute(minute).second(0).unix(),59):59;
+
+            const minMinute = minUnix?Math.max(minUnix/60 - copy.hour(hour).minute(0).second(0).unix()/60,0)-1:0;
+            const minSecond = minUnix?Math.max(minUnix - copy.hour(hour).minute(minute).second(0).unix(),0):0;
+
             this.setState({
                 defaultOpenValue:defaultOpenValue,
                 hourRange:range(0,Math.max(minHour,hour)).concat(range(maxHour,23)),
-                // minuteRange:range()
+                minuteRange:range(0,minMinute).concat(range(maxMinute,59)),
+                secondRange:range(0,minSecond).concat(range(maxSecond,59))
             })
         }
     }
@@ -105,9 +88,26 @@ class DatePickerWithTime extends React.PureComponent<IDatePickerWithTimeProps,ID
     @Bind
     private onChange(date: Moment|null, dateString: string){
         if(date){
-            // console.log(date);
+            const copy = date.clone();
+            const hour = date.hour();
+            const minute = date.minute();
+            const {minTime,maxTime} = this.props;
+            const {defaultOpenValue} = this.state;
+            const minDate = minTime?.isAfter(defaultOpenValue)?minTime:defaultOpenValue;
+            const maxUnix = maxTime?.unix();
+            const minUnix = minDate?.unix();
+            const minHour = minUnix?Math.max(minUnix/3600 - copy.hour(0).minute(0).second(0).unix()/3600,0)-1:0;
+            const maxHour = maxUnix?Math.min(maxUnix/3600 - copy.hour(0).minute(0).second(0).unix()/3600,23):23;
+            const maxMinute = maxUnix?Math.min(maxUnix/60 - copy.hour(hour).minute(0).second(0).unix()/60,59):59;
+            const maxSecond = maxUnix?Math.min(maxUnix - copy.hour(hour).minute(minute).second(0).unix(),59):59;
+            const minMinute = minUnix?Math.max(minUnix/60 - copy.hour(hour).minute(0).second(0).unix()/60,0)-1:0;
+            const minSecond = minUnix?Math.max(minUnix - copy.hour(hour).minute(minute).second(0).unix(),0):0;
+            this.setState({
+                hourRange:range(0,minHour).concat(range(maxHour,23)),
+                minuteRange:range(0,minMinute).concat(range(maxMinute,59)),
+                secondRange:range(0,minSecond).concat(range(maxSecond,59))
+            })
         }
-
         const { onChange } = this.props;
         if (onChange) {
             onChange(date, dateString);
@@ -120,11 +120,12 @@ class DatePickerWithTime extends React.PureComponent<IDatePickerWithTimeProps,ID
         return (
             <DatePicker {...this.props} showTime={{
                 defaultOpenValue:defaultOpenValue,
+                hideDisabledOptions:true
             }} disabledTime={(date)=>{
                 return {
                     disabledHours:()=>hourRange,
-                    disabledMinutes:()=>[],
-                    disabledSeconds:()=>[],
+                    disabledMinutes:()=>minuteRange,
+                    disabledSeconds:()=>secondRange,
                 }
             }} onChange={this.onChange} onPanelChange={this.onPanelChange}/>
         )
