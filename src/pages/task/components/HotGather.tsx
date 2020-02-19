@@ -30,6 +30,7 @@ import {
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import { numberFormatter } from '@/utils/common';
 import moment, { Moment } from 'moment';
+import { validateNull } from '@/utils/validate';
 
 export declare interface IFormData {
     range?: TaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -309,6 +310,50 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
         this.props.form.resetFields(['category_level_two']);
     }
 
+    @Bind
+    private checkMinSaleNum(rule:any,value:any,callback:any){
+        const {form} = this.props;
+        const { sales_volume_max } = form.getFieldsValue(["sales_volume_max"]);
+        if(!validateNull(sales_volume_max) && !validateNull(value) && Number(value) > Number(sales_volume_max)){
+            callback("最小销量不能大于最大销量");
+            return;
+        }
+        callback();
+    }
+
+    @Bind
+    private checkMaxSaleNum(rule:any,value:any,callback:any){
+        const {form} = this.props;
+        const { sales_volume_min } = form.getFieldsValue(["sales_volume_min"]);
+        if(!validateNull(sales_volume_min) && !validateNull(value) && Number(value) < Number(sales_volume_min)){
+            callback("最大销量不能小于最小销量");
+            return;
+        }
+        callback();
+    }
+
+    @Bind
+    private checkMinPrice(rule:any,value:any,callback:any){
+        const {form} = this.props;
+        const { price_max } = form.getFieldsValue(["price_max"]);
+        if(!validateNull(price_max) && !validateNull(value) && Number(value) > Number(price_max)){
+            callback("最小价格不能大于最大价格");
+            return;
+        }
+        callback();
+    }
+
+    @Bind
+    private checkMaxPrice(rule:any,value:any,callback:any){
+        const {form} = this.props;
+        const { price_min } = form.getFieldsValue(["price_min"]);
+        if(!validateNull(price_min) && !validateNull(value) && Number(value) < Number(price_min)){
+            callback("最大价格不能小于最小价格");
+            return;
+        }
+        callback();
+    }
+
     render() {
         const { form, taskId } = this.props;
         const edit = taskId !== void 0;
@@ -347,6 +392,10 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                         form={form}
                         name="task_name"
                         label="任务名称"
+                        rules={[{
+                            required:true,
+                            message:"请输入任务名称"
+                        }]}
                     >
                         <Input className="input-default" />
                     </Form.Item>
@@ -376,7 +425,7 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                         name="shopId"
                                         rules={[
                                             {
-                                                required: range === 'shop',
+                                                required: range === TaskRange.store,
                                                 message: '请输入店铺ID',
                                             },
                                         ]}
@@ -475,6 +524,9 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                     form={form}
                                     name="sales_volume_min"
                                     label="销&emsp;&emsp;量"
+                                    rules={[{
+                                        validator:this.checkMinSaleNum
+                                    }]}
                                 >
                                     <InputNumber
                                         min={0}
@@ -487,6 +539,9 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                     validateTrigger={'onBlur'}
                                     form={form}
                                     name="sales_volume_max"
+                                    rules={[{
+                                        validator:this.checkMaxSaleNum
+                                    }]}
                                 >
                                     <InputNumber
                                         min={0}
@@ -502,6 +557,9 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                     form={form}
                                     name="price_min"
                                     label="价格范围(￥)"
+                                    rules={[{
+                                        validator:this.checkMinPrice
+                                    }]}
                                 >
                                     <InputNumber
                                         min={0}
@@ -510,7 +568,14 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                     />
                                 </Form.Item>
                                 <span className="ant-col ant-form-item-label config-colon">-</span>
-                                <Form.Item validateTrigger={'onBlur'} form={form} name="price_max">
+                                <Form.Item
+                                    validateTrigger={'onBlur'}
+                                    form={form}
+                                    name="price_max"
+                                    rules={[{
+                                        validator:this.checkMaxPrice
+                                    }]}
+                                >
                                     <InputNumber
                                         min={0}
                                         className="input-small input-handler"
@@ -596,6 +661,10 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                         form={form}
                                         label="开始时间"
                                         name="timerStartTime"
+                                        rules={[{
+                                            required:task_type === TaskType.interval,
+                                            message:"请选择开始时间",
+                                        }]}
                                     >
                                         <DatePicker
                                             showTime={true}
@@ -608,6 +677,10 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                         form={form}
                                         label="结束时间"
                                         name="task_end_time"
+                                        rules={[{
+                                            required:task_type === TaskType.interval,
+                                            message:"请选择结束时间"
+                                        }]}
                                     >
                                         <DatePicker
                                             showTime={true}
@@ -629,6 +702,10 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                                     validateTrigger={'onBlur'}
                                                     form={form}
                                                     name="day"
+                                                    rules={[{
+                                                        required:task_type === TaskType.interval && taskIntervalType === TaskIntervalType.day,
+                                                        message:"请输入间隔天数"
+                                                    }]}
                                                 >
                                                     <InputNumber
                                                         min={0}
@@ -649,6 +726,10 @@ class _HotGather extends Form.BaseForm<IHotGatherProps, IHotGatherState> {
                                                     validateTrigger={'onBlur'}
                                                     form={form}
                                                     name="second"
+                                                    rules={[{
+                                                        required:task_type === TaskType.interval && taskIntervalType === TaskIntervalType.second,
+                                                        message:"请输入间隔秒数"
+                                                    }]}
                                                 >
                                                     <InputNumber
                                                         min={0}

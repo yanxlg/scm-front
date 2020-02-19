@@ -12,6 +12,7 @@ import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/ta
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { DatePickerWithTime } from '@/components/DatePickerWithTime';
+import { validateUrl } from '@/utils/validate';
 
 declare interface IFormData {
     urls?: string;
@@ -207,7 +208,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                         groundLoading: false,
                     });
                 });
-        });
+        }).catch(()=>{});
     }
 
     @Bind
@@ -250,6 +251,17 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
         return startTime.valueOf() > endValue || endValue < currentValue;
     }
 
+    @Bind
+    private checkUrl(type:any,value:any,callback:any){
+        const urls = stringifyText(value);
+        const urlList = urls.split(",");
+        if(urlList.find(url=>!validateUrl(url))){
+            callback("输入的URL不合法，请检查并输入正确的URL");
+            return;
+        }
+        callback();
+    }
+
     render() {
         const { form, taskId } = this.props;
         const edit = taskId !== void 0;
@@ -273,21 +285,35 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                         <div className="config-task-label">执行失败：{failTimes}次</div>
                     </React.Fragment>
                 )}
-                <Form layout="inline" autoComplete={'off'}>
+                <Form layout="inline" autoComplete={'off'} className="form-help-absolute">
                     <Form.Item
                         className="block form-item"
                         validateTrigger={'onBlur'}
                         form={form}
                         name="task_name"
                         label="任务名称"
+                        rules={[{
+                            required:true,
+                            message:"请输入任务名称"
+                        }]}
                     >
                         <Input className="input-default" />
                     </Form.Item>
                     <Form.Item
-                        className="config-card form-item-block"
+                        className="config-card form-item-block config-textarea-wrap"
                         validateTrigger={'onBlur'}
                         form={form}
                         name="urls"
+                        required={true}
+                        label={<span/>}
+                        colon={false}
+                        rules={[{
+                            required:true,
+                            whitespace:true,
+                            message:"请输入PDD商品详情链接"
+                        },{
+                            validator:this.checkUrl,
+                        }]}
                     >
                         <Input.TextArea
                             spellCheck={'false'}
@@ -330,10 +356,14 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                     </Radio>
                                     <Form.Item
                                         className="vertical-middle"
-                                        validateTrigger={'onBlur'}
                                         form={form}
                                         label="开始时间"
+                                        validateTrigger={'onChange'}
                                         name="timerStartTime"
+                                        rules={[{
+                                            required:task_type === TaskType.interval,
+                                            message:"请选择开始时间",
+                                        }]}
                                     >
                                         {/*<DatePickerWithTime disabled={task_type !== TaskType.interval} disabledDate={this.disabledStartDate} maxTime={task_end_time}/>*/}
                                         <DatePicker
@@ -344,10 +374,14 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                     </Form.Item>
                                     <Form.Item
                                         className="vertical-middle"
-                                        validateTrigger={'onBlur'}
+                                        validateTrigger={'onChange'}
                                         form={form}
                                         label="结束时间"
                                         name="task_end_time"
+                                        rules={[{
+                                            required:task_type === TaskType.interval,
+                                            message:"请选择结束时间"
+                                        }]}
                                     >
                                         <DatePicker
                                             showTime={true}
@@ -361,6 +395,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                         form={form}
                                         label="任务间隔"
                                         name="taskIntervalType"
+                                        required={task_type === TaskType.interval}
                                         initialValue={TaskIntervalType.day}
                                     >
                                         <Radio.Group disabled={task_type !== TaskType.interval}>
@@ -370,6 +405,10 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                                     validateTrigger={'onBlur'}
                                                     form={form}
                                                     name="day"
+                                                    rules={[{
+                                                        required:task_type === TaskType.interval && taskIntervalType === TaskIntervalType.day,
+                                                        message:"请输入间隔天数"
+                                                    }]}
                                                 >
                                                     <InputNumber
                                                         min={0}
@@ -390,6 +429,10 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                                                     validateTrigger={'onBlur'}
                                                     form={form}
                                                     name="second"
+                                                    rules={[{
+                                                        required:task_type === TaskType.interval && taskIntervalType === TaskIntervalType.second,
+                                                        message:"请输入间隔秒数"
+                                                    }]}
                                                 >
                                                     <InputNumber
                                                         min={0}
