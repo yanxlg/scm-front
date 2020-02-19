@@ -9,9 +9,9 @@ const Page:React.FC=()=>{
         useMemo(()=>{
             return (
                 <Result
-                    status="404"
-                    title="404"
-                    subTitle="抱歉，你访问的页面不存在。"
+                    status="403"
+                    title="403"
+                    subTitle="抱歉，你无权访问该页面。"
                     extra={<Button type="primary" onClick={goToHome}>返回首页</Button>}
                 />
             )

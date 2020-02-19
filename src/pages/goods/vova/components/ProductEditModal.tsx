@@ -12,8 +12,7 @@ declare interface ISku {
     sku_name: string;
     sku_image: string;
     specs: {
-        size: string;
-        color: string;
+        [key:string]:string;
     };
     price: string;
     freight: string;
@@ -113,6 +112,11 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                     }
                 </div>
                 {sku_list.map((sku: ISku, index: number) => {
+                    const specsChild =[];
+                    const {specs={}} = sku;
+                    for (let key in specs){
+                        specsChild.push(<div key={key}>{key}:{specs[key]}</div>)
+                    }
                     return (
                         <div className="form-item flex flex-align" key={sku.sku_name + index}>
                             <div className="inline-block ant-form-item-label product-modal-item product-modal-name" title={sku.sku_name}>
@@ -129,9 +133,10 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                             </div>
                             <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
                                 <label title="商品规格">商品规格</label>
-                                <div title={`color:${sku.specs?.color??""};size:${sku.specs?.size??""}`} className="product-modal-specs-ellipse">
-                                    color:{sku.specs?.color}<br/>
-                                    size:{sku.specs?.size}
+                                <div title={JSON.stringify(specs)} className="product-modal-specs-ellipse">
+                                    {
+                                        specsChild
+                                    }
                                 </div>
                             </div>
                             <Form.Item

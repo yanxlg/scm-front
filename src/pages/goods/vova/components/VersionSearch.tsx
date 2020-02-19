@@ -132,7 +132,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                         loading={searchLoading}
                         onClick={this.onSearch}
                         type="primary"
-                        className="btn-group"
+                        className="btn-group vertical-middle"
                     >
                         查询
                     </Button>
@@ -140,7 +140,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                         loading={exportLoading}
                         onClick={this.onExport}
                         type="primary"
-                        className="btn-group"
+                        className="btn-group vertical-middle"
                     >
                         导出Excel
                     </Button>
@@ -148,7 +148,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                         loading={activeLoading}
                         onClick={this.onActive}
                         type="primary"
-                        className="btn-group"
+                        className="btn-group vertical-middle"
                     >
                         应用新版本
                     </Button>
