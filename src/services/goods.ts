@@ -4,21 +4,21 @@ import { ApiPathEnum } from '@/enums/ApiPathEnum';
 export declare interface IFilterParams {
     page: number;
     page_count: number;
-    task_number?: string;                // 任务 id
-    store_id?: string;                   // 店铺 ID
-    commodity_id?: string;               // Commodity_ID
-    inventory_status?: string;           // 库存
-    version_status?: string;             // 版本更新
-    first_catagory?: string;             // 一级类目
-    second_catagory?: string;            // 二级类目
-    third_catagory?: string;             // 三级类目
-    min_sale?: number | undefined;       // 销量最小
-    max_sale?: number | undefined;       // 销量最大值
-    min_sku?: number | undefined;        // sku数量最小值
-    max_sku?: number | undefined;        // sku最大值
-    min_price?: number | undefined;      // 价格范围最小值
-    max_price?: number | undefined;      // 价格范围最大值
-    min_comment?: number | undefined;    // 评论数量最小值
+    task_number?: string[];                 // 任务 id
+    store_id?: string[];                    // 店铺 ID
+    commodity_id?: number[];                // Commodity_ID
+    inventory_status?: number | undefined;  // 库存
+    version_status?: number | undefined;    // 版本更新
+    first_catagory?: number | undefined;    // 一级类目
+    second_catagory?: number | undefined;   // 二级类目
+    third_catagory?: number | undefined;    // 三级类目
+    min_sale?: number | undefined;          // 销量最小
+    max_sale?: number | undefined;          // 销量最大值
+    min_sku?: number | undefined;           // sku数量最小值
+    max_sku?: number | undefined;           // sku最大值
+    min_price?: number | undefined;         // 价格范围最小值
+    max_price?: number | undefined;         // 价格范围最大值
+    min_comment?: number | undefined;       // 评论数量最小值
 }
 
 declare interface IImgEditData {

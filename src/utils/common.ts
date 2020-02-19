@@ -17,3 +17,11 @@ export const stringifyText = (text:string)=>{
 export const parseText=(text:string="")=>{
     return text.replace(/,/g, '\r\n');
 };
+
+/**
+ * 字符串转成number或者undefined
+ * @param string
+ */
+export const strToNumber = (str: string): number | undefined => {
+    return str ? Number(str) : undefined;
+}
