@@ -230,7 +230,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory: strToNumber(third_catagory),
                 task_number: task_number.split(',').filter(item => item.trim()),
                 store_id: store_id.split(',').filter(item => item.trim()),
-                commodity_id: store_id.split(',').map(item => Number(item.trim())).filter(item => item),
+                commodity_id: commodity_id.split(',').map(item => Number(item.trim())).filter(item => item),
             });
         }
         if (searchData) {
