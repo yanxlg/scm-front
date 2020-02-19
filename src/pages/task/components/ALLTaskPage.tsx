@@ -49,7 +49,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             searchLoading: false,
             deleteLoading: false,
             dataSet: [],
-            pageNumber: 20,
+            pageNumber: 50,
             page: 1,
             total: 0,
         };
@@ -332,7 +332,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                             pageSize={pageNumber}
                             current={page}
                             total={total}
-                            pageSizeOptions={['100', '200', '500']}
+                            pageSizeOptions={['50','100','500','1000']}
                             onChange={this.onPageChange}
                             onShowSizeChange={this.onShowSizeChange}
                             showSizeChanger={true}
