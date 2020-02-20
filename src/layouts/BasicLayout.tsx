@@ -22,9 +22,6 @@ export interface BasicLayoutProps extends ProLayoutProps {
 }
 
 
-let timer:number|undefined = undefined;
-NProgress.configure({ showSpinner: false });
-
 class BasicLayout extends React.PureComponent<BasicLayoutProps>{
     private handleMenuCollapse = (payload: boolean): void => {
         const {dispatch} = this.props;
@@ -35,18 +32,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
             });
         }
     };
-    public static getDerivedStateFromProps(nextProps:BasicLayoutProps){
-        if(timer){
-            clearTimeout(timer);
-            timer = undefined;
-            NProgress.remove();
-        }
-        NProgress.start();
-        NProgress.inc();
-        timer=window.setTimeout(()=>{
-            NProgress.done();
-        },200+Math.floor(Math.random()*300));
-    }
+
     render(){
         const {children,dispatch,...props} = this.props;
         return (
