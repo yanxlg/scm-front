@@ -97,10 +97,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             message.error('导入失败！图片大于100k');
             return false;
         }
-        return true;
+        return false;
     };
 
-    private uploadImg = (info: UploadChangeParam) => {
+    // UploadChangeParam
+    private uploadImg = (info: any) => {
         const { loading } = this.state;
         const { imgList, product_id } = this.props;
         if (!loading) {
@@ -111,8 +112,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 () => {
                     // console.log('uploadImg', info);
                     const formData = new FormData();
-                    const file = info.file.originFileObj;
-                    formData.append('file', file as Blob);
+                    const file = info.file;
+                    formData.append('file', file);
                     // 获取图片的原始宽高
                     const _URL = window.URL || window.webkitURL;
                     const img = new Image();

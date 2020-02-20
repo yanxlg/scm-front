@@ -465,14 +465,14 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             width: 100,
             render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
                 return {
-                    children: (
+                    children: value ? (
                         <Button
                             type="link"
                             onClick={() => this.props.searchGoodsSale(row.product_id)}
                         >
                             {value.map((item: ISaleItem) => item.onsale_channel).join('、')}
                         </Button>
-                    ),
+                    ) : null,
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -487,7 +487,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             width: 120,
             render: (value: number, row: IRowDataItem) => {
                 return {
-                    children: <div>{formatDate(new Date(value), 'yyyy-MM-dd')}</div>,
+                    children: <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd')}</div>,
                     props: {
                         rowSpan: row._rowspan || 0,
                     },

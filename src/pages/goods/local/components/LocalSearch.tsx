@@ -75,35 +75,19 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         };
     }
 
-    private setTaskNumber = (e: ChangeEvent<HTMLInputElement>) => {
+    // task_number,store_id,commodity_id
+    private setInputVal = (e: ChangeEvent<HTMLInputElement>) => {
         this.setState({
-            task_number: e.target.value,
+            [e.target.name as 'task_number']: e.target.value,
         });
     };
 
-    private setStoreId = (e: ChangeEvent<HTMLInputElement>) => {
+    // inventory_status,version_status,third_catagory
+    private setSelectVal = (type: string, val: string) => {
         this.setState({
-            store_id: e.target.value,
+            [type as 'inventory_status']: val,
         });
-    };
-
-    private setcommodity_id = (e: ChangeEvent<HTMLInputElement>) => {
-        this.setState({
-            commodity_id: e.target.value,
-        });
-    };
-
-    private setInventoryStatus = (val: string) => {
-        this.setState({
-            inventory_status: val,
-        });
-    };
-
-    private setVersionStatus = (val: string) => {
-        this.setState({
-            version_status: val,
-        });
-    };
+    }
 
     private setFirstCatagory = (val: string) => {
         // console.log('setFirstCatagory', val);
@@ -127,53 +111,12 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         });
     };
 
-    private setThirdCatagory = (val: string) => {
+    // min_sale,max_sale,min_sku,max_sku,min_price,max_price,min_comment
+    private setNumber = (type: string, val: number | undefined) => {
         this.setState({
-            third_catagory: val,
+            [type as 'min_sale']: val ? val : undefined,
         });
-    };
-
-    private setMinSale = (val: number | undefined) => {
-        this.setState({
-            min_sale: val,
-        });
-    };
-
-    private setMaxSale = (val: number | undefined) => {
-        this.setState({
-            max_sale: val,
-        });
-    };
-
-    private setMinSku = (val: number | undefined) => {
-        this.setState({
-            min_sku: val,
-        });
-    };
-
-    private setMaxSku = (val: number | undefined) => {
-        this.setState({
-            max_sku: val,
-        });
-    };
-
-    private setMinPrice = (val: number | undefined) => {
-        this.setState({
-            min_price: val,
-        });
-    };
-
-    private setMaxPrice = (val: number | undefined) => {
-        this.setState({
-            max_price: val,
-        });
-    };
-
-    private setMinComment = (val: number | undefined) => {
-        this.setState({
-            min_comment: val,
-        });
-    };
+    }
 
     onSearch = () => {
         // console.log('onSearch', this.state);
@@ -230,7 +173,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         placeholder="请输入爬虫任务ID"
                         name="task_number"
                         value={task_number}
-                        onChange={this.setTaskNumber}
+                        onChange={this.setInputVal}
                     />
                 </div>
                 <div className="local-search-item">
@@ -240,7 +183,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         placeholder="请输入店铺ID"
                         name="store_id"
                         value={store_id}
-                        onChange={this.setStoreId}
+                        onChange={this.setInputVal}
                     />
                 </div>
                 <div className="local-search-item">
@@ -250,7 +193,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         placeholder="请输入Commodity ID"
                         name="commodity_id"
                         value={commodity_id}
-                        onChange={this.setcommodity_id}
+                        onChange={this.setInputVal}
                     />
                 </div>
                 <div className="local-search-item">
@@ -258,7 +201,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <Select
                         className="local-search-item-select"
                         value={inventory_status}
-                        onChange={this.setInventoryStatus}
+                        onChange={(val: string) => this.setSelectVal('inventory_status', val)}
                     >
                         <Option value="">全部</Option>
                         <Option value="1">不可销售</Option>
@@ -270,7 +213,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <Select
                         className="local-search-item-select"
                         value={version_status}
-                        onChange={this.setVersionStatus}
+                        onChange={(val: string) => this.setSelectVal('version_status', val)}
                     >
                         <Option value="">全部</Option>
                         <Option value="1">有新版本更新</Option>
@@ -313,7 +256,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <Select
                         className="local-search-item-select"
                         value={third_catagory}
-                        onChange={this.setThirdCatagory}
+                        onChange={(val: string) => this.setSelectVal('third_catagory', val)}
                     >
                         <Option value="">全部</Option>
                         {thirdCatagoryList.map(item => (
@@ -323,21 +266,20 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         ))}
                     </Select>
                 </div>
-
                 <div className="local-search-item">
                     <span className="local-search-label">sku数量</span>
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
                         value={min_sku}
-                        onChange={this.setMinSku}
+                        onChange={(val) => this.setNumber('min_sku', val)}
                     />
                     <span className="local-search-item-join">-</span>
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
                         value={max_sku}
-                        onChange={this.setMaxSku}
+                        onChange={(val) => this.setNumber('max_sku', val)}
                     />
                 </div>
                 <div className="local-search-item">
@@ -346,14 +288,14 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         className="local-search-item-input-min"
                         min={0}
                         value={min_price}
-                        onChange={this.setMinPrice}
+                        onChange={(val) => this.setNumber('min_price', val)}
                     />
                     <span className="local-search-item-join">-</span>
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
                         value={max_price}
-                        onChange={this.setMaxPrice}
+                        onChange={(val) => this.setNumber('max_price', val)}
                     />
                 </div>
                 <div className="local-search-item">
@@ -362,14 +304,14 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         className="local-search-item-input-min"
                         min={0}
                         value={min_sale}
-                        onChange={this.setMinSale}
+                        onChange={(val) => this.setNumber('min_sale', val)}
                     />
                     <span className="local-search-item-join">-</span>
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
                         value={max_sale}
-                        onChange={this.setMaxSale}
+                        onChange={(val) => this.setNumber('max_sale', val)}
                     />
                 </div>
                 <div className="local-search-item">
@@ -378,7 +320,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         className="local-search-item-input-min"
                         min={0}
                         value={min_comment}
-                        onChange={this.setMinComment}
+                        onChange={(val) => this.setNumber('min_comment', val)}
                     />
                 </div>
                 <div className="local-search-item">

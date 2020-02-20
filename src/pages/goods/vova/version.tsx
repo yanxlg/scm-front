@@ -33,18 +33,10 @@ declare interface IVersionState {
     dataLoading: boolean;
     clearLoading:boolean;
     dataSet: ITableItem[];
-    attributes?: {
-        price: number;
-        shipping_fee: number;
-        sku_volume: number;
-        goods_title: number;
-        product_description: number;
-        category: number;
-        specs: number;
-        lower_shelf: number;
-        upper_shelf: number;
-        sku_pics: number;
-    };
+    attributes?:Array< {
+        property:string;
+        count:number;
+    }>;
 }
 
 @BindAll()
@@ -68,10 +60,10 @@ class Version extends React.PureComponent<{}, IVersionState> {
             dataLoading: true,
         });
         return queryGoodsVersion(params)
-            .then(({ data: { attribute_update = {}, goods_list = [] } }) => {
+            .then(({ data: { changed_property_list = [], goods_list = [] } }) => {
                 this.setState({
                     dataSet: goods_list,
-                    attributes: attribute_update,
+                    attributes: changed_property_list,
                 });
             })
             .finally(() => {
@@ -181,7 +173,6 @@ class Version extends React.PureComponent<{}, IVersionState> {
     }
     render() {
         const { selectedRowKeys, dataLoading, attributes, dataSet: data,clearLoading } = this.state;
-
         const { dataSet, keys } = this.combineDataSet(data);
         const selectedSize = selectedRowKeys.size;
         const indeterminate = selectedSize > 0;
@@ -383,18 +374,11 @@ class Version extends React.PureComponent<{}, IVersionState> {
 
                 <Card className="product-card card-divider">
                     <Divider orientation="left">数据/状态更新：</Divider>
-                    <div className="product-text">价格（{attributes?.price ?? 0}）</div>
-                    <div className="product-text">运费（{attributes?.shipping_fee ?? 0}）</div>
-                    <div className="product-text">SKU数量（{attributes?.sku_volume ?? 0}）</div>
-                    <div className="product-text">商品标题（{attributes?.goods_title ?? 0}）</div>
-                    <div className="product-text">
-                        商品描述（{attributes?.product_description ?? 0}）
-                    </div>
-                    <div className="product-text">类目（{attributes?.category ?? 0}）</div>
-                    <div className="product-text">规格（{attributes?.specs ?? 0}）</div>
-                    <div className="product-text">下架（{attributes?.lower_shelf ?? 0}）</div>
-                    <div className="product-text">上架（{attributes?.upper_shelf ?? 0}）</div>
-                    <div className="product-text">SKU对应图片（{attributes?.sku_pics ?? 0}）</div>
+                    {
+                        attributes?.map(({count,property})=>{
+                            return <div className="product-text" key={property}>{property}（{count}）</div>
+                        })
+                    }
                     <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
                 </Card>
 

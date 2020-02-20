@@ -89,17 +89,29 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
 
     // 选中一级类目
     onLevelOneChange = value => {
-        const { searchOptions } = this.props;
-        const levelTwoOptions = searchOptions.filter(item => {
-            return item.id === value;
-        })[0].children as SelectOptionsItem;
-        this.setState({
-            levelTwoOptions: levelTwoOptions
-        });
+        if (value) {
+            const { searchOptions } = this.props;
+            const levelTwoOptions = searchOptions.filter(item => {
+                return item.id === value;
+            })[0].children as SelectOptionsItem;
+            this.setState({
+                levelTwoOptions: levelTwoOptions
+            });
+        } else {
+            this.setState({
+                levelTwoOptions: []
+            });
+            this.props.form.setFieldsValue({
+                level_two_category: ''
+              });
+        }
+
+
+
     }
 
     validateEndTime = (current, type) => {
-        
+
     }
 
     render() {
@@ -121,7 +133,6 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             label="时间"
                         >
                             <DatePicker
-                                showTime={true}
                                 disabledDate={currentDate =>
                                     currentDate
                                         ? onshelf_time_end
@@ -135,7 +146,6 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                         <span className="ant-col ant-form-item-label config-colon">-</span>
                         <Form.Item form={form} name="onshelf_time_end">
                             <DatePicker
-                                showTime={true}
                                 disabledDate={currentDate =>
                                     currentDate
                                         ? onshelf_time_satrt
@@ -151,10 +161,10 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                         <Input className="input-default input-handler" />
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="virtual_goods_id" label="虚拟ID">
-                        <Input className="input-small input-handler" />
+                        <Input className="input-default input-handler" />
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} form={form} name="product_id" label="product_id">
-                        <Input className="input-small input-handler" />
+                        <Input className="input-default input-handler" />
                     </Form.Item>
                 </div>
                 <div className="form-item">
@@ -170,8 +180,9 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_one_category" label="一级类目">
+                    <Form.Item validateTrigger={'onBlur'} form={form} initialValue="" name="level_one_category" label="一级类目">
                         <Select className="select-default" onChange={this.onLevelOneChange}>
+                            <Option value="">全部</Option>
                             {
                                 searchOptions.map(item => (
                                     <Option value={item.id}>{item.name}</Option>
@@ -179,8 +190,9 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="level_two_category" label="二级类目">
+                    <Form.Item validateTrigger={'onBlur'} initialValue="" form={form} name="level_two_category" label="二级类目">
                         <Select className="select-default">
+                            <Option value="">全部</Option>
                             {
                                 levelTwoOptions.map(item => (
                                     <Option value={item.id}>{item.name}</Option>
@@ -190,7 +202,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                     </Form.Item>
                 </div>
                 <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="product_status" label="商品状态">
+                    <Form.Item validateTrigger={'onBlur'} className="vertical-middle" form={form} name="product_status" label="商品状态">
                         <Select className="select-default">
                             {
                                 goodsStatus.map(item => (
@@ -199,10 +211,10 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Button type="primary" className="btn-default" onClick={this.onSearch}>
+                    <Button type="primary" className="btn-group vertical-middle" onClick={this.onSearch}>
                         查询
                     </Button>
-                    <Button type="primary" className="btn-default" onClick={this.toggleExcelDialog}>
+                    <Button type="primary" className="btn-group vertical-middle" onClick={this.toggleExcelDialog}>
                         导出
                     </Button>
                 </div>
