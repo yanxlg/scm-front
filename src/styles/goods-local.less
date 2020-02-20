@@ -134,7 +134,9 @@
     display: flex;
     flex-wrap: wrap;
     &-label {
+        width: 90px;
         margin-right: 8px;
+        text-align: right;
         white-space: nowrap;
     }
     &-item {
@@ -145,11 +147,14 @@
         &-input, &-select {
             width: 180px;
             &-min {
-                width: 80px;
+                width: 75px;
             }
         }
         &-btn {
-            width: 120px;
+            width: 108px;
+        }
+        &-btn + &-btn {
+            margin-left: 8px;
         }
         &-join {
             margin: 0 12px;
@@ -157,8 +162,11 @@
         &-small-btn {
             width: 80px;
         }
+        &-small-btn {
+            margin-left: 8px;
+        }
         &-small-btn + &-small-btn {
-            margin-left: 10px;
+            margin-right: 8px;
         }
     }    
 }

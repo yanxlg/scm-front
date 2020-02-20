@@ -46,8 +46,10 @@ export declare interface ISaleItem {
 }
 
 export declare interface ISkuStyle {
-    size?: string;
-    color?: string;
+    [key: string]: string;
+    // size?: string;
+    // color?: string;
+
 }
 
 declare interface ISkuItem {
@@ -63,6 +65,7 @@ declare interface IBaseData {
     commodity_id: string;
     product_id: string;
     goods_img: string;
+    goods_status: string;
     title: string;
     description: string;
     first_catagory: ICatagoryData;
@@ -415,7 +418,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             })
                 .then(res => {
                     // console.log('putGoodsEdit', res);
-                    message.error('编辑商品信息成功');
+                    const { success, failed } = res.data;
+                    let msg = '';
+                    msg += success.length ? `编辑成功的商品${success.map((item: any) => item.product_id).join(',')}。` : '';
+                    msg += failed.length ? `\t\t编辑失败的商品${success.map((item: any) => item.product_id).join(',')}。` : '';
+                    message.info(msg, 5);
                     this.onSearch();
                     this.setState({
                         isEditing: false,
@@ -549,7 +556,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 this.setState({
                     onsaleLoading: false,
                 });
-                message.error('一键上架失败');
+                // message.error('一键上架失败');
             });
     };
 
@@ -576,7 +583,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 this.setState({
                     deleteLoading: false,
                 });
-                message.success('商品删除失败！');
+                // message.success('商品删除失败！');
             });
     };
 
@@ -671,6 +678,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 />
                 <GoodsTable
                     ref={node => (this.goodsTableRef = node)}
+                    isEditing={isEditing}
                     searchLoading={searchLoading}
                     goodsList={goodsList}
                     editGoodsList={editGoodsList}

@@ -323,7 +323,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onChange={(val) => this.setNumber('min_comment', val)}
                     />
                 </div>
-                <div className="local-search-item">
+                <div>
                     <Button
                         type="primary"
                         className="local-search-item-btn"
@@ -332,8 +332,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     >
                         查询
                     </Button>
-                </div>
-                <div className="local-search-item">
                     <Button
                         type="primary"
                         className="local-search-item-btn"
@@ -342,8 +340,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     >
                         一键上架
                     </Button>
-                </div>
-                <div className="local-search-item">
                     {isEditing ? (
                         <>
                             <Button
@@ -370,8 +366,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                             编辑
                         </Button>
                     )}
-                </div>
-                <div className="local-search-item">
                     <Button
                         className="local-search-item-btn"
                         loading={deleteLoading}
@@ -379,13 +373,9 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     >
                         删除
                     </Button>
-                </div>
-                <div className="local-search-item">
                     <Button className="local-search-item-btn" onClick={this.refreshPage}>
                         刷新
                     </Button>
-                </div>
-                <div className="local-search-item">
                     <Button
                         className="local-search-item-btn"
                         onClick={() => this.props.toggleExcelDialog(true)}

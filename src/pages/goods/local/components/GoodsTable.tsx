@@ -13,6 +13,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 declare interface IGoodsTableProps {
+    isEditing: boolean;
     searchLoading: boolean;
     selectedRowKeys: string[];
     rowKeys: string[];
@@ -45,6 +46,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             key: 'x',
             title: () => (
                 <Checkbox
+                    disabled={this.props.isEditing}
                     indeterminate={this.state.indeterminate}
                     checked={this.state.checkAll}
                     onChange={this.onCheckAllChange}
@@ -60,6 +62,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                     // children: row._isParent ? <Checkbox /> : null,
                     children: (
                         <Checkbox
+                            disabled={this.props.isEditing}
                             checked={selectedRowKeys.indexOf(product_id) > -1}
                             onChange={() => this.selectedRow(product_id)}
                         />
@@ -99,6 +102,14 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                     },
                 };
             },
+        },
+        {
+            key: 'goods_status',
+            title: '商品状态',
+            dataIndex: 'goods_status',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
         },
         {
             key: 'goods_img',
@@ -198,8 +209,9 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             align: 'center',
             width: 100,
             render: (value: ICatagoryData, row: IRowDataItem) => {
+                return null
                 const { editGoodsList, allCatagoryList } = this.props;
-                const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
+                const index = -1 || editGoodsList.findIndex(item => row.product_id === item.product_id);
                 const currentEditGoods = editGoodsList[index];
                 return {
                     children:
@@ -237,6 +249,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             align: 'center',
             width: 100,
             render: (value: ICatagoryData, row: IRowDataItem) => {
+                return null
                 const { editGoodsList, allCatagoryList } = this.props;
                 const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 const currentEditGoods = editGoodsList[index];
@@ -283,6 +296,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             align: 'center',
             width: 100,
             render: (value: ICatagoryData, row: IRowDataItem) => {
+                return null
                 const { editGoodsList, allCatagoryList } = this.props;
                 const index = editGoodsList.findIndex(item => row.product_id === item.product_id);
                 const currentEditGoods = editGoodsList[index];
@@ -344,13 +358,18 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             title: '规格',
             dataIndex: 'sku_style',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: ISkuStyle, row: IRowDataItem, index: number) => {
                 return (
-                    <>
-                        {value.size ? <div>Size: {value.size}</div> : null}
-                        {value.color ? <div>Color: {value.color}</div> : null}
-                    </>
+                    <div>
+                        {
+                            value ? (
+                                Object.keys(value).map(key => (
+                                    <span key={key}>{key}: {value[key]}</span>
+                                ))
+                            ) : null
+                        }
+                    </div>
                 );
             },
         },
