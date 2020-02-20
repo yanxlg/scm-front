@@ -1,9 +1,10 @@
 import React from 'react';
 import { Modal, Icon, Upload, message, Popconfirm } from 'antd';
 import { RcFile } from 'antd/lib/upload';
-import { UploadChangeParam } from 'antd/lib/upload';
+// import { UploadChangeParam } from 'antd/lib/upload';
 
 import { putGoodsPicEdit, postGoodsPicUpload } from '@/services/goods';
+import { imgDomain } from '@/enums/ConfigEnum';
 
 declare interface ImgEditDialogProps {
     visible: boolean;
@@ -133,11 +134,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                 });
                                 this.props.toggleImgEditDialog(
                                     true,
-                                    [...imgList, res.data.url],
+                                    [...imgList, imgDomain + res.data.url],
                                     product_id,
                                 );
                                 this.props.updateGoodsListImg(
-                                    [...imgList, res.data.url],
+                                    [...imgList, imgDomain + res.data.url],
                                     product_id,
                                 );
                             })

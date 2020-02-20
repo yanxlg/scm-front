@@ -46,3 +46,5 @@ export const TaskStatusList:{[key:number]:string}={
     2:"已执行",
     3:"执行失败"
 };
+
+export const imgDomain: string = '//vovaimguploadtest-img-t.vova.com.hk/'; 
