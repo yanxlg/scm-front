@@ -14,7 +14,7 @@ import '../../../styles/goods-local.less';
 import {
     getGoodsList,
     postGoodsExports,
-    getGoodsOnsale,
+    postGoodsOnsale,
     getGoodsDelete,
     getGoodsSales,
     IFilterParams,
@@ -450,7 +450,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     }
 
     // 一键上架
-    getGoodsOnsale = () => {
+    postGoodsOnsale = () => {
         const { selectedRowKeys } = this.state;
         if (!selectedRowKeys.length) {
             return message.error('一键上架需要选择商品');
@@ -458,9 +458,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             onsaleLoading: true,
         });
-        getGoodsOnsale({ scm_goods_id: selectedRowKeys })
+        postGoodsOnsale({ scm_goods_id: selectedRowKeys })
             .then(res => {
-                // console.log('getGoodsOnsale');
+                // console.log('postGoodsOnsale');
                 this.setState({
                     onsaleLoading: false,
                 });
@@ -468,7 +468,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 message.success('一键上架成功');
             })
             .catch(err => {
-                // console.log('getGoodsOnsale ERR');
+                // console.log('postGoodsOnsale ERR');
                 this.setState({
                     onsaleLoading: false,
                 });
@@ -571,7 +571,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     deleteLoading={deleteLoading}
                     allCatagoryList={allCatagoryList}
                     onSearch={this.onSearch}
-                    getGoodsOnsale={this.getGoodsOnsale}
+                    postGoodsOnsale={this.postGoodsOnsale}
                     getGoodsDelete={this.getGoodsDelete}
                     toggleExcelDialog={this.toggleExcelDialog}
                     getCurrentCatagory={this.getCurrentCatagory}

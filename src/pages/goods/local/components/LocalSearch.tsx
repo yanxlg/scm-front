@@ -17,7 +17,7 @@ declare interface ILocalSearchProps {
     deleteLoading: boolean;
     allCatagoryList: ICategoryItem[];
     onSearch(params?: IPageData, isRefresh?: boolean): void;
-    getGoodsOnsale(): void;
+    postGoodsOnsale(): void;
     getGoodsDelete(): void;
     toggleExcelDialog(status: boolean): void;
     getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
@@ -122,8 +122,8 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.props.onSearch({}, true);
     };
 
-    getGoodsOnsale = () => {
-        this.props.getGoodsOnsale();
+    postGoodsOnsale = () => {
+        this.props.postGoodsOnsale();
     };
 
     getGoodsDelete = () => {
@@ -330,7 +330,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         type="primary"
                         className="local-search-item-btn"
                         loading={onsaleLoading}
-                        onClick={this.getGoodsOnsale}
+                        onClick={this.postGoodsOnsale}
                     >
                         一键上架
                     </Button>
