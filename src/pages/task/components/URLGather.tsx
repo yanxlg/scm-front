@@ -1,8 +1,6 @@
-import React from 'react';
-import { Form } from '@/components/Form';
+import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { Bind } from 'lodash-decorators';
-import { FormComponentProps } from 'antd/lib/form';
-import { Button, Card, DatePicker, Input, InputNumber, Modal, Radio, Spin } from 'antd';
+import { Button, Card, DatePicker, Input, InputNumber, Modal, Radio, Spin, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import { TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
@@ -13,6 +11,9 @@ import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { DatePickerWithTime } from '@/components/DatePickerWithTime';
 import { validateUrl } from '@/utils/validate';
+import { FormInstance } from 'antd/es/form';
+import styler from 'stylefire';
+import { spring } from 'popmotion';
 
 declare interface IFormData {
     urls?: string;
@@ -26,7 +27,7 @@ declare interface IFormData {
     second?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
 }
 
-declare interface IURLGatherProps extends FormComponentProps<IFormData> {
+declare interface IURLGatherProps{
     taskId?: number;
 }
 
@@ -39,40 +40,17 @@ declare interface IHotGatherState {
     failTimes?: number;
 }
 
+const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
 
+    const [form] = Form.useForm();
+    const [gatherLoading,setGatherLoading] = useState(false);
+    const [groundLoading,setGroundLoading] = useState(false);
+    const [queryLoading,setQueryLoading] = useState(taskId !== void 0);
+    const [taskType,setTaskType] = useState<TaskType|undefined>();
+    const [successTimes,setSuccessTimes] = useState<number|undefined>();
+    const [failTimes,setFailTimes] = useState<number|undefined>();
 
-
-class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
-    constructor(props: IURLGatherProps) {
-        super(props);
-        this.state = {
-            gatherLoading: false,
-            groundLoading: false,
-            queryLoading: props.taskId !== void 0,
-        };
-    }
-
-    componentDidMount(): void {
-        const { taskId } = this.props;
-        if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
-                const initValues = this.convertDetail(task_detail_info);
-                const { task_type, success, fail } = initValues;
-                this.props.form.setFieldsValue({
-                    ...initValues,
-                });
-                this.setState({
-                    queryLoading: false,
-                    taskType: task_type,
-                    successTimes: success,
-                    failTimes: fail,
-                });
-            });
-        }
-    }
-
-    @Bind
-    private convertDetail(info: IPddHotTaskParams) {
+    const convertDetail = useCallback((info: IPddHotTaskParams) => {
         const {
             range,
             task_type,
@@ -104,10 +82,8 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
             urls: parseText(urls),
             ...extra,
         };
-    }
-
-    @Bind
-    private convertFormData(values: IFormData) {
+    },[]);
+    const convertFormData=useCallback((values: IFormData)=>{
         const {
             urls = '',
             onceStartTime,
@@ -133,34 +109,36 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
             ...(task_type === TaskType.once
                 ? {}
                 : {
-                      task_interval_seconds:
-                          taskIntervalType === TaskIntervalType.second
-                              ? second
-                              : day * 60 * 60 * 24,
-                  }),
+                    task_interval_seconds:
+                        taskIntervalType === TaskIntervalType.second
+                            ? second
+                            : day * 60 * 60 * 24,
+                }),
             task_end_time: task_type === TaskType.interval?task_end_time?.unix() ?? undefined:undefined,
         };
-    }
+    },[]);
 
-    @Bind
-    private onGather(is_upper_shelf: boolean = false) {
-        this.validate({
-            scroll: {
-                offsetTop: 80,
-            },
-        }).then((values: any) => {
-            const params = this.convertFormData(values);
-            this.setState(
-                is_upper_shelf
-                    ? {
-                          groundLoading: true,
-                          gatherLoading: false,
-                      }
-                    : {
-                          gatherLoading: true,
-                          groundLoading: false,
-                      },
-            );
+    useEffect(()=>{
+        if (taskId !== void 0) {
+            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
+                const initValues = convertDetail(task_detail_info);
+                const { task_type, success, fail } = initValues;
+                form.setFieldsValue({
+                    ...initValues,
+                });
+                setQueryLoading(false);
+                setTaskType(task_type);
+                setSuccessTimes(success);
+                setFailTimes(fail);
+            });
+        }
+    },[]);
+
+    const onGather = useCallback((is_upper_shelf: boolean = false) => {
+        form.validateFields().then((values: any) => {
+            const params = convertFormData(values);
+            setGatherLoading(!is_upper_shelf);
+            setGroundLoading(is_upper_shelf);
             addPddURLTask(
                 Object.assign({}, params, {
                     is_upper_shelf: is_upper_shelf,
@@ -193,7 +171,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                             <GatherFailureModal
                                 onClick={() => {
                                     Modal.destroyAll();
-                                    this.onGather(is_upper_shelf);
+                                    onGather(is_upper_shelf);
                                 }}
                             />
                         ),
@@ -203,27 +181,33 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                     });
                 })
                 .finally(() => {
-                    this.setState({
-                        gatherLoading: false,
-                        groundLoading: false,
-                    });
+                    setGroundLoading(false);
+                    setGatherLoading(false);
                 });
-        }).catch(()=>{});
-    }
+        }).catch(({errorFields})=>{
+            form.scrollToField(errorFields[0].name,{
+                scrollMode: 'if-needed',
+                behavior: ([{el,top}]) => {
+                    const elStyler = styler(el);
+                    const to = Math.max(top - 80,0);
+                    const from = el.scrollTop;
+                    spring({ from: el.scrollTop, to: to,damping:Math.abs(to - from)}).start((top:number) =>
+                        elStyler.set('scrollTop', top)
+                    );
+                },
+            })
+        });
+    },[]);
 
-    @Bind
-    private onStartGather() {
-        this.onGather();
-    }
+    const onStartGather = useCallback(() => {
+        onGather();
+    },[]);
 
-    @Bind
-    private onAcquisitionRack() {
-        this.onGather(true);
-    }
+    const onAcquisitionRack = useCallback(() => {
+        onGather(true);
+    },[]);
 
-    @Bind
-    private disabledStartDate(startTime: Moment | null) {
-        const { form } = this.props;
+    const disabledStartDate = useCallback((startTime: Moment | null) => {
         const endTime = form.getFieldValue('task_end_time');
         if (!startTime) {
             return false;
@@ -234,11 +218,9 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
             return startValue < currentValue;
         }
         return startValue > endTime.valueOf() || startValue < currentValue;
-    }
+    },[]);
 
-    @Bind
-    private disabledEndDate(endTime: Moment | null) {
-        const { form } = this.props;
+    const disabledEndDate = useCallback((endTime: Moment | null) => {
         const startTime = form.getFieldValue('timerStartTime');
         if (!endTime) {
             return false;
@@ -249,32 +231,23 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
             return endValue < currentValue;
         }
         return startTime.valueOf() > endValue || endValue < currentValue;
-    }
+    },[]);
 
-    @Bind
-    private checkUrl(type:any,value:any,callback:any){
+    const checkUrl = useCallback((type:any,value) => {
+        if(!type){
+            return Promise.resolve();
+        }
         const urls = stringifyText(value);
         const urlList = urls.split(",");
         if(urlList.find(url=>!validateUrl(url))){
-            callback("输入的URL不合法，请检查并输入正确的URL");
-            return;
+            return Promise.reject("输入的URL不合法，请检查并输入正确的URL");
         }
-        callback();
-    }
+        return Promise.resolve();
+    },[]);
 
-    render() {
-        const { form, taskId } = this.props;
+
+    return useMemo(()=>{
         const edit = taskId !== void 0;
-        const formData = form.getFieldsValue();
-        const { task_type, taskIntervalType , task_end_time} = formData;
-        const {
-            gatherLoading,
-            groundLoading,
-            queryLoading,
-            taskType,
-            failTimes,
-            successTimes,
-        } = this.state;
         return (
             <Spin spinning={queryLoading} tip="Loading...">
                 {edit && (
@@ -285,13 +258,22 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                         <div className="config-task-label">执行失败：{failTimes}次</div>
                     </React.Fragment>
                 )}
-                <Form layout="inline" autoComplete={'off'} className="form-help-absolute">
+                <Form
+                    form={form}
+                    layout="horizontal"
+                    autoComplete={'off'}
+                    className="form-help-absolute"
+                    initialValues={{
+                        taskIntervalType:TaskIntervalType.day,
+                        task_type:TaskType.once
+                    }}
+                >
                     <Form.Item
-                        className="block form-item"
+                        className="form-item"
                         validateTrigger={'onBlur'}
-                        form={form}
                         name="task_name"
                         label="任务名称"
+                        validateFirst={true}
                         rules={[{
                             required:true,
                             message:"请输入任务名称"
@@ -300,156 +282,216 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                         <Input className="input-default" />
                     </Form.Item>
                     <Form.Item
-                        className="config-card form-item-block config-textarea-wrap"
+                        className="form-item form-control-full"
                         validateTrigger={'onBlur'}
-                        form={form}
                         name="urls"
                         required={true}
                         label={<span/>}
                         colon={false}
+                        validateFirst={true}
                         rules={[{
                             required:true,
                             whitespace:true,
                             message:"请输入PDD商品详情链接"
                         },{
-                            validator:this.checkUrl,
+                            validator:checkUrl,
                         }]}
                     >
                         <Input.TextArea
                             spellCheck={'false'}
-                            className="config-textarea"
+                            className="config-textarea flex-1"
                             placeholder="请输入PDD商品详情链接，一行一个，多个URL以回车隔开"
                         />
                     </Form.Item>
                     <Card
-                        className="config-card"
-                        title={<span className="ant-form-item-required">任务类型：</span>}
+                        className="form-item"
+                        title={<span className="form-required">任务类型：</span>}
                     >
                         <Form.Item
                             validateTrigger={'onBlur'}
-                            form={form}
                             name="task_type"
-                            initialValue={TaskType.once}
+                            className="form-item-inline"
                         >
                             <Radio.Group>
-                                <div className="block">
-                                    <Radio className="vertical-middle" value={TaskType.once}>
-                                        单次任务
-                                    </Radio>
+                                <Form.Item label={<Radio value={TaskType.once}>单次任务</Radio>} colon={false}>
                                     <Form.Item
-                                        className="vertical-middle"
-                                        validateTrigger={'onBlur'}
-                                        form={form}
-                                        label="开始时间"
-                                        name="onceStartTime"
+                                        noStyle={true}
+                                        shouldUpdate={
+                                            (prevValues, currentValues) =>
+                                                prevValues.task_type !== currentValues.task_type
+                                        }
                                     >
-                                        <DatePicker
-                                            showTime={true}
-                                            disabled={task_type !== TaskType.once}
-                                            placeholder="立即开始"
-                                        />
+                                        {
+                                            ({getFieldValue})=>{
+                                                const taskType = getFieldValue("task_type");
+                                                return (
+                                                    <Form.Item
+                                                        validateTrigger={'onBlur'}
+                                                        label="开始时间"
+                                                        name="onceStartTime"
+                                                        className="form-item-inline"
+                                                    >
+                                                        <DatePicker
+                                                            showTime={true}
+                                                            disabled={taskType !== TaskType.once}
+                                                            placeholder="立即开始"
+                                                        />
+                                                    </Form.Item>
+                                                )
+                                            }
+                                        }
                                     </Form.Item>
-                                </div>
-                                <div className="form-item">
-                                    <Radio className="vertical-middle" value={TaskType.interval}>
-                                        定时任务
-                                    </Radio>
+                                </Form.Item>
+                                <Form.Item label={<Radio value={TaskType.interval}>定时任务</Radio>} className="form-item-inline" colon={false}>
                                     <Form.Item
-                                        className="vertical-middle"
-                                        form={form}
-                                        label="开始时间"
-                                        validateTrigger={'onChange'}
-                                        name="timerStartTime"
-                                        rules={[{
-                                            required:task_type === TaskType.interval,
-                                            message:"请选择开始时间",
-                                        }]}
+                                        noStyle={true}
+                                        shouldUpdate={
+                                            (prevValues, currentValues) =>
+                                                prevValues.task_type !== currentValues.task_type
+                                        }
                                     >
-                                        {/*<DatePickerWithTime disabled={task_type !== TaskType.interval} disabledDate={this.disabledStartDate} maxTime={task_end_time}/>*/}
-                                        <DatePicker
-                                            showTime={true}
-                                            disabled={task_type !== TaskType.interval}
-                                            disabledDate={this.disabledStartDate}
-                                        />
+                                        {
+                                            ({ getFieldValue }) => {
+                                                const taskType = getFieldValue("task_type");
+                                                return (
+                                                    <React.Fragment>
+                                                        <Form.Item
+                                                            label="开始时间"
+                                                            validateTrigger={'onChange'}
+                                                            className="form-required-absolute"
+                                                            name="timerStartTime"
+                                                            rules={[{
+                                                                required:taskType === TaskType.interval,
+                                                                message:"请选择开始时间",
+                                                            }]}
+                                                        >
+                                                            {/*<DatePickerWithTime disabled={task_type !== TaskType.interval} disabledDate={this.disabledStartDate} maxTime={task_end_time}/>*/}
+                                                            <DatePicker
+                                                                showTime={true}
+                                                                disabled={taskType !== TaskType.interval}
+                                                                disabledDate={disabledStartDate}
+                                                            />
+                                                        </Form.Item>
+                                                        <Form.Item
+                                                            validateTrigger={'onChange'}
+                                                            label="结束时间"
+                                                            name="task_end_time"
+                                                            className="form-required-absolute form-item"
+                                                            rules={[{
+                                                                required: taskType === TaskType.interval,
+                                                                message: "请选择结束时间"
+                                                            }]}
+                                                        >
+                                                            <DatePicker
+                                                                showTime={true}
+                                                                disabled={taskType !== TaskType.interval}
+                                                                disabledDate={disabledEndDate}
+                                                            />
+                                                        </Form.Item>
+                                                        <Form.Item
+                                                            validateTrigger={'onBlur'}
+                                                            label="任务间隔"
+                                                            name="taskIntervalType"
+                                                            className="form-required-absolute form-item-inline form-item"
+                                                            required={taskType === TaskType.interval}
+                                                        >
+                                                            <Radio.Group disabled={taskType !== TaskType.interval}>
+                                                                <Radio value={TaskIntervalType.day}>
+                                                                    <div className="inline-block vertical-middle">
+                                                                        <Form.Item
+                                                                            noStyle={true}
+                                                                            shouldUpdate={
+                                                                                (prevValues, currentValues) =>
+                                                                                    prevValues.taskIntervalType!==currentValues.taskIntervalType
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                ({getFieldValue})=>{
+                                                                                    const taskIntervalType = getFieldValue("taskIntervalType");
+                                                                                    return (
+                                                                                        <Form.Item className="form-item-inline">
+                                                                                            <Form.Item
+                                                                                                noStyle={true}
+                                                                                                validateTrigger={'onBlur'}
+                                                                                                name="day"
+                                                                                                rules={[{
+                                                                                                    required:taskType === TaskType.interval && taskIntervalType === TaskIntervalType.day,
+                                                                                                    message:"请输入间隔天数"
+                                                                                                }]}
+                                                                                            >
+                                                                                                <InputNumber
+                                                                                                    min={0}
+                                                                                                    className="input-small input-handler"
+                                                                                                    formatter={numberFormatter}
+                                                                                                    disabled={
+                                                                                                        taskType !== TaskType.interval ||
+                                                                                                        taskIntervalType !==
+                                                                                                        TaskIntervalType.day
+                                                                                                    }
+                                                                                                />
+                                                                                            </Form.Item>
+                                                                                            <span className="form-unit">
+                                                                                                            天
+                                                                                                        </span>
+                                                                                        </Form.Item>
+
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                        </Form.Item>
+                                                                    </div>
+                                                                </Radio>
+                                                                <Radio value={TaskIntervalType.second}>
+                                                                    <div className="inline-block vertical-middle">
+                                                                        <Form.Item
+                                                                            noStyle={true}
+                                                                            shouldUpdate={
+                                                                                (prevValues, currentValues) =>
+                                                                                    prevValues.taskIntervalType!==currentValues.taskIntervalType
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                ({getFieldValue})=> {
+                                                                                    const taskIntervalType = getFieldValue("taskIntervalType");
+                                                                                    return (
+                                                                                        <Form.Item className="form-item-inline">
+                                                                                            <Form.Item
+                                                                                                noStyle={true}
+                                                                                                validateTrigger={'onBlur'}
+                                                                                                name="second"
+                                                                                                rules={[{
+                                                                                                    required:taskType === TaskType.interval && taskIntervalType === TaskIntervalType.second,
+                                                                                                    message:"请输入间隔秒数"
+                                                                                                }]}
+                                                                                                className="inline-block"
+                                                                                            >
+                                                                                                <InputNumber
+                                                                                                    min={0}
+                                                                                                    className="input-small input-handler"
+                                                                                                    formatter={numberFormatter}
+                                                                                                    disabled={
+                                                                                                        taskType !== TaskType.interval ||
+                                                                                                        taskIntervalType !==
+                                                                                                        TaskIntervalType.second
+                                                                                                    }
+                                                                                                />
+                                                                                            </Form.Item>
+                                                                                            <span className="form-unit">秒</span>
+                                                                                        </Form.Item>
+                                                                                    )
+                                                                                }
+                                                                            }
+                                                                        </Form.Item>
+                                                                    </div>
+                                                                </Radio>
+                                                            </Radio.Group>
+                                                        </Form.Item>
+                                                    </React.Fragment>
+                                                )
+                                            }
+                                        }
                                     </Form.Item>
-                                    <Form.Item
-                                        className="vertical-middle"
-                                        validateTrigger={'onChange'}
-                                        form={form}
-                                        label="结束时间"
-                                        name="task_end_time"
-                                        rules={[{
-                                            required:task_type === TaskType.interval,
-                                            message:"请选择结束时间"
-                                        }]}
-                                    >
-                                        <DatePicker
-                                            showTime={true}
-                                            disabled={task_type !== TaskType.interval}
-                                            disabledDate={this.disabledEndDate}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        className="vertical-middle"
-                                        validateTrigger={'onBlur'}
-                                        form={form}
-                                        label="任务间隔"
-                                        name="taskIntervalType"
-                                        required={task_type === TaskType.interval}
-                                        initialValue={TaskIntervalType.day}
-                                    >
-                                        <Radio.Group disabled={task_type !== TaskType.interval}>
-                                            <Radio value={TaskIntervalType.day}>
-                                                <Form.Item
-                                                    className="vertical-middle"
-                                                    validateTrigger={'onBlur'}
-                                                    form={form}
-                                                    name="day"
-                                                    rules={[{
-                                                        required:task_type === TaskType.interval && taskIntervalType === TaskIntervalType.day,
-                                                        message:"请输入间隔天数"
-                                                    }]}
-                                                >
-                                                    <InputNumber
-                                                        min={0}
-                                                        className="input-small input-handler"
-                                                        formatter={numberFormatter}
-                                                        disabled={
-                                                            task_type !== TaskType.interval ||
-                                                            taskIntervalType !==
-                                                                TaskIntervalType.day
-                                                        }
-                                                    />
-                                                </Form.Item>
-                                                天
-                                            </Radio>
-                                            <Radio value={TaskIntervalType.second}>
-                                                <Form.Item
-                                                    className="vertical-middle"
-                                                    validateTrigger={'onBlur'}
-                                                    form={form}
-                                                    name="second"
-                                                    rules={[{
-                                                        required:task_type === TaskType.interval && taskIntervalType === TaskIntervalType.second,
-                                                        message:"请输入间隔秒数"
-                                                    }]}
-                                                >
-                                                    <InputNumber
-                                                        min={0}
-                                                        className="input-small input-handler"
-                                                        formatter={numberFormatter}
-                                                        disabled={
-                                                            task_type !== TaskType.interval ||
-                                                            taskIntervalType !==
-                                                                TaskIntervalType.second
-                                                        }
-                                                    />
-                                                </Form.Item>
-                                                秒
-                                            </Radio>
-                                        </Radio.Group>
-                                    </Form.Item>
-                                </div>
+                                </Form.Item>
                             </Radio.Group>
                         </Form.Item>
                     </Card>
@@ -458,7 +500,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                             loading={gatherLoading}
                             type="primary"
                             className="btn-default"
-                            onClick={this.onStartGather}
+                            onClick={onStartGather}
                         >
                             {edit ? '创建新任务' : '开始采集'}
                         </Button>
@@ -466,7 +508,7 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                             loading={groundLoading}
                             type="primary"
                             className="btn-default"
-                            onClick={this.onAcquisitionRack}
+                            onClick={onAcquisitionRack}
                         >
                             {edit ? '创建任务且上架' : '一键采集上架'}
                         </Button>
@@ -474,9 +516,8 @@ class _URLGather extends Form.BaseForm<IURLGatherProps, IHotGatherState> {
                 </Form>
             </Spin>
         );
-    }
-}
+    },[taskId,gatherLoading,groundLoading,queryLoading,taskType,successTimes,failTimes])
+};
 
-const URLGather = Form.create<IURLGatherProps>()(_URLGather);
 
 export default URLGather;

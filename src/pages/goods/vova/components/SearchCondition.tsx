@@ -1,9 +1,9 @@
-import React, { PureComponent } from 'react'
-import { Button, Card, Input, DatePicker, Select, InputNumber, Col } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
-import { Form } from '@/components/Form';
+import React, { RefObject } from 'react';
+import { Button, Card, Input, DatePicker, Select, Form } from 'antd';
+import { FormInstance } from 'antd/es/form';
+import {Bind} from 'lodash-decorators';
 
-declare interface SdProps extends FormComponentProps<any> {
+declare interface SdProps{
     searchOptions: SelectOptionsItem[];
     onSearch: Function;
     toggleExcelDialog: Function;
@@ -26,7 +26,8 @@ export declare interface SelectOptionsItem {
 
 const Option = Select.Option;
 
-export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
+export default class SearchCondition extends React.PureComponent<SdProps, SdState> {
+    private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props: SdProps) {
         super(props);
         this.state = {
@@ -88,12 +89,12 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
     }
 
     // 选中一级类目
-    onLevelOneChange = value => {
+    onLevelOneChange = (value:string) => {
         if (value) {
             const { searchOptions } = this.props;
             const levelTwoOptions = searchOptions.filter(item => {
                 return item.id === value;
-            })[0].children as SelectOptionsItem;
+            })[0].children as SelectOptionsItem[];
             this.setState({
                 levelTwoOptions: levelTwoOptions
             });
@@ -101,74 +102,112 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
             this.setState({
                 levelTwoOptions: []
             });
-            this.props.form.setFieldsValue({
+            this.formRef.current!.setFieldsValue({
                 level_two_category: ''
               });
         }
-
-
-
     }
 
-    validateEndTime = (current, type) => {
-
+    @Bind
+    public getFieldsValue(){
+        return this.formRef.current!.getFieldsValue();
     }
 
     render() {
-        const { form, searchOptions } = this.props;
+        const { searchOptions } = this.props;
         const { volumes, goodsStatus, levelTwoOptions } = this.state;
-        const { onshelf_time_satrt, onshelf_time_end } = form.getFieldsValue();
         return (
             <Card className="condition-card">
-                <div className="form-item">
-                    <div className="inline-block">
-                        {/* <DatePicker
-                            showTime={true}
-                            format="YYYY-MM-DD HH:mm:ss"
-                        /> */}
+                <Form
+                    ref={this.formRef}
+                    className="form-help-absolute"
+                    layout="inline"
+                    autoComplete={'off'}
+                    initialValues={{
+                        level_one_category:"",
+                        level_two_category:""
+                    }}
+                >
+                    <Form.Item
+                        label="时间"
+                        className="form-item"
+                    >
                         <Form.Item
-                            className="margin-none"
-                            form={form}
-                            name="onshelf_time_satrt"
-                            label="时间"
+                            noStyle={true}
+                            shouldUpdate={
+                                (prevValues, currentValues) =>
+                                    prevValues.onshelf_time_end !== currentValues.onshelf_time_end
+                            }
                         >
-                            <DatePicker
-                                disabledDate={currentDate =>
-                                    currentDate
-                                        ? onshelf_time_end
-                                            ? currentDate.isAfter(onshelf_time_end)
-                                            : false
-                                        : false
+                            {
+                                ({getFieldValue})=>{
+                                    const onshelf_time_end = getFieldValue("onshelf_time_end");
+                                    return (
+                                        <Form.Item
+                                            name="onshelf_time_satrt"
+                                            noStyle={true}
+                                        >
+                                            <DatePicker
+                                                disabledDate={currentDate =>
+                                                    currentDate
+                                                        ? onshelf_time_end
+                                                        ? currentDate.isAfter(onshelf_time_end)
+                                                        : false
+                                                        : false
+                                                }
+                                                className="picker-small"
+                                            />
+                                        </Form.Item>
+                                    )
                                 }
-                                className="picker-small"
-                            />
+                            }
                         </Form.Item>
-                        <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="onshelf_time_end">
-                            <DatePicker
-                                disabledDate={currentDate =>
-                                    currentDate
-                                        ? onshelf_time_satrt
-                                            ? currentDate.isBefore(onshelf_time_satrt)
-                                            : false
-                                        : false
+                        <span className="config-colon">-</span>
+                        <Form.Item
+                            noStyle={true}
+                            shouldUpdate={
+                                (prevValues, currentValues) =>
+                                    prevValues.onshelf_time_satrt !== currentValues.onshelf_time_satrt
+                            }
+                        >
+                            {
+                                ({getFieldValue})=>{
+                                    const onshelf_time_satrt = getFieldValue("onshelf_time_satrt");
+                                    return (
+                                        <Form.Item
+                                            name="onshelf_time_end"
+                                            noStyle={true}
+                                        >
+                                            <DatePicker
+                                                disabledDate={currentDate =>
+                                                    currentDate
+                                                        ? onshelf_time_satrt
+                                                        ? currentDate.isBefore(onshelf_time_satrt)
+                                                        : false
+                                                        : false
+                                                }
+                                                className="picker-small"
+                                            />
+                                        </Form.Item>
+                                    )
                                 }
-                                className="picker-small"
-                            />
+                            }
                         </Form.Item>
-                    </div>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="commondity_id" label="Commodity_ID">
+                    </Form.Item>
+
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="commondity_id" label="Commodity_ID">
                         <Input className="input-default input-handler" />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="virtual_goods_id" label="虚拟ID">
+
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="virtual_goods_id" label="虚拟ID">
                         <Input className="input-default input-handler" />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="product_id" label="product_id">
+
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="product_id" label="product_id">
                         <Input className="input-default input-handler" />
                     </Form.Item>
-                </div>
-                <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="sales_volume" label="销量">
+
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="sales_volume" label="销量">
                         <Select className="select-default">
                             {
                                 volumes.map(item => (
@@ -177,10 +216,10 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} name="shop_name" label="店铺名">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="shop_name" label="店铺名">
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} form={form} initialValue="" name="level_one_category" label="一级类目">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_one_category" label="一级类目">
                         <Select className="select-default" onChange={this.onLevelOneChange}>
                             <Option value="">全部</Option>
                             {
@@ -190,7 +229,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} initialValue="" form={form} name="level_two_category" label="二级类目">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_two_category" label="二级类目">
                         <Select className="select-default">
                             <Option value="">全部</Option>
                             {
@@ -200,9 +239,7 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                </div>
-                <div className="form-item">
-                    <Form.Item validateTrigger={'onBlur'} className="vertical-middle" form={form} name="product_status" label="商品状态">
+                    <Form.Item validateTrigger={'onBlur'} className="form-item" name="product_status" label="商品状态">
                         <Select className="select-default">
                             {
                                 goodsStatus.map(item => (
@@ -211,13 +248,13 @@ export default class SearchCondition extends Form.BaseForm<SdProps, SdState> {
                             }
                         </Select>
                     </Form.Item>
-                    <Button type="primary" className="btn-group vertical-middle" onClick={this.onSearch}>
+                    <Button type="primary" className="btn-group vertical-middle form-item" onClick={this.onSearch}>
                         查询
                     </Button>
-                    <Button type="primary" className="btn-group vertical-middle" onClick={this.toggleExcelDialog}>
+                    <Button type="primary" className="btn-group vertical-middle form-item" onClick={this.toggleExcelDialog}>
                         导出
                     </Button>
-                </div>
+                </Form>
             </Card>
         )
     }

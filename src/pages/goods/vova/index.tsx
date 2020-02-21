@@ -1,6 +1,4 @@
-import React from 'react';
-import { FormComponentProps } from 'antd/lib/form';
-import { Form } from '@/components/Form';
+import React, { RefObject } from 'react';
 import SearchCondition from './components/SearchCondition';
 import DataStatusUpdate from './components/DataStatusUpdate';
 import GoodsTable from './components/GoodsTable';
@@ -19,7 +17,7 @@ import './index.less';
 import { Modal, message } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
 
-declare interface IPros extends FormComponentProps<any> {
+declare interface IPros{
 
 }
 
@@ -57,7 +55,8 @@ export declare interface IRowDataItem extends IBaseData {
     _rowspan?: number;
 }
 
-class _Index extends Form.BaseForm<IPros, IState> {
+class Index extends React.PureComponent<IPros, IState> {
+    private formRef:RefObject<SearchCondition> = React.createRef();
     goodsTableRef: GoodsTable | null = null;
     constructor(props: IPros) {
         super(props);
@@ -92,8 +91,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
 
     onSearch = (current?: number, size?: number) => {
         const { dataLoading } = this.state;
-        const { form } = this.props;
-        const formData = form.getFieldsValue()
+        const formData = this.formRef.current!.getFieldsValue();
         if (dataLoading) return;
         this.setState({
             dataLoading: true,
@@ -147,7 +145,7 @@ class _Index extends Form.BaseForm<IPros, IState> {
     };
 
     getExcelData = (count: number) => {
-        const formData = this.props.form.getFieldsValue();
+        const formData = this.formRef.current!.getFieldsValue();
         let param: IFilterParams = {} as IFilterParams;
         if (this.goodsTableRef) {
             const { pageCount } = this.goodsTableRef.state;
@@ -192,36 +190,32 @@ class _Index extends Form.BaseForm<IPros, IState> {
     }
 
     render() {
-        const { form } = this.props;
         const { goodsList, propertyList, allCount, searchOptions, excelDialogStataus } = this.state;
         return (
             <div className="container">
-                <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
-                    <SearchCondition 
-                        form={form}
-                        onSearch={this.onSearch}
-                        toggleExcelDialog={this.toggleExcelDialog}
-                        searchOptions={searchOptions} />
-                    <DataStatusUpdate propertyList={propertyList} />
-                    <GoodsTable
-                        ref={node => (this.goodsTableRef = node)}
-                        goodsList={goodsList}
-                        allCount={allCount}
-                        toggleDetailDialog={this.toggleDetailDialog}
-                        onSearch={this.onSearch}
-                    />
-                    <ExcelDialog
-                        visible={excelDialogStataus}
-                        allCount={allCount}
-                        getExcelData={this.getExcelData}
-                        toggleExcelDialog={this.toggleExcelDialog}
-                    />
-                </Form>
+                <SearchCondition
+                    ref={this.formRef}
+                    onSearch={this.onSearch}
+                    toggleExcelDialog={this.toggleExcelDialog}
+                    searchOptions={searchOptions} />
+                <DataStatusUpdate propertyList={propertyList} />
+                <GoodsTable
+                    ref={node => (this.goodsTableRef = node)}
+                    goodsList={goodsList}
+                    allCount={allCount}
+                    toggleDetailDialog={this.toggleDetailDialog}
+                    onSearch={this.onSearch}
+                />
+                <ExcelDialog
+                    visible={excelDialogStataus}
+                    allCount={allCount}
+                    getExcelData={this.getExcelData}
+                    toggleExcelDialog={this.toggleExcelDialog}
+                />
             </div>
         );
     }
 }
 
-const Index = Form.create()(_Index);
 
 export default Index;

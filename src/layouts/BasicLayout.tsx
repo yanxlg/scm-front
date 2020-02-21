@@ -9,8 +9,7 @@ import { connect } from 'dva';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.svg';
-import MenuData from "@/config/menu.json";
-import NProgress from 'nprogress';
+import MenuData from "@/config/menu";
 import 'nprogress/nprogress.css';
 import "@/styles/menu.less";
 
@@ -21,6 +20,10 @@ export interface BasicLayoutProps extends ProLayoutProps {
     dispatch: Dispatch;
 }
 
+const MenuDataList = MenuData.map((item)=>{
+    // filter
+    return item as any;
+});
 
 class BasicLayout extends React.PureComponent<BasicLayoutProps>{
     private handleMenuCollapse = (payload: boolean): void => {
@@ -71,7 +74,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                     );
                 }}
                 footerRender={false}
-                menuDataRender={() =>MenuData}
+                menuDataRender={() => MenuDataList}
                 rightContentRender={rightProps => <RightContent {...rightProps} />}
                 fixSiderbar={true}
                 fixedHeader={true}

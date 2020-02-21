@@ -1,10 +1,9 @@
-import React from 'react';
-import { Form } from '@/components/Form';
-import { Button, DatePicker, Input } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
+import React, { RefObject } from 'react';
+import { Button, DatePicker, Input, Form } from 'antd';
 import '@/styles/config.less';
 import { BindAll } from 'lodash-decorators';
 import { transEndDate, transStartDate } from '@/utils/date';
+import { FormInstance } from 'antd/es/form';
 
 
 export declare interface IApiParams{
@@ -13,7 +12,7 @@ export declare interface IApiParams{
     virtual_id?: string;
 }
 
-declare interface IVersionSearchProps extends FormComponentProps<IApiParams> {
+declare interface IVersionSearchProps {
     onSearch: (params: IApiParams) => Promise<any>;
     onExport: (params: IApiParams) => Promise<any>;
     onActive: (params: IApiParams) => Promise<any>;
@@ -27,7 +26,8 @@ declare interface IVersionSearchState {
 
 
 @BindAll()
-class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchState> {
+class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSearchState> {
+    private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props: IVersionSearchProps) {
         super(props);
         this.state = {
@@ -77,8 +77,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
     }
 
     private convertFromData(){
-        const {form} = this.props;
-        const {start_time,end_time,...extra} = form.getFieldsValue();
+        const {start_time,end_time,...extra} = this.formRef.current!.getFieldsValue();
         return {
             ...extra,
             start_time:transStartDate(start_time),
@@ -87,52 +86,88 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
     }
 
     render() {
-        const { form } = this.props;
         const { searchLoading, exportLoading, activeLoading } = this.state;
-        const { start_time, end_time } = form.getFieldsValue();
         return (
             <React.Fragment>
-                <Form layout="inline" autoComplete={'off'}>
-                    <div className="inline-block">
+                <Form
+                    ref={this.formRef}
+                    layout="inline"
+                    autoComplete={'off'}
+                >
+                    <Form.Item
+                        label="时间"
+                        className="form-item"
+                    >
                         <Form.Item
-                            className="margin-none"
-                            form={form}
-                            name="start_time"
-                            label="时间"
+                            noStyle={true}
+                            shouldUpdate={
+                                (prevValues, currentValues) =>
+                                    prevValues.end_time !== currentValues.end_time
+                            }
                         >
-                            <DatePicker
-                                disabledDate={currentDate =>
-                                    currentDate
-                                        ? end_time
-                                            ? currentDate.isAfter(end_time)
-                                            : false
-                                        : false
+                            {
+                                ({getFieldValue})=>{
+                                    const end_time = getFieldValue("end_time");
+                                    return (
+                                        <Form.Item
+                                            name="start_time"
+                                            noStyle={true}
+                                        >
+                                            <DatePicker
+                                                disabledDate={currentDate =>
+                                                    currentDate
+                                                        ? end_time
+                                                        ? currentDate.isAfter(end_time)
+                                                        : false
+                                                        : false
+                                                }
+                                                className="picker-small"
+                                            />
+                                        </Form.Item>
+                                    )
                                 }
-                                className="picker-small"
-                            />
+                            }
                         </Form.Item>
-                        <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="end_time">
-                            <DatePicker
-                                disabledDate={currentDate =>
-                                    currentDate
-                                        ? start_time
-                                            ? currentDate.isBefore(start_time)
-                                            : false
-                                        : false
+                        <span className="config-colon">-</span>
+                        <Form.Item
+                            noStyle={true}
+                            shouldUpdate={
+                                (prevValues, currentValues) =>
+                                    prevValues.start_time !== currentValues.start_time
+                            }
+                        >
+                            {
+                                ({getFieldValue})=>{
+                                    const start_time = getFieldValue("start_time");
+                                    return (
+                                        <Form.Item
+                                            name="end_time"
+                                            noStyle={true}
+                                        >
+                                            <DatePicker
+                                                disabledDate={currentDate =>
+                                                    currentDate
+                                                        ? start_time
+                                                        ? currentDate.isBefore(start_time)
+                                                        : false
+                                                        : false
+                                                }
+                                                className="picker-small"
+                                            />
+                                        </Form.Item>
+                                    )
                                 }
-                                className="picker-small"
-                            />
+                            }
                         </Form.Item>
-                    </div>
-                    <Form.Item form={form} name="virtual_id" label="虚拟ID">
+                    </Form.Item>
+                    <Form.Item className="form-item" name="virtual_id" label="虚拟ID">
                         <Input className="input-default" />
                     </Form.Item>
                     <Button
                         loading={searchLoading}
                         onClick={this.onSearch}
                         type="primary"
-                        className="btn-group vertical-middle"
+                        className="btn-group vertical-middle form-item"
                     >
                         查询
                     </Button>
@@ -140,7 +175,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                         loading={exportLoading}
                         onClick={this.onExport}
                         type="primary"
-                        className="btn-group vertical-middle"
+                        className="btn-group vertical-middle form-item"
                     >
                         导出Excel
                     </Button>
@@ -148,7 +183,7 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
                         loading={activeLoading}
                         onClick={this.onActive}
                         type="primary"
-                        className="btn-group vertical-middle"
+                        className="btn-group vertical-middle form-item"
                     >
                         应用新版本
                     </Button>
@@ -157,7 +192,5 @@ class _VersionSearch extends Form.BaseForm<IVersionSearchProps, IVersionSearchSt
         );
     }
 }
-
-const VersionSearch = Form.create<IVersionSearchProps>()(_VersionSearch);
 
 export default VersionSearch;

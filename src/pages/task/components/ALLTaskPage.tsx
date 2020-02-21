@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import TaskSearch, { _TaskSearch } from '@/pages/task/components/TaskSearch';
+import TaskSearch from '@/pages/task/components/TaskSearch';
 import { Button, Modal, Pagination } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
@@ -40,7 +40,7 @@ declare interface IALLTaskPageProps {
 
 @BindAll()
 class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
-    private searchRef: RefObject<_TaskSearch> = React.createRef();
+    private searchRef: RefObject<TaskSearch> = React.createRef();
     constructor(props: IALLTaskPageProps) {
         super(props);
         this.state = {
@@ -204,7 +204,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         }
         return columns;
     }
-    private onSelectChange(selectedRowKeys: string[] | number[]) {
+    private onSelectChange(selectedRowKeys:React.Key[]) {
         this.setState({ selectedRowKeys: selectedRowKeys as string[] });
     }
     private showTotal(total: number) {
@@ -297,8 +297,8 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         const selectTaskSize = selectedRowKeys.length;
         return (
             <div>
-                <TaskSearch wrappedComponentRef={this.searchRef} task_status={task_status} />
-                <div className="config-card">
+                <TaskSearch ref={this.searchRef} task_status={task_status} />
+                <div className="form-item">
                     <div className="block">
                         <Button loading={searchLoading} onClick={this.onSearch} type="primary">
                             查询
@@ -344,7 +344,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         />
                     </div>
                     <FitTable
-                        className="config-card"
+                        className="form-item"
                         rowKey="task_id"
                         bordered={true}
                         rowSelection={rowSelection}

@@ -1,12 +1,12 @@
-import React from 'react';
-import { Form } from '@/components/Form';
-import { FormComponentProps } from 'antd/lib/form';
+import React, { RefObject } from 'react';
 import '@/styles/product.less';
 import '@/styles/form.less';
-import { Button, Icon, InputNumber, Modal } from 'antd';
+import { Button, InputNumber, Modal, Form } from 'antd';
 import { numberFormatter } from '@/utils/common';
 import { Bind } from 'lodash-decorators';
 import { editGoodsDetail, queryGoodsDetail } from '@/services/vova';
+import { FormInstance } from 'antd/es/form';
+import { CloseOutlined } from '@ant-design/icons/lib';
 
 declare interface ISku {
     sku_name: string;
@@ -23,7 +23,7 @@ declare interface IFormData {
     sku_list: ISku[];
 }
 
-declare interface IProductEditProps extends FormComponentProps<IFormData> {
+declare interface IProductEditProps{
     product_id: number;
     channel?: string;
 }
@@ -37,7 +37,8 @@ declare interface IProductEditState {
     sku_list?: ISku[];
 }
 
-class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditState> {
+class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEditState> {
+    private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props: IProductEditProps) {
         super(props);
         this.state = {
@@ -49,13 +50,13 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
     }
     @Bind
     private queryDetail() {
-        const { product_id, channel, form } = this.props;
+        const { product_id, channel } = this.props;
         queryGoodsDetail({ product_id, channel }).then(({ data = {} }) => {
             this.setState({
                 loading: false,
                 ...data,
             },()=>{
-                form.setFieldsValue({
+                this.formRef.current!.setFieldsValue({
                     sku_list: data.sku_list,
                 });
             });
@@ -68,8 +69,8 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
     }
     @Bind
     private onSubmit() {
-        const { form, product_id } = this.props;
-        const { sku_list = [] } = form.getFieldsValue();
+        const { product_id } = this.props;
+        const { sku_list = [] } = this.formRef.current!.getFieldsValue();
         const { sku_list: _sku_list } = this.state;
         // diff
         const skuString = JSON.stringify(sku_list);
@@ -85,13 +86,17 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
         }
     }
     render() {
-        const { form } = this.props;
         const { product_id, product_name, main_image, product_description,sku_list=[] } = this.state;
         return (
-            <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
+            <Form
+                className="form-help-absolute"
+                layout="inline"
+                autoComplete={'off'}
+                ref={this.formRef}
+            >
                 <button className="ant-modal-close block" onClick={this.onClose}>
                     <div className="ant-modal-close-x">
-                        <Icon type="close" />
+                        <CloseOutlined />
                     </div>
                 </button>
                 <div className="form-item">
@@ -142,7 +147,6 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                             <Form.Item
                                 className="inline-block product-modal-item"
                                 validateTrigger={'onBlur'}
-                                form={form}
                                 name={`sku_list[${index}].price`}
                                 label="价格"
                             >
@@ -155,7 +159,6 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                             <Form.Item
                                 className="inline-block"
                                 validateTrigger={'onBlur'}
-                                form={form}
                                 name={`sku_list[${index}].freight`}
                                 label="运费"
                             >
@@ -168,7 +171,6 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                             <Form.Item
                                 className="inline-block"
                                 validateTrigger={'onBlur'}
-                                form={form}
                                 name={`sku_list[${index}].storage`}
                                 label="库存"
                             >
@@ -189,7 +191,5 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
         );
     }
 }
-
-const ProductEditModal = Form.create<IProductEditProps>()(_ProductEditModal);
 
 export default ProductEditModal;

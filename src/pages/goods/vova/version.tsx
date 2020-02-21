@@ -2,7 +2,7 @@ import React from 'react';
 import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
 import { Button, Card, Checkbox, Divider, message, Table } from 'antd';
 import '@/styles/product.less';
-import { ColumnProps } from 'antd/lib/table/interface';
+import { ColumnType } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
 import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion, queryGoodsVersion } from '@/services/vova';
 
@@ -177,7 +177,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
         const selectedSize = selectedRowKeys.size;
         const indeterminate = selectedSize > 0;
         const checkedAll = selectedSize === keys.length;
-        const columns: ColumnProps<ITableItem>[] = [
+        const columns: ColumnType<ITableItem>[] = [
             {
                 title: (
                     <Checkbox
@@ -371,7 +371,6 @@ class Version extends React.PureComponent<{}, IVersionState> {
                         onSearch={this.queryData}
                     />
                 </Card>
-
                 <Card className="product-card card-divider">
                     <Divider orientation="left">数据/状态更新：</Divider>
                     {
