@@ -17,7 +17,6 @@ import './index.less';
 import { Modal, message } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
 import {BindAll} from 'lodash-decorators';
-import { getTaskList } from '@/services/task';
 
 declare interface IPros{
 

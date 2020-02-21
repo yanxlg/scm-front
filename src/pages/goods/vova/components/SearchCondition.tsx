@@ -2,81 +2,104 @@ import React, { RefObject } from 'react';
 import { Button, Card, Input, DatePicker, Select, Form } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import {Bind} from 'lodash-decorators';
+import { getSearchConditionOptions } from '@/services/VovaGoodsService';
 
 declare interface SdProps{
-    searchOptions: SelectOptionsItem[];
+
     onSearch: Function;
     toggleExcelDialog: Function;
 }
 
+declare interface SelectOptionsItem{
+    id:string;
+    name:string;
+    children?:SelectOptionsItem[];
+}
+
 declare interface SdState {
+    categoryLoading:boolean;
+    searchOptions: SelectOptionsItem[];
     levelTwoOptions: SelectOptionsItem[];
 }
 
-declare interface SdState {
-    volumes: Array<SelectOptionsItem>;
-    goodsStatus: Array<SelectOptionsItem>;
-}
-
-export declare interface SelectOptionsItem {
-    id: string;
-    name: string;
-    children?: SelectOptionsItem[];
-}
-
 const Option = Select.Option;
+
+
+const salesVolumeList=[{
+    id: '1',
+    name: '日销量大于10',
+}, {
+    id: '2',
+    name: '日销量大于50',
+}, {
+    id: '3',
+    name: '日销量大于100',
+}, {
+    id: '4',
+    name: '周销量大于100',
+}, {
+    id: '5',
+    name: '周销量大于200',
+}, {
+    id: '6',
+    name: '周销量大于500',
+}, {
+    id: '7',
+    name: '月销量大于100',
+}, {
+    id: '8',
+    name: '月销量大于500',
+}, {
+    id: '9',
+    name: '月销量大于100',
+}, {
+    id: '100',
+    name: 'all',
+}];
+
+const goodsStatusList = [{
+    id: '1',
+    name: '已上架',
+}, {
+    id: '2',
+    name: '待上架',
+}, {
+    id: '3',
+    name: '已下架',
+}, {
+    id: '100',
+    name: 'all',
+}];
+
+
 
 export default class SearchCondition extends React.PureComponent<SdProps, SdState> {
     private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props: SdProps) {
         super(props);
         this.state = {
+            categoryLoading:true,
+            searchOptions:[],
             levelTwoOptions: [],
-            volumes: [{
-                id: '1',
-                name: '日销量大于10',
-            }, {
-                id: '2',
-                name: '日销量大于50',
-            }, {
-                id: '3',
-                name: '日销量大于100',
-            }, {
-                id: '4',
-                name: '周销量大于100',
-            }, {
-                id: '5',
-                name: '周销量大于200',
-            }, {
-                id: '6',
-                name: '周销量大于500',
-            }, {
-                id: '7',
-                name: '月销量大于100',
-            }, {
-                id: '8',
-                name: '月销量大于500',
-            }, {
-                id: '9',
-                name: '月销量大于100',
-            }, {
-                id: '100',
-                name: 'all',
-            }],
-            goodsStatus: [{
-                id: '1',
-                name: '已上架',
-            }, {
-                id: '2',
-                name: '待上架',
-            }, {
-                id: '3',
-                name: '已下架',
-            }, {
-                id: '100',
-                name: 'all',
-            }]
         };
+    }
+
+    componentDidMount(): void {
+        this.queryCategory();
+    }
+
+    @Bind
+    private queryCategory() {
+        getSearchConditionOptions().then(({data=[]}) => {
+            this.setState({
+                categoryLoading: false,
+                searchOptions: data,
+            });
+        }).catch(()=>{
+            this.setState({
+                categoryLoading: false,
+            });
+        });
     }
 
     onSearch = () => {
@@ -114,8 +137,7 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
     }
 
     render() {
-        const { searchOptions } = this.props;
-        const { volumes, goodsStatus, levelTwoOptions } = this.state;
+        const { searchOptions,levelTwoOptions,categoryLoading } = this.state;
         return (
             <Card className="condition-card">
                 <Form
@@ -210,7 +232,7 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
                     <Form.Item className="form-item" validateTrigger={'onBlur'} name="sales_volume" label="销量">
                         <Select className="select-default">
                             {
-                                volumes.map(item => (
+                                salesVolumeList.map(item => (
                                     <Option value={item.id}>{item.name}</Option>
                                 ))
                             }
@@ -220,7 +242,7 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
                         <Input className="input-small input-handler" style={{width: 130}} />
                     </Form.Item>
                     <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_one_category" label="一级类目">
-                        <Select className="select-default" onChange={this.onLevelOneChange}>
+                        <Select loading={categoryLoading} className="select-default" onChange={this.onLevelOneChange}>
                             <Option value="">全部</Option>
                             {
                                 searchOptions.map(item => (
@@ -242,7 +264,7 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
                     <Form.Item validateTrigger={'onBlur'} className="form-item" name="product_status" label="商品状态">
                         <Select className="select-default">
                             {
-                                goodsStatus.map(item => (
+                                goodsStatusList.map(item => (
                                     <Option value={item.id}>{item.name}</Option>
                                 ))
                             }
