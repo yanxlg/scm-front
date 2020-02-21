@@ -1,5 +1,4 @@
-import React, { RefObject, useCallback, useEffect, useMemo, useState } from 'react';
-import { Bind } from 'lodash-decorators';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, DatePicker, Input, InputNumber, Modal, Radio, Spin, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
@@ -9,11 +8,7 @@ import { numberFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { DatePickerWithTime } from '@/components/DatePickerWithTime';
 import { validateUrl } from '@/utils/validate';
-import { FormInstance } from 'antd/es/form';
-import styler from 'stylefire';
-import { spring } from 'popmotion';
 
 declare interface IFormData {
     urls?: string;
@@ -187,13 +182,16 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
         }).catch(({errorFields})=>{
             form.scrollToField(errorFields[0].name,{
                 scrollMode: 'if-needed',
-                behavior: ([{el,top}]) => {
-                    const elStyler = styler(el);
+                behavior: (actions) => {
+                    if(!actions || actions.length ===0){
+                        return;
+                    }
+                    const [{top}] = actions;
                     const to = Math.max(top - 80,0);
-                    const from = el.scrollTop;
-                    spring({ from: el.scrollTop, to: to,damping:Math.abs(to - from)}).start((top:number) =>
-                        elStyler.set('scrollTop', top)
-                    );
+                    window.scrollTo({
+                        top:to,
+                        behavior:"smooth"
+                    });
                 },
             })
         });
@@ -234,7 +232,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
     },[]);
 
     const checkUrl = useCallback((type:any,value) => {
-        if(!type){
+        if(!value){
             return Promise.resolve();
         }
         const urls = stringifyText(value);
@@ -245,6 +243,17 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
         return Promise.resolve();
     },[]);
 
+    const checkDate = useCallback((type:any,value:Moment) => {
+        if(!value){
+            return Promise.resolve();
+        }
+        const now = moment();
+        if(value.isAfter(now)){
+            return Promise.resolve();
+        }else{
+            return Promise.reject("选择的时间不能早于当前时间");
+        }
+    },[]);
 
     return useMemo(()=>{
         const edit = taskId !== void 0;
@@ -330,6 +339,9 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                                                         label="开始时间"
                                                         name="onceStartTime"
                                                         className="form-item-inline"
+                                                        rules={[{
+                                                            validator:checkDate,
+                                                        }]}
                                                     >
                                                         <DatePicker
                                                             showTime={true}
@@ -363,9 +375,10 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                                                             rules={[{
                                                                 required:taskType === TaskType.interval,
                                                                 message:"请选择开始时间",
+                                                            },{
+                                                                validator:checkDate,
                                                             }]}
                                                         >
-                                                            {/*<DatePickerWithTime disabled={task_type !== TaskType.interval} disabledDate={this.disabledStartDate} maxTime={task_end_time}/>*/}
                                                             <DatePicker
                                                                 showTime={true}
                                                                 disabled={taskType !== TaskType.interval}
@@ -380,6 +393,8 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                                                             rules={[{
                                                                 required: taskType === TaskType.interval,
                                                                 message: "请选择结束时间"
+                                                            },{
+                                                                validator:checkDate,
                                                             }]}
                                                         >
                                                             <DatePicker

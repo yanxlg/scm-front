@@ -16,6 +16,8 @@ import '@/styles/index.less';
 import './index.less';
 import { Modal, message } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
+import {BindAll} from 'lodash-decorators';
+import { getTaskList } from '@/services/task';
 
 declare interface IPros{
 
@@ -23,7 +25,6 @@ declare interface IPros{
 
 declare interface IState {
     goodsList: Array<IRowDataItem>;
-    propertyList: PropertyItem[];
     searchOptions: SelectOptionsItem[];
     dataLoading: boolean;
     searchLoading: boolean;
@@ -55,6 +56,9 @@ export declare interface IRowDataItem extends IBaseData {
     _rowspan?: number;
 }
 
+
+
+@BindAll()
 class Index extends React.PureComponent<IPros, IState> {
     private formRef:RefObject<SearchCondition> = React.createRef();
     goodsTableRef: GoodsTable | null = null;
@@ -62,7 +66,6 @@ class Index extends React.PureComponent<IPros, IState> {
         super(props);
         this.state = {
             goodsList: [],
-            propertyList: [],
             searchOptions: [],
             dataLoading: false,
             searchLoading: false,
@@ -79,17 +82,10 @@ class Index extends React.PureComponent<IPros, IState> {
                 });
             }
         });
-        getVovaChangedProperties().then(res => {
-            if (res.code === 200) {
-                this.setState({
-                    propertyList: res.data.changed_property_list
-                });
-            }
-        });
         this.onSearch();
     }
 
-    onSearch = (current?: number, size?: number) => {
+    private onSearch(current?: number, size?: number){
         const { dataLoading } = this.state;
         const formData = this.formRef.current!.getFieldsValue();
         if (dataLoading) return;
@@ -121,14 +117,11 @@ class Index extends React.PureComponent<IPros, IState> {
             shop_name: formData.shop_name,
             product_status: formData.product_status,
         })
-        getVovaGoodsList(param).then(res => {
-            if (res.code === 200) {
-                const data = res.data
-                this.setState({
-                    goodsList: data.list,
-                    allCount: data.all_count
-                });
-            }
+        getVovaGoodsList(param).then(({data:{data=[],total=0}}) => {
+            this.setState({
+                goodsList: data,
+                allCount: total
+            });
         }).finally(() => {
             this.setState({
                 dataLoading: false,
@@ -136,6 +129,7 @@ class Index extends React.PureComponent<IPros, IState> {
             });
         })
     }
+
 
     // 显示下载弹框
     toggleExcelDialog = (status: boolean) => {
@@ -190,7 +184,7 @@ class Index extends React.PureComponent<IPros, IState> {
     }
 
     render() {
-        const { goodsList, propertyList, allCount, searchOptions, excelDialogStataus } = this.state;
+        const { goodsList, allCount, searchOptions, excelDialogStataus } = this.state;
         return (
             <div className="container">
                 <SearchCondition
@@ -198,7 +192,7 @@ class Index extends React.PureComponent<IPros, IState> {
                     onSearch={this.onSearch}
                     toggleExcelDialog={this.toggleExcelDialog}
                     searchOptions={searchOptions} />
-                <DataStatusUpdate propertyList={propertyList} />
+                <DataStatusUpdate/>
                 <GoodsTable
                     ref={node => (this.goodsTableRef = node)}
                     goodsList={goodsList}

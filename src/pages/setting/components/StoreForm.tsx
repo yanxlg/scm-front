@@ -109,13 +109,16 @@ class StoreForm extends React.PureComponent<IStoreFormProps,IStoreFormState>{
         }).catch(({errorFields})=>{
             this.formRef.current!.scrollToField(errorFields[0].name,{
                 scrollMode: 'if-needed',
-                behavior: ([{el,top}]) => {
-                    const elStyler = styler(el);
+                behavior: (actions) => {
+                    if(!actions || actions.length ===0){
+                        return;
+                    }
+                    const [{top}] = actions;
                     const to = Math.max(top - 80,0);
-                    const from = el.scrollTop;
-                    spring({ from: el.scrollTop, to: to,damping:Math.abs(to - from)}).start((top:number) =>
-                        elStyler.set('scrollTop', top)
-                    );
+                    window.scrollTo({
+                        top:to,
+                        behavior:"smooth"
+                    });
                 },
             })
         });

@@ -32,10 +32,6 @@ import { validateNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
 
-import styler from 'stylefire';
-import { spring } from 'popmotion';
-
-
 
 export declare interface IFormData {
     range?: TaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -300,13 +296,16 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
         }).catch(({errorFields})=>{
             this.formRef.current!.scrollToField(errorFields[0].name,{
                 scrollMode: 'if-needed',
-                behavior: ([{el,top}]) => {
-                    const elStyler = styler(el);
+                behavior: (actions) => {
+                    if(!actions || actions.length ===0){
+                        return;
+                    }
+                    const [{top}] = actions;
                     const to = Math.max(top - 80,0);
-                    const from = el.scrollTop;
-                    spring({ from: el.scrollTop, to: to,damping:Math.abs(to - from)}).start((top:number) =>
-                        elStyler.set('scrollTop', top)
-                    );
+                    window.scrollTo({
+                        top:to,
+                        behavior:"smooth"
+                    });
                 },
             })
         });

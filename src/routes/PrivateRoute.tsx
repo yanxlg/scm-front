@@ -6,12 +6,13 @@
 import React from "react";
 import {router} from "dva";
 import {  RouteProps } from 'dva/router';
-import User from '@/storage/User';
+import { getCookie } from '@/utils/common';
 
 const {Route, Redirect} = router;
 
+const cookie = getCookie("JSESSIONID");
 const AuthRouter:React.FC<RouteProps> = (props) => {
-    return User.token?<Route {...props} /> : <Redirect to="/login" />
+    return cookie?<Route {...props} /> : <Redirect to="/login" />
 };
 
 export default AuthRouter;
