@@ -34,30 +34,35 @@ declare interface IGoodsDeleteData {
     product_ids: string[];
 }
 
-export declare interface IGoodsEditDataItem {
-    product_id: string;
-    title: string;
-    description: string;
-    first_catagory: number;
-    second_catagory: number;
-    third_catagory: number;
-}
-declare interface IGoodsEditData {
-    modify_data: IGoodsEditDataItem[];
-}
-
 declare interface IProductId {
     product_id: string;
 }
 
 declare interface IGoodsVersionParams {
-    start_time: string;
-    end_time: string;
-    commodity_id: number;
+    start_time: number | undefined;
+    end_time: number | undefined;
+    commodity_id: string;
 }
 
 declare interface IVersionExportData {
-    commodity_id: number;
+    commodity_id: string;
+}
+
+export interface IGoodsEditImgItem {
+    type: 'new' | 'old';
+    url: string;
+    position?: number;
+    alt?: string;
+    width?: number;
+    height?: number;
+}
+
+export declare interface IGoodsEditData {
+    product_id: string;
+    title: string;
+    description: string;
+    cat_id: number;
+    imgs: IGoodsEditImgItem[];
 }
 
 export async function getGoodsList(params: IFilterParams) {

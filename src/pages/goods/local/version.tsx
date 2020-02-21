@@ -87,23 +87,23 @@ declare interface IGoodsVersionBase {
 }
 
 declare interface IVersionState {
-    start_time: string;
-    end_time: string;
+    start_time: number;
+    end_time: number;
     loading: boolean;
     currentInfo: IGoodsVersionBase;
     versionGoodsList: IGoodsVersionRowItem[];
 }
 
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
-    id: number = 0;
+    id: string = '';
 
     constructor(props: IVersionProps) {
         super(props);
         let nowTime = new Date();
         this.state = {
             loading: false,
-            end_time: formatDate(nowTime, 'yyyy-MM-dd'),
-            start_time: formatDate(new Date(nowTime.setDate(nowTime.getDate() - 3)), 'yyyy-MM-dd'),
+            end_time: this.getTimeSecond(nowTime.getTime()),
+            start_time: this.getTimeSecond(new Date(nowTime.setDate(nowTime.getDate() - 3)).getTime()),
             currentInfo: {
                 goods_title: '',
                 goods_url: '',
@@ -121,9 +121,13 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     }
 
     componentDidMount(): void {
-        this.id = Number(this.props.location.query.id);
+        this.id = this.props.location.query.id;
         this.onSearch();
         // console.log();
+    }
+
+    private getTimeSecond = (millisecond: number) => {
+        return Math.round(millisecond / 1000)
     }
 
     private onSearch = () => {
@@ -132,8 +136,8 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             loading: true,
         });
         return getGoodsVersion({
-            start_time,
-            end_time,
+            start_time: start_time ? start_time : undefined,
+            end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
         })
             .then(res => {
@@ -183,18 +187,19 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
 
     // moment.Moment[]
     private selectedDate = (dates: RangePickerValue) => {
-        // console.log(dates[0].format('YYYY-MM-DD'), dates[1].format('YYYY-MM-DD'));
-        if (dates[0] && dates[1]) {
-            this.setState(
-                {
-                    start_time: dates[0] ? dates[0].format('YYYY-MM-DD') : '',
-                    end_time: dates[1] ? dates[1].format('YYYY-MM-DD') : '',
-                },
-                () => {
-                    this.onSearch();
-                },
-            );
-        }
+        // console.log(formatDate(new Date(dates[0]?.valueOf()), 'yyyy-MM-dd'), dates[1]);
+        // if (dates[0] && dates[1]) {
+            
+        // }
+        this.setState(
+            {
+                start_time: dates[0] ? this.getTimeSecond(dates[0].valueOf()) : 0,
+                end_time: dates[1] ? this.getTimeSecond(dates[1].valueOf()) : 0
+            },
+            () => {
+                this.onSearch();
+            },
+        );
     };
 
     // 生成表格
@@ -289,7 +294,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         <RangePicker
                             className="date"
                             defaultValue={
-                                start_time ? [moment(start_time), moment(end_time)] : [null, null]
+                                start_time ? [
+                                    moment(formatDate(new Date(start_time * 1000), 'yyyy-MM-dd')), 
+                                    moment(formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'))
+                                ] : [null, null]
                             }
                             onChange={this.selectedDate}
                         />
