@@ -12,8 +12,6 @@ declare interface IPageData {
 }
 
 declare interface ILocalSearchProps {
-    // toggleUpdateDialog(status: boolean, type?: string): void;
-    isEditing: boolean;
     searchLoading: boolean;
     onsaleLoading: boolean;
     deleteLoading: boolean;
@@ -22,10 +20,7 @@ declare interface ILocalSearchProps {
     getGoodsOnsale(): void;
     getGoodsDelete(): void;
     toggleExcelDialog(status: boolean): void;
-    setEditGoodsList(): void;
-    getCurrentCatagory(firstId: number, secondId?: number): ICategoryItem[];
-    toggleEdit(status: boolean): void;
-
+    getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
     task_id?: number; // 默认task_id
 }
 
@@ -93,7 +88,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         // console.log('setFirstCatagory', val);
         this.setState({
             first_catagory: val,
-            secondCatagoryList: val ? this.props.getCurrentCatagory(Number(val)) : [],
+            secondCatagoryList: val ? this.props.getCurrentCatagory(val) : [],
             thirdCatagoryList: [],
             second_catagory: '',
             third_catagory: '',
@@ -105,7 +100,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.setState({
             second_catagory: val,
             thirdCatagoryList: val
-                ? this.props.getCurrentCatagory(Number(first_catagory), Number(val))
+                ? this.props.getCurrentCatagory(first_catagory, val)
                 : [],
             third_catagory: '',
         });
@@ -137,7 +132,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
 
     render() {
         const {
-            isEditing,
             onsaleLoading,
             deleteLoading,
             searchLoading,
@@ -340,32 +334,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     >
                         一键上架
                     </Button>
-                    {isEditing ? (
-                        <>
-                            <Button
-                                className="local-search-item-small-btn"
-                                size="small"
-                                onClick={() => this.props.toggleEdit(false)}
-                            >
-                                取消
-                            </Button>
-                            <Button
-                                type="primary"
-                                className="local-search-item-small-btn"
-                                size="small"
-                                onClick={() => this.props.toggleEdit(true)}
-                            >
-                                保存
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            className="local-search-item-btn"
-                            onClick={this.props.setEditGoodsList}
-                        >
-                            编辑
-                        </Button>
-                    )}
                     <Button
                         className="local-search-item-btn"
                         loading={deleteLoading}
