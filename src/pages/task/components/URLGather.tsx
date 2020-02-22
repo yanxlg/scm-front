@@ -251,7 +251,39 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
         if(value.isAfter(now)){
             return Promise.resolve();
         }else{
-            return Promise.reject("选择的时间不能早于当前时间");
+            return Promise.reject("开始时间不能早于当前时间");
+        }
+    },[]);
+
+    const checkStartDate = useCallback((type:any,value:Moment)=>{
+        if(!value){
+            return Promise.resolve();
+        }
+        const endDate = form.getFieldValue("task_end_time");
+        const now = moment();
+        if(value.isAfter(now)){
+            if(endDate && value.isSameOrAfter(endDate)){
+                return Promise.reject("开始时间不能晚于结束时间");
+            }
+            return Promise.resolve();
+        }else{
+            return Promise.reject("开始时间不能早于当前时间");
+        }
+    },[]);
+
+    const checkEndDate = useCallback((type:any,value:Moment)=>{
+        if(!value){
+            return Promise.resolve();
+        }
+        const startDate = form.getFieldValue("timerStartTime");
+        const now = moment();
+        if(value.isAfter(now)){
+            if(startDate && value.isSameOrBefore(startDate)){
+                return Promise.reject("结束时间不能早于开始时间");
+            }
+            return Promise.resolve();
+        }else{
+            return Promise.reject("结束时间不能早于当前时间");
         }
     },[]);
 
@@ -376,7 +408,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                                                                 required:taskType === TaskType.interval,
                                                                 message:"请选择开始时间",
                                                             },{
-                                                                validator:checkDate,
+                                                                validator:checkStartDate,
                                                             }]}
                                                         >
                                                             <DatePicker
@@ -394,7 +426,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                                                                 required: taskType === TaskType.interval,
                                                                 message: "请选择结束时间"
                                                             },{
-                                                                validator:checkDate,
+                                                                validator:checkEndDate,
                                                             }]}
                                                         >
                                                             <DatePicker

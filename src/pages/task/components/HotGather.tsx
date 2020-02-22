@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React, { RefObject, useCallback } from 'react';
 import { Bind } from 'lodash-decorators';
 import {
     Button,
@@ -390,6 +390,53 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
         return startTime.valueOf() > endValue || endValue < currentValue;
     }
 
+    @Bind
+    private checkDate(type:any,value:Moment){
+        if(!value){
+            return Promise.resolve();
+        }
+        const now = moment();
+        if(value.isAfter(now)){
+            return Promise.resolve();
+        }else{
+            return Promise.reject("开始时间不能早于当前时间");
+        }
+    }
+
+    @Bind
+    private checkStartDate(type:any,value:Moment){
+        if(!value){
+            return Promise.resolve();
+        }
+        const endDate = this.formRef.current!.getFieldValue("task_end_time");
+        const now = moment();
+        if(value.isAfter(now)){
+            if(endDate && value.isSameOrAfter(endDate)){
+                return Promise.reject("开始时间不能晚于结束时间");
+            }
+            return Promise.resolve();
+        }else{
+            return Promise.reject("开始时间不能早于当前时间");
+        }
+    }
+
+    @Bind
+    private checkEndDate(type:any,value:Moment){
+        if(!value){
+            return Promise.resolve();
+        }
+        const startDate = this.formRef.current!.getFieldValue("timerStartTime");
+        const now = moment();
+        if(value.isAfter(now)){
+            if(startDate && value.isSameOrBefore(startDate)){
+                return Promise.reject("结束时间不能早于开始时间");
+            }
+            return Promise.resolve();
+        }else{
+            return Promise.reject("结束时间不能早于当前时间");
+        }
+    }
+
     render() {
         const { taskId } = this.props;
         const edit = taskId !== void 0;
@@ -715,6 +762,9 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                         label="开始时间"
                                                         name="onceStartTime"
                                                         className="form-item-inline"
+                                                        rules={[{
+                                                            validator:this.checkDate
+                                                        }]}
                                                     >
                                                         <DatePicker
                                                             showTime={true}
@@ -748,9 +798,10 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                             rules={[{
                                                                 required:taskType === TaskType.interval,
                                                                 message:"请选择开始时间",
+                                                            },{
+                                                                validator:this.checkStartDate
                                                             }]}
                                                         >
-                                                            {/*<DatePickerWithTime disabled={task_type !== TaskType.interval} disabledDate={this.disabledStartDate} maxTime={task_end_time}/>*/}
                                                             <DatePicker
                                                                 showTime={true}
                                                                 disabled={taskType !== TaskType.interval}
@@ -765,6 +816,8 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                             rules={[{
                                                                 required: taskType === TaskType.interval,
                                                                 message: "请选择结束时间"
+                                                            },{
+                                                                validator:this.checkEndDate
                                                             }]}
                                                         >
                                                             <DatePicker
