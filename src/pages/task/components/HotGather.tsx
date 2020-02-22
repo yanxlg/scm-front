@@ -369,11 +369,11 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
             return false;
         }
         const startValue = startTime.valueOf();
-        const currentValue = moment().valueOf();
+        const currentDay = moment().startOf('day');
         if (!endTime) {
-            return startValue < currentValue;
+            return startTime < currentDay;
         }
-        return startValue > endTime.valueOf() || startValue < currentValue;
+        return startValue > endTime.endOf('day') || startTime < currentDay;
     }
 
     @Bind
@@ -383,11 +383,11 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
             return false;
         }
         const endValue = endTime.valueOf();
-        const currentValue = moment().valueOf();
+        const currentDay = moment().startOf('day');
         if (!startTime) {
-            return endValue < currentValue;
+            return endTime < currentDay;
         }
-        return startTime.valueOf() > endValue || endValue < currentValue;
+        return startTime.startOf('day') > endValue || endTime < currentDay;
     }
 
     @Bind
@@ -770,6 +770,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                             showTime={true}
                                                             disabled={taskType !== TaskType.once}
                                                             placeholder="立即开始"
+                                                            disabledDate={this.disabledStartDate}
                                                         />
                                                     </Form.Item>
                                                 )

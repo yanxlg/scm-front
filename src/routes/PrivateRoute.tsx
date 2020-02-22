@@ -10,7 +10,9 @@ import { getCookie } from '@/utils/common';
 
 const {Route} = router;
 
-const cookie = getCookie("JSESSIONID");
+const host = window.location.host;
+
+const cookie = /localhost/.test(host)?true:getCookie("JSESSIONID");
 
 const Login:React.FC = ()=>{
     useEffect(()=>{

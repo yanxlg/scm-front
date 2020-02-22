@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import TaskSearch from '@/pages/task/components/TaskSearch';
-import { Button, message, Modal, Pagination } from 'antd';
+import { Button, message, Modal, Pagination, Progress } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
 import '@/styles/config.less';
@@ -159,9 +159,17 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             {
                 title: '任务状态',
                 dataIndex: 'status',
-                width: '100px',
+                width: '130px',
                 align: 'center',
-                render:(text:number)=>TaskStatusList[text]
+                render:(status:string)=>{
+                    const percent = status === "0"?0:status === "1"?50:status==="2"?100:100;
+                    return (
+                        <>
+                            <Progress className="task-progress" width={20} strokeWidth={15} strokeLinecap="round" type="circle" percent={percent} status={status==="2"?"success":status==="3"?"exception":"normal"} format={() => ""}/>
+                            {TaskStatusList[status]}
+                        </>
+                    )
+                }
             },
             {
                 title: '创建时间',
