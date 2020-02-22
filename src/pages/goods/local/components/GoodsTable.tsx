@@ -1,5 +1,5 @@
-import React, { ChangeEvent } from 'react';
-import { Table, Checkbox, Button, Input, Select, message } from 'antd';
+import React from 'react';
+import { Table, Checkbox, Button } from 'antd';
 import Link from 'umi/link';
 import ZoomImage from '@/components/ZoomImage';
 
@@ -9,9 +9,6 @@ import { IRowDataItem, ISaleItem, ISkuStyle, ICatagoryData, ICategoryItem } from
 
 import { formatDate } from '@/utils/date';
 
-const { Option } = Select;
-const { TextArea } = Input;
-
 declare interface IGoodsTableProps {
     searchLoading: boolean;
     selectedRowKeys: string[];
@@ -19,7 +16,7 @@ declare interface IGoodsTableProps {
     goodsList: IRowDataItem[];
     allCatagoryList: ICategoryItem[];
     toggleEditGoodsDialog(status: boolean, row: IRowDataItem): void;
-    changeSelectedRowKeys(rowKeys: string[]): void;
+    changeSelectedRowKeys(rowKeys: string[], productId?: string): void;
     searchGoodsSale(product_id: string): void;
 }
 
@@ -418,10 +415,6 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
 
     // 点击全选
     private onCheckAllChange = (e: CheckboxChangeEvent) => {
-        // console.log(1111, );
-        // checkedList: e.target.checked ? plainOptions : [],
-        // indeterminate: false,
-        // checkAll: e.target.checked,
         const checked = e.target.checked;
         const { rowKeys } = this.props;
         this.setState({
@@ -433,7 +426,6 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
 
     // 选择商品行
     private selectedRow = (id: string) => {
-        // console.log('selectedRow', id);
         const { selectedRowKeys, rowKeys } = this.props;
         const copySelectedRowKeys = [...selectedRowKeys];
         const index = copySelectedRowKeys.indexOf(id);
@@ -447,7 +439,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             indeterminate: len > 0 && len !== rowKeys.length,
             checkAll: len === rowKeys.length,
         });
-        this.props.changeSelectedRowKeys(copySelectedRowKeys);
+        this.props.changeSelectedRowKeys(copySelectedRowKeys, id);
     };
 
     // 合并单元格

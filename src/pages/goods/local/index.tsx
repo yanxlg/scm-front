@@ -291,9 +291,19 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 设置选择行
-    private changeSelectedRowKeys = (keys: string[]) => {
+    private changeSelectedRowKeys = (keys: string[], productId?: string) => {
+        const { goodsList } = this.state;
         this.setState({
             selectedRowKeys: keys,
+            // 改变goodsList(执行column的render)
+            goodsList: goodsList.map(item => {
+                if ((!productId || item.product_id === productId) && item._rowspan) {
+                    return {
+                        ...item
+                    }
+                }
+                return item
+            })
         });
     };
 
