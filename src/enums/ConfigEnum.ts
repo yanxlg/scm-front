@@ -39,9 +39,9 @@ export const TaskRangeList:{[key:number]:string}={
     3:"指定店铺"
 };
 
-export const TaskStatusList:{[key:number]:string}={
-    0:"未执行",
-    1:"执行中",
-    2:"已执行",
-    3:"执行失败"
+export const TaskStatusList:{[key:string]:string}={
+    "0":"未执行",
+    "1":"执行中",
+    "2":"已执行",
+    "3":"执行失败"
 };

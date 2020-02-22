@@ -27,12 +27,12 @@ function padLeftZero(str: string) {
 
 export function transStartDate(moment?:Moment) {
     // 日期转换成unix
-    return moment?moment.hour(0).minute(0).second(0).unix():moment;
+    return moment?moment.clone().hour(0).minute(0).second(0).unix():moment;
 }
 
 
 export function transEndDate(moment?:Moment) {
-    return moment?moment.add(1,'d').hour(0).minute(0).second(0).unix():moment;
+    return moment?moment.clone().add(1,'d').hour(0).minute(0).second(0).unix():moment;
 }
 
 
