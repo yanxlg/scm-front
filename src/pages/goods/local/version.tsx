@@ -1,5 +1,5 @@
 import React from 'react';
-import { DatePicker, Button, message } from 'antd';
+import { DatePicker, Button, message, Pagination } from 'antd';
 import { RangePickerValue } from 'antd/lib/date-picker/interface';
 import moment from 'moment';
 
@@ -19,6 +19,11 @@ const { RangePicker } = DatePicker;
 
 declare interface IVersionProps {
     location: any;
+}
+
+declare interface IPageData {
+    page?: number;
+    page_count?: number;
 }
 
 export declare interface IOnsaleItem {
@@ -86,12 +91,17 @@ declare interface IGoodsVersionBase {
 }
 
 declare interface IVersionState {
+    loading: boolean;
     start_time: number;
     end_time: number;
-    loading: boolean;
+    page: number;
+    page_count: number,
+    allCount: number,
     currentInfo: IGoodsVersionRowItem | null;
     versionGoodsList: IGoodsVersionRowItem[];
 }
+
+const pageSizeOptions = ['50', '100', '500', '1000'];
 
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
     id: string = '';
@@ -103,6 +113,9 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             loading: false,
             end_time: 0,
             start_time: 0,
+            page: 1,
+            page_count: 50,
+            allCount: 0,
             // end_time: this.getTimeSecond(nowTime.getTime()),
             // start_time: this.getTimeSecond(new Date(nowTime.setDate(nowTime.getDate() - 3)).getTime()),
             currentInfo: null,
@@ -120,24 +133,30 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         return Math.round(millisecond / 1000)
     }
 
-    private onSearch = () => {
-        const { start_time, end_time } = this.state;
+    private onSearch = (pageData?: IPageData) => {
+        const { start_time, end_time, page, page_count } = this.state;
         this.setState({
             loading: true,
         });
-        return getGoodsVersion({
+        const data = Object.assign({
+            page,
+            page_count,
             start_time: start_time ? start_time : undefined,
             end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
-        })
+        }, pageData ? pageData : {});
+        return getGoodsVersion(data)
             .then(res => {
                 // const { goods_version_list, ...rest } = res.data;
-                const { list } = res.data;
+                const { list, all_count } = res.data;
                 const goodsList = this.addRowSpanData(list);
-                const index = goodsList.findIndex(goodsList => goodsList.goods_status === 'RELEASED');
+                // const index = goodsList.findIndex(goodsList => goodsList.goods_status === 'RELEASED');
                 this.setState({
+                    allCount: all_count,
+                    page: data.page,
+                    page_count: data.page_count,
                     versionGoodsList: goodsList,
-                    currentInfo: index > -1 ? goodsList[index] : null
+                    currentInfo: goodsList[0] || null
                 });
             })
             .finally(() => {
@@ -239,10 +258,31 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 message.success(`${product_id}忽略失败`);
                 this.onSearch();
             });
-    };
+    }
+
+    onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    }
+
+    pageCountChange = (current: number, size: number) => {
+        this.onSearch({
+            page_count: size,
+        });
+    }
 
     render() {
-        const { loading, start_time, end_time, currentInfo, versionGoodsList } = this.state;
+        const { 
+            loading,
+            page,
+            page_count,
+            allCount,
+            start_time, 
+            end_time, 
+            currentInfo, 
+            versionGoodsList
+        } = this.state;
         let currentDom = null;
         if (currentInfo) {
             const {
@@ -305,7 +345,17 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
                     </div>
-                    {/* <Pagination size="small" total={50} showSizeChanger={true} showQuickJumper={true} /> */}
+                    <Pagination 
+                        size="small"
+                        total={allCount}
+                        current={page}
+                        pageSize={page_count}
+                        showSizeChanger={true} 
+                        showQuickJumper={true} 
+                        pageSizeOptions={pageSizeOptions}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
+                    />
                 </div>
                 <VersionTable
                     loading={loading}

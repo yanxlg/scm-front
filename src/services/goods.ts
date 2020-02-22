@@ -31,7 +31,7 @@ declare interface IOnsaleData {
 }
 
 declare interface IGoodsDeleteData {
-    product_ids: string[];
+    commodity_ids: string[];
 }
 
 declare interface IProductId {
@@ -39,6 +39,8 @@ declare interface IProductId {
 }
 
 declare interface IGoodsVersionParams {
+    page: number;
+    page_count: number;
     start_time: number | undefined;
     end_time: number | undefined;
     commodity_id: string;

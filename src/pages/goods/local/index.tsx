@@ -478,7 +478,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
     // 删除
     getGoodsDelete = () => {
-        const { selectedRowKeys } = this.state;
+        const { selectedRowKeys, goodsList } = this.state;
         if (!selectedRowKeys.length) {
             return message.error('删除需要选择商品');
         }
@@ -486,7 +486,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             deleteLoading: true,
         });
         // console.log('selectedRowKeys', selectedRowKeys);
-        getGoodsDelete({ product_ids: selectedRowKeys })
+        getGoodsDelete({ 
+            commodity_ids: [...new Set(selectedRowKeys.map(productId => {
+                const index = goodsList.findIndex(item => item.product_id === productId)
+                return goodsList[index].commodity_id;
+            }))] 
+        })
             .then(res => {
                 this.setState({
                     deleteLoading: false,
