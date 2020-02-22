@@ -38,6 +38,7 @@ export function transEndDate(moment?:Moment) {
 
 const dateFormat = "YYYY-MM-DD HH:mm:ss";
 
-export function utcToLocal(dateString?:string) {
-    return dateString?moment.utc(dateString).local().format(dateFormat):"";
+export function utcToLocal(dateString?:string|number) {
+    const dateValue = typeof dateString === "number"?dateString*1000:dateString;
+    return dateString?moment.utc(dateValue).local().format(dateFormat):"";
 }
