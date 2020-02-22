@@ -12,7 +12,7 @@ import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/Con
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
-import moment from 'moment';
+import { utcToLocal } from '@/utils/date';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -28,10 +28,10 @@ declare interface IALLTaskPageState {
 declare interface IDataItem {
     task_id: number;
     task_name: string;
-    task_range: string;
-    task_type: string;
+    task_range: number;
+    task_type: number;
     start_time: string;
-    status: string;
+    status: number;
     create_time: string;
 }
 
@@ -151,7 +151,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'start_time',
                 width: '223px',
                 align: 'center',
-                render:(dateString)=>dateString?moment.utc(dateString).local().format("YYYY-MM-DD HH:mm:ss"):""
+                render:(dateString)=>utcToLocal(dateString)
             },
             {
                 title: '任务状态',
@@ -165,7 +165,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'create_time',
                 width: '200px',
                 align: 'center',
-                render:(dateString)=>dateString?moment.utc(dateString).local().format("YYYY-MM-DD HH:mm:ss"):""
+                render:(dateString)=>utcToLocal(dateString)
             },
             {
                 title: '操作',
@@ -195,7 +195,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         ];
                     } else {
                         return [
-                            <Button type="link" key="1">
+                            <Button type="link" key="1" onClick={() => this.viewTaskDetail(record)}>
                                 查看任务详情
                             </Button>,
                         ];
@@ -245,7 +245,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     private viewTaskDetail(task: IDataItem) {
         // task_range 分别弹不同的弹窗
         const { task_range, task_id } = task;
-        if (task_range === void 0) {
+        if (task_range === 1) {
             // url
             Modal.info({
                 content: <URLGather taskId={task_id} />,
