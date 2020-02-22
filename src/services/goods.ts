@@ -151,9 +151,10 @@ export async function getGoodsVersion(params: IGoodsVersionParams) {
 
 // 下载商品版本excel
 export async function postGoodsVersionExport(data: IVersionExportData) {
-    return request.post(ApiPathEnum.postGoodsVersionExport, {
+    return request.get(ApiPathEnum.postGoodsVersionExport, {
         // requestType: 'form',
-        data,
+        params: data,
+        // data,
         responseType:"blob",
         parseResponse:false
     }).then((response)=>{

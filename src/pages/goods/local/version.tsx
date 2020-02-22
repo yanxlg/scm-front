@@ -58,6 +58,8 @@ declare interface IGoodsVersionItemBase {
     second_catagory: ICatagoryData;
     third_catagory: ICatagoryData;
     update_time: number;
+    worm_goods_id: string;
+    worm_goodsinfo_link: string;
     _update_time?: string;
 }
 
@@ -250,7 +252,9 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 first_catagory,
                 second_catagory,
                 third_catagory,
-                _update_time
+                _update_time,
+                worm_goodsinfo_link,
+                worm_goods_id
             } = currentInfo;
             currentDom = (
                 <div className="goods-version-current">
@@ -258,19 +262,23 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     <div className="info">
                         <p>
                             商品标题：{title}
-                            {/* <a href={goods_url} target="_blank">
+                            <a href={worm_goodsinfo_link} target="_blank">
                                 【查看源商品】
-                            </a> */}
+                            </a>
                         </p>
                         <p>
                             <span>中台商品ID：{product_id}</span>
-                            {/* <span>源商品ID：{source_goods_id}</span>
-                            <span>源平台：{flatform}</span> */}
+                            <span>源商品ID：{worm_goods_id}</span>
+                            {/* <span>源平台：{flatform}</span> */}
                             <span>采集时间：{_update_time}</span>
                         </p>
                         <p>
                             <span>
-                                类目：{[first_catagory.name, second_catagory.name, third_catagory.name].join('/')}
+                                类目：{
+                                    [first_catagory.name, second_catagory.name, third_catagory.name]
+                                    .filter(item => item)
+                                    .join('/')
+                                }
                             </span>
                         </p>
                     </div>
