@@ -8,7 +8,7 @@ import '@/styles/table.less';
 import { getTaskList, deleteTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskRangeList, TaskStatus, TaskStatusList } from '@/enums/ConfigEnum';
+import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
@@ -143,6 +143,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'task_type',
                 width: '223px',
                 align: 'center',
+                render:(text:number)=>text === TaskType.once?"单次任务":text===TaskType.interval?"定时任务":""
             },
             {
                 title: '开始时间',
@@ -239,7 +240,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         });
     }
     private viewTaskDetail(task: IDataItem) {
-        // 根据task_type 分别弹不同的弹窗
+        // task_range 分别弹不同的弹窗
         const { task_range, task_id } = task;
         if (task_range === void 0) {
             // url

@@ -3,7 +3,7 @@
  * 该路由仅拦截本地登录校验，无法判断登录过期，合法问题，此类问题在请求拦截器中处理
  */
 
-import React from "react";
+import React, { useEffect, useMemo } from 'react';
 import {router} from "dva";
 import {  RouteProps } from 'dva/router';
 import { getCookie } from '@/utils/common';
@@ -11,8 +11,18 @@ import { getCookie } from '@/utils/common';
 const {Route, Redirect} = router;
 
 const cookie = getCookie("JSESSIONID");
+
+const Login:React.FC = ()=>{
+    useEffect(()=>{
+        window.location.href="https://www.baidu.com";
+    },[]);
+    return useMemo(()=>{
+        return <div/>
+    },[]);
+};
+
 const AuthRouter:React.FC<RouteProps> = (props) => {
-    return cookie?<Route {...props} /> : <Redirect to="/login" />
+    return cookie?<Route {...props} /> : <Login/>
 };
 
 export default AuthRouter;
