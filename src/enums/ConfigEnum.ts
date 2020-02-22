@@ -19,7 +19,6 @@ export enum TaskIntervalType{
 
 
 export enum TaskStatus{
-    All,
     UnExecuted,
     Executing,
     Executed,
