@@ -25,6 +25,7 @@ enum ApiPathEnum {
     AddPDDURLTask="/api/v1/task/spider/url",
     DeleteTask = "/api/v1/task/delete",
     ActiveTask = "/api/v1/task/plan",
+    AbortTask = "/api/v1/task/cancel",
     QueryTaskDetail="/api/v1/task/detail",
     QueryPDDCategory = "/api/v1/spider/pdd_category",
     QueryPDDSortCondition = "/api/v1/spider/pdd_sort_type",

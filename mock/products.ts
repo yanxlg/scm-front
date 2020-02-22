@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 export default {
-    'get /*/vova_goods/version': (req: Request, res: Response) => {
+    'get /v1/vova_goods/version': (req: Request, res: Response) => {
         res.status(200).send({
                 message: "",
                 code: 200,

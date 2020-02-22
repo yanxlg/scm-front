@@ -5,7 +5,7 @@ import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
 import '@/styles/config.less';
 import '@/styles/table.less';
-import { getTaskList, deleteTasks, activeTasks } from '@/services/task';
+import { getTaskList, deleteTasks, activeTasks, abortTasks, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
@@ -25,6 +25,8 @@ declare interface IALLTaskPageState {
     total: number;
     deleteLoading: boolean;
     activeLoading:boolean;
+    abortLoading:boolean;
+    reActiveLoading:boolean;
 }
 
 declare interface IDataItem {
@@ -52,6 +54,8 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             searchLoading: false,
             deleteLoading: false,
             activeLoading: false,
+            abortLoading: false,
+            reActiveLoading: false,
             dataSet: [],
             pageNumber: 50,
             page: 1,
@@ -80,6 +84,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         this.setState({
             dataLoading: true,
             searchLoading,
+            selectedRowKeys:[],
         });
         getTaskList({
             task_status:this.props.task_status,
@@ -320,6 +325,43 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             });
     }
 
+    private reActiveTasks(){
+        const { selectedRowKeys } = this.state;
+        this.setState({
+            reActiveLoading: true,
+        });
+        reActiveTasks(selectedRowKeys.join(','))
+            .then(() => {
+                this.queryList({
+                    searchLoading: true,
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    reActiveLoading: false,
+                });
+            });
+    }
+
+    private abortTasks(){
+        const { selectedRowKeys } = this.state;
+        this.setState({
+            abortLoading: true,
+        });
+        abortTasks(selectedRowKeys.join(','))
+            .then(() => {
+                message.success("任务已终止!");
+                this.queryList({
+                    searchLoading: true,
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    abortLoading: false,
+                });
+            });
+    }
+
     render() {
         const {
             selectedRowKeys,
@@ -330,7 +372,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page,
             pageNumber,
             total,
-            activeLoading
+            activeLoading,
+            abortLoading,
+            reActiveLoading
         } = this.state;
         const rowSelection = {
             fixed: true,
@@ -351,7 +395,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         {(task_status === void 0 ||
                             task_status === TaskStatus.Executed ||
                             task_status === TaskStatus.Failed) && (
-                            <Button type="link" disabled={selectTaskSize === 0}>
+                            <Button type="link" loading={reActiveLoading} disabled={selectTaskSize === 0} onClick={this.reActiveTasks}>
                                 重新执行任务
                             </Button>
                         )}
@@ -361,7 +405,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 立即执行任务
                             </Button>
                         )}
-                        <Button type="link" disabled={selectTaskSize === 0}>
+                        <Button type="link" loading={abortLoading} disabled={selectTaskSize === 0} onClick={this.abortTasks}>
                             终止任务
                         </Button>
                         <Button

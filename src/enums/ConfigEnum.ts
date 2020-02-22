@@ -22,7 +22,8 @@ export enum TaskStatus{
     UnExecuted,
     Executing,
     Executed,
-    Failed
+    Failed,
+    Canceled,
 }
 
 
@@ -43,5 +44,6 @@ export const TaskStatusList:{[key:string]:string}={
     "0":"未执行",
     "1":"执行中",
     "2":"已执行",
-    "3":"执行失败"
+    "3":"执行失败",
+    "4":"已取消"
 };
