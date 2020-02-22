@@ -1,6 +1,12 @@
 import React, { ChangeEvent } from 'react';
-import { Modal, Input, Select, Icon, Upload, message, Popconfirm } from 'antd';
+import { Modal, Input, Select, Upload, message, Popconfirm } from 'antd';
 import { RcFile } from 'antd/lib/upload';
+import {
+    CloseOutlined,
+    LoadingOutlined,
+    PlusOutlined
+} from '@ant-design/icons';
+
 // import { UploadChangeParam } from 'antd/lib/upload';
 
 import { postGoodsPicUpload } from '@/services/goods';
@@ -436,7 +442,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                             okText="是"
                                             cancelText="否"
                                         >
-                                            <Icon className="close" type="close-circle" />
+                                            <CloseOutlined className="close"/>
                                         </Popconfirm>
                                     </div>
                                 );
@@ -449,10 +455,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             >
                                 <div className="add">
                                     <div className="inner">
-                                        <Icon
-                                            className="add-icon"
-                                            type={loading ? 'loading' : 'plus'}
-                                        />
+                                        { loading ? <LoadingOutlined className="add-icon"/> : <PlusOutlined className="add-icon"/> }
                                     </div>
                                     <div className="desc">图片为低于100k的jpg格式</div>
                                 </div>

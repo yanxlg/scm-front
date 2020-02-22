@@ -31,7 +31,7 @@ declare interface IOnsaleData {
 }
 
 declare interface IGoodsDeleteData {
-    product_ids: string[];
+    commodity_ids: string[];
 }
 
 declare interface IProductId {
@@ -39,6 +39,8 @@ declare interface IProductId {
 }
 
 declare interface IGoodsVersionParams {
+    page: number;
+    page_count: number;
     start_time: number | undefined;
     end_time: number | undefined;
     commodity_id: string;
@@ -108,7 +110,7 @@ export async function postGoodsPicUpload(data: any) {
 }
 
 // 一键上架
-export async function getGoodsOnsale(data: IOnsaleData) {
+export async function postGoodsOnsale(data: IOnsaleData) {
     return request.post(ApiPathEnum.getGoodsOnsale, {
         data
     })
@@ -151,9 +153,10 @@ export async function getGoodsVersion(params: IGoodsVersionParams) {
 
 // 下载商品版本excel
 export async function postGoodsVersionExport(data: IVersionExportData) {
-    return request.post(ApiPathEnum.postGoodsVersionExport, {
+    return request.get(ApiPathEnum.postGoodsVersionExport, {
         // requestType: 'form',
-        data,
+        params: data,
+        // data,
         responseType:"blob",
         parseResponse:false
     }).then((response)=>{
@@ -169,13 +172,6 @@ export async function postGoodsVersionExport(data: IVersionExportData) {
             link.remove();
         })
     });
-}
-
-// 应用版本
-export async function postGoodsApplyVersion(data: IProductId) {
-    return request.post(ApiPathEnum.postGoodsApplyVersion, {
-        data
-    })
 }
 
 // 忽略版本
