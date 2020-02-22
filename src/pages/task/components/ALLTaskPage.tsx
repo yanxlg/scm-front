@@ -1,11 +1,11 @@
 import React, { RefObject } from 'react';
 import TaskSearch from '@/pages/task/components/TaskSearch';
-import { Button, Modal, Pagination } from 'antd';
+import { Button, message, Modal, Pagination } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
 import '@/styles/config.less';
 import '@/styles/table.less';
-import { getTaskList, deleteTasks } from '@/services/task';
+import { getTaskList, deleteTasks, activeTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
@@ -13,6 +13,7 @@ import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -23,6 +24,7 @@ declare interface IALLTaskPageState {
     page: number;
     total: number;
     deleteLoading: boolean;
+    activeLoading:boolean;
 }
 
 declare interface IDataItem {
@@ -49,6 +51,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             dataLoading: false,
             searchLoading: false,
             deleteLoading: false,
+            activeLoading: false,
             dataSet: [],
             pageNumber: 50,
             page: 1,
@@ -264,10 +267,39 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     }
     private deleteTasks() {
         const { selectedRowKeys } = this.state;
-        this.setState({
-            deleteLoading: true,
+        const ids = selectedRowKeys.join(",");
+        Modal.confirm({
+            title: '确定要删除选中的任务吗？',
+            icon: <ExclamationCircleOutlined />,
+            content: `任务ID包括:${ids}`,
+            okText: '确定',
+            okType: 'danger',
+            cancelText: '取消',
+            onOk:()=>{
+                this.setState({
+                    deleteLoading: true,
+                });
+                deleteTasks(selectedRowKeys.join(','))
+                    .then(() => {
+                        message.success("任务删除成功!");
+                        this.queryList({
+                            searchLoading: true,
+                        });
+                    }).finally(() => {
+                        this.setState({
+                            deleteLoading: false,
+                        });
+                    });
+            },
         });
-        deleteTasks(selectedRowKeys.join(','))
+    }
+
+    private activeTasks(){
+        const { selectedRowKeys } = this.state;
+        this.setState({
+            activeLoading: true,
+        });
+        activeTasks(selectedRowKeys.join(','))
             .then(() => {
                 this.queryList({
                     searchLoading: true,
@@ -275,7 +307,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             })
             .finally(() => {
                 this.setState({
-                    deleteLoading: false,
+                    activeLoading: false,
                 });
             });
     }
@@ -290,6 +322,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page,
             pageNumber,
             total,
+            activeLoading
         } = this.state;
         const rowSelection = {
             fixed: true,
@@ -316,7 +349,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         )}
                         {(task_status === void 0 ||
                             task_status === TaskStatus.UnExecuted) && (
-                            <Button type="link" disabled={selectTaskSize === 0}>
+                            <Button loading={activeLoading} type="link" disabled={selectTaskSize === 0} onClick={this.activeTasks}>
                                 立即执行任务
                             </Button>
                         )}

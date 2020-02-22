@@ -14,7 +14,8 @@ const cookie = getCookie("JSESSIONID");
 
 const Login:React.FC = ()=>{
     useEffect(()=>{
-        window.location.href="https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login";
+        const host = window.location.host;
+        window.location.replace(`/cas/login?service=${host}/auth/cas_login`);
     },[]);
     return useMemo(()=>{
         return <div/>
