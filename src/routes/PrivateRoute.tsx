@@ -8,13 +8,13 @@ import {router} from "dva";
 import {  RouteProps } from 'dva/router';
 import { getCookie } from '@/utils/common';
 
-const {Route, Redirect} = router;
+const {Route} = router;
 
 const cookie = getCookie("JSESSIONID");
 
 const Login:React.FC = ()=>{
     useEffect(()=>{
-        window.location.href="https://www.baidu.com";
+        window.location.href="https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login";
     },[]);
     return useMemo(()=>{
         return <div/>
