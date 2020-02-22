@@ -12,20 +12,15 @@ declare interface IPageData {
 }
 
 declare interface ILocalSearchProps {
-    // toggleUpdateDialog(status: boolean, type?: string): void;
-    isEditing: boolean;
     searchLoading: boolean;
     onsaleLoading: boolean;
     deleteLoading: boolean;
     allCatagoryList: ICategoryItem[];
     onSearch(params?: IPageData, isRefresh?: boolean): void;
-    getGoodsOnsale(): void;
+    postGoodsOnsale(): void;
     getGoodsDelete(): void;
     toggleExcelDialog(status: boolean): void;
-    setEditGoodsList(): void;
-    getCurrentCatagory(firstId: number, secondId?: number): ICategoryItem[];
-    toggleEdit(status: boolean): void;
-
+    getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
     task_id?: number; // 默认task_id
 }
 
@@ -93,7 +88,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         // console.log('setFirstCatagory', val);
         this.setState({
             first_catagory: val,
-            secondCatagoryList: val ? this.props.getCurrentCatagory(Number(val)) : [],
+            secondCatagoryList: val ? this.props.getCurrentCatagory(val) : [],
             thirdCatagoryList: [],
             second_catagory: '',
             third_catagory: '',
@@ -105,7 +100,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.setState({
             second_catagory: val,
             thirdCatagoryList: val
-                ? this.props.getCurrentCatagory(Number(first_catagory), Number(val))
+                ? this.props.getCurrentCatagory(first_catagory, val)
                 : [],
             third_catagory: '',
         });
@@ -127,8 +122,8 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.props.onSearch({}, true);
     };
 
-    getGoodsOnsale = () => {
-        this.props.getGoodsOnsale();
+    postGoodsOnsale = () => {
+        this.props.postGoodsOnsale();
     };
 
     getGoodsDelete = () => {
@@ -137,7 +132,6 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
 
     render() {
         const {
-            isEditing,
             onsaleLoading,
             deleteLoading,
             searchLoading,
@@ -323,7 +317,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onChange={(val) => this.setNumber('min_comment', val)}
                     />
                 </div>
-                <div className="local-search-item">
+                <div>
                     <Button
                         type="primary"
                         className="local-search-item-btn"
@@ -332,46 +326,14 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     >
                         查询
                     </Button>
-                </div>
-                <div className="local-search-item">
                     <Button
                         type="primary"
                         className="local-search-item-btn"
                         loading={onsaleLoading}
-                        onClick={this.getGoodsOnsale}
+                        onClick={this.postGoodsOnsale}
                     >
                         一键上架
                     </Button>
-                </div>
-                <div className="local-search-item">
-                    {isEditing ? (
-                        <>
-                            <Button
-                                className="local-search-item-small-btn"
-                                size="small"
-                                onClick={() => this.props.toggleEdit(false)}
-                            >
-                                取消
-                            </Button>
-                            <Button
-                                type="primary"
-                                className="local-search-item-small-btn"
-                                size="small"
-                                onClick={() => this.props.toggleEdit(true)}
-                            >
-                                保存
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            className="local-search-item-btn"
-                            onClick={this.props.setEditGoodsList}
-                        >
-                            编辑
-                        </Button>
-                    )}
-                </div>
-                <div className="local-search-item">
                     <Button
                         className="local-search-item-btn"
                         loading={deleteLoading}
@@ -379,13 +341,9 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     >
                         删除
                     </Button>
-                </div>
-                <div className="local-search-item">
                     <Button className="local-search-item-btn" onClick={this.refreshPage}>
                         刷新
                     </Button>
-                </div>
-                <div className="local-search-item">
                     <Button
                         className="local-search-item-btn"
                         onClick={() => this.props.toggleExcelDialog(true)}
