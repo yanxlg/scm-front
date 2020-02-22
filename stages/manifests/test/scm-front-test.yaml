@@ -49,8 +49,14 @@ data:
         }
 
         location /api/{
-            add_header Access-Control-Allow-Origin *;
-            rewrite ^/api(.*)$ /$1 break;
+            #proxy_cookie_path /cas-server/ /;
+            #proxy_cookie_path /cas-server /;
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass https://scm-api-t.vova.com.hk/;
         }
     }
