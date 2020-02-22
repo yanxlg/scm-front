@@ -58,7 +58,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         this.queryList();
     }
 
-    private onSearch = () => {
+    private onSearch(){
         this.queryList({
             searchLoading: true,
             page: 1,

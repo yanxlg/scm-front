@@ -24,7 +24,7 @@ declare interface IFormData {
 }
 
 declare interface IProductEditProps{
-    product_id: number;
+    product_id: string;
     channel?: string;
 }
 
@@ -35,6 +35,7 @@ declare interface IProductEditState {
     main_image?: string;
     product_description?: string;
     sku_list?: ISku[];
+    submitting:boolean;
 }
 
 class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEditState> {
@@ -43,6 +44,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
         super(props);
         this.state = {
             loading: true,
+            submitting:false
         };
     }
     componentDidMount(): void {
@@ -75,22 +77,27 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
         // diff
         const skuString = JSON.stringify(sku_list);
         if (JSON.stringify(sku_list) !== JSON.stringify(_sku_list)) {
+            this.setState({
+                submitting:true
+            });
             editGoodsDetail({
                 goods_id: product_id,
                 sku_list: skuString,
             }).then(() => {
                 this.onClose();
+            }).finally(()=>{
+                this.setState({submitting:false})
             });
         } else {
             this.onClose();
         }
     }
     render() {
-        const { product_id, product_name, main_image, product_description,sku_list=[] } = this.state;
+        const { product_id, product_name, main_image, product_description,sku_list=[],submitting } = this.state;
         return (
             <Form
                 className="form-help-absolute"
-                layout="inline"
+                layout="horizontal"
                 autoComplete={'off'}
                 ref={this.formRef}
             >
@@ -124,17 +131,17 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                     }
                     return (
                         <div className="form-item flex flex-align" key={sku.sku_name + index}>
-                            <div className="inline-block ant-form-item-label product-modal-item product-modal-name" title={sku.sku_name}>
+                            <div className="ant-form-item-label product-modal-item product-modal-name" title={sku.sku_name}>
                                 <label title="sku名称">sku名称</label>
                                 {sku.sku_name}
                             </div>
-                            <div className="inline-block ant-form-item-label product-modal-item product-modal-avatar-wrap">
+                            <div className="ant-form-item-label product-modal-item flex flex-align">
                                 <label title="对应图片">对应图片</label>
-                                <img
-                                    src={sku.sku_image}
-                                    className="product-modal-avatar-small"
-                                    alt="avatar"
-                                />
+                                {
+                                    sku.sku_image
+                                        ?
+                                        <img src={sku.sku_image} className="product-modal-avatar-small" alt="avatar" />:<div className="product-modal-avatar-small"/>
+                                }
                             </div>
                             <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
                                 <label title="商品规格">商品规格</label>
@@ -145,9 +152,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                 </div>
                             </div>
                             <Form.Item
-                                className="inline-block product-modal-item"
+                                className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                name={`sku_list[${index}].price`}
+                                name={["sku_list",index,"price"]}
                                 label="价格"
                             >
                                 <InputNumber
@@ -157,9 +164,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                 />
                             </Form.Item>
                             <Form.Item
-                                className="inline-block"
+                                className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                name={`sku_list[${index}].freight`}
+                                name={["sku_list",index,"freight"]}
                                 label="运费"
                             >
                                 <InputNumber
@@ -169,9 +176,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                 />
                             </Form.Item>
                             <Form.Item
-                                className="inline-block"
+                                className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                name={`sku_list[${index}].storage`}
+                                name={["sku_list",index,"storage"]}
                                 label="库存"
                             >
                                 <InputNumber
@@ -183,8 +190,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                         </div>
                     );
                 })}
-
-                <Button type="primary" className="float-right" onClick={this.onSubmit}>
+                <Button loading={submitting} type="primary" className="float-right" onClick={this.onSubmit}>
                     确定
                 </Button>
             </Form>

@@ -2,10 +2,10 @@ import React, { RefObject } from 'react';
 import { Button, Card, Input, DatePicker, Select, Form } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import {Bind} from 'lodash-decorators';
-import { getSearchConditionOptions } from '@/services/VovaGoodsService';
+import { getSearchConditionOptions, IFilterParams } from '@/services/VovaGoodsService';
+import { transEndDate, transStartDate } from '@/utils/date';
 
-declare interface SdProps{
-
+declare interface ISearchProps{
     onSearch: Function;
     toggleExcelDialog: Function;
 }
@@ -16,10 +16,9 @@ declare interface SelectOptionsItem{
     children?:SelectOptionsItem[];
 }
 
-declare interface SdState {
+declare interface ISearchState {
     categoryLoading:boolean;
     searchOptions: SelectOptionsItem[];
-    levelTwoOptions: SelectOptionsItem[];
 }
 
 const Option = Select.Option;
@@ -73,14 +72,13 @@ const goodsStatusList = [{
 
 
 
-export default class SearchCondition extends React.PureComponent<SdProps, SdState> {
+export default class SearchCondition extends React.PureComponent<ISearchProps, ISearchState> {
     private formRef:RefObject<FormInstance> = React.createRef();
-    constructor(props: SdProps) {
+    constructor(props: ISearchProps) {
         super(props);
         this.state = {
             categoryLoading:true,
             searchOptions:[],
-            levelTwoOptions: [],
         };
     }
 
@@ -101,43 +99,28 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
             });
         });
     }
-
-    onSearch = () => {
+    @Bind
+    private onSearch(){
         this.props.onSearch();
     }
 
-    // 导出
-    toggleExcelDialog = () => {
+    @Bind
+    private toggleExcelDialog(){
         this.props.toggleExcelDialog(true);
-    }
-
-    // 选中一级类目
-    onLevelOneChange = (value:string) => {
-        if (value) {
-            const { searchOptions } = this.props;
-            const levelTwoOptions = searchOptions.filter(item => {
-                return item.id === value;
-            })[0].children as SelectOptionsItem[];
-            this.setState({
-                levelTwoOptions: levelTwoOptions
-            });
-        } else {
-            this.setState({
-                levelTwoOptions: []
-            });
-            this.formRef.current!.setFieldsValue({
-                level_two_category: ''
-              });
-        }
     }
 
     @Bind
     public getFieldsValue(){
-        return this.formRef.current!.getFieldsValue();
+        const {onshelf_time_satrt,onshelf_time_end,...values} = this.formRef.current!.getFieldsValue();
+        return {
+            ...values,
+            onshelf_time_satrt:transStartDate(onshelf_time_satrt),
+            onshelf_time_end:transEndDate(onshelf_time_end)
+        } as IFilterParams
     }
 
     render() {
-        const { searchOptions,levelTwoOptions,categoryLoading } = this.state;
+        const { searchOptions,categoryLoading } = this.state;
         return (
             <Card className="condition-card">
                 <Form
@@ -239,10 +222,11 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
                         </Select>
                     </Form.Item>
                     <Form.Item className="form-item" validateTrigger={'onBlur'} name="shop_name" label="店铺名">
-                        <Input className="input-small input-handler" style={{width: 130}} />
+                        <Input className="input-default input-handler"/>
                     </Form.Item>
+
                     <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_one_category" label="一级类目">
-                        <Select loading={categoryLoading} className="select-default" onChange={this.onLevelOneChange}>
+                        <Select loading={categoryLoading} className="select-default">
                             <Option value="">全部</Option>
                             {
                                 searchOptions.map(item => (
@@ -251,15 +235,44 @@ export default class SearchCondition extends React.PureComponent<SdProps, SdStat
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_two_category" label="二级类目">
-                        <Select className="select-default">
-                            <Option value="">全部</Option>
-                            {
-                                levelTwoOptions.map(item => (
-                                    <Option value={item.id}>{item.name}</Option>
-                                ))
+                    <Form.Item
+                        noStyle={true}
+                        shouldUpdate={
+                            (prevValues, currentValues) =>
+                                prevValues.level_one_category !== currentValues.level_one_category
+                        }
+                    >
+                        {
+                            ({getFieldValue})=>{
+                                const levelOne = getFieldValue("level_one_category");
+                                const childCategory =
+                                    searchOptions.find(category => {
+                                        return category.id === levelOne;
+                                    })?.children || [];
+                                return (
+                                    <Form.Item
+                                        validateTrigger={'onBlur'}
+                                        name="level_two_category"
+                                        label="二级类目"
+                                        className="form-item"
+                                    >
+                                        <Select loading={categoryLoading} className="select-default">
+                                            <Option value="">全部</Option>
+                                            {childCategory.map(category => {
+                                                return (
+                                                    <Option
+                                                        key={category.id}
+                                                        value={category.id}
+                                                    >
+                                                        {category.name}
+                                                    </Option>
+                                                );
+                                            })}
+                                        </Select>
+                                    </Form.Item>
+                                )
                             }
-                        </Select>
+                        }
                     </Form.Item>
                     <Form.Item validateTrigger={'onBlur'} className="form-item" name="product_status" label="商品状态">
                         <Select className="select-default">

@@ -5,9 +5,9 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 
 declare interface IExcelDialogProps {
     visible: boolean;
-    allCount: number;
+    total: number;
     // saleStatusList: ISaleStatausItem[];
-    getExcelData(count: number): void;
+    getExcelData(pageNumber: number,pageSize:number): void;
     toggleExcelDialog(status: boolean): void;
 }
 
@@ -16,6 +16,7 @@ declare interface IExcelDialogState {
 }
 
 class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogState> {
+    private excelPageSize:number = 10000;
     constructor(props: IExcelDialogProps) {
         super(props);
         this.state = {
@@ -29,7 +30,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
 
     private handleOk = () => {
         const { val } = this.state;
-        this.props.getExcelData(val);
+        this.props.getExcelData(val,this.excelPageSize);
     };
 
     private onChange = (e: RadioChangeEvent) => {
@@ -39,14 +40,14 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
     };
 
     render() {
-        const { visible, allCount } = this.props;
+        const { visible, total } = this.props;
         const { val } = this.state;
 
-        if (allCount < 1) {
+        if (total < 1) {
             return null;
         }
         const list: number[] = [];
-        for (let i = 0; i < Math.ceil(allCount / 10000); i++) {
+        for (let i = 0; i < Math.ceil(total / this.excelPageSize); i++) {
             list.push(i);
         }
 
@@ -65,7 +66,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
                             if (index === 0) {
                                 desc = '导出前1万条';
                             } else if (index === list.length - 1) {
-                                desc = `导出${index * 10000}条-${allCount}条`;
+                                desc = `导出${index * this.excelPageSize}条-${total}条`;
                             } else {
                                 desc = `导出${index}万条-${index + 1}条`;
                             }

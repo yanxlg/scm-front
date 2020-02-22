@@ -28,23 +28,23 @@ const DataStatusUpdate:React.FC = ()=>{
 
     return useMemo(()=>{
         return (
-            <Spin spinning={loading} tip="Loading...">
-                <Card
-                    id="vova-goods-card"
-                    title={<span className="ant-form-item">数据/状态更新</span>}
-                    onClick={goTo}
-                >
-                    <ul className="dataUpdateTags">
-                        {list.map((item: PropertyItem, index) => {
-                            return (
-                                <li key={item.property + index}>
-                                    {item.property}(<span>{item.count}</span>)
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </Card>
-            </Spin>
+            <Card
+                id="vova-goods-card"
+                title="数据/状态更新"
+                onClick={goTo}
+            >
+                <Spin spinning={loading} tip="Loading...">
+                <ul className="dataUpdateTags">
+                    {list.map((item: PropertyItem, index) => {
+                        return (
+                            <li key={item.property + index}>
+                                {item.property}(<span>{item.count}</span>)
+                            </li>
+                        );
+                    })}
+                </ul>
+                </Spin>
+            </Card>
         )
     },[list,loading]);
 };

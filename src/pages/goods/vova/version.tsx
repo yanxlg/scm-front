@@ -1,6 +1,6 @@
 import React from 'react';
 import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
-import { Button, Card, Checkbox, Divider, message, Table } from 'antd';
+import { Button, Card, Checkbox, Divider, message, Spin, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnType } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
@@ -371,16 +371,16 @@ class Version extends React.PureComponent<{}, IVersionState> {
                         onSearch={this.queryData}
                     />
                 </Card>
-                <Card className="product-card card-divider">
-                    <Divider orientation="left">数据/状态更新：</Divider>
-                    {
-                        attributes?.map(({count,property})=>{
-                            return <div className="product-text" key={property}>{property}（{count}）</div>
-                        })
-                    }
-                    <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
-                </Card>
-
+                    <Card className="product-card" title="数据/状态更新">
+                        <Spin spinning={dataLoading} tip="Loading...">
+                        {
+                            attributes?.map(({count,property})=>{
+                                return <div className="product-text" key={property}>{property}（{count}）</div>
+                            })
+                        }
+                        <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
+                        </Spin>
+                    </Card>
                 <Table
                     loading={dataLoading}
                     rowKey="product_id"

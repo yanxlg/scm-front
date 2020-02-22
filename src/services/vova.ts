@@ -9,14 +9,14 @@ export async function queryGoodsVersion(params?: IApiParams) {
 }
 
 
-export async function queryGoodsDetail(params:{product_id:number; channel?:string;}) {
+export async function queryGoodsDetail(params:{product_id:string; channel?:string;}) {
     return request.get(ApiPathEnum.QueryGoodsDetail,{
         params: params,
     })
 }
 
 export async function editGoodsDetail(params:{
-    goods_id:number;
+    goods_id:string;
     sku_list:string;
 }) {
     return request.put(ApiPathEnum.EditGoodsDetail,{
