@@ -1,3 +1,8 @@
+/**
+ * Routes:
+ *   - ./src/routes/PrivateRoute.tsx
+ */
+
 import React from 'react';
 import DraftSearch from '@/pages/task/components/DraftSearchForm';
 import "@/styles/index.less";

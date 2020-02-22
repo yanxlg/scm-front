@@ -1,3 +1,8 @@
+/**
+ * Routes:
+ *   - ./src/routes/PrivateRoute.tsx
+ */
+
 import React from 'react';
 import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
 import { Button, Card, Checkbox, Divider, message, Spin, Table } from 'antd';

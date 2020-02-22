@@ -1,3 +1,8 @@
+/**
+ * Routes:
+ *   - ./src/routes/PrivateRoute.tsx
+ */
+
 import React, { RefObject } from 'react';
 import SearchCondition from './components/SearchCondition';
 import DataStatusUpdate from './components/DataStatusUpdate';
