@@ -78,7 +78,6 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                     children: (
                         <>
                             <Link to={`/goods/local/version?id=${value}`}>{value}</Link>
-                             
                         </>
                     ),
                     props: {
@@ -470,7 +469,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                 className="goods-local-table"
                 columns={this.columns}
                 dataSource={goodsList}
-                scroll={{ x: true }}
+                scroll={{ x: true, y: 800 }}
                 pagination={false}
                 loading={searchLoading}
             />

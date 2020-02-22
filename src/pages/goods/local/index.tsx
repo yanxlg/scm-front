@@ -14,7 +14,7 @@ import '../../../styles/goods-local.less';
 import {
     getGoodsList,
     postGoodsExports,
-    getGoodsOnsale,
+    postGoodsOnsale,
     getGoodsDelete,
     getGoodsSales,
     IFilterParams,
@@ -450,7 +450,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     }
 
     // 一键上架
-    getGoodsOnsale = () => {
+    postGoodsOnsale = () => {
         const { selectedRowKeys } = this.state;
         if (!selectedRowKeys.length) {
             return message.error('一键上架需要选择商品');
@@ -458,9 +458,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             onsaleLoading: true,
         });
-        getGoodsOnsale({ scm_goods_id: selectedRowKeys })
+        postGoodsOnsale({ scm_goods_id: selectedRowKeys })
             .then(res => {
-                // console.log('getGoodsOnsale');
+                // console.log('postGoodsOnsale');
                 this.setState({
                     onsaleLoading: false,
                 });
@@ -468,7 +468,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 message.success('一键上架成功');
             })
             .catch(err => {
-                // console.log('getGoodsOnsale ERR');
+                // console.log('postGoodsOnsale ERR');
                 this.setState({
                     onsaleLoading: false,
                 });
@@ -478,7 +478,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
     // 删除
     getGoodsDelete = () => {
-        const { selectedRowKeys } = this.state;
+        const { selectedRowKeys, goodsList } = this.state;
         if (!selectedRowKeys.length) {
             return message.error('删除需要选择商品');
         }
@@ -486,7 +486,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             deleteLoading: true,
         });
         // console.log('selectedRowKeys', selectedRowKeys);
-        getGoodsDelete({ product_ids: selectedRowKeys })
+        getGoodsDelete({ 
+            commodity_ids: [...new Set(selectedRowKeys.map(productId => {
+                const index = goodsList.findIndex(item => item.product_id === productId)
+                return goodsList[index].commodity_id;
+            }))] 
+        })
             .then(res => {
                 this.setState({
                     deleteLoading: false,
@@ -571,7 +576,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     deleteLoading={deleteLoading}
                     allCatagoryList={allCatagoryList}
                     onSearch={this.onSearch}
-                    getGoodsOnsale={this.getGoodsOnsale}
+                    postGoodsOnsale={this.postGoodsOnsale}
                     getGoodsDelete={this.getGoodsDelete}
                     toggleExcelDialog={this.toggleExcelDialog}
                     getCurrentCatagory={this.getCurrentCatagory}
