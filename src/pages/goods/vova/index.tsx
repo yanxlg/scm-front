@@ -87,11 +87,11 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             page: page,
             page_count: page_number,
             ...values,
-        }).then(({data:{data=[],total=0}}) => {
+        }).then(({data:{list=[],total=0}}) => {
             this.setState({
                 page: page,
                 pageNumber: page_number,
-                dataSet: data,
+                dataSet: list,
                 total,
             });
         }).finally(() => {
