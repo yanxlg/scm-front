@@ -40,7 +40,7 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
     private onSearch(){
 
     }
-    private onSelectChange(selectedRowKeys: string[] | number[]) {
+    private onSelectChange(selectedRowKeys: React.Key[]) {
         this.setState({ selectedRowKeys:selectedRowKeys as string[]});
     };
     private showTotal(total: number) {
@@ -116,7 +116,7 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
         return (
             <div className="container">
                 <DraftSearch/>
-                <div className="block config-card">
+                <div className="block form-item">
                     <Button loading={searchLoading} onClick={this.onSearch} type="primary">查询</Button>
                     <Button type="link">重新创建任务</Button>
                     <Button type="link">删除任务</Button>
@@ -138,7 +138,7 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
                     />
                 </div>
                 <Table
-                    className="config-card"
+                    className="form-item"
                     rowKey="order_goods_sn"
                     bordered={true}
                     rowSelection={rowSelection}

@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import TaskSearch, { _TaskSearch } from '@/pages/task/components/TaskSearch';
+import TaskSearch from '@/pages/task/components/TaskSearch';
 import { Button, Modal, Pagination } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
@@ -8,10 +8,11 @@ import '@/styles/table.less';
 import { getTaskList, deleteTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskRangeList, TaskStatus, TaskStatusList } from '@/enums/ConfigEnum';
+import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
+import { utcToLocal } from '@/utils/date';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -27,10 +28,10 @@ declare interface IALLTaskPageState {
 declare interface IDataItem {
     task_id: number;
     task_name: string;
-    task_range: string;
-    task_type: string;
+    task_range: number;
+    task_type: number;
     start_time: string;
-    status: string;
+    status: number;
     create_time: string;
 }
 
@@ -40,7 +41,7 @@ declare interface IALLTaskPageProps {
 
 @BindAll()
 class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
-    private searchRef: RefObject<_TaskSearch> = React.createRef();
+    private searchRef: RefObject<TaskSearch> = React.createRef();
     constructor(props: IALLTaskPageProps) {
         super(props);
         this.state = {
@@ -58,7 +59,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         this.queryList();
     }
 
-    private onSearch = () => {
+    private onSearch(){
         this.queryList({
             searchLoading: true,
             page: 1,
@@ -143,12 +144,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'task_type',
                 width: '223px',
                 align: 'center',
+                render:(text:number)=>text === TaskType.once?"单次任务":text===TaskType.interval?"定时任务":""
             },
             {
                 title: '开始时间',
                 dataIndex: 'start_time',
                 width: '223px',
                 align: 'center',
+                render:(dateString)=>utcToLocal(dateString)
             },
             {
                 title: '任务状态',
@@ -162,6 +165,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'create_time',
                 width: '200px',
                 align: 'center',
+                render:(dateString)=>utcToLocal(dateString)
             },
             {
                 title: '操作',
@@ -191,7 +195,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         ];
                     } else {
                         return [
-                            <Button type="link" key="1">
+                            <Button type="link" key="1" onClick={() => this.viewTaskDetail(record)}>
                                 查看任务详情
                             </Button>,
                         ];
@@ -204,7 +208,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         }
         return columns;
     }
-    private onSelectChange(selectedRowKeys: string[] | number[]) {
+    private onSelectChange(selectedRowKeys:React.Key[]) {
         this.setState({ selectedRowKeys: selectedRowKeys as string[] });
     }
     private showTotal(total: number) {
@@ -239,9 +243,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         });
     }
     private viewTaskDetail(task: IDataItem) {
-        // 根据task_type 分别弹不同的弹窗
+        // task_range 分别弹不同的弹窗
         const { task_range, task_id } = task;
-        if (task_range === void 0) {
+        if (task_range === 1) {
             // url
             Modal.info({
                 content: <URLGather taskId={task_id} />,
@@ -297,8 +301,8 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         const selectTaskSize = selectedRowKeys.length;
         return (
             <div>
-                <TaskSearch wrappedComponentRef={this.searchRef} task_status={task_status} />
-                <div className="config-card">
+                <TaskSearch ref={this.searchRef} task_status={task_status} />
+                <div className="form-item">
                     <div className="block">
                         <Button loading={searchLoading} onClick={this.onSearch} type="primary">
                             查询
@@ -344,7 +348,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         />
                     </div>
                     <FitTable
-                        className="config-card"
+                        className="form-item"
                         rowKey="task_id"
                         bordered={true}
                         rowSelection={rowSelection}

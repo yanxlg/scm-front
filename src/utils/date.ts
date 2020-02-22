@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 
 export function formatDate(date: Date, fmt: string): string {
 	if (/(y+)/.test(fmt)) {
@@ -36,6 +36,8 @@ export function transEndDate(moment?:Moment) {
 }
 
 
-function transApiDate(unix:number) {
+const dateFormat = "YYYY-MM-DD HH:mm:ss";
 
+export function utcToLocal(dateString?:string) {
+    return dateString?moment.utc(dateString).local().format(dateFormat):"";
 }

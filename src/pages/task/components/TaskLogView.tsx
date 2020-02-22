@@ -54,7 +54,7 @@ const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
             <div className="config-console-content">
                 <div className="config-console-title">任务日志</div>
                 <Table
-                    className="config-card"
+                    className="form-item"
                     rowKey="order_goods_sn"
                     columns={columns}
                     dataSource={dataSet}

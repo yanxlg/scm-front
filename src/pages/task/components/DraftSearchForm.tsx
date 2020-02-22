@@ -1,8 +1,7 @@
-import React from 'react';
-import { Form } from '@/components/Form';
-import { Input, Select } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
+import React, { RefObject } from 'react';
+import { Input, Select, Form } from 'antd';
 import "@/styles/config.less";
+import { FormInstance } from 'antd/es/form';
 
 declare interface IFormData {
     taskName?:string;
@@ -12,51 +11,58 @@ declare interface IFormData {
     createEndTime?:string;
 }
 
-declare interface ITaskSearchProps extends FormComponentProps<IFormData>{
+declare interface ITaskSearchProps{
 }
 
 const Option = Select.Option;
 
-class _DraftSearch extends Form.BaseForm<ITaskSearchProps>{
+class DraftSearch extends React.PureComponent<ITaskSearchProps>{
+    private formRef:RefObject<FormInstance> = React.createRef();
     render(){
-        const {form} = this.props;
         return (
             <React.Fragment>
-                <Form className="config-card" layout="inline" autoComplete={'off'}>
-                    <Form.Item form={form} name="taskId" label="任务名称">
+                <Form
+                    layout="inline"
+                    autoComplete={'off'}
+                    ref={this.formRef}
+                >
+                    <Form.Item className="form-item" name="taskId" label="任务名称">
                         <Input className="input-default" />
                     </Form.Item>
-                    <Form.Item form={form} name="scope" label="任务范围">
+                    <Form.Item className="form-item" name="scope" label="任务范围">
                         <Select className="select-default">
                             <Option value="1">女装</Option>
                             <Option value="2">男装</Option>
                             <Option value="3">鞋子</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item form={form} name="taskStatus" label="任务状态">
+                    <Form.Item className="form-item" name="taskStatus" label="任务状态">
                         <Select className="select-default">
                             <Option value="1">女装</Option>
                             <Option value="2">男装</Option>
                             <Option value="3">鞋子</Option>
                         </Select>
                     </Form.Item>
-                    <div className="inline-block">
-                        <Form.Item className="margin-none" form={form} name="createStartTime" label="任务创建时间">
+                    <Form.Item label="任务创建时间" className="form-item">
+                        <Form.Item
+                            noStyle={true}
+                            name="createStartTime"
+                        >
                             <Input className="input-small"/>
                         </Form.Item>
-                        <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="createEndTime">
+                        <span className="config-colon">-</span>
+                        <Form.Item
+                            noStyle={true}
+                            name="createEndTime"
+                        >
                             <Input className="input-small"/>
                         </Form.Item>
-                    </div>
+                    </Form.Item>
                 </Form>
             </React.Fragment>
         )
     }
 }
 
-const DraftSearch = Form.create<ITaskSearchProps>()(_DraftSearch);
 
 export default DraftSearch;
-
-export {_DraftSearch};

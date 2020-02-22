@@ -1,7 +1,7 @@
 import React from 'react';
 
 import styles from './index.less';
-import { Breadcrumb } from 'antd';
+import { Breadcrumb, Button } from 'antd';
 import { genBreadcrumbProps } from '@ant-design/pro-layout/es/utils/getBreadcrumbProps';
 import { BasicLayoutProps, getMenuData, MenuDataItem } from '@ant-design/pro-layout';
 
@@ -31,7 +31,7 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
           {
               breadcrumbData ? <Breadcrumb className={styles.breadcrumb} routes={breadcrumbData} itemRender={itemRender}/> : null}
           <div className={className}>
-              用户名，退出
+              用户名，<Button type="link" className="padding-none" onClick={()=>{alert("退出")}}>退出</Button>
           </div>
       </div>
     );

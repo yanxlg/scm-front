@@ -1,12 +1,12 @@
-import React from 'react';
-import { Form } from '@/components/Form';
-import { FormComponentProps } from 'antd/lib/form';
+import React, { RefObject } from 'react';
 import '@/styles/product.less';
 import '@/styles/form.less';
-import { Button, Icon, InputNumber, Modal } from 'antd';
+import { Button, InputNumber, Modal, Form } from 'antd';
 import { numberFormatter } from '@/utils/common';
 import { Bind } from 'lodash-decorators';
 import { editGoodsDetail, queryGoodsDetail } from '@/services/vova';
+import { FormInstance } from 'antd/es/form';
+import { CloseOutlined } from '@ant-design/icons/lib';
 
 declare interface ISku {
     sku_name: string;
@@ -23,8 +23,8 @@ declare interface IFormData {
     sku_list: ISku[];
 }
 
-declare interface IProductEditProps extends FormComponentProps<IFormData> {
-    product_id: number;
+declare interface IProductEditProps{
+    product_id: string;
     channel?: string;
 }
 
@@ -35,13 +35,16 @@ declare interface IProductEditState {
     main_image?: string;
     product_description?: string;
     sku_list?: ISku[];
+    submitting:boolean;
 }
 
-class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditState> {
+class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEditState> {
+    private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props: IProductEditProps) {
         super(props);
         this.state = {
             loading: true,
+            submitting:false
         };
     }
     componentDidMount(): void {
@@ -49,13 +52,13 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
     }
     @Bind
     private queryDetail() {
-        const { product_id, channel, form } = this.props;
+        const { product_id, channel } = this.props;
         queryGoodsDetail({ product_id, channel }).then(({ data = {} }) => {
             this.setState({
                 loading: false,
                 ...data,
             },()=>{
-                form.setFieldsValue({
+                this.formRef.current!.setFieldsValue({
                     sku_list: data.sku_list,
                 });
             });
@@ -68,30 +71,39 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
     }
     @Bind
     private onSubmit() {
-        const { form, product_id } = this.props;
-        const { sku_list = [] } = form.getFieldsValue();
+        const { product_id } = this.props;
+        const { sku_list = [] } = this.formRef.current!.getFieldsValue();
         const { sku_list: _sku_list } = this.state;
         // diff
         const skuString = JSON.stringify(sku_list);
         if (JSON.stringify(sku_list) !== JSON.stringify(_sku_list)) {
+            this.setState({
+                submitting:true
+            });
             editGoodsDetail({
                 goods_id: product_id,
                 sku_list: skuString,
             }).then(() => {
                 this.onClose();
+            }).finally(()=>{
+                this.setState({submitting:false})
             });
         } else {
             this.onClose();
         }
     }
     render() {
-        const { form } = this.props;
-        const { product_id, product_name, main_image, product_description,sku_list=[] } = this.state;
+        const { product_id, product_name, main_image, product_description,sku_list=[],submitting } = this.state;
         return (
-            <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
+            <Form
+                className="form-help-absolute"
+                layout="horizontal"
+                autoComplete={'off'}
+                ref={this.formRef}
+            >
                 <button className="ant-modal-close block" onClick={this.onClose}>
                     <div className="ant-modal-close-x">
-                        <Icon type="close" />
+                        <CloseOutlined />
                     </div>
                 </button>
                 <div className="form-item">
@@ -119,17 +131,17 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                     }
                     return (
                         <div className="form-item flex flex-align" key={sku.sku_name + index}>
-                            <div className="inline-block ant-form-item-label product-modal-item product-modal-name" title={sku.sku_name}>
+                            <div className="ant-form-item-label product-modal-item product-modal-name" title={sku.sku_name}>
                                 <label title="sku名称">sku名称</label>
                                 {sku.sku_name}
                             </div>
-                            <div className="inline-block ant-form-item-label product-modal-item product-modal-avatar-wrap">
+                            <div className="ant-form-item-label product-modal-item flex flex-align">
                                 <label title="对应图片">对应图片</label>
-                                <img
-                                    src={sku.sku_image}
-                                    className="product-modal-avatar-small"
-                                    alt="avatar"
-                                />
+                                {
+                                    sku.sku_image
+                                        ?
+                                        <img src={sku.sku_image} className="product-modal-avatar-small" alt="avatar" />:<div className="product-modal-avatar-small"/>
+                                }
                             </div>
                             <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
                                 <label title="商品规格">商品规格</label>
@@ -140,10 +152,9 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                                 </div>
                             </div>
                             <Form.Item
-                                className="inline-block product-modal-item"
+                                className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                form={form}
-                                name={`sku_list[${index}].price`}
+                                name={["sku_list",index,"price"]}
                                 label="价格"
                             >
                                 <InputNumber
@@ -153,10 +164,9 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                                 />
                             </Form.Item>
                             <Form.Item
-                                className="inline-block"
+                                className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                form={form}
-                                name={`sku_list[${index}].freight`}
+                                name={["sku_list",index,"freight"]}
                                 label="运费"
                             >
                                 <InputNumber
@@ -166,10 +176,9 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                                 />
                             </Form.Item>
                             <Form.Item
-                                className="inline-block"
+                                className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                form={form}
-                                name={`sku_list[${index}].storage`}
+                                name={["sku_list",index,"storage"]}
                                 label="库存"
                             >
                                 <InputNumber
@@ -181,15 +190,12 @@ class _ProductEditModal extends Form.BaseForm<IProductEditProps, IProductEditSta
                         </div>
                     );
                 })}
-
-                <Button type="primary" className="float-right" onClick={this.onSubmit}>
+                <Button loading={submitting} type="primary" className="float-right" onClick={this.onSubmit}>
                     确定
                 </Button>
             </Form>
         );
     }
 }
-
-const ProductEditModal = Form.create<IProductEditProps>()(_ProductEditModal);
 
 export default ProductEditModal;
