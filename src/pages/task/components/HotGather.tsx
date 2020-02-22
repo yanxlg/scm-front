@@ -17,7 +17,7 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskRange, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import {
     addPddHotTask,
     IPddHotTaskParams,
@@ -64,7 +64,7 @@ declare interface IHotGatherState {
     gatherLoading: boolean;
     groundLoading: boolean;
     queryLoading: boolean;
-    taskType?: TaskType;
+    status?: string;
     successTimes?: number;
     failTimes?: number;
 
@@ -111,13 +111,13 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
         if (taskId !== void 0) {
             queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
                 const initValues = this.convertDetail(task_detail_info);
-                const { task_type, success, fail } = initValues;
+                const { success, fail,status } = initValues;
                 this.formRef.current!.setFieldsValue({
                     ...initValues,
                 });
                 this.setState({
                     queryLoading: false,
-                    taskType: task_type,
+                    status: status,
                     successTimes: success,
                     failTimes: fail,
                 });
@@ -448,7 +448,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
             gatherLoading,
             groundLoading,
             queryLoading,
-            taskType,
+            status,
             failTimes,
             successTimes,
             pddCategory = [],
@@ -462,7 +462,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                 {edit && (
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
-                        <div className="config-task-label">任务状态: {taskType}</div>
+                        <div className="config-task-label">任务状态: {TaskStatusList[status??""]}</div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>
                     </React.Fragment>

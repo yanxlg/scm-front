@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import moment, { Moment } from 'moment';
 import { numberFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
@@ -26,14 +26,6 @@ declare interface IURLGatherProps{
     taskId?: number;
 }
 
-declare interface IHotGatherState {
-    gatherLoading: boolean;
-    groundLoading: boolean;
-    queryLoading: boolean;
-    taskType?: TaskType;
-    successTimes?: number;
-    failTimes?: number;
-}
 
 const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
 
@@ -41,7 +33,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
     const [gatherLoading,setGatherLoading] = useState(false);
     const [groundLoading,setGroundLoading] = useState(false);
     const [queryLoading,setQueryLoading] = useState(taskId !== void 0);
-    const [taskType,setTaskType] = useState<TaskType|undefined>();
+    const [taskStatus,setTaskStatus] = useState<string|undefined>();
     const [successTimes,setSuccessTimes] = useState<number|undefined>();
     const [failTimes,setFailTimes] = useState<number|undefined>();
 
@@ -118,12 +110,12 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
         if (taskId !== void 0) {
             queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
                 const initValues = convertDetail(task_detail_info);
-                const { task_type, success, fail } = initValues;
+                const { status, success, fail } = initValues;
                 form.setFieldsValue({
                     ...initValues,
                 });
                 setQueryLoading(false);
-                setTaskType(task_type);
+                setTaskStatus(status);
                 setSuccessTimes(success);
                 setFailTimes(fail);
             });
@@ -298,7 +290,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                 {edit && (
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
-                        <div className="config-task-label">任务状态: {taskType}</div>
+                        <div className="config-task-label">任务状态: {TaskStatusList[taskStatus??""]}</div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>
                     </React.Fragment>
@@ -568,7 +560,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                 </Form>
             </Spin>
         );
-    },[taskId,gatherLoading,groundLoading,queryLoading,taskType,successTimes,failTimes])
+    },[taskId,gatherLoading,groundLoading,queryLoading,taskStatus,successTimes,failTimes])
 };
 
 
