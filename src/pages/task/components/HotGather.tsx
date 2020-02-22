@@ -620,7 +620,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                             </Form.Item>
                         </div>
                         <Form.Item
-                            className="form-item form-item-inline"
+                            className="form-item-inline"
                             validateTrigger={'onBlur'}
                             name="keywords"
                             label="关&ensp;键&ensp;词"
@@ -697,12 +697,12 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                 </Form.Item>
                             </Form.Item>
                         </div>
-                        <div className="form-item">
+                        <div>
                             <Form.Item
                                 validateTrigger={'onBlur'}
                                 name="grab_page_count"
                                 label="爬取页数"
-                                className="form-item-horizon"
+                                className="form-item-horizon form-item-inline"
                             >
                                 <InputNumber
                                     min={0}
@@ -714,7 +714,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                             <Form.Item
                                 validateTrigger={'onBlur'}
                                 name="grab_count_max"
-                                className="form-item-horizon"
+                                className="form-item-horizon form-item-inline"
                                 label={
                                     <span>
                                         爬取数量
