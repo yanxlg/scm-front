@@ -11,8 +11,8 @@ import { FormInstance } from 'antd/es/form';
 export declare interface IFormData {
     task_id?: string;
     task_name?: string;
-    task_range?: string;
-    task_status?: string;
+    task_range?: number;
+    task_status?: number;
     task_begin_time?: number;
     task_end_time?: number;
     task_create_time1?: number;
@@ -20,7 +20,7 @@ export declare interface IFormData {
 }
 
 declare interface ITaskSearchProps{
-    task_status: TaskStatus;
+    task_status?: TaskStatus;
 }
 
 const Option = Select.Option;
@@ -124,7 +124,7 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                             }
                         </Select>
                     </Form.Item>
-                    {task_status === TaskStatus.All && (
+                    {task_status === void 0 && (
                         <Form.Item
                             name="task_status"
                             label="任务状态"

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Card, DatePicker, Input, InputNumber, Modal, Radio, Spin, Form } from 'antd';
+import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import { TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
@@ -55,23 +55,24 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
             urls,
             ...extra
         } = info;
+        const taskType = (task_type as any) === "单次任务"?TaskType.once:TaskType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
-            task_end_time: task_end_time ? moment(task_end_time*1000) : undefined,
+            task_end_time: taskType===TaskType.interval&&task_end_time ? moment(task_end_time*1000) : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
                     ? TaskIntervalType.day
                     : TaskIntervalType.second
                 : TaskIntervalType.day,
+            task_type:taskType,
             onceStartTime:
-                task_type === TaskType.once && task_start_time
+                taskType === TaskType.once && task_start_time
                     ? moment(task_start_time*1000)
                     : undefined,
             timerStartTime:
-                task_type === TaskType.interval && task_start_time
+                taskType === TaskType.interval && task_start_time
                     ? moment(task_start_time*1000)
                     : undefined,
-            task_type,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
             urls: parseText(urls),

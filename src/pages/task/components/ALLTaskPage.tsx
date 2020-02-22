@@ -28,7 +28,7 @@ declare interface IALLTaskPageState {
 declare interface IDataItem {
     task_id: number;
     task_name: string;
-    task_range: number;
+    task_range: string;
     task_type: number;
     start_time: string;
     status: number;
@@ -36,7 +36,7 @@ declare interface IDataItem {
 }
 
 declare interface IALLTaskPageProps {
-    task_status: TaskStatus;
+    task_status?: TaskStatus;
 }
 
 @BindAll()
@@ -79,6 +79,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             searchLoading,
         });
         getTaskList({
+            task_status:this.props.task_status,
             page: page,
             page_number: page_number,
             ...values,
@@ -143,8 +144,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 title: '任务类型',
                 dataIndex: 'task_type',
                 width: '223px',
-                align: 'center',
-                render:(text:number)=>text === TaskType.once?"单次任务":text===TaskType.interval?"定时任务":""
+                align: 'center'
             },
             {
                 title: '开始时间',
@@ -173,7 +173,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 align: 'center',
                 render: (text: any, record: IDataItem) => {
                     const { task_status } = this.props;
-                    if (task_status === TaskStatus.All) {
+                    if (task_status === void 0) {
                         return [
                             <Button
                                 type="link"
@@ -203,7 +203,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 },
             },
         ];
-        if (task_status !== TaskStatus.All) {
+        if (task_status !== void 0) {
             columns.splice(7, 1);
         }
         return columns;
@@ -245,7 +245,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     private viewTaskDetail(task: IDataItem) {
         // task_range 分别弹不同的弹窗
         const { task_range, task_id } = task;
-        if (task_range === 1) {
+        if (task_range === "1") {
             // url
             Modal.info({
                 content: <URLGather taskId={task_id} />,
@@ -307,14 +307,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         <Button loading={searchLoading} onClick={this.onSearch} type="primary">
                             查询
                         </Button>
-                        {(task_status === TaskStatus.All ||
+                        {(task_status === void 0 ||
                             task_status === TaskStatus.Executed ||
                             task_status === TaskStatus.Failed) && (
                             <Button type="link" disabled={selectTaskSize === 0}>
                                 重新执行任务
                             </Button>
                         )}
-                        {(task_status === TaskStatus.All ||
+                        {(task_status === void 0 ||
                             task_status === TaskStatus.UnExecuted) && (
                             <Button type="link" disabled={selectTaskSize === 0}>
                                 立即执行任务
@@ -357,7 +357,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         pagination={false}
                         loading={dataLoading}
                         scroll={{
-                            x: task_status === TaskStatus.All ? 1600 : 1500,
+                            x: task_status === void 0 ? 1600 : 1500,
                             scrollToFirstRowOnChange: true,
                         }}
                         bottom={100}
