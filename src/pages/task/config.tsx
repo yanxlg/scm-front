@@ -1,9 +1,13 @@
+/**
+ * Routes:
+ *   - ./src/routes/PrivateRoute.tsx
+ */
+
 import React, { useCallback, useMemo, useState } from 'react';
 import { Tabs } from 'antd';
 import HotGather from '@/pages/task/components/HotGather';
 import '@/styles/index.less';
 import URLGather from '@/pages/task/components/URLGather';
-import TimerUpdate from '@/pages/task/components/TimerUpdate';
 
 const { TabPane } = Tabs;
 

@@ -1,3 +1,8 @@
+/**
+ * Routes:
+ *   - ./src/routes/PrivateRoute.tsx
+ */
+
 import React from 'react';
 import { DatePicker, Button, message, Pagination } from 'antd';
 // import { RangePickerValue } from 'antd/lib/date-picker/interface';

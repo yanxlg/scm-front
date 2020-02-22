@@ -393,7 +393,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                             x: task_status === void 0 ? 1600 : 1500,
                             scrollToFirstRowOnChange: true,
                         }}
-                        bottom={100}
+                        bottom={130}
                     />
                 </div>
             </div>

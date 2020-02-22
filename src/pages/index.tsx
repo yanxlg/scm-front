@@ -1,5 +1,4 @@
 /**
- * hideInMenu: true
  * Routes:
  *   - ./src/routes/PrivateRoute.tsx
  */
