@@ -181,7 +181,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
         const { dataSet, keys } = this.combineDataSet(data);
         const selectedSize = selectedRowKeys.size;
         const indeterminate = selectedSize > 0;
-        const checkedAll = selectedSize === keys.length;
+        const checkedAll = selectedSize === keys.length && selectedSize > 0;
         const columns: ColumnType<ITableItem>[] = [
             {
                 title: (
