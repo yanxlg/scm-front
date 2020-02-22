@@ -212,11 +212,11 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
             return false;
         }
         const startValue = startTime.valueOf();
-        const currentValue = moment().valueOf();
+        const currentDay = moment().startOf('day');
         if (!endTime) {
-            return startValue < currentValue;
+            return startTime < currentDay;
         }
-        return startValue > endTime.valueOf() || startValue < currentValue;
+        return startValue > endTime.endOf('day') || startTime < currentDay;
     },[]);
 
     const disabledEndDate = useCallback((endTime: Moment | null) => {
@@ -225,11 +225,11 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
             return false;
         }
         const endValue = endTime.valueOf();
-        const currentValue = moment().valueOf();
+        const currentDay = moment().startOf('day');
         if (!startTime) {
-            return endValue < currentValue;
+            return endTime < currentDay;
         }
-        return startTime.valueOf() > endValue || endValue < currentValue;
+        return startTime.startOf('day') > endValue || endTime < currentDay;
     },[]);
 
     const checkUrl = useCallback((type:any,value) => {
@@ -379,6 +379,7 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={taskType !== TaskType.once}
+                                                            disabledDate={disabledStartDate}
                                                             placeholder="立即开始"
                                                         />
                                                     </Form.Item>
