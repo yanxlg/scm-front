@@ -17,7 +17,7 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskRange, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import {
     addPddHotTask,
     IPddHotTaskParams,
@@ -64,7 +64,7 @@ declare interface IHotGatherState {
     gatherLoading: boolean;
     groundLoading: boolean;
     queryLoading: boolean;
-    taskType?: TaskType;
+    status?: string;
     successTimes?: number;
     failTimes?: number;
 
@@ -111,13 +111,13 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
         if (taskId !== void 0) {
             queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
                 const initValues = this.convertDetail(task_detail_info);
-                const { task_type, success, fail } = initValues;
+                const { success, fail,status } = initValues;
                 this.formRef.current!.setFieldsValue({
                     ...initValues,
                 });
                 this.setState({
                     queryLoading: false,
-                    taskType: task_type,
+                    status: status,
                     successTimes: success,
                     failTimes: fail,
                 });
@@ -171,25 +171,26 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
             task_interval_seconds,
             ...extra
         } = info;
+        const taskType = (task_type as any) === "单次任务"?TaskType.once:TaskType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
             range: range === TaskRange.fullStack ? range : TaskRange.store,
             shopId: range !== TaskRange.fullStack ? range : undefined,
-            task_end_time: task_end_time ? moment(task_end_time*1000) : undefined,
+            task_end_time: taskType===TaskType.interval && task_end_time ? moment(task_end_time*1000) : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
                     ? TaskIntervalType.day
                     : TaskIntervalType.second
                 : TaskIntervalType.day,
             onceStartTime:
-                task_type === TaskType.once && task_start_time
+                taskType === TaskType.once && task_start_time
                     ? moment(task_start_time*1000)
                     : undefined,
             timerStartTime:
-                task_type === TaskType.interval && task_start_time
+                taskType === TaskType.interval && task_start_time
                     ? moment(task_start_time*1000)
                     : undefined,
-            task_type,
+            task_type:taskType,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
             ...extra,
@@ -392,7 +393,8 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
 
     @Bind
     private checkDate(type:any,value:Moment){
-        if(!value){
+        const taskType = this.formRef.current!.getFieldValue("task_type");
+        if(!value || taskType === TaskType.interval){
             return Promise.resolve();
         }
         const now = moment();
@@ -405,7 +407,8 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
 
     @Bind
     private checkStartDate(type:any,value:Moment){
-        if(!value){
+        const taskType = this.formRef.current!.getFieldValue("task_type");
+        if(!value || taskType === TaskType.once){
             return Promise.resolve();
         }
         const endDate = this.formRef.current!.getFieldValue("task_end_time");
@@ -422,7 +425,8 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
 
     @Bind
     private checkEndDate(type:any,value:Moment){
-        if(!value){
+        const taskType = this.formRef.current!.getFieldValue("task_type");
+        if(!value || taskType === TaskType.once){
             return Promise.resolve();
         }
         const startDate = this.formRef.current!.getFieldValue("timerStartTime");
@@ -444,7 +448,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
             gatherLoading,
             groundLoading,
             queryLoading,
-            taskType,
+            status,
             failTimes,
             successTimes,
             pddCategory = [],
@@ -458,7 +462,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                 {edit && (
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
-                        <div className="config-task-label">任务状态: {taskType}</div>
+                        <div className="config-task-label">任务状态: {TaskStatusList[status??""]}</div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>
                     </React.Fragment>
@@ -634,7 +638,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                     </Card>
                     <Card className="form-item" title="设置商品条件：">
                         <div>
-                            <Form.Item className="form-item-horizon" label="销&emsp;&emsp;量">
+                            <Form.Item className="form-item-horizon form-item-inline" label="销&emsp;&emsp;量">
                                 <Form.Item
                                     noStyle={true}
                                     validateTrigger={'onBlur'}
@@ -665,7 +669,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                     />
                                 </Form.Item>
                             </Form.Item>
-                            <Form.Item className="form-item-horizon" label="价格范围(￥)">
+                            <Form.Item className="form-item-horizon form-item-inline" label="价格范围(￥)">
                                 <Form.Item
                                     noStyle={true}
                                     validateTrigger={'onBlur'}
@@ -697,7 +701,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                 </Form.Item>
                             </Form.Item>
                         </div>
-                        <div>
+                        <div className="form-item">
                             <Form.Item
                                 validateTrigger={'onBlur'}
                                 name="grab_page_count"

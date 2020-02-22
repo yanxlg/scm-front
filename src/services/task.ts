@@ -30,6 +30,7 @@ export declare interface IPddHotTaskParams {
     success?:number;
     fail?:number;
     urls?:string;
+    status?:string;
 }
 
 declare interface IPddURLTaskParams {
