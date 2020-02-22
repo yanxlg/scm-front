@@ -245,7 +245,8 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
     },[]);
 
     const checkDate = useCallback((type:any,value:Moment) => {
-        if(!value){
+        const taskType = form.getFieldValue("task_type");
+        if(!value || taskType === TaskType.interval){
             return Promise.resolve();
         }
         const now = moment();
@@ -257,7 +258,8 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
     },[]);
 
     const checkStartDate = useCallback((type:any,value:Moment)=>{
-        if(!value){
+        const taskType = form.getFieldValue("task_type");
+        if(!value || taskType === TaskType.once){
             return Promise.resolve();
         }
         const endDate = form.getFieldValue("task_end_time");
@@ -273,7 +275,8 @@ const URLGather:React.FC<IURLGatherProps>=({taskId})=>{
     },[]);
 
     const checkEndDate = useCallback((type:any,value:Moment)=>{
-        if(!value){
+        const taskType = form.getFieldValue("task_type");
+        if(!value || taskType === TaskType.once){
             return Promise.resolve();
         }
         const startDate = form.getFieldValue("timerStartTime");
