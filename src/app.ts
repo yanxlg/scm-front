@@ -9,6 +9,7 @@ let timer:number|undefined = undefined;
 // router change
 history.listen(() => {
     Modal.destroyAll();
+    // 滚动条自动滚动到顶部
     if(timer){
         clearTimeout(timer);
         timer = undefined;
