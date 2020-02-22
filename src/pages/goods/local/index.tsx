@@ -497,7 +497,14 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     deleteLoading: false,
                 });
                 this.onSearch();
-                message.success('商品删除成功！');
+                const { success, failed } = res.data;
+                let str = '';
+                if (success.length) {
+                    str += `删除成功${success.join('、')}。`;
+                } else if (failed.length) {
+                    str += `删除失败${failed.join('、')}。`;
+                }
+                message.success(str);
             })
             .catch(err => {
                 // console.log('getGoodsDelete ERR');
