@@ -14,8 +14,7 @@ const cookie = getCookie("JSESSIONID");
 
 const Login:React.FC = ()=>{
     useEffect(()=>{
-        const host = window.location.host;
-        window.location.replace(`/cas/login?service=${host}/auth/cas_login`);
+        window.location.replace(`/cas/login?service=${window.location.protocol}//${window.location.host}/auth/cas_login`);
     },[]);
     return useMemo(()=>{
         return <div/>
