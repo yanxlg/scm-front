@@ -73,8 +73,17 @@ export async function addPddURLTask(params: IPddURLTaskParams) {
     });
 }
 
+
+export async function activeTasks(task_ids:string) {
+    return request.post(ApiPathEnum.ActiveTask,{
+        data:{
+            task_ids
+        }
+    })
+}
+
 export async function deleteTasks(task_ids:string) {
-    return request.delete(ApiPathEnum.DeleteTask, {
+    return request.put(ApiPathEnum.DeleteTask, {
         data: {
             task_ids
         },

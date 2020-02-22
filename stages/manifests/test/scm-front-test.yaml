@@ -40,12 +40,24 @@ data:
         set $prjroot /usr/share/nginx/html;
         root $prjroot/;
         index index.html;
+
+        rewrite ^/cas/(.*)$ https://cas-t.vova.com.hk/cas/$1 permanent; ## cas 重定向
+
         location /version {
             root $prjroot/;
             add_header Content-Type text/plain;
         }
         location / {
             try_files $uri $uri/ /index.html;
+        }
+        location /cas/{
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass https://scm-api-t.vova.com.hk;
         }
         location /auth/{
             proxy_set_header   Cookie $http_cookie;
