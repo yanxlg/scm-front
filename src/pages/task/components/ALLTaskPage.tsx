@@ -12,6 +12,7 @@ import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/Con
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
+import moment from 'moment';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -150,6 +151,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'start_time',
                 width: '223px',
                 align: 'center',
+                render:(dateString)=>dateString?moment.utc(dateString).local().format("YYYY-MM-DD HH:mm:ss"):""
             },
             {
                 title: '任务状态',
@@ -163,6 +165,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'create_time',
                 width: '200px',
                 align: 'center',
+                render:(dateString)=>dateString?moment.utc(dateString).local().format("YYYY-MM-DD HH:mm:ss"):""
             },
             {
                 title: '操作',
