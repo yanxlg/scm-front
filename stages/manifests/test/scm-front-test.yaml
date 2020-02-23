@@ -46,15 +46,16 @@ data:
             add_header Content-Type text/plain;
         }
         location / {
-            rewrite ^ http://example.com/ permanent；
-            if ($cookie_jsessionid != "")
-            {
-                try_files $uri $uri/ /index.html;
-            }
-            if ($cookie_jsessionid = "")
-            {
-                rewrite ^/(.*) https://cas-t.vova.com.hk/cas/ permanent; ## cas 重定向
-            }
+            return 301 https://www.baidu.com;
+            #rewrite ^ http://example.com/ permanent；
+            #if ($cookie_jsessionid != "")
+            #{
+            #    try_files $uri $uri/ /index.html;
+            #}
+            #if ($cookie_jsessionid = "")
+            #{
+            #    rewrite ^/(.*) https://cas-t.vova.com.hk/cas/ permanent; ## cas 重定向
+            #}
         }
         location /cas/{
             proxy_set_header   Cookie $http_cookie;
