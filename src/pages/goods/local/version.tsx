@@ -1,7 +1,3 @@
-/**
- * Routes:
- *   - ./src/routes/PrivateRoute.tsx
- */
 
 import React from 'react';
 import { DatePicker, Button, message, Pagination } from 'antd';
@@ -280,14 +276,14 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     }
 
     render() {
-        const { 
+        const {
             loading,
             page,
             page_count,
             allCount,
-            start_time, 
-            end_time, 
-            currentInfo, 
+            start_time,
+            end_time,
+            currentInfo,
             versionGoodsList
         } = this.state;
         let currentDom = null;
@@ -332,7 +328,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 </div>
             )
         }
-        
+
 
         return (
             <div className="goods-version">
@@ -344,7 +340,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                             className="date"
                             defaultValue={
                                 start_time ? [
-                                    moment(formatDate(new Date(start_time * 1000), 'yyyy-MM-dd')), 
+                                    moment(formatDate(new Date(start_time * 1000), 'yyyy-MM-dd')),
                                     moment(formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'))
                                 ] : [null, null]
                             }
@@ -352,13 +348,13 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
                     </div>
-                    <Pagination 
+                    <Pagination
                         size="small"
                         total={allCount}
                         current={page}
                         pageSize={page_count}
-                        showSizeChanger={true} 
-                        showQuickJumper={true} 
+                        showSizeChanger={true}
+                        showQuickJumper={true}
                         pageSizeOptions={pageSizeOptions}
                         onChange={this.onChangePage}
                         onShowSizeChange={this.pageCountChange}

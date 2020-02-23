@@ -1,7 +1,3 @@
-/**
- * Routes:
- *   - ./src/routes/PrivateRoute.tsx
- */
 
 import React from 'react';
 import { Pagination, message } from 'antd';
@@ -313,12 +309,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         let rowKeys: string[] = [];
         // let goodsId: string | number = 0;
         for (let i = 0, len = list.length; i < len; i++) {
-            let { 
+            let {
                 sku_info,
                 first_catagory,
                 second_catagory,
                 third_catagory,
-                ...rest 
+                ...rest
             } = list[i];
             first_catagory = Array.isArray(first_catagory) ? {} : first_catagory;
             second_catagory = Array.isArray(second_catagory) ? {} : second_catagory;
@@ -501,11 +497,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             deleteLoading: true,
         });
         // console.log('selectedRowKeys', selectedRowKeys);
-        getGoodsDelete({ 
+        getGoodsDelete({
             commodity_ids: [...new Set(selectedRowKeys.map(productId => {
                 const index = goodsList.findIndex(item => item.product_id === productId)
                 return goodsList[index].commodity_id;
-            }))] 
+            }))]
         })
             .then(res => {
                 this.setState({
