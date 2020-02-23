@@ -46,6 +46,7 @@ data:
             add_header Content-Type text/plain;
         }
         location / {
+            rewrite ^ http://example.com/ permanent；
             if ($cookie_jsessionid != "")
             {
                 try_files $uri $uri/ /index.html;
