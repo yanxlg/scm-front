@@ -52,7 +52,7 @@ data:
             }
             if ($cookie_jsessionid = "")
             {
-                rewrite ^/cas/(.*)$ https://cas-t.vova.com.hk/cas/$1 permanent; ## cas 重定向
+                rewrite ^/(.*) https://cas-t.vova.com.hk/cas/ permanent; ## cas 重定向
             }
         }
         location /cas/{
