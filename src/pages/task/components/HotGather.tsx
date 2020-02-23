@@ -253,6 +253,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                 }),
             )
                 .then(({ data: { task_id = -1 } = {} } = {}) => {
+                    this.formRef.current!.resetFields();
                     Modal.info({
                         content: (
                             <GatherSuccessModal
@@ -365,7 +366,8 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
 
     @Bind
     private disabledStartDate(startTime: Moment | null){
-        const endTime = this.formRef.current!.getFieldValue('task_end_time');
+        const taskType = this.formRef.current!.getFieldValue("task_type");
+        const endTime = taskType === TaskType.interval?this.formRef.current!.getFieldValue('task_end_time'):null;
         if (!startTime) {
             return false;
         }
@@ -374,7 +376,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
         if (!endTime) {
             return startTime < currentDay;
         }
-        return startValue > endTime.endOf('day') || startTime < currentDay;
+        return startValue > endTime.clone().endOf('day') || startTime < currentDay;
     }
 
     @Bind
@@ -388,7 +390,21 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
         if (!startTime) {
             return endTime < currentDay;
         }
-        return startTime.startOf('day') > endValue || endTime < currentDay;
+        return startTime.clone().startOf('day') > endValue || endTime < currentDay;
+    }
+
+    @Bind
+    private resetTaskTypeError(){
+        this.formRef.current!.setFields([{
+            name:"onceStartTime",
+            errors:[],
+        },{
+            name:"timerStartTime",
+            errors:[],
+        },{
+            name:"task_end_time",
+            errors:[],
+        }])
     }
 
     @Bind
@@ -748,7 +764,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                             name="task_type"
                             className="form-item-inline"
                         >
-                            <Radio.Group>
+                            <Radio.Group onChange={this.resetTaskTypeError}>
                                 <Form.Item label={<Radio value={TaskType.once}>单次任务</Radio>} colon={false}>
                                     <Form.Item
                                         noStyle={true}
@@ -800,6 +816,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                             validateTrigger={'onChange'}
                                                             className="form-required-absolute"
                                                             name="timerStartTime"
+                                                            dependencies={['task_end_time']}
                                                             rules={[{
                                                                 required:taskType === TaskType.interval,
                                                                 message:"请选择开始时间",
@@ -817,6 +834,7 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                             validateTrigger={'onChange'}
                                                             label="结束时间"
                                                             name="task_end_time"
+                                                            dependencies={['timerStartTime']}
                                                             className="form-required-absolute form-item"
                                                             rules={[{
                                                                 required: taskType === TaskType.interval,
