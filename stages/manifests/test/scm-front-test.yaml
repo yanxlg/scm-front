@@ -46,9 +46,9 @@ data:
             add_header Content-Type text/plain;
         }
         location / {
-            return 200 $cookie_jsessionid;
             if ($cookie_jsessionid = "")
             {
+                return 200 $cookie_jsessionid;
                 rewrite ^/cas/(.*)$ https://cas-t.vova.com.hk/cas/$1 break; ## cas 重定向
             }
             try_files $uri $uri/ /index.html;
