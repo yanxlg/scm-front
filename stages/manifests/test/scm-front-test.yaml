@@ -46,11 +46,14 @@ data:
             add_header Content-Type text/plain;
         }
         location / {
+            if ($cookie_jsessionid != "")
+            {
+                try_files $uri $uri/ /index.html;
+            }
             if ($cookie_jsessionid = "")
             {
                 rewrite ^/cas/(.*)$ https://cas-t.vova.com.hk/cas/$1 redirect; ## cas 重定向
             }
-            try_files $uri $uri/ /index.html;
         }
         location /cas/{
             proxy_set_header   Cookie $http_cookie;
