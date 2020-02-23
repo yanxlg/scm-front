@@ -41,13 +41,15 @@ data:
         root $prjroot/;
         index index.html;
 
-        rewrite ^/cas/(.*)$ https://cas-t.vova.com.hk/cas/$1 permanent; ## cas 重定向
-
         location /version {
             root $prjroot/;
             add_header Content-Type text/plain;
         }
         location / {
+            if ($cookie_jsessionid != "")
+            {
+                rewrite ^/cas/(.*)$ https://cas-t.vova.com.hk/cas/$1 break; ## cas 重定向
+            }
             try_files $uri $uri/ /index.html;
         }
         location /cas/{
