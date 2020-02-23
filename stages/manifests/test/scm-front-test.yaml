@@ -48,7 +48,7 @@ data:
         location / {
             if ($cookie_jsessionid = "")
             {
-                return 301 https://cas-t.vova.com.hk/cas/login?service=http://scm-front-t.vova.com.hk/auth/cas_login;
+                return 301 https://cas-t.vova.com.hk/cas/login?service=http://${host}/auth/cas_login;
                 #rewrite ^/(.*) https://cas-t.vova.com.hk/cas/ permanent; ## cas 重定向
             }
 
