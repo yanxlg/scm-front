@@ -229,19 +229,19 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
     };
 
     // RcFile
-    private beforeUpload = (file: RcFile, FileList: RcFile[]) => {
-        // console.log('beforeUpload', file);
-        if (file.type !== 'image/jpeg') {
-            message.error('导入失败！图片格式错误');
-            return false;
-        }
-        const isLt = file.size / 1024 / 1024 <= 0.1;
-        if (!isLt) {
-            message.error('导入失败！图片大于100k');
-            return false;
-        }
-        return false;
-    };
+    // private beforeUpload = (file: RcFile) => {
+    //     // console.log('beforeUpload', file);
+    //     if (file.type !== 'image/jpeg') {
+    //         message.error('导入失败！图片格式错误');
+    //         return false;
+    //     }
+    //     const isLt = file.size / 1024 / 1024 <= 0.1;
+    //     if (!isLt) {
+    //         message.error('导入失败！图片大于100k');
+    //         return false;
+    //     }
+    //     return true;
+    // };
 
     // UploadChangeParam
     private uploadImg = (info: any) => {
@@ -249,13 +249,33 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         const { currentEditGoods, changeGoodsImg } = this.props;
         if (!loading && currentEditGoods) {
             const { sku_image, product_id } = currentEditGoods;
+            
             this.setState(
                 {
                     loading: true,
                 },
                 () => {
+                    // 检验图片规格
+                    const file = info.file.originFileObj;
+                    if (file.type !== 'image/jpeg') {
+                        message.error('导入失败！图片格式错误', 1.5).then(() => {
+                            this.setState({
+                                loading: false
+                            })
+                        }, () => {});
+                        return false;
+                    }
+                    const isLt = file.size / 1024 / 1024 <= 0.1;
+                    if (!isLt) {
+                        message.error('导入失败！图片大于100k', 1.5).then(() => {
+                            this.setState({
+                                loading: false
+                            })
+                        }, () => {});
+                        return false;
+                    }
                     const formData = new FormData();
-                    const file = info.file;
+                     //.originFileObj;
                     formData.append('file', file);
                     // 获取图片的原始宽高
                     const _URL = window.URL || window.webkitURL;
@@ -450,7 +470,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             <Upload
                                 className="item"
                                 showUploadList={false}
-                                beforeUpload={this.beforeUpload}
+                                // beforeUpload={this.beforeUpload}
                                 onChange={this.uploadImg}
                             >
                                 <div className="add">
