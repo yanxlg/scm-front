@@ -48,7 +48,7 @@ data:
         location / {
             if ($cookie_jsessionid = "")
             {
-                return 301 https://cas-t.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
+                return 302 https://cas-t.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
             }
 
             try_files $uri $uri/ /index.html;
