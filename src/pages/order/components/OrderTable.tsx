@@ -1,10 +1,11 @@
 import React from 'react';
-import { Table, Checkbox, message, Button } from 'antd';
+import { Table, message, Button } from 'antd';
 import GoodsDetailDialog from './GoodsDetailDialog';
 
 import { ColumnProps } from 'antd/es/table';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { IOrderItem } from '../index';
+import { TableRowSelection } from 'antd/lib/table/interface';
 
 import { 
     getOrderGoodsDetail
@@ -55,29 +56,29 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
     }
 
     private columns: ColumnProps<IOrderItem>[] = [
-        {
-            key: 'x',
-            title: () => (
-                <Checkbox
-                    indeterminate={this.state.indeterminate}
-                    checked={this.state.checkAll}
-                    onChange={this.onCheckAllChange}
-                />
-            ),
-            // dataIndex: 'a1',
-            align: 'center',
-            width: 60,
-            render: (value: string, row: IOrderItem) => {
-                const { selectedRowKeys } = this.props;
-                const { middleground_order_id } = row;
-                return (
-                    <Checkbox
-                        checked={selectedRowKeys.indexOf(middleground_order_id) > -1}
-                        onChange={() => this.selectedRow(middleground_order_id)}
-                    />
-                )
-            },
-        },
+        // {
+        //     key: 'x',
+        //     title: () => (
+        //         <Checkbox
+        //             indeterminate={this.state.indeterminate}
+        //             checked={this.state.checkAll}
+        //             onChange={this.onCheckAllChange}
+        //         />
+        //     ),
+        //     // dataIndex: 'a1',
+        //     align: 'center',
+        //     width: 60,
+        //     render: (value: string, row: IOrderItem) => {
+        //         const { selectedRowKeys } = this.props;
+        //         const { middleground_order_id } = row;
+        //         return (
+        //             <Checkbox
+        //                 checked={selectedRowKeys.indexOf(middleground_order_id) > -1}
+        //                 onChange={() => this.selectedRow(middleground_order_id)}
+        //             />
+        //         )
+        //     },
+        // },
         {
             key: 'order_confirm_time',
             title: '订单确认时间',
@@ -331,6 +332,17 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
     render() {
         const { orderList, loading } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
+        const rowSelection: TableRowSelection<IOrderItem>  = {
+            // onChange: (selectedRowKeys, selectedRows) => {
+            //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+            // },
+            onSelect: (record, selected, selectedRows) => {
+                // console.log(record, selected, selectedRows);
+            },
+            // onSelectAll: (selected, selectedRows, changeRows) => {
+            //     console.log(selected, selectedRows, changeRows);
+            // },
+        };
         return (
             <>
                 <Table
@@ -338,6 +350,7 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
                     rowKey="middleground_order_id"
                     className="order-table"
                     columns={this.columns}
+                    rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: true }}
                     pagination={false}
