@@ -1,13 +1,16 @@
-[
+import React from 'react';
+import { DashboardOutlined } from '@ant-design/icons/lib';
+import Icon from '@/components/Icons/Icon';
+export default [
     {
         "path": "/",
         "name": "首页",
-        "icon": "dashboard"
+        "icon": <DashboardOutlined />
     },
     {
         "path": "/task",
         "name": "任务中心",
-        "icon": "dashboard",
+        "icon": <Icon type="task" className="menu-icon"/>,
         "children": [
             {
                 "path": "/task/config",
@@ -27,7 +30,7 @@
     {
         "path": "/goods",
         "name": "商品中心",
-        "icon": "dashboard",
+        "icon": <Icon type="goods" className="menu-icon"/>,
         "children": [
             {
                 "path": "/goods/local",
@@ -52,12 +55,12 @@
     {
         "path": "/order",
         "name": "订单管理",
-        "icon": "dashboard"
+        "icon": <Icon type="order" className="menu-icon"/>
     },
     {
         "path": "/setting",
         "name": "基本设置",
-        "icon": "dashboard",
+        "icon": <Icon type="setting" className="menu-icon"/>,
         "children": [
             {
                 "path": "/setting/store",

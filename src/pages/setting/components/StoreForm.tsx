@@ -1,21 +1,22 @@
-import React from 'react';
-import { Form } from '@/components/Form';
+import React, { RefObject } from 'react';
 import { Bind } from 'lodash-decorators';
-import { FormComponentProps } from 'antd/lib/form';
 import {
     Button,
     Card,
     Divider,
     Input, InputNumber,
     Modal,
+    Form
 } from 'antd';
 import '@/styles/setting.less';
 import '@/styles/form.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
 import { addPddHotTask } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import { numberFormatter } from '@/utils/common';
+import { FormInstance } from 'antd/es/form';
+import styler from 'stylefire';
+import { spring } from 'popmotion';
 
 
 declare interface IStore {
@@ -28,23 +29,26 @@ export declare interface IFormData {
     list:IStore[]
 }
 
-declare interface IStoreFormProps extends FormComponentProps<IFormData>{
+declare interface IStoreFormProps{
 
 }
 
 declare interface IStoreFormState {
     gatherLoading:boolean;
     groundLoading:boolean;
+    list:number[];
 }
 
 
 
-class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
+class StoreForm extends React.PureComponent<IStoreFormProps,IStoreFormState>{
+    private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props:IStoreFormProps){
         super(props);
         this.state={
             gatherLoading:false,
-            groundLoading:false
+            groundLoading:false,
+            list:[1],
         };
     }
     @Bind
@@ -66,11 +70,7 @@ class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
     }
     @Bind
     private onGather(is_upper_shelf:boolean=false){
-        this.validate({
-            scroll:{
-                offsetTop:80
-            }
-        }).then((values:any)=>{
+        this.formRef.current!.validateFields().then((values:any)=>{
             const params = this.convertFormData(values);
             this.setState(is_upper_shelf?{
                 groundLoading:true,
@@ -85,7 +85,6 @@ class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
                 Modal.info({
                     content:<GatherSuccessModal taskId={task_id} onClick={()=>{
                         Modal.destroyAll();
-                        alert("任务详情");
                     }}/>,
                     className:"modal-empty",
                     icon:null,
@@ -107,6 +106,21 @@ class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
                     groundLoading:false
                 })
             });
+        }).catch(({errorFields})=>{
+            this.formRef.current!.scrollToField(errorFields[0].name,{
+                scrollMode: 'if-needed',
+                behavior: (actions) => {
+                    if(!actions || actions.length ===0){
+                        return;
+                    }
+                    const [{top}] = actions;
+                    const to = Math.max(top - 80,0);
+                    window.scrollTo({
+                        top:to,
+                        behavior:"smooth"
+                    });
+                },
+            })
         });
     }
     @Bind
@@ -118,28 +132,25 @@ class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
         this.onGather(true);
     }
     render(){
-        const {form} = this.props;
-        const formData = form.getFieldsValue();
-        const {list=[{
-            name:"",
-            id:null,
-            link:""
-        }]} = formData;
-        const {gatherLoading,groundLoading} = this.state;
+        const {gatherLoading,groundLoading,list} = this.state;
         return (
-            <Form className="form-help-absolute" layout="inline" autoComplete={'off'}>
+            <Form
+                className="form-help-absolute"
+                layout="horizontal"
+                autoComplete={'off'}
+            >
                 {
                     list.map((item:any,index:number)=>{
                         return (
                             <Card key={index} className="setting-card card-divider">
                                 <Divider orientation="left">{`关联店铺${index+1}`}：</Divider>
-                                <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name={`list[${index}].name`} label="店铺名称">
+                                <Form.Item className="block form-item" validateTrigger={'onBlur'} name={`list[${index}].name`} label="店铺名称">
                                     <Input type="text" className="input-large" spellCheck={'false'} placeholder=""/>
                                 </Form.Item>
-                                <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name={`list[${index}].id`} label="店铺&emsp;ID">
+                                <Form.Item className="block form-item" validateTrigger={'onBlur'} name={`list[${index}].id`} label="店铺&emsp;ID">
                                     <InputNumber min={0} className="input-large input-handler" formatter={numberFormatter}/>
                                 </Form.Item>
-                                <Form.Item className="block form-item" validateTrigger={'onBlur'} form={form} name={`list[${index}].link`} label="店铺链接">
+                                <Form.Item className="block form-item" validateTrigger={'onBlur'} name={`list[${index}].link`} label="店铺链接">
                                     <Input className="input-large" spellCheck={'false'} placeholder=""/>
                                 </Form.Item>
                             </Card>
@@ -158,8 +169,6 @@ class _StoreForm extends Form.BaseForm<IStoreFormProps,IStoreFormState>{
         )
     }
 }
-
-const StoreForm = Form.create<IStoreFormProps>()(_StoreForm);
 
 
 export default StoreForm;

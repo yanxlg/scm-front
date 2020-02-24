@@ -15,7 +15,7 @@ const List:React.FC = (props:{})=>{
                 <Tabs className="tabs-margin-none" onChange={onChange} activeKey={activeKey} type="card" children={
                     [
                         <TabPane tab="全部任务" key="1">
-                            <ALLTaskPage task_status={TaskStatus.All}/>
+                            <ALLTaskPage/>
                         </TabPane>,
                         <TabPane tab="未执行" key="2">
                             <ALLTaskPage task_status={TaskStatus.UnExecuted}/>

@@ -1,6 +1,8 @@
+
 import React from 'react';
-import { DatePicker, Button, message } from 'antd';
-import { RangePickerValue } from 'antd/lib/date-picker/interface';
+import { DatePicker, Button, message, Pagination } from 'antd';
+// import { RangePickerValue } from 'antd/lib/date-picker/interface';
+import { RangeValue } from 'rc-picker/lib/interface';
 import moment from 'moment';
 
 import VersionTable from './components/VersionTable';
@@ -10,7 +12,7 @@ import '../../../styles/goods-version.less';
 import {
     getGoodsVersion,
     postGoodsVersionExport,
-    postGoodsApplyVersion,
+    postGoodsOnsale,
     postGoodsIgnoreVersion,
 } from '@/services/goods';
 import { formatDate } from '@/utils/date';
@@ -21,51 +23,55 @@ declare interface IVersionProps {
     location: any;
 }
 
-declare interface ISubImageItem {
-    sub_image_url: string;
-    sku_id: string;
+declare interface IPageData {
+    page?: number;
+    page_count?: number;
 }
 
-export declare interface IGoodsImgs {
-    version: number;
-    main_image_url: string;
-    sub_image: ISubImageItem[];
+export declare interface IOnsaleItem {
+    onsale_channel: string;
+    onsale_time: number;
 }
 
-export declare interface IOperations {
-    can_apply: boolean;
-    can_ignore: boolean;
-    is_current_version: boolean;
+export declare interface ISkuStyle {
+    [key: string]: string;
 }
 
 declare interface ISkuItem {
-    middle_sku_id: number;
-    source_sku_id: number;
-    specs: string;
-    price: number;
-    weight: number;
-    stock: number;
-    shipping_fee: number;
-    sales_volume: number;
-    evaluation_quantity: number;
-    category_one_level: string;
-    category_two_level: string;
-    category_three_level: string;
-    change_time: string;
-    change_operator: string;
+    sku_id: string;
+    origin_sku_id: string;
+    sku_style: ISkuStyle;
+    sku_price: number;
+    sku_weight: number;
+    sku_inventory: number;
+}
+
+export declare interface ICatagoryData {
+    id?: string;
+    name?: string;
 }
 
 declare interface IGoodsVersionItemBase {
-    product_id: number;
-    up_shelf_channel: string;
-    goods_imgs: IGoodsImgs;
-    goods_title: string;
-    goods_description: string;
-    operations: IOperations;
+    product_id: string;
+    onsale_info: IOnsaleItem[];
+    sku_image: string[];
+    title: string;
+    description: string;
+    goods_img: string;
+    goods_status: string;
+    sales_volume: number;
+    comments: number;
+    first_catagory: ICatagoryData;
+    second_catagory: ICatagoryData;
+    third_catagory: ICatagoryData;
+    update_time: number;
+    worm_goods_id: string;
+    worm_goodsinfo_link: string;
+    _update_time?: string;
 }
 
 declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
-    sku: ISkuItem[];
+    sku_info: ISkuItem[];
 }
 
 export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {
@@ -74,74 +80,85 @@ export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISk
 }
 
 declare interface IGoodsVersionBase {
-    goods_title: string;
+    title: string;
     goods_url: string;
     main_image_url: string;
     goods_id: number;
     source_goods_id: number;
     flatform: string;
     collection_time: string;
-    category_one_level: string;
-    category_two_level: string;
-    category_tree_level: string;
+    first_catagory: ICatagoryData;
+    second_catagory: ICatagoryData;
+    third_catagory: ICatagoryData;
 }
 
 declare interface IVersionState {
-    start_time: string;
-    end_time: string;
     loading: boolean;
-    currentInfo: IGoodsVersionBase;
+    start_time: number;
+    end_time: number;
+    page: number;
+    page_count: number,
+    allCount: number,
+    currentInfo: IGoodsVersionRowItem | null;
     versionGoodsList: IGoodsVersionRowItem[];
 }
 
+const pageSizeOptions = ['50', '100', '500', '1000'];
+
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
-    id: number = 0;
+    id: string = '';
 
     constructor(props: IVersionProps) {
         super(props);
         let nowTime = new Date();
         this.state = {
             loading: false,
-            end_time: formatDate(nowTime, 'yyyy-MM-dd'),
-            start_time: formatDate(new Date(nowTime.setDate(nowTime.getDate() - 3)), 'yyyy-MM-dd'),
-            currentInfo: {
-                goods_title: '',
-                goods_url: '',
-                main_image_url: '',
-                goods_id: 0,
-                source_goods_id: 0,
-                flatform: '',
-                collection_time: '',
-                category_one_level: '',
-                category_two_level: '',
-                category_tree_level: '',
-            },
+            end_time: 0,
+            start_time: 0,
+            page: 1,
+            page_count: 50,
+            allCount: 0,
+            // end_time: this.getTimeSecond(nowTime.getTime()),
+            // start_time: this.getTimeSecond(new Date(nowTime.setDate(nowTime.getDate() - 3)).getTime()),
+            currentInfo: null,
             versionGoodsList: [],
         };
     }
 
     componentDidMount(): void {
-        this.id = Number(this.props.location.query.id);
+        this.id = this.props.location.query.id;
         this.onSearch();
         // console.log();
     }
 
-    private onSearch = () => {
-        const { start_time, end_time } = this.state;
+    private getTimeSecond = (millisecond: number) => {
+        return Math.round(millisecond / 1000)
+    }
+
+    private onSearch = (pageData?: IPageData) => {
+        const { start_time, end_time, page, page_count } = this.state;
         this.setState({
             loading: true,
         });
-        return getGoodsVersion({
-            start_time,
-            end_time,
+        const data = Object.assign({
+            page,
+            page_count,
+            start_time: start_time ? start_time : undefined,
+            end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
-        })
+        }, pageData ? pageData : {});
+        return getGoodsVersion(data)
             .then(res => {
-                const { goods_version_list, ...rest } = res.data;
-
+                // const { goods_version_list, ...rest } = res.data;
+                const { list, all_count } = res.data;
+                const goodsList = this.addRowSpanData(list);
+                // const index = goodsList.findIndex(goodsList => goodsList.goods_status === 'RELEASED');
                 this.setState({
-                    versionGoodsList: this.addRowSpanData(goods_version_list),
-                    currentInfo: rest,
+                    allCount: all_count,
+                    page: data.page,
+                    page_count: data.page_count,
+                    versionGoodsList: goodsList,
+                    currentInfo: goodsList[0] || null
                 });
             })
             .finally(() => {
@@ -156,23 +173,32 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         let ret: IGoodsVersionRowItem[] = [];
         const len = list.length;
         list.forEach((item, index) => {
-            const { sku, ...rest } = item;
-            sku.forEach((skuItem, skuIndex) => {
+            const { sku_info, ...rest } = item;
+            sku_info.forEach((skuItem, skuIndex) => {
                 const retItem: IGoodsVersionRowItem = {
-                    ...rest,
-                    ...skuItem,
+                    ...Object.assign(rest, {
+                        _update_time: formatDate(new Date(rest.update_time * 1000), 'yyyy-MM-dd hh:mm:ss'),
+                    }),
+                    ...Object.assign(skuItem, {
+                        sku_price: Number(skuItem.sku_price),
+                        sku_inventory: Number(skuItem.sku_inventory)
+                    })
                 };
                 if (index !== len - 1) {
                     const prev = list[index + 1];
-                    const { sku: prevSku, ...prevRest } = prev;
+                    const { sku_info: prevSku, ...prevRest } = prev;
+                    const prevSkuItem = prevSku[skuIndex];
                     retItem._prevVersion = {
                         ...prevRest,
-                        ...prevSku[skuIndex],
+                        ...Object.assign(prevSkuItem, {
+                            sku_price: Number(prevSkuItem.sku_price),
+                            sku_inventory: Number(prevSkuItem.sku_inventory)
+                        }),
                     };
                     // list[index + 1].sku[skuIndex];
                 }
                 if (skuIndex === 0) {
-                    retItem._rowspan = sku.length;
+                    retItem._rowspan = sku_info.length;
                 }
                 ret.push(retItem);
             });
@@ -181,20 +207,18 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         return ret;
     }
 
-    // moment.Moment[]
-    private selectedDate = (dates: RangePickerValue) => {
-        // console.log(dates[0].format('YYYY-MM-DD'), dates[1].format('YYYY-MM-DD'));
-        if (dates[0] && dates[1]) {
-            this.setState(
-                {
-                    start_time: dates[0] ? dates[0].format('YYYY-MM-DD') : '',
-                    end_time: dates[1] ? dates[1].format('YYYY-MM-DD') : '',
-                },
-                () => {
-                    this.onSearch();
-                },
-            );
-        }
+    // moment.Moment[] DateType
+    private selectedDate = (dates: RangeValue<moment.Moment>) => {
+        // console.log('selectedDate', dates);
+        this.setState(
+            {
+                start_time: (dates && dates[0]) ? this.getTimeSecond(dates[0].valueOf()) : 0,
+                end_time: (dates && dates[1]) ? this.getTimeSecond(dates[1].valueOf()) : 0
+            },
+            () => {
+                this.onSearch();
+            },
+        );
     };
 
     // 生成表格
@@ -207,30 +231,27 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     };
 
     // 操作版本
-    operationVersion = (product_id: number, type: string) => {
+    operationVersion = (product_id: string, type: string) => {
         type === 'apply'
-            ? this.postGoodsApplyVersion(product_id)
+            ? this.postGoodsOnsale(product_id)
             : this.postGoodsIgnoreVersion(product_id);
     };
 
     // 应用版本
-    postGoodsApplyVersion = (product_id: number) => {
-        postGoodsApplyVersion({
-            product_id: product_id + '',
+    postGoodsOnsale = (product_id: string) => {
+        postGoodsOnsale({
+            scm_goods_id: [product_id],
         })
             .then(res => {
                 message.success(`${product_id}应用成功`);
                 this.onSearch();
             })
-            .catch(err => {
-                message.error(`${product_id}应用失败`);
-            });
     };
 
     // 忽略版本
-    postGoodsIgnoreVersion = (product_id: number) => {
-        postGoodsApplyVersion({
-            product_id: product_id + '',
+    postGoodsIgnoreVersion = (product_id: string) => {
+        postGoodsIgnoreVersion({
+            product_id: product_id,
         })
             .then(res => {
                 message.success(`${product_id}忽略成功`);
@@ -240,62 +261,104 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 message.success(`${product_id}忽略失败`);
                 this.onSearch();
             });
-    };
+    }
+
+    onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    }
+
+    pageCountChange = (current: number, size: number) => {
+        this.onSearch({
+            page_count: size,
+        });
+    }
 
     render() {
-        const { loading, start_time, end_time, currentInfo, versionGoodsList } = this.state;
-
         const {
-            goods_title,
-            goods_url,
-            main_image_url,
-            goods_id,
-            source_goods_id,
-            flatform,
-            collection_time,
-            category_one_level,
-            category_two_level,
-            category_tree_level,
-        } = currentInfo;
-
-        return (
-            <div className="goods-version">
+            loading,
+            page,
+            page_count,
+            allCount,
+            start_time,
+            end_time,
+            currentInfo,
+            versionGoodsList
+        } = this.state;
+        let currentDom = null;
+        if (currentInfo) {
+            const {
+                title,
+                product_id,
+                goods_img,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                _update_time,
+                worm_goodsinfo_link,
+                worm_goods_id
+            } = currentInfo;
+            currentDom = (
                 <div className="goods-version-current">
-                    <img src={main_image_url} />
+                    <img src={goods_img} />
                     <div className="info">
                         <p>
-                            商品标题：{goods_title}
-                            <a href={goods_url} target="_blank">
+                            商品标题：{title}
+                            <a href={worm_goodsinfo_link} target="_blank">
                                 【查看源商品】
                             </a>
                         </p>
                         <p>
-                            <span>中台商品ID：{goods_id}</span>
-                            <span>源商品ID：{source_goods_id}</span>
-                            <span>源平台：{flatform}</span>
-                            <span>采集时间：{collection_time}</span>
+                            <span>中台商品ID：{product_id}</span>
+                            <span>源商品ID：{worm_goods_id}</span>
+                            {/* <span>源平台：{flatform}</span> */}
+                            <span>采集时间：{_update_time}</span>
                         </p>
                         <p>
                             <span>
-                                类目：{category_one_level}/{category_two_level}/
-                                {category_tree_level}
+                                类目：{
+                                    [first_catagory.name, second_catagory.name, third_catagory.name]
+                                    .filter(item => item)
+                                    .join('/')
+                                }
                             </span>
                         </p>
                     </div>
                 </div>
+            )
+        }
+
+
+        return (
+            <div className="goods-version">
+                {currentDom}
                 <div className="goods-version-filter">
                     <div className="left-item">
                         <span className="">商品调价跟踪</span>
                         <RangePicker
                             className="date"
                             defaultValue={
-                                start_time ? [moment(start_time), moment(end_time)] : [null, null]
+                                start_time ? [
+                                    moment(formatDate(new Date(start_time * 1000), 'yyyy-MM-dd')),
+                                    moment(formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'))
+                                ] : [null, null]
                             }
                             onChange={this.selectedDate}
                         />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
                     </div>
-                    {/* <Pagination size="small" total={50} showSizeChanger={true} showQuickJumper={true} /> */}
+                    <Pagination
+                        size="small"
+                        total={allCount}
+                        current={page}
+                        pageSize={page_count}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
+                    />
                 </div>
                 <VersionTable
                     loading={loading}

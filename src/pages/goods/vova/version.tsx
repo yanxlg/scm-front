@@ -1,11 +1,11 @@
+
 import React from 'react';
-import VersionSearch, { IFormData } from '@/pages/goods/vova/components/VersionSearch';
-import { Button, Card, Checkbox, Divider, message, Table } from 'antd';
+import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
+import { Button, Card, Checkbox, Divider, message, Spin, Table } from 'antd';
 import '@/styles/product.less';
-import { ColumnProps } from 'antd/lib/table/interface';
+import { ColumnType } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
-import { queryGoodsVersion } from '@/services/products';
-import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion } from '@/services/goods';
+import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion, queryGoodsVersion } from '@/services/vova';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -34,18 +34,10 @@ declare interface IVersionState {
     dataLoading: boolean;
     clearLoading:boolean;
     dataSet: ITableItem[];
-    attributes?: {
-        price: number;
-        shipping_fee: number;
-        sku_volume: number;
-        goods_title: number;
-        product_description: number;
-        category: number;
-        specs: number;
-        lower_shelf: number;
-        upper_shelf: number;
-        sku_pics: number;
-    };
+    attributes?:Array< {
+        property:string;
+        count:number;
+    }>;
 }
 
 @BindAll()
@@ -64,15 +56,15 @@ class Version extends React.PureComponent<{}, IVersionState> {
         this.queryData();
     }
 
-    private queryData(params?: IFormData) {
+    private queryData(params?: IApiParams) {
         this.setState({
             dataLoading: true,
         });
         return queryGoodsVersion(params)
-            .then(({ data: { attribute_update = {}, goods_list = [] } }) => {
+            .then(({ data: { changed_property_list = [], goods_list = [] } }) => {
                 this.setState({
                     dataSet: goods_list,
-                    attributes: attribute_update,
+                    attributes: changed_property_list,
                 });
             })
             .finally(() => {
@@ -82,12 +74,23 @@ class Version extends React.PureComponent<{}, IVersionState> {
             });
     }
 
-    private exportGoodsVersion(params?: IFormData) {
+    private exportGoodsVersion(params?: IApiParams) {
         return exportVovaGoodsVersion(params);
     }
 
     private activeGoodsVersion(){
-        return activeVovaGoodsVersion().then(()=>{
+        const {selectedRowKeys,dataSet} = this.state;
+        let params:Array<{
+            virtual_id:number,
+            product_id:number
+        }>=[];
+        selectedRowKeys.forEach(product_id=>{
+            params.push({
+                product_id:product_id,
+                virtual_id:dataSet.find(item=>item.product_id===product_id)!.vova_virtual_id
+            })
+        });
+        return activeVovaGoodsVersion(params).then(()=>{
             message.success("应用新版本成功!");
         })
     }
@@ -171,12 +174,11 @@ class Version extends React.PureComponent<{}, IVersionState> {
     }
     render() {
         const { selectedRowKeys, dataLoading, attributes, dataSet: data,clearLoading } = this.state;
-
         const { dataSet, keys } = this.combineDataSet(data);
         const selectedSize = selectedRowKeys.size;
         const indeterminate = selectedSize > 0;
-        const checkedAll = selectedSize === keys.length;
-        const columns: ColumnProps<ITableItem>[] = [
+        const checkedAll = selectedSize === keys.length && selectedSize > 0;
+        const columns: ColumnType<ITableItem>[] = [
             {
                 title: (
                     <Checkbox
@@ -370,24 +372,16 @@ class Version extends React.PureComponent<{}, IVersionState> {
                         onSearch={this.queryData}
                     />
                 </Card>
-
-                <Card className="product-card card-divider">
-                    <Divider orientation="left">数据/状态更新：</Divider>
-                    <div className="product-text">价格（{attributes?.price ?? 0}）</div>
-                    <div className="product-text">运费（{attributes?.shipping_fee ?? 0}）</div>
-                    <div className="product-text">SKU数量（{attributes?.sku_volume ?? 0}）</div>
-                    <div className="product-text">商品标题（{attributes?.goods_title ?? 0}）</div>
-                    <div className="product-text">
-                        商品描述（{attributes?.product_description ?? 0}）
-                    </div>
-                    <div className="product-text">类目（{attributes?.category ?? 0}）</div>
-                    <div className="product-text">规格（{attributes?.specs ?? 0}）</div>
-                    <div className="product-text">下架（{attributes?.lower_shelf ?? 0}）</div>
-                    <div className="product-text">上架（{attributes?.upper_shelf ?? 0}）</div>
-                    <div className="product-text">SKU对应图片（{attributes?.sku_pics ?? 0}）</div>
-                    <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
-                </Card>
-
+                    <Card className="product-card" title="数据/状态更新">
+                        <Spin spinning={dataLoading} tip="Loading...">
+                        {
+                            attributes?.map(({count,property})=>{
+                                return <div className="product-text" key={property}>{property}（{count}）</div>
+                            })
+                        }
+                        <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
+                        </Spin>
+                    </Card>
                 <Table
                     loading={dataLoading}
                     rowKey="product_id"

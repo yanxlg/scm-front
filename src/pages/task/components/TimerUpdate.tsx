@@ -1,13 +1,12 @@
-import React from 'react';
-import { Form } from '@/components/Form';
+import React, { RefObject } from 'react';
 import { Bind } from 'lodash-decorators';
-import { FormComponentProps } from 'antd/lib/form';
-import { Button, Card, DatePicker, Icon, Input, InputNumber, Radio } from 'antd';
+import { Button, Card, DatePicker, Input, InputNumber, Radio ,Form} from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import { TaskGoodsArea } from '@/enums/ConfigEnum';
 import { Moment } from 'moment';
 import { numberFormatter } from '@/utils/common';
+import { FormInstance } from 'antd/es/form';
 
 declare interface IFormData {
     task_name: string;
@@ -16,13 +15,14 @@ declare interface IFormData {
     day?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
 }
 
-declare interface ITimerUpdateProps extends FormComponentProps<IFormData> {}
+declare interface ITimerUpdateProps {}
 
 declare interface ITimerUpdateState {
     createLoading: boolean;
 }
 
-class _TimerUpdate extends Form.BaseForm<ITimerUpdateProps, ITimerUpdateState> {
+class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateState> {
+    private formRef:RefObject<FormInstance> = React.createRef();
     constructor(props: ITimerUpdateProps) {
         super(props);
         this.state = {
@@ -36,29 +36,37 @@ class _TimerUpdate extends Form.BaseForm<ITimerUpdateProps, ITimerUpdateState> {
         });
     }
     render() {
-        const { form } = this.props;
         const { createLoading } = this.state;
         return (
-            <Form layout="inline" autoComplete={'off'}>
+            <Form
+                ref={this.formRef}
+                layout="horizontal"
+                autoComplete={'off'}
+                initialValues={{
+                    goods_area:TaskGoodsArea.All
+                }}
+            >
                 <Form.Item
-                    className="block form-item"
+                    className="form-item"
                     validateTrigger={'onBlur'}
-                    form={form}
                     name="task_name"
                     label="任务名称"
+                    validateFirst={true}
+                    rules={[{
+                        required:true,
+                        message:"请输入任务名称"
+                    }]}
                 >
                     <Input className="input-default" />
                 </Form.Item>
                 <Card
-                    className="config-card"
-                    title={<span className="ant-form-item-required">定时更新配置：</span>}
+                    className="form-item"
+                    title={<span className="form-required">定时更新配置：</span>}
                 >
                     <Form.Item
                         validateTrigger={'onBlur'}
-                        form={form}
                         name="goods_area"
                         label="商品范围"
-                        initialValue={TaskGoodsArea.All}
                     >
                         <Radio.Group>
                             <Radio value={TaskGoodsArea.All}>定时任务</Radio>
@@ -66,20 +74,20 @@ class _TimerUpdate extends Form.BaseForm<ITimerUpdateProps, ITimerUpdateState> {
                             <Radio value={TaskGoodsArea.HasSales}>有销量的已上架商品</Radio>
                         </Radio.Group>
                     </Form.Item>
-                    <div className="block form-item">
+                    <Form.Item
+                        validateTrigger={'onBlur'}
+                        name="task_start_time"
+                        label="任务执行时间"
+                    >
+                        <DatePicker showTime={true} />
+                    </Form.Item>
+                    <Form.Item
+                        label="任务间隔"
+                        className="form-item-inline"
+                    >
                         <Form.Item
-                            validateTrigger={'onBlur'}
-                            form={form}
-                            name="task_start_time"
-                            label="任务执行时间"
-                        >
-                            <DatePicker showTime={true} />
-                        </Form.Item>
-                        <Form.Item
-                            validateTrigger={'onBlur'}
-                            form={form}
+                            noStyle={true}
                             name="day"
-                            label="任务间隔"
                         >
                             <InputNumber
                                 min={0}
@@ -87,8 +95,8 @@ class _TimerUpdate extends Form.BaseForm<ITimerUpdateProps, ITimerUpdateState> {
                                 formatter={numberFormatter}
                             />
                         </Form.Item>
-                        <label className="ant-form-item-label config-label-after">天</label>
-                    </div>
+                        <label className="form-unit">天</label>
+                    </Form.Item>
                 </Card>
                 <div className="form-item">
                     <Button
@@ -104,7 +112,5 @@ class _TimerUpdate extends Form.BaseForm<ITimerUpdateProps, ITimerUpdateState> {
         );
     }
 }
-
-const TimerUpdate = Form.create<ITimerUpdateProps>()(_TimerUpdate);
 
 export default TimerUpdate;

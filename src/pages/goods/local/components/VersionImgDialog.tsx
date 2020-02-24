@@ -2,12 +2,11 @@ import React from 'react';
 import { Modal, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
-import { IGoodsVersionRowItem, IGoodsImgs } from '../version';
+import { IGoodsVersionRowItem } from '../version';
 
 declare interface IDataSource {
-    product_id: number;
-    goods_imgs: IGoodsImgs;
-    // prev_goods_imgs: IGoodsImgs;
+    product_id: string;
+    sku_image: string[];
 }
 
 declare interface VersionImgProps {
@@ -26,19 +25,19 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             align: 'center',
         },
         {
-            key: 'goods_imgs',
+            key: 'sku_image',
             width: 200,
             title: '主图',
-            dataIndex: 'goods_imgs',
+            dataIndex: 'sku_image',
             align: 'center',
             className: 'top',
-            render: (value: IGoodsImgs, row: IDataSource) => {
-                const classStr = this.isAddImg(value.main_image_url)
+            render: (value: string[], row: IDataSource) => {
+                const classStr = this.isAddImg(value[0])
                     ? 'main-item add'
                     : 'main-item';
                 return (
                     <div className={classStr}>
-                        <img className="main-img" src={value.main_image_url} />
+                        <img className="main-img" src={value[0]} />
                     </div>
                 );
             },
@@ -53,14 +52,14 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
                 return (
                     // <div>111</div>
                     <div className="list">
-                        {row.goods_imgs.sub_image.map(item => {
-                            const classStr = this.isAddImg(item.sub_image_url)
+                        {row.sku_image.slice(1).map(item => {
+                            const classStr = this.isAddImg(item)
                                 ? 'item add'
                                 : 'item';
                             return (
-                                <div className={classStr} key={item.sku_id}>
-                                    <img src={item.sub_image_url} />
-                                    <div className="desc">sku id：{item.sku_id}</div>
+                                <div className={classStr} key={item}>
+                                    <img src={item} />
+                                    {/* <div className="desc">sku id：{item}</div> */}
                                 </div>
                             );
                         })}
@@ -74,10 +73,7 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
     isAddImg = (imgUrl: string): boolean => {
         const { activeRow } = this.props;
         if (activeRow && activeRow._prevVersion) {
-            const prevGoodsImgs = activeRow._prevVersion.goods_imgs;
-            const list = [prevGoodsImgs.main_image_url];
-            prevGoodsImgs.sub_image.forEach(item => list.push(item.sub_image_url));
-            return list.indexOf(imgUrl) === -1;
+            return activeRow._prevVersion.sku_image.indexOf(imgUrl) === -1;
         }
         return false;
     };
@@ -93,7 +89,7 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             const dataSource: IDataSource[] = [
                 {
                     product_id: activeRow.product_id,
-                    goods_imgs: activeRow.goods_imgs,
+                    sku_image: activeRow.sku_image,
                 },
             ];
 

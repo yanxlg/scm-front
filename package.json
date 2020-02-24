@@ -8,8 +8,9 @@
         "precommit": "lint-staged"
     },
     "dependencies": {
-        "@ant-design/pro-layout": "^4.5.16",
-        "antd": "^3.19.5",
+        "@ant-design/pro-layout": "^5.0.3",
+        "@ant-design/icons": "^4.0.0-alpha.19",
+        "antd": "^4.0.0-rc.5",
         "dva": "^2.6.0-beta.6",
         "lodash-decorators": "^6.0.1",
         "moment": "^2.24.0",

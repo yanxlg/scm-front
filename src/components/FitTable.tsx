@@ -14,7 +14,7 @@ declare interface IFitTableProps<T> extends TableProps<T>{
     minHeight?:number;
 }
 
-class FitTable<T> extends React.PureComponent<IFitTableProps<T>,IFitTableState>{
+class FitTable<T extends object> extends React.PureComponent<IFitTableProps<T>,IFitTableState>{
     constructor(props:TableProps<T>) {
         super(props);
         this.state={
@@ -47,7 +47,7 @@ class FitTable<T> extends React.PureComponent<IFitTableProps<T>,IFitTableState>{
         const {scroll,...props} = this.props;
         const {y} = this.state;
         return (
-            <Table {...props} scroll={{...scroll,y:y}}/>
+            <Table<T> {...props} scroll={{...scroll,y:y}}/>
         )
     }
 }

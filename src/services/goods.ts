@@ -1,25 +1,24 @@
 import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
-import { IFormData } from '@/pages/goods/vova/components/VersionSearch';
 
 export declare interface IFilterParams {
     page: number;
     page_count: number;
-    task_number?: string;                // 任务 id
-    store_id?: string;                   // 店铺 ID
-    commodity_id?: string;               // Commodity_ID
-    inventory_status?: string;           // 库存
-    version_status?: string;             // 版本更新
-    first_catagory?: string;             // 一级类目
-    second_catagory?: string;            // 二级类目
-    third_catagory?: string;             // 三级类目
-    min_sale?: number | undefined;       // 销量最小
-    max_sale?: number | undefined;       // 销量最大值
-    min_sku?: number | undefined;        // sku数量最小值
-    max_sku?: number | undefined;        // sku最大值
-    min_price?: number | undefined;      // 价格范围最小值
-    max_price?: number | undefined;      // 价格范围最大值
-    min_comment?: number | undefined;    // 评论数量最小值
+    task_number?: string[];                 // 任务 id
+    store_id?: string[];                    // 店铺 ID
+    commodity_id?: number[];                // Commodity_ID
+    inventory_status?: number | undefined;  // 库存
+    version_status?: number | undefined;    // 版本更新
+    first_catagory?: number | undefined;    // 一级类目
+    second_catagory?: number | undefined;   // 二级类目
+    third_catagory?: number | undefined;    // 三级类目
+    min_sale?: number | undefined;          // 销量最小
+    max_sale?: number | undefined;          // 销量最大值
+    min_sku?: number | undefined;           // sku数量最小值
+    max_sku?: number | undefined;           // sku最大值
+    min_price?: number | undefined;         // 价格范围最小值
+    max_price?: number | undefined;         // 价格范围最大值
+    min_comment?: number | undefined;       // 评论数量最小值
 }
 
 declare interface IImgEditData {
@@ -32,19 +31,7 @@ declare interface IOnsaleData {
 }
 
 declare interface IGoodsDeleteData {
-    product_ids: string[];
-}
-
-export declare interface IGoodsEditDataItem {
-    product_id: string;
-    title: string;
-    description: string;
-    first_catagory: number;
-    second_catagory: number;
-    third_catagory: number;
-}
-declare interface IGoodsEditData {
-    modify_data: IGoodsEditDataItem[];
+    commodity_ids: string[];
 }
 
 declare interface IProductId {
@@ -52,13 +39,32 @@ declare interface IProductId {
 }
 
 declare interface IGoodsVersionParams {
-    start_time: string;
-    end_time: string;
-    commodity_id: number;
+    page: number;
+    page_count: number;
+    start_time: number | undefined;
+    end_time: number | undefined;
+    commodity_id: string;
 }
 
 declare interface IVersionExportData {
-    commodity_id: number;
+    commodity_id: string;
+}
+
+export interface IGoodsEditImgItem {
+    type: 'new' | 'old';
+    url: string;
+    position?: number;
+    alt?: string;
+    width?: number;
+    height?: number;
+}
+
+export declare interface IGoodsEditData {
+    product_id: string;
+    title: string;
+    description: string;
+    cat_id: number;
+    imgs: IGoodsEditImgItem[];
 }
 
 export async function getGoodsList(params: IFilterParams) {
@@ -104,7 +110,7 @@ export async function postGoodsPicUpload(data: any) {
 }
 
 // 一键上架
-export async function getGoodsOnsale(data: IOnsaleData) {
+export async function postGoodsOnsale(data: IOnsaleData) {
     return request.post(ApiPathEnum.getGoodsOnsale, {
         data
     })
@@ -147,9 +153,10 @@ export async function getGoodsVersion(params: IGoodsVersionParams) {
 
 // 下载商品版本excel
 export async function postGoodsVersionExport(data: IVersionExportData) {
-    return request.post(ApiPathEnum.postGoodsVersionExport, {
+    return request.get(ApiPathEnum.postGoodsVersionExport, {
         // requestType: 'form',
-        data,
+        params: data,
+        // data,
         responseType:"blob",
         parseResponse:false
     }).then((response)=>{
@@ -165,13 +172,6 @@ export async function postGoodsVersionExport(data: IVersionExportData) {
             link.remove();
         })
     });
-}
-
-// 应用版本
-export async function postGoodsApplyVersion(data: IProductId) {
-    return request.post(ApiPathEnum.postGoodsApplyVersion, {
-        data
-    })
 }
 
 // 忽略版本
@@ -179,43 +179,4 @@ export async function postGoodsIgnoreVersion(data: IProductId) {
     return request.post(ApiPathEnum.postGoodsIgnoreVersion, {
         data
     })
-}
-
-export async function exportVovaGoodsVersion(data?:IFormData) {
-    return request.post(ApiPathEnum.ExportVovaGoodsVersion, {
-        data:{
-            start_time:data?.onshelf_time_satrt,
-            end_time:data?.onshelf_time_end,
-            virtual_id:data?.vova_virtual_id
-        },
-        responseType:"blob",
-        parseResponse:false
-    }).then((response)=>{
-        const disposition = response.headers.get('content-disposition');
-        const fileName = decodeURI(disposition.substring(disposition.indexOf('filename=')+9, disposition.length));
-        response.blob().then((blob:Blob)=>{
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        })
-    });
-}
-
-
-
-export async function activeVovaGoodsVersion(product_id:number) {
-    return request.post(ApiPathEnum.ActiveVovaGoodsVersion,{
-        data:{
-            product_id
-        }
-    });
-}
-
-
-export async function clearGoodsVersionRecord() {
-    return request.post(ApiPathEnum.ClearGoodsVersionRecord);
 }

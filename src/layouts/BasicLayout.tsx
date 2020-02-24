@@ -9,8 +9,7 @@ import { connect } from 'dva';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.svg';
-import MenuData from "@/config/menu.json";
-import NProgress from 'nprogress';
+import MenuData from "@/config/menu";
 import 'nprogress/nprogress.css';
 import "@/styles/menu.less";
 
@@ -21,9 +20,10 @@ export interface BasicLayoutProps extends ProLayoutProps {
     dispatch: Dispatch;
 }
 
-
-let timer:number|undefined = undefined;
-NProgress.configure({ showSpinner: false });
+const MenuDataList = MenuData.map((item)=>{
+    // filter
+    return item as any;
+});
 
 class BasicLayout extends React.PureComponent<BasicLayoutProps>{
     private handleMenuCollapse = (payload: boolean): void => {
@@ -35,18 +35,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
             });
         }
     };
-    public static getDerivedStateFromProps(nextProps:BasicLayoutProps){
-        if(timer){
-            clearTimeout(timer);
-            timer = undefined;
-            NProgress.remove();
-        }
-        NProgress.start();
-        NProgress.inc();
-        timer=window.setTimeout(()=>{
-            NProgress.done();
-        },200+Math.floor(Math.random()*300));
-    }
+
     render(){
         const {children,dispatch,...props} = this.props;
         return (
@@ -85,7 +74,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                     );
                 }}
                 footerRender={false}
-                menuDataRender={() =>MenuData}
+                menuDataRender={() => MenuDataList}
                 rightContentRender={rightProps => <RightContent {...rightProps} />}
                 fixSiderbar={true}
                 fixedHeader={true}
