@@ -467,7 +467,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     rowKey="sku_id"
                     className="goods-version-table"
                     loading={loading}
-                    scroll={{ x: true }}
+                    scroll={{ x: true, y: 800 }}
                     pagination={false}
                     columns={this.columns}
                     dataSource={versionGoodsList}
