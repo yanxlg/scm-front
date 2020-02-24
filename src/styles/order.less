@@ -1,0 +1,68 @@
+
+@divisionSpacing: 6px;
+@btnSpacing: 12px;
+@inputWidth: 140px;
+
+.order {
+    &-wrap {
+        padding: 12px;
+    }
+    &-division {
+        margin: 0 @divisionSpacing;
+        font-size: 17px;
+    }
+    &-form-item {
+        margin-bottom: 16px !important;
+    }
+    &-time {
+        margin-right: 0 !important;
+    }
+    &-date-picker {
+        width: 197px;
+    }
+    &-input {
+        width: 140px !important;
+    }
+    &-label {
+        display: inline-block;
+        width: 104px;
+    }
+    &-operation {
+        margin: 8px 20px;
+    }
+    &-btn {
+        width: 100px;
+    }
+    &-btn + &-btn {
+        margin-left: 12px;
+    } 
+    &-table {
+        margin-top: 20px;
+    }
+    &-goods-content {
+        > div {
+            margin: 10px 0;
+        }
+        .img-line {
+            display: flex;
+            align-items: center;
+        }
+        .img-wrap {
+            margin-left: 30px;
+            span {
+                display: inline-block;
+                width: 90px;
+                vertical-align: -3px;
+            }
+        }
+        img {
+            height: 80px;
+        }
+        .style + .style {
+            margin-left: 6px;
+        }
+    }
+    &-goods-none {
+        text-align: center;
+    }
+}
