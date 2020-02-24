@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button, message } from 'antd';
 
-import FormWrapOrderFilter, { OrderFilter } from './components/OrderFilter';
+import OrderFilter from './components/OrderFilter';
 import OrderTable from './components/OrderTable';
 
 import { 
@@ -156,8 +156,8 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
         return ( 
             <div className="order-wrap">
-                <FormWrapOrderFilter 
-                    wrappedComponentRef={this.orderFilterRef}
+                <OrderFilter 
+                    ref={this.orderFilterRef}
                 />
                 <div className="order-operation">
                     <Button 
