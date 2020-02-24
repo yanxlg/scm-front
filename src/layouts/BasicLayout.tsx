@@ -78,7 +78,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                 rightContentRender={rightProps => <RightContent {...rightProps} />}
                 fixSiderbar={true}
                 fixedHeader={true}
-                links={[<div key="1" className="menu-link">草稿箱（9999999）</div>]}
+                // links={[<div key="1" className="menu-link">草稿箱（9999999）</div>]}
                 {...props}
             >
                 {children}
