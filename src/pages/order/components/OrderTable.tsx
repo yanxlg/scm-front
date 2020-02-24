@@ -16,10 +16,7 @@ import {
 declare interface IOrderTableProps {
     loading: boolean;
     orderList: IOrderItem[];
-    allRowKeys: string[];
-    selectedRowKeys: string[];
-    activeOrderList: IOrderItem[];
-    changeSelectedRowKeys(keys: string[]): void;
+    changeSelectedRows(selectedRows: IOrderItem[]): void;
 }
 
 declare interface ISpecs {
@@ -38,8 +35,6 @@ export declare interface IGoodsDetail {
 }
 
 declare interface IOrderTableState {
-    indeterminate: boolean;
-    checkAll: boolean;
     detailDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
 }
@@ -48,37 +43,12 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
     constructor(props: IOrderTableProps) {
         super(props);
         this.state = {
-            indeterminate: false,
-            checkAll: false,
             detailDialogStatus: false,
             goodsDetail: null
         };
     }
 
     private columns: ColumnProps<IOrderItem>[] = [
-        // {
-        //     key: 'x',
-        //     title: () => (
-        //         <Checkbox
-        //             indeterminate={this.state.indeterminate}
-        //             checked={this.state.checkAll}
-        //             onChange={this.onCheckAllChange}
-        //         />
-        //     ),
-        //     // dataIndex: 'a1',
-        //     align: 'center',
-        //     width: 60,
-        //     render: (value: string, row: IOrderItem) => {
-        //         const { selectedRowKeys } = this.props;
-        //         const { middleground_order_id } = row;
-        //         return (
-        //             <Checkbox
-        //                 checked={selectedRowKeys.indexOf(middleground_order_id) > -1}
-        //                 onChange={() => this.selectedRow(middleground_order_id)}
-        //             />
-        //         )
-        //     },
-        // },
         {
             key: 'order_confirm_time',
             title: '订单确认时间',
@@ -268,43 +238,6 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
         },
     ];
 
-    // 取消全选
-    cancelCheckAll = () => {
-        this.setState({
-            indeterminate: false,
-            checkAll: false,
-        });
-    };
-
-    // 点击全选
-    private onCheckAllChange = (e: CheckboxChangeEvent) => {
-        const checked = e.target.checked;
-        const { allRowKeys, changeSelectedRowKeys } = this.props;
-        this.setState({
-            indeterminate: false,
-            checkAll: checked,
-        });
-        changeSelectedRowKeys(checked ? [...allRowKeys] : []);
-    };
-
-    // 选择订单行
-    private selectedRow = (id: string) => {
-        const { selectedRowKeys, allRowKeys, changeSelectedRowKeys } = this.props;
-        const copySelectedRowKeys = [...selectedRowKeys];
-        const index = copySelectedRowKeys.indexOf(id);
-        if (index === -1) {
-            copySelectedRowKeys.push(id);
-        } else {
-            copySelectedRowKeys.splice(index, 1);
-        }
-        const len = copySelectedRowKeys.length;
-        this.setState({
-            indeterminate: len > 0 && len !== allRowKeys.length,
-            checkAll: len === allRowKeys.length,
-        });
-        changeSelectedRowKeys(copySelectedRowKeys);
-    };
-
     // 获取商品详情
     private getOrderGoodsDetail = (middleground_order_id: string) => {
         this.setState({
@@ -330,18 +263,13 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
     }
 
     render() {
-        const { orderList, loading } = this.props;
+        const { orderList, loading, changeSelectedRows } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
         const rowSelection: TableRowSelection<IOrderItem>  = {
-            // onChange: (selectedRowKeys, selectedRows) => {
-            //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            // },
-            onSelect: (record, selected, selectedRows) => {
-                // console.log(record, selected, selectedRows);
-            },
-            // onSelectAll: (selected, selectedRows, changeRows) => {
-            //     console.log(selected, selectedRows, changeRows);
-            // },
+            onChange: (selectedRowKeys, selectedRows) => {
+                // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                changeSelectedRows(selectedRows);
+            }
         };
         return (
             <>
