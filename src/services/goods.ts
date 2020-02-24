@@ -46,10 +46,6 @@ declare interface IGoodsVersionParams {
     commodity_id: string;
 }
 
-declare interface IVersionExportData {
-    commodity_id: string;
-}
-
 export interface IGoodsEditImgItem {
     type: 'new' | 'old';
     url: string;
@@ -152,7 +148,7 @@ export async function getGoodsVersion(params: IGoodsVersionParams) {
 }
 
 // 下载商品版本excel
-export async function postGoodsVersionExport(data: IVersionExportData) {
+export async function postGoodsVersionExport(data: IGoodsVersionParams) {
     return request.get(ApiPathEnum.postGoodsVersionExport, {
         // requestType: 'form',
         params: data,

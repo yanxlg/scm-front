@@ -34,7 +34,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                 const { operationVersion } = this.props;
                 let children = null;
                 // UPDATED RELEASED INITIALIZED updated
-                if (value === 'RELEASED') {
+                if (value !== 'RELEASED') {
                     children = <Button
                         className="btn"
                         type="primary"
