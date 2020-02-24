@@ -4,13 +4,14 @@ import { Button, message } from 'antd';
 import OrderFilter from './components/OrderFilter';
 import OrderTable from './components/OrderTable';
 
-import { 
+import {
     getProductOrderList,
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 
 import "@/styles/order.less";
+import { OrderPayListModal } from '@/pages/order/components/OrderPayListModal';
 
 export declare interface IOrderItem {
     order_confirm_time: string;
@@ -145,49 +146,49 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
     render() {
 
-        const { 
+        const {
             loading,
             editing,
-            orderList, 
-            allRowKeys, 
+            orderList,
+            allRowKeys,
             selectedRowKeys,
             activeOrderList
         } = this.state;
 
-        return ( 
+        return (
             <div className="order-wrap">
-                <OrderFilter 
+                <OrderFilter
                     ref={this.orderFilterRef}
                 />
                 <div className="order-operation">
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         className="order-btn"
                         loading={loading}
                         onClick={() => this.onSearch()}
                     >查询</Button>
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         className="order-btn"
                     >一键拍单</Button>
                     {
                         editing ? (
                             <>
-                                <Button 
+                                <Button
                                     size="small"
                                     className="order-btn"
                                     onClick={this.cancelEdit}
                                 >取消</Button>
-                                <Button 
-                                    size="small" 
+                                <Button
+                                    size="small"
                                     type="primary"
                                     className="order-btn"
                                     onClick={this.saveEdit}
                                 >保存</Button>
                             </>
                         ) : (
-                            <Button 
-                                type="primary" 
+                            <Button
+                                type="primary"
                                 className="order-btn"
                                 onClick={this.handleClickEdit}
                             >编辑</Button>
@@ -203,6 +204,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                     activeOrderList={activeOrderList}
                     changeSelectedRowKeys={this.changeSelectedRowKeys}
                 />
+                <OrderPayListModal/>
             </div>
         )
     }

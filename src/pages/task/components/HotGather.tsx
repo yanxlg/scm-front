@@ -324,8 +324,13 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
     }
 
     @Bind
-    private onCategoryChange() {
-        this.formRef.current!.resetFields(['category_level_two']);
+    private onFirstCategoryChange() {
+        this.formRef.current!.resetFields(['category_level_two','category_level_three']);
+    }
+
+    @Bind
+    private onSecondCategoryChange() {
+        this.formRef.current!.resetFields(['category_level_three']);
     }
 
     @Bind
@@ -565,12 +570,12 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                 validateTrigger={'onBlur'}
                                 name="category_level_one"
                                 label="一级类目"
-                                className="form-item-horizon"
+                                className="form-item-horizon form-item-inline"
                             >
                                 <Select
                                     loading={categoryLoading}
                                     className="select-default"
-                                    onChange={this.onCategoryChange}
+                                    onChange={this.onFirstCategoryChange}
                                 >
                                     {pddCategory.map(category => {
                                         return (
@@ -603,9 +608,13 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                                 validateTrigger={'onBlur'}
                                                 name="category_level_two"
                                                 label="二级类目"
-                                                className="form-item-horizon"
+                                                className="form-item-horizon form-item-inline"
                                             >
-                                                <Select loading={categoryLoading} className="select-default">
+                                                <Select
+                                                    loading={categoryLoading}
+                                                    className="select-default"
+                                                    onChange={this.onSecondCategoryChange}
+                                                >
                                                     {childCategory.map(category => {
                                                         return (
                                                             <Option
@@ -623,10 +632,55 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                 }
                             </Form.Item>
                             <Form.Item
+                                noStyle={true}
+                                shouldUpdate={
+                                    (prevValues, currentValues) =>
+                                        prevValues.category_level_two !== currentValues.category_level_two
+                                }
+                            >
+                                {
+                                    ({getFieldValue})=>{
+                                        const levelOne = getFieldValue("category_level_one");
+                                        const childCategory =
+                                            pddCategory.find(category => {
+                                                return category.platform_cate_id === levelOne;
+                                            })?.children || [];
+                                        const parentLevel = getFieldValue("category_level_two");
+                                        const parentCategory =
+                                            childCategory.find(category => {
+                                                return category.platform_cate_id === parentLevel;
+                                            })?.children || [];
+                                        return (
+                                            <Form.Item
+                                                validateTrigger={'onBlur'}
+                                                name="category_level_three"
+                                                label="三级类目"
+                                                className="form-item-horizon form-item-inline"
+                                            >
+                                                <Select loading={categoryLoading} className="select-default">
+                                                    {parentCategory.map(category => {
+                                                        return (
+                                                            <Option
+                                                                key={category.platform_cate_id}
+                                                                value={category.platform_cate_id}
+                                                            >
+                                                                {category.platform_cate_name}
+                                                            </Option>
+                                                        );
+                                                    })}
+                                                </Select>
+                                            </Form.Item>
+                                        )
+                                    }
+                                }
+                            </Form.Item>
+                        </div>
+                        <div>
+                            <Form.Item
                                 validateTrigger={'onBlur'}
                                 name="sort_type"
                                 label="排序类型"
-                                className="form-item-horizon"
+                                className="form-item-horizon form-item-inline form-item"
                             >
                                 <Select loading={sortLoading} className="select-default">
                                     {sortCondition.map(sort => {
@@ -638,19 +692,19 @@ class HotGather extends React.PureComponent<IHotGatherProps,IHotGatherState>{
                                     })}
                                 </Select>
                             </Form.Item>
+                            <Form.Item
+                                className="form-item-horizon form-item-inline form-item"
+                                validateTrigger={'onBlur'}
+                                name="keywords"
+                                label="关&ensp;键&ensp;词"
+                            >
+                                <Input
+                                    className="input-large"
+                                    spellCheck={'false'}
+                                    placeholder="iPhone XR，国行，白"
+                                />
+                            </Form.Item>
                         </div>
-                        <Form.Item
-                            className="form-item-inline"
-                            validateTrigger={'onBlur'}
-                            name="keywords"
-                            label="关&ensp;键&ensp;词"
-                        >
-                            <Input
-                                className="input-large"
-                                spellCheck={'false'}
-                                placeholder="iPhone XR，国行，白"
-                            />
-                        </Form.Item>
                     </Card>
                     <Card className="form-item" title="设置商品条件：">
                         <div>
