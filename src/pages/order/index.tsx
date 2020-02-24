@@ -82,6 +82,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
+        // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
             loading: true
         })

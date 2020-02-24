@@ -31,13 +31,6 @@ class GoodsDetailDialog extends React.PureComponent<IGoodsDetailDialogProps> {
                 onCancel={this.handleCancel}
                 footer={null}
             >
-                {/* channel_goods_id: string;
-    psku: string;
-    main_img: string;
-    sku: string;
-    sku_img: string;
-    goods_name: string;
-    specs: ISpecs; */}
                 {
                     goodsDetail ? (
                         <div className="order-goods-content">

@@ -50,6 +50,13 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
 
     private columns: ColumnProps<IOrderItem>[] = [
         {
+            key: 'order_time',
+            title: '订单时间',
+            dataIndex: 'order_time',
+            align: 'center',
+            width: 120
+        },
+        {
             key: 'order_confirm_time',
             title: '订单确认时间',
             dataIndex: 'order_confirm_time',
@@ -84,7 +91,8 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
             align: 'center',
             width: 120,
             render: (value: any, row: IOrderItem) => {
-                return <Button type="link" onClick={() => this.getOrderGoodsDetail(row.middleground_order_id)}>查看商品详情</Button>
+                // return <Button type="link" onClick={() => this.getOrderGoodsDetail(row.middleground_order_id)}>查看商品详情</Button>
+                return <a onClick={() => this.getOrderGoodsDetail(row.middleground_order_id)}>查看商品详情</a>
             }
         },
 
@@ -203,7 +211,7 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
         },
         {
             key: 'purchase_place_order_time',
-            title: '采购下单时间',
+            title: '采购生成时间',
             dataIndex: 'purchase_place_order_time',
             align: 'center',
             width: 120
@@ -215,13 +223,13 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
             align: 'center',
             width: 120
         },
-        {
-            key: 'purchase_porder_number',
-            title: '采购父订单号',
-            dataIndex: 'purchase_porder_number',
-            align: 'center',
-            width: 120
-        },
+        // {
+        //     key: 'purchase_porder_number',
+        //     title: '采购父订单号',
+        //     dataIndex: 'purchase_porder_number',
+        //     align: 'center',
+        //     width: 120
+        // },
         {
             key: 'purchase_waybill_number',
             title: '采购运单号',
@@ -234,7 +242,19 @@ class OrderTable extends React.PureComponent<IOrderTableProps, IOrderTableState>
             title: '操作',
             // dataIndex: '',
             align: 'center',
-            width: 120
+            width: 120,
+            render: (value: any, row: IOrderItem) => {
+                return (
+                    <>
+                        <div><Button size="small" type="primary">拍单</Button></div>
+                        {/* <div><Button size="small" type="primary">重新拍单</Button></div>
+                        <div><Button size="small" type="primary">取消拍单</Button></div> */}
+                        <div>
+                            <a>查看订单轨迹</a>
+                        </div>
+                    </>
+                )
+            }
         },
     ];
 
