@@ -223,7 +223,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
 
     // 生成表格
     downloadExcel = () => {
+        const { start_time, end_time, page, page_count } = this.state;
         postGoodsVersionExport({
+            page,
+            page_count,
+            start_time: start_time ? start_time : undefined,
+            end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
         }).catch(err => {
             message.error('下载表格失败');
