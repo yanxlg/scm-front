@@ -312,7 +312,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         },
         {
             key: '_update_time',
-            width: 120,
+            width: 180,
             title: '变更时间',
             dataIndex: '_update_time',
             align: 'center',
@@ -467,7 +467,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     rowKey="sku_id"
                     className="goods-version-table"
                     loading={loading}
-                    scroll={{ x: true, y: 800 }}
+                    scroll={{ x: true, y: 600 }}
                     pagination={false}
                     columns={this.columns}
                     dataSource={versionGoodsList}

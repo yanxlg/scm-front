@@ -250,13 +250,13 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             align: 'center',
             width: 100,
         },
-        {
-            key: 'sku_shopping_fee',
-            title: '运费',
-            dataIndex: 'sku_shopping_fee',
-            align: 'center',
-            width: 100,
-        },
+        // {
+        //     key: 'sku_shopping_fee',
+        //     title: '运费',
+        //     dataIndex: 'sku_shopping_fee',
+        //     align: 'center',
+        //     width: 100,
+        // },
         {
             key: 'sku_weight',
             title: '重量',
@@ -461,7 +461,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                 className="goods-local-table"
                 columns={this.columns}
                 dataSource={goodsList}
-                scroll={{ x: true, y: 800 }}
+                scroll={{ x: true, y: 600 }}
                 pagination={false}
                 loading={searchLoading}
             />
