@@ -170,7 +170,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     // 取消选中的商品
     private cancelSelectedRow = () => {
         this.setState({
-            selectedRowKeys: [],
+            selectedRowKeys: []
         });
         if (this.goodsTableRef) {
             // console.log(this.localSearchRef);
@@ -243,15 +243,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 this.searchFilter = params;
                 const { list, all_count } = res.data;
                 // console.log(111111, this.addRowSpanData(list));
+                if (!isRefresh) {
+                    this.cancelSelectedRow();
+                }
                 this.setState({
                     allCount: all_count,
                     page: params.page,
                     page_count: params.page_count,
-                    goodsList: this.addRowSpanData(list),
+                    goodsList: this.addRowSpanData(list)
                 });
-                if (!isRefresh) {
-                    this.cancelSelectedRow();
-                }
             })
             .finally(() => {
                 this.setState({
