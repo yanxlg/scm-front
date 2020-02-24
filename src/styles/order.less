@@ -1,3 +1,4 @@
+@import "~antd/lib/style/themes/default";
 
 @divisionSpacing: 6px;
 @btnSpacing: 12px;
@@ -69,6 +70,23 @@
     &-pay{
         &-modal{
             width: 600px!important;
+        }
+        &-total{
+            float: right;
+            color: #999999;
+            font-size: 14px;
+            margin-right: 20px;
+            line-height: 25px;
+            &-amount{
+                color: @success-color;
+            }
+        }
+        &-qr{
+            width: 120px;
+            height: 120px;
+            &-modal{
+                width: 300px!important;
+            }
         }
     }
 }
