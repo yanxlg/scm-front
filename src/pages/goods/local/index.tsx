@@ -19,8 +19,7 @@ import {
     getGoodsDelete,
     getGoodsSales,
     IFilterParams,
-    getCatagoryList,
-    putGoodsEdit,
+    getCatagoryList
 } from '@/services/goods';
 import { strToNumber } from '@/utils/common'
 import { RouteComponentProps } from 'dva/router';
@@ -134,8 +133,9 @@ type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     localSearchRef: LocalSearch | null = null;
-
     goodsTableRef: GoodsTable | null = null;
+    // 保存搜索条件
+    searchFilter: IFilterParams | null = null;
 
     constructor(props: LocalPageProps) {
         super(props);
@@ -240,6 +240,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         return getGoodsList(params)
             .then(res => {
                 // console.log(res)
+                this.searchFilter = params;
                 const { list, all_count } = res.data;
                 // console.log(111111, this.addRowSpanData(list));
                 this.setState({
@@ -547,10 +548,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
     // 获取下载表格数据
     getExcelData = (count: number) => {
-        postGoodsExports({
+        postGoodsExports(Object.assign({}, this.searchFilter, {
             page: count + 1,
             page_count: 10000,
-        })
+        }))
             .catch(err => {
                 // console.log('postGoodsExports err', err);
                 message.error('导出表格失败！');

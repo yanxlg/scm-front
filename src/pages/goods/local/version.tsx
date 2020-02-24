@@ -118,8 +118,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             page: 1,
             page_count: 50,
             allCount: 0,
-            // end_time: this.getTimeSecond(nowTime.getTime()),
-            // start_time: this.getTimeSecond(new Date(nowTime.setDate(nowTime.getDate() - 3)).getTime()),
             currentInfo: null,
             versionGoodsList: [],
         };
@@ -131,8 +129,11 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log();
     }
 
-    private getTimeSecond = (millisecond: number) => {
-        return Math.round(millisecond / 1000)
+    private getTimeSecond = (millisecond: number, isStart?: boolean) => {
+        const date = formatDate(new Date(millisecond), 'yyyy-MM-dd');
+        const zero = new Date(`${date} ${isStart ? '00:00:00' : '23:59:59'}`).getTime();
+        // console.log(formatDate(new Date(zero), 'yyyy-MM-dd hh:mm:ss'));
+        return Math.round(zero / 1000);
     }
 
     private onSearch = (pageData?: IPageData) => {
@@ -212,7 +213,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: (dates && dates[0]) ? this.getTimeSecond(dates[0].valueOf()) : 0,
+                start_time: (dates && dates[0]) ? this.getTimeSecond(dates[0].valueOf(), true) : 0,
                 end_time: (dates && dates[1]) ? this.getTimeSecond(dates[1].valueOf()) : 0
             },
             () => {
@@ -223,7 +224,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
 
     // 生成表格
     downloadExcel = () => {
+        const { start_time, end_time, page, page_count } = this.state;
         postGoodsVersionExport({
+            page,
+            page_count,
+            start_time: start_time ? start_time : undefined,
+            end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
         }).catch(err => {
             message.error('下载表格失败');
