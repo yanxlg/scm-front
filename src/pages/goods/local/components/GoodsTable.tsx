@@ -69,7 +69,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             title: 'Commodity ID',
             dataIndex: 'commodity_id',
             align: 'center',
-            width: 130,
+            width: 140,
             render: (value: string, row: IRowDataItem) => {
                 return {
                     children: (
@@ -88,7 +88,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             title: 'Product ID',
             dataIndex: 'product_id',
             align: 'center',
-            width: 130,
+            width: 140,
             render: (value: string, row: IRowDataItem) => {
                 return {
                     children: (

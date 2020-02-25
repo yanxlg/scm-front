@@ -75,7 +75,7 @@ declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
 }
 
 export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {
-    _prevVersion?: IGoodsVersionRowItem;
+    // _prevVersion?: IGoodsVersionRowItem;
     _rowspan?: number;
 }
 
@@ -185,19 +185,19 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         sku_inventory: Number(skuItem.sku_inventory)
                     })
                 };
-                if (index !== len - 1) {
-                    const prev = list[index + 1];
-                    const { sku_info: prevSku, ...prevRest } = prev;
-                    const prevSkuItem = prevSku[skuIndex];
-                    retItem._prevVersion = {
-                        ...prevRest,
-                        ...Object.assign(prevSkuItem, {
-                            sku_price: Number(prevSkuItem.sku_price),
-                            sku_inventory: Number(prevSkuItem.sku_inventory)
-                        }),
-                    };
-                    // list[index + 1].sku[skuIndex];
-                }
+                // if (index !== len - 1) {
+                //     const prev = list[index + 1];
+                //     const { sku_info: prevSku, ...prevRest } = prev;
+                //     const prevSkuItem = prevSku[skuIndex];
+                //     retItem._prevVersion = {
+                //         ...prevRest,
+                //         ...Object.assign(prevSkuItem, {
+                //             sku_price: Number(prevSkuItem.sku_price),
+                //             sku_inventory: Number(prevSkuItem.sku_inventory)
+                //         }),
+                //     };
+                //     // list[index + 1].sku[skuIndex];
+                // }
                 if (skuIndex === 0) {
                     retItem._rowspan = sku_info.length;
                 }
