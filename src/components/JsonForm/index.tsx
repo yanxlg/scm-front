@@ -49,6 +49,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         } = field;
         return (
             <Form.Item
+                key={name}
                 name={name}
                 label={<Label text={labelText}/>}
             >
@@ -65,6 +66,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         } = field;
         return (
             <Form.Item
+                key={name}
                 name={name}
                 label={<Label text={labelText} />}
             >
@@ -85,6 +87,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         } = field;
         return (
             <Form.Item
+                key={name}
                 name={name}
                 label={<Label text={labelText}/>}
             >
@@ -103,6 +106,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         } = field;
         return (
             <Form.Item
+                key={name}
                 name={name}
             >
                 <Checkbox>{labelText}</Checkbox>

@@ -1,6 +1,8 @@
 import React from 'react';
+import { Button } from 'antd';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import OptionalColumn from './OptionalColumn';
 
 declare interface IPaneAllState {
     fieldList: IFieldItem[];
@@ -47,11 +49,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         }
                     ]
                 },
-                {
-                    type: 'checkbox',
-                    name: 'is_parent',
-                    labelText: '仅展示父订单ID',
-                }
+                // {
+                //     type: 'checkbox',
+                //     name: 'is_parent',
+                //     labelText: '仅展示父订单ID',
+                // }
             ]
         }
     }
@@ -66,9 +68,16 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     <JsonForm
                         fieldList={fieldList}
                     />
-                    {/* <div className="order-operation-group">
-
-                    </div> */}
+                    <div className="order-operation">
+                        <Button type="primary" className="order-btn">查询</Button>
+                        <Button type="primary" className="order-btn">一键拍单</Button>
+                        <Button type="primary" className="order-btn">取消采购单</Button>
+                        <Button type="primary" className="order-btn">取消渠道订单</Button>
+                        <Button type="primary" className="order-btn">导出数据</Button>
+                        <Button type="default" className="order-btn">展示搜索条件</Button>
+                        <Button type="default" className="order-btn">展示字段设置</Button>
+                    </div>
+                    <OptionalColumn />
                 </div>
             </>
         )
