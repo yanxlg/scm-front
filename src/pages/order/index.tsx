@@ -1,17 +1,15 @@
 import React, { RefObject } from 'react';
-import { Button, message } from 'antd';
+import { Button, Tabs, message } from 'antd';
 
 import OrderFilter from './components/OrderFilter';
 import OrderTable from './components/OrderTable';
+import PaneAll from './components/PaneAll';
 
-import {
-    getProductOrderList,
-    IFilterBaseParams,
-    IFilterParams
-} from '@/services/order-manage';
+import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 
-import "@/styles/order.less";
-import { OrderPayListModal } from '@/pages/order/components/OrderPayListModal';
+import '@/styles/order.less';
+
+const { TabPane } = Tabs;
 
 export declare interface IOrderItem {
     order_confirm_time: string;
@@ -43,32 +41,25 @@ export declare interface IOrderItem {
 
 declare interface IOrderState {
     loading: boolean;
-    editing: boolean;
     page: number;
     pageNumber: number;
     total: number;
     orderList: IOrderItem[];
-    allRowKeys: string[];
-    selectedRowKeys: string[];
-    activeOrderList: IOrderItem[];
+    selectedRows: IOrderItem[];
 }
 
 class Order extends React.PureComponent<{}, IOrderState> {
-
     private orderFilterRef: RefObject<OrderFilter> = React.createRef();
 
     constructor(props: {}) {
         super(props);
         this.state = {
             loading: false,
-            editing: false,
             page: 1,
             pageNumber: 30,
             total: 0,
             orderList: [],
-            allRowKeys: [],
-            selectedRowKeys: [],
-            activeOrderList: []
+            selectedRows: [],
         };
     }
 
@@ -80,8 +71,8 @@ class Order extends React.PureComponent<{}, IOrderState> {
         const { page, pageNumber } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
-        }
+            page_number: pageNumber,
+        };
         if (this.orderFilterRef.current) {
             // console.log('onSearch', this.orderFilterRef.current.getValues());
             params = Object.assign(params, this.orderFilterRef.current.getValues());
@@ -89,75 +80,75 @@ class Order extends React.PureComponent<{}, IOrderState> {
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
+        // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
-            loading: true
-        })
-        getProductOrderList(params).then(res => {
-            // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
-            this.setState({
-                total,
-                page: params.page,
-                pageNumber: params.page_number,
-                orderList: list,
-                allRowKeys: list.map((item: IOrderItem) => item.middleground_order_id)
+            loading: true,
+        });
+        getProductOrderList(params)
+            .then(res => {
+                // console.log('getProductOrderList', res);
+                const { total, list } = res.data;
+                this.setState({
+                    total,
+                    page: params.page,
+                    pageNumber: params.page_number,
+                    orderList: list,
+                });
             })
-        }).catch(err => {
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
-        })
-    }
-
-    // 设置当前选中的行
-    changeSelectedRowKeys = (selectedRowKeys: string[]) => {
+    // 改变选择的行
+    changeSelectedRows = (selectedRows: IOrderItem[]) => {
         this.setState({
-            selectedRowKeys
-        })
-    }
+            selectedRows,
+        });
+    };
 
-    // 点击编辑
-    handleClickEdit = () => {
-        const { editing, selectedRowKeys, orderList } = this.state;
-        if (!selectedRowKeys.length) {
-            return message.info('请选择需要编辑的订单');
-        }
-        this.setState({
-            editing: true,
-            activeOrderList: orderList.filter(item => selectedRowKeys.indexOf(item.middleground_order_id) > -1)
-        })
-    }
+    // 拍单
+    placeOrder = () => {
+        const { selectedRows } = this.state;
+        // console.log('selectedRows', selectedRows);
+    };
 
-    // 取消编辑
-    cancelEdit = () => {
-        this.setState({
-            editing: false,
-            selectedRowKeys: [],
-            activeOrderList: []
-        })
-    }
-
-    // 保存编辑
-    saveEdit = () => {
-        // console.log('saveEdit');
-    }
+    // 改变tab
+    selectedTab = (key: string) => {
+        // console.log('selectedTab', key);
+    };
 
     render() {
-
-        const {
-            loading,
-            editing,
-            orderList,
-            allRowKeys,
-            selectedRowKeys,
-            activeOrderList
-        } = this.state;
+        const { loading, orderList } = this.state;
 
         return (
             <div className="order-wrap">
-                <OrderFilter
+                <Tabs onChange={this.selectedTab} type="card">
+                    <TabPane tab={`全部（1000）`} key="1">
+                        <PaneAll />
+                    </TabPane>
+                    <TabPane tab={`待拍单（1000）`} key="2">
+                        待拍单
+                    </TabPane>
+                    <TabPane tab={`待支付（1000）`} key="3">
+                        待支付
+                    </TabPane>
+                    <TabPane tab={`待发货（1000）`} key="4">
+                        待发货
+                    </TabPane>
+                    <TabPane tab={`采购未发货（1000）`} key="5">
+                        采购未发货
+                    </TabPane>
+                    <TabPane tab={`仓库未发货（1000）`} key="6">
+                        仓库未发货
+                    </TabPane>
+                    <TabPane tab={`异常订单（1000）`} key="7">
+                        异常订单
+                    </TabPane>
+                </Tabs>
+                {/* <OrderFilter
                     ref={this.orderFilterRef}
                 />
                 <div className="order-operation">
@@ -170,43 +161,21 @@ class Order extends React.PureComponent<{}, IOrderState> {
                     <Button
                         type="primary"
                         className="order-btn"
+                        onClick={this.placeOrder}
                     >一键拍单</Button>
-                    {
-                        editing ? (
-                            <>
-                                <Button
-                                    size="small"
-                                    className="order-btn"
-                                    onClick={this.cancelEdit}
-                                >取消</Button>
-                                <Button
-                                    size="small"
-                                    type="primary"
-                                    className="order-btn"
-                                    onClick={this.saveEdit}
-                                >保存</Button>
-                            </>
-                        ) : (
-                            <Button
-                                type="primary"
-                                className="order-btn"
-                                onClick={this.handleClickEdit}
-                            >编辑</Button>
-                        )
-                    }
+                    <Button
+                        type="primary"
+                        className="order-btn"
+                    >支付</Button>
                     <Button className="order-btn">导出Excel</Button>
                 </div>
                 <OrderTable
                     loading={loading}
                     orderList={orderList}
-                    allRowKeys={allRowKeys}
-                    selectedRowKeys={selectedRowKeys}
-                    activeOrderList={activeOrderList}
-                    changeSelectedRowKeys={this.changeSelectedRowKeys}
-                />
-                <OrderPayListModal/>
+                    changeSelectedRows={this.changeSelectedRows}
+                /> */}
             </div>
-        )
+        );
     }
 }
 
