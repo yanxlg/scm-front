@@ -6,6 +6,7 @@ import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
 import { utcToLocal } from '@/utils/date';
+import JsonForm, { IFieldItem } from '@/components/JsonForm';
 
 declare interface ITableData {
     good_id: number; // 中台商品ID
@@ -181,7 +182,21 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         };
         return (
             <div>
-                <div className="form-item float-clear">
+                <div className="float-clear">
+                    <JsonForm
+                        labelClassName="stock-form-label"
+                        fieldList={
+                            [
+                                {
+                                    type: 'input',
+                                    label: '中台商品ID',
+                                    name: 'good_id',
+                                    formItemClassName: 'form-item',
+                                    className: 'input-default',
+                                },
+                            ] as IFieldItem[]
+                        }
+                    />
                     <Pagination
                         className="float-right"
                         pageSize={pageSize}

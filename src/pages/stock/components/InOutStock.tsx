@@ -3,10 +3,11 @@ import { FitTable } from '@/components/FitTable';
 import { Button, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
+import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
 import { utcToLocal } from '@/utils/date';
-import { getTaskList } from '@/services/task';
+import JsonForm, { IFieldItem } from '@/components/JsonForm';
 
 declare interface ITableData {
     in_time: number; // 入库时间
@@ -197,7 +198,63 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
         };
         return (
             <div>
-                <div className="form-item float-clear">
+                <div className="float-clear">
+                    <JsonForm
+                        labelClassName="stock-form-label"
+                        fieldList={
+                            [
+                                {
+                                    type: 'dateRanger',
+                                    label: <span>出库&emsp;时间</span>,
+                                    name: ['out_time_start', 'out_time_end'],
+                                    formItemClassName: 'form-item',
+                                    className: 'stock-form-picker',
+                                },
+                                {
+                                    type: 'dateRanger',
+                                    label: <span>入库&emsp;时间</span>,
+                                    name: ['in_time_start', 'in_time_end'],
+                                    formItemClassName: 'form-item',
+                                    className: 'stock-form-picker',
+                                },
+                                {
+                                    type: 'input',
+                                    label: '尾程运单号',
+                                    name: 'last_trans_no',
+                                    formItemClassName: 'form-item',
+                                    className: 'input-default',
+                                },
+                                {
+                                    type: 'input',
+                                    label: '出库订单号',
+                                    name: 'out_order',
+                                    formItemClassName: 'form-item',
+                                    className: 'input-default',
+                                },
+                                {
+                                    type: 'input',
+                                    label: '入库订单号',
+                                    name: 'in_order',
+                                    formItemClassName: 'form-item',
+                                    className: 'input-default',
+                                },
+                                {
+                                    type: 'input',
+                                    label: '采购订单号',
+                                    name: 'buy_order',
+                                    formItemClassName: 'form-item',
+                                    className: 'input-default',
+                                },
+                                {
+                                    type: 'input',
+                                    label: '中台商品ID',
+                                    name: 'good_id',
+                                    formItemClassName: 'form-item',
+                                    className: 'input-default',
+                                },
+                            ] as IFieldItem[]
+                        }
+                    />
                     <Pagination
                         className="float-right"
                         pageSize={pageSize}
