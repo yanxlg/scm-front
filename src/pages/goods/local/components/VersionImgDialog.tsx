@@ -32,11 +32,11 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             align: 'center',
             className: 'top',
             render: (value: string[], row: IDataSource) => {
-                const classStr = this.isAddImg(value[0])
-                    ? 'main-item add'
-                    : 'main-item';
+                // const classStr = this.isAddImg(value[0])
+                //     ? 'main-item add'
+                //     : 'main-item';
                 return (
-                    <div className={classStr}>
+                    <div className="main-item">
                         <img className="main-img" src={value[0]} />
                     </div>
                 );
@@ -53,11 +53,11 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
                     // <div>111</div>
                     <div className="list">
                         {row.sku_image.slice(1).map(item => {
-                            const classStr = this.isAddImg(item)
-                                ? 'item add'
-                                : 'item';
+                            // const classStr = this.isAddImg(item)
+                            //     ? 'item add'
+                            //     : 'item';
                             return (
-                                <div className={classStr} key={item}>
+                                <div className="item" key={item}>
                                     <img src={item} />
                                     {/* <div className="desc">sku id：{item}</div> */}
                                 </div>
@@ -70,13 +70,13 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
     ];
 
     // 判断当前图片是否为新增
-    isAddImg = (imgUrl: string): boolean => {
-        const { activeRow } = this.props;
-        if (activeRow && activeRow._prevVersion) {
-            return activeRow._prevVersion.sku_image.indexOf(imgUrl) === -1;
-        }
-        return false;
-    };
+    // isAddImg = (imgUrl: string): boolean => {
+    //     const { activeRow } = this.props;
+    //     if (activeRow && activeRow._prevVersion) {
+    //         return activeRow._prevVersion.sku_image.indexOf(imgUrl) === -1;
+    //     }
+    //     return false;
+    // };
 
     private handleCancel = () => {
         this.props.toggleVersionImgDialog(false);
