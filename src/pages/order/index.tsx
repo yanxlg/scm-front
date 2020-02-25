@@ -1,8 +1,9 @@
 import React, { RefObject } from 'react';
-import { Button, message } from 'antd';
+import { Button, Tabs, message } from 'antd';
 
 import OrderFilter from './components/OrderFilter';
 import OrderTable from './components/OrderTable';
+import PaneAll from './components/PaneAll';
 
 import { 
     getProductOrderList,
@@ -11,6 +12,8 @@ import {
 } from '@/services/order-manage';
 
 import "@/styles/order.less";
+
+const { TabPane } = Tabs;
 
 export declare interface IOrderItem {
     order_confirm_time: string;
@@ -115,6 +118,11 @@ class Order extends React.PureComponent<{}, IOrderState> {
         // console.log('selectedRows', selectedRows);
     }
 
+    // 改变tab  
+    selectedTab = (key: string) => {
+        // console.log('selectedTab', key);
+    }
+
     render() {
 
         const { 
@@ -124,7 +132,30 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
         return ( 
             <div className="order-wrap">
-                <OrderFilter 
+                <Tabs onChange={this.selectedTab} type="card">
+                    <TabPane tab={`全部（1000）`} key="1">
+                        <PaneAll />
+                    </TabPane>
+                    <TabPane tab={`待拍单（1000）`} key="2">
+                        待拍单
+                    </TabPane>
+                    <TabPane tab={`待支付（1000）`} key="3">
+                        待支付
+                    </TabPane>
+                    <TabPane tab={`待发货（1000）`} key="4">
+                        待发货
+                    </TabPane>
+                    <TabPane tab={`采购未发货（1000）`} key="5">
+                        采购未发货
+                    </TabPane>
+                    <TabPane tab={`仓库未发货（1000）`} key="6">
+                        仓库未发货
+                    </TabPane>
+                    <TabPane tab={`异常订单（1000）`} key="7">
+                        异常订单
+                    </TabPane>
+                </Tabs>
+                {/* <OrderFilter 
                     ref={this.orderFilterRef}
                 />
                 <div className="order-operation">
@@ -149,7 +180,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                     loading={loading}
                     orderList={orderList}
                     changeSelectedRows={this.changeSelectedRows}
-                />
+                /> */}
             </div>
         )
     }
