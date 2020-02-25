@@ -41,9 +41,10 @@ declare interface IProductId {
 declare interface IGoodsVersionParams {
     page: number;
     page_count: number;
-    start_time: number | undefined;
-    end_time: number | undefined;
+    start_time?: number | undefined;
+    end_time?: number | undefined;
     commodity_id: string;
+    product_status?: number[];
 }
 
 export interface IGoodsEditImgItem {

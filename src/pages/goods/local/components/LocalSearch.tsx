@@ -265,6 +265,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
+                        precision={0}
                         value={min_sku}
                         onChange={(val) => this.setNumber('min_sku', val)}
                     />
@@ -272,6 +273,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
+                        precision={0}
                         value={max_sku}
                         onChange={(val) => this.setNumber('max_sku', val)}
                     />
@@ -297,6 +299,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
+                        precision={0}
                         value={min_sale}
                         onChange={(val) => this.setNumber('min_sale', val)}
                     />
@@ -304,6 +307,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
+                        precision={0}
                         value={max_sale}
                         onChange={(val) => this.setNumber('max_sale', val)}
                     />
@@ -313,6 +317,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     <InputNumber
                         className="local-search-item-input-min"
                         min={0}
+                        precision={0}
                         value={min_comment}
                         onChange={(val) => this.setNumber('min_comment', val)}
                     />

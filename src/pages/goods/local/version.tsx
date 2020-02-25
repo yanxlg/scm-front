@@ -125,6 +125,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     componentDidMount(): void {
         this.id = this.props.location.query.id;
         this.onSearch();
+        this.searchReleasedGoods();
         // console.log();
     }
 
@@ -167,6 +168,23 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 });
             });
     };
+
+    // 获取RELEASED状态商品
+    private searchReleasedGoods = () => {
+        getGoodsVersion({
+            page: 1,
+            page_count: 50,
+            commodity_id: this.id,
+            product_status: [5]
+        }).then(res => {
+            const { list } = res.data;
+            const goodsList = this.addRowSpanData(list);
+            // console.log('goodsList', goodsList);
+            this.setState({
+                currentInfo: goodsList[0] || null
+            })
+        });
+    }
 
     // 处理表格数据，用于合并单元格
     private addRowSpanData(list: IGoodsVersionItem[]): IGoodsVersionRowItem[] {
