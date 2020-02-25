@@ -34,6 +34,7 @@ declare interface IVersionState {
     dataLoading: boolean;
     clearLoading:boolean;
     dataSet: ITableItem[];
+    keys:number[];
     attributes?:Array< {
         property:string;
         count:number;
@@ -48,6 +49,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
             selectedRowKeys: new Set(),
             dataLoading: false,
             dataSet: [],
+            keys: [],
             clearLoading:false
         };
     }
@@ -62,8 +64,10 @@ class Version extends React.PureComponent<{}, IVersionState> {
         });
         return queryGoodsVersion(params)
             .then(({ data: { changed_property_list = [], goods_list = [] } }) => {
+                const { dataSet, keys } = this.combineDataSet(goods_list);
                 this.setState({
-                    dataSet: goods_list,
+                    dataSet,
+                    keys,
                     attributes: changed_property_list,
                 });
             })
@@ -172,197 +176,199 @@ class Version extends React.PureComponent<{}, IVersionState> {
             })
         })
     }
-    render() {
-        const { selectedRowKeys, dataLoading, attributes, dataSet: data,clearLoading } = this.state;
-        const { dataSet, keys } = this.combineDataSet(data);
-        const selectedSize = selectedRowKeys.size;
-        const indeterminate = selectedSize > 0;
-        const checkedAll = selectedSize === keys.length && selectedSize > 0;
-        const columns: ColumnType<ITableItem>[] = [
-            {
-                title: (
+    private columns: ColumnType<ITableItem>[] = [
+        {
+            title: ()=>{
+                const {selectedRowKeys,keys} = this.state;
+                const selectedSize = selectedRowKeys.size;
+                const indeterminate = selectedSize > 0;
+                const checkedAll = selectedSize === keys.length && selectedSize > 0;
+                return (
                     <Checkbox
                         indeterminate={checkedAll ? false : indeterminate}
                         checked={checkedAll}
                         onChange={e => this.onCheckAllBoxStateChange(e.target.checked, keys)}
                     />
-                ),
-                width: '50px',
-                fixed: 'left',
-                render: (text, record, index) => {
-                    const { selectedRowKeys } = this.state;
-                    return {
-                        children: (
-                            <Checkbox
-                                checked={selectedRowKeys.has(record.product_id)}
-                                onChange={e =>
-                                    this.onCheckboxStateChange(e.target.checked, record.product_id)
-                                }
-                            />
-                        ),
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+                )
             },
-            {
-                title: '虚拟ID',
-                dataIndex: 'vova_virtual_id',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+            width: '50px',
+            fixed: 'left',
+            render: (text, record, index) => {
+                const { selectedRowKeys } = this.state;
+                return {
+                    children: (
+                        <Checkbox
+                            checked={selectedRowKeys.has(record.product_id)}
+                            onChange={e =>
+                                this.onCheckboxStateChange(e.target.checked, record.product_id)
+                            }
+                        />
+                    ),
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: 'Product_ID',
-                dataIndex: 'product_id',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '虚拟ID',
+            dataIndex: 'vova_virtual_id',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: 'Commodity_id',
-                dataIndex: 'commodity_id',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: 'Product_ID',
+            dataIndex: 'product_id',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '价格',
-                dataIndex: 'price',
+        },
+        {
+            title: 'Commodity_id',
+            dataIndex: 'commodity_id',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '运费',
-                dataIndex: 'shipping_fee',
+        },
+        {
+            title: '价格',
+            dataIndex: 'price',
+        },
+        {
+            title: '运费',
+            dataIndex: 'shipping_fee',
+        },
+        {
+            title: '规格',
+            dataIndex: 'specs',
+        },
+        {
+            title: '商品主图',
+            dataIndex: 'product_main_pic',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '规格',
-                dataIndex: 'specs',
+        },
+        {
+            title: '下架',
+            dataIndex: 'lower_shelf',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '商品主图',
-                dataIndex: 'product_main_pic',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '上架',
+            dataIndex: 'upper_shelf',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '下架',
-                dataIndex: 'lower_shelf',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '商品标题&描述',
+            dataIndex: 'goods_title',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '上架',
-                dataIndex: 'upper_shelf',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: 'sku图片数',
+            dataIndex: 'sku_pics_volume',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '商品标题&描述',
-                dataIndex: 'goods_title',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '操作人',
+            dataIndex: 'operationer',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: 'sku图片数',
-                dataIndex: 'sku_pics_volume',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '应用时间',
+            dataIndex: 'apply_time',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '操作人',
-                dataIndex: 'operationer',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '推送时间',
+            dataIndex: 'push_time',
+            render: (text, record, index) => {
+                return {
+                    children: text,
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '应用时间',
-                dataIndex: 'apply_time',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
+        },
+        {
+            title: '操作',
+            dataIndex: 'is_version_applied',
+            render: (text, record, index) => {
+                return {
+                    children: text === 1?"已使用":"",
+                    props: {
+                        rowSpan: record.rowSpan || 0,
+                    },
+                };
             },
-            {
-                title: '推送时间',
-                dataIndex: 'push_time',
-                render: (text, record, index) => {
-                    return {
-                        children: text,
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                title: '操作',
-                dataIndex: 'is_version_applied',
-                render: (text, record, index) => {
-                    return {
-                        children: text === 1?"已使用":"",
-                        props: {
-                            rowSpan: record.rowSpan || 0,
-                        },
-                    };
-                },
-            },
-        ];
+        },
+    ];
+    render() {
+        const { dataLoading, attributes, dataSet,clearLoading } = this.state;
         return (
             <div className="container">
                 <Card>
@@ -386,7 +392,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
                     loading={dataLoading}
                     rowKey="product_id"
                     className="product-card"
-                    columns={columns}
+                    columns={this.columns}
                     dataSource={dataSet}
                     bordered={true}
                     scroll={{ x: 1600 }}
