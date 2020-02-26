@@ -15,12 +15,11 @@ declare interface ILabelProps {
 }
 
 function Label(props: ILabelProps) {
-    return <span className="order-label">{props.text}</span>
+    return <span className="order-label">{props.text}</span>;
 }
 
 // <IOrderFilterProps>
 class OrderFilter extends React.PureComponent {
-
     formRef: RefObject<FormInstance> = React.createRef();
 
     // constructor(props: IOrderFilterProps) {
@@ -34,7 +33,7 @@ class OrderFilter extends React.PureComponent {
         //     return false;
         // }
         // return startTime.valueOf() > endTime.valueOf();
-    }
+    };
 
     private disabledEndDate = (endTime: Moment | null) => {
         // const { form } = this.props;
@@ -43,13 +42,13 @@ class OrderFilter extends React.PureComponent {
         //     return false;
         // }
         // return startTime.valueOf() > endTime.valueOf();
-    }
+    };
 
     getValues = () => {
         // const { form } = this.props;
         // console.log('getValues', this.formRef.current!.getFieldsValue());
-        return this.formRef.current!.getFieldsValue()
-    }
+        return this.formRef.current!.getFieldsValue();
+    };
 
     render() {
         const initialValues = {
@@ -59,44 +58,37 @@ class OrderFilter extends React.PureComponent {
             purchase_payment_status: '',
             purchase_delivery_status: '',
             channel_order_status: '',
-            channel_shipments_status: ''
-        }
+            channel_shipments_status: '',
+        };
 
         return (
-            <Form 
-                layout="inline"
-                ref={this.formRef}
-                initialValues={initialValues}
-            >
+            <Form layout="inline" ref={this.formRef} initialValues={initialValues}>
                 <Form.Item
-                    name="order_time" 
+                    name="order_time"
                     className="order-form-item"
-                    label={<Label text="订单时间"/>}
+                    label={<Label text="订单时间" />}
                 >
                     <DatePicker
-                        className="order-input" 
+                        className="order-input"
                         placeholder="订单时间"
                         // disabledDate={this.disabledStartDate}
                     />
                 </Form.Item>
                 <Form.Item
-                    name="order_confirm_time1" 
+                    name="order_confirm_time1"
                     className="order-form-item order-time"
-                    label={<Label text="确认订单时间"/>}
+                    label={<Label text="确认订单时间" />}
                 >
                     <DatePicker
-                        className="order-date-picker" 
+                        className="order-date-picker"
                         placeholder="开始时间"
                         // disabledDate={this.disabledStartDate}
                     />
                 </Form.Item>
                 <span className="ant-form-item-label order-division">-</span>
-                <Form.Item
-                    name="order_confirm_time2"
-                    className="order-form-item"
-                >
+                <Form.Item name="order_confirm_time2" className="order-form-item">
                     <DatePicker
-                        className="order-date-picker" 
+                        className="order-date-picker"
                         placeholder="结束时间"
                         // disabledDate={this.disabledEndDate}
                     />
@@ -104,47 +96,35 @@ class OrderFilter extends React.PureComponent {
                 <Form.Item
                     name="commodity_id"
                     className="order-form-item"
-                    label={<Label text="中台商品ID"/>}
+                    label={<Label text="中台商品ID" />}
                 >
-                    <Input
-                        className="order-input"  
-                        placeholder="请输入中台商品ID"
-                    />
+                    <Input className="order-input" placeholder="请输入中台商品ID" />
                 </Form.Item>
                 <Form.Item
-                    name="middleground_order_id" 
+                    name="middleground_order_id"
                     className="order-form-item"
-                    label={<Label text="中台订单ID"/>}
+                    label={<Label text="中台订单ID" />}
                 >
-                    <Input
-                        className="order-input"  
-                        placeholder="请输入中台订单ID"
-                    />
+                    <Input className="order-input" placeholder="请输入中台订单ID" />
                 </Form.Item>
                 <Form.Item
                     name="channel_goods_id"
                     className="order-form-item"
-                    label={<Label text="渠道商品ID"/>}
+                    label={<Label text="渠道商品ID" />}
                 >
-                    <Input
-                        className="order-input"  
-                        placeholder="请输入渠道商品ID"
-                    />
+                    <Input className="order-input" placeholder="请输入渠道商品ID" />
                 </Form.Item>
                 <Form.Item
                     name="channel_order_number"
                     className="order-form-item"
-                    label={<Label text="渠道订单号"/>}
+                    label={<Label text="渠道订单号" />}
                 >
-                    <Input
-                        className="order-input"  
-                        placeholder="请输入渠道订单号"
-                    />
+                    <Input className="order-input" placeholder="请输入渠道订单号" />
                 </Form.Item>
                 <Form.Item
                     name="purchase_order_status"
                     className="order-form-item"
-                    label={<Label text="采购订单状态"/>}
+                    label={<Label text="采购订单状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -157,8 +137,8 @@ class OrderFilter extends React.PureComponent {
                 </Form.Item>
                 <Form.Item
                     name="middleground_order_status"
-                    className="order-form-item" 
-                    label={<Label text="中台订单状态"/>}
+                    className="order-form-item"
+                    label={<Label text="中台订单状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -168,8 +148,8 @@ class OrderFilter extends React.PureComponent {
                 </Form.Item>
                 <Form.Item
                     name="middleground_order_logistics_status"
-                    className="order-form-item" 
-                    label={<Label text="中台订单物流状态"/>}
+                    className="order-form-item"
+                    label={<Label text="中台订单物流状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -184,8 +164,8 @@ class OrderFilter extends React.PureComponent {
                 </Form.Item>
                 <Form.Item
                     name="purchase_payment_status"
-                    className="order-form-item" 
-                    label={<Label text="采购支付状态"/>}
+                    className="order-form-item"
+                    label={<Label text="采购支付状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -199,7 +179,7 @@ class OrderFilter extends React.PureComponent {
                 <Form.Item
                     name="purchase_delivery_status"
                     className="order-form-item"
-                    label={<Label text="采购配送状态"/>}
+                    label={<Label text="采购配送状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -211,7 +191,7 @@ class OrderFilter extends React.PureComponent {
                 <Form.Item
                     name="channel_order_status"
                     className="order-form-item"
-                    label={<Label text="渠道订单状态"/>}
+                    label={<Label text="渠道订单状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -221,8 +201,8 @@ class OrderFilter extends React.PureComponent {
                 </Form.Item>
                 <Form.Item
                     name="channel_shipments_status"
-                    className="order-form-item" 
-                    label={<Label text="渠道发货状态"/>}
+                    className="order-form-item"
+                    label={<Label text="渠道发货状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>
@@ -231,7 +211,7 @@ class OrderFilter extends React.PureComponent {
                     </Select>
                 </Form.Item>
             </Form>
-        )
+        );
     }
 }
 

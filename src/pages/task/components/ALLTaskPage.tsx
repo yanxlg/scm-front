@@ -107,9 +107,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 });
             });
     }
-
+    private columns?:ColumnProps<IDataItem>[] = undefined;
     private getColumns(): ColumnProps<IDataItem>[] {
-        const { page, pageNumber } = this.state;
+        if(this.columns){
+            return this.columns;
+        }
         const { task_status } = this.props;
         const columns: ColumnProps<IDataItem>[] = [
             {
@@ -118,8 +120,10 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'index',
                 fixed: 'left',
                 align: 'center',
-                render: (text: string, record: any, index: number) =>
-                    index + 1 + pageNumber * (page - 1),
+                render: (text: string, record: any, index: number) =>{
+                    const { page, pageNumber } = this.state;
+                    return index + 1 + pageNumber * (page - 1);
+                },
             },
             {
                 title: '任务SN',
@@ -187,6 +191,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 title: '操作',
                 dataIndex: 'operation',
                 align: 'center',
+                width:"200px",
                 render: (text: any, record: IDataItem) => {
                     const { task_status } = this.props;
                     if (task_status === void 0) {
@@ -222,6 +227,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         if (task_status !== void 0) {
             columns.splice(7, 1);
         }
+        this.columns = columns;
         return columns;
     }
     private onSelectChange(selectedRowKeys:React.Key[]) {
@@ -442,7 +448,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         pagination={false}
                         loading={dataLoading}
                         scroll={{
-                            x: task_status === void 0 ? 1600 : 1500,
+                            x: true,
                             scrollToFirstRowOnChange: true,
                         }}
                         bottom={130}

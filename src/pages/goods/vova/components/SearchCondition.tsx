@@ -4,6 +4,7 @@ import { FormInstance } from 'antd/es/form';
 import {Bind} from 'lodash-decorators';
 import { getSearchConditionOptions, IFilterParams } from '@/services/VovaGoodsService';
 import { transEndDate, transStartDate } from '@/utils/date';
+import "@/styles/product.less";
 
 declare interface ISearchProps{
     onSearch: Function;
@@ -134,7 +135,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                     }}
                 >
                     <Form.Item
-                        label="时间"
+                        label={<span className="product-form-label">时&emsp;&emsp;&emsp;间</span>}
                         className="form-item"
                     >
                         <Form.Item
@@ -160,7 +161,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                                                         : false
                                                         : false
                                                 }
-                                                className="picker-small"
+                                                className="product-picker"
                                             />
                                         </Form.Item>
                                     )
@@ -191,7 +192,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                                                         : false
                                                         : false
                                                 }
-                                                className="picker-small"
+                                                className="product-picker"
                                             />
                                         </Form.Item>
                                     )
@@ -200,19 +201,19 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         </Form.Item>
                     </Form.Item>
 
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="commondity_id" label="Commodity_ID">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="commondity_id" label={<span className="product-form-label">Commodity ID</span>}>
                         <Input className="input-default input-handler" />
                     </Form.Item>
 
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="virtual_goods_id" label="虚拟ID">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="virtual_goods_id" label={<span className="product-form-label">虚拟&emsp;ID</span>}>
                         <Input className="input-default input-handler" />
                     </Form.Item>
 
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="product_id" label="product_id">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="product_id" label={<span className="product-form-label">Product ID</span>}>
                         <Input className="input-default input-handler" />
                     </Form.Item>
 
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="sales_volume" label="销量">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="sales_volume" label={<span className="product-form-label">销&emsp;&emsp;&emsp;量</span>}>
                         <Select className="select-default">
                             {
                                 salesVolumeList.map(item => (
@@ -221,11 +222,11 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                             }
                         </Select>
                     </Form.Item>
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="shop_name" label="店铺名">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="shop_name" label={<span className="product-form-label">店&ensp;铺&ensp;名</span>}>
                         <Input className="input-default input-handler"/>
                     </Form.Item>
 
-                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_one_category" label="一级类目">
+                    <Form.Item className="form-item" validateTrigger={'onBlur'} name="level_one_category" label={<span className="product-form-label">一级类目</span>}>
                         <Select loading={categoryLoading} className="select-default">
                             <Option value="">全部</Option>
                             {
@@ -253,7 +254,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                                     <Form.Item
                                         validateTrigger={'onBlur'}
                                         name="level_two_category"
-                                        label="二级类目"
+                                        label={<span className="product-form-label">二级类目</span>}
                                         className="form-item"
                                     >
                                         <Select loading={categoryLoading} className="select-default">
@@ -274,7 +275,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                             }
                         }
                     </Form.Item>
-                    <Form.Item validateTrigger={'onBlur'} className="form-item" name="product_status" label="商品状态">
+                    <Form.Item validateTrigger={'onBlur'} className="form-item" name="product_status" label={<span className="product-form-label">商品状态</span>}>
                         <Select className="select-default">
                             {
                                 goodsStatusList.map(item => (

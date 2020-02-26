@@ -2,137 +2,130 @@ import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
 import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
+import { validateNull } from '@/utils/validate';
 
-declare interface ITaskListSearch extends IFormData{
-    page:number;
-    page_number:number;
+declare interface ITaskListSearch extends IFormData {
+    page: number;
+    page_number: number;
 }
-
 
 export declare interface IPddHotTaskParams {
     range?: number;
-    category_level_one?:string;
-    category_level_two?:string;
-    sort_type?:string;
-    keywords?:string;
-    task_type?:TaskType;
-    sales_volume_min?:number;
-    sales_volume_max?:number;
-    price_min?:number;
-    price_max?:number;
-    grab_page_count?:number;
-    grab_count_max?:number;
-    task_start_time?:number;
-    task_end_time?:number;
-    task_interval_seconds?:number;
-    task_name?:string;
-    is_upper_shelf:boolean;
-    success?:number;
-    fail?:number;
-    urls?:string;
-    status?:string;
+    category_level_one?: string;
+    category_level_two?: string;
+    sort_type?: string;
+    keywords?: string;
+    task_type?: TaskType;
+    sales_volume_min?: number;
+    sales_volume_max?: number;
+    price_min?: number;
+    price_max?: number;
+    grab_page_count?: number;
+    grab_count_max?: number;
+    task_start_time?: number;
+    task_end_time?: number;
+    task_interval_seconds?: number;
+    task_name?: string;
+    is_upper_shelf: boolean;
+    success?: number;
+    fail?: number;
+    urls?: string;
+    status?: string;
 }
 
 declare interface IPddURLTaskParams {
     urls: string;
-    task_name:string;
-    task_type:TaskType;
-    task_start_time?:number;
-    task_end_time?:number;
-    task_interval_seconds?:number;
-    is_upper_shelf:boolean;
+    task_name: string;
+    task_type: TaskType;
+    task_start_time?: number;
+    task_end_time?: number;
+    task_interval_seconds?: number;
+    is_upper_shelf: boolean;
 }
 
-
-export async function getTaskList(params:ITaskListSearch) {
+export async function getTaskList(params: ITaskListSearch) {
     return request.get(ApiPathEnum.QueryTaskList, {
         params: params,
     });
 }
 
-
-export async function addPddHotTask(params: IPddHotTaskParams) {
+export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskParams) {
     return request.post(ApiPathEnum.AddPDDHotTask, {
         data: {
             ...params,
-            version:"1.0",
-            platform:"PDD"
+            grab_count_max: validateNull(grab_count_max) ? 10000 : grab_count_max,
+            version: '1.0',
+            platform: 'PDD',
         },
-        errorHandler:errorHandlerFactory(true)
+        errorHandler: errorHandlerFactory(true),
     });
 }
-
 
 export async function addPddURLTask(params: IPddURLTaskParams) {
     return request.post(ApiPathEnum.AddPDDURLTask, {
         data: {
             ...params,
-            version:"1.0",
-            platform:"PDD",
+            version: '1.0',
+            platform: 'PDD',
         },
-        errorHandler:errorHandlerFactory(true)
+        errorHandler: errorHandlerFactory(true),
     });
 }
 
-
-export async function activeTasks(task_ids:string) {
-    return request.post(ApiPathEnum.ActiveTask,{
-        data:{
+export async function activeTasks(task_ids: string) {
+    return request.post(ApiPathEnum.ActiveTask, {
+        data: {
             task_ids,
-            type:0
-        }
-    })
+            type: 0,
+        },
+    });
 }
 
-export async function reActiveTasks(task_ids:string) {
-    return request.post(ApiPathEnum.ActiveTask,{
-        data:{
+export async function reActiveTasks(task_ids: string) {
+    return request.post(ApiPathEnum.ActiveTask, {
+        data: {
             task_ids,
-            type:1
-        }
-    })
+            type: 1,
+        },
+    });
 }
 
-export async function abortTasks(task_ids:string) {
-    return request.post(ApiPathEnum.AbortTask,{
-        data:{
-            task_ids
-        }
-    })
+export async function abortTasks(task_ids: string) {
+    return request.post(ApiPathEnum.AbortTask, {
+        data: {
+            task_ids,
+        },
+    });
 }
 
-export async function deleteTasks(task_ids:string) {
+export async function deleteTasks(task_ids: string) {
     return request.put(ApiPathEnum.DeleteTask, {
         data: {
-            task_ids
+            task_ids,
         },
     });
 }
 
-
 export async function queryTaskDetail(task_id: number) {
-    return request.get(ApiPathEnum.QueryTaskDetail,{
-        params:{
-            task_id
-        }
-    })
+    return request.get(ApiPathEnum.QueryTaskDetail, {
+        params: {
+            task_id,
+        },
+    });
 }
-
 
 export async function queryCategory() {
-    return request.get(ApiPathEnum.QueryPDDCategory)
+    return request.get(ApiPathEnum.QueryPDDCategory);
 }
-
 
 export async function querySortCondition() {
-    return request.get(ApiPathEnum.QueryPDDSortCondition)
+    return request.get(ApiPathEnum.QueryPDDSortCondition);
 }
 
-
-export async function queryTaskLog(task_id:number) {
-    return request.get(ApiPathEnum.QueryTaskLog,{
-        params:{
-            task_id
-        }
-    })
+export async function queryTaskLog(task_id: number) {
+    return request.get(ApiPathEnum.QueryTaskLog, {
+        params: {
+            task_id,
+        },
+    });
 }

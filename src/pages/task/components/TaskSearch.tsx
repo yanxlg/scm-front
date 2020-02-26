@@ -65,13 +65,15 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
 
     @Bind
     public getFieldsValue(fieldsName?:string[]){
-        const {task_begin_time,task_end_time,task_create_time1,task_create_time2,...extra} = this.formRef.current!.getFieldsValue(fieldsName);
+        const {task_begin_time,task_end_time,task_create_time1,task_create_time2,task_range,task_status,...extra} = this.formRef.current!.getFieldsValue(fieldsName);
         return {
             ...extra,
             task_begin_time:transStartDate(task_begin_time),
             task_end_time:transEndDate(task_end_time),
             task_create_time1:transStartDate(task_create_time1),
-            task_create_time2:transEndDate(task_create_time2)
+            task_create_time2:transEndDate(task_create_time2),
+            task_range:task_range===-1?undefined:task_range,
+            task_status:task_status===-1?undefined:task_status
         }
     }
     render() {
@@ -95,8 +97,8 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                     layout="inline"
                     autoComplete={'off'}
                     initialValues={{
-                        task_range:1,
-                        task_status:0
+                        task_range:-1,
+                        task_status:-1
                     }}
                 >
                     <Form.Item
@@ -104,21 +106,22 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                         label={<span>任务<span className="task-justify-1">ID</span></span>}
                         className="form-item"
                     >
-                        <Input className="input-equal-date" />
+                        <Input className="input-default" />
                     </Form.Item>
                     <Form.Item
                         name="task_name"
                         label="任务名称"
                         className="form-item"
                     >
-                        <Input className="input-equal-date" />
+                        <Input className="input-default" />
                     </Form.Item>
                     <Form.Item
                         name="task_range"
                         label="任务范围"
                         className="form-item"
                     >
-                        <Select className="select-equal-date">
+                        <Select className="select-default">
+                            <Select.Option value={-1}>全部</Select.Option>
                             {
                                 taskRangeSelections
                             }
@@ -130,7 +133,8 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                             label="任务状态"
                             className="form-item"
                         >
-                            <Select className="select-equal-date">
+                            <Select className="select-default">
+                                <Select.Option value={-1}>全部</Select.Option>
                                 {
                                     taskStatusSelections
                                 }
@@ -146,7 +150,7 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                             noStyle={true}
                         >
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledStartDate}
                             />
                         </Form.Item>
@@ -156,7 +160,7 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                             noStyle={true}
                         >
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledEndDate}
                             />
                         </Form.Item>
@@ -170,7 +174,7 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                             noStyle={true}
                         >
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledCreateStartDate}
                             />
                         </Form.Item>
@@ -180,7 +184,7 @@ class TaskSearch extends React.PureComponent<ITaskSearchProps> {
                             noStyle={true}
                         >
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledCreateEndDate}
                             />
                         </Form.Item>

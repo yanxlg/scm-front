@@ -5,13 +5,9 @@ import OrderFilter from './components/OrderFilter';
 import OrderTable from './components/OrderTable_del';
 import PaneAll from './components/PaneAll';
 
-import { 
-    getProductOrderList,
-    IFilterBaseParams,
-    IFilterParams
-} from '@/services/order-manage';
+import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 
-import "@/styles/order.less";
+import '@/styles/order.less';
 
 const { TabPane } = Tabs;
  
@@ -53,7 +49,6 @@ declare interface IOrderState {
 }
 
 class Order extends React.PureComponent<{}, IOrderState> {
-
     private orderFilterRef: RefObject<OrderFilter> = React.createRef();
 
     constructor(props: {}) {
@@ -64,7 +59,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
             pageNumber: 30,
             total: 0,
             orderList: [],
-            selectedRows: []
+            selectedRows: [],
         };
     }
 
@@ -76,8 +71,8 @@ class Order extends React.PureComponent<{}, IOrderState> {
         const { page, pageNumber } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
-        }
+            page_number: pageNumber,
+        };
         if (this.orderFilterRef.current) {
             // console.log('onSearch', this.orderFilterRef.current.getValues());
             params = Object.assign(params, this.orderFilterRef.current.getValues());
@@ -87,50 +82,48 @@ class Order extends React.PureComponent<{}, IOrderState> {
         }
         // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
-            loading: true
-        })
-        getProductOrderList(params).then(res => {
-            // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
-            this.setState({
-                total,
-                page: params.page,
-                pageNumber: params.page_number,
-                orderList: list
+            loading: true,
+        });
+        getProductOrderList(params)
+            .then(res => {
+                // console.log('getProductOrderList', res);
+                const { total, list } = res.data;
+                this.setState({
+                    total,
+                    page: params.page,
+                    pageNumber: params.page_number,
+                    orderList: list,
+                });
             })
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
-        })
-    }
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     // 改变选择的行
     changeSelectedRows = (selectedRows: IOrderItem[]) => {
         this.setState({
-            selectedRows
-        })
-    }
+            selectedRows,
+        });
+    };
 
     // 拍单
     placeOrder = () => {
         const { selectedRows } = this.state;
         // console.log('selectedRows', selectedRows);
-    }
+    };
 
-    // 改变tab  
+    // 改变tab
     selectedTab = (key: string) => {
         // console.log('selectedTab', key);
-    }
+    };
 
     render() {
+        const { loading, orderList } = this.state;
 
-        const { 
-            loading,
-            orderList         
-        } = this.state;
-
-        return ( 
+        return (
             <div className="order-wrap">
                 <Tabs onChange={this.selectedTab} type="card">
                     <TabPane tab={`全部（1000）`} key="1">
@@ -155,23 +148,23 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         异常订单
                     </TabPane>
                 </Tabs>
-                {/* <OrderFilter 
+                {/* <OrderFilter
                     ref={this.orderFilterRef}
                 />
                 <div className="order-operation">
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         className="order-btn"
                         loading={loading}
                         onClick={() => this.onSearch()}
                     >查询</Button>
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         className="order-btn"
                         onClick={this.placeOrder}
                     >一键拍单</Button>
-                    <Button 
-                        type="primary" 
+                    <Button
+                        type="primary"
                         className="order-btn"
                     >支付</Button>
                     <Button className="order-btn">导出Excel</Button>
@@ -182,7 +175,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                     changeSelectedRows={this.changeSelectedRows}
                 /> */}
             </div>
-        )
+        );
     }
 }
 
