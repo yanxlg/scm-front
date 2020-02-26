@@ -10,7 +10,7 @@ import { transEndDate, transStartDate, utcToLocal } from '@/utils/date';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
-import { queryIOList } from '@/services/stock';
+import { exportIOList, queryIOList } from '@/services/stock';
 
 declare interface ITableData {
     warehousing_time: number; // 入库时间
@@ -180,6 +180,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             className: 'input-default',
         },
     ];
+
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -197,6 +198,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
     componentDidMount(): void {
         this.onSearch();
     }
+
     private convertFormData() {
         const {
             warehousing_start_time,
@@ -218,6 +220,18 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
         this.queryList({
             searchLoading: true,
             pageNumber: 1,
+        });
+    }
+
+    private onExport() {
+        const values = this.convertFormData();
+        this.setState({
+            exportingLoading: true,
+        });
+        exportIOList(values).finally(() => {
+            this.setState({
+                exportingLoading: false,
+            });
         });
     }
 
@@ -306,12 +320,14 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
                         type="primary"
                         loading={searchLoading}
                         className="btn-group vertical-middle form-item"
+                        onClick={this.onSearch}
                     >
                         查询
                     </Button>
                     <Button
                         loading={exportingLoading}
                         className="btn-group vertical-middle form-item"
+                        onClick={this.onExport}
                     >
                         导出Excel表
                     </Button>

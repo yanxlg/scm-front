@@ -1,5 +1,5 @@
 import React, { RefObject, useCallback } from 'react';
-import { Bind } from 'lodash-decorators';
+import { BindAll } from 'lodash-decorators';
 import {
     Button,
     Card,
@@ -17,13 +17,7 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import {
-    TaskIntervalType,
-    TaskRange,
-    TaskStatus,
-    TaskStatusList,
-    TaskType,
-} from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskRange, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import {
     addPddHotTask,
     IPddHotTaskParams,
@@ -37,6 +31,7 @@ import moment, { Moment } from 'moment';
 import { validateNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
+import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
 export declare interface IFormData {
     range?: TaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -94,8 +89,10 @@ declare interface IPDDSortItem {
 
 const Option = Select.Option;
 
+@BindAll()
 class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+
     constructor(props: IHotGatherProps) {
         super(props);
         this.state = {
@@ -108,6 +105,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             sortLoading: true,
         };
     }
+
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
@@ -130,7 +128,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         this.querySortCondition();
     }
 
-    @Bind
     private querySortCondition() {
         querySortCondition()
             .then(({ data: { sortCondition } }) => {
@@ -146,7 +143,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             });
     }
 
-    @Bind
     private queryCategory() {
         queryCategory()
             .then(({ data }) => {
@@ -162,7 +158,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             });
     }
 
-    @Bind
     private convertDetail(info: IPddHotTaskParams) {
         const {
             range,
@@ -201,7 +196,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         };
     }
 
-    @Bind
     private convertFormData(values: IFormData) {
         const {
             range,
@@ -237,7 +231,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         };
     }
 
-    @Bind
     private onGather(is_upper_shelf: boolean = false) {
         this.formRef
             .current!.validateFields()
@@ -321,27 +314,22 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             });
     }
 
-    @Bind
     private onStartGather() {
         this.onGather();
     }
 
-    @Bind
     private onAcquisitionRack() {
         this.onGather(true);
     }
 
-    @Bind
     private onFirstCategoryChange() {
         this.formRef.current!.resetFields(['category_level_two', 'category_level_three']);
     }
 
-    @Bind
     private onSecondCategoryChange() {
         this.formRef.current!.resetFields(['category_level_three']);
     }
 
-    @Bind
     private checkMinSaleNum(rule: any, value: any) {
         const { sales_volume_max } = this.formRef.current!.getFieldsValue(['sales_volume_max']);
         if (
@@ -354,7 +342,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return Promise.resolve();
     }
 
-    @Bind
     private checkMaxSaleNum(rule: any, value: any) {
         const { sales_volume_min } = this.formRef.current!.getFieldsValue(['sales_volume_min']);
         if (
@@ -367,7 +354,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return Promise.resolve();
     }
 
-    @Bind
     private checkMinPrice(rule: any, value: any) {
         const { price_max } = this.formRef.current!.getFieldsValue(['price_max']);
         if (!validateNull(price_max) && !validateNull(value) && Number(value) > Number(price_max)) {
@@ -376,7 +362,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return Promise.resolve();
     }
 
-    @Bind
     private checkMaxPrice(rule: any, value: any) {
         const { price_min } = this.formRef.current!.getFieldsValue(['price_min']);
         if (!validateNull(price_min) && !validateNull(value) && Number(value) < Number(price_min)) {
@@ -385,7 +370,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return Promise.resolve();
     }
 
-    @Bind
     private disabledStartDate(startTime: Moment | null) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
         const endTime =
@@ -403,7 +387,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return startValue > endTime.clone().endOf('day') || startTime < currentDay;
     }
 
-    @Bind
     private disabledEndDate(endTime: Moment | null) {
         const startTime = this.formRef.current!.getFieldValue('timerStartTime');
         if (!endTime) {
@@ -417,7 +400,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return startTime.clone().startOf('day') > endValue || endTime < currentDay;
     }
 
-    @Bind
     private resetTaskTypeError() {
         this.formRef.current!.setFields([
             {
@@ -435,7 +417,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         ]);
     }
 
-    @Bind
     private checkDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
         if (!value || taskType === TaskType.interval) {
@@ -449,7 +430,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    @Bind
     private checkStartDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
         if (!value || taskType === TaskType.once) {
@@ -467,7 +447,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    @Bind
     private checkEndDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
         if (!value || taskType === TaskType.once) {
@@ -482,6 +461,20 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             return Promise.resolve();
         } else {
             return Promise.reject('结束时间不能早于当前时间');
+        }
+    }
+
+    private taskRangeChange(e: RadioChangeEvent) {
+        const value = e.target.value;
+        if (value === TaskRange.fullStack) {
+            // 全站
+            this.formRef.current!.resetFields(['shopId']);
+        } else {
+            this.formRef.current!.resetFields([
+                'category_level_one',
+                'category_level_two',
+                'category_level_three',
+            ]);
         }
     }
 
@@ -543,7 +536,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         title={<span className="form-required">任务范围：</span>}
                     >
                         <Form.Item validateTrigger={'onBlur'} name="range" noStyle={true}>
-                            <Radio.Group>
+                            <Radio.Group onChange={this.taskRangeChange}>
                                 <Radio className="block" value={TaskRange.fullStack}>
                                     全站
                                 </Radio>
@@ -591,37 +584,56 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     <Card className="form-item" title="指定类目/关键词：">
                         <div>
                             <Form.Item
-                                validateTrigger={'onBlur'}
-                                name="category_level_one"
-                                label="一级类目"
-                                className="form-item-horizon form-item-inline"
+                                noStyle={true}
+                                shouldUpdate={(prevValues, currentValues) =>
+                                    prevValues.range !== currentValues.range
+                                }
                             >
-                                <Select
-                                    loading={categoryLoading}
-                                    className="select-default"
-                                    onChange={this.onFirstCategoryChange}
-                                >
-                                    {pddCategory.map(category => {
-                                        return (
-                                            <Option
-                                                key={category.platform_cate_id}
-                                                value={category.platform_cate_id}
+                                {({ getFieldValue }) => {
+                                    const range = getFieldValue('range');
+                                    return (
+                                        <Form.Item
+                                            validateTrigger={'onBlur'}
+                                            name="category_level_one"
+                                            label="一级类目"
+                                            className="form-item-horizon form-item-inline"
+                                            shouldUpdate={(prevValues, currentValues) =>
+                                                prevValues.range !== currentValues.range
+                                            }
+                                        >
+                                            <Select
+                                                disabled={range === TaskRange.store}
+                                                loading={categoryLoading}
+                                                className="select-default"
+                                                onChange={this.onFirstCategoryChange}
                                             >
-                                                {category.platform_cate_name}
-                                            </Option>
-                                        );
-                                    })}
-                                </Select>
+                                                {pddCategory.map(category => {
+                                                    return (
+                                                        <Option
+                                                            key={category.platform_cate_id}
+                                                            value={category.platform_cate_id}
+                                                        >
+                                                            {category.platform_cate_name}
+                                                        </Option>
+                                                    );
+                                                })}
+                                            </Select>
+                                        </Form.Item>
+                                    );
+                                }}
                             </Form.Item>
+
                             <Form.Item
                                 noStyle={true}
                                 shouldUpdate={(prevValues, currentValues) =>
                                     prevValues.category_level_one !==
-                                    currentValues.category_level_one
+                                        currentValues.category_level_one ||
+                                    prevValues.range !== currentValues.range
                                 }
                             >
                                 {({ getFieldValue }) => {
                                     const levelOne = getFieldValue('category_level_one');
+                                    const range = getFieldValue('range');
                                     const childCategory =
                                         pddCategory.find(category => {
                                             return category.platform_cate_id === levelOne;
@@ -634,6 +646,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             className="form-item-horizon form-item-inline"
                                         >
                                             <Select
+                                                disabled={range === TaskRange.store}
                                                 loading={categoryLoading}
                                                 className="select-default"
                                                 onChange={this.onSecondCategoryChange}
@@ -657,11 +670,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                 noStyle={true}
                                 shouldUpdate={(prevValues, currentValues) =>
                                     prevValues.category_level_two !==
-                                    currentValues.category_level_two
+                                        currentValues.category_level_two ||
+                                    prevValues.range !== currentValues.range
                                 }
                             >
                                 {({ getFieldValue }) => {
                                     const levelOne = getFieldValue('category_level_one');
+                                    const range = getFieldValue('range');
                                     const childCategory =
                                         pddCategory.find(category => {
                                             return category.platform_cate_id === levelOne;
@@ -679,6 +694,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             className="form-item-horizon form-item-inline"
                                         >
                                             <Select
+                                                disabled={range === TaskRange.store}
                                                 loading={categoryLoading}
                                                 className="select-default"
                                             >
