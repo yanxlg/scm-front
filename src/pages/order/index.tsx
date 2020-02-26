@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button, Tabs, message } from 'antd';
 
 import OrderFilter from './components/OrderFilter';
-import OrderTable from './components/OrderTable';
+import OrderTable from './components/OrderTable_del';
 import PaneAll from './components/PaneAll';
 
 import { 
@@ -14,7 +14,7 @@ import {
 import "@/styles/order.less";
 
 const { TabPane } = Tabs;
-
+ 
 export declare interface IOrderItem {
     order_confirm_time: string;
     middleground_order_id: string;

@@ -3,9 +3,22 @@ import { Button } from 'antd';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import OptionalColumn from './OptionalColumn';
+import OrderTableAll from './OrderTableAll'
+
+import { IOrderItem } from '../index';
+import { 
+    getProductOrderList,
+    IFilterBaseParams,
+    IFilterParams
+} from '@/services/order-manage';
 
 declare interface IPaneAllState {
+    page: number;
+    pageNumber: number;
+    total: number;
+    loading: boolean;
     fieldList: IFieldItem[];
+    orderList: IOrderItem[]
 }
 
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
@@ -13,6 +26,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     constructor(props: {}) {
         super(props);
         this.state = {
+            page: 1,
+            pageNumber: 50,
+            total: 0,
+            loading: false,
+            orderList: [],
             fieldList: [
                 {
                     type: 'datePicker',
@@ -58,9 +76,51 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         }
     }
 
+    componentDidMount() {
+        // console.log('PaneAll');
+        this.onSearch();
+    }
+
+    onSearch = (baseParams?: IFilterBaseParams) => {
+        const { page, pageNumber } = this.state;
+        let params: IFilterParams = {
+            page,
+            page_number: pageNumber
+        }
+        // if (this.orderFilterRef.current) {
+        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
+        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
+        // }
+        if (baseParams) {
+            params = Object.assign(params, baseParams);
+        }
+        // console.log('getValues', this.orderFilterRef.current!.getValues());
+        this.setState({
+            loading: true
+        })
+        getProductOrderList(params).then(res => {
+            // console.log('getProductOrderList', res);
+            const { total, list } = res.data;
+            this.setState({
+                total,
+                page: params.page,
+                pageNumber: params.page_number,
+                orderList: list
+            })
+        }).finally(() => {
+            this.setState({
+                loading: false
+            })
+        })
+    }
+
     render() {
 
-        const { fieldList } = this.state;
+        const { 
+            fieldList,
+            loading,
+            orderList
+        } = this.state;
 
         return (
             <>
@@ -78,6 +138,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         <Button type="default" className="order-btn">展示字段设置</Button>
                     </div>
                     <OptionalColumn />
+                    <OrderTableAll
+                        loading={loading}
+                        orderList={orderList}
+                    />
                 </div>
             </>
         )
