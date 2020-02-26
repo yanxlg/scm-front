@@ -2,51 +2,50 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, Spin } from 'antd';
 import router from 'umi/router';
 import { getVovaChangedProperties } from '@/services/VovaGoodsService';
+import '@/styles/form.less';
 
 export declare interface PropertyItem {
     property: string;
     count: number;
 }
 
-const DataStatusUpdate:React.FC = ()=>{
-    const [loading,setLoading] = useState(true);
-    const [list,setList] = useState([]);
+const DataStatusUpdate: React.FC = () => {
+    const [loading, setLoading] = useState(true);
+    const [list, setList] = useState([]);
 
-    useEffect(()=>{
+    useEffect(() => {
         getVovaChangedProperties()
-            .then(({data:{changed_property_list=[]}}) => {
+            .then(({ data: { changed_property_list = [] } }) => {
                 setList(changed_property_list);
                 setLoading(false);
-            }).catch(()=>{
+            })
+            .catch(() => {
                 setLoading(false);
             });
-    },[]);
+    }, []);
 
-    const goTo = useCallback(()=>{
+    const goTo = useCallback(() => {
         router.push(`${window.location.pathname}/version`);
-    },[]);
+    }, []);
 
-    return useMemo(()=>{
+    return useMemo(() => {
         return (
-            <Card
-                id="vova-goods-card"
-                title="数据/状态更新"
-                onClick={goTo}
-            >
+            <Card title="数据/状态更新" onClick={goTo} className="form-item">
                 <Spin spinning={loading} tip="Loading...">
-                <ul className="dataUpdateTags">
-                    {list.map((item: PropertyItem, index) => {
-                        return (
-                            <li key={item.property + index}>
-                                {item.property}(<span>{item.count}</span>)
-                            </li>
-                        );
-                    })}
-                </ul>
+                    <div className="product-tags">
+                        {list.map((item: PropertyItem, index) => {
+                            return (
+                                <div key={item.property + index} className="product-tag">
+                                    {item.property}(
+                                    <span className="product-tag-value">{item.count}</span>)
+                                </div>
+                            );
+                        })}
+                    </div>
                 </Spin>
             </Card>
-        )
-    },[list,loading]);
+        );
+    }, [list, loading]);
 };
 
 export default DataStatusUpdate;

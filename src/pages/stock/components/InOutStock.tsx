@@ -56,7 +56,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
     private columns: ColumnProps<ITableData>[] = [
         {
             title: '入库时间',
-            width: '128px',
+            width: '200px',
             dataIndex: 'warehousing_time',
             align: 'center',
             render: (time: number) => utcToLocal(time),
@@ -99,7 +99,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
         },
         {
             title: '出库时间',
-            width: '128px',
+            width: '200px',
             dataIndex: 'outgoing_time',
             align: 'center',
             render: (time: number) => utcToLocal(time),
@@ -240,7 +240,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             page: pageNumber,
             page_count: pageSize,
         })
-            .then(({ total, list = [] }) => {
+            .then(({ data: { total, list = [] } }) => {
                 this.setState({
                     dataLoading: false,
                     searchLoading: false,

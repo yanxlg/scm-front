@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react';
 import '@/styles/product.less';
 import '@/styles/form.less';
-import { Button, InputNumber, Modal, Form } from 'antd';
+import { Button, InputNumber, Modal, Form, Spin } from 'antd';
 import { numberFormatter } from '@/utils/common';
 import { Bind } from 'lodash-decorators';
 import { editGoodsDetail, queryGoodsDetail } from '@/services/vova';
@@ -112,6 +112,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
             product_description,
             sku_list = [],
             submitting,
+            loading,
         } = this.state;
         return (
             <Form
@@ -120,112 +121,131 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                 autoComplete={'off'}
                 ref={this.formRef}
             >
-                <button className="ant-modal-close block" onClick={this.onClose}>
-                    <div className="ant-modal-close-x">
-                        <CloseOutlined />
-                    </div>
-                </button>
-                <div className="form-item">
-                    <label className="ant-form-item-label">商品&emsp;ID：{product_id}</label>
-                </div>
-                <div className="form-item">
-                    <label className="ant-form-item-label">商品名称：{product_name}</label>
-                </div>
-                <div className="form-item">
-                    <label className="ant-form-item-label">商品描述：{product_description}</label>
-                </div>
-                <div className="form-item">
-                    <label className="ant-form-item-label">商品主图：</label>
-                    {main_image ? (
-                        <img src={main_image} className="product-modal-avatar" alt="avatar" />
-                    ) : (
-                        <div className="product-modal-avatar" />
-                    )}
-                </div>
-                {sku_list.map((sku: ISku, index: number) => {
-                    const { specs = [], sku_name, sku_image } = sku;
-                    return (
-                        <div className="form-item flex flex-align" key={sku_name + index}>
-                            <div
-                                className="ant-form-item-label product-modal-item product-modal-name"
-                                title={sku_name}
-                            >
-                                <label title="sku名称">sku名称</label>
-                                <Form.Item noStyle={true} name={['sku_list', index, 'sku_name']}>
-                                    <span>{sku_name}</span>
-                                </Form.Item>
-                            </div>
-                            <div className="ant-form-item-label product-modal-item flex flex-align">
-                                <label title="对应图片">对应图片</label>
-                                {sku_image ? (
-                                    <img
-                                        src={sku_image}
-                                        className="product-modal-avatar-small"
-                                        alt="avatar"
-                                    />
-                                ) : (
-                                    <div className="product-modal-avatar-small" />
-                                )}
-                            </div>
-                            <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
-                                <label title="商品规格">商品规格</label>
-                                <div className="product-modal-specs-value">
-                                    {specs.map(({ name, value }) => {
-                                        return (
-                                            <div key={name} className="product-modal-specs-item">
-                                                {name}:{value}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline"
-                                validateTrigger={'onBlur'}
-                                name={['sku_list', index, 'price']}
-                                label="价格"
-                            >
-                                <InputNumber
-                                    min={0}
-                                    className="input-small input-handler"
-                                    formatter={numberFormatter}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline"
-                                validateTrigger={'onBlur'}
-                                name={['sku_list', index, 'shipping_fee']}
-                                label="运费"
-                            >
-                                <InputNumber
-                                    min={0}
-                                    className="input-small input-handler"
-                                    formatter={numberFormatter}
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline"
-                                validateTrigger={'onBlur'}
-                                name={['sku_list', index, 'storage']}
-                                label="库存"
-                            >
-                                <InputNumber
-                                    min={0}
-                                    className="input-small input-handler"
-                                    formatter={numberFormatter}
-                                />
-                            </Form.Item>
+                <Spin spinning={loading}>
+                    <div className="product-modal-content">
+                        <div className="form-item">
+                            <label className="ant-form-item-label">
+                                商品&emsp;ID：{product_id}
+                            </label>
                         </div>
-                    );
-                })}
-                <Button
-                    loading={submitting}
-                    type="primary"
-                    className="float-right"
-                    onClick={this.onSubmit}
-                >
-                    确定
-                </Button>
+                        <div className="form-item">
+                            <label className="ant-form-item-label">
+                                商品名称：
+                                <div className="product-modal-item-value">{product_name}</div>
+                            </label>
+                        </div>
+                        <div className="form-item">
+                            <label className="ant-form-item-label">
+                                商品描述：
+                                <div className="product-modal-item-value">
+                                    {product_description}
+                                </div>
+                            </label>
+                        </div>
+                        <div className="form-item">
+                            <label className="ant-form-item-label">商品主图：</label>
+                            {main_image ? (
+                                <img
+                                    src={main_image}
+                                    className="product-modal-avatar"
+                                    alt="avatar"
+                                />
+                            ) : (
+                                <div className="product-modal-avatar" />
+                            )}
+                        </div>
+                        {sku_list.map((sku: ISku, index: number) => {
+                            const { specs = [], sku_name, sku_image } = sku;
+                            return (
+                                <div className="form-item flex flex-align" key={sku_name + index}>
+                                    <div
+                                        className="ant-form-item-label product-modal-item product-modal-name"
+                                        title={sku_name}
+                                    >
+                                        <label title="sku名称">sku名称</label>
+                                        <Form.Item
+                                            noStyle={true}
+                                            name={['sku_list', index, 'sku_name']}
+                                        >
+                                            <span>{sku_name}</span>
+                                        </Form.Item>
+                                    </div>
+                                    <div className="ant-form-item-label product-modal-item flex flex-align">
+                                        <label title="对应图片">对应图片</label>
+                                        {sku_image ? (
+                                            <img
+                                                src={sku_image}
+                                                className="product-modal-avatar-small"
+                                                alt="avatar"
+                                            />
+                                        ) : (
+                                            <div className="product-modal-avatar-small" />
+                                        )}
+                                    </div>
+                                    <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
+                                        <label title="商品规格">商品规格</label>
+                                        <div className="product-modal-specs-value">
+                                            {specs.map(({ name, value }) => {
+                                                return (
+                                                    <div
+                                                        key={name}
+                                                        className="product-modal-specs-item"
+                                                    >
+                                                        {name}:{value}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    <Form.Item
+                                        className="form-item-horizon form-item-inline"
+                                        validateTrigger={'onBlur'}
+                                        name={['sku_list', index, 'price']}
+                                        label="价格"
+                                    >
+                                        <InputNumber
+                                            min={0}
+                                            className="input-small input-handler"
+                                            formatter={numberFormatter}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className="form-item-horizon form-item-inline"
+                                        validateTrigger={'onBlur'}
+                                        name={['sku_list', index, 'shipping_fee']}
+                                        label="运费"
+                                    >
+                                        <InputNumber
+                                            min={0}
+                                            className="input-small input-handler"
+                                            formatter={numberFormatter}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        className="form-item-horizon form-item-inline"
+                                        validateTrigger={'onBlur'}
+                                        name={['sku_list', index, 'storage']}
+                                        label="库存"
+                                    >
+                                        <InputNumber
+                                            min={0}
+                                            className="input-small input-handler"
+                                            formatter={numberFormatter}
+                                        />
+                                    </Form.Item>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <Button
+                        loading={submitting}
+                        type="primary"
+                        className="float-right"
+                        onClick={this.onSubmit}
+                    >
+                        确定
+                    </Button>
+                </Spin>
             </Form>
         );
     }

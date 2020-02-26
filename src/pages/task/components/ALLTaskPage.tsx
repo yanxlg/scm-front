@@ -411,7 +411,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             <div>
                 <TaskSearch ref={this.searchRef} task_status={task_status} />
                 <div className="form-item">
-                    <div className="block">
+                    <div className="block float-clear">
                         <Button loading={searchLoading} onClick={this.onSearch} type="primary">
                             查询
                         </Button>
@@ -454,7 +454,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                             删除任务
                         </Button>
                         <Pagination
-                            className="float-right"
+                            className="float-right float-clear"
                             pageSize={pageNumber}
                             current={page}
                             total={total}
