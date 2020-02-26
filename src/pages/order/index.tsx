@@ -4,6 +4,9 @@ import { Button, Tabs, message } from 'antd';
 import OrderFilter from './components/OrderFilter';
 import OrderTable from './components/OrderTable_del';
 import PaneAll from './components/PaneAll';
+import PanePendingOrder from './components/PanePendingOrder';
+import PanePay from './components/PanePay';
+import PaneWaitShip from './components/PaneWaitShip';
 
 import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 
@@ -64,7 +67,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
     }
 
     componentDidMount() {
-        this.onSearch();
+        // this.onSearch();
     }
 
     onSearch = (baseParams?: IFilterBaseParams) => {
@@ -125,18 +128,18 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="4">
                     <TabPane tab={`全部（1000）`} key="1">
                         <PaneAll />
                     </TabPane>
                     <TabPane tab={`待拍单（1000）`} key="2">
-                        待拍单
+                        <PanePendingOrder />
                     </TabPane>
                     <TabPane tab={`待支付（1000）`} key="3">
-                        待支付
+                        <PanePay />
                     </TabPane>
                     <TabPane tab={`待发货（1000）`} key="4">
-                        待发货
+                        <PaneWaitShip />
                     </TabPane>
                     <TabPane tab={`采购未发货（1000）`} key="5">
                         采购未发货

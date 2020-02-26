@@ -8,7 +8,7 @@ const { Option } = Select;
 
 declare interface IOptionItem {
     name: string;
-    value: string;
+    value: string | number;
 }
 
 export interface IFieldItem extends FormItemLabelProps {
@@ -25,6 +25,7 @@ declare interface IJsonFormProps extends FormProps {
     labelClassName?: string;
     appendChildren?: ReactNode;
     formRef?: RefObject<FormInstance>;
+    initialValues?: object;
 }
 
 export default class JsonForm extends React.PureComponent<IJsonFormProps> {
@@ -163,7 +164,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
     private addCheckbox = (field: IFieldItem) => {
         const { name, label, formItemClassName, className } = field;
         return (
-            <Form.Item name={name} className={formItemClassName}>
+            <Form.Item name={name} className={formItemClassName} valuePropName="checked">
                 <Checkbox className={className}>{label}</Checkbox>
             </Form.Item>
         );

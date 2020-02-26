@@ -57,6 +57,109 @@ const list = [
     },
 ]
 
+const pendingList = [
+    {
+        order_create_time: 1582703606,
+        middleground_order_id: '111111',
+        goods_img: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
+        style: {
+            color: 'Red',
+            size: 'M'
+        },
+        goods_num: 1,
+        price: 10,
+        shipping_fee: 100,
+        sale_price: 1000,
+        sale_order_status: 1,
+        purchase_order_status: 1,
+        commodity_id: '111111',
+        second_catagory: {
+            id: '1',
+            name: '类目'
+        },
+        sku_id: '111111',
+        comment: 'xxxx'
+    },
+    {
+        order_create_time: 1582703606,
+        middleground_order_id: '222222',
+        goods_img: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
+        style: {
+            color: 'Red',
+            size: 'M'
+        },
+        goods_num: 1,
+        price: 10,
+        shipping_fee: 100,
+        sale_price: 1000,
+        sale_order_status: 1,
+        purchase_order_status: 1,
+        commodity_id: '222222',
+        second_catagory: {
+            id: '1',
+            name: '类目'
+        },
+        sku_id: '222222',
+        comment: '你好，你好。'
+    }
+]
+
+const payList = [
+    {
+        purchase_time: 1582703606,
+        middleground_order_id: '111',
+        pay_url: 'pay_url',
+        purchase_p_order_id: 'purchase_p_order_id',
+        purchase_order_id: 'purchase_order_id',
+        purchase_price: 100,
+        sale_order_status: 1,
+        purchase_order_status: 1,
+        purchase_pay_status: 1,
+        order_create_time: 1582703606,
+        comment: '待支付'
+    },
+    {
+        purchase_time: 1582703606,
+        middleground_order_id: '222',
+        pay_url: 'pay_url',
+        purchase_p_order_id: 'purchase_p_order_id',
+        purchase_order_id: 'purchase_order_id',
+        purchase_price: 100,
+        sale_order_status: 1,
+        purchase_order_status: 1,
+        purchase_pay_status: 1,
+        order_create_time: 1582703606,
+        comment: '待支付222'
+    }
+]
+
+const waitShip = [
+    {
+        purchase_time: 1582703606,
+        middleground_order_id: '111',
+        purchase_p_order_id: 'purchase_p_order_id',
+        purchase_order_id: 'purchase_order_id',
+        purchase_price: 100,
+        sale_order_status: 1,
+        purchase_order_status: 1,
+        purchase_pay_status: 1,
+        order_create_time: 1582703606,
+        comment: '待支付'
+    },
+    {
+        purchase_time: 1582703606,
+        middleground_order_id: '222',
+        purchase_p_order_id: 'purchase_p_order_id',
+        purchase_order_id: 'purchase_order_id',
+        purchase_price: 100,
+        sale_order_status: 1,
+        purchase_order_status: 1,
+        purchase_pay_status: 1,
+        order_create_time: 1582703606,
+        comment: '待支付222'
+    }
+]
+
 export default {
     'GET /v1/order/list': (req: Request, res: Response) => {
         const { page, page_number } = req.params;
@@ -65,6 +168,42 @@ export default {
                 code: 200,
                 data: {
                     list,
+                    total: 200
+                }
+            })
+        }, 500);
+    },
+    'GET /v1/order/list/2': (req: Request, res: Response) => {
+        // const { page, page_number } = req.params;
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                data: {
+                    list: pendingList,
+                    total: 200
+                }
+            })
+        }, 500);
+    },
+    'GET /v1/order/list/3': (req: Request, res: Response) => {
+        // const { page, page_number } = req.params;
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                data: {
+                    list: payList,
+                    total: 200
+                }
+            })
+        }, 500);
+    },
+    'GET /v1/order/list/4': (req: Request, res: Response) => {
+        // const { page, page_number } = req.params;
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                data: {
+                    list: waitShip,
                     total: 200
                 }
             })

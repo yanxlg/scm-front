@@ -3,7 +3,7 @@ import { Button } from 'antd';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import OptionalColumn from './OptionalColumn';
-import OrderTableAll from './OrderTableAll'
+import TableAll from './TableAll';
 
 import { IOrderItem } from '../index';
 import { 
@@ -138,7 +138,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         <Button type="default" className="order-btn">展示字段设置</Button>
                     </div>
                     <OptionalColumn />
-                    <OrderTableAll
+                    <TableAll
                         loading={loading}
                         orderList={orderList}
                     />

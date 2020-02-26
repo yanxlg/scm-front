@@ -21,12 +21,38 @@ export declare interface IFilterParams extends IFilterBaseParams {
     channel_shipments_status?: string;
 }
 
+ 
 export async function getProductOrderList(params: IFilterParams) {
     return request.get(ApiPathEnum.getProductOrderList, {
         requestType: 'form',
         params
     });
 }
+
+// 获取待拍单
+export async function getPendingOrderList(params = {}) {
+    return request.get(ApiPathEnum.getPendingOrderList, {
+        requestType: 'form',
+        params
+    });
+}
+
+// 获取待支付
+export async function getPayOrderList(params = {}) {
+    return request.get(ApiPathEnum.getPayOrderList, {
+        requestType: 'form',
+        params
+    });
+}
+
+// 获取待发货
+export async function getWaitShipList(params = {}) {
+    return request.get(ApiPathEnum.getWaitShipList, {
+        requestType: 'form',
+        params
+    });
+}
+
 
 export async function getOrderGoodsDetail(params: { middleground_order_id: string }) {
     return request.get(ApiPathEnum.getOrderGoodsDetail, {

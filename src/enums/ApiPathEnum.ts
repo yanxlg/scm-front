@@ -56,6 +56,12 @@ enum ApiPathEnum {
 
     // 订单管理
     getProductOrderList="/v1/order/list",
+    // 待拍单
+    getPendingOrderList="/v1/order/list/2",
+    // 待支付
+    getPayOrderList="/v1/order/list/3",
+    // 待发货
+    getWaitShipList="/v1/order/list/4",
     getOrderGoodsDetail="/v1/order/goods_detail"
 }
 
