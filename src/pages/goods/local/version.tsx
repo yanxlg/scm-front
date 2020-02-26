@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DatePicker, Button, message, Pagination } from 'antd';
 // import { RangePickerValue } from 'antd/lib/date-picker/interface';
@@ -97,8 +96,8 @@ declare interface IVersionState {
     start_time: number;
     end_time: number;
     page: number;
-    page_count: number,
-    allCount: number,
+    page_count: number;
+    allCount: number;
     currentInfo: IGoodsVersionRowItem | null;
     versionGoodsList: IGoodsVersionRowItem[];
 }
@@ -132,21 +131,24 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     }
 
     private getTimeSecond = (millisecond: number) => {
-        return Math.round(millisecond / 1000)
-    }
+        return Math.round(millisecond / 1000);
+    };
 
     private onSearch = (pageData?: IPageData) => {
         const { start_time, end_time, page, page_count } = this.state;
         this.setState({
             loading: true,
         });
-        const data = Object.assign({
-            page,
-            page_count,
-            start_time: start_time ? start_time : undefined,
-            end_time: end_time ? end_time : undefined,
-            commodity_id: this.id,
-        }, pageData ? pageData : {});
+        const data = Object.assign(
+            {
+                page,
+                page_count,
+                start_time: start_time ? start_time : undefined,
+                end_time: end_time ? end_time : undefined,
+                commodity_id: this.id,
+            },
+            pageData ? pageData : {},
+        );
         return getGoodsVersion(data)
             .then(res => {
                 // const { goods_version_list, ...rest } = res.data;
@@ -158,7 +160,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     page: data.page,
                     page_count: data.page_count,
                     versionGoodsList: goodsList,
-                    currentInfo: goodsList[0] || null
+                    currentInfo: goodsList[0] || null,
                 });
             })
             .finally(() => {
@@ -177,12 +179,15 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             sku_info.forEach((skuItem, skuIndex) => {
                 const retItem: IGoodsVersionRowItem = {
                     ...Object.assign(rest, {
-                        _update_time: formatDate(new Date(rest.update_time * 1000), 'yyyy-MM-dd hh:mm:ss'),
+                        _update_time: formatDate(
+                            new Date(rest.update_time * 1000),
+                            'yyyy-MM-dd hh:mm:ss',
+                        ),
                     }),
                     ...Object.assign(skuItem, {
                         sku_price: Number(skuItem.sku_price),
-                        sku_inventory: Number(skuItem.sku_inventory)
-                    })
+                        sku_inventory: Number(skuItem.sku_inventory),
+                    }),
                 };
                 if (index !== len - 1) {
                     const prev = list[index + 1];
@@ -192,7 +197,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         ...prevRest,
                         ...Object.assign(prevSkuItem, {
                             sku_price: Number(prevSkuItem.sku_price),
-                            sku_inventory: Number(prevSkuItem.sku_inventory)
+                            sku_inventory: Number(prevSkuItem.sku_inventory),
                         }),
                     };
                     // list[index + 1].sku[skuIndex];
@@ -212,8 +217,8 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: (dates && dates[0]) ? this.getTimeSecond(dates[0].valueOf()) : 0,
-                end_time: (dates && dates[1]) ? this.getTimeSecond(dates[1].valueOf()) : 0
+                start_time: dates && dates[0] ? this.getTimeSecond(dates[0].valueOf()) : 0,
+                end_time: dates && dates[1] ? this.getTimeSecond(dates[1].valueOf()) : 0,
             },
             () => {
                 this.onSearch();
@@ -241,11 +246,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     postGoodsOnsale = (product_id: string) => {
         postGoodsOnsale({
             scm_goods_id: [product_id],
-        })
-            .then(res => {
-                message.success(`${product_id}应用成功`);
-                this.onSearch();
-            })
+        }).then(res => {
+            message.success(`${product_id}应用成功`);
+            this.onSearch();
+        });
     };
 
     // 忽略版本
@@ -261,19 +265,19 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 message.success(`${product_id}忽略失败`);
                 this.onSearch();
             });
-    }
+    };
 
     onChangePage = (page: number) => {
         this.onSearch({
             page,
         });
-    }
+    };
 
     pageCountChange = (current: number, size: number) => {
         this.onSearch({
             page_count: size,
         });
-    }
+    };
 
     render() {
         const {
@@ -284,7 +288,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             start_time,
             end_time,
             currentInfo,
-            versionGoodsList
+            versionGoodsList,
         } = this.state;
         let currentDom = null;
         if (currentInfo) {
@@ -297,7 +301,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 third_catagory,
                 _update_time,
                 worm_goodsinfo_link,
-                worm_goods_id
+                worm_goods_id,
             } = currentInfo;
             currentDom = (
                 <div className="goods-version-current">
@@ -317,18 +321,16 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         </p>
                         <p>
                             <span>
-                                类目：{
-                                    [first_catagory.name, second_catagory.name, third_catagory.name]
+                                类目：
+                                {[first_catagory.name, second_catagory.name, third_catagory.name]
                                     .filter(item => item)
-                                    .join('/')
-                                }
+                                    .join('/')}
                             </span>
                         </p>
                     </div>
                 </div>
-            )
+            );
         }
-
 
         return (
             <div className="goods-version">
@@ -339,10 +341,16 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         <RangePicker
                             className="date"
                             defaultValue={
-                                start_time ? [
-                                    moment(formatDate(new Date(start_time * 1000), 'yyyy-MM-dd')),
-                                    moment(formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'))
-                                ] : [null, null]
+                                start_time
+                                    ? [
+                                          moment(
+                                              formatDate(new Date(start_time * 1000), 'yyyy-MM-dd'),
+                                          ),
+                                          moment(
+                                              formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'),
+                                          ),
+                                      ]
+                                    : [null, null]
                             }
                             onChange={this.selectedDate}
                         />

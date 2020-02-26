@@ -176,7 +176,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
+            },
         },
         {
             key: 'second_catagory',
@@ -191,7 +191,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
+            },
         },
         {
             key: 'third_catagory',
@@ -206,7 +206,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
+            },
         },
         {
             key: 'sku_number',
@@ -232,13 +232,13 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             render: (value: ISkuStyle, row: IRowDataItem, index: number) => {
                 return (
                     <div>
-                        {
-                            value ? (
-                                Object.keys(value).map(key => (
-                                    <span key={key}>{key}: {value[key]}</span>
-                                ))
-                            ) : null
-                        }
+                        {value
+                            ? Object.keys(value).map(key => (
+                                  <span key={key}>
+                                      {key}: {value[key]}
+                                  </span>
+                              ))
+                            : null}
                     </div>
                 );
             },

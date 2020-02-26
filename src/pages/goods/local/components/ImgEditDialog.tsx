@@ -1,17 +1,13 @@
 import React, { ChangeEvent } from 'react';
 import { Modal, Input, Select, Upload, message, Popconfirm } from 'antd';
 import { RcFile } from 'antd/lib/upload';
-import {
-    CloseOutlined,
-    LoadingOutlined,
-    PlusOutlined
-} from '@ant-design/icons';
+import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
 // import { UploadChangeParam } from 'antd/lib/upload';
 
 import { postGoodsPicUpload } from '@/services/goods';
-import { ICategoryItem, IRowDataItem } from '../index'; 
-import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData  } from '@/services/goods';
+import { ICategoryItem, IRowDataItem } from '../index';
+import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -52,7 +48,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         super(props);
         this.state = {
             loading: false,
-            addImgList: []
+            addImgList: [],
         };
     }
 
@@ -72,14 +68,13 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 // 刷新页面
                 onSearch({}, true);
                 this.setState({
-                    addImgList: []
-                })
+                    addImgList: [],
+                });
             });
         } else {
             message.info('没有任何更改');
         }
-
-    }
+    };
 
     private handleCancel = () => {
         const { toggleEditGoodsDialog } = this.props;
@@ -91,11 +86,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 onCancel() {
                     toggleEditGoodsDialog(false);
                 },
-              })
+            });
         } else {
             toggleEditGoodsDialog(false);
         }
-    }
+    };
 
     // 判断数据是否改变
     private isChangeData = () => {
@@ -107,7 +102,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 sku_image,
                 first_catagory,
                 second_catagory,
-                third_catagory
+                third_catagory,
             } = currentEditGoods;
             const {
                 title: orginTitle,
@@ -115,7 +110,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 sku_image: orginSkuImage,
                 first_catagory: originFirstCatagory,
                 second_catagory: originSecondCatagory,
-                third_catagory: originThirdCatagory
+                third_catagory: originThirdCatagory,
             } = originEditGoods;
             if (title !== orginTitle) {
                 return true;
@@ -138,7 +133,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             }
         }
         return false;
-    }
+    };
 
     // 获取商品编辑数据
     private getGoodsEditData = () => {
@@ -152,11 +147,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 sku_image,
                 first_catagory,
                 second_catagory,
-                third_catagory
+                third_catagory,
             } = currentEditGoods;
-            const {
-                sku_image: orginSkuImage
-            } = originEditGoods;
+            const { sku_image: orginSkuImage } = originEditGoods;
             return {
                 product_id,
                 title,
@@ -167,30 +160,24 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         return {
                             type: 'old',
                             url: item,
-                            position: index + 1
-                        }
+                            position: index + 1,
+                        };
                     } else {
                         const i = addImgList.findIndex(addItem => addItem.fileUrl === item);
-                        const {
-                            url,
-                            type,
-                            alt,
-                            width,
-                            height
-                        } = addImgList[i];
+                        const { url, type, alt, width, height } = addImgList[i];
                         return {
                             type,
                             url,
                             position: index + 1,
                             alt,
                             width,
-                            height
-                        }
+                            height,
+                        };
                     }
-                })
+                }),
             };
         }
-    }
+    };
 
     private dragstart = (item: string) => {
         // console.log('dragstart', item);
@@ -275,14 +262,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                             type: 'new',
                                             alt: product_id,
                                             width: img.width,
-                                            height: img.height
-                                        }
-                                    ]
+                                            height: img.height,
+                                        },
+                                    ],
                                 });
-                                changeGoodsImg([
-                                    ...sku_image,
-                                    fileUrl
-                                ]);
+                                changeGoodsImg([...sku_image, fileUrl]);
                                 // console.log('postGoodsPicUpload', res);
                             })
                             .catch(err => {
@@ -297,18 +281,17 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 },
             );
         }
-        
     };
 
     render() {
-        const { 
+        const {
             visible,
             allCatagoryList,
             currentEditGoods,
             getCurrentCatagory,
             changeGoodsText,
             changeGoodsCatagory,
-            resetGoodsData
+            resetGoodsData,
         } = this.props;
         const { loading } = this.state;
         if (!currentEditGoods) {
@@ -321,7 +304,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             first_catagory,
             second_catagory,
             third_catagory,
-            sku_image
+            sku_image,
         } = currentEditGoods;
 
         let secondCatagoryList: ICategoryItem[] = [];
@@ -330,7 +313,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             secondCatagoryList = getCurrentCatagory(first_catagory.id);
         }
         if (first_catagory.id && third_catagory.id) {
-            thirdCatagoryList = getCurrentCatagory(first_catagory.id,second_catagory.id);
+            thirdCatagoryList = getCurrentCatagory(first_catagory.id, second_catagory.id);
         }
         return (
             <Modal
@@ -344,7 +327,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 maskClosable={false}
                 // footer={}
                 cancelButtonProps={{
-                    onClick: resetGoodsData
+                    onClick: resetGoodsData,
                 }}
             >
                 <div className="goods-local-edit-item">
@@ -357,7 +340,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         className="textarea"
                         autoSize={true}
                         value={title}
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {changeGoodsText('title', e.target.value)}}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+                            changeGoodsText('title', e.target.value);
+                        }}
                     />
                 </div>
                 <div className="goods-local-edit-item">
@@ -366,7 +351,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         className="textarea"
                         autoSize={true}
                         value={description}
-                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {changeGoodsText('description', e.target.value)}}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+                            changeGoodsText('description', e.target.value);
+                        }}
                     />
                 </div>
                 <div className="goods-local-edit-item">
@@ -442,7 +429,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                             okText="是"
                                             cancelText="否"
                                         >
-                                            <CloseOutlined className="close"/>
+                                            <CloseOutlined className="close" />
                                         </Popconfirm>
                                     </div>
                                 );
@@ -455,7 +442,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             >
                                 <div className="add">
                                     <div className="inner">
-                                        { loading ? <LoadingOutlined className="add-icon"/> : <PlusOutlined className="add-icon"/> }
+                                        {loading ? (
+                                            <LoadingOutlined className="add-icon" />
+                                        ) : (
+                                            <PlusOutlined className="add-icon" />
+                                        )}
                                     </div>
                                     <div className="desc">图片为低于100k的jpg格式</div>
                                 </div>

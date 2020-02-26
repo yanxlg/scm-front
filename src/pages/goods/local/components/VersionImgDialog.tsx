@@ -32,9 +32,7 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             align: 'center',
             className: 'top',
             render: (value: string[], row: IDataSource) => {
-                const classStr = this.isAddImg(value[0])
-                    ? 'main-item add'
-                    : 'main-item';
+                const classStr = this.isAddImg(value[0]) ? 'main-item add' : 'main-item';
                 return (
                     <div className={classStr}>
                         <img className="main-img" src={value[0]} />
@@ -53,9 +51,7 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
                     // <div>111</div>
                     <div className="list">
                         {row.sku_image.slice(1).map(item => {
-                            const classStr = this.isAddImg(item)
-                                ? 'item add'
-                                : 'item';
+                            const classStr = this.isAddImg(item) ? 'item add' : 'item';
                             return (
                                 <div className={classStr} key={item}>
                                     <img src={item} />

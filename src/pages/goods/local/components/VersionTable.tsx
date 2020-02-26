@@ -1,12 +1,7 @@
 import React from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { 
-    IGoodsVersionRowItem,
-    ISkuStyle, 
-    IOnsaleItem,
-    ICatagoryData
-} from '../version';
+import { IGoodsVersionRowItem, ISkuStyle, IOnsaleItem, ICatagoryData } from '../version';
 
 import VersionImgDialog from './VersionImgDialog';
 import { formatDate } from '@/utils/date';
@@ -35,14 +30,22 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                 let children = null;
                 // UPDATED RELEASED INITIALIZED updated
                 if (value === 'RELEASED') {
-                    children = <Button
-                        className="btn"
-                        type="primary"
-                        size="small"
-                        onClick={() => operationVersion(row.product_id, 'apply')}
-                    >应用</Button>
+                    children = (
+                        <Button
+                            className="btn"
+                            type="primary"
+                            size="small"
+                            onClick={() => operationVersion(row.product_id, 'apply')}
+                        >
+                            应用
+                        </Button>
+                    );
                 } else {
-                    children = <Button ghost={true} className="btn" type="primary" size="small">当前版本</Button>
+                    children = (
+                        <Button ghost={true} className="btn" type="primary" size="small">
+                            当前版本
+                        </Button>
+                    );
                 }
                 return {
                     children,
@@ -73,7 +76,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
+            },
         },
         {
             key: 'sku_image',
@@ -130,9 +133,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     } else {
                         children = (
                             <>
-                                <div className="text-left">
-                                    原标题: {row._prevVersion.title}
-                                </div>
+                                <div className="text-left">原标题: {row._prevVersion.title}</div>
                                 <div className="text-left red">新标题: {value}</div>
                             </>
                         );
@@ -203,11 +204,11 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             render: (value: ISkuStyle, row: IGoodsVersionRowItem) => {
                 return (
                     <div className="border text-left">
-                        {
-                            Object.keys(value).map(item => (
-                                <div key={item}>{item}: {value[item]}</div>
-                            ))
-                        }
+                        {Object.keys(value).map(item => (
+                            <div key={item}>
+                                {item}: {value[item]}
+                            </div>
+                        ))}
                         {/* <div className="nowrap">{value.split(',')}</div> */}
                     </div>
                 );
@@ -327,8 +328,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
-        }
+            },
+        },
     ];
 
     constructor(props: IVersionTableProps) {
@@ -345,7 +346,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         row: IGoodsVersionRowItem,
         key: string,
         desc: string,
-        isMerge?: boolean
+        isMerge?: boolean,
     ) => {
         let children = null;
         if (row._prevVersion) {
@@ -378,7 +379,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         return {
             children: <div className="border text-left">{children}</div>,
             props: {
-                rowSpan: isMerge ? (row._rowspan || 0) : 1
+                rowSpan: isMerge ? row._rowspan || 0 : 1,
             },
         };
     };
@@ -389,7 +390,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         row: IGoodsVersionRowItem,
         key: string,
         desc: string,
-        isMerge?: boolean
+        isMerge?: boolean,
     ) => {
         let children = null;
         if (row._prevVersion) {
@@ -422,7 +423,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         return {
             children: <div className="border text-left">{children}</div>,
             props: {
-                rowSpan: isMerge ? (row._rowspan || 0) : 1
+                rowSpan: isMerge ? row._rowspan || 0 : 1,
             },
         };
     };

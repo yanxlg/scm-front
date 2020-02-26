@@ -1,11 +1,11 @@
 import React, { RefObject } from 'react';
 import { Bind } from 'lodash-decorators';
-import { Button, Card, DatePicker, Input, InputNumber, Radio ,Form} from 'antd';
+import { Button, Card, DatePicker, Input, InputNumber, Radio, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import { TaskGoodsArea } from '@/enums/ConfigEnum';
 import { Moment } from 'moment';
-import { numberFormatter } from '@/utils/common';
+import { intFormatter } from '@/utils/common';
 import { FormInstance } from 'antd/es/form';
 
 declare interface IFormData {
@@ -22,7 +22,7 @@ declare interface ITimerUpdateState {
 }
 
 class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateState> {
-    private formRef:RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<FormInstance> = React.createRef();
     constructor(props: ITimerUpdateProps) {
         super(props);
         this.state = {
@@ -43,7 +43,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                 layout="horizontal"
                 autoComplete={'off'}
                 initialValues={{
-                    goods_area:TaskGoodsArea.All
+                    goods_area: TaskGoodsArea.All,
                 }}
             >
                 <Form.Item
@@ -52,10 +52,12 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     name="task_name"
                     label="任务名称"
                     validateFirst={true}
-                    rules={[{
-                        required:true,
-                        message:"请输入任务名称"
-                    }]}
+                    rules={[
+                        {
+                            required: true,
+                            message: '请输入任务名称',
+                        },
+                    ]}
                 >
                     <Input className="input-default" />
                 </Form.Item>
@@ -63,11 +65,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     className="form-item"
                     title={<span className="form-required">定时更新配置：</span>}
                 >
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        name="goods_area"
-                        label="商品范围"
-                    >
+                    <Form.Item validateTrigger={'onBlur'} name="goods_area" label="商品范围">
                         <Radio.Group>
                             <Radio value={TaskGoodsArea.All}>定时任务</Radio>
                             <Radio value={TaskGoodsArea.AllOnShelves}>全部已上架商品</Radio>
@@ -81,18 +79,12 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     >
                         <DatePicker showTime={true} />
                     </Form.Item>
-                    <Form.Item
-                        label="任务间隔"
-                        className="form-item-inline"
-                    >
-                        <Form.Item
-                            noStyle={true}
-                            name="day"
-                        >
+                    <Form.Item label="任务间隔" className="form-item-inline">
+                        <Form.Item noStyle={true} name="day">
                             <InputNumber
                                 min={0}
                                 className="config-input-count input-handler"
-                                formatter={numberFormatter}
+                                formatter={intFormatter}
                             />
                         </Form.Item>
                         <label className="form-unit">天</label>
