@@ -1,7 +1,8 @@
-import React from 'react';
-import { Form, Input, Checkbox, Select, DatePicker } from 'antd';
+import React, { ReactNode, RefObject } from 'react';
+import { Checkbox, DatePicker, Form, Input, Select } from 'antd';
 import { FormProps } from 'antd/lib/form/Form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
+import { FormInstance } from 'antd/es/form';
 
 const { Option } = Select;
 
@@ -22,10 +23,13 @@ export interface IFieldItem extends FormItemLabelProps {
 declare interface IJsonFormProps extends FormProps {
     fieldList: IFieldItem[];
     labelClassName?: string;
+    appendChildren?: ReactNode;
+    formRef?: RefObject<FormInstance>;
 }
 
 export default class JsonForm extends React.PureComponent<IJsonFormProps> {
-    addFormItem = (field: IFieldItem) => {
+    private formRef: RefObject<FormInstance> = React.createRef();
+    private addFormItem = (field: IFieldItem) => {
         switch (field.type) {
             case 'input':
                 return this.addInput(field);
@@ -108,7 +112,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         );
     };
 
-    addInput = (field: IFieldItem) => {
+    private addInput = (field: IFieldItem) => {
         const { name, placeholder, label, className, formItemClassName } = field;
         const { labelClassName } = this.props;
         return (
@@ -122,7 +126,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         );
     };
 
-    addSelect = (field: IFieldItem) => {
+    private addSelect = (field: IFieldItem) => {
         const { name, optionList, label, className, formItemClassName } = field;
         const { labelClassName } = this.props;
         return (
@@ -142,7 +146,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         );
     };
 
-    addDatePicker = (field: IFieldItem) => {
+    private addDatePicker = (field: IFieldItem) => {
         const { name, placeholder, label, className, formItemClassName } = field;
         const { labelClassName } = this.props;
         return (
@@ -156,7 +160,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         );
     };
 
-    addCheckbox = (field: IFieldItem) => {
+    private addCheckbox = (field: IFieldItem) => {
         const { name, label, formItemClassName, className } = field;
         return (
             <Form.Item name={name} className={formItemClassName}>
@@ -165,12 +169,23 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         );
     };
 
-    render() {
-        const { fieldList, labelClassName, ...props } = this.props;
+    public getFieldsValue = () => {
+        const { formRef = this.formRef } = this.props;
+        return formRef.current!.getFieldsValue();
+    };
 
+    render() {
+        const {
+            fieldList,
+            labelClassName,
+            appendChildren,
+            formRef = this.formRef,
+            ...props
+        } = this.props;
         return (
-            <Form layout="inline" {...props}>
+            <Form layout="inline" {...props} ref={formRef}>
                 {fieldList.map(field => this.addFormItem(field))}
+                {appendChildren}
             </Form>
         );
     }

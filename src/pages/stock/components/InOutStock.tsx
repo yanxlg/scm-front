@@ -1,13 +1,16 @@
 import React, { RefObject } from 'react';
 import { FitTable } from '@/components/FitTable';
-import { Button, Pagination } from 'antd';
+import { Button, Form, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
-import { utcToLocal } from '@/utils/date';
+import { transEndDate, transStartDate, utcToLocal } from '@/utils/date';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import { Moment } from 'moment';
+import { FormInstance } from 'antd/es/form';
+import { queryIOList } from '@/services/stock';
 
 declare interface ITableData {
     in_time: number; // 入库时间
@@ -28,14 +31,28 @@ declare interface IInOutStockState {
     dataSet: ITableData[];
     dataLoading: boolean;
     searchLoading: boolean;
+    exportingLoading: boolean;
     pageNumber: number;
     pageSize: number;
     total: number;
     selectedRowKeys: string[];
 }
 
+export declare interface IFormData {
+    warehousing_start_time?: Moment;
+    warehousing_end_time?: Moment;
+    outgoing__start_time?: Moment;
+    outgoing__end_time?: Moment;
+    outgoing_order_sn?: string;
+    warehousing_order_sn?: string;
+    purchase_order_sn?: string;
+    product_id?: string;
+    last_waybill_no?: string;
+}
+
 @BindAll()
 class InOutStock extends React.PureComponent<{}, IInOutStockState> {
+    private formRef: RefObject<FormInstance> = React.createRef();
     private columns: ColumnProps<ITableData>[] = [
         {
             title: '入库时间',
@@ -112,21 +129,89 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             align: 'center',
         },
     ];
-
+    private fieldList: IFieldItem[] = [
+        {
+            type: 'dateRanger',
+            label: <span>出库&emsp;时间</span>,
+            name: ['out_time_start', 'out_time_end'],
+            formItemClassName: 'form-item',
+            className: 'stock-form-picker',
+        },
+        {
+            type: 'dateRanger',
+            label: <span>入库&emsp;时间</span>,
+            name: ['in_time_start', 'in_time_end'],
+            formItemClassName: 'form-item',
+            className: 'stock-form-picker',
+        },
+        {
+            type: 'input',
+            label: '尾程运单号',
+            name: 'last_trans_no',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+        {
+            type: 'input',
+            label: '出库订单号',
+            name: 'out_order',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+        {
+            type: 'input',
+            label: '入库订单号',
+            name: 'in_order',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+        {
+            type: 'input',
+            label: '采购订单号',
+            name: 'buy_order',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+        {
+            type: 'input',
+            label: '中台商品ID',
+            name: 'good_id',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+    ];
     constructor(props: {}) {
         super(props);
         this.state = {
             dataSet: [],
             dataLoading: true,
             searchLoading: true,
+            exportingLoading: false,
             total: 0,
             pageNumber: 1,
             pageSize: 50,
             selectedRowKeys: [],
         };
     }
+
     componentDidMount(): void {
         this.onSearch();
+    }
+    private convertFormData() {
+        const {
+            warehousing_start_time,
+            warehousing_end_time,
+            outgoing__start_time,
+            outgoing__end_time,
+            ...values
+        } = this.formRef.current!.getFieldsValue();
+        return {
+            ...values,
+            warehousing_start_time: transStartDate(warehousing_start_time),
+            warehousing_end_time: transEndDate(warehousing_end_time),
+            outgoing__start_time: transStartDate(outgoing__start_time),
+            outgoing__end_time: transEndDate(outgoing__end_time),
+        };
     }
 
     private onSearch() {
@@ -144,7 +229,9 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             pageSize = this.state.pageSize,
             searchLoading = false,
         } = params;
-        // const values = this.searchRef.current!.getFieldsValue();
+        const values = this.convertFormData();
+
+        queryIOList({}).then(() => {});
 
         setTimeout(() => {
             this.setState({
@@ -185,6 +272,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             dataSet,
             dataLoading,
             searchLoading,
+            exportingLoading,
             pageNumber,
             pageSize,
             total,
@@ -201,62 +289,24 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
                 <div className="float-clear">
                     <JsonForm
                         labelClassName="stock-form-label"
-                        fieldList={
-                            [
-                                {
-                                    type: 'dateRanger',
-                                    label: <span>出库&emsp;时间</span>,
-                                    name: ['out_time_start', 'out_time_end'],
-                                    formItemClassName: 'form-item',
-                                    className: 'stock-form-picker',
-                                },
-                                {
-                                    type: 'dateRanger',
-                                    label: <span>入库&emsp;时间</span>,
-                                    name: ['in_time_start', 'in_time_end'],
-                                    formItemClassName: 'form-item',
-                                    className: 'stock-form-picker',
-                                },
-                                {
-                                    type: 'input',
-                                    label: '尾程运单号',
-                                    name: 'last_trans_no',
-                                    formItemClassName: 'form-item',
-                                    className: 'input-default',
-                                },
-                                {
-                                    type: 'input',
-                                    label: '出库订单号',
-                                    name: 'out_order',
-                                    formItemClassName: 'form-item',
-                                    className: 'input-default',
-                                },
-                                {
-                                    type: 'input',
-                                    label: '入库订单号',
-                                    name: 'in_order',
-                                    formItemClassName: 'form-item',
-                                    className: 'input-default',
-                                },
-                                {
-                                    type: 'input',
-                                    label: '采购订单号',
-                                    name: 'buy_order',
-                                    formItemClassName: 'form-item',
-                                    className: 'input-default',
-                                },
-                                {
-                                    type: 'input',
-                                    label: '中台商品ID',
-                                    name: 'good_id',
-                                    formItemClassName: 'form-item',
-                                    className: 'input-default',
-                                },
-                            ] as IFieldItem[]
-                        }
+                        formRef={this.formRef}
+                        fieldList={this.fieldList}
                     />
+                    <Button
+                        type="primary"
+                        loading={searchLoading}
+                        className="btn-group vertical-middle form-item"
+                    >
+                        查询
+                    </Button>
+                    <Button
+                        loading={exportingLoading}
+                        className="btn-group vertical-middle form-item"
+                    >
+                        导出Excel表
+                    </Button>
                     <Pagination
-                        className="float-right"
+                        className="float-right form-item"
                         pageSize={pageSize}
                         current={pageNumber}
                         total={total}

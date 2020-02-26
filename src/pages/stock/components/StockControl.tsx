@@ -25,6 +25,8 @@ declare interface IStockControlState {
     dataSet: ITableData[];
     dataLoading: boolean;
     searchLoading: boolean;
+    exportingLoading: boolean;
+    syncLoading: boolean;
     pageNumber: number;
     pageSize: number;
     total: number;
@@ -103,12 +105,15 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             dataSet: [],
             dataLoading: true,
             searchLoading: true,
+            exportingLoading: false,
+            syncLoading: false,
             total: 0,
             pageNumber: 1,
             pageSize: 50,
             selectedRowKeys: [],
         };
     }
+
     componentDidMount(): void {
         this.onSearch();
     }
@@ -169,6 +174,8 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             dataSet,
             dataLoading,
             searchLoading,
+            exportingLoading,
+            syncLoading,
             pageNumber,
             pageSize,
             total,
@@ -196,9 +203,33 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                                 },
                             ] as IFieldItem[]
                         }
+                        appendChildren={
+                            <React.Fragment>
+                                <Button
+                                    type="primary"
+                                    loading={searchLoading}
+                                    className="btn-group vertical-middle form-item"
+                                >
+                                    查询
+                                </Button>
+                                <Button
+                                    loading={exportingLoading}
+                                    className="btn-group vertical-middle form-item"
+                                >
+                                    导出Excel表
+                                </Button>
+                                <Button
+                                    loading={syncLoading}
+                                    className="btn-group vertical-middle form-item"
+                                    type="link"
+                                >
+                                    点击同步库存
+                                </Button>
+                            </React.Fragment>
+                        }
                     />
                     <Pagination
-                        className="float-right"
+                        className="float-right form-item"
                         pageSize={pageSize}
                         current={pageNumber}
                         total={total}
