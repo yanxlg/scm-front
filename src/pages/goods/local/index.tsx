@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Pagination, message } from 'antd';
 
@@ -19,9 +18,9 @@ import {
     getGoodsDelete,
     getGoodsSales,
     IFilterParams,
-    getCatagoryList
+    getCatagoryList,
 } from '@/services/goods';
-import { strToNumber } from '@/utils/common'
+import { strToNumber } from '@/utils/common';
 import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
@@ -48,7 +47,6 @@ export declare interface ISkuStyle {
     [key: string]: string;
     // size?: string;
     // color?: string;
-
 }
 
 declare interface ISkuItem {
@@ -170,7 +168,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     // 取消选中的商品
     private cancelSelectedRow = () => {
         this.setState({
-            selectedRowKeys: []
+            selectedRowKeys: [],
         });
         if (this.goodsTableRef) {
             // console.log(this.localSearchRef);
@@ -228,7 +226,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory: strToNumber(third_catagory),
                 task_number: task_number.split(',').filter(item => item.trim()),
                 store_id: store_id.split(',').filter(item => item.trim()),
-                commodity_id: commodity_id.split(',').map(item => Number(item.trim())).filter(item => item),
+                commodity_id: commodity_id
+                    .split(',')
+                    .map(item => Number(item.trim()))
+                    .filter(item => item),
             });
         }
         if (searchData) {
@@ -250,7 +251,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     allCount: all_count,
                     page: params.page,
                     page_count: params.page_count,
-                    goodsList: this.addRowSpanData(list)
+                    goodsList: this.addRowSpanData(list),
                 });
             })
             .finally(() => {
@@ -278,10 +279,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const { allCatagoryList } = this.state;
         let ret: ICategoryItem[] = [];
         const firstIndex = allCatagoryList.findIndex(item => item.id === firstId);
-        ret = allCatagoryList[firstIndex].children as ICategoryItem[] || [];
+        ret = (allCatagoryList[firstIndex].children as ICategoryItem[]) || [];
         if (secondId) {
             const secondIndex = ret.findIndex(item => item.id === secondId);
-            ret = ret[secondIndex].children as ICategoryItem[] || [];
+            ret = (ret[secondIndex].children as ICategoryItem[]) || [];
             // ret = ret[secondIndex] ? (ret[secondIndex].children as ICategoryItem[]) : [];
         }
         return ret;
@@ -296,11 +297,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             goodsList: goodsList.map(item => {
                 if ((!productId || item.product_id === productId) && item._rowspan) {
                     return {
-                        ...item
-                    }
+                        ...item,
+                    };
                 }
-                return item
-            })
+                return item;
+            }),
         });
     };
 
@@ -310,13 +311,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         let rowKeys: string[] = [];
         // let goodsId: string | number = 0;
         for (let i = 0, len = list.length; i < len; i++) {
-            let {
-                sku_info,
-                first_catagory,
-                second_catagory,
-                third_catagory,
-                ...rest
-            } = list[i];
+            let { sku_info, first_catagory, second_catagory, third_catagory, ...rest } = list[i];
             first_catagory = Array.isArray(first_catagory) ? {} : first_catagory;
             second_catagory = Array.isArray(second_catagory) ? {} : second_catagory;
             third_catagory = Array.isArray(third_catagory) ? {} : third_catagory;
@@ -326,7 +321,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     ...item,
                     first_catagory,
                     second_catagory,
-                    third_catagory
+                    third_catagory,
                 };
                 if (index === 0) {
                     rowDataItem._rowspan = sku_info.length;
@@ -395,8 +390,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             goodsEditDialogStatus: status,
             currentEditGoods: rowData ? { ...rowData } : null,
             originEditGoods: rowData ? { ...rowData } : null,
-        })
-    }
+        });
+    };
 
     // 编辑title和description
     changeGoodsText = (type: string, text: string) => {
@@ -405,10 +400,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             currentEditGoods: {
                 ...(currentEditGoods as IRowDataItem),
-                [type]: text
-            }
-        })
-    }
+                [type]: text,
+            },
+        });
+    };
 
     // 编辑类目
     changeGoodsCatagory = (type: string, id: string) => {
@@ -418,29 +413,29 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 currentEditGoods: {
                     ...(currentEditGoods as IRowDataItem),
                     first_catagory: {
-                        id
+                        id,
                     },
                     second_catagory: {},
-                    third_catagory: {}
-                }
-            })
+                    third_catagory: {},
+                },
+            });
         } else if (type === 'second_catagory') {
             this.setState({
                 currentEditGoods: {
                     ...(currentEditGoods as IRowDataItem),
                     second_catagory: { id },
-                    third_catagory: {}
-                }
-            })
+                    third_catagory: {},
+                },
+            });
         } else {
             this.setState({
                 currentEditGoods: {
                     ...(currentEditGoods as IRowDataItem),
-                    third_catagory: { id }
-                }
-            })
+                    third_catagory: { id },
+                },
+            });
         }
-    }
+    };
 
     // 编辑图片
     changeGoodsImg = (imgList: string[]) => {
@@ -448,18 +443,18 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             currentEditGoods: {
                 ...(currentEditGoods as IRowDataItem),
-                sku_image: imgList
-            }
-        })
-    }
+                sku_image: imgList,
+            },
+        });
+    };
 
     // 重置编辑弹框
     resetGoodsData = () => {
         const { originEditGoods } = this.state;
         this.setState({
-            currentEditGoods: { ...(originEditGoods as IRowDataItem) }
-        })
-    }
+            currentEditGoods: { ...(originEditGoods as IRowDataItem) },
+        });
+    };
 
     // 一键上架
     postGoodsOnsale = () => {
@@ -499,10 +494,14 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
         // console.log('selectedRowKeys', selectedRowKeys);
         getGoodsDelete({
-            commodity_ids: [...new Set(selectedRowKeys.map(productId => {
-                const index = goodsList.findIndex(item => item.product_id === productId)
-                return goodsList[index].commodity_id;
-            }))]
+            commodity_ids: [
+                ...new Set(
+                    selectedRowKeys.map(productId => {
+                        const index = goodsList.findIndex(item => item.product_id === productId);
+                        return goodsList[index].commodity_id;
+                    }),
+                ),
+            ],
         })
             .then(res => {
                 this.setState({
@@ -548,10 +547,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
     // 获取下载表格数据
     getExcelData = (count: number) => {
-        postGoodsExports(Object.assign({}, this.searchFilter, {
-            page: count + 1,
-            page_count: 10000,
-        }))
+        postGoodsExports(
+            Object.assign({}, this.searchFilter, {
+                page: count + 1,
+                page_count: 10000,
+            }),
+        )
             .catch(err => {
                 // console.log('postGoodsExports err', err);
                 message.error('导出表格失败！');
@@ -579,7 +580,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             saleStatusList,
             allCatagoryList,
             currentEditGoods,
-            originEditGoods
+            originEditGoods,
         } = this.state;
 
         const task_id = this.props.location.state?.task_id;

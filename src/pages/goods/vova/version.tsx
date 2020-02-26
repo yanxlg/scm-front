@@ -1,11 +1,15 @@
-
 import React from 'react';
 import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
 import { Button, Card, Checkbox, Divider, message, Spin, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnType } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
-import { activeVovaGoodsVersion, clearGoodsVersionRecord, exportVovaGoodsVersion, queryGoodsVersion } from '@/services/vova';
+import {
+    activeVovaGoodsVersion,
+    clearGoodsVersionRecord,
+    exportVovaGoodsVersion,
+    queryGoodsVersion,
+} from '@/services/vova';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -32,12 +36,12 @@ declare interface ITableItem {
 declare interface IVersionState {
     selectedRowKeys: Set<number>;
     dataLoading: boolean;
-    clearLoading:boolean;
+    clearLoading: boolean;
     dataSet: ITableItem[];
-    keys:number[];
-    attributes?:Array< {
-        property:string;
-        count:number;
+    keys: number[];
+    attributes?: Array<{
+        property: string;
+        count: number;
     }>;
 }
 
@@ -50,7 +54,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
             dataLoading: false,
             dataSet: [],
             keys: [],
-            clearLoading:false
+            clearLoading: false,
         };
     }
 
@@ -82,21 +86,21 @@ class Version extends React.PureComponent<{}, IVersionState> {
         return exportVovaGoodsVersion(params);
     }
 
-    private activeGoodsVersion(){
-        const {selectedRowKeys,dataSet} = this.state;
-        let params:Array<{
-            virtual_id:number,
-            product_id:number
-        }>=[];
-        selectedRowKeys.forEach(product_id=>{
+    private activeGoodsVersion() {
+        const { selectedRowKeys, dataSet } = this.state;
+        let params: Array<{
+            virtual_id: number;
+            product_id: number;
+        }> = [];
+        selectedRowKeys.forEach(product_id => {
             params.push({
-                product_id:product_id,
-                virtual_id:dataSet.find(item=>item.product_id===product_id)!.vova_virtual_id
-            })
+                product_id: product_id,
+                virtual_id: dataSet.find(item => item.product_id === product_id)!.vova_virtual_id,
+            });
         });
-        return activeVovaGoodsVersion(params).then(()=>{
-            message.success("应用新版本成功!");
-        })
+        return activeVovaGoodsVersion(params).then(() => {
+            message.success('应用新版本成功!');
+        });
     }
 
     private combineDataSet(dataSet: ITableItem[]) {
@@ -163,23 +167,25 @@ class Version extends React.PureComponent<{}, IVersionState> {
         });
     }
 
-    private clearRecord(){
-        this.setState({clearLoading:true});
-        clearGoodsVersionRecord().then(()=>{
-            this.setState({
-                clearLoading:false,
-                attributes:undefined
+    private clearRecord() {
+        this.setState({ clearLoading: true });
+        clearGoodsVersionRecord()
+            .then(() => {
+                this.setState({
+                    clearLoading: false,
+                    attributes: undefined,
+                });
             })
-        }).catch(()=>{
-            this.setState({
-                clearLoading:false
-            })
-        })
+            .catch(() => {
+                this.setState({
+                    clearLoading: false,
+                });
+            });
     }
     private columns: ColumnType<ITableItem>[] = [
         {
-            title: ()=>{
-                const {selectedRowKeys,keys} = this.state;
+            title: () => {
+                const { selectedRowKeys, keys } = this.state;
                 const selectedSize = selectedRowKeys.size;
                 const indeterminate = selectedSize > 0;
                 const checkedAll = selectedSize === keys.length && selectedSize > 0;
@@ -189,7 +195,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
                         checked={checkedAll}
                         onChange={e => this.onCheckAllBoxStateChange(e.target.checked, keys)}
                     />
-                )
+                );
             },
             width: '50px',
             fixed: 'left',
@@ -359,7 +365,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
             dataIndex: 'is_version_applied',
             render: (text, record, index) => {
                 return {
-                    children: text === 1?"已使用":"",
+                    children: text === 1 ? '已使用' : '',
                     props: {
                         rowSpan: record.rowSpan || 0,
                     },
@@ -368,7 +374,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
         },
     ];
     render() {
-        const { dataLoading, attributes, dataSet,clearLoading } = this.state;
+        const { dataLoading, attributes, dataSet, clearLoading } = this.state;
         return (
             <div className="container">
                 <Card>
@@ -378,16 +384,20 @@ class Version extends React.PureComponent<{}, IVersionState> {
                         onSearch={this.queryData}
                     />
                 </Card>
-                    <Card className="product-card" title="数据/状态更新">
-                        <Spin spinning={dataLoading} tip="Loading...">
-                        {
-                            attributes?.map(({count,property})=>{
-                                return <div className="product-text" key={property}>{property}（{count}）</div>
-                            })
-                        }
-                        <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>所有更新信息已查看</Button>
-                        </Spin>
-                    </Card>
+                <Card className="product-card" title="数据/状态更新">
+                    <Spin spinning={dataLoading} tip="Loading...">
+                        {attributes?.map(({ count, property }) => {
+                            return (
+                                <div className="product-text" key={property}>
+                                    {property}（{count}）
+                                </div>
+                            );
+                        })}
+                        <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>
+                            所有更新信息已查看
+                        </Button>
+                    </Spin>
+                </Card>
                 <Table
                     loading={dataLoading}
                     rowKey="product_id"

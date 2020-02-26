@@ -16,7 +16,7 @@ declare interface ISku {
         value: string;
     }>;
     price: string;
-    freight: string;
+    shipping_fee: string;
     storage: string;
 }
 
@@ -79,13 +79,20 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
         const { sku_list = [] } = this.formRef.current!.getFieldsValue();
         const { sku_list: _sku_list } = this.state;
         // diff
-        if (JSON.stringify(sku_list) !== JSON.stringify(_sku_list)) {
+        if (sku_list.length > 0 && JSON.stringify(sku_list) !== JSON.stringify(_sku_list)) {
             this.setState({
                 submitting: true,
             });
             editGoodsDetail({
                 product_id: product_id,
-                sku_list: sku_list,
+                sku_list: sku_list.map((sku: ISku) => {
+                    return {
+                        sku: sku.sku_name,
+                        shop_price: sku.price,
+                        shipping_fee: sku.shipping_fee,
+                        storage: sku.storage,
+                    };
+                }),
             })
                 .then(() => {
                     this.onClose();
@@ -144,7 +151,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                 title={sku_name}
                             >
                                 <label title="sku名称">sku名称</label>
-                                {sku_name}
+                                <Form.Item noStyle={true} name={['sku_list', index, 'sku_name']}>
+                                    <span>{sku_name}</span>
+                                </Form.Item>
                             </div>
                             <div className="ant-form-item-label product-modal-item flex flex-align">
                                 <label title="对应图片">对应图片</label>
@@ -185,7 +194,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                             <Form.Item
                                 className="form-item-horizon form-item-inline"
                                 validateTrigger={'onBlur'}
-                                name={['sku_list', index, 'freight']}
+                                name={['sku_list', index, 'shipping_fee']}
                                 label="运费"
                             >
                                 <InputNumber

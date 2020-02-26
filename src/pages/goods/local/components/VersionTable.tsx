@@ -1,12 +1,7 @@
 import React from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { 
-    IGoodsVersionRowItem,
-    ISkuStyle, 
-    IOnsaleItem,
-    ICatagoryData
-} from '../version';
+import { IGoodsVersionRowItem, ISkuStyle, IOnsaleItem, ICatagoryData } from '../version';
 
 import VersionImgDialog from './VersionImgDialog';
 import { formatDate } from '@/utils/date';
@@ -35,14 +30,22 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                 let children = null;
                 // UPDATED RELEASED INITIALIZED updated
                 if (value !== 'RELEASED') {
-                    children = <Button
-                        className="btn"
-                        type="primary"
-                        size="small"
-                        onClick={() => operationVersion(row.product_id, 'apply')}
-                    >应用</Button>
+                    children = (
+                        <Button
+                            className="btn"
+                            type="primary"
+                            size="small"
+                            onClick={() => operationVersion(row.product_id, 'apply')}
+                        >
+                            应用
+                        </Button>
+                    );
                 } else {
-                    children = <Button ghost={true} className="btn" type="primary" size="small">当前版本</Button>
+                    children = (
+                        <Button ghost={true} className="btn" type="primary" size="small">
+                            当前版本
+                        </Button>
+                    );
                 }
                 return {
                     children,
@@ -73,7 +76,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
+            },
         },
         {
             key: 'sku_image',
@@ -206,11 +209,11 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                 return (
                     // className="border text-left"
                     <div>
-                        {
-                            Object.keys(value).map(item => (
-                                <div key={item}>{item}: {value[item]}</div>
-                            ))
-                        }
+                        {Object.keys(value).map(item => (
+                            <div key={item}>
+                                {item}: {value[item]}
+                            </div>
+                        ))}
                         {/* <div className="nowrap">{value.split(',')}</div> */}
                     </div>
                 );
@@ -371,8 +374,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
-        }
+            },
+        },
     ];
 
     constructor(props: IVersionTableProps) {

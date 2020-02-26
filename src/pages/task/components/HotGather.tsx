@@ -32,7 +32,7 @@ import {
     queryTaskDetail,
 } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import { numberFormatter } from '@/utils/common';
+import { intFormatter } from '@/utils/common';
 import moment, { Moment } from 'moment';
 import { validateNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
@@ -577,7 +577,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         min={0}
                                                         placeholder={'请输入'}
                                                         className="input-default input-handler"
-                                                        formatter={numberFormatter}
+                                                        formatter={intFormatter}
                                                         disabled={range !== TaskRange.store}
                                                     />
                                                 </Form.Item>
@@ -748,7 +748,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     <InputNumber
                                         min={0}
                                         className="input-small input-handler"
-                                        formatter={numberFormatter}
+                                        formatter={intFormatter}
                                     />
                                 </Form.Item>
                                 <span className="config-colon">-</span>
@@ -765,7 +765,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     <InputNumber
                                         min={0}
                                         className="input-small input-handler"
-                                        formatter={numberFormatter}
+                                        formatter={intFormatter}
                                     />
                                 </Form.Item>
                             </Form.Item>
@@ -786,7 +786,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     <InputNumber
                                         min={0}
                                         className="input-small input-handler"
-                                        formatter={numberFormatter}
+                                        formatter={intFormatter}
                                     />
                                 </Form.Item>
                                 <span className="config-colon">-</span>
@@ -803,7 +803,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     <InputNumber
                                         min={0}
                                         className="input-small input-handler"
-                                        formatter={numberFormatter}
+                                        formatter={intFormatter}
                                     />
                                 </Form.Item>
                             </Form.Item>
@@ -818,7 +818,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                 <InputNumber
                                     min={0}
                                     className="config-input-pages input-handler"
-                                    formatter={numberFormatter}
+                                    formatter={intFormatter}
                                     width={200}
                                 />
                             </Form.Item>
@@ -842,7 +842,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     placeholder="默认值：10000"
                                     min={0}
                                     className="config-input-count input-handler"
-                                    formatter={numberFormatter}
+                                    formatter={intFormatter}
                                 />
                             </Form.Item>
                         </div>
@@ -1011,7 +1011,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             min={0}
                                                                                             className="input-small input-handler"
                                                                                             formatter={
-                                                                                                numberFormatter
+                                                                                                intFormatter
                                                                                             }
                                                                                             disabled={
                                                                                                 taskType !==
@@ -1073,7 +1073,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             min={0}
                                                                                             className="input-small input-handler"
                                                                                             formatter={
-                                                                                                numberFormatter
+                                                                                                intFormatter
                                                                                             }
                                                                                             disabled={
                                                                                                 taskType !==
