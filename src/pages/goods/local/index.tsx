@@ -96,6 +96,7 @@ export declare interface IRowDataItem extends IBaseData {
     sku_inventory: number;
     sku_shopping_fee: number;
     _rowspan?: number;
+    _sales_status?: string;
 }
 
 export declare interface ICategoryItem {
@@ -329,6 +330,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 };
                 if (index === 0) {
                     rowDataItem._rowspan = sku_info.length;
+                    const i = sku_info.findIndex(item => Number(item.sku_inventory) > 0);
+                    rowDataItem._sales_status = i > -1 ? '可销售' : '不可销售';
                     rowKeys.push(rowDataItem.product_id);
                 }
                 // rowDataItem._isCollapse = false;
