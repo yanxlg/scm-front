@@ -191,6 +191,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
                 const checkedAll = selectedSize === keys.length && selectedSize > 0;
                 return (
                     <Checkbox
+                        disabled={keys.length === 0}
                         indeterminate={checkedAll ? false : indeterminate}
                         checked={checkedAll}
                         onChange={e => this.onCheckAllBoxStateChange(e.target.checked, keys)}
@@ -377,7 +378,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
         const { dataLoading, attributes, dataSet, clearLoading } = this.state;
         return (
             <div className="container">
-                <Card>
+                <Card className="card-affix-top">
                     <VersionSearch
                         onActive={this.activeGoodsVersion}
                         onExport={this.exportGoodsVersion}
@@ -386,16 +387,23 @@ class Version extends React.PureComponent<{}, IVersionState> {
                 </Card>
                 <Card className="product-card" title="数据/状态更新">
                     <Spin spinning={dataLoading} tip="Loading...">
-                        {attributes?.map(({ count, property }) => {
-                            return (
-                                <div className="product-text" key={property}>
-                                    {property}（{count}）
-                                </div>
-                            );
-                        })}
-                        <Button loading={clearLoading} type="primary" onClick={this.clearRecord}>
-                            所有更新信息已查看
-                        </Button>
+                        <div className="product-tags">
+                            {attributes?.map(({ count, property }) => {
+                                return (
+                                    <div className="product-tag" key={property}>
+                                        {property}(
+                                        <span className="product-tag-value">{count}</span>)
+                                    </div>
+                                );
+                            })}
+                            <Button
+                                loading={clearLoading}
+                                type="primary"
+                                onClick={this.clearRecord}
+                            >
+                                所有更新信息已查看
+                            </Button>
+                        </div>
                     </Spin>
                 </Card>
                 <Table
