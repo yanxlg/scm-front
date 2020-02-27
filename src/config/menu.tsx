@@ -42,11 +42,11 @@ export default [
                 hideInMenu: true,
             },
             {
-                path: '/goods/vova',
-                name: 'VoVa产品库',
+                path: '/goods/channel',
+                name: '渠道产品库',
             },
             {
-                path: '/goods/vova/version',
+                path: '/goods/channel/version',
                 name: '商品版本更新',
                 hideInMenu: true,
             },

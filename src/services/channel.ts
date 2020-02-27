@@ -1,4 +1,4 @@
-import { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
+import { IApiParams } from '@/pages/goods/channel/components/VersionSearch';
 import request from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 

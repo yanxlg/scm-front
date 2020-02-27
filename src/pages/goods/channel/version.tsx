@@ -1,6 +1,6 @@
 import React from 'react';
-import VersionSearch, { IApiParams } from '@/pages/goods/vova/components/VersionSearch';
-import { Button, Card, Checkbox, Divider, message, Spin, Table } from 'antd';
+import VersionSearch, { IApiParams } from './components/VersionSearch';
+import { Button, Card, Checkbox, message, Spin, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnType } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
@@ -9,7 +9,7 @@ import {
     clearGoodsVersionRecord,
     exportVovaGoodsVersion,
     queryGoodsVersion,
-} from '@/services/vova';
+} from '@/services/channel';
 
 declare interface ITableItem {
     vova_virtual_id: number;
