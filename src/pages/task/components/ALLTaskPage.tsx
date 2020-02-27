@@ -8,12 +8,13 @@ import '@/styles/table.less';
 import { getTaskList, deleteTasks, activeTasks, abortTasks, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
+import { TaskRangeMap, TaskStatus, TaskStatusMap } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import TimerUpdate from '@/pages/task/components/TimerUpdate';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -86,8 +87,10 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             searchLoading,
             selectedRowKeys: [],
         });
+        const { task_status } = this.props;
+
         getTaskList({
-            task_status: this.props.task_status,
+            task_status: task_status,
             page: page,
             page_number: page_number,
             ...values,
@@ -150,7 +153,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'task_range',
                 width: '182px',
                 align: 'center',
-                render: (text: number) => TaskRangeList[text],
+                render: (text: number) => TaskRangeMap[text],
             },
             {
                 title: '任务类型',
@@ -191,7 +194,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 }
                                 format={() => ''}
                             />
-                            {TaskStatusList[status]}
+                            {TaskStatusMap[status]}
                         </>
                     );
                 },
@@ -283,21 +286,36 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     private viewTaskDetail(task: IDataItem) {
         // task_range 分别弹不同的弹窗
         const { task_range, task_id } = task;
-        if (task_range === '1') {
-            // url
-            Modal.info({
-                content: <URLGather taskId={task_id} />,
-                className: 'modal-empty config-modal-hot',
-                icon: null,
-                maskClosable: true,
-            });
-        } else {
-            Modal.info({
-                content: <HotGather taskId={task_id} />,
-                className: 'modal-empty config-modal-hot',
-                icon: null,
-                maskClosable: true,
-            });
+        switch (task_range) {
+            case '1':
+                // url
+                Modal.info({
+                    content: <URLGather taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '2':
+            case '3':
+                Modal.info({
+                    content: <HotGather taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '4':
+            case '5':
+                Modal.info({
+                    content: <TimerUpdate taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            default:
+                break;
         }
     }
     private deleteTasks() {

@@ -17,7 +17,7 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskRange, TaskStatusMap, TaskType } from '@/enums/ConfigEnum';
 import {
     addPddHotTask,
     IPddHotTaskParams,
@@ -500,7 +500,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
                         <div className="config-task-label">
-                            任务状态: {TaskStatusList[status ?? '']}
+                            任务状态: {TaskStatusMap[status ?? '']}
                         </div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>
@@ -926,7 +926,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                     <Form.Item
                                                         label="开始时间"
                                                         validateTrigger={'onChange'}
-                                                        className="form-required-absolute"
+                                                        className="form-required-absolute form-item-inline"
                                                         name="timerStartTime"
                                                         dependencies={['task_end_time']}
                                                         rules={[
@@ -953,7 +953,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         label="结束时间"
                                                         name="task_end_time"
                                                         dependencies={['timerStartTime']}
-                                                        className="form-required-absolute form-item"
+                                                        className="form-required-absolute form-item form-item-inline"
                                                         rules={[
                                                             {
                                                                 required:

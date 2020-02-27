@@ -22,6 +22,7 @@ enum ApiPathEnum {
     QueryTaskList = '/api/v1/task/list',
     AddPDDHotTask = '/api/v1/task/spider/pdd_hotsale',
     AddPDDURLTask = '/api/v1/task/spider/url',
+    ADDTimerUpdate = '/api/v1/task/spider/goods_update',
     DeleteTask = '/api/v1/task/delete',
     ActiveTask = '/api/v1/task/plan',
     AbortTask = '/api/v1/task/cancel',

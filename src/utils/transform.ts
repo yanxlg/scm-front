@@ -1,6 +1,6 @@
 import { isNull } from '@/utils/validate';
 
-export function transSelectValue(value: string | number | undefined | null) {
+export function transSelectValue(value?: string | number) {
     return value === '' || isNull(value) ? undefined : value;
 }
 

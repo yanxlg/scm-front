@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { TaskIntervalType, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskStatusMap, TaskType } from '@/enums/ConfigEnum';
 import moment, { Moment } from 'moment';
 import { intFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
@@ -314,7 +314,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
                         <div className="config-task-label">
-                            任务状态: {TaskStatusList[taskStatus ?? '']}
+                            任务状态: {TaskStatusMap[taskStatus ?? '']}
                         </div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>
@@ -433,7 +433,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                     <Form.Item
                                                         label="开始时间"
                                                         validateTrigger={'onChange'}
-                                                        className="form-required-absolute"
+                                                        className="form-required-absolute form-item-inline"
                                                         name="timerStartTime"
                                                         dependencies={['task_end_time']}
                                                         rules={[
@@ -460,7 +460,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                         label="结束时间"
                                                         name="task_end_time"
                                                         dependencies={['timerStartTime']}
-                                                        className="form-required-absolute form-item"
+                                                        className="form-required-absolute form-item form-item-inline"
                                                         rules={[
                                                             {
                                                                 required:

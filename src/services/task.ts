@@ -1,7 +1,7 @@
 import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
+import { TaskType } from '@/enums/ConfigEnum';
 import { isNull } from '@/utils/validate';
 
 declare interface ITaskListSearch extends IFormData {
@@ -63,6 +63,21 @@ export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskPa
 
 export async function addPddURLTask(params: IPddURLTaskParams) {
     return request.post(ApiPathEnum.AddPDDURLTask, {
+        data: {
+            ...params,
+            version: '1.0',
+            platform: 'PDD',
+        },
+        errorHandler: errorHandlerFactory(true),
+    });
+}
+
+declare interface IPDDTimerUpdateTaskParams {
+    task_name: string;
+}
+
+export async function addPDDTimerUpdateTask(params: IPDDTimerUpdateTaskParams) {
+    return request.post(ApiPathEnum.ADDTimerUpdate, {
         data: {
             ...params,
             version: '1.0',

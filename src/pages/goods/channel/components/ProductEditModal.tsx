@@ -74,12 +74,33 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
         Modal.destroyAll();
     }
     @Bind
+    private diffSkuList(nextSkuList: ISku[], beforeSkuList: ISku[]) {
+        // 仅 diff价格、运费、库存三个字段
+        let updated = false;
+        let i = 0;
+        const length = nextSkuList.length;
+        while (!updated && i < length) {
+            const next = nextSkuList[i];
+            const before = beforeSkuList[i];
+            if (
+                Number(next.price) !== Number(before.price) ||
+                Number(next.storage) !== Number(before.storage) ||
+                Number(next.shipping_fee) !== Number(before.shipping_fee)
+            ) {
+                updated = true;
+            } else {
+                i++;
+            }
+        }
+        return updated;
+    }
+    @Bind
     private onSubmit() {
         const { product_id } = this.props;
         const { sku_list = [] } = this.formRef.current!.getFieldsValue();
-        const { sku_list: _sku_list } = this.state;
+        const { sku_list: _sku_list = [] } = this.state;
         // diff
-        if (sku_list.length > 0 && JSON.stringify(sku_list) !== JSON.stringify(_sku_list)) {
+        if (sku_list.length > 0 && this.diffSkuList(sku_list, _sku_list)) {
             this.setState({
                 submitting: true,
             });
