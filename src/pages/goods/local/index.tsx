@@ -185,14 +185,14 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             task_number,
             store_id,
             commodity_id,
-            min_sku, 
-            max_sku, 
-            min_price, 
-            max_price, 
-            min_sale, 
-            max_sale 
+            min_sku,
+            max_sku,
+            min_price,
+            max_price,
+            min_sale,
+            max_sale,
         } = searhParam;
-        const reg = /[^0-9\,]/
+        const reg = /[^0-9\,]/;
         if (task_number && reg.test(task_number.trim())) {
             message.error('爬虫任务ID输入了非法字符，只支持检索数字！');
             return false;
@@ -240,7 +240,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory,
                 ...searhParams
             } = this.localSearchRef.state;
-            if (!this.validateSearhParam({...searhParams, task_number, store_id, commodity_id})) {
+            if (!this.validateSearhParam({ ...searhParams, task_number, store_id, commodity_id })) {
                 return;
             }
             // 转换数据格式

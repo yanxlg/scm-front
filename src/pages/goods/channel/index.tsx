@@ -15,7 +15,8 @@ import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
-import { goodsStatusMap } from '@/enums/StatusEnum';
+import { checkLowerShelf, checkUpperShelf, goodsStatusMap } from '@/enums/StatusEnum';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 declare interface IVoVaListState {
     dataSet: Array<IRowDataItem>;
@@ -114,38 +115,64 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
 
     // 上架操作
     private onShelves(row: IRowDataItem) {
-        putVovaGoodsSales({
-            type: 'onsale',
-            info: {
-                product_id: row.product_id,
-                commodity_id: row.commodity_id,
-                sale_domain: 'vova',
+        Modal.confirm({
+            title: '确定需要上架该商品吗?',
+            okText: '确定',
+            cancelText: '取消',
+            icon: <ExclamationCircleOutlined />,
+            onOk: () => {
+                return putVovaGoodsSales({
+                    type: 'onsale',
+                    info: {
+                        onsale: {
+                            task_body: {
+                                product_id: row.product_id,
+                                commodity_id: row.commodity_id,
+                                sale_domain: 'vova',
+                            },
+                        },
+                    },
+                })
+                    .then(res => {
+                        message.success('上架成功');
+                        this.queryList();
+                    })
+                    .catch(() => {
+                        message.success('上架失败');
+                    });
             },
-        })
-            .then(res => {
-                message.success('上架成功');
-            })
-            .catch(() => {
-                message.success('上架失败');
-            });
+        });
     }
 
     // 下架操作
     private offShelves(row: IRowDataItem) {
-        putVovaGoodsSales({
-            type: 'offsale',
-            info: {
-                product_id: row.product_id,
-                commodity_id: row.commodity_id,
-                sale_domain: 'vova',
+        Modal.confirm({
+            title: '确定需要下架该商品吗?',
+            okText: '确定',
+            cancelText: '取消',
+            icon: <ExclamationCircleOutlined />,
+            onOk: () => {
+                return putVovaGoodsSales({
+                    type: 'offsale',
+                    info: {
+                        offsale: {
+                            task_body: {
+                                product_id: row.product_id,
+                                commodity_id: row.commodity_id,
+                                sale_domain: 'vova',
+                            },
+                        },
+                    },
+                })
+                    .then(res => {
+                        message.success('下架成功');
+                        this.queryList();
+                    })
+                    .catch(() => {
+                        message.error('下架失败');
+                    });
             },
-        })
-            .then(res => {
-                message.success('下架成功');
-            })
-            .catch(() => {
-                message.error('下架失败');
-            });
+        });
     }
 
     private columns: ColumnProps<IRowDataItem>[] = [
@@ -258,25 +285,25 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataIndex: 'product_status',
             align: 'center',
             width: 100,
-            render: row => {
+            render: (status, item) => {
                 return {
                     children: (
                         <>
                             <Button
                                 className="shelves-btn"
                                 onClick={() => {
-                                    this.onShelves(row);
+                                    this.onShelves(item);
                                 }}
-                                disabled={row !== 3}
+                                disabled={!checkUpperShelf(status)}
                             >
                                 上架
                             </Button>
                             <Button
                                 className="unshelves-btn"
                                 onClick={() => {
-                                    this.offShelves(row);
+                                    this.offShelves(item);
                                 }}
-                                disabled={row !== 1}
+                                disabled={!checkLowerShelf(status)}
                             >
                                 下架
                             </Button>

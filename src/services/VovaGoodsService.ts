@@ -19,9 +19,20 @@ export declare interface IFilterParams {
 declare interface goodsSalesParam {
     type: string;
     info: {
-        product_id: string;
-        commodity_id: string;
-        sale_domain: string;
+        onsale?: {
+            task_body: {
+                product_id: string;
+                commodity_id: string;
+                sale_domain: string;
+            };
+        };
+        offsale?: {
+            task_body: {
+                product_id: string;
+                commodity_id: string;
+                sale_domain: string;
+            };
+        };
     };
 }
 
