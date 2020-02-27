@@ -95,6 +95,7 @@ export declare interface IRowDataItem extends IBaseData {
     sku_inventory: number;
     sku_shopping_fee: number;
     _rowspan?: number;
+    _sales_status?: string;
 }
 
 export declare interface ICategoryItem {
@@ -176,9 +177,32 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         }
     };
 
-    // 校验 sku数量、价格范围、销量 区间是否正常
-    private validateRange = (searhParam: any): boolean => {
-        const { min_sku, max_sku, min_price, max_price, min_sale, max_sale } = searhParam;
+    // 校验  sku数量、价格范围、销量 区间是否正常
+    private validateSearhParam = (searhParam: any): boolean => {
+        const {
+            task_number,
+            store_id,
+            commodity_id,
+            min_sku, 
+            max_sku, 
+            min_price, 
+            max_price, 
+            min_sale, 
+            max_sale 
+        } = searhParam;
+        const reg = /[^0-9\,]/
+        if (task_number && reg.test(task_number.trim())) {
+            message.error('爬虫任务ID输入了非法字符，只支持检索数字！');
+            return false;
+        }
+        if (store_id && reg.test(store_id.trim())) {
+            message.error('店铺ID输入了非法字符，只支持检索数字！');
+            return false;
+        }
+        if (commodity_id && reg.test(commodity_id.trim())) {
+            message.error('Commodity ID输入了非法字符，只支持检索数字！');
+            return false;
+        }
         if (min_sku >= 0 && max_sku >= 0 && min_sku - max_sku > 0) {
             message.error('sku数量最小值大于最大值！');
             return false;
@@ -214,7 +238,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory,
                 ...searhParams
             } = this.localSearchRef.state;
-            if (!this.validateRange(searhParams)) {
+            if (!this.validateSearhParam({...searhParams, task_number, store_id, commodity_id})) {
                 return;
             }
             // 转换数据格式
@@ -226,10 +250,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory: strToNumber(third_catagory),
                 task_number: task_number.split(',').filter(item => item.trim()),
                 store_id: store_id.split(',').filter(item => item.trim()),
-                commodity_id: commodity_id
-                    .split(',')
-                    .map(item => Number(item.trim()))
-                    .filter(item => item),
+                // .map(item => Number(item.trim()))
+                commodity_id: commodity_id.split(',').filter(item => item.trim()),
             });
         }
         if (searchData) {
@@ -325,6 +347,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 };
                 if (index === 0) {
                     rowDataItem._rowspan = sku_info.length;
+                    const i = sku_info.findIndex(item => Number(item.sku_inventory) > 0);
+                    rowDataItem._sales_status = i > -1 ? '可销售' : '不可销售';
                     rowKeys.push(rowDataItem.product_id);
                 }
                 // rowDataItem._isCollapse = false;

@@ -281,7 +281,14 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         //     align: 'center',
         //     width: 100
         // },
-
+        {
+            key: '_sales_status',
+            title: '销售状态',
+            dataIndex: '_sales_status',
+            align: 'center',
+            width: 100,
+            render: this.mergeCell,
+        },
         {
             key: 'sales_volume',
             title: '销量',
