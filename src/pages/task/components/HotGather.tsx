@@ -17,7 +17,6 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
 import {
     addPddHotTask,
     IPddHotTaskParams,
@@ -32,17 +31,22 @@ import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
-import { TaskStatusMap } from '@/enums/StatusEnum';
+import {
+    TaskStatusMap,
+    HotTaskRange,
+    TaskExecuteType,
+    TaskIntervalConfigType,
+} from '@/enums/StatusEnum';
 
 export declare interface IFormData {
-    range?: TaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
+    range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
     shopId?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     category_level_one?: string;
     category_level_two?: string;
     sort_type?: string;
     keywords?: string;
-    task_type?: TaskType;
-    taskIntervalType?: TaskIntervalType; // 调用接口前需要进行处理 && 编辑数据源需要处理
+    task_type?: TaskExecuteType;
+    taskIntervalType?: TaskIntervalConfigType; // 调用接口前需要进行处理 && 编辑数据源需要处理
     sales_volume_min?: number;
     sales_volume_max?: number;
     price_min?: number;
@@ -168,26 +172,27 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             task_interval_seconds,
             ...extra
         } = info;
-        const taskType = (task_type as any) === '单次任务' ? TaskType.once : TaskType.interval;
+        const taskType =
+            (task_type as any) === '单次任务' ? TaskExecuteType.once : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
-            range: range === TaskRange.fullStack ? range : TaskRange.store,
-            shopId: range !== TaskRange.fullStack ? range : undefined,
+            range: range === HotTaskRange.fullStack ? range : HotTaskRange.store,
+            shopId: range !== HotTaskRange.fullStack ? range : undefined,
             task_end_time:
-                taskType === TaskType.interval && task_end_time
+                taskType === TaskExecuteType.interval && task_end_time
                     ? moment(task_end_time * 1000)
                     : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
-                    ? TaskIntervalType.day
-                    : TaskIntervalType.second
-                : TaskIntervalType.day,
+                    ? TaskIntervalConfigType.day
+                    : TaskIntervalConfigType.second
+                : TaskIntervalConfigType.day,
             onceStartTime:
-                taskType === TaskType.once && task_start_time
+                taskType === TaskExecuteType.once && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             timerStartTime:
-                taskType === TaskType.interval && task_start_time
+                taskType === TaskExecuteType.interval && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             task_type: taskType,
@@ -213,22 +218,24 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return {
             ...extra,
             task_type,
-            range: range === TaskRange.store ? shopId : range,
-            is_immediately_execute: task_type === TaskType.once && !onceStartTime,
+            range: range === HotTaskRange.store ? shopId : range,
+            is_immediately_execute: task_type === TaskExecuteType.once && !onceStartTime,
             task_start_time:
-                task_type === TaskType.once
+                task_type === TaskExecuteType.once
                     ? onceStartTime?.unix() ?? undefined
                     : timerStartTime?.unix() ?? undefined,
-            ...(task_type === TaskType.once
+            ...(task_type === TaskExecuteType.once
                 ? {}
                 : {
                       task_interval_seconds:
-                          taskIntervalType === TaskIntervalType.second
+                          taskIntervalType === TaskIntervalConfigType.second
                               ? second
                               : day * 60 * 60 * 24,
                   }),
             task_end_time:
-                task_type === TaskType.interval ? task_end_time?.unix() ?? undefined : undefined,
+                task_type === TaskExecuteType.interval
+                    ? task_end_time?.unix() ?? undefined
+                    : undefined,
         };
     }
 
@@ -374,7 +381,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     private disabledStartDate(startTime: Moment | null) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
         const endTime =
-            taskType === TaskType.interval
+            taskType === TaskExecuteType.interval
                 ? this.formRef.current!.getFieldValue('task_end_time')
                 : null;
         if (!startTime) {
@@ -420,7 +427,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private checkDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.interval) {
+        if (!value || taskType === TaskExecuteType.interval) {
             return Promise.resolve();
         }
         const now = moment();
@@ -433,7 +440,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private checkStartDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const endDate = this.formRef.current!.getFieldValue('task_end_time');
@@ -450,7 +457,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private checkEndDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const startDate = this.formRef.current!.getFieldValue('timerStartTime');
@@ -467,7 +474,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private taskRangeChange(e: RadioChangeEvent) {
         const value = e.target.value;
-        if (value === TaskRange.fullStack) {
+        if (value === HotTaskRange.fullStack) {
             // 全站
             this.formRef.current!.resetFields(['shopId']);
         } else {
@@ -513,9 +520,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     autoComplete={'off'}
                     ref={this.formRef}
                     initialValues={{
-                        range: TaskRange.fullStack,
-                        task_type: TaskType.once,
-                        taskIntervalType: TaskIntervalType.day,
+                        range: HotTaskRange.fullStack,
+                        task_type: TaskExecuteType.once,
+                        taskIntervalType: TaskIntervalConfigType.day,
                     }}
                 >
                     <Form.Item
@@ -538,12 +545,12 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     >
                         <Form.Item validateTrigger={'onBlur'} name="range" noStyle={true}>
                             <Radio.Group onChange={this.taskRangeChange}>
-                                <Radio className="block" value={TaskRange.fullStack}>
+                                <Radio className="block" value={HotTaskRange.fullStack}>
                                     全站
                                 </Radio>
                                 <Form.Item
                                     className="form-item form-item-inline"
-                                    label={<Radio value={TaskRange.store}>指定店铺</Radio>}
+                                    label={<Radio value={HotTaskRange.store}>指定店铺</Radio>}
                                     colon={false}
                                 >
                                     <Form.Item
@@ -562,7 +569,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                     name="shopId"
                                                     rules={[
                                                         {
-                                                            required: range === TaskRange.store,
+                                                            required: range === HotTaskRange.store,
                                                             message: '请输入店铺ID',
                                                         },
                                                     ]}
@@ -572,7 +579,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         placeholder={'请输入'}
                                                         className="input-default input-handler"
                                                         formatter={intFormatter}
-                                                        disabled={range !== TaskRange.store}
+                                                        disabled={range !== HotTaskRange.store}
                                                     />
                                                 </Form.Item>
                                             );
@@ -603,7 +610,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             }
                                         >
                                             <Select
-                                                disabled={range === TaskRange.store}
+                                                disabled={range === HotTaskRange.store}
                                                 loading={categoryLoading}
                                                 className="select-default"
                                                 onChange={this.onFirstCategoryChange}
@@ -647,7 +654,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             className="form-item-horizon form-item-inline"
                                         >
                                             <Select
-                                                disabled={range === TaskRange.store}
+                                                disabled={range === HotTaskRange.store}
                                                 loading={categoryLoading}
                                                 className="select-default"
                                                 onChange={this.onSecondCategoryChange}
@@ -695,7 +702,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             className="form-item-horizon form-item-inline"
                                         >
                                             <Select
-                                                disabled={range === TaskRange.store}
+                                                disabled={range === HotTaskRange.store}
                                                 loading={categoryLoading}
                                                 className="select-default"
                                             >
@@ -875,7 +882,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         >
                             <Radio.Group onChange={this.resetTaskTypeError}>
                                 <Form.Item
-                                    label={<Radio value={TaskType.once}>单次任务</Radio>}
+                                    label={<Radio value={TaskExecuteType.once}>单次任务</Radio>}
                                     colon={false}
                                 >
                                     <Form.Item
@@ -900,7 +907,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                 >
                                                     <DatePicker
                                                         showTime={true}
-                                                        disabled={taskType !== TaskType.once}
+                                                        disabled={taskType !== TaskExecuteType.once}
                                                         placeholder="立即开始"
                                                         disabledDate={this.disabledStartDate}
                                                     />
@@ -910,7 +917,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     </Form.Item>
                                 </Form.Item>
                                 <Form.Item
-                                    label={<Radio value={TaskType.interval}>定时任务</Radio>}
+                                    label={<Radio value={TaskExecuteType.interval}>定时任务</Radio>}
                                     className="form-item-inline"
                                     colon={false}
                                 >
@@ -933,7 +940,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         rules={[
                                                             {
                                                                 required:
-                                                                    taskType === TaskType.interval,
+                                                                    taskType ===
+                                                                    TaskExecuteType.interval,
                                                                 message: '请选择开始时间',
                                                             },
                                                             {
@@ -944,7 +952,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                             disabledDate={this.disabledStartDate}
                                                         />
@@ -958,7 +967,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         rules={[
                                                             {
                                                                 required:
-                                                                    taskType === TaskType.interval,
+                                                                    taskType ===
+                                                                    TaskExecuteType.interval,
                                                                 message: '请选择结束时间',
                                                             },
                                                             {
@@ -969,7 +979,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                             disabledDate={this.disabledEndDate}
                                                         />
@@ -979,14 +990,19 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         label="任务间隔"
                                                         name="taskIntervalType"
                                                         className="form-required-absolute form-item-inline form-item"
-                                                        required={taskType === TaskType.interval}
+                                                        required={
+                                                            taskType === TaskExecuteType.interval
+                                                        }
                                                     >
                                                         <Radio.Group
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                         >
-                                                            <Radio value={TaskIntervalType.day}>
+                                                            <Radio
+                                                                value={TaskIntervalConfigType.day}
+                                                            >
                                                                 <div className="inline-block vertical-middle">
                                                                     <Form.Item
                                                                         noStyle={true}
@@ -1016,9 +1032,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             {
                                                                                                 required:
                                                                                                     taskType ===
-                                                                                                        TaskType.interval &&
+                                                                                                        TaskExecuteType.interval &&
                                                                                                     taskIntervalType ===
-                                                                                                        TaskIntervalType.day,
+                                                                                                        TaskIntervalConfigType.day,
                                                                                                 message:
                                                                                                     '请输入间隔天数',
                                                                                             },
@@ -1032,9 +1048,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             }
                                                                                             disabled={
                                                                                                 taskType !==
-                                                                                                    TaskType.interval ||
+                                                                                                    TaskExecuteType.interval ||
                                                                                                 taskIntervalType !==
-                                                                                                    TaskIntervalType.day
+                                                                                                    TaskIntervalConfigType.day
                                                                                             }
                                                                                         />
                                                                                     </Form.Item>
@@ -1047,7 +1063,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     </Form.Item>
                                                                 </div>
                                                             </Radio>
-                                                            <Radio value={TaskIntervalType.second}>
+                                                            <Radio
+                                                                value={
+                                                                    TaskIntervalConfigType.second
+                                                                }
+                                                            >
                                                                 <div className="inline-block vertical-middle">
                                                                     <Form.Item
                                                                         noStyle={true}
@@ -1077,9 +1097,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             {
                                                                                                 required:
                                                                                                     taskType ===
-                                                                                                        TaskType.interval &&
+                                                                                                        TaskExecuteType.interval &&
                                                                                                     taskIntervalType ===
-                                                                                                        TaskIntervalType.second,
+                                                                                                        TaskIntervalConfigType.second,
                                                                                                 message:
                                                                                                     '请输入间隔秒数',
                                                                                             },
@@ -1094,9 +1114,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             }
                                                                                             disabled={
                                                                                                 taskType !==
-                                                                                                    TaskType.interval ||
+                                                                                                    TaskExecuteType.interval ||
                                                                                                 taskIntervalType !==
-                                                                                                    TaskIntervalType.second
+                                                                                                    TaskIntervalConfigType.second
                                                                                             }
                                                                                         />
                                                                                     </Form.Item>

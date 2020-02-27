@@ -1,8 +1,8 @@
 import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
-import { TaskType } from '@/enums/ConfigEnum';
 import { isNull } from '@/utils/validate';
+import { TaskExecuteType } from '@/enums/StatusEnum';
 
 declare interface ITaskListSearch extends IFormData {
     page: number;
@@ -15,7 +15,7 @@ export declare interface IPddHotTaskParams {
     category_level_two?: string;
     sort_type?: string;
     keywords?: string;
-    task_type?: TaskType;
+    task_type?: TaskExecuteType;
     sales_volume_min?: number;
     sales_volume_max?: number;
     price_min?: number;
@@ -36,7 +36,7 @@ export declare interface IPddHotTaskParams {
 declare interface IPddURLTaskParams {
     urls: string;
     task_name: string;
-    task_type: TaskType;
+    task_type: TaskExecuteType;
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;

@@ -3,21 +3,21 @@ import { BindAll } from 'lodash-decorators';
 import { Button, Card, DatePicker, Input, InputNumber, Radio, Form, Modal, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { TimerUpdateTaskRange, TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
+import { TimerUpdateTaskRange } from '@/enums/ConfigEnum';
 import moment, { Moment } from 'moment';
 import { intFormatter } from '@/utils/common';
 import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskStatusMap } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskIntervalConfigType, TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IFormData {
     task_name: string;
     range: TimerUpdateTaskRange;
     task_start_time?: Moment;
     task_end_time?: Moment;
-    taskIntervalType?: TaskIntervalType;
+    taskIntervalType?: TaskIntervalConfigType;
     day?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     second?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
 }
@@ -83,9 +83,9 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
             range: update_type,
             taskIntervalType: time_interval
                 ? isDay
-                    ? TaskIntervalType.day
-                    : TaskIntervalType.second
-                : TaskIntervalType.day,
+                    ? TaskIntervalConfigType.day
+                    : TaskIntervalConfigType.second
+                : TaskIntervalConfigType.day,
             task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
             task_end_time: task_end_time ? moment(task_end_time * 1000) : undefined,
             day: isDay ? time_interval! / 86400 : undefined,
@@ -110,7 +110,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
             task_start_time: task_start_time?.unix() ?? undefined,
             task_end_time: task_end_time?.unix() ?? undefined,
             task_interval_seconds:
-                taskIntervalType === TaskIntervalType.second ? second : day * 60 * 60 * 24,
+                taskIntervalType === TaskIntervalConfigType.second ? second : day * 60 * 60 * 24,
         };
     }
 
@@ -185,8 +185,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     }
 
     private checkStartDate(type: any, value: Moment) {
-        const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value) {
             return Promise.resolve();
         }
         const endDate = this.formRef.current!.getFieldValue('task_end_time');
@@ -202,8 +201,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     }
 
     private checkEndDate(type: any, value: Moment) {
-        const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value) {
             return Promise.resolve();
         }
         const startDate = this.formRef.current!.getFieldValue('timerStartTime');
@@ -219,11 +217,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     }
 
     private disabledStartDate(startTime: Moment | null) {
-        const taskType = this.formRef.current!.getFieldValue('task_type');
-        const endTime =
-            taskType === TaskType.interval
-                ? this.formRef.current!.getFieldValue('task_end_time')
-                : null;
+        const endTime = this.formRef.current!.getFieldValue('task_end_time');
         if (!startTime) {
             return false;
         }
@@ -236,7 +230,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     }
 
     private disabledEndDate(endTime: Moment | null) {
-        const startTime = this.formRef.current!.getFieldValue('timerStartTime');
+        const startTime = this.formRef.current!.getFieldValue('task_start_time');
         if (!endTime) {
             return false;
         }
@@ -270,7 +264,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     autoComplete={'off'}
                     initialValues={{
                         range: TimerUpdateTaskRange.AllOnShelves,
-                        taskIntervalType: TaskIntervalType.day,
+                        taskIntervalType: TaskIntervalConfigType.day,
                     }}
                 >
                     <Form.Item
@@ -358,7 +352,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             required={true}
                         >
                             <Radio.Group>
-                                <Radio value={TaskIntervalType.day}>
+                                <Radio value={TaskIntervalConfigType.day}>
                                     <div className="inline-block vertical-middle">
                                         <Form.Item
                                             noStyle={true}
@@ -381,7 +375,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 {
                                                                     required:
                                                                         taskIntervalType ===
-                                                                        TaskIntervalType.day,
+                                                                        TaskIntervalConfigType.day,
                                                                     message: '请输入间隔天数',
                                                                 },
                                                             ]}
@@ -392,7 +386,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 formatter={intFormatter}
                                                                 disabled={
                                                                     taskIntervalType !==
-                                                                    TaskIntervalType.day
+                                                                    TaskIntervalConfigType.day
                                                                 }
                                                             />
                                                         </Form.Item>
@@ -403,7 +397,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                         </Form.Item>
                                     </div>
                                 </Radio>
-                                <Radio value={TaskIntervalType.second}>
+                                <Radio value={TaskIntervalConfigType.second}>
                                     <div className="inline-block vertical-middle">
                                         <Form.Item
                                             noStyle={true}
@@ -426,7 +420,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 {
                                                                     required:
                                                                         taskIntervalType ===
-                                                                        TaskIntervalType.second,
+                                                                        TaskIntervalConfigType.second,
                                                                     message: '请输入间隔秒数',
                                                                 },
                                                             ]}
@@ -438,7 +432,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 formatter={intFormatter}
                                                                 disabled={
                                                                     taskIntervalType !==
-                                                                    TaskIntervalType.second
+                                                                    TaskIntervalConfigType.second
                                                                 }
                                                             />
                                                         </Form.Item>

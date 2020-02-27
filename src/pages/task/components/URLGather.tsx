@@ -2,20 +2,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
 import moment, { Moment } from 'moment';
 import { intFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { isUrl } from '@/utils/validate';
-import { TaskStatusMap } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskIntervalConfigType, TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IFormData {
     urls?: string;
     task_name: string;
-    task_type: TaskType;
-    taskIntervalType?: TaskIntervalType; // 调用接口前需要进行处理 && 编辑数据源需要处理
+    task_type: TaskExecuteType;
+    taskIntervalType?: TaskIntervalConfigType; // 调用接口前需要进行处理 && 编辑数据源需要处理
     onceStartTime?: Moment; // 调用接口前需要进行处理 && 编辑数据源需要处理
     timerStartTime?: Moment; // 调用接口前需要进行处理 && 编辑数据源需要处理
     task_end_time?: Moment;
@@ -46,25 +45,26 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
             urls,
             ...extra
         } = info;
-        const taskType = (task_type as any) === '单次任务' ? TaskType.once : TaskType.interval;
+        const taskType =
+            (task_type as any) === '单次任务' ? TaskExecuteType.once : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
             task_end_time:
-                taskType === TaskType.interval && task_end_time
+                taskType === TaskExecuteType.interval && task_end_time
                     ? moment(task_end_time * 1000)
                     : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
-                    ? TaskIntervalType.day
-                    : TaskIntervalType.second
-                : TaskIntervalType.day,
+                    ? TaskIntervalConfigType.day
+                    : TaskIntervalConfigType.second
+                : TaskIntervalConfigType.day,
             task_type: taskType,
             onceStartTime:
-                taskType === TaskType.once && task_start_time
+                taskType === TaskExecuteType.once && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             timerStartTime:
-                taskType === TaskType.interval && task_start_time
+                taskType === TaskExecuteType.interval && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
@@ -91,21 +91,23 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
             ...extra,
             urls: stringifyText(urls),
             task_type,
-            is_immediately_execute: task_type === TaskType.once && !onceStartTime,
+            is_immediately_execute: task_type === TaskExecuteType.once && !onceStartTime,
             task_start_time:
-                task_type === TaskType.once
+                task_type === TaskExecuteType.once
                     ? onceStartTime?.unix() ?? undefined
                     : timerStartTime?.unix() ?? undefined,
-            ...(task_type === TaskType.once
+            ...(task_type === TaskExecuteType.once
                 ? {}
                 : {
                       task_interval_seconds:
-                          taskIntervalType === TaskIntervalType.second
+                          taskIntervalType === TaskIntervalConfigType.second
                               ? second
                               : day * 60 * 60 * 24,
                   }),
             task_end_time:
-                task_type === TaskType.interval ? task_end_time?.unix() ?? undefined : undefined,
+                task_type === TaskExecuteType.interval
+                    ? task_end_time?.unix() ?? undefined
+                    : undefined,
         };
     }, []);
 
@@ -223,7 +225,8 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
 
     const disabledStartDate = useCallback((startTime: Moment | null) => {
         const taskType = form.getFieldValue('task_type');
-        const endTime = taskType === TaskType.interval ? form.getFieldValue('task_end_time') : null;
+        const endTime =
+            taskType === TaskExecuteType.interval ? form.getFieldValue('task_end_time') : null;
         if (!startTime) {
             return false;
         }
@@ -262,7 +265,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
 
     const checkDate = useCallback((type: any, value: Moment) => {
         const taskType = form.getFieldValue('task_type');
-        if (!value || taskType === TaskType.interval) {
+        if (!value || taskType === TaskExecuteType.interval) {
             return Promise.resolve();
         }
         const now = moment();
@@ -275,7 +278,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
 
     const checkStartDate = useCallback((type: any, value: Moment) => {
         const taskType = form.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const endDate = form.getFieldValue('task_end_time');
@@ -292,7 +295,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
 
     const checkEndDate = useCallback((type: any, value: Moment) => {
         const taskType = form.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const startDate = form.getFieldValue('timerStartTime');
@@ -327,8 +330,8 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                     autoComplete={'off'}
                     className="form-help-absolute"
                     initialValues={{
-                        taskIntervalType: TaskIntervalType.day,
-                        task_type: TaskType.once,
+                        taskIntervalType: TaskIntervalConfigType.day,
+                        task_type: TaskExecuteType.once,
                     }}
                 >
                     <Form.Item
@@ -382,7 +385,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                         >
                             <Radio.Group onChange={resetTaskTypeError}>
                                 <Form.Item
-                                    label={<Radio value={TaskType.once}>单次任务</Radio>}
+                                    label={<Radio value={TaskExecuteType.once}>单次任务</Radio>}
                                     colon={false}
                                 >
                                     <Form.Item
@@ -407,7 +410,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                 >
                                                     <DatePicker
                                                         showTime={true}
-                                                        disabled={taskType !== TaskType.once}
+                                                        disabled={taskType !== TaskExecuteType.once}
                                                         disabledDate={disabledStartDate}
                                                         placeholder="立即开始"
                                                     />
@@ -417,7 +420,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                     </Form.Item>
                                 </Form.Item>
                                 <Form.Item
-                                    label={<Radio value={TaskType.interval}>定时任务</Radio>}
+                                    label={<Radio value={TaskExecuteType.interval}>定时任务</Radio>}
                                     className="form-item-inline"
                                     colon={false}
                                 >
@@ -440,7 +443,8 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                         rules={[
                                                             {
                                                                 required:
-                                                                    taskType === TaskType.interval,
+                                                                    taskType ===
+                                                                    TaskExecuteType.interval,
                                                                 message: '请选择开始时间',
                                                             },
                                                             {
@@ -451,7 +455,8 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                             disabledDate={disabledStartDate}
                                                         />
@@ -465,7 +470,8 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                         rules={[
                                                             {
                                                                 required:
-                                                                    taskType === TaskType.interval,
+                                                                    taskType ===
+                                                                    TaskExecuteType.interval,
                                                                 message: '请选择结束时间',
                                                             },
                                                             {
@@ -476,7 +482,8 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                             disabledDate={disabledEndDate}
                                                         />
@@ -486,14 +493,19 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                         label="任务间隔"
                                                         name="taskIntervalType"
                                                         className="form-required-absolute form-item-inline form-item"
-                                                        required={taskType === TaskType.interval}
+                                                        required={
+                                                            taskType === TaskExecuteType.interval
+                                                        }
                                                     >
                                                         <Radio.Group
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                         >
-                                                            <Radio value={TaskIntervalType.day}>
+                                                            <Radio
+                                                                value={TaskIntervalConfigType.day}
+                                                            >
                                                                 <div className="inline-block vertical-middle">
                                                                     <Form.Item
                                                                         noStyle={true}
@@ -523,9 +535,9 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                                             {
                                                                                                 required:
                                                                                                     taskType ===
-                                                                                                        TaskType.interval &&
+                                                                                                        TaskExecuteType.interval &&
                                                                                                     taskIntervalType ===
-                                                                                                        TaskIntervalType.day,
+                                                                                                        TaskIntervalConfigType.day,
                                                                                                 message:
                                                                                                     '请输入间隔天数',
                                                                                             },
@@ -539,9 +551,9 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                                             }
                                                                                             disabled={
                                                                                                 taskType !==
-                                                                                                    TaskType.interval ||
+                                                                                                    TaskExecuteType.interval ||
                                                                                                 taskIntervalType !==
-                                                                                                    TaskIntervalType.day
+                                                                                                    TaskIntervalConfigType.day
                                                                                             }
                                                                                         />
                                                                                     </Form.Item>
@@ -554,7 +566,11 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                     </Form.Item>
                                                                 </div>
                                                             </Radio>
-                                                            <Radio value={TaskIntervalType.second}>
+                                                            <Radio
+                                                                value={
+                                                                    TaskIntervalConfigType.second
+                                                                }
+                                                            >
                                                                 <div className="inline-block vertical-middle">
                                                                     <Form.Item
                                                                         noStyle={true}
@@ -584,9 +600,9 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                                             {
                                                                                                 required:
                                                                                                     taskType ===
-                                                                                                        TaskType.interval &&
+                                                                                                        TaskExecuteType.interval &&
                                                                                                     taskIntervalType ===
-                                                                                                        TaskIntervalType.second,
+                                                                                                        TaskIntervalConfigType.second,
                                                                                                 message:
                                                                                                     '请输入间隔秒数',
                                                                                             },
@@ -601,9 +617,9 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                                             }
                                                                                             disabled={
                                                                                                 taskType !==
-                                                                                                    TaskType.interval ||
+                                                                                                    TaskExecuteType.interval ||
                                                                                                 taskIntervalType !==
-                                                                                                    TaskIntervalType.second
+                                                                                                    TaskIntervalConfigType.second
                                                                                             }
                                                                                         />
                                                                                     </Form.Item>

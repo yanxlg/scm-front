@@ -39,3 +39,21 @@ export const TaskStatusMap: { [key: string]: string } = {
     '4': '已取消',
 };
 export const TaskStatusList = transStatusList(TaskStatusMap);
+
+//======================= Hot 任务范围 ======================//
+export enum HotTaskRange {
+    fullStack,
+    store,
+}
+
+//======================= 任务执行类型 ======================//
+export enum TaskExecuteType {
+    once = 1, // 单次任务
+    interval, // 定时任务
+}
+
+//======================= 定时任务类型 ======================//
+export enum TaskIntervalConfigType {
+    day,
+    second,
+}
