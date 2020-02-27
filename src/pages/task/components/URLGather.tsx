@@ -8,7 +8,7 @@ import { intFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { validateUrl } from '@/utils/validate';
+import { isUrl } from '@/utils/validate';
 
 declare interface IFormData {
     urls?: string;
@@ -253,7 +253,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
         }
         const urls = stringifyText(value);
         const urlList = urls.split(',');
-        if (urlList.find(url => !validateUrl(url))) {
+        if (urlList.find(url => !isUrl(url))) {
             return Promise.reject('输入的URL不合法，请检查并输入正确的URL');
         }
         return Promise.resolve();

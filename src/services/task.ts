@@ -2,7 +2,7 @@ import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
 import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
-import { validateNull } from '@/utils/validate';
+import { isNull } from '@/utils/validate';
 
 declare interface ITaskListSearch extends IFormData {
     page: number;
@@ -53,7 +53,7 @@ export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskPa
     return request.post(ApiPathEnum.AddPDDHotTask, {
         data: {
             ...params,
-            grab_count_max: validateNull(grab_count_max) ? 10000 : grab_count_max,
+            grab_count_max: isNull(grab_count_max) ? 10000 : grab_count_max,
             version: '1.0',
             platform: 'PDD',
         },

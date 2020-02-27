@@ -6,6 +6,8 @@ import { getSearchConditionOptions, IFilterParams } from '@/services/VovaGoodsSe
 import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/product.less';
 import '@/styles/card.less';
+import { transSelectValue, transStatusList } from '@/utils/transform';
+import { goodsStatusMap } from '@/enums/StatusEnum';
 
 declare interface ISearchProps {
     onSearch: Function;
@@ -68,24 +70,7 @@ const salesVolumeList = [
     },
 ];
 
-const goodsStatusList = [
-    {
-        id: 1,
-        name: '全部',
-    },
-    {
-        id: 2,
-        name: '待上架',
-    },
-    {
-        id: 3,
-        name: '已上架',
-    },
-    {
-        id: 4,
-        name: '已下架',
-    },
-];
+const goodsStatusList = transStatusList(goodsStatusMap);
 
 export default class SearchCondition extends React.PureComponent<ISearchProps, ISearchState> {
     private formRef: RefObject<FormInstance> = React.createRef();
@@ -129,7 +114,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
     @Bind
     public getFieldsValue() {
         const {
-            onshelf_time_satrt,
+            onshelf_time_start,
             onshelf_time_end,
             level_one_category,
             level_two_category,
@@ -137,10 +122,10 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
         } = this.formRef.current!.getFieldsValue();
         return {
             ...values,
-            onshelf_time_satrt: transStartDate(onshelf_time_satrt),
+            onshelf_time_start: transStartDate(onshelf_time_start),
             onshelf_time_end: transEndDate(onshelf_time_end),
-            level_one_category: level_one_category || undefined,
-            level_two_category: level_two_category || undefined,
+            level_one_category: transSelectValue(level_one_category),
+            level_two_category: transSelectValue(level_two_category),
         } as IFilterParams;
     }
 
@@ -178,7 +163,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                             {({ getFieldValue }) => {
                                 const onshelf_time_end = getFieldValue('onshelf_time_end');
                                 return (
-                                    <Form.Item name="onshelf_time_satrt" noStyle={true}>
+                                    <Form.Item name="onshelf_time_start" noStyle={true}>
                                         <DatePicker
                                             disabledDate={currentDate =>
                                                 currentDate
@@ -197,18 +182,18 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         <Form.Item
                             noStyle={true}
                             shouldUpdate={(prevValues, currentValues) =>
-                                prevValues.onshelf_time_satrt !== currentValues.onshelf_time_satrt
+                                prevValues.onshelf_time_start !== currentValues.onshelf_time_start
                             }
                         >
                             {({ getFieldValue }) => {
-                                const onshelf_time_satrt = getFieldValue('onshelf_time_satrt');
+                                const onshelf_time_start = getFieldValue('onshelf_time_start');
                                 return (
                                     <Form.Item name="onshelf_time_end" noStyle={true}>
                                         <DatePicker
                                             disabledDate={currentDate =>
                                                 currentDate
-                                                    ? onshelf_time_satrt
-                                                        ? currentDate.isBefore(onshelf_time_satrt)
+                                                    ? onshelf_time_start
+                                                        ? currentDate.isBefore(onshelf_time_start)
                                                         : false
                                                     : false
                                             }

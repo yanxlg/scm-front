@@ -7,18 +7,20 @@ import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
 import { utcToLocal } from '@/utils/date';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import { FormInstance } from 'antd/es/form';
+import { exportIOList, exportStockList, queryStockList } from '@/services/stock';
 
 declare interface ITableData {
-    good_id: number; // 中台商品ID
-    good_sku: string; // 商品子SKU
-    sku_image: string; // SKU对应图片
-    main_image: string; // 商品主图
+    product_id: number; // 中台商品ID
+    sku_info: string; // 商品子SKU
+    sku_img: string; // SKU对应图片
+    goods_img: string; // 商品主图
     size: number; // size
     color: number; // color
-    stock_amount: number; //在途库存
-    lock_amount: number; //锁定库存
-    sale_amount: string; //可销售库存
-    store_amount: number; //仓库库存
+    shipping_inventory_qy: number; //在途库存
+    lock_inventory_qy: number; //锁定库存
+    sales_inventory_qy: string; //可销售库存
+    inventory_qy: number; //仓库库存
 }
 
 declare interface IStockControlState {
@@ -30,36 +32,46 @@ declare interface IStockControlState {
     pageNumber: number;
     pageSize: number;
     total: number;
-    selectedRowKeys: string[];
+}
+
+export declare interface IStockFormData {
+    product_id?: string;
 }
 
 @BindAll()
 class StockControl extends React.PureComponent<{}, IStockControlState> {
+    private formRef: RefObject<FormInstance> = React.createRef();
     private columns: ColumnProps<ITableData>[] = [
         {
             title: '中台商品ID',
             width: '130px',
-            dataIndex: 'good_id',
+            dataIndex: 'product_id',
             align: 'center',
             render: (time: number) => utcToLocal(time),
         },
         {
             title: '商品子SKU',
             width: '130px',
-            dataIndex: 'good_sku',
+            dataIndex: 'sku_info',
             align: 'center',
         },
         {
             title: 'SKU对应图片',
             width: '130px',
-            dataIndex: 'sku_image',
+            dataIndex: 'sku_img',
             align: 'center',
+            render: (img: string) => {
+                return <img src={img} className="stock-img" alt="" />;
+            },
         },
         {
             title: '商品主图',
             width: '130px',
-            dataIndex: 'main_image',
+            dataIndex: 'goods_img',
             align: 'center',
+            render: (img: string) => {
+                return <img src={img} className="stock-img" alt="" />;
+            },
         },
         {
             title: 'size',
@@ -76,29 +88,37 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         {
             title: '在途库存',
             width: '128px',
-            dataIndex: 'stock_amount',
+            dataIndex: 'shipping_inventory_qy',
             align: 'center',
         },
         {
             title: '锁定库存',
             width: '128px',
-            dataIndex: 'lock_amount',
+            dataIndex: 'lock_inventory_qy',
             align: 'center',
         },
         {
             title: '可销售库存',
             width: '128px',
-            dataIndex: 'sale_amount',
+            dataIndex: 'sales_inventory_qy',
             align: 'center',
         },
         {
             title: '仓库库存',
             width: '128px',
-            dataIndex: 'store_amount',
+            dataIndex: 'inventory_qy',
             align: 'center',
         },
     ];
-
+    private fieldsList: IFieldItem[] = [
+        {
+            type: 'input',
+            label: '中台商品ID',
+            name: 'product_id',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+    ];
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -110,8 +130,11 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             total: 0,
             pageNumber: 1,
             pageSize: 50,
-            selectedRowKeys: [],
         };
+    }
+
+    private convertFormData() {
+        return this.formRef.current!.getFieldsValue();
     }
 
     componentDidMount(): void {
@@ -133,23 +156,30 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             pageSize = this.state.pageSize,
             searchLoading = false,
         } = params;
-        // const values = this.searchRef.current!.getFieldsValue();
-
-        setTimeout(() => {
-            this.setState({
-                dataLoading: false,
-                searchLoading: false,
-            });
-        }, 2000);
+        const values = this.convertFormData();
         this.setState({
             dataLoading: true,
             searchLoading,
-            selectedRowKeys: [],
         });
-    }
-
-    private onSelectChange(selectedRowKeys: React.Key[]) {
-        this.setState({ selectedRowKeys: selectedRowKeys as string[] });
+        queryStockList({
+            ...values,
+            page: pageNumber,
+            page_count: pageSize,
+        })
+            .then(({ data: { all_count = 0, list = [] } }) => {
+                this.setState({
+                    dataLoading: false,
+                    searchLoading: false,
+                    total: all_count,
+                    dataSet: list,
+                });
+            })
+            .catch(() => {
+                this.setState({
+                    dataLoading: false,
+                    searchLoading: false,
+                });
+            });
     }
 
     private showTotal(total: number) {
@@ -169,6 +199,18 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         });
     }
 
+    private onExport() {
+        const values = this.convertFormData();
+        this.setState({
+            exportingLoading: true,
+        });
+        exportStockList(values).finally(() => {
+            this.setState({
+                exportingLoading: false,
+            });
+        });
+    }
+
     render() {
         const {
             dataSet,
@@ -179,42 +221,28 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             pageNumber,
             pageSize,
             total,
-            selectedRowKeys,
         } = this.state;
-        const rowSelection = {
-            fixed: true,
-            columnWidth: '50px',
-            selectedRowKeys: selectedRowKeys,
-            onChange: this.onSelectChange,
-        };
         return (
             <div>
                 <div className="float-clear">
                     <JsonForm
                         labelClassName="stock-form-label"
-                        fieldList={
-                            [
-                                {
-                                    type: 'input',
-                                    label: '中台商品ID',
-                                    name: 'good_id',
-                                    formItemClassName: 'form-item',
-                                    className: 'input-default',
-                                },
-                            ] as IFieldItem[]
-                        }
+                        fieldList={this.fieldsList}
+                        formRef={this.formRef}
                         appendChildren={
                             <React.Fragment>
                                 <Button
                                     type="primary"
                                     loading={searchLoading}
                                     className="btn-group vertical-middle form-item"
+                                    onClick={this.onSearch}
                                 >
                                     查询
                                 </Button>
                                 <Button
                                     loading={exportingLoading}
                                     className="btn-group vertical-middle form-item"
+                                    onClick={this.onExport}
                                 >
                                     导出Excel表
                                 </Button>
@@ -248,7 +276,6 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                     className="form-item"
                     rowKey="in_order"
                     bordered={true}
-                    rowSelection={rowSelection}
                     columns={this.columns}
                     dataSource={dataSet}
                     pagination={false}

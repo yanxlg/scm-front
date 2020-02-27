@@ -28,7 +28,7 @@ import {
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import { intFormatter } from '@/utils/common';
 import moment, { Moment } from 'moment';
-import { validateNull } from '@/utils/validate';
+import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
@@ -333,8 +333,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     private checkMinSaleNum(rule: any, value: any) {
         const { sales_volume_max } = this.formRef.current!.getFieldsValue(['sales_volume_max']);
         if (
-            !validateNull(sales_volume_max) &&
-            !validateNull(value) &&
+            !isNull(sales_volume_max) &&
+            !isNull(value) &&
             Number(value) > Number(sales_volume_max)
         ) {
             return Promise.reject('最小销量不能大于最大销量');
@@ -345,8 +345,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     private checkMaxSaleNum(rule: any, value: any) {
         const { sales_volume_min } = this.formRef.current!.getFieldsValue(['sales_volume_min']);
         if (
-            !validateNull(sales_volume_min) &&
-            !validateNull(value) &&
+            !isNull(sales_volume_min) &&
+            !isNull(value) &&
             Number(value) < Number(sales_volume_min)
         ) {
             return Promise.reject('最大销量不能小于最小销量');
@@ -356,7 +356,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private checkMinPrice(rule: any, value: any) {
         const { price_max } = this.formRef.current!.getFieldsValue(['price_max']);
-        if (!validateNull(price_max) && !validateNull(value) && Number(value) > Number(price_max)) {
+        if (!isNull(price_max) && !isNull(value) && Number(value) > Number(price_max)) {
             return Promise.reject('最小价格不能大于最大价格');
         }
         return Promise.resolve();
@@ -364,7 +364,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private checkMaxPrice(rule: any, value: any) {
         const { price_min } = this.formRef.current!.getFieldsValue(['price_min']);
-        if (!validateNull(price_min) && !validateNull(value) && Number(value) < Number(price_min)) {
+        if (!isNull(price_min) && !isNull(value) && Number(value) < Number(price_min)) {
             return Promise.reject('最大价格不能小于最小价格');
         }
         return Promise.resolve();

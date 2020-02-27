@@ -35,10 +35,9 @@ declare interface IInOutStockState {
     pageNumber: number;
     pageSize: number;
     total: number;
-    selectedRowKeys: string[];
 }
 
-export declare interface IFormData {
+export declare interface IStockIOFormData {
     warehousing_start_time?: Moment | number;
     warehousing_end_time?: Moment | number;
     outgoing_start_time?: Moment | number;
@@ -191,7 +190,6 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             total: 0,
             pageNumber: 1,
             pageSize: 50,
-            selectedRowKeys: [],
         };
     }
 
@@ -247,18 +245,17 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
         this.setState({
             dataLoading: true,
             searchLoading,
-            selectedRowKeys: [],
         });
         queryIOList({
             ...values,
             page: pageNumber,
             page_count: pageSize,
         })
-            .then(({ data: { total, list = [] } }) => {
+            .then(({ data: { all_count = 0, list = [] } }) => {
                 this.setState({
                     dataLoading: false,
                     searchLoading: false,
-                    total,
+                    total: all_count,
                     dataSet: list,
                 });
             })
@@ -268,10 +265,6 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
                     searchLoading: false,
                 });
             });
-    }
-
-    private onSelectChange(selectedRowKeys: React.Key[]) {
-        this.setState({ selectedRowKeys: selectedRowKeys as string[] });
     }
 
     private showTotal(total: number) {
@@ -300,14 +293,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             pageNumber,
             pageSize,
             total,
-            selectedRowKeys,
         } = this.state;
-        const rowSelection = {
-            fixed: true,
-            columnWidth: '50px',
-            selectedRowKeys: selectedRowKeys,
-            onChange: this.onSelectChange,
-        };
         return (
             <div>
                 <div className="float-clear">
@@ -351,7 +337,6 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
                     className="form-item"
                     rowKey="in_order"
                     bordered={true}
-                    rowSelection={rowSelection}
                     columns={this.columns}
                     dataSource={dataSet}
                     pagination={false}

@@ -15,6 +15,7 @@ import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
+import { goodsStatusMap } from '@/enums/StatusEnum';
 
 declare interface IVoVaListState {
     dataSet: Array<IRowDataItem>;
@@ -149,52 +150,45 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
 
     private columns: ColumnProps<IRowDataItem>[] = [
         {
-            key: 'storeName',
             title: '店铺名称',
             dataIndex: 'shop_name',
             align: 'center',
             width: 130,
         },
         {
-            key: 'virtualGoodsId',
             title: '虚拟ID',
             dataIndex: 'virtual_id',
             align: 'center',
             width: 100,
         },
         {
-            key: 'goodsImg',
             title: '商品图片',
             dataIndex: 'main_image',
             align: 'center',
-            width: 100,
+            width: 120,
             render: (value: string, row: IRowDataItem, index: number) => (
-                <img className="goods-vova-img" src={value} />
+                <img className="goods-vova-img" src={value} alt="" />
             ),
         },
         {
-            key: 'commodityId',
             title: 'Commodity_ID',
             dataIndex: 'commodity_id',
             align: 'center',
-            width: 130,
+            width: 160,
         },
         {
-            key: 'productId',
             title: 'Product_ID',
             dataIndex: 'product_id',
             align: 'center',
-            width: 130,
+            width: 160,
         },
         {
-            key: 'salesVolume',
             title: '销量',
             dataIndex: 'sales_volume',
             align: 'center',
             width: 100,
         },
         {
-            key: 'productDetail',
             title: '商品详情',
             dataIndex: 'product_detail',
             align: 'center',
@@ -212,51 +206,39 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             },
         },
         {
-            key: 'evaluateVolume',
             title: '评价数量',
             dataIndex: 'evaluate_volume',
             align: 'center',
             width: 100,
         },
         {
-            key: 'averageScore',
             title: '平均评分',
             dataIndex: 'average_score',
             align: 'center',
             width: 100,
         },
         {
-            key: 'levelOneCategory',
             title: '一级类目',
             dataIndex: 'level_one_category',
             align: 'center',
-            width: 100,
+            width: 120,
         },
         {
-            key: 'levelTwoCategory',
             title: '二级类目',
             dataIndex: 'level_two_category',
             align: 'center',
-            width: 100,
+            width: 120,
         },
         {
-            key: 'productStatus',
             title: '商品状态',
             dataIndex: 'product_status',
             align: 'center',
             width: 100,
-            render: status => {
-                return status === 1
-                    ? '已上架'
-                    : status === 2
-                    ? '待上架'
-                    : status === 3
-                    ? '已下架'
-                    : '';
+            render: (status: number) => {
+                return goodsStatusMap[status];
             },
         },
         {
-            key: 'vovaProductLink',
             title: '链接',
             dataIndex: 'vova_product_link',
             align: 'center',
@@ -272,7 +254,6 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             },
         },
         {
-            key: 'operation',
             title: '操作',
             dataIndex: 'product_status',
             align: 'center',
@@ -385,7 +366,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                 </div>
                 <FitTable
                     className="form-item goods-vova-table"
-                    rowKey="scmSkuSn"
+                    rowKey="product_id"
                     bordered={true}
                     columns={this.columns}
                     dataSource={dataSet}

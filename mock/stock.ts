@@ -27,6 +27,23 @@ const list = Mock.mock({
     ],
 });
 
+const list1 = Mock.mock({
+    'data|100-500': [
+        {
+            product_id: '@increment',
+            sku_info: '@text',
+            sku_id: '@increment',
+            sku_img: '@image',
+            goods_img: '@image',
+            size: '@title',
+            color: '@title',
+            shipping_inventory_qy: '@increment',
+            lock_inventory_qy: '@increment',
+            sales_inventory_qy: '@increment',
+            inventory_qy: '@increment',
+        },
+    ],
+});
 export default {
     'POST /v1/inventory/io/list': (req: Request, res: Response) => {
         const { page, page_count } = req.body;
@@ -38,7 +55,23 @@ export default {
                     Number(page_count) * Number(page - 1),
                     Number(page_count) * Number(page),
                 ),
-                total: list.data.length,
+                all_count: list.data.length,
+                page: 1,
+                size: 100,
+            },
+        });
+    },
+    'POST /v1/inventory/list': (req: Request, res: Response) => {
+        const { page, page_count } = req.body;
+        res.status(200).send({
+            code: 200,
+            message: 'By mock.js',
+            data: {
+                list: list1.data.slice(
+                    Number(page_count) * Number(page - 1),
+                    Number(page_count) * Number(page),
+                ),
+                all_count: list1.data.length,
                 page: 1,
                 size: 100,
             },

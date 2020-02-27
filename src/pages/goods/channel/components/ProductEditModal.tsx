@@ -4,7 +4,7 @@ import '@/styles/form.less';
 import { Button, InputNumber, Modal, Form, Spin } from 'antd';
 import { numberFormatter } from '@/utils/common';
 import { Bind } from 'lodash-decorators';
-import { editGoodsDetail, queryGoodsDetail } from '@/services/vova';
+import { editGoodsDetail, queryGoodsDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
 import { CloseOutlined } from '@ant-design/icons/lib';
 
