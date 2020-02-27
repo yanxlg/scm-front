@@ -7,6 +7,7 @@ import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
 import PanePay from './components/PanePay';
 import PaneWaitShip from './components/PaneWaitShip';
+import PaneError from './components/PaneError';
 
 import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 
@@ -128,7 +129,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="4">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
                     <TabPane tab={`全部（1000）`} key="1">
                         <PaneAll />
                     </TabPane>
@@ -148,7 +149,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         仓库未发货
                     </TabPane>
                     <TabPane tab={`异常订单（1000）`} key="7">
-                        异常订单
+                        <PaneError/>
                     </TabPane>
                 </Tabs>
                 {/* <OrderFilter

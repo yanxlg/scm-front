@@ -53,6 +53,14 @@ export async function getWaitShipList(params = {}) {
     });
 }
 
+// 获取异常订单
+export async function getErrorOrderList(params = {}) {
+    return request.get(ApiPathEnum.getErrorOrderList, {
+        requestType: 'form',
+        params
+    });
+}
+
 
 export async function getOrderGoodsDetail(params: { middleground_order_id: string }) {
     return request.get(ApiPathEnum.getOrderGoodsDetail, {

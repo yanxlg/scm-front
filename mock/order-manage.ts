@@ -2,59 +2,45 @@ import { Request, Response } from 'express';
 
 const list = [
     {
-        order_confirm_time: 'order_confirm_time',
-        middleground_order_id: '111',
-        channel_order_id: 'channel_order_id',
-        commodity_id: 'commodity_id',
-        goods_detatil: 'goods_detatil',
-        channel_goods_price: 'channel_goods_price',
-        channel_shipping_fee: 'channel_shipping_fee',
-        goods_number: 'goods_number',
-        order_price: 'order_price',
-        currency_type: 'currency_type',
-        address: 'address',
-        remain_delivery_time: 'remain_delivery_time',
-        cancel_order_time: 'cancel_order_time',
-        channel_store_name: 'channel_store_name',
-        channel_order_status: 'channel_order_status',
-        channel_shipments_status: 'channel_shipments_status',
-        middleground_order_status: 'middleground_order_status',
-        purchase_order_status: 'purchase_order_status',
-        purchase_payment_status: 'purchase_payment_status',
-        purchase_delivery_status: 'purchase_delivery_status',
-        cancel_order: 'cancel_order',
-        purchase_place_order_time: 'purchase_place_order_time',
-        purchase_order_number: 'purchase_order_number',
-        purchase_porder_number: 'purchase_porder_number',
-        purchase_waybill_number: 'purchase_waybill_number'
-    },
-    {
-        order_confirm_time: 'order_confirm_time',
-        middleground_order_id: '222',
-        channel_order_id: 'channel_order_id',
-        commodity_id: 'commodity_id',
-        goods_detatil: 'goods_detatil',
-        channel_goods_price: 'channel_goods_price',
-        channel_shipping_fee: 'channel_shipping_fee',
-        goods_number: 'goods_number',
-        order_price: 'order_price',
-        currency_type: 'currency_type',
-        address: 'address',
-        remain_delivery_time: 'remain_delivery_time',
-        cancel_order_time: 'cancel_order_time',
-        channel_store_name: 'channel_store_name',
-        channel_order_status: 'channel_order_status',
-        channel_shipments_status: 'channel_shipments_status',
-        middleground_order_status: 'middleground_order_status',
-        purchase_order_status: 'purchase_order_status',
-        purchase_payment_status: 'purchase_payment_status',
-        purchase_delivery_status: 'purchase_delivery_status',
-        cancel_order: 'cancel_order',
-        purchase_place_order_time: 'purchase_place_order_time',
-        purchase_order_number: 'purchase_order_number',
-        purchase_porder_number: 'purchase_porder_number',
-        purchase_waybill_number: 'purchase_waybill_number'
-    },
+        order_confirm_time: 1582703606,                          // 订单确认时间
+        channel_order_id: "111",                                 // 渠道订单ID
+        channel_goods_price: 1,                                  // 价格
+        channel_shipping_fee: 2,                                 // 运费
+        goods_number: 3,                                         // 商品数量
+        cancel_order_time: 1582703606,                           // 取消订单时间
+        middleground_order_status: 1,                            // 中台订单状态
+        purchase_payment_status: 1,                              // 采购支付状态
+        purchase_order_time: 1582703606,                         // 采购生成时间
+        purchase_shipping_no: "purchase_shipping_no",            // 采购运单号
+        channel: 1,                                              // 销售渠道
+        middleground_p_order_id: "middleground_p_order_id",      // 中台父订单ID
+        currency_type: "currency_type",                          // 货币类型
+        remain_delivery_time: "remain_delivery_time",            // 发货剩余时间
+        channel_store_name: "channel_store_name",                // 渠道店铺名
+        purchase_delivery_status: 1,                             // 采购配送状态
+        purchase_cancel_reason: 1,                               // 采购取消原因
+        goods_amount: 8888,                                      // 商品总金额
+        channel_order_status: 1,                                 // 渠道订单状态
+        purchase_order_status: 1,                                // 采购订单状态
+        purchase_order_no: "purchase_order_no",                  // 采购订单号
+        p_order_id: "p_order_id",                                // 父订单ID
+        child_order_id: "child_order_id",                        // 子订单ID
+        middleground_c_order_id: "middleground_c_order_id",      // 中台子订单ID 
+        goods_list: [
+            {
+                commodity_id: "111111",
+                purchase_status:{
+                    status: 1, 
+                    comment: "无库存" 
+                },
+                purchase_payment_status: 1,                      // 采购支付状态
+                purchase_delivery_status: 1,                     // 采购配送状态
+                purchase_order_time: 1582703606,                 // 采购生成时间
+                purchase_order_sn: "purchase_order_sn",          // 采购订单号
+                purchase_waybill_sn: "purchase_waybill_sn",      // 采购运单号
+            }
+        ]
+    }
 ]
 
 const pendingList = [
@@ -133,7 +119,7 @@ const payList = [
     }
 ]
 
-const waitShip = [
+const waitShipList = [
     {
         purchase_time: 1582703606,
         middleground_order_id: '111',
@@ -157,6 +143,29 @@ const waitShip = [
         purchase_pay_status: 1,
         order_create_time: 1582703606,
         comment: '待支付222'
+    }
+]
+
+const errorOrderList = [
+    {
+        order_create_time: 1582703606,
+        order_confirm_time: 1582703606,
+        middleground_order_id: '111',
+        channel_order_id: '222',
+        error_type: 1,
+        error_detail: 1,
+        first_waybill_no: '333',
+        last_waybill_no: '444'
+    },
+    {
+        order_create_time: 1582703606,
+        order_confirm_time: 1582703606,
+        middleground_order_id: '555',
+        channel_order_id: '666',
+        error_type: 1,
+        error_detail: 1,
+        first_waybill_no: '777',
+        last_waybill_no: '888'
     }
 ]
 
@@ -203,7 +212,19 @@ export default {
             res.status(200).send({
                 code: 200,
                 data: {
-                    list: waitShip,
+                    list: waitShipList,
+                    total: 200
+                }
+            })
+        }, 500);
+    },
+    'GET /v1/order/list/7': (req: Request, res: Response) => {
+        // const { page, page_number } = req.params;
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                data: {
+                    list: errorOrderList,
                     total: 200
                 }
             })
