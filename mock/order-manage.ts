@@ -38,7 +38,83 @@ const list = [
                 purchase_order_time: 1582703606,                 // 采购生成时间
                 purchase_order_sn: "purchase_order_sn",          // 采购订单号
                 purchase_waybill_sn: "purchase_waybill_sn",      // 采购运单号
-            }
+            },
+            {
+                commodity_id: "222222",
+                purchase_status:{
+                    status: 1, 
+                    comment: "无库存" 
+                },
+                purchase_payment_status: 1,                      // 采购支付状态
+                purchase_delivery_status: 1,                     // 采购配送状态
+                purchase_order_time: 1582703606,                 // 采购生成时间
+                purchase_order_sn: "purchase_order_sn",          // 采购订单号
+                purchase_waybill_sn: "purchase_waybill_sn",      // 采购运单号
+            },
+        ]
+    },
+    {
+        order_confirm_time: 1582703606,                          // 订单确认时间
+        channel_order_id: "222",                                 // 渠道订单ID
+        channel_goods_price: 1,                                  // 价格
+        channel_shipping_fee: 2,                                 // 运费
+        goods_number: 3,                                         // 商品数量
+        cancel_order_time: 1582703606,                           // 取消订单时间
+        middleground_order_status: 1,                            // 中台订单状态
+        purchase_payment_status: 1,                              // 采购支付状态
+        purchase_order_time: 1582703606,                         // 采购生成时间
+        purchase_shipping_no: "purchase_shipping_no",            // 采购运单号
+        channel: 1,                                              // 销售渠道
+        middleground_p_order_id: "middleground_p_order_id",      // 中台父订单ID
+        currency_type: "currency_type",                          // 货币类型
+        remain_delivery_time: "remain_delivery_time",            // 发货剩余时间
+        channel_store_name: "channel_store_name",                // 渠道店铺名
+        purchase_delivery_status: 1,                             // 采购配送状态
+        purchase_cancel_reason: 1,                               // 采购取消原因
+        goods_amount: 8888,                                      // 商品总金额
+        channel_order_status: 1,                                 // 渠道订单状态
+        purchase_order_status: 1,                                // 采购订单状态
+        purchase_order_no: "purchase_order_no",                  // 采购订单号
+        p_order_id: "p_order_id",                                // 父订单ID
+        child_order_id: "child_order_id",                        // 子订单ID
+        middleground_c_order_id: "middleground_c_order_id",      // 中台子订单ID 
+        goods_list: [
+            {
+                commodity_id: "333333",
+                purchase_status:{
+                    status: 1, 
+                    comment: "无库存" 
+                },
+                purchase_payment_status: 1,                      // 采购支付状态
+                purchase_delivery_status: 1,                     // 采购配送状态
+                purchase_order_time: 1582703606,                 // 采购生成时间
+                purchase_order_sn: "purchase_order_sn",          // 采购订单号
+                purchase_waybill_sn: "purchase_waybill_sn",      // 采购运单号
+            },
+            {
+                commodity_id: "444444",
+                purchase_status:{
+                    status: 1, 
+                    comment: "无库存" 
+                },
+                purchase_payment_status: 1,                      // 采购支付状态
+                purchase_delivery_status: 1,                     // 采购配送状态
+                purchase_order_time: 1582703606,                 // 采购生成时间
+                purchase_order_sn: "purchase_order_sn",          // 采购订单号
+                purchase_waybill_sn: "purchase_waybill_sn",      // 采购运单号
+            },
+            {
+                commodity_id: "555555",
+                purchase_status:{
+                    status: 1, 
+                    comment: "无库存" 
+                },
+                purchase_payment_status: 1,                      // 采购支付状态
+                purchase_delivery_status: 1,                     // 采购配送状态
+                purchase_order_time: 1582703606,                 // 采购生成时间
+                purchase_order_sn: "purchase_order_sn",          // 采购订单号
+                purchase_waybill_sn: "purchase_waybill_sn",      // 采购运单号
+            },
         ]
     }
 ]
@@ -170,7 +246,7 @@ const errorOrderList = [
 ]
 
 export default {
-    'GET /v1/order/list': (req: Request, res: Response) => {
+    'GET /v1/order/list/1': (req: Request, res: Response) => {
         const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({

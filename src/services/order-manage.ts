@@ -22,8 +22,8 @@ export declare interface IFilterParams extends IFilterBaseParams {
 }
 
  
-export async function getProductOrderList(params: IFilterParams) {
-    return request.get(ApiPathEnum.getProductOrderList, {
+export async function getAllOrderList(params: IFilterParams) {
+    return request.get(ApiPathEnum.getAllOrderList, {
         requestType: 'form',
         params
     });

@@ -8,13 +8,24 @@ import TableAll from './TableAll';
 
 // import { IOrderItem } from '../index';
 import { 
-    getProductOrderList,
+    getAllOrderList,
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 
-declare interface IGoodsItem {
+export declare interface IPurchaseStatus {
+    status: number;
+    comment: string;
+}
 
+declare interface IGoodsItem {
+    goods_commodity_id: string;
+    goods_purchase_status: IPurchaseStatus;   // 采购订单状态
+    goods_purchase_payment_status: number;    // 采购支付状态
+    goods_purchase_delivery_status: number;   // 采购配送状态
+    goods_purchase_order_time: number;        // 采购生成时间
+    goods_purchase_order_sn: string;          // 采购订单号
+    goods_purchase_waybill_sn: string;        // 采购运单号
 }
 
 declare interface IBaseOrderItem {
@@ -33,11 +44,11 @@ declare interface IBaseOrderItem {
     currency_type: string;                // 货币类型
     remain_delivery_time: string;         // 发货剩余时间
     channel_store_name: string;           // 渠道店铺名
-    purchase_delivery_status: number;     // 采购配送状态
     purchase_cancel_reason: number;       // 采购取消原因
     goods_amount: number;                 // 商品总金额
     channel_order_status: number;         // 渠道订单状态
     purchase_order_status: number;        // 采购订单状态
+    purchase_delivery_status: number;     // 采购配送状态
     purchase_order_no: string;            // 采购订单号
     p_order_id: string;                   // 父订单ID
     child_order_id: string;               // 子订单ID
@@ -45,17 +56,10 @@ declare interface IBaseOrderItem {
 }
 
 export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
-
+    _rowspan?: number;
 }
 
-declare interface IPaneAllState {
-    page: number;
-    pageNumber: number;
-    total: number;
-    loading: boolean;
-    showStatus: boolean;
-    orderList: IOrderItem[]
-}
+
 
 const baseFieldList: IFieldItem[] = [
     {
@@ -232,9 +236,28 @@ const allFieldList: IFieldItem[] = [
     endFieldItem
 ];
 
+declare interface IPaneAllState {
+    page: number;
+    pageNumber: number;
+    total: number;
+    loading: boolean;
+    showStatus: boolean;
+    orderList: IOrderItem[];
+    fieldList: IFieldItem[];
+}
+
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     private formRef: RefObject<FormInstance> = React.createRef();
+
+    private initialValues = {
+        channel: 100,
+        sale_order_status: 100,
+        purchase_order_status: 100,
+        purchase_pay_status: 100,
+        purchase_shipping_status: 100,
+        purchase_cancel_res: 100
+    }
 
     constructor(props: {}) {
         super(props);
@@ -244,7 +267,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             total: 0,
             loading: false,
             showStatus: false,
-            orderList: []
+            orderList: [],
+            fieldList: defaultFieldList
         }
     }
 
@@ -270,14 +294,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         this.setState({
             loading: true
         })
-        getProductOrderList(params).then(res => {
+        getAllOrderList(params).then(res => {
             // console.log('getProductOrderList', res);
             const { total, list } = res.data;
             this.setState({
                 total,
                 page: params.page,
                 pageNumber: params.page_number,
-                orderList: list
+                orderList: this.addRowSpanData(list)
             })
         }).finally(() => {
             this.setState({
@@ -286,10 +310,35 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         })
     }
 
+    // 处理表格数据，用于合并单元格
+    private addRowSpanData(list: any[]): IOrderItem[] {
+        let ret: IOrderItem[] = [];
+        // let goodsId: string | number = 0;
+        for (let i = 0, len = list.length; i < len; i++) {
+            let {
+                goods_list,
+                ...rest
+            } = list[i];
+            goods_list.forEach((item: any, index: number) => {
+                const goodsInfo: any = {};
+                Object.keys(item).forEach(key => {
+                    goodsInfo[`goods_${key}`] = item[key];
+                })
+                let rowDataItem: IOrderItem = Object.assign({}, rest, goodsInfo);
+                if (index === 0) {
+                    rowDataItem._rowspan = goods_list.length;
+                }
+                ret.push(rowDataItem);
+            });
+        }
+        return ret;
+    }
+
     changeShowStatus = () => {
         const { showStatus } = this.state;
         this.setState({
-            showStatus: !showStatus
+            showStatus: !showStatus,
+            fieldList: showStatus ? defaultFieldList : allFieldList
         });
     }
 
@@ -298,20 +347,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         const { 
             showStatus,
             loading,
-            orderList
+            orderList,
+            fieldList
         } = this.state;
-
-        const fieldList = showStatus ? allFieldList : defaultFieldList;
-
-        const initialValues = {
-            channel: 100,
-            sale_order_status: 100,
-            purchase_order_status: 100,
-            purchase_pay_status: 100,
-            purchase_shipping_status: 100,
-            purchase_cancel_res: 100
-        }
-
+    
         return (
             <>
                 <div>
@@ -319,7 +358,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         fieldList={fieldList}
                         labelClassName="order-label"
                         formRef={this.formRef}
-                        initialValues={initialValues}
+                        initialValues={this.initialValues}
                     />
                     <div className="order-operation">
                         <Button type="primary" className="order-btn">查询</Button>
