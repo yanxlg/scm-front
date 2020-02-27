@@ -12,6 +12,7 @@ import { goodsStatusMap } from '@/enums/StatusEnum';
 declare interface ISearchProps {
     onSearch: Function;
     toggleExcelDialog: Function;
+    searchLoading: boolean;
 }
 
 declare interface SelectOptionsItem {
@@ -136,6 +137,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
 
     render() {
         const { searchOptions, categoryLoading } = this.state;
+        const { searchLoading } = this.props;
         return (
             <Card className="card-affix-top">
                 <Form
@@ -318,6 +320,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                     <Button
                         type="primary"
                         className="btn-group vertical-middle form-item"
+                        loading={searchLoading}
                         onClick={this.onSearch}
                     >
                         查询

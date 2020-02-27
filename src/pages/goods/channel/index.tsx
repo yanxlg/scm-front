@@ -60,7 +60,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         this.state = {
             dataSet: [],
             dataLoading: false,
-            searchLoading: false,
+            searchLoading: true,
             total: 0,
             pageNumber: 50,
             page: 1,
@@ -365,11 +365,20 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     }
 
     render() {
-        const { dataSet, total, excelDialogStatus, dataLoading, page, pageNumber } = this.state;
+        const {
+            dataSet,
+            total,
+            excelDialogStatus,
+            dataLoading,
+            page,
+            pageNumber,
+            searchLoading,
+        } = this.state;
         return (
             <div className="container">
                 <SearchCondition
                     ref={this.formRef}
+                    searchLoading={searchLoading}
                     onSearch={this.onSearch}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />

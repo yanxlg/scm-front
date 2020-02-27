@@ -3,6 +3,7 @@ import request from '@/utils/request';
 import { StockApiPathEnum } from '@/enums/StockApiPathEnum';
 import { IRequestPagination } from '@/interface/IGlobal';
 import { IStockFormData } from '@/pages/stock/components/StockControl';
+import Stock from '@/pages/stock';
 
 export function queryIOList(data: IStockIOFormData & IRequestPagination) {
     return request.post(StockApiPathEnum.QueryIOList, {
@@ -62,4 +63,8 @@ export function exportStockList(data: IStockFormData) {
                 link.remove();
             });
         });
+}
+
+export function syncStock() {
+    return request.post(StockApiPathEnum.SyncStock);
 }

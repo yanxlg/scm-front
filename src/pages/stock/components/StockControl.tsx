@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import { FitTable } from '@/components/FitTable';
-import { Button, Pagination } from 'antd';
+import { Button, message, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
@@ -8,7 +8,7 @@ import { BindAll } from 'lodash-decorators';
 import { utcToLocal } from '@/utils/date';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import { FormInstance } from 'antd/es/form';
-import { exportIOList, exportStockList, queryStockList } from '@/services/stock';
+import { exportIOList, exportStockList, queryStockList, syncStock } from '@/services/stock';
 
 declare interface ITableData {
     product_id: number; // 中台商品ID
@@ -211,6 +211,21 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         });
     }
 
+    private syncStock() {
+        this.setState({
+            syncLoading: true,
+        });
+        syncStock()
+            .then(() => {
+                message.success('同步成功!');
+            })
+            .finally(() => {
+                this.setState({
+                    syncLoading: false,
+                });
+            });
+    }
+
     render() {
         const {
             dataSet,
@@ -250,6 +265,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                                     loading={syncLoading}
                                     className="btn-group vertical-middle form-item"
                                     type="link"
+                                    onClick={this.syncStock}
                                 >
                                     点击同步库存
                                 </Button>
