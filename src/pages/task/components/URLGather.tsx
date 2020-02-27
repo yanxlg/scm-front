@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { TaskIntervalType, TaskStatusMap, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
 import moment, { Moment } from 'moment';
 import { intFormatter, parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { isUrl } from '@/utils/validate';
+import { TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IFormData {
     urls?: string;

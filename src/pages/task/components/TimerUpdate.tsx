@@ -3,17 +3,18 @@ import { BindAll } from 'lodash-decorators';
 import { Button, Card, DatePicker, Input, InputNumber, Radio, Form, Modal, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { TaskGoodsArea, TaskIntervalType, TaskStatusMap, TaskType } from '@/enums/ConfigEnum';
+import { TimerUpdateTaskRange, TaskIntervalType, TaskType } from '@/enums/ConfigEnum';
 import moment, { Moment } from 'moment';
 import { intFormatter } from '@/utils/common';
 import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IFormData {
     task_name: string;
-    range: TaskGoodsArea;
+    range: TimerUpdateTaskRange;
     task_start_time?: Moment;
     task_end_time?: Moment;
     taskIntervalType?: TaskIntervalType;
@@ -34,7 +35,7 @@ declare interface ITimerUpdateState {
 }
 
 declare interface ITaskDetail {
-    update_type: TaskGoodsArea;
+    update_type: TimerUpdateTaskRange;
     task_id: string;
     task_name: string;
     execute_count: string;
@@ -268,7 +269,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        range: TaskGoodsArea.AllOnShelves,
+                        range: TimerUpdateTaskRange.AllOnShelves,
                         taskIntervalType: TaskIntervalType.day,
                     }}
                 >
@@ -298,8 +299,12 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             required={true}
                         >
                             <Radio.Group>
-                                <Radio value={TaskGoodsArea.AllOnShelves}>全部已上架商品</Radio>
-                                <Radio value={TaskGoodsArea.HasSales}>有销量的已上架商品</Radio>
+                                <Radio value={TimerUpdateTaskRange.AllOnShelves}>
+                                    全部已上架商品
+                                </Radio>
+                                <Radio value={TimerUpdateTaskRange.HasSales}>
+                                    有销量的已上架商品
+                                </Radio>
                             </Radio.Group>
                         </Form.Item>
                         <Form.Item

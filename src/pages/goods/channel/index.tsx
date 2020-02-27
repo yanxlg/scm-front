@@ -15,7 +15,7 @@ import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
-import { checkLowerShelf, checkUpperShelf, goodsStatusMap } from '@/enums/StatusEnum';
+import { checkLowerShelf, checkUpperShelf, GoodsStatusMap } from '@/enums/StatusEnum';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 declare interface IVoVaListState {
@@ -262,7 +262,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             align: 'center',
             width: 100,
             render: (status: number) => {
-                return goodsStatusMap[status];
+                return GoodsStatusMap[status];
             },
         },
         {

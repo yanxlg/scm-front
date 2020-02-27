@@ -3,6 +3,7 @@ import '@/styles/config.less';
 import { Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
 import { queryTaskLog } from '@/services/task';
+import { TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface ITaskLogViewProps {
     task_Id: number;
@@ -34,6 +35,9 @@ const columns: ColumnProps<ILogItem>[] = [
         width: '126px',
         dataIndex: 'status',
         align: 'center',
+        render: task_status => {
+            return TaskStatusMap[task_status];
+        },
     },
 ];
 

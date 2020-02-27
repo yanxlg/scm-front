@@ -7,7 +7,7 @@ import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/product.less';
 import '@/styles/card.less';
 import { transSelectValue, transStatusList } from '@/utils/transform';
-import { goodsStatusMap } from '@/enums/StatusEnum';
+import { GoodsStatusList, GoodsStatusMap } from '@/enums/StatusEnum';
 
 declare interface ISearchProps {
     onSearch: Function;
@@ -70,8 +70,6 @@ const salesVolumeList = [
         name: '月销量大于1000',
     },
 ];
-
-const goodsStatusList = transStatusList(goodsStatusMap);
 
 export default class SearchCondition extends React.PureComponent<ISearchProps, ISearchState> {
     private formRef: RefObject<FormInstance> = React.createRef();
@@ -149,7 +147,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         level_one_category: '',
                         level_two_category: '',
                         sales_volume: salesVolumeList[0].id,
-                        product_status: goodsStatusList[0].id,
+                        product_status: GoodsStatusList[0].id,
                     }}
                 >
                     <Form.Item
@@ -312,7 +310,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         label={<span className="product-form-label">商品状态</span>}
                     >
                         <Select className="select-default">
-                            {goodsStatusList.map(item => (
+                            {GoodsStatusList.map(item => (
                                 <Option value={item.id}>{item.name}</Option>
                             ))}
                         </Select>

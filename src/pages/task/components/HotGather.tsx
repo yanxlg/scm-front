@@ -17,7 +17,7 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalType, TaskRange, TaskStatusMap, TaskType } from '@/enums/ConfigEnum';
+import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
 import {
     addPddHotTask,
     IPddHotTaskParams,
@@ -32,6 +32,7 @@ import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
+import { TaskStatusMap } from '@/enums/StatusEnum';
 
 export declare interface IFormData {
     range?: TaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理

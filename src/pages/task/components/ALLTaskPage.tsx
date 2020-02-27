@@ -5,16 +5,17 @@ import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
 import '@/styles/config.less';
 import '@/styles/table.less';
-import { getTaskList, deleteTasks, activeTasks, abortTasks, reActiveTasks } from '@/services/task';
+import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskRangeMap, TaskStatus, TaskStatusMap } from '@/enums/ConfigEnum';
+import { TaskStatus } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import TimerUpdate from '@/pages/task/components/TimerUpdate';
+import { TaskRangeMap, TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -81,16 +82,15 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page_number = this.state.pageNumber,
             searchLoading = false,
         } = params;
-        const values = this.searchRef.current!.getFieldsValue();
+        const { task_status, ...values } = this.searchRef.current!.getFieldsValue();
         this.setState({
             dataLoading: true,
             searchLoading,
             selectedRowKeys: [],
         });
-        const { task_status } = this.props;
 
         getTaskList({
-            task_status: task_status,
+            task_status: task_status || this.props.task_status,
             page: page,
             page_number: page_number,
             ...values,
@@ -213,7 +213,13 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 width: '200px',
                 render: (text: any, record: IDataItem) => {
                     const { task_status } = this.props;
-                    if (task_status === void 0) {
+                    if (task_status === TaskStatus.UnExecuted) {
+                        return [
+                            <Button type="link" key="1" onClick={() => this.viewTaskDetail(record)}>
+                                查看任务详情
+                            </Button>,
+                        ];
+                    } else {
                         return [
                             <Button
                                 type="link"
@@ -231,12 +237,6 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 onClick={() => this.showLogView(record.task_id)}
                             >
                                 查看日志
-                            </Button>,
-                        ];
-                    } else {
-                        return [
-                            <Button type="link" key="1" onClick={() => this.viewTaskDetail(record)}>
-                                查看任务详情
                             </Button>,
                         ];
                     }
