@@ -330,7 +330,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
 
     private getExcelData(pageNumber: number, pageSize: number) {
         const values = this.formRef.current!.getFieldsValue();
-        postVovaGoodsListExport({
+        return postVovaGoodsListExport({
             page: pageNumber,
             page_count: pageSize,
             ...values,

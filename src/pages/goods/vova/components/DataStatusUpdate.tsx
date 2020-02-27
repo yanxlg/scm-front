@@ -30,9 +30,9 @@ const DataStatusUpdate: React.FC = () => {
 
     return useMemo(() => {
         return (
-            <Card title="数据/状态更新" onClick={goTo} className="form-item">
+            <Card title="数据/状态更新" className="form-item">
                 <Spin spinning={loading} tip="Loading...">
-                    <div className="product-tags">
+                    <div className="product-tags cursor-pointer" onClick={goTo}>
                         {list.map((item: PropertyItem, index) => {
                             return (
                                 <div key={item.property + index} className="product-tag">

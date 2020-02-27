@@ -27,63 +27,63 @@ const Option = Select.Option;
 
 const salesVolumeList = [
     {
-        id: '1',
+        id: 'all',
+        name: '全部',
+    },
+    {
+        id: 'day_10',
         name: '日销量大于10',
     },
     {
-        id: '2',
+        id: 'day_50',
         name: '日销量大于50',
     },
     {
-        id: '3',
+        id: 'day_100',
         name: '日销量大于100',
     },
     {
-        id: '4',
+        id: 'week_100',
         name: '周销量大于100',
     },
     {
-        id: '5',
+        id: 'week_200',
         name: '周销量大于200',
     },
     {
-        id: '6',
+        id: 'week_500',
         name: '周销量大于500',
     },
     {
-        id: '7',
+        id: 'month_100',
         name: '月销量大于100',
     },
     {
-        id: '8',
+        id: 'month_500',
         name: '月销量大于500',
     },
     {
-        id: '9',
-        name: '月销量大于100',
-    },
-    {
-        id: '100',
-        name: 'all',
+        id: 'month_1000',
+        name: '月销量大于1000',
     },
 ];
 
 const goodsStatusList = [
     {
-        id: '1',
-        name: '已上架',
+        id: 1,
+        name: '全部',
     },
     {
-        id: '2',
+        id: 2,
         name: '待上架',
     },
     {
-        id: '3',
-        name: '已下架',
+        id: 3,
+        name: '已上架',
     },
     {
-        id: '100',
-        name: 'all',
+        id: 4,
+        name: '已下架',
     },
 ];
 
@@ -131,13 +131,22 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
         const {
             onshelf_time_satrt,
             onshelf_time_end,
+            level_one_category,
+            level_two_category,
             ...values
         } = this.formRef.current!.getFieldsValue();
         return {
             ...values,
             onshelf_time_satrt: transStartDate(onshelf_time_satrt),
             onshelf_time_end: transEndDate(onshelf_time_end),
+            level_one_category: level_one_category || undefined,
+            level_two_category: level_two_category || undefined,
         } as IFilterParams;
+    }
+
+    @Bind
+    private onFirstCategoryChange() {
+        this.formRef.current!.resetFields(['level_two_category']);
     }
 
     render() {
@@ -152,6 +161,8 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                     initialValues={{
                         level_one_category: '',
                         level_two_category: '',
+                        sales_volume: salesVolumeList[0].id,
+                        product_status: goodsStatusList[0].id,
                     }}
                 >
                     <Form.Item
@@ -212,19 +223,19 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                     <Form.Item
                         className="form-item"
                         validateTrigger={'onBlur'}
-                        name="commondity_id"
+                        name="commodity_id"
                         label={<span className="product-form-label">Commodity ID</span>}
                     >
-                        <Input className="input-default input-handler" />
+                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
                     </Form.Item>
 
                     <Form.Item
                         className="form-item"
                         validateTrigger={'onBlur'}
-                        name="virtual_goods_id"
+                        name="vova_virtual_id"
                         label={<span className="product-form-label">虚拟&emsp;ID</span>}
                     >
-                        <Input className="input-default input-handler" />
+                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
                     </Form.Item>
 
                     <Form.Item
@@ -233,7 +244,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         name="product_id"
                         label={<span className="product-form-label">Product ID</span>}
                     >
-                        <Input className="input-default input-handler" />
+                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
                     </Form.Item>
 
                     <Form.Item
@@ -254,7 +265,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         name="shop_name"
                         label={<span className="product-form-label">店&ensp;铺&ensp;名</span>}
                     >
-                        <Input className="input-default input-handler" />
+                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
                     </Form.Item>
 
                     <Form.Item
@@ -263,7 +274,11 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         name="level_one_category"
                         label={<span className="product-form-label">一级类目</span>}
                     >
-                        <Select loading={categoryLoading} className="select-default">
+                        <Select
+                            loading={categoryLoading}
+                            className="select-default"
+                            onChange={this.onFirstCategoryChange}
+                        >
                             <Option value="">全部</Option>
                             {searchOptions.map(item => (
                                 <Option value={item.id}>{item.name}</Option>
