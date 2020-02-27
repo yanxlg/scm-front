@@ -57,6 +57,7 @@ declare interface ISkuItem {
     sku_weight: number;
     sku_inventory: number;
     sku_shopping_fee: number;
+    sku_img: string;
 }
 
 declare interface IBaseData {
@@ -97,6 +98,7 @@ export declare interface IRowDataItem extends IBaseData {
     sku_shopping_fee: number;
     _rowspan?: number;
     _sales_status?: string;
+    _sku_img_list?: string[];
 }
 
 export declare interface ICategoryItem {
@@ -357,6 +359,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     const i = sku_info.findIndex(item => Number(item.sku_inventory) > 0);
                     rowDataItem._sales_status = i > -1 ? '可销售' : '不可销售';
                     rowKeys.push(rowDataItem.product_id);
+                    rowDataItem._sku_img_list = [...new Set(sku_info.map(item => item.sku_img))];
                 }
                 // rowDataItem._isCollapse = false;
                 // rowDataItem._isParent = true;

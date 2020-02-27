@@ -341,7 +341,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             first_catagory,
             second_catagory,
             third_catagory,
-            sku_image
+            sku_image,
+            _sku_img_list
         } = currentEditGoods;
 
         let secondCatagoryList: ICategoryItem[] = [];
@@ -365,6 +366,10 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 // footer={}
                 cancelButtonProps={{
                     onClick: resetGoodsData
+                }}
+                bodyStyle={{
+                    maxHeight: 600,
+                    overflow: 'auto'
                 }}
             >
                 <div className="goods-local-edit-item">
@@ -456,14 +461,18 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                             onDragOver={this.dragover}
                                             onDrop={() => this.drop(item)}
                                         />
-                                        <Popconfirm
-                                            title="确定删除吗?"
-                                            onConfirm={() => this.confirmDelete(item)}
-                                            okText="是"
-                                            cancelText="否"
-                                        >
-                                            <CloseOutlined className="close"/>
-                                        </Popconfirm>
+                                        {
+                                            _sku_img_list!.indexOf(item) === -1 ? (
+                                                <Popconfirm
+                                                    title="确定删除吗?"
+                                                    onConfirm={() => this.confirmDelete(item)}
+                                                    okText="是"
+                                                    cancelText="否"
+                                                >
+                                                    <CloseOutlined className="close"/>
+                                                </Popconfirm>
+                                            ) : null
+                                        }
                                     </div>
                                 );
                             })}
