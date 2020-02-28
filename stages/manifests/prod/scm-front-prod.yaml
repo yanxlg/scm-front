@@ -146,7 +146,7 @@ spec:
             - weight: 100
               podAffinityTerm:
                 labelSelector:
-                  matchExprodssions:
+                  matchExpressions:
                     - key: name
                       operator: In
                       values:
