@@ -37,6 +37,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
     private columns: ColumnProps<IRowDataItem>[] = [
         {
             key: 'x',
+            className: "top",
             title: () => (
                 <Checkbox
                     indeterminate={this.state.indeterminate}
@@ -66,6 +67,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'commodity_id',
+            className: "top",
             title: 'Commodity ID',
             dataIndex: 'commodity_id',
             align: 'center',
@@ -74,7 +76,15 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                 return {
                     children: (
                         <>
-                            <Link to={`/goods/local/version?id=${value}`}>{value}</Link>
+                            <div>{value}</div>
+                            <Button
+                                className="goods-local-img-edit"
+                                size="small"
+                                onClick={() => this.props.toggleEditGoodsDialog(true, row)}
+                            >
+                                编辑
+                            </Button>
+                            
                         </>
                     ),
                     props: {
@@ -85,6 +95,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'product_id',
+            className: "top",
             title: 'Product ID',
             dataIndex: 'product_id',
             align: 'center',
@@ -94,13 +105,9 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                     children: (
                         <>
                             <div className={row.hasnew_version ? 'red' : ''}>{value}</div>
-                            <Button
-                                className="goods-local-img-edit"
-                                size="small"
-                                onClick={() => this.props.toggleEditGoodsDialog(true, row)}
-                            >
-                                编辑
-                            </Button>
+                            <Link to={`/goods/local/version?id=${value}`}>
+                                <Button className="goods-local-img-edit" size="small">查看更多版本</Button>
+                            </Link>
                         </>
                     ),
                     props: {
@@ -111,6 +118,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'goods_status',
+            className: "top",
             title: '商品状态',
             dataIndex: 'goods_status',
             align: 'center',
@@ -119,10 +127,11 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'goods_img',
+            className: "top",
             title: '商品图片',
             dataIndex: 'goods_img',
             align: 'center',
-            width: 100,
+            width: 120,
             render: (value: string, row: IRowDataItem, index: number) => {
                 return {
                     children: <ZoomImage className="goods-local-img" src={row.sku_image[0]} />,
@@ -134,6 +143,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'title',
+            className: "top",
             title: '标题',
             dataIndex: 'title',
             align: 'center',
@@ -149,6 +159,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'description',
+            className: "top",
             title: '描述',
             dataIndex: 'description',
             align: 'center',
@@ -162,9 +173,9 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                 };
             },
         },
-
         {
             key: 'first_catagory',
+            className: "top",
             title: '一级类目',
             dataIndex: 'first_catagory',
             align: 'center',
@@ -180,6 +191,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'second_catagory',
+            className: "top",
             title: '二级类目',
             dataIndex: 'second_catagory',
             align: 'center',
@@ -195,6 +207,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'third_catagory',
+            className: "top",
             title: '三级类目',
             dataIndex: 'third_catagory',
             align: 'center',
@@ -210,6 +223,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'sku_number',
+            className: "top",
             title: 'sku数量',
             dataIndex: 'sku_number',
             align: 'center',
@@ -235,7 +249,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
                         {
                             value ? (
                                 Object.keys(value).map(key => (
-                                    <span key={key}>{key}: {value[key]}</span>
+                                    <div key={key}>{key}: {value[key]}</div>
                                 ))
                             ) : null
                         }
@@ -283,6 +297,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         // },
         {
             key: '_sales_status',
+            className: "top",
             title: '销售状态',
             dataIndex: '_sales_status',
             align: 'center',
@@ -291,6 +306,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'sales_volume',
+            className: "top",
             title: '销量',
             dataIndex: 'sales_volume',
             align: 'center',
@@ -299,6 +315,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'comments',
+            className: "top",
             title: '评价数量',
             dataIndex: 'comments',
             align: 'center',
@@ -307,6 +324,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'brand',
+            className: "top",
             title: '品牌',
             dataIndex: 'brand',
             align: 'center',
@@ -315,6 +333,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'store_id',
+            className: "top",
             title: '店铺 id',
             dataIndex: 'store_id',
             align: 'center',
@@ -323,6 +342,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'store_name',
+            className: "top",
             title: '店铺名称',
             dataIndex: 'store_name',
             align: 'center',
@@ -331,6 +351,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'worm_task_id',
+            className: "top",
             title: '爬虫任务ID',
             dataIndex: 'worm_task_id',
             align: 'center',
@@ -339,6 +360,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'worm_goods_id',
+            className: "top",
             title: '爬虫商品ID',
             dataIndex: 'worm_goods_id',
             align: 'center',
@@ -355,6 +377,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         // },
         {
             key: 'onsale_info',
+            className: "top",
             title: '上架渠道',
             dataIndex: 'onsale_info',
             align: 'center',
@@ -378,6 +401,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
         },
         {
             key: 'update_time',
+            className: "top",
             title: '更新时间',
             dataIndex: 'update_time',
             align: 'center',
@@ -394,6 +418,7 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
 
         {
             key: 'worm_goodsinfo_link',
+            className: "top",
             title: '链接',
             dataIndex: 'worm_goodsinfo_link',
             align: 'center',
@@ -462,6 +487,10 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
 
     render() {
         const { goodsList, searchLoading } = this.props;
+        // const totalWidth = this.columns.reduce((total, current) => {
+        //     return total + current.width;
+        // }, 0);
+        // console.log('totalWidth', totalWidth);
         return (
             <Table
                 bordered={true}
