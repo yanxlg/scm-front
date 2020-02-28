@@ -17,7 +17,7 @@ declare interface IGoodsTableProps {
     allCatagoryList: ICategoryItem[];
     toggleEditGoodsDialog(status: boolean, row: IRowDataItem): void;
     changeSelectedRowKeys(rowKeys: string[], productId?: string): void;
-    searchGoodsSale(product_id: string): void;
+    searchGoodsSale(product_id: string, saleList: ISaleItem[]): void;
 }
 
 declare interface IGoodsTableState {
@@ -360,13 +360,14 @@ class GoodsTable extends React.PureComponent<IGoodsTableProps, IGoodsTableState>
             align: 'center',
             width: 100,
             render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
+                const channelList = [...new Set(value.map(item => item.onsale_channel))];
                 return {
                     children: value ? (
                         <Button
                             type="link"
-                            onClick={() => this.props.searchGoodsSale(row.product_id)}
+                            onClick={() => this.props.searchGoodsSale(row.product_id, value)}
                         >
-                            {value.map((item: ISaleItem) => item.onsale_channel).join('、')}
+                            {channelList.join('、')}
                         </Button>
                     ) : null,
                     props: {

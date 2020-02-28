@@ -16,7 +16,6 @@ import {
     postGoodsExports,
     postGoodsOnsale,
     getGoodsDelete,
-    getGoodsSales,
     IFilterParams,
     getCatagoryList
 } from '@/services/goods';
@@ -41,6 +40,7 @@ declare interface ITranslateItem {
 export declare interface ISaleItem {
     onsale_channel: string;
     onsale_time: number;
+    status_label: string;
 }
 
 export declare interface ISkuStyle {
@@ -390,24 +390,17 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 查询商品上下架记录
-    searchGoodsSale = (product_id: string) => {
-        getGoodsSales({
-            product_id: product_id,
-        })
-            .then(res => {
-                // console.log('product_id', product_id, res);
-                this.toggleShelvesDialog(true);
-                this.setState({
-                    // (item, index, list)
-                    saleStatusList: res.data.map(
-                        (item: ISaleStatausItem, index: number, list: ISaleStatausItem[]) => {
-                            item.order = list.length - index;
-                            return item;
-                        },
-                    ),
-                });
+    searchGoodsSale = (product_id: string, saleList: ISaleItem[]) => {
+        this.toggleShelvesDialog(true);
+        this.setState({
+            saleStatusList: saleList.map((item: ISaleItem, index: number): ISaleStatausItem => {
+                return {
+                    ...item,
+                    product_id: product_id,
+                    order: index + 1
+                }
             })
-            .catch(err => {});
+        })
     };
 
     // 编辑图片弹框
