@@ -3,7 +3,8 @@ import { Checkbox, DatePicker, Form, Input, InputNumber, Select } from 'antd';
 import { FormProps } from 'antd/lib/form/Form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance } from 'antd/es/form';
-import { intFormatter, numberFormatter } from '@/utils/common';
+import NumberInput from '@/components/NumberInput';
+import IntegerInput from '@/components/IntegerInput';
 
 const { Option } = Select;
 
@@ -59,12 +60,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <InputNumber
-                    min={0}
-                    formatter={numberFormatter}
-                    placeholder={placeholder}
-                    className={className}
-                />
+                <NumberInput min={0} placeholder={placeholder} className={className} />
             </Form.Item>
         );
     };
@@ -77,12 +73,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <InputNumber
-                    min={0}
-                    formatter={intFormatter}
-                    placeholder={placeholder}
-                    className={className}
-                />
+                <IntegerInput min={0} placeholder={placeholder} className={className} />
             </Form.Item>
         );
     };

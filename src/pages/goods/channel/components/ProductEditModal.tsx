@@ -1,12 +1,12 @@
 import React, { RefObject } from 'react';
 import '@/styles/product.less';
 import '@/styles/form.less';
-import { Button, InputNumber, Modal, Form, Spin } from 'antd';
-import { numberFormatter } from '@/utils/common';
+import { Button, Modal, Form, Spin } from 'antd';
 import { Bind } from 'lodash-decorators';
 import { editGoodsDetail, queryGoodsDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
-import { CloseOutlined } from '@ant-design/icons/lib';
+import NumberInput from '@/components/NumberInput';
+import IntegerInput from '@/components/IntegerInput';
 
 declare interface ISku {
     sku_name: string;
@@ -224,10 +224,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                         name={['sku_list', index, 'price']}
                                         label="价格"
                                     >
-                                        <InputNumber
+                                        <NumberInput
                                             min={0}
                                             className="input-small input-handler"
-                                            formatter={numberFormatter}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -236,10 +235,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                         name={['sku_list', index, 'shipping_fee']}
                                         label="运费"
                                     >
-                                        <InputNumber
+                                        <NumberInput
                                             min={0}
                                             className="input-small input-handler"
-                                            formatter={numberFormatter}
                                         />
                                     </Form.Item>
                                     <Form.Item
@@ -248,10 +246,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                         name={['sku_list', index, 'storage']}
                                         label="库存"
                                     >
-                                        <InputNumber
+                                        <IntegerInput
                                             min={0}
                                             className="input-small input-handler"
-                                            formatter={numberFormatter}
                                         />
                                     </Form.Item>
                                 </div>

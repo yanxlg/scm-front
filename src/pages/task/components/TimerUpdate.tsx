@@ -1,20 +1,19 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import { Button, Card, DatePicker, Input, InputNumber, Radio, Form, Modal, Spin } from 'antd';
+import { Button, Card, DatePicker, Input, Radio, Form, Modal, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import moment, { Moment } from 'moment';
-import { intFormatter } from '@/utils/common';
 import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import {
-    TaskExecuteType,
     TaskIntervalConfigType,
     TaskStatusMap,
     TimerUpdateTaskRangeType,
 } from '@/enums/StatusEnum';
+import IntegerInput from '@/components/IntegerInput';
 
 declare interface IFormData {
     task_name: string;
@@ -384,10 +383,9 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 },
                                                             ]}
                                                         >
-                                                            <InputNumber
+                                                            <IntegerInput
                                                                 min={0}
                                                                 className="input-small input-handler"
-                                                                formatter={intFormatter}
                                                                 disabled={
                                                                     taskIntervalType !==
                                                                     TaskIntervalConfigType.day
@@ -430,10 +428,9 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                             ]}
                                                             className="inline-block"
                                                         >
-                                                            <InputNumber
+                                                            <IntegerInput
                                                                 min={0}
                                                                 className="input-small input-handler"
-                                                                formatter={intFormatter}
                                                                 disabled={
                                                                     taskIntervalType !==
                                                                     TaskIntervalConfigType.second

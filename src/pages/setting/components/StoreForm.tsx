@@ -1,13 +1,13 @@
 import React, { RefObject } from 'react';
 import { Bind } from 'lodash-decorators';
-import { Button, Card, Divider, Input, InputNumber, Modal, Form } from 'antd';
+import { Button, Card, Divider, Input, Modal, Form } from 'antd';
 import '@/styles/setting.less';
 import '@/styles/form.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { addPddHotTask } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import { intFormatter } from '@/utils/common';
 import { FormInstance } from 'antd/es/form';
+import IntegerInput from '@/components/IntegerInput';
 
 declare interface IStore {
     name?: string;
@@ -165,11 +165,7 @@ class StoreForm extends React.PureComponent<IStoreFormProps, IStoreFormState> {
                                 name={`list[${index}].id`}
                                 label="店铺&emsp;ID"
                             >
-                                <InputNumber
-                                    min={0}
-                                    className="input-large input-handler"
-                                    formatter={intFormatter}
-                                />
+                                <IntegerInput min={0} className="input-large input-handler" />
                             </Form.Item>
                             <Form.Item
                                 className="block form-item"

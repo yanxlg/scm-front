@@ -3,12 +3,13 @@ import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin 
 import '@/styles/config.less';
 import '@/styles/form.less';
 import moment, { Moment } from 'moment';
-import { intFormatter, parseText, stringifyText } from '@/utils/common';
+import { parseText, stringifyText } from '@/utils/common';
 import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { isUrl } from '@/utils/validate';
 import { TaskExecuteType, TaskIntervalConfigType, TaskStatusMap } from '@/enums/StatusEnum';
+import IntegerInput from '@/components/IntegerInput';
 
 declare interface IFormData {
     urls?: string;
@@ -543,12 +544,9 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                                             },
                                                                                         ]}
                                                                                     >
-                                                                                        <InputNumber
+                                                                                        <IntegerInput
                                                                                             min={0}
                                                                                             className="input-small input-handler"
-                                                                                            formatter={
-                                                                                                intFormatter
-                                                                                            }
                                                                                             disabled={
                                                                                                 taskType !==
                                                                                                     TaskExecuteType.interval ||
@@ -609,12 +607,9 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                                                                                         ]}
                                                                                         className="inline-block"
                                                                                     >
-                                                                                        <InputNumber
+                                                                                        <IntegerInput
                                                                                             min={0}
                                                                                             className="input-small input-handler"
-                                                                                            formatter={
-                                                                                                intFormatter
-                                                                                            }
                                                                                             disabled={
                                                                                                 taskType !==
                                                                                                     TaskExecuteType.interval ||

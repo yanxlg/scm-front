@@ -25,7 +25,6 @@ import {
     queryTaskDetail,
 } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import { intFormatter } from '@/utils/common';
 import moment, { Moment } from 'moment';
 import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
@@ -38,6 +37,7 @@ import {
     TaskIntervalConfigType,
     HotTaskFilterType,
 } from '@/enums/StatusEnum';
+import IntegerInput from '@/components/IntegerInput';
 
 export declare interface IFormData {
     range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -601,11 +601,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         },
                                                     ]}
                                                 >
-                                                    <InputNumber
+                                                    <IntegerInput
                                                         min={0}
                                                         placeholder={'请输入'}
                                                         className="input-default input-handler"
-                                                        formatter={intFormatter}
                                                         disabled={range !== HotTaskRange.store}
                                                     />
                                                 </Form.Item>
@@ -921,11 +920,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={intFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                                 <span className="config-colon">-</span>
                                 <Form.Item
@@ -938,11 +933,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={intFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                             </Form.Item>
                             <Form.Item
@@ -959,11 +950,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={intFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                                 <span className="config-colon">-</span>
                                 <Form.Item
@@ -976,11 +963,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={intFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                             </Form.Item>
                         </div>
@@ -991,11 +974,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                 label="爬取页数"
                                 className="form-item-horizon form-item-inline"
                             >
-                                <InputNumber
+                                <IntegerInput
                                     min={0}
                                     className="config-input-pages input-handler"
-                                    formatter={intFormatter}
-                                    width={200}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -1014,11 +995,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     </span>
                                 }
                             >
-                                <InputNumber
+                                <IntegerInput
                                     placeholder="默认值：10000"
                                     min={0}
                                     className="config-input-count input-handler"
-                                    formatter={intFormatter}
                                 />
                             </Form.Item>
                         </div>
@@ -1192,12 +1172,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             },
                                                                                         ]}
                                                                                     >
-                                                                                        <InputNumber
+                                                                                        <IntegerInput
                                                                                             min={0}
                                                                                             className="input-small input-handler"
-                                                                                            formatter={
-                                                                                                intFormatter
-                                                                                            }
                                                                                             disabled={
                                                                                                 taskType !==
                                                                                                     TaskExecuteType.interval ||
@@ -1258,12 +1235,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                         ]}
                                                                                         className="inline-block"
                                                                                     >
-                                                                                        <InputNumber
+                                                                                        <IntegerInput
                                                                                             min={0}
                                                                                             className="input-small input-handler"
-                                                                                            formatter={
-                                                                                                intFormatter
-                                                                                            }
                                                                                             disabled={
                                                                                                 taskType !==
                                                                                                     TaskExecuteType.interval ||
