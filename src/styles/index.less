@@ -121,6 +121,12 @@
     &-align{
         align-items: center;
     }
+    &-inline{
+        display: inline-flex;
+    }
+    &-wrap{
+        flex-wrap: wrap;
+    }
 }
 
 
@@ -140,9 +146,11 @@
     }
     &-clear{
         clear: both;
+        overflow: hidden;
         &:after{
             content: "";
             clear: both;
+            display: inline-block;
         }
     }
 }
@@ -170,4 +178,25 @@
     }
 }
 
-// 图片放大
+body{
+    min-width: 500px;
+}
+
+
+.menu{
+    &-icon{
+        margin-right: 10px;
+    }
+}
+
+.text{
+    &-center{
+        text-align: center;
+    }
+}
+
+.cursor{
+    &-pointer{
+        cursor: pointer;
+    }
+}
