@@ -4,12 +4,16 @@ import { CheckboxChangeEvent } from 'antd/lib/checkbox/Checkbox';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 
 declare interface IOptionalColumnProps {
-
+    // 表格默认展示的列这里不展示
+    defaultColList: string[];
+    selectedColList: string[];
+    changeSelectedColList(list: string[]):void;
 }
 
 declare interface IOptionalColumnState {
     indeterminate: boolean;
     checkAll: boolean;
+    
 }
 
 const allColumnList = [

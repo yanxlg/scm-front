@@ -236,6 +236,26 @@ const allFieldList: IFieldItem[] = [
     endFieldItem
 ];
 
+// 未勾选仅展示父订单ID
+const defaultAllColList = [
+    'order_confirm_time',
+    'middleground_c_order_id',
+    'goods_detatil',
+    'product_id',
+    'channel_order_status',
+    'channel_delivery_status',
+    'middleground_order_status',
+    'goods_commodity_id',
+    'goods_purchase_status',
+    'goods_purchase_payment_status',
+    'goods_purchase_delivery_status',
+    'goods_purchase_order_time',
+    'goods_purchase_order_sn',
+    'goods_purchase_waybill_sn'
+]
+// 勾选仅展示
+const defaultParentColList = []
+
 declare interface IPaneAllState {
     page: number;
     pageNumber: number;
@@ -244,6 +264,7 @@ declare interface IPaneAllState {
     showStatus: boolean;
     orderList: IOrderItem[];
     fieldList: IFieldItem[];
+    selectedColList: string[];
 }
 
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
@@ -268,7 +289,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             loading: false,
             showStatus: false,
             orderList: [],
-            fieldList: defaultFieldList
+            fieldList: defaultFieldList,
+            selectedColList: []
         }
     }
 
@@ -342,13 +364,20 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
     }
 
+    changeSelectedColList = (list: string[]) => {
+        this.setState({
+            selectedColList: []
+        });
+    }
+
     render() {
 
         const { 
             showStatus,
             loading,
             orderList,
-            fieldList
+            fieldList,
+            selectedColList
         } = this.state;
     
         return (
@@ -373,7 +402,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         >{ showStatus ? '收起' : '展示'}搜索条件</Button>
                         <Button type="default" className="order-btn">展示字段设置</Button>
                     </div>
-                    <OptionalColumn />
+                    <OptionalColumn 
+                        selectedColList={selectedColList}
+                        changeSelectedColList={this.changeSelectedColList}
+                    />
                     <TableAll
                         loading={loading}
                         orderList={orderList}

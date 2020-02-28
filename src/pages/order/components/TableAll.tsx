@@ -65,7 +65,6 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
             width: 120,
             render: this.mergeCell
         },
-        
         {
             key: 'channel_order_status',
             title: '渠道订单状态',
