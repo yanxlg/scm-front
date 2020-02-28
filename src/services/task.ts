@@ -2,7 +2,8 @@ import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
 import { isNull } from '@/utils/validate';
-import { TaskExecuteType } from '@/enums/StatusEnum';
+import { AutoPurchaseTaskType, TaskExecuteType } from '@/enums/StatusEnum';
+import { transStartDate } from '@/utils/date';
 
 declare interface ITaskListSearch extends IFormData {
     page: number;
@@ -141,6 +142,24 @@ export async function queryTaskLog(task_id: number) {
     return request.get(ApiPathEnum.QueryTaskLog, {
         params: {
             task_id,
+        },
+    });
+}
+
+declare interface IAutoPurchaseTaskData {
+    task_name: string;
+    type: AutoPurchaseTaskType;
+    task_start_time?: number;
+    task_end_time?: number;
+    purchase_times: string[];
+}
+
+export async function addAutoPurchaseTask(data: IAutoPurchaseTaskData) {
+    return request.post(ApiPathEnum.ADDAutoPurchaseTask, {
+        data: {
+            ...data,
+            version: '1.0',
+            platform: 'PDD',
         },
     });
 }

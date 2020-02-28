@@ -1,27 +1,23 @@
-import React, { RefObject, useCallback } from 'react';
+import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import { Button, Card, DatePicker, Input, Radio, Form, Modal, Spin, TimePicker } from 'antd';
+import { Button, Card, DatePicker, Form, Input, Modal, Radio, Spin, TimePicker } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
-import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
+import { addAutoPurchaseTask, addPDDTimerUpdateTask } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import {
-    AutoPurchaseTaskType,
-    TaskExecuteType,
-    TaskIntervalConfigType,
-    TaskStatusMap,
-    TimerUpdateTaskRangeType,
-} from '@/enums/StatusEnum';
+import { AutoPurchaseTaskType, TaskStatusMap, TimerUpdateTaskRangeType } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
+import { transStartDate } from '@/utils/date';
 
 declare interface IFormData {
     task_name: string;
-    times: Array<Moment | undefined>;
+    purchase_times: Array<Moment | undefined>;
     type: AutoPurchaseTaskType;
+    dateRange?: [Moment, Moment];
 }
 
 declare interface IAutoPurchaseTaskProps {
@@ -49,9 +45,14 @@ declare interface ITaskDetail {
     fail: number;
 }
 
+function disabledDate(current: Moment) {
+    return current && current < moment().startOf('day');
+}
+
 @BindAll()
 class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAutoPurchaseTaskState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+
     constructor(props: IAutoPurchaseTaskProps) {
         super(props);
         this.state = {
@@ -59,60 +60,42 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
             queryLoading: props.taskId !== void 0,
         };
     }
+
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
-                const initValues = this.convertDetail(task_detail_info);
-                const { success, fail, status } = initValues;
-                this.formRef.current!.setFieldsValue({
-                    ...initValues,
-                });
-                this.setState({
-                    queryLoading: false,
-                    status: status,
-                    successTimes: success,
-                    failTimes: fail,
-                });
-            });
+            // queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
+            //     const initValues = this.convertDetail(task_detail_info);
+            //     const { success, fail, status } = initValues;
+            //     this.formRef.current!.setFieldsValue({
+            //         ...initValues,
+            //     });
+            //     this.setState({
+            //         queryLoading: false,
+            //         status: status,
+            //         successTimes: success,
+            //         failTimes: fail,
+            //     });
+            // });
         }
     }
 
-    private convertDetail(info: ITaskDetail) {
-        const { update_type, task_end_time, task_start_time, time_interval, ...extra } = info;
-        const isDay = time_interval && time_interval % 86400 === 0;
-        return {
-            range: update_type,
-            taskIntervalType: time_interval
-                ? isDay
-                    ? TaskIntervalConfigType.day
-                    : TaskIntervalConfigType.second
-                : TaskIntervalConfigType.day,
-            task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
-            task_end_time: task_end_time ? moment(task_end_time * 1000) : undefined,
-            day: isDay ? time_interval! / 86400 : undefined,
-            second: time_interval && !isDay ? time_interval : undefined,
-            ...extra,
-        };
-    }
-
     private convertFormData(values: IFormData) {
-        const {
-            range,
-            day = 0,
-            second,
-            taskIntervalType,
-            task_end_time,
-            task_start_time,
-            task_name,
-        } = values;
+        const { task_name, purchase_times, type, dateRange } = values;
         return {
             task_name,
-            range,
-            task_start_time: task_start_time?.unix() ?? undefined,
-            task_end_time: task_end_time?.unix() ?? undefined,
-            task_interval_seconds:
-                taskIntervalType === TaskIntervalConfigType.second ? second : day * 60 * 60 * 24,
+            type,
+            task_start_time:
+                type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![0]) : undefined,
+            task_end_time:
+                type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![1]) : undefined,
+            purchase_times: purchase_times
+                .filter(date => date)
+                .map(date =>
+                    date!.format(
+                        type === AutoPurchaseTaskType.EveryDay ? 'hh:mm:ss' : 'YYYY-MM-DD HH:mm:ss',
+                    ),
+                ),
         };
     }
 
@@ -124,10 +107,10 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                 this.setState({
                     createLoading: true,
                 });
-                addPDDTimerUpdateTask(params)
+                addAutoPurchaseTask(params)
                     .then(({ data: { task_id = -1 } = {} } = {}) => {
                         this.formRef.current!.resetFields();
-                        Modal.info({
+                        /*Modal.info({
                             content: (
                                 <GatherSuccessModal
                                     taskId={task_id}
@@ -145,7 +128,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                             className: 'modal-empty',
                             icon: null,
                             maskClosable: true,
-                        });
+                        });*/
                     })
                     .catch(() => {
                         Modal.info({
@@ -186,34 +169,6 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
             });
     }
 
-    private checkStartDate(type: any, value: Moment) {
-        if (!value) {
-            return Promise.resolve();
-        }
-        const endDate = this.formRef.current!.getFieldValue('task_end_time');
-        const now = moment();
-        if (value.isAfter(now)) {
-            if (endDate && value.isSameOrAfter(endDate)) {
-                return Promise.reject('开始时间不能晚于结束时间');
-            }
-            return Promise.resolve();
-        } else {
-            return Promise.reject('开始时间不能早于当前时间');
-        }
-    }
-    private disabledStartDate(startTime: Moment | null) {
-        const endTime = this.formRef.current!.getFieldValue('task_end_time');
-        if (!startTime) {
-            return false;
-        }
-        const startValue = startTime.valueOf();
-        const currentDay = moment().startOf('day');
-        if (!endTime) {
-            return startTime < currentDay;
-        }
-        return startValue > endTime.clone().endOf('day') || startTime < currentDay;
-    }
-
     private checkDate(type: any, value: Moment) {
         if (!value) {
             return Promise.resolve();
@@ -222,9 +177,32 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
         if (value.isAfter(now)) {
             return Promise.resolve();
         } else {
-            return Promise.reject('开始时间不能早于当前时间');
+            return Promise.reject('任务时间不能早于当前时间');
         }
     }
+
+    private checkTime(type: any, value: Moment) {
+        const dateRange = this.formRef.current!.getFieldValue('dateRange');
+        if (dateRange && value) {
+            const [startDate] = dateRange;
+            const nowDate = moment();
+            let clone = startDate.clone();
+            clone
+                .hour(value.hour())
+                .minute(value.minute())
+                .second(value.second())
+                .millisecond(0);
+            if (clone.isSameOrBefore(nowDate)) {
+                return Promise.reject('任务时间不能早于当前时间');
+            }
+        }
+        return Promise.resolve();
+    }
+
+    private onTypeChange() {
+        this.formRef.current!.resetFields(['purchase_times', 'dateRange']);
+    }
+
     render() {
         const { createLoading, queryLoading, status, successTimes, failTimes } = this.state;
         const { taskId } = this.props;
@@ -249,6 +227,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     initialValues={{
                         type: AutoPurchaseTaskType.EveryDay,
                         purchase_times: [undefined],
+                        dateRange: null,
                     }}
                 >
                     <Form.Item
@@ -270,87 +249,141 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                         className="form-item"
                         title={<span className="form-required">定时采购时间：</span>}
                     >
-                        <Form.List name="purchase_times">
-                            {(fields, { add, remove }) => {
-                                return fields.map((field, index) => {
-                                    if (index === 0) {
-                                        return (
-                                            <Form.Item
-                                                key={field.key}
-                                                label={`采购时间${index + 1}`}
-                                                className={`form-item-inline form-item-horizon ${
-                                                    index > 0 ? 'form-item task-require' : ''
-                                                }`}
-                                            >
+                        <Form.Item
+                            validateTrigger={'onBlur'}
+                            className="form-item-inline"
+                            name="type"
+                            label="任务周期"
+                            required={true}
+                        >
+                            <Radio.Group onChange={this.onTypeChange}>
+                                <Form.Item className="form-item-inline form-item-horizon vertical-middle">
+                                    <Radio value={AutoPurchaseTaskType.EveryDay}>每天</Radio>
+                                    <Form.Item
+                                        noStyle={true}
+                                        shouldUpdate={(prevValues, curValues) =>
+                                            prevValues.type !== curValues.type
+                                        }
+                                    >
+                                        {({ getFieldValue }) => {
+                                            const type = getFieldValue('type');
+                                            const disabled = type === AutoPurchaseTaskType.OnlyOnce;
+                                            return (
                                                 <Form.Item
-                                                    {...field}
-                                                    label={`采购时间${index + 1}`}
-                                                    validateTrigger={['onChange']}
-                                                    noStyle={true}
+                                                    colon={false}
+                                                    className="form-item-inline form-item-horizon vertical-middle"
+                                                    name="dateRange"
                                                     rules={[
                                                         {
-                                                            required: index === 0,
-                                                            message: '请选择时间',
-                                                        },
-                                                        {
-                                                            validator: this.checkDate,
+                                                            required: !disabled,
+                                                            message: '请选择任务执行时间段',
                                                         },
                                                     ]}
                                                 >
-                                                    <TimePicker
-                                                        placeholder="请选择时间"
-                                                        disabledDate={this.disabledStartDate}
+                                                    <DatePicker.RangePicker
+                                                        allowEmpty={[disabled, disabled]}
+                                                        disabled={[disabled, disabled]}
+                                                        disabledDate={disabledDate}
                                                     />
                                                 </Form.Item>
+                                            );
+                                        }}
+                                    </Form.Item>
+                                </Form.Item>
+                                <Radio
+                                    className="vertical-middle"
+                                    value={AutoPurchaseTaskType.OnlyOnce}
+                                >
+                                    只执行一次
+                                </Radio>
+                            </Radio.Group>
+                        </Form.Item>
+                        <Form.List name="purchase_times">
+                            {(fields, { add, remove }) => {
+                                return fields.map((field, index) => {
+                                    return (
+                                        <Form.Item
+                                            key={field.key}
+                                            label={`采购时间${index + 1}`}
+                                            className={`form-item-inline form-item ${
+                                                index > 0 ? 'task-require' : 'form-item-horizon'
+                                            }`}
+                                            required={index === 0}
+                                        >
+                                            <Form.Item
+                                                noStyle={true}
+                                                shouldUpdate={(prevValues, curValues) =>
+                                                    prevValues.type !== curValues.type
+                                                }
+                                            >
+                                                {({ getFieldValue }) => {
+                                                    const type = getFieldValue('type');
+                                                    if (type === AutoPurchaseTaskType.EveryDay) {
+                                                        return (
+                                                            <Form.Item
+                                                                {...field}
+                                                                label={`采购时间${index + 1}`}
+                                                                validateTrigger={['onChange']}
+                                                                noStyle={true}
+                                                                rules={[
+                                                                    {
+                                                                        required: index === 0,
+                                                                        message: '请选择时间',
+                                                                    },
+                                                                    {
+                                                                        validator: this.checkTime,
+                                                                    },
+                                                                ]}
+                                                            >
+                                                                <TimePicker
+                                                                    className="task-picker-time"
+                                                                    placeholder="请选择时间"
+                                                                />
+                                                            </Form.Item>
+                                                        );
+                                                    } else {
+                                                        return (
+                                                            <Form.Item
+                                                                {...field}
+                                                                label={`采购时间${index + 1}`}
+                                                                validateTrigger={['onChange']}
+                                                                noStyle={true}
+                                                                rules={[
+                                                                    {
+                                                                        required: index === 0,
+                                                                        message: '请选择时间',
+                                                                    },
+                                                                    {
+                                                                        validator: this.checkDate,
+                                                                    },
+                                                                ]}
+                                                            >
+                                                                <DatePicker
+                                                                    placeholder="请选择时间"
+                                                                    className="task-picker-time"
+                                                                    showTime={true}
+                                                                    disabledDate={disabledDate}
+                                                                />
+                                                            </Form.Item>
+                                                        );
+                                                    }
+                                                }}
+                                            </Form.Item>
+                                            {index === 0 ? (
                                                 <PlusCircleOutlined
                                                     className="task-add"
                                                     onClick={() => {
                                                         add();
                                                     }}
                                                 />
-                                            </Form.Item>
-                                        );
-                                    }
-                                    return (
-                                        <Form.Item
-                                            key={field.key}
-                                            {...field}
-                                            label={`采购时间${index + 1}`}
-                                            validateTrigger={['onChange']}
-                                            className={`form-item-inline ${
-                                                index > 0 ? 'form-item task-require' : ''
-                                            }`}
-                                            rules={[
-                                                {
-                                                    required: index === 0,
-                                                    message: '请选择时间',
-                                                },
-                                                {
-                                                    validator: this.checkDate,
-                                                },
-                                            ]}
-                                        >
-                                            <TimePicker
-                                                placeholder="请选择时间"
-                                                disabledDate={this.disabledStartDate}
-                                            />
+                                            ) : (
+                                                <span />
+                                            )}
                                         </Form.Item>
                                     );
                                 });
                             }}
                         </Form.List>
-                        <Form.Item
-                            validateTrigger={'onBlur'}
-                            className="form-item form-item-inline"
-                            name="type"
-                            label="任务周期"
-                            required={true}
-                        >
-                            <Radio.Group>
-                                <Radio value={AutoPurchaseTaskType.EveryDay}>每天</Radio>
-                                <Radio value={AutoPurchaseTaskType.OnlyOnce}>只执行一次</Radio>
-                            </Radio.Group>
-                        </Form.Item>
                     </Card>
                     <div className="form-item">
                         <Button
