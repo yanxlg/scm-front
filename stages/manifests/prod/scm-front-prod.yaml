@@ -45,6 +45,10 @@ data:
             add_header Content-Type text/plain;
         }
         location / {
+            if ($cookie_jsessionid = "")
+            {
+                return 302 https://cas.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
+            }
             try_files $uri $uri/ /index.html;
         }
         location /auth/{
@@ -79,7 +83,7 @@ spec:
   selector:
     matchLabels:
       name: trigram-scm-front-page-prod
-  replicas: 1
+  replicas: 3
   strategy:
     rollingUpdate:
       maxSurge: 25%
