@@ -31,14 +31,24 @@ export const TaskRangeMap: { [key: number]: string } = {
 export const TaskRangeList = transStatusList(TaskRangeMap);
 
 //======================= 任务状态 ======================//
+
 export const TaskStatusMap: { [key: string]: string } = {
-    '0': '未执行',
-    '1': '执行中',
-    '2': '已执行',
-    '3': '执行失败',
-    '4': '已取消',
+    0: '未执行',
+    1: '执行中',
+    2: '已执行',
+    3: '执行失败',
+    4: '已取消',
 };
+
 export const TaskStatusList = transStatusList(TaskStatusMap);
+
+export enum TaskStatus {
+    UnExecuted, // 未执行
+    Executing, // 执行中
+    Executed, // 已执行
+    Failed, // 执行失败
+    Canceled, // 已取消
+}
 
 //======================= Hot 任务范围 ======================//
 export enum HotTaskRange {
@@ -56,4 +66,10 @@ export enum TaskExecuteType {
 export enum TaskIntervalConfigType {
     day,
     second,
+}
+
+//======================= 定时更新任务商品范围 ======================//
+export enum TimerUpdateTaskRangeType {
+    AllOnShelves = 2,
+    HasSales,
 }

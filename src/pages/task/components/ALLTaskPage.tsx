@@ -8,14 +8,13 @@ import '@/styles/table.less';
 import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskStatus } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import TimerUpdate from '@/pages/task/components/TimerUpdate';
-import { TaskRangeMap, TaskStatusMap } from '@/enums/StatusEnum';
+import { TaskRangeMap, TaskStatus, TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -90,7 +89,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         });
 
         getTaskList({
-            task_status: task_status || this.props.task_status,
+            task_status: task_status ?? this.props.task_status,
             page: page,
             page_number: page_number,
             ...values,

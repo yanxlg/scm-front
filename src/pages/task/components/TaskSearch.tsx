@@ -2,13 +2,12 @@ import React, { RefObject } from 'react';
 import { DatePicker, Input, Select, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/task.less';
-import { TaskStatus } from '@/enums/ConfigEnum';
 import { Bind } from 'lodash-decorators';
 import { Moment } from 'moment';
 import { transEndDate, transStartDate } from '@/utils/date';
 import { FormInstance } from 'antd/es/form';
 import { transSelectValue } from '@/utils/transform';
-import { TaskRangeList, TaskStatusList } from '@/enums/StatusEnum';
+import { TaskRangeList, TaskStatus, TaskStatusList } from '@/enums/StatusEnum';
 
 export declare interface IFormData {
     task_id?: string;
