@@ -142,7 +142,7 @@ spec:
                 path: trigram-scm-front-page.conf
       affinity:
         podAntiAffinity:
-          prodferredDuringSchedulingIgnoredDuringExecution:
+          preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               podAffinityTerm:
                 labelSelector:
