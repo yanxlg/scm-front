@@ -382,7 +382,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                     onSearch={this.onSearch}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
-                <DataStatusUpdate />
+                {/*<DataStatusUpdate />*/}
                 <div className="float-clear">
                     <Pagination
                         className="float-right form-item"
@@ -412,7 +412,8 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                         x: true,
                         scrollToFirstRowOnChange: true,
                     }}
-                    bottom={100}
+                    minHeight={600}
+                    bottom={130}
                 />
                 <ExcelDialog
                     visible={excelDialogStatus}
