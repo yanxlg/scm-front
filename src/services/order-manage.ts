@@ -53,6 +53,22 @@ export async function getWaitShipList(params = {}) {
     });
 }
 
+// 采购未发货
+export async function getPurchasedNotStockList(params = {}) {
+    return request.get(ApiPathEnum.getPurchasedNotStockList, {
+        requestType: 'form',
+        params
+    });
+}
+
+// 仓库未发货
+export async function getStockNotShipList(params = {}) {
+    return request.get(ApiPathEnum.getStockNotShipList, {
+        requestType: 'form',
+        params
+    });
+}
+
 // 获取异常订单
 export async function getErrorOrderList(params = {}) {
     return request.get(ApiPathEnum.getErrorOrderList, {

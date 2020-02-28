@@ -222,6 +222,52 @@ const waitShipList = [
     }
 ]
 
+const notStockList = [
+    {
+        order_create_time: 1582703606,
+        middleground_order_id: "111", 
+        commodity_id: "111",
+        purchase_shipping_no: "111",
+        purchase_order_status: 1,
+        purchase_shipping_status: 1,
+        purchase_pay_time: 1582703606,
+        purchase_num: 1
+    },
+    {
+        order_create_time: 1582703606,
+        middleground_order_id: "222", 
+        commodity_id: "222",
+        purchase_shipping_no: "222",
+        purchase_order_status: 1,
+        purchase_shipping_status: 1,
+        purchase_pay_time: 1582703606,
+        purchase_num: 2
+    }
+]
+
+const stockNotShipList = [
+    {
+        order_create_time: 1582703606,
+        middleground_order_id: "111",
+        commodity_id: "111",
+        purchase_shipping_no: "111",
+        purchase_order_status: 1,
+        purchase_shipping_status: 1,
+        warehousing_time: 1582703606,
+        deliver_start_time: 1
+    },
+    {
+        order_create_time: 1582703606,
+        middleground_order_id: "222",
+        commodity_id: "222",
+        purchase_shipping_no: "222",
+        purchase_order_status: 1,
+        purchase_shipping_status: 1,
+        warehousing_time: 1582703606,
+        deliver_start_time: 2
+    }
+]
+
 const errorOrderList = [
     {
         order_create_time: 1582703606,
@@ -289,6 +335,30 @@ export default {
                 code: 200,
                 data: {
                     list: waitShipList,
+                    total: 200
+                }
+            })
+        }, 500);
+    },
+    'GET /v1/order/list/5': (req: Request, res: Response) => {
+        // const { page, page_number } = req.params;
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                data: {
+                    list: notStockList,
+                    total: 200
+                }
+            })
+        }, 500);
+    },
+    'GET /v1/order/list/6': (req: Request, res: Response) => {
+        // const { page, page_number } = req.params;
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                data: {
+                    list: stockNotShipList,
                     total: 200
                 }
             })

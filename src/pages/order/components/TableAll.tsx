@@ -6,6 +6,7 @@ import { IOrderItem, IPurchaseStatus } from './PaneAll';
 
 declare interface IOrderTableAllProps {
     loading: boolean;
+    colList: string[];
     orderList: IOrderItem[];
     // changeSelectedRows(selectedRows: IOrderItem[]): void;
 }
@@ -41,9 +42,9 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
             render: this.mergeCell
         },
         {
-            key: 'goods_detatil',
+            key: 'goods_detail',
             title: '商品详情',
-            dataIndex: 'goods_detatil',
+            dataIndex: 'goods_detail',
             align: 'center',
             width: 120,
             render: (value: any, row: IOrderItem) => {
@@ -142,6 +143,126 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
             align: 'center',
             width: 120
         },
+        {
+            key: 'channel_order_id',
+            title: '渠道订单ID',
+            dataIndex: 'channel_order_id',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'channel_goods_price',
+            title: '价格',
+            dataIndex: 'channel_goods_price',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'channel_shipping_fee',
+            title: '运费',
+            dataIndex: 'channel_shipping_fee',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'goods_number',
+            title: '商品数量',
+            dataIndex: 'goods_number',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'cancel_order_time',
+            title: '取消订单时间',
+            dataIndex: 'cancel_order_time',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'goods_purchase_shipping_no',
+            title: '采购运单号',
+            dataIndex: 'goods_purchase_shipping_no',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'channel',
+            title: '销售渠道',
+            dataIndex: 'channel',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'middleground_p_order_id',
+            title: '中台父订单ID',
+            dataIndex: 'middleground_p_order_id',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'currency_type',
+            title: '货币类型',
+            dataIndex: 'currency_type',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'remain_delivery_time',
+            title: '发货剩余时间',
+            dataIndex: 'remain_delivery_time',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'channel_store_name',
+            title: '渠道店铺名',
+            dataIndex: 'channel_store_name',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'purchase_cancel_reason',
+            title: '采购取消原因',
+            dataIndex: 'purchase_cancel_reason',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'goods_amount',
+            title: '商品总金额',
+            dataIndex: 'goods_amount',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'p_order_id',
+            title: '父订单ID',
+            dataIndex: 'p_order_id',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'child_order_id',
+            title: '子订单ID',
+            dataIndex: 'child_order_id',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
     ]
 
     constructor(props: IOrderTableAllProps) {
@@ -149,7 +270,13 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
     }
 
     private createColumns = ():ColumnProps<IOrderItem>[] => {
-        return this.allColumns;
+        const { colList } = this.props;
+        // console.log(111, colList);
+        return colList.map(key => {
+            const i = this.allColumns.findIndex(item => item.key === key);
+            // console.log('key', key, i);
+            return this.allColumns[i]
+        });
     }
 
     // 合并单元格

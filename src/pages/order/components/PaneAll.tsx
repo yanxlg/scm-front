@@ -3,15 +3,15 @@ import { Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
-import OptionalColumn from './OptionalColumn';
+import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 
-// import { IOrderItem } from '../index';
 import { 
     getAllOrderList,
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
+import { allColumnList, defaultColList, defaultParentColList } from '@/enums/OrderEnum';
 
 export declare interface IPurchaseStatus {
     status: number;
@@ -58,8 +58,6 @@ declare interface IBaseOrderItem {
 export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
     _rowspan?: number;
 }
-
-
 
 const baseFieldList: IFieldItem[] = [
     {
@@ -236,35 +234,18 @@ const allFieldList: IFieldItem[] = [
     endFieldItem
 ];
 
-// 未勾选仅展示父订单ID
-const defaultAllColList = [
-    'order_confirm_time',
-    'middleground_c_order_id',
-    'goods_detatil',
-    'product_id',
-    'channel_order_status',
-    'channel_delivery_status',
-    'middleground_order_status',
-    'goods_commodity_id',
-    'goods_purchase_status',
-    'goods_purchase_payment_status',
-    'goods_purchase_delivery_status',
-    'goods_purchase_order_time',
-    'goods_purchase_order_sn',
-    'goods_purchase_waybill_sn'
-]
-// 勾选仅展示
-const defaultParentColList = []
-
 declare interface IPaneAllState {
     page: number;
     pageNumber: number;
     total: number;
     loading: boolean;
-    showStatus: boolean;
+    showFilterStatus: boolean;
+    showColStatus: boolean;
     orderList: IOrderItem[];
     fieldList: IFieldItem[];
-    selectedColList: string[];
+    selectedColKeyList: string[];
+    colList: string[];
+    optionalColList: IOptionalColItem[];
 }
 
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
@@ -287,10 +268,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             pageNumber: 50,
             total: 0,
             loading: false,
-            showStatus: false,
+            showFilterStatus: false,
+            showColStatus: false,
             orderList: [],
             fieldList: defaultFieldList,
-            selectedColList: []
+            selectedColKeyList: [],
+            optionalColList: allColumnList.filter(item => defaultColList.indexOf(item.key) === -1),
+            // 表格展示的列
+            colList: defaultColList
         }
     }
 
@@ -356,28 +341,39 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         return ret;
     }
 
-    changeShowStatus = () => {
-        const { showStatus } = this.state;
+    changeShowFilterStatus = () => {
+        const { showFilterStatus } = this.state;
         this.setState({
-            showStatus: !showStatus,
-            fieldList: showStatus ? defaultFieldList : allFieldList
+            showFilterStatus: !showFilterStatus,
+            fieldList: showFilterStatus ? defaultFieldList : allFieldList
+        });
+    }
+
+    changeShowColStatus = () => {
+        const { showColStatus } = this.state;
+        this.setState({
+            showColStatus: !showColStatus
         });
     }
 
     changeSelectedColList = (list: string[]) => {
         this.setState({
-            selectedColList: []
+            selectedColKeyList: list,
+            colList: [...defaultColList, ...list]
         });
     }
 
     render() {
 
         const { 
-            showStatus,
             loading,
+            showFilterStatus,
+            showColStatus,
             orderList,
             fieldList,
-            selectedColList
+            selectedColKeyList,
+            optionalColList,
+            colList
         } = this.state;
     
         return (
@@ -396,18 +392,26 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         <Button type="primary" className="order-btn">取消渠道订单</Button>
                         <Button type="primary" className="order-btn">导出数据</Button>
                         <Button 
-                            type="default" 
                             className="order-btn"
-                            onClick={this.changeShowStatus}
-                        >{ showStatus ? '收起' : '展示'}搜索条件</Button>
-                        <Button type="default" className="order-btn">展示字段设置</Button>
+                            onClick={this.changeShowFilterStatus}
+                        >{ showFilterStatus ? '收起' : '展示'}搜索条件</Button>
+                        <Button 
+                            className="order-btn"
+                            onClick={this.changeShowColStatus}
+                        >{ showColStatus ? '收起' : '展示'}字段设置</Button>
                     </div>
-                    <OptionalColumn 
-                        selectedColList={selectedColList}
-                        changeSelectedColList={this.changeSelectedColList}
-                    />
+                    {
+                        showColStatus ? (
+                            <OptionalColumn
+                                optionalColList={optionalColList}
+                                selectedColKeyList={selectedColKeyList}
+                                changeSelectedColList={this.changeSelectedColList}
+                            />
+                        ) : null
+                    }
                     <TableAll
                         loading={loading}
+                        colList={colList}
                         orderList={orderList}
                     />
                 </div>

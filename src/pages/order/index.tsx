@@ -8,8 +8,10 @@ import PanePendingOrder from './components/PanePendingOrder';
 import PanePay from './components/PanePay';
 import PaneWaitShip from './components/PaneWaitShip';
 import PaneError from './components/PaneError';
+import PaneNotStock from './components/PaneNotStock';
+import PaneStockNotShip from './components/PaneStockNotShip';
 
-import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
+// import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 
 import '@/styles/order.less';
 
@@ -71,41 +73,6 @@ class Order extends React.PureComponent<{}, IOrderState> {
         // this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
-        let params: IFilterParams = {
-            page,
-            page_number: pageNumber,
-        };
-        if (this.orderFilterRef.current) {
-            // console.log('onSearch', this.orderFilterRef.current.getValues());
-            params = Object.assign(params, this.orderFilterRef.current.getValues());
-        }
-        if (baseParams) {
-            params = Object.assign(params, baseParams);
-        }
-        // console.log('getValues', this.orderFilterRef.current!.getValues());
-        this.setState({
-            loading: true,
-        });
-        getProductOrderList(params)
-            .then(res => {
-                // console.log('getProductOrderList', res);
-                const { total, list } = res.data;
-                this.setState({
-                    total,
-                    page: params.page,
-                    pageNumber: params.page_number,
-                    orderList: list,
-                });
-            })
-            .finally(() => {
-                this.setState({
-                    loading: false,
-                });
-            });
-    };
-
     // 改变选择的行
     changeSelectedRows = (selectedRows: IOrderItem[]) => {
         this.setState({
@@ -143,10 +110,10 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         <PaneWaitShip />
                     </TabPane>
                     <TabPane tab={`采购未发货（1000）`} key="5">
-                        采购未发货
+                        <PaneNotStock />
                     </TabPane>
                     <TabPane tab={`仓库未发货（1000）`} key="6">
-                        仓库未发货
+                        <PaneStockNotShip />
                     </TabPane>
                     <TabPane tab={`异常订单（1000）`} key="7">
                         <PaneError/>
