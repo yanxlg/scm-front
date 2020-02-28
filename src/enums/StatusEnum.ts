@@ -79,3 +79,9 @@ export enum HotTaskFilterType {
     ByCategory,
     ByKeywords,
 }
+
+//======================= AutoPurchase 任务类型 ======================//
+export enum AutoPurchaseTaskType {
+    EveryDay = 1,
+    OnlyOnce,
+}
