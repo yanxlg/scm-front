@@ -386,14 +386,16 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     searchGoodsSale = (product_id: string, saleList: ISaleItem[]) => {
         this.toggleShelvesDialog(true);
         this.setState({
-            saleStatusList: saleList.map((item: ISaleItem, index: number): ISaleStatausItem => {
-                return {
-                    ...item,
-                    product_id: product_id,
-                    order: index + 1
-                }
-            })
-        })
+            saleStatusList: saleList.map(
+                (item: ISaleItem, index: number): ISaleStatausItem => {
+                    return {
+                        ...item,
+                        product_id: product_id,
+                        order: index + 1,
+                    };
+                },
+            ),
+        });
     };
 
     // 编辑图片弹框

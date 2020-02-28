@@ -36,6 +36,7 @@ import {
     HotTaskRange,
     TaskExecuteType,
     TaskIntervalConfigType,
+    HotTaskFilterType,
 } from '@/enums/StatusEnum';
 
 export declare interface IFormData {
@@ -170,12 +171,14 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             task_end_time,
             task_start_time,
             task_interval_seconds,
+            keywords,
             ...extra
         } = info;
         const taskType =
             (task_type as any) === '单次任务' ? TaskExecuteType.once : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
+            keywords,
             range: range === HotTaskRange.fullStack ? range : HotTaskRange.store,
             shopId: range !== HotTaskRange.fullStack ? range : undefined,
             task_end_time:
@@ -198,6 +201,12 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             task_type: taskType,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
+            filterType:
+                range === HotTaskRange.fullStack
+                    ? keywords
+                        ? HotTaskFilterType.ByKeywords
+                        : HotTaskFilterType.ByCategory
+                    : HotTaskFilterType.ByKeywords,
             ...extra,
         };
     }
@@ -483,6 +492,23 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 'category_level_two',
                 'category_level_three',
             ]);
+            this.formRef.current!.setFieldsValue({
+                filterType: HotTaskFilterType.ByKeywords,
+            });
+        }
+    }
+
+    private onFilterTypeChange(e: RadioChangeEvent) {
+        const value = e.target.value;
+        if (value === HotTaskFilterType.ByCategory) {
+            // 类目筛选
+            this.formRef.current!.resetFields(['keywords']);
+        } else {
+            this.formRef.current!.resetFields([
+                'category_level_one',
+                'category_level_two',
+                'category_level_three',
+            ]);
         }
     }
 
@@ -523,6 +549,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         range: HotTaskRange.fullStack,
                         task_type: TaskExecuteType.once,
                         taskIntervalType: TaskIntervalConfigType.day,
+                        filterType: HotTaskFilterType.ByCategory,
                     }}
                 >
                     <Form.Item
@@ -591,138 +618,275 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     </Card>
                     <Card className="form-item" title="指定类目/关键词：">
                         <div>
-                            <Form.Item
-                                noStyle={true}
-                                shouldUpdate={(prevValues, currentValues) =>
-                                    prevValues.range !== currentValues.range
-                                }
-                            >
-                                {({ getFieldValue }) => {
-                                    const range = getFieldValue('range');
-                                    return (
+                            <Form.Item validateTrigger={'onBlur'} name="filterType" noStyle={true}>
+                                <Radio.Group onChange={this.onFilterTypeChange}>
+                                    <Form.Item
+                                        noStyle={true}
+                                        shouldUpdate={(prevValues, currentValues) =>
+                                            prevValues.range !== currentValues.range
+                                        }
+                                    >
+                                        {({ getFieldValue }) => {
+                                            const range = getFieldValue('range');
+                                            return (
+                                                <Form.Item
+                                                    className="form-item-inline"
+                                                    label={
+                                                        <Radio
+                                                            disabled={range === HotTaskRange.store}
+                                                            value={HotTaskFilterType.ByCategory}
+                                                        />
+                                                    }
+                                                    colon={false}
+                                                >
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.range !==
+                                                                currentValues.range ||
+                                                            prevValues.filterType !==
+                                                                currentValues.filterType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const range = getFieldValue('range');
+                                                            const filterType = getFieldValue(
+                                                                'filterType',
+                                                            );
+                                                            return (
+                                                                <Form.Item
+                                                                    validateTrigger={'onBlur'}
+                                                                    name="category_level_one"
+                                                                    label="一级类目"
+                                                                    className="form-item-horizon form-item-inline"
+                                                                >
+                                                                    <Select
+                                                                        disabled={
+                                                                            range ===
+                                                                                HotTaskRange.store ||
+                                                                            filterType ===
+                                                                                HotTaskFilterType.ByKeywords
+                                                                        }
+                                                                        loading={categoryLoading}
+                                                                        className="select-default"
+                                                                        onChange={
+                                                                            this
+                                                                                .onFirstCategoryChange
+                                                                        }
+                                                                    >
+                                                                        {pddCategory.map(
+                                                                            category => {
+                                                                                return (
+                                                                                    <Option
+                                                                                        key={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                        value={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            category.platform_cate_name
+                                                                                        }
+                                                                                    </Option>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.category_level_one !==
+                                                                currentValues.category_level_one ||
+                                                            prevValues.range !==
+                                                                currentValues.range ||
+                                                            prevValues.filterType !==
+                                                                currentValues.filterType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const levelOne = getFieldValue(
+                                                                'category_level_one',
+                                                            );
+                                                            const range = getFieldValue('range');
+                                                            const filterType = getFieldValue(
+                                                                'filterType',
+                                                            );
+                                                            const childCategory =
+                                                                pddCategory.find(category => {
+                                                                    return (
+                                                                        category.platform_cate_id ===
+                                                                        levelOne
+                                                                    );
+                                                                })?.children || [];
+                                                            return (
+                                                                <Form.Item
+                                                                    validateTrigger={'onBlur'}
+                                                                    name="category_level_two"
+                                                                    label="二级类目"
+                                                                    className="form-item-horizon form-item-inline"
+                                                                >
+                                                                    <Select
+                                                                        disabled={
+                                                                            range ===
+                                                                                HotTaskRange.store ||
+                                                                            filterType ===
+                                                                                HotTaskFilterType.ByKeywords
+                                                                        }
+                                                                        loading={categoryLoading}
+                                                                        className="select-default"
+                                                                        onChange={
+                                                                            this
+                                                                                .onSecondCategoryChange
+                                                                        }
+                                                                    >
+                                                                        {childCategory.map(
+                                                                            category => {
+                                                                                return (
+                                                                                    <Option
+                                                                                        key={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                        value={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            category.platform_cate_name
+                                                                                        }
+                                                                                    </Option>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.category_level_two !==
+                                                                currentValues.category_level_two ||
+                                                            prevValues.range !==
+                                                                currentValues.range ||
+                                                            prevValues.filterType !==
+                                                                currentValues.filterType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const levelOne = getFieldValue(
+                                                                'category_level_one',
+                                                            );
+                                                            const range = getFieldValue('range');
+                                                            const filterType = getFieldValue(
+                                                                'filterType',
+                                                            );
+                                                            const childCategory =
+                                                                pddCategory.find(category => {
+                                                                    return (
+                                                                        category.platform_cate_id ===
+                                                                        levelOne
+                                                                    );
+                                                                })?.children || [];
+                                                            const parentLevel = getFieldValue(
+                                                                'category_level_two',
+                                                            );
+                                                            const parentCategory =
+                                                                childCategory.find(category => {
+                                                                    return (
+                                                                        category.platform_cate_id ===
+                                                                        parentLevel
+                                                                    );
+                                                                })?.children || [];
+                                                            return (
+                                                                <Form.Item
+                                                                    validateTrigger={'onBlur'}
+                                                                    name="category_level_three"
+                                                                    label="三级类目"
+                                                                    className="form-item-horizon form-item-inline"
+                                                                >
+                                                                    <Select
+                                                                        disabled={
+                                                                            range ===
+                                                                                HotTaskRange.store ||
+                                                                            filterType ===
+                                                                                HotTaskFilterType.ByKeywords
+                                                                        }
+                                                                        loading={categoryLoading}
+                                                                        className="select-default"
+                                                                    >
+                                                                        {parentCategory.map(
+                                                                            category => {
+                                                                                return (
+                                                                                    <Option
+                                                                                        key={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                        value={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            category.platform_cate_name
+                                                                                        }
+                                                                                    </Option>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+                                                </Form.Item>
+                                            );
+                                        }}
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        className="form-item form-item-inline"
+                                        label={<Radio value={HotTaskFilterType.ByKeywords} />}
+                                        colon={false}
+                                    >
                                         <Form.Item
-                                            validateTrigger={'onBlur'}
-                                            name="category_level_one"
-                                            label="一级类目"
-                                            className="form-item-horizon form-item-inline"
+                                            noStyle={true}
                                             shouldUpdate={(prevValues, currentValues) =>
-                                                prevValues.range !== currentValues.range
+                                                prevValues.filterType !== currentValues.filterType
                                             }
                                         >
-                                            <Select
-                                                disabled={range === HotTaskRange.store}
-                                                loading={categoryLoading}
-                                                className="select-default"
-                                                onChange={this.onFirstCategoryChange}
-                                            >
-                                                {pddCategory.map(category => {
-                                                    return (
-                                                        <Option
-                                                            key={category.platform_cate_id}
-                                                            value={category.platform_cate_id}
-                                                        >
-                                                            {category.platform_cate_name}
-                                                        </Option>
-                                                    );
-                                                })}
-                                            </Select>
+                                            {({ getFieldValue }) => {
+                                                const filterType = getFieldValue('filterType');
+                                                return (
+                                                    <Form.Item
+                                                        className="form-item-horizon form-item-inline"
+                                                        validateTrigger={'onBlur'}
+                                                        name="keywords"
+                                                        label="关&ensp;键&ensp;词"
+                                                    >
+                                                        <Input
+                                                            disabled={
+                                                                filterType ===
+                                                                HotTaskFilterType.ByCategory
+                                                            }
+                                                            className="input-large"
+                                                            spellCheck={'false'}
+                                                            placeholder="iPhone XR，国行，白"
+                                                        />
+                                                    </Form.Item>
+                                                );
+                                            }}
                                         </Form.Item>
-                                    );
-                                }}
-                            </Form.Item>
-
-                            <Form.Item
-                                noStyle={true}
-                                shouldUpdate={(prevValues, currentValues) =>
-                                    prevValues.category_level_one !==
-                                        currentValues.category_level_one ||
-                                    prevValues.range !== currentValues.range
-                                }
-                            >
-                                {({ getFieldValue }) => {
-                                    const levelOne = getFieldValue('category_level_one');
-                                    const range = getFieldValue('range');
-                                    const childCategory =
-                                        pddCategory.find(category => {
-                                            return category.platform_cate_id === levelOne;
-                                        })?.children || [];
-                                    return (
-                                        <Form.Item
-                                            validateTrigger={'onBlur'}
-                                            name="category_level_two"
-                                            label="二级类目"
-                                            className="form-item-horizon form-item-inline"
-                                        >
-                                            <Select
-                                                disabled={range === HotTaskRange.store}
-                                                loading={categoryLoading}
-                                                className="select-default"
-                                                onChange={this.onSecondCategoryChange}
-                                            >
-                                                {childCategory.map(category => {
-                                                    return (
-                                                        <Option
-                                                            key={category.platform_cate_id}
-                                                            value={category.platform_cate_id}
-                                                        >
-                                                            {category.platform_cate_name}
-                                                        </Option>
-                                                    );
-                                                })}
-                                            </Select>
-                                        </Form.Item>
-                                    );
-                                }}
-                            </Form.Item>
-                            <Form.Item
-                                noStyle={true}
-                                shouldUpdate={(prevValues, currentValues) =>
-                                    prevValues.category_level_two !==
-                                        currentValues.category_level_two ||
-                                    prevValues.range !== currentValues.range
-                                }
-                            >
-                                {({ getFieldValue }) => {
-                                    const levelOne = getFieldValue('category_level_one');
-                                    const range = getFieldValue('range');
-                                    const childCategory =
-                                        pddCategory.find(category => {
-                                            return category.platform_cate_id === levelOne;
-                                        })?.children || [];
-                                    const parentLevel = getFieldValue('category_level_two');
-                                    const parentCategory =
-                                        childCategory.find(category => {
-                                            return category.platform_cate_id === parentLevel;
-                                        })?.children || [];
-                                    return (
-                                        <Form.Item
-                                            validateTrigger={'onBlur'}
-                                            name="category_level_three"
-                                            label="三级类目"
-                                            className="form-item-horizon form-item-inline"
-                                        >
-                                            <Select
-                                                disabled={range === HotTaskRange.store}
-                                                loading={categoryLoading}
-                                                className="select-default"
-                                            >
-                                                {parentCategory.map(category => {
-                                                    return (
-                                                        <Option
-                                                            key={category.platform_cate_id}
-                                                            value={category.platform_cate_id}
-                                                        >
-                                                            {category.platform_cate_name}
-                                                        </Option>
-                                                    );
-                                                })}
-                                            </Select>
-                                        </Form.Item>
-                                    );
-                                }}
+                                    </Form.Item>
+                                </Radio.Group>
                             </Form.Item>
                         </div>
-                        <div>
+                        <div className="config-radio">
                             <Form.Item
                                 validateTrigger={'onBlur'}
                                 name="sort_type"
@@ -738,18 +902,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         );
                                     })}
                                 </Select>
-                            </Form.Item>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline form-item"
-                                validateTrigger={'onBlur'}
-                                name="keywords"
-                                label="关&ensp;键&ensp;词"
-                            >
-                                <Input
-                                    className="input-large"
-                                    spellCheck={'false'}
-                                    placeholder="iPhone XR，国行，白"
-                                />
                             </Form.Item>
                         </div>
                     </Card>

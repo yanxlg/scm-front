@@ -50,7 +50,7 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             key: 'status_label',
             title: '操作',
             dataIndex: 'status_label',
-            align: 'center'
+            align: 'center',
         },
     ];
 

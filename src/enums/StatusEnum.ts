@@ -73,3 +73,9 @@ export enum TimerUpdateTaskRangeType {
     AllOnShelves = 2,
     HasSales,
 }
+
+//======================= Hot 任务筛选类型 ======================//
+export enum HotTaskFilterType {
+    ByCategory,
+    ByKeywords,
+}
