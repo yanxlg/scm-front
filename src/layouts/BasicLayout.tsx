@@ -8,10 +8,10 @@ import { Dispatch } from 'redux';
 import { connect } from 'dva';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
-import logo from '../assets/logo.svg';
-import MenuData from "@/config/menu";
+import logo from '../assets/logo.png';
+import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
-import "@/styles/menu.less";
+import '@/styles/index.less';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -20,14 +20,14 @@ export interface BasicLayoutProps extends ProLayoutProps {
     dispatch: Dispatch;
 }
 
-const MenuDataList = MenuData.map((item)=>{
+const MenuDataList = MenuData.map(item => {
     // filter
     return item as any;
 });
 
-class BasicLayout extends React.PureComponent<BasicLayoutProps>{
+class BasicLayout extends React.PureComponent<BasicLayoutProps> {
     private handleMenuCollapse = (payload: boolean): void => {
-        const {dispatch} = this.props;
+        const { dispatch } = this.props;
         if (dispatch) {
             dispatch({
                 type: 'global/changeLayoutCollapsed',
@@ -36,12 +36,13 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
         }
     };
 
-    render(){
-        const {children,dispatch,...props} = this.props;
+    render() {
+        const { children, dispatch, ...props } = this.props;
         return (
             <ProLayout
                 multiple={false}
-                logo={logo}
+                logo={<img src={logo} className="menu-logo" alt="" />}
+                title="供应链中台"
                 onCollapse={this.handleMenuCollapse}
                 menuItemRender={(menuItemProps, defaultDom) => {
                     if (menuItemProps.isUrl) {
@@ -67,7 +68,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
                         return null;
                     } // 删除首页
 
-                    return !last&&!first ? (
+                    return !last && !first ? (
                         <Link to={route.path}>{route.breadcrumbName}</Link>
                     ) : (
                         <span>{route.breadcrumbName}</span>
@@ -86,8 +87,6 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps>{
         );
     }
 }
-
-
 
 export default connect(({ global }: ConnectState) => ({
     collapsed: global.collapsed,
