@@ -74,8 +74,7 @@ declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
 }
 
 export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {
-    // _prevVersion?: IGoodsVersionRowItem;
-    _rowspan?: number;
+
 }
 
 declare interface IGoodsVersionBase {
@@ -109,7 +108,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
 
     constructor(props: IVersionProps) {
         super(props);
-        let nowTime = new Date();
         this.state = {
             loading: false,
             end_time: 0,
@@ -158,8 +156,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     allCount: all_count,
                     page: data.page,
                     page_count: data.page_count,
-                    versionGoodsList: goodsList,
-                    currentInfo: goodsList[0] || null
+                    versionGoodsList: goodsList
                 });
             })
             .finally(() => {
@@ -190,9 +187,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     private addRowSpanData(list: IGoodsVersionItem[]): IGoodsVersionRowItem[] {
         let ret: IGoodsVersionRowItem[] = [];
         const len = list.length;
-        list.forEach((item, index) => {
+        list.forEach((item) => {
             const { sku_info, ...rest } = item;
-            sku_info.forEach((skuItem, skuIndex) => {
+            // 目前只有一条默认的sku
+            sku_info.forEach((skuItem) => {
                 const retItem: IGoodsVersionRowItem = {
                     ...Object.assign(rest, {
                         _update_time: formatDate(new Date(rest.update_time * 1000), 'yyyy-MM-dd hh:mm:ss'),
@@ -202,22 +200,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         sku_inventory: Number(skuItem.sku_inventory)
                     })
                 };
-                // if (index !== len - 1) {
-                //     const prev = list[index + 1];
-                //     const { sku_info: prevSku, ...prevRest } = prev;
-                //     const prevSkuItem = prevSku[skuIndex];
-                //     retItem._prevVersion = {
-                //         ...prevRest,
-                //         ...Object.assign(prevSkuItem, {
-                //             sku_price: Number(prevSkuItem.sku_price),
-                //             sku_inventory: Number(prevSkuItem.sku_inventory)
-                //         }),
-                //     };
-                //     // list[index + 1].sku[skuIndex];
-                // }
-                if (skuIndex === 0) {
-                    retItem._rowspan = sku_info.length;
-                }
                 ret.push(retItem);
             });
         });
@@ -268,6 +250,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             .then(res => {
                 message.success(`${product_id}应用成功`);
                 this.onSearch();
+                this.searchReleasedGoods();
             })
     };
 
@@ -381,6 +364,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         pageSizeOptions={pageSizeOptions}
                         onChange={this.onChangePage}
                         onShowSizeChange={this.pageCountChange}
+                        showTotal={(total) => `共${total}条`}
                     />
                 </div>
                 <VersionTable

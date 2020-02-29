@@ -163,8 +163,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 description,
                 cat_id: Number(third_catagory.id || second_catagory.id || first_catagory.id),
                 imgs: sku_image.map((item, index) => {
+                    let ret: any = {};
                     if (orginSkuImage.indexOf(item) > -1) {
-                        return {
+                        ret = {
                             type: 'old',
                             url: item,
                             position: index + 1
@@ -178,7 +179,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             width,
                             height
                         } = addImgList[i];
-                        return {
+                        ret = {
                             type,
                             url,
                             position: index + 1,
@@ -187,6 +188,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             height
                         }
                     }
+                    ret.is_default = index === 0 ? 1 : 0;
+                    return ret;
                 })
             };
         }
@@ -341,8 +344,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             first_catagory,
             second_catagory,
             third_catagory,
+            goods_img,
             sku_image,
-            _sku_img_list
+            // _sku_img_list
         } = currentEditGoods;
 
         let secondCatagoryList: ICategoryItem[] = [];
@@ -353,6 +357,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         if (first_catagory.id && third_catagory.id) {
             thirdCatagoryList = getCurrentCatagory(first_catagory.id,second_catagory.id);
         }
+
         return (
             <Modal
                 title="商品编辑"
@@ -363,7 +368,6 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 onOk={this.handleOk}
                 onCancel={this.handleCancel}
                 maskClosable={false}
-                // footer={}
                 cancelButtonProps={{
                     onClick: resetGoodsData
                 }}
@@ -461,8 +465,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                             onDragOver={this.dragover}
                                             onDrop={() => this.drop(item)}
                                         />
-                                        {
-                                            _sku_img_list!.indexOf(item) === -1 ? (
+                                        {/* {
+                                            goods_img !== item ? (
                                                 <Popconfirm
                                                     title="确定删除吗?"
                                                     onConfirm={() => this.confirmDelete(item)}
@@ -472,7 +476,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                                     <CloseOutlined className="close"/>
                                                 </Popconfirm>
                                             ) : null
-                                        }
+                                        } */}
                                     </div>
                                 );
                             })}
