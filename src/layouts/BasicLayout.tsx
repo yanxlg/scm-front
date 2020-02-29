@@ -8,10 +8,10 @@ import { Dispatch } from 'redux';
 import { connect } from 'dva';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
-import '@/styles/menu.less';
+import '@/styles/index.less';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -41,7 +41,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
         return (
             <ProLayout
                 multiple={false}
-                logo={logo}
+                logo={<img src={logo} className="menu-logo" alt="" />}
                 title="供应链中台"
                 onCollapse={this.handleMenuCollapse}
                 menuItemRender={(menuItemProps, defaultDom) => {
