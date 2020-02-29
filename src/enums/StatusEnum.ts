@@ -38,6 +38,8 @@ export const TaskStatusMap: { [key: string]: string } = {
     2: '已执行',
     3: '执行失败',
     4: '已取消',
+    5: '已完成',
+    6: '终止',
 };
 
 export const TaskStatusList = transStatusList(TaskStatusMap);
@@ -47,7 +49,6 @@ export enum TaskStatus {
     Executing, // 执行中
     Executed, // 已执行
     Failed, // 执行失败
-    Canceled, // 已取消
 }
 
 //======================= Hot 任务范围 ======================//
