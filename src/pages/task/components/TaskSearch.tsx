@@ -1,36 +1,36 @@
-import React from 'react';
-import { Form } from '@/components/Form';
-import { DatePicker, Input, Select } from 'antd';
-import { FormComponentProps } from 'antd/lib/form';
+import React, { RefObject } from 'react';
+import { DatePicker, Input, Select, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/task.less';
-import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import { Bind } from 'lodash-decorators';
 import { Moment } from 'moment';
 import { transEndDate, transStartDate } from '@/utils/date';
+import { FormInstance } from 'antd/es/form';
+import { transSelectValue } from '@/utils/transform';
+import { TaskRangeList, TaskStatus, TaskStatusList } from '@/enums/StatusEnum';
 
 export declare interface IFormData {
     task_id?: string;
     task_name?: string;
-    task_range?: string;
-    task_status?: string;
+    task_range?: number;
+    task_status?: number;
     task_begin_time?: number;
     task_end_time?: number;
     task_create_time1?: number;
     task_create_time2?: number;
 }
 
-declare interface ITaskSearchProps extends FormComponentProps<IFormData> {
-    task_status: TaskStatus;
+declare interface ITaskSearchProps {
+    task_status?: TaskStatus;
 }
 
 const Option = Select.Option;
 
-class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
+class TaskSearch extends React.PureComponent<ITaskSearchProps> {
+    private formRef: RefObject<FormInstance> = React.createRef();
     @Bind
     private disabledStartDate(startTime: Moment | null) {
-        const { form } = this.props;
-        const endTime = form.getFieldValue('task_end_time');
+        const endTime = this.formRef.current!.getFieldValue('task_end_time');
         if (!startTime || !endTime) {
             return false;
         }
@@ -39,8 +39,7 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
 
     @Bind
     private disabledEndDate(endTime: Moment | null) {
-        const { form } = this.props;
-        const startTime = form.getFieldValue('task_begin_time');
+        const startTime = this.formRef.current!.getFieldValue('task_begin_time');
         if (!endTime || !startTime) {
             return false;
         }
@@ -49,8 +48,7 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
 
     @Bind
     private disabledCreateStartDate(startTime: Moment | null) {
-        const { form } = this.props;
-        const endTime = form.getFieldValue('task_create_time2');
+        const endTime = this.formRef.current!.getFieldValue('task_create_time2');
         if (!startTime || !endTime) {
             return false;
         }
@@ -59,8 +57,7 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
 
     @Bind
     private disabledCreateEndDate(endTime: Moment | null) {
-        const { form } = this.props;
-        const startTime = form.getFieldValue('task_create_time1');
+        const startTime = this.formRef.current!.getFieldValue('task_create_time1');
         if (!endTime || !startTime) {
             return false;
         }
@@ -68,104 +65,116 @@ class _TaskSearch extends Form.BaseForm<ITaskSearchProps> {
     }
 
     @Bind
-    public getFieldsValue(fieldsName?:string[]){
-        const {form} = this.props;
-        const {task_begin_time,task_end_time,task_create_time1,task_create_time2,...extra} = form.getFieldsValue(fieldsName);
+    public getFieldsValue(fieldsName?: string[]) {
+        const {
+            task_begin_time,
+            task_end_time,
+            task_create_time1,
+            task_create_time2,
+            task_range,
+            task_status,
+            ...extra
+        } = this.formRef.current!.getFieldsValue(fieldsName);
         return {
             ...extra,
-            task_begin_time:transStartDate(task_begin_time),
-            task_end_time:transEndDate(task_end_time),
-            task_create_time1:transStartDate(task_create_time1),
-            task_create_time2:transEndDate(task_create_time2)
-        }
+            task_begin_time: transStartDate(task_begin_time),
+            task_end_time: transEndDate(task_end_time),
+            task_create_time1: transStartDate(task_create_time1),
+            task_create_time2: transEndDate(task_create_time2),
+            task_range: transSelectValue(task_range),
+            task_status: transSelectValue(task_status),
+        } as IFormData;
     }
     render() {
-        const { form, task_status } = this.props;
-
-        const taskRangeSelections=[];
-        for (let key in TaskRangeList){
-            const value = Number(key);
-            taskRangeSelections.push(<Option key={value} value={value}>{TaskRangeList[value]}</Option>);
-        }
-        const taskStatusSelections=[];
-        for (let key in TaskStatusList){
-            const value = Number(key);
-            taskStatusSelections.push(<Option key={value} value={value}>{TaskStatusList[value]}</Option>);
-        }
+        const { task_status } = this.props;
 
         return (
             <React.Fragment>
-                <Form className="config-card" layout="inline" autoComplete={'off'}>
-                    <Form.Item form={form} name="task_id" label={<span>任务<span className="task-justify-1">ID</span></span>}>
-                        <Input className="input-equal-date" />
+                <Form
+                    ref={this.formRef}
+                    layout="inline"
+                    autoComplete={'off'}
+                    initialValues={{
+                        task_range: '',
+                        task_status: '',
+                    }}
+                >
+                    <Form.Item
+                        name="task_id"
+                        label={
+                            <span>
+                                任务<span className="task-justify-1">ID</span>
+                            </span>
+                        }
+                        className="form-item"
+                    >
+                        <Input className="input-default" />
                     </Form.Item>
-                    <Form.Item form={form} name="task_name" label="任务名称">
-                        <Input className="input-equal-date" />
+                    <Form.Item name="task_name" label="任务名称" className="form-item">
+                        <Input className="input-default" />
                     </Form.Item>
-                    <Form.Item form={form} name="task_range" label="任务范围" initialValue={1}>
-                        <Select className="select-equal-date">
-                            {
-                                taskRangeSelections
-                            }
+                    <Form.Item name="task_range" label="任务范围" className="form-item">
+                        <Select className="select-default">
+                            <Select.Option value="">全部</Select.Option>
+                            {TaskRangeList.map(range => {
+                                const { id, name } = range;
+                                return (
+                                    <Option key={id} value={id}>
+                                        {name}
+                                    </Option>
+                                );
+                            })}
                         </Select>
                     </Form.Item>
-                    {task_status === TaskStatus.All && (
-                        <Form.Item form={form} name="task_status" label="任务状态" initialValue={0}>
-                            <Select className="select-equal-date">
-                                {
-                                    taskStatusSelections
-                                }
+                    {task_status === void 0 && (
+                        <Form.Item name="task_status" label="任务状态" className="form-item">
+                            <Select className="select-default">
+                                <Select.Option value="">全部</Select.Option>
+                                {TaskStatusList.map(status => {
+                                    const { id, name } = status;
+                                    return (
+                                        <Option key={id} value={id}>
+                                            {name}
+                                        </Option>
+                                    );
+                                })}
                             </Select>
                         </Form.Item>
                     )}
-                    <div className="inline-block">
-                        <Form.Item
-                            className="margin-none"
-                            form={form}
-                            name="task_begin_time"
-                            label="开始时间"
-                        >
+                    <Form.Item label="开始时间" className="form-item">
+                        <Form.Item name="task_begin_time" noStyle={true}>
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledStartDate}
                             />
                         </Form.Item>
-                        <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="task_end_time">
+                        <span className="config-colon">-</span>
+                        <Form.Item name="task_end_time" noStyle={true}>
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledEndDate}
                             />
                         </Form.Item>
-                    </div>
-                    <div className="inline-block">
-                        <Form.Item
-                            className="margin-none"
-                            form={form}
-                            name="task_create_time1"
-                            label="创建时间"
-                        >
+                    </Form.Item>
+                    <Form.Item label="创建时间" className="form-item">
+                        <Form.Item name="task_create_time1" noStyle={true}>
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledCreateStartDate}
                             />
                         </Form.Item>
-                        <span className="ant-col ant-form-item-label config-colon">-</span>
-                        <Form.Item form={form} name="task_create_time2">
+                        <span className="config-colon">-</span>
+                        <Form.Item name="task_create_time2" noStyle={true}>
                             <DatePicker
-                                className="picker-small"
+                                className="task-picker"
                                 disabledDate={this.disabledCreateEndDate}
                             />
                         </Form.Item>
-                    </div>
+                    </Form.Item>
                 </Form>
             </React.Fragment>
         );
     }
 }
 
-const TaskSearch = Form.create<ITaskSearchProps>()(_TaskSearch);
-
 export default TaskSearch;
-
-export { _TaskSearch };

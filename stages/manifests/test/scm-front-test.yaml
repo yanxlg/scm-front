@@ -40,26 +40,36 @@ data:
         set $prjroot /usr/share/nginx/html;
         root $prjroot/;
         index index.html;
+
         location /version {
             root $prjroot/;
             add_header Content-Type text/plain;
         }
         location / {
+            if ($cookie_jsessionid = "")
+            {
+                return 302 https://cas-t.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
+            }
+
             try_files $uri $uri/ /index.html;
         }
-
-        location /api/{
-            add_header Access-Control-Allow-Origin *;
-            add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-            add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
-            if ($request_method = 'OPTIONS') {
-                    return 204;
-            }
-            rewrite ^/api(.*)$ /$1 break;
-            proxy_connect_timeout 65s;
-            proxy_send_timeout 65;
-            proxy_read_timeout 65;
+        location /auth/{
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass https://scm-api-t.vova.com.hk;
+        }
+        location /api/{
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass https://scm-api-t.vova.com.hk/;
         }
     }
 ---

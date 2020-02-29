@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 
 export function formatDate(date: Date, fmt: string): string {
 	if (/(y+)/.test(fmt)) {
@@ -27,15 +27,18 @@ function padLeftZero(str: string) {
 
 export function transStartDate(moment?:Moment) {
     // 日期转换成unix
-    return moment?moment.hour(0).minute(0).second(0).unix():moment;
+    return moment?moment.clone().hour(0).minute(0).second(0).unix():moment;
 }
 
 
 export function transEndDate(moment?:Moment) {
-    return moment?moment.add(1,'d').hour(0).minute(0).second(0).unix():moment;
+    return moment?moment.clone().add(1,'d').hour(0).minute(0).second(0).unix():moment;
 }
 
 
-function transApiDate(unix:number) {
+const dateFormat = "YYYY-MM-DD HH:mm:ss";
 
+export function utcToLocal(dateString?:string|number) {
+    const dateValue = typeof dateString === "number"?dateString*1000:dateString;
+    return dateString?moment.utc(dateValue).local().format(dateFormat):"";
 }

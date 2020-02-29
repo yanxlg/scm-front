@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import HotGather from '@/pages/task/components/HotGather';
 import '@/styles/index.less';
 import URLGather from '@/pages/task/components/URLGather';
+import TimerUpdate from '@/pages/task/components/TimerUpdate';
 
 const { TabPane } = Tabs;
 
@@ -24,7 +25,9 @@ const Config: React.FC = (props: {}) => {
                         <TabPane tab="热销款采集" key="2">
                             <HotGather />
                         </TabPane>,
-                        // <TabPane tab="定时商品更新" key="3"><TimerUpdate/></TabPane>,
+                        <TabPane tab="定时商品更新" key="3">
+                            <TimerUpdate />
+                        </TabPane>,
                     ]}
                 />
             </div>

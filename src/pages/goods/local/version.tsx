@@ -1,6 +1,7 @@
 import React from 'react';
 import { DatePicker, Button, message, Pagination } from 'antd';
-import { RangePickerValue } from 'antd/lib/date-picker/interface';
+// import { RangePickerValue } from 'antd/lib/date-picker/interface';
+import { RangeValue } from 'rc-picker/lib/interface';
 import moment from 'moment';
 
 import VersionTable from './components/VersionTable';
@@ -73,7 +74,7 @@ declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
 }
 
 export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {
-    _prevVersion?: IGoodsVersionRowItem;
+    // _prevVersion?: IGoodsVersionRowItem;
     _rowspan?: number;
 }
 
@@ -95,8 +96,8 @@ declare interface IVersionState {
     start_time: number;
     end_time: number;
     page: number;
-    page_count: number,
-    allCount: number,
+    page_count: number;
+    allCount: number;
     currentInfo: IGoodsVersionRowItem | null;
     versionGoodsList: IGoodsVersionRowItem[];
 }
@@ -116,8 +117,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             page: 1,
             page_count: 50,
             allCount: 0,
-            // end_time: this.getTimeSecond(nowTime.getTime()),
-            // start_time: this.getTimeSecond(new Date(nowTime.setDate(nowTime.getDate() - 3)).getTime()),
             currentInfo: null,
             versionGoodsList: [],
         };
@@ -126,25 +125,32 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     componentDidMount(): void {
         this.id = this.props.location.query.id;
         this.onSearch();
+        this.searchReleasedGoods();
         // console.log();
     }
 
-    private getTimeSecond = (millisecond: number) => {
-        return Math.round(millisecond / 1000)
-    }
+    private getTimeSecond = (millisecond: number, isStart?: boolean) => {
+        const date = formatDate(new Date(millisecond), 'yyyy-MM-dd');
+        const zero = new Date(`${date} ${isStart ? '00:00:00' : '23:59:59'}`).getTime();
+        // console.log(formatDate(new Date(zero), 'yyyy-MM-dd hh:mm:ss'));
+        return Math.round(zero / 1000);
+    };
 
     private onSearch = (pageData?: IPageData) => {
         const { start_time, end_time, page, page_count } = this.state;
         this.setState({
             loading: true,
         });
-        const data = Object.assign({
-            page,
-            page_count,
-            start_time: start_time ? start_time : undefined,
-            end_time: end_time ? end_time : undefined,
-            commodity_id: this.id,
-        }, pageData ? pageData : {});
+        const data = Object.assign(
+            {
+                page,
+                page_count,
+                start_time: start_time ? start_time : undefined,
+                end_time: end_time ? end_time : undefined,
+                commodity_id: this.id,
+            },
+            pageData ? pageData : {},
+        );
         return getGoodsVersion(data)
             .then(res => {
                 // const { goods_version_list, ...rest } = res.data;
@@ -156,7 +162,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     page: data.page,
                     page_count: data.page_count,
                     versionGoodsList: goodsList,
-                    currentInfo: goodsList[0] || null
+                    currentInfo: goodsList[0] || null,
                 });
             })
             .finally(() => {
@@ -164,6 +170,23 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     loading: false,
                 });
             });
+    };
+
+    // 获取RELEASED状态商品
+    private searchReleasedGoods = () => {
+        getGoodsVersion({
+            page: 1,
+            page_count: 50,
+            commodity_id: this.id,
+            product_status: [5],
+        }).then(res => {
+            const { list } = res.data;
+            const goodsList = this.addRowSpanData(list);
+            // console.log('goodsList', goodsList);
+            this.setState({
+                currentInfo: goodsList[0] || null,
+            });
+        });
     };
 
     // 处理表格数据，用于合并单元格
@@ -175,26 +198,29 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             sku_info.forEach((skuItem, skuIndex) => {
                 const retItem: IGoodsVersionRowItem = {
                     ...Object.assign(rest, {
-                        _update_time: formatDate(new Date(rest.update_time * 1000), 'yyyy-MM-dd hh:mm:ss'),
+                        _update_time: formatDate(
+                            new Date(rest.update_time * 1000),
+                            'yyyy-MM-dd hh:mm:ss',
+                        ),
                     }),
                     ...Object.assign(skuItem, {
                         sku_price: Number(skuItem.sku_price),
-                        sku_inventory: Number(skuItem.sku_inventory)
-                    })
+                        sku_inventory: Number(skuItem.sku_inventory),
+                    }),
                 };
-                if (index !== len - 1) {
-                    const prev = list[index + 1];
-                    const { sku_info: prevSku, ...prevRest } = prev;
-                    const prevSkuItem = prevSku[skuIndex];
-                    retItem._prevVersion = {
-                        ...prevRest,
-                        ...Object.assign(prevSkuItem, {
-                            sku_price: Number(prevSkuItem.sku_price),
-                            sku_inventory: Number(prevSkuItem.sku_inventory)
-                        }),
-                    };
-                    // list[index + 1].sku[skuIndex];
-                }
+                // if (index !== len - 1) {
+                //     const prev = list[index + 1];
+                //     const { sku_info: prevSku, ...prevRest } = prev;
+                //     const prevSkuItem = prevSku[skuIndex];
+                //     retItem._prevVersion = {
+                //         ...prevRest,
+                //         ...Object.assign(prevSkuItem, {
+                //             sku_price: Number(prevSkuItem.sku_price),
+                //             sku_inventory: Number(prevSkuItem.sku_inventory)
+                //         }),
+                //     };
+                //     // list[index + 1].sku[skuIndex];
+                // }
                 if (skuIndex === 0) {
                     retItem._rowspan = sku_info.length;
                 }
@@ -205,12 +231,13 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         return ret;
     }
 
-    // moment.Moment[]
-    private selectedDate = (dates: RangePickerValue) => {
+    // moment.Moment[] DateType
+    private selectedDate = (dates: RangeValue<moment.Moment>) => {
+        // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: dates[0] ? this.getTimeSecond(dates[0].valueOf()) : 0,
-                end_time: dates[1] ? this.getTimeSecond(dates[1].valueOf()) : 0
+                start_time: dates && dates[0] ? this.getTimeSecond(dates[0].valueOf(), true) : 0,
+                end_time: dates && dates[1] ? this.getTimeSecond(dates[1].valueOf()) : 0,
             },
             () => {
                 this.onSearch();
@@ -220,7 +247,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
 
     // 生成表格
     downloadExcel = () => {
+        const { start_time, end_time, page, page_count } = this.state;
         postGoodsVersionExport({
+            page,
+            page_count,
+            start_time: start_time ? start_time : undefined,
+            end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
         }).catch(err => {
             message.error('下载表格失败');
@@ -238,11 +270,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     postGoodsOnsale = (product_id: string) => {
         postGoodsOnsale({
             scm_goods_id: [product_id],
-        })
-            .then(res => {
-                message.success(`${product_id}应用成功`);
-                this.onSearch();
-            })
+        }).then(res => {
+            message.success(`${product_id}应用成功`);
+            this.onSearch();
+        });
     };
 
     // 忽略版本
@@ -258,30 +289,30 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 message.success(`${product_id}忽略失败`);
                 this.onSearch();
             });
-    }
+    };
 
     onChangePage = (page: number) => {
         this.onSearch({
             page,
         });
-    }
+    };
 
     pageCountChange = (current: number, size: number) => {
         this.onSearch({
             page_count: size,
         });
-    }
+    };
 
     render() {
-        const { 
+        const {
             loading,
             page,
             page_count,
             allCount,
-            start_time, 
-            end_time, 
-            currentInfo, 
-            versionGoodsList
+            start_time,
+            end_time,
+            currentInfo,
+            versionGoodsList,
         } = this.state;
         let currentDom = null;
         if (currentInfo) {
@@ -294,7 +325,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 third_catagory,
                 _update_time,
                 worm_goodsinfo_link,
-                worm_goods_id
+                worm_goods_id,
             } = currentInfo;
             currentDom = (
                 <div className="goods-version-current">
@@ -314,18 +345,16 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         </p>
                         <p>
                             <span>
-                                类目：{
-                                    [first_catagory.name, second_catagory.name, third_catagory.name]
+                                类目：
+                                {[first_catagory.name, second_catagory.name, third_catagory.name]
                                     .filter(item => item)
-                                    .join('/')
-                                }
+                                    .join('/')}
                             </span>
                         </p>
                     </div>
                 </div>
-            )
+            );
         }
-        
 
         return (
             <div className="goods-version">
@@ -336,22 +365,28 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         <RangePicker
                             className="date"
                             defaultValue={
-                                start_time ? [
-                                    moment(formatDate(new Date(start_time * 1000), 'yyyy-MM-dd')), 
-                                    moment(formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'))
-                                ] : [null, null]
+                                start_time
+                                    ? [
+                                          moment(
+                                              formatDate(new Date(start_time * 1000), 'yyyy-MM-dd'),
+                                          ),
+                                          moment(
+                                              formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'),
+                                          ),
+                                      ]
+                                    : [null, null]
                             }
                             onChange={this.selectedDate}
                         />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
                     </div>
-                    <Pagination 
+                    <Pagination
                         size="small"
                         total={allCount}
                         current={page}
                         pageSize={page_count}
-                        showSizeChanger={true} 
-                        showQuickJumper={true} 
+                        showSizeChanger={true}
+                        showQuickJumper={true}
                         pageSizeOptions={pageSizeOptions}
                         onChange={this.onChangePage}
                         onShowSizeChange={this.pageCountChange}
