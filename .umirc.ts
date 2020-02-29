@@ -1,7 +1,6 @@
 import { IConfig } from 'umi-types';
 const shajs = require('sha.js');
 import path from 'path';
-const eslint = require('eslint');
 
 // ref: https://umijs.org/config/
 const config: IConfig = {
@@ -40,7 +39,6 @@ const config: IConfig = {
                 antd: true,
                 dva: true,
                 dynamicImport: { webpackChunkName: true },
-                title: '供应链管理中台',
                 dll: process.env.NODE_ENV === 'production',
                 locale: {
                     enable: false,

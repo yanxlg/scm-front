@@ -42,6 +42,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
             <ProLayout
                 multiple={false}
                 logo={logo}
+                title="供应链中台"
                 onCollapse={this.handleMenuCollapse}
                 menuItemRender={(menuItemProps, defaultDom) => {
                     if (menuItemProps.isUrl) {
