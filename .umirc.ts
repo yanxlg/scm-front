@@ -1,16 +1,16 @@
 import { IConfig } from 'umi-types';
 const shajs = require('sha.js');
-import path from "path";
+import path from 'path';
 const eslint = require('eslint');
 
 // ref: https://umijs.org/config/
 const config: IConfig = {
     treeShaking: true,
-    hash:true,
+    hash: true,
     devtool: process.env.NODE_ENV !== 'production' ? 'source-map' : false,
     cssLoaderOptions: {
         modules: false,
-        localsConvention: 'camelCase',// scope支持camel转换
+        localsConvention: 'camelCase', // scope支持camel转换
         getLocalIdent: (
             context: {
                 resourcePath: string;
@@ -34,27 +34,30 @@ const config: IConfig = {
     },
     plugins: [
         // ref: https://umijs.org/plugin/umi-plugin-react.html
-        ['umi-plugin-react', {
-            antd: true,
-            dva: true,
-            dynamicImport: { webpackChunkName: true },
-            title: '供应链管理中台',
-            dll: process.env.NODE_ENV === 'production',
-            locale: {
-                enable: false,
-                default: 'zh-CN',
-                baseNavigator: false,
+        [
+            'umi-plugin-react',
+            {
+                antd: true,
+                dva: true,
+                dynamicImport: { webpackChunkName: true },
+                title: '供应链管理中台',
+                dll: process.env.NODE_ENV === 'production',
+                locale: {
+                    enable: false,
+                    default: 'zh-CN',
+                    baseNavigator: false,
+                },
+                routes: {
+                    exclude: [
+                        /models\//,
+                        /services\//,
+                        /model\.(t|j)sx?$/,
+                        /service\.(t|j)sx?$/,
+                        /components\//,
+                    ],
+                },
             },
-            routes: {
-                exclude: [
-                    /models\//,
-                    /services\//,
-                    /model\.(t|j)sx?$/,
-                    /service\.(t|j)sx?$/,
-                    /components\//,
-                ],
-            },
-        }],
+        ],
     ],
     proxy: {
         '/api': {
@@ -64,20 +67,24 @@ const config: IConfig = {
         },
     },
     chainWebpack(config, { webpack }) {
-        const appSrc = path.resolve(process.cwd(),"src");
-        const umi = path.resolve(process.cwd(),"src/pages/.umi");
-        config.module.rule("lint").test(/\.(js|mjs|jsx|ts|tsx)$/)
-            .include.add(appSrc).end()
-            .exclude.add(umi).end()
-            .enforce("pre")
-            .use("eslint-loader")
-            .loader("eslint-loader")
+        const appSrc = path.resolve(process.cwd(), 'src');
+        const umi = path.resolve(process.cwd(), 'src/pages/.umi');
+        config.module
+            .rule('lint')
+            .test(/\.(js|mjs|jsx|ts|tsx)$/)
+            .include.add(appSrc)
+            .end()
+            .exclude.add(umi)
+            .end()
+            .enforce('pre')
+            .use('eslint-loader')
+            .loader('eslint-loader')
             .options({
                 cache: true,
                 resolvePluginsRelativeTo: __dirname,
                 useEslintrc: true,
             });
-    }
+    },
 };
 
 export default config;
