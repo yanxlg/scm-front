@@ -13,7 +13,7 @@ declare interface IFitTableProps<T> extends TableProps<T> {
     minHeight?: number;
 }
 
-class FitTable<T extends object> extends React.PureComponent<IFitTableProps<T>, IFitTableState> {
+class FitTable<T extends object> extends React.Component<IFitTableProps<T>, IFitTableState> {
     constructor(props: TableProps<T>) {
         super(props);
         this.state = {
