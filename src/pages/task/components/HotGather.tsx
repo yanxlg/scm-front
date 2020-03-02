@@ -38,6 +38,8 @@ import {
     HotTaskFilterType,
 } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
+import { doc } from 'prettier';
+import concat = doc.builders.concat;
 
 export declare interface IFormData {
     range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -78,7 +80,8 @@ declare interface IHotGatherState {
 
     pddCategory: IPDDCategory;
     categoryLoading: boolean;
-    sortCondition: Array<IPDDSortItem>;
+    listSort: Array<IPDDSortItem>;
+    merchantSort: Array<IPDDSortItem>;
     sortLoading: boolean;
 }
 
@@ -109,7 +112,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             queryLoading: props.taskId !== void 0,
             pddCategory: [],
             categoryLoading: true,
-            sortCondition: [],
+            listSort: [],
+            merchantSort: [],
             sortLoading: true,
         };
     }
@@ -137,19 +141,36 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     }
 
     private querySortCondition() {
-        querySortCondition()
-            .then(({ data: { sortCondition = [] } }) => {
-                this.setState({
-                    sortLoading: false,
-                    sortCondition: sortCondition,
-                });
-                if (this.props.taskId === void 0) {
-                    // 设置默认排序类型
-                    this.formRef.current!.setFieldsValue({
-                        sort_type: sortCondition[0]?.value,
+        Promise.all([querySortCondition('list'), querySortCondition('merchant')])
+            .then(
+                ([
+                    {
+                        data: { sortCondition: listSort = [] },
+                    },
+                    {
+                        data: { sortCondition: merchantSort = [] },
+                    },
+                ]) => {
+                    this.setState({
+                        sortLoading: false,
+                        listSort: listSort,
+                        merchantSort: merchantSort,
                     });
-                }
-            })
+                    if (this.props.taskId === void 0) {
+                        // 设置默认排序类型
+                        const range = this.formRef.current!.getFieldValue('range');
+                        if (range === HotTaskRange.fullStack) {
+                            this.formRef.current!.setFieldsValue({
+                                sort_type: listSort[0]?.value,
+                            });
+                        } else {
+                            this.formRef.current!.setFieldsValue({
+                                sort_type: merchantSort[0]?.value,
+                            });
+                        }
+                    }
+                },
+            )
             .catch(() => {
                 this.setState({
                     sortLoading: false,
@@ -522,6 +543,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         if (value === HotTaskRange.fullStack) {
             // 全站
             this.formRef.current!.resetFields(['shopId']);
+            this.formRef.current!.setFieldsValue({
+                sort_type: this.state.listSort[0].value,
+            });
         } else {
             this.formRef.current!.resetFields([
                 'category_level_one',
@@ -530,6 +554,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             ]);
             this.formRef.current!.setFieldsValue({
                 filterType: HotTaskFilterType.ByKeywords,
+                sort_type: this.state.merchantSort[0].value,
             });
         }
     }
@@ -548,25 +573,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    private getDefaultAllIds(pddCategory: IPDDCategory) {
-        let firstLevelIds: string[] = [];
-        let secondLevelIds: string[] = [];
-        let lastLevelIds: string[] = [];
-        pddCategory.forEach(firstCategory => {
-            firstLevelIds.push(firstCategory?.platform_cate_id);
-            firstCategory?.children?.forEach(secondCategory => {
-                secondLevelIds.push(secondCategory?.platform_cate_id);
-                secondCategory?.children?.forEach(lastCategory => {
-                    lastLevelIds.push(lastCategory?.platform_cate_id);
-                });
-            });
-        });
-        return {
-            firstIds: firstLevelIds.join(','),
-            secondIds: secondLevelIds.join(','),
-            lastIds: lastLevelIds.join(','),
-        };
-    }
     private getTreeNodeList(firstFilterIds?: string[], secondFilterIds?: string[]) {
         const { pddCategory = [] } = this.state;
         const filterType =
@@ -701,6 +707,123 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             : [];
     }
 
+    private checkSecondCategory() {
+        const {
+            category_level_one = [],
+            category_level_two = [],
+            filterType,
+        } = this.formRef.current!.getFieldsValue([
+            'category_level_one',
+            'category_level_two',
+            'filterType',
+        ]);
+        if (filterType === HotTaskFilterType.ByKeywords) {
+            return Promise.resolve();
+        }
+        const firstIds =
+            typeof category_level_one === 'string'
+                ? category_level_one.split(',')
+                : category_level_one.length === 1
+                ? category_level_one[0].split(',')
+                : category_level_one;
+        let validate = false;
+        const { pddCategory = [] } = this.state;
+        let firstCategoryList: any[] = [];
+
+        pddCategory.forEach(first => {
+            if (firstIds.indexOf(first.platform_cate_id) > -1) {
+                firstCategoryList.push(first);
+            }
+        });
+
+        const mergeList = ([] as any[]).concat(firstCategoryList);
+
+        const length = mergeList.length;
+
+        let i = 0;
+        while (!validate && i < length) {
+            const cur = mergeList[i];
+            const children = cur.children;
+            if (!children || children!.length === 0) {
+                validate = true;
+            }
+            i++;
+        }
+
+        if (validate || (category_level_two && category_level_two.length > 0)) {
+            return Promise.resolve();
+        }
+
+        return Promise.reject('必须选择二级分类');
+    }
+    private checkLastCategory() {
+        const {
+            category_level_one = [],
+            category_level_two = [],
+            category_level_three = [],
+            filterType,
+        } = this.formRef.current!.getFieldsValue([
+            'category_level_one',
+            'category_level_two',
+            'category_level_three',
+            'filterType',
+        ]);
+        if (filterType === HotTaskFilterType.ByKeywords) {
+            return Promise.resolve();
+        }
+        const firstIds =
+            typeof category_level_one === 'string'
+                ? category_level_one.split(',')
+                : category_level_one.length === 1
+                ? category_level_one[0].split(',')
+                : category_level_one;
+        const secondIds =
+            typeof category_level_two === 'string'
+                ? category_level_two.split(',')
+                : category_level_two.length === 1
+                ? category_level_two[0].split(',')
+                : category_level_two;
+        let validate = false;
+        const { pddCategory = [] } = this.state;
+        let firstCategoryList: any[] = [];
+        let secondCategory: any[] = [];
+
+        pddCategory.forEach(first => {
+            if (firstIds.indexOf(first.platform_cate_id) > -1) {
+                firstCategoryList.push(first);
+            }
+            first.children?.forEach(second => {
+                if (secondIds.indexOf(second.platform_cate_id) > -1) {
+                    secondCategory.push(second);
+                }
+            });
+        });
+
+        const mergeList = ([] as any[]).concat(firstCategoryList).concat(secondCategory);
+
+        const length = mergeList.length;
+
+        let i = 0;
+        while (!validate && i < length) {
+            const cur = mergeList[i];
+            const children = cur.children;
+            if (!children || children!.length === 0) {
+                validate = true;
+            }
+            i++;
+        }
+
+        if (
+            validate ||
+            (category_level_three && category_level_three.length > 0) ||
+            !category_level_two ||
+            category_level_two.length === 0
+        ) {
+            return Promise.resolve();
+        }
+        return Promise.reject('必须选择三级分类');
+    }
+
     render() {
         const { taskId } = this.props;
         const edit = taskId !== void 0;
@@ -711,10 +834,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             status,
             failTimes,
             successTimes,
-            pddCategory = [],
             categoryLoading,
             sortLoading,
-            sortCondition = [],
+            listSort = [],
+            merchantSort = [],
         } = this.state;
 
         return (
@@ -849,12 +972,14 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     name="category_level_one"
                                                                     label="一级类目"
                                                                     className="form-item-horizon form-item-inline form-required-absolute"
+                                                                    validateFirst={true}
                                                                     rules={[
                                                                         {
                                                                             required:
                                                                                 filterType ===
                                                                                 HotTaskFilterType.ByCategory,
-                                                                            message: '请选择类目',
+                                                                            message:
+                                                                                '必须选择一级分类',
                                                                         },
                                                                     ]}
                                                                 >
@@ -913,7 +1038,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     validateTrigger={'onBlur'}
                                                                     name="category_level_two"
                                                                     label="二级类目"
-                                                                    className="form-item-horizon form-item-inline"
+                                                                    className="form-item-horizon form-item-inline form-required-absolute"
+                                                                    rules={[
+                                                                        {
+                                                                            validator: this
+                                                                                .checkSecondCategory,
+                                                                        },
+                                                                    ]}
                                                                 >
                                                                     <TreeSelect
                                                                         disabled={
@@ -972,7 +1103,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     validateTrigger={'onBlur'}
                                                                     name="category_level_three"
                                                                     label="三级类目"
-                                                                    className="form-item-horizon form-item-inline"
+                                                                    className="form-item-horizon form-item-inline form-required-absolute"
+                                                                    rules={[
+                                                                        {
+                                                                            validator: this
+                                                                                .checkLastCategory,
+                                                                        },
+                                                                    ]}
                                                                 >
                                                                     <TreeSelect
                                                                         disabled={
@@ -1040,20 +1177,37 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         </div>
                         <div className="config-radio">
                             <Form.Item
-                                validateTrigger={'onBlur'}
-                                name="sort_type"
-                                label="排序类型"
-                                className="form-item-horizon form-item-inline form-item"
+                                noStyle={true}
+                                shouldUpdate={(prevValues, currentValues) =>
+                                    prevValues.range !== currentValues.range
+                                }
                             >
-                                <Select loading={sortLoading} className="select-default">
-                                    {sortCondition.map(sort => {
-                                        return (
-                                            <Option key={sort.value} value={sort.value}>
-                                                {sort.display}
-                                            </Option>
-                                        );
-                                    })}
-                                </Select>
+                                {({ getFieldValue }) => {
+                                    const range = getFieldValue('range');
+                                    const list =
+                                        range === HotTaskRange.fullStack ? listSort : merchantSort;
+                                    return (
+                                        <Form.Item
+                                            validateTrigger={'onBlur'}
+                                            name="sort_type"
+                                            label="排序类型"
+                                            className="form-item-horizon form-item-inline form-item"
+                                        >
+                                            <Select
+                                                loading={sortLoading}
+                                                className="select-default"
+                                            >
+                                                {list.map(sort => {
+                                                    return (
+                                                        <Option key={sort.value} value={sort.value}>
+                                                            {sort.display}
+                                                        </Option>
+                                                    );
+                                                })}
+                                            </Select>
+                                        </Form.Item>
+                                    );
+                                }}
                             </Form.Item>
                         </div>
                     </Card>
