@@ -32,7 +32,7 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             title: '时间',
             dataIndex: 'onsale_time',
             align: 'center',
-            render: (val: number) => formatDate(new Date(val * 1000), 'yyyy-MM-dd'),
+            render: (val: number) => formatDate(new Date(val * 1000), 'yyyy-MM-dd hh:mm:ss'),
         },
         {
             key: 'onsale_channel',
