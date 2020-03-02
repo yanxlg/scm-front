@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "6798070",
+      "name": "出入库管理",
+      "font_class": "io",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
       "icon_id": "1277992",
       "name": "订单管理",
       "font_class": "order",

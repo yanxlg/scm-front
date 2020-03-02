@@ -74,7 +74,7 @@ export default [
         name: '出入库管理',
         icon: (
             <span className="anticon">
-                <Icon type="order" className="menu-icon" />
+                <Icon type="io" className="menu-icon" />
             </span>
         ),
     },
