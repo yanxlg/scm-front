@@ -47,8 +47,9 @@ declare interface IGoodsVersionParams {
     product_status?: number[];
 }
 
-export interface IGoodsEditImgItem {
+export declare interface IGoodsEditImgItem {
     type: 'new' | 'old';
+    is_default?: 0 | 1;
     url: string;
     position?: number;
     alt?: string;
@@ -62,6 +63,12 @@ export declare interface IGoodsEditData {
     description: string;
     cat_id: number;
     imgs: IGoodsEditImgItem[];
+}
+
+declare interface ISkuParams {
+    page: number;
+    page_count: number;
+    product_id: string;
 }
 
 export async function getGoodsList(params: IFilterParams) {
@@ -184,4 +191,11 @@ export async function postGoodsIgnoreVersion(data: IProductId) {
     return request.post(ApiPathEnum.postGoodsIgnoreVersion, {
         data,
     });
+}
+
+// 获取sku列表分页
+export async function getGoodsSkuList(params: ISkuParams) {
+    return request.get(`/api/v1/goods/skus/${params.product_id}`, {
+        params
+    })
 }
