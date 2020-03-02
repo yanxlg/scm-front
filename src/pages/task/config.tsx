@@ -9,7 +9,7 @@ import AutoPurchaseTask from '@/pages/task/components/AutoPurchaseTask';
 const { TabPane } = Tabs;
 
 const Config: React.FC = (props: {}) => {
-    const [activeKey, setActiveKey] = useState('2');
+    const [activeKey, setActiveKey] = useState('1');
     const onChange = useCallback((activeKey: string) => setActiveKey(activeKey), []);
     return useMemo(() => {
         return (
