@@ -3,7 +3,6 @@ import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
 import { isNull } from '@/utils/validate';
 import { AutoPurchaseTaskType, TaskExecuteType } from '@/enums/StatusEnum';
-import { transStartDate } from '@/utils/date';
 
 declare interface ITaskListSearch extends IFormData {
     page: number;
@@ -14,6 +13,7 @@ export declare interface IPddHotTaskParams {
     range?: number;
     category_level_one?: string;
     category_level_two?: string;
+    category_level_three?: string;
     sort_type?: string;
     keywords?: string;
     task_type?: TaskExecuteType;
@@ -50,11 +50,16 @@ export async function getTaskList(params: ITaskListSearch) {
     });
 }
 
-export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskParams) {
+export async function addPddHotTask({
+    grab_count_max,
+    grab_page_count,
+    ...params
+}: IPddHotTaskParams) {
     return request.post(ApiPathEnum.AddPDDHotTask, {
         data: {
             ...params,
             grab_count_max: isNull(grab_count_max) ? 10000 : grab_count_max,
+            grab_page_count: isNull(grab_page_count) ? 20 : grab_page_count,
             version: '1.0',
             platform: 'PDD',
         },

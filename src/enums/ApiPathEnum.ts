@@ -25,7 +25,7 @@ enum ApiPathEnum {
     ADDTimerUpdate = '/api/v1/task/spider/goods_update',
     DeleteTask = '/api/v1/task/delete',
     ActiveTask = '/api/v1/task/plan',
-    AbortTask = '/api/v1/task/cancel',
+    AbortTask = '/api/v1/task/termination',
     QueryTaskDetail = '/api/v1/task/detail',
     QueryPDDCategory = '/api/v1/spider/pdd_category',
     QueryPDDSortCondition = '/api/v1/spider/pdd_sort_type',

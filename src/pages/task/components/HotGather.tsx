@@ -5,13 +5,13 @@ import {
     Card,
     DatePicker,
     Input,
-    InputNumber,
     Modal,
     Radio,
     Select,
     Spin,
     Tooltip,
     Form,
+    TreeSelect,
 } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
@@ -42,8 +42,9 @@ import IntegerInput from '@/components/IntegerInput';
 export declare interface IFormData {
     range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
     shopId?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
-    category_level_one?: string;
-    category_level_two?: string;
+    category_level_one?: string[] | string;
+    category_level_two?: string[] | string;
+    category_level_three?: string[] | string;
     sort_type?: string;
     keywords?: string;
     task_type?: TaskExecuteType;
@@ -60,6 +61,7 @@ export declare interface IFormData {
     day?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     second?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     task_name?: string;
+    filterType?: HotTaskFilterType;
 }
 
 declare interface IHotGatherProps {
@@ -136,11 +138,17 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private querySortCondition() {
         querySortCondition()
-            .then(({ data: { sortCondition } }) => {
+            .then(({ data: { sortCondition = [] } }) => {
                 this.setState({
                     sortLoading: false,
                     sortCondition: sortCondition,
                 });
+                if (this.props.taskId === void 0) {
+                    // 设置默认排序类型
+                    this.formRef.current!.setFieldsValue({
+                        sort_type: sortCondition[0]?.value,
+                    });
+                }
             })
             .catch(() => {
                 this.setState({
@@ -156,6 +164,15 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     categoryLoading: false,
                     pddCategory: data,
                 });
+                if (this.props.taskId === void 0) {
+                    const { firstIds, secondIds, lastIds } = this.getDefaultAllIds(data);
+                    // 创建时设置默认值为全选
+                    this.formRef.current!.setFieldsValue({
+                        category_level_one: firstIds,
+                        category_level_two: secondIds,
+                        category_level_three: lastIds,
+                    });
+                }
             })
             .catch(() => {
                 this.setState({
@@ -172,6 +189,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             task_start_time,
             task_interval_seconds,
             keywords,
+            category_level_one = '',
+            category_level_two = '',
+            category_level_three = '',
             ...extra
         } = info;
         const taskType =
@@ -179,6 +199,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
             keywords,
+            category_level_one: category_level_one.split(','),
+            category_level_two: category_level_two.split(','),
+            category_level_three: category_level_three.split(','),
             range: range === HotTaskRange.fullStack ? range : HotTaskRange.store,
             shopId: range !== HotTaskRange.fullStack ? range : undefined,
             task_end_time:
@@ -222,12 +245,34 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             taskIntervalType,
             task_type,
             task_end_time,
+            category_level_one,
+            category_level_two,
+            category_level_three,
+            filterType,
             ...extra
         } = values;
         return {
             ...extra,
             task_type,
             range: range === HotTaskRange.store ? shopId : range,
+            category_level_one:
+                range === HotTaskRange.fullStack
+                    ? typeof category_level_one === 'string'
+                        ? category_level_one
+                        : category_level_one?.join(',')
+                    : undefined,
+            category_level_two:
+                range === HotTaskRange.fullStack
+                    ? typeof category_level_two === 'string'
+                        ? category_level_two
+                        : category_level_two?.join(',')
+                    : undefined,
+            category_level_three:
+                range === HotTaskRange.fullStack
+                    ? typeof category_level_three === 'string'
+                        ? category_level_three
+                        : category_level_three?.join(',')
+                    : undefined,
             is_immediately_execute: task_type === TaskExecuteType.once && !onceStartTime,
             task_start_time:
                 task_type === TaskExecuteType.once
@@ -271,6 +316,14 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 )
                     .then(({ data: { task_id = -1 } = {} } = {}) => {
                         this.formRef.current!.resetFields();
+                        const { firstIds, secondIds, lastIds } = this.getDefaultAllIds(
+                            this.state.pddCategory,
+                        );
+                        this.formRef.current!.setFieldsValue({
+                            category_level_one: firstIds,
+                            category_level_two: secondIds,
+                            category_level_three: lastIds,
+                        });
                         Modal.info({
                             content: (
                                 <GatherSuccessModal
@@ -503,6 +556,12 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         if (value === HotTaskFilterType.ByCategory) {
             // 类目筛选
             this.formRef.current!.resetFields(['keywords']);
+            const { firstIds, secondIds, lastIds } = this.getDefaultAllIds(this.state.pddCategory);
+            this.formRef.current!.setFieldsValue({
+                category_level_one: firstIds,
+                category_level_two: secondIds,
+                category_level_three: lastIds,
+            });
         } else {
             this.formRef.current!.resetFields([
                 'category_level_one',
@@ -510,6 +569,113 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 'category_level_three',
             ]);
         }
+    }
+
+    private getDefaultAllIds(pddCategory: IPDDCategory) {
+        let firstLevelIds: string[] = [];
+        let secondLevelIds: string[] = [];
+        let lastLevelIds: string[] = [];
+        pddCategory.forEach(firstCategory => {
+            firstLevelIds.push(firstCategory?.platform_cate_id);
+            firstCategory?.children?.forEach(secondCategory => {
+                secondLevelIds.push(secondCategory?.platform_cate_id);
+                secondCategory?.children?.forEach(lastCategory => {
+                    lastLevelIds.push(lastCategory?.platform_cate_id);
+                });
+            });
+        });
+        return {
+            firstIds: firstLevelIds.join(','),
+            secondIds: secondLevelIds.join(','),
+            lastIds: lastLevelIds.join(','),
+        };
+    }
+    private getTreeNodeList(firstFilterIds?: string[], secondFilterIds?: string[]) {
+        const { pddCategory = [] } = this.state;
+        let idArr: string[] = [];
+        let childrenArr: any[] = [];
+        let ids = '';
+        const firstFilterIdArray =
+            firstFilterIds && firstFilterIds.length === 1
+                ? firstFilterIds[0].split(',')
+                : firstFilterIds;
+        const secondFilterIdArray =
+            secondFilterIds && secondFilterIds.length === 1
+                ? secondFilterIds[0].split(',')
+                : secondFilterIds;
+        if (!firstFilterIdArray) {
+            pddCategory.forEach(category => {
+                idArr.push(category.platform_cate_id);
+                childrenArr.push({
+                    title: category.platform_cate_name,
+                    value: category.platform_cate_id,
+                    key: category.platform_cate_id,
+                });
+            });
+            ids = idArr.join(',');
+            return [
+                {
+                    title: '全选',
+                    value: ids,
+                    key: ids,
+                    children: childrenArr,
+                },
+            ];
+        }
+        if (!secondFilterIdArray) {
+            pddCategory
+                .filter(category => {
+                    return firstFilterIdArray.indexOf(category.platform_cate_id) > -1;
+                })
+                .forEach(({ children = [] }) => {
+                    children.forEach(category => {
+                        idArr.push(category.platform_cate_id);
+                        childrenArr.push({
+                            title: category.platform_cate_name,
+                            value: category.platform_cate_id,
+                            key: category.platform_cate_id,
+                        });
+                    });
+                });
+            ids = idArr.join(',');
+            return [
+                {
+                    title: '全选',
+                    value: ids,
+                    key: ids,
+                    children: childrenArr,
+                },
+            ];
+        }
+        pddCategory
+            .filter(category => {
+                return firstFilterIdArray.indexOf(category.platform_cate_id) > -1;
+            })
+            .forEach(({ children = [] }) => {
+                children
+                    .filter(category => {
+                        return secondFilterIdArray.indexOf(category.platform_cate_id) > -1;
+                    })
+                    .forEach(({ children = [] }) => {
+                        children.forEach(category => {
+                            idArr.push(category.platform_cate_id);
+                            childrenArr.push({
+                                title: category.platform_cate_name,
+                                value: category.platform_cate_id,
+                                key: category.platform_cate_id,
+                            });
+                        });
+                    });
+            });
+        ids = idArr.join(',');
+        return [
+            {
+                title: '全选',
+                value: ids,
+                key: ids,
+                children: childrenArr,
+            },
+        ];
     }
 
     render() {
@@ -550,6 +716,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         task_type: TaskExecuteType.once,
                         taskIntervalType: TaskIntervalConfigType.day,
                         filterType: HotTaskFilterType.ByCategory,
+                        day: 1,
                     }}
                 >
                     <Form.Item
@@ -652,6 +819,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                             const filterType = getFieldValue(
                                                                 'filterType',
                                                             );
+                                                            const treData = this.getTreeNodeList();
                                                             return (
                                                                 <Form.Item
                                                                     validateTrigger={'onBlur'}
@@ -659,7 +827,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     label="一级类目"
                                                                     className="form-item-horizon form-item-inline"
                                                                 >
-                                                                    <Select
+                                                                    <TreeSelect
+                                                                        onChange={
+                                                                            this
+                                                                                .onFirstCategoryChange
+                                                                        }
                                                                         disabled={
                                                                             range ===
                                                                                 HotTaskRange.store ||
@@ -667,31 +839,16 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                 HotTaskFilterType.ByKeywords
                                                                         }
                                                                         loading={categoryLoading}
+                                                                        showArrow={true}
                                                                         className="select-default"
-                                                                        onChange={
-                                                                            this
-                                                                                .onFirstCategoryChange
+                                                                        showCheckedStrategy={
+                                                                            'SHOW_PARENT'
                                                                         }
-                                                                    >
-                                                                        {pddCategory.map(
-                                                                            category => {
-                                                                                return (
-                                                                                    <Option
-                                                                                        key={
-                                                                                            category.platform_cate_id
-                                                                                        }
-                                                                                        value={
-                                                                                            category.platform_cate_id
-                                                                                        }
-                                                                                    >
-                                                                                        {
-                                                                                            category.platform_cate_name
-                                                                                        }
-                                                                                    </Option>
-                                                                                );
-                                                                            },
-                                                                        )}
-                                                                    </Select>
+                                                                        showSearch={true}
+                                                                        treeDefaultExpandAll={true}
+                                                                        treeCheckable={true}
+                                                                        treeData={treData}
+                                                                    />
                                                                 </Form.Item>
                                                             );
                                                         }}
@@ -716,13 +873,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                             const filterType = getFieldValue(
                                                                 'filterType',
                                                             );
-                                                            const childCategory =
-                                                                pddCategory.find(category => {
-                                                                    return (
-                                                                        category.platform_cate_id ===
-                                                                        levelOne
-                                                                    );
-                                                                })?.children || [];
+                                                            const treData = this.getTreeNodeList(
+                                                                levelOne || [],
+                                                            );
+
                                                             return (
                                                                 <Form.Item
                                                                     validateTrigger={'onBlur'}
@@ -730,7 +884,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     label="二级类目"
                                                                     className="form-item-horizon form-item-inline"
                                                                 >
-                                                                    <Select
+                                                                    <TreeSelect
                                                                         disabled={
                                                                             range ===
                                                                                 HotTaskRange.store ||
@@ -743,26 +897,15 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                             this
                                                                                 .onSecondCategoryChange
                                                                         }
-                                                                    >
-                                                                        {childCategory.map(
-                                                                            category => {
-                                                                                return (
-                                                                                    <Option
-                                                                                        key={
-                                                                                            category.platform_cate_id
-                                                                                        }
-                                                                                        value={
-                                                                                            category.platform_cate_id
-                                                                                        }
-                                                                                    >
-                                                                                        {
-                                                                                            category.platform_cate_name
-                                                                                        }
-                                                                                    </Option>
-                                                                                );
-                                                                            },
-                                                                        )}
-                                                                    </Select>
+                                                                        showArrow={true}
+                                                                        showCheckedStrategy={
+                                                                            'SHOW_PARENT'
+                                                                        }
+                                                                        showSearch={true}
+                                                                        treeDefaultExpandAll={true}
+                                                                        treeCheckable={true}
+                                                                        treeData={treData}
+                                                                    />
                                                                 </Form.Item>
                                                             );
                                                         }}
@@ -786,23 +929,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                             const filterType = getFieldValue(
                                                                 'filterType',
                                                             );
-                                                            const childCategory =
-                                                                pddCategory.find(category => {
-                                                                    return (
-                                                                        category.platform_cate_id ===
-                                                                        levelOne
-                                                                    );
-                                                                })?.children || [];
                                                             const parentLevel = getFieldValue(
                                                                 'category_level_two',
                                                             );
-                                                            const parentCategory =
-                                                                childCategory.find(category => {
-                                                                    return (
-                                                                        category.platform_cate_id ===
-                                                                        parentLevel
-                                                                    );
-                                                                })?.children || [];
+                                                            const treData = this.getTreeNodeList(
+                                                                levelOne || [],
+                                                                parentLevel || [],
+                                                            );
                                                             return (
                                                                 <Form.Item
                                                                     validateTrigger={'onBlur'}
@@ -810,7 +943,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     label="三级类目"
                                                                     className="form-item-horizon form-item-inline"
                                                                 >
-                                                                    <Select
+                                                                    <TreeSelect
                                                                         disabled={
                                                                             range ===
                                                                                 HotTaskRange.store ||
@@ -819,26 +952,15 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                         }
                                                                         loading={categoryLoading}
                                                                         className="select-default"
-                                                                    >
-                                                                        {parentCategory.map(
-                                                                            category => {
-                                                                                return (
-                                                                                    <Option
-                                                                                        key={
-                                                                                            category.platform_cate_id
-                                                                                        }
-                                                                                        value={
-                                                                                            category.platform_cate_id
-                                                                                        }
-                                                                                    >
-                                                                                        {
-                                                                                            category.platform_cate_name
-                                                                                        }
-                                                                                    </Option>
-                                                                                );
-                                                                            },
-                                                                        )}
-                                                                    </Select>
+                                                                        showArrow={true}
+                                                                        showCheckedStrategy={
+                                                                            'SHOW_PARENT'
+                                                                        }
+                                                                        showSearch={true}
+                                                                        treeDefaultExpandAll={true}
+                                                                        treeCheckable={true}
+                                                                        treeData={treData}
+                                                                    />
                                                                 </Form.Item>
                                                             );
                                                         }}
@@ -976,6 +1098,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             >
                                 <IntegerInput
                                     min={0}
+                                    placeholder="默认值：20"
                                     className="config-input-pages input-handler"
                                 />
                             </Form.Item>
