@@ -60,7 +60,7 @@ export default [
     {
         path: '/stock',
         name: '出入库管理',
-        icon: <Icon type="order" className="menu-icon" />,
+        icon: <Icon type="io" className="menu-icon" />,
     },
     {
         path: '/setting',
