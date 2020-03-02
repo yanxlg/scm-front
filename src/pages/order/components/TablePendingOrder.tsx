@@ -1,9 +1,9 @@
 import React from 'react';
 import { Table, Input } from 'antd';
-
 import { ColumnProps } from 'antd/es/table';
-import { IPendingOrderItem, IStyleData, ICatagoryData } from './PanePendingOrder';
 import { TableRowSelection } from 'antd/lib/table/interface';
+
+import { IPendingOrderItem, IStyleData, ICatagoryData } from './PanePendingOrder';
 
 import { formatDate } from '@/utils/date';
 
@@ -12,6 +12,8 @@ const { TextArea } = Input;
 declare interface IProps {
     loading: boolean;
     orderList: IPendingOrderItem[];
+    selectedRowKeys: string[];
+    changeSelectedKeys(keys: string[]): void;
     // changeSelectedRows(selectedRows: IOrderItem[]): void;
 }
 
@@ -21,8 +23,9 @@ declare interface IState {
 
 class TablePendingOrder extends React.PureComponent<IProps, IState> {
 
-    columns: ColumnProps<IPendingOrderItem>[] = [
+    private columns: ColumnProps<IPendingOrderItem>[] = [
         {
+            fixed: true,
             key: 'order_create_time',
             title: '订单时间',
             dataIndex: 'order_create_time',
@@ -33,6 +36,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             }
         },
         {
+            fixed: true,
             key: 'middleground_order_id',
             title: '中台订单ID',
             dataIndex: 'middleground_order_id',
@@ -151,12 +155,14 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
         super(props);
     }
 
+    selectedRow = (selectedRowKeys: React.Key[]) => {
+        // console.log('selectedRowKeys', selectedRowKeys);
+        this.props.changeSelectedKeys(selectedRowKeys as string[]);
+    }
+
     render() {
-
-        
-        const { loading, orderList } = this.props;
-        // const columns = this.createColumns()
-
+        const { loading, orderList, selectedRowKeys } = this.props;
+    
         return (
             <Table
                 bordered={true}
@@ -164,7 +170,12 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 className="order-table"
                 loading={loading}
                 columns={this.columns}
-                // rowSelection={rowSelection}
+                rowSelection={{
+                    selectedRowKeys,
+                    fixed: true,
+                    columnWidth: 60,
+                    onChange: this.selectedRow
+                }}
                 dataSource={orderList}
                 scroll={{ x: true }}
                 pagination={false}

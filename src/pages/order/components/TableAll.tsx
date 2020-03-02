@@ -1,21 +1,41 @@
 import React from 'react';
-import { Table } from 'antd';
-
+import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { IOrderItem, IPurchaseStatus } from './PaneAll';
 
-declare interface IOrderTableAllProps {
+import GoodsDetailDialog from './GoodsDetailDialog';
+import { IOrderItem, IPurchaseStatus } from './PaneAll';
+import { getOrderGoodsDetail } from '@/services/order-manage';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+
+declare interface ISpecs {
+    [key: string]: string;
+}
+
+export declare interface IGoodsDetail {
+    channel_goods_id: string;
+    psku: string;
+    main_img: string;
+    sku: string;
+    sku_img: string;
+    goods_name: string;
+    specs: ISpecs;
+}
+
+declare interface IProps {
     loading: boolean;
     colList: string[];
     orderList: IOrderItem[];
     // changeSelectedRows(selectedRows: IOrderItem[]): void;
+    onCheckAllChange(status: boolean): void;
+    onSelectedRow(row: IOrderItem): void;
 }
 
-declare interface IOrderTableAllState {
-
+declare interface IState {
+    detailDialogStatus: boolean;
+    goodsDetail: IGoodsDetail | null;
 }
 
-class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTableAllState> {
+class OrderTableAll extends React.PureComponent<IProps, IState> {
 
     private allColumns: ColumnProps<IOrderItem>[] = [
         {
@@ -49,8 +69,7 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
             width: 120,
             render: (value: any, row: IOrderItem) => {
                 return {
-                    // onClick={() => this.getOrderGoodsDetail(row.middleground_order_id)}
-                    children: <a >查看商品详情</a>,
+                    children: <a onClick={() => this.getOrderGoodsDetail(row.channel_order_id)}>查看商品详情</a>,
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -265,18 +284,58 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
         },
     ]
 
-    constructor(props: IOrderTableAllProps) {
+    constructor(props: IProps) {
         super(props);
+        this.state = {
+            detailDialogStatus: false,
+            goodsDetail: null,
+        }
     }
 
     private createColumns = ():ColumnProps<IOrderItem>[] => {
-        const { colList } = this.props;
+        const { colList, orderList, onCheckAllChange, onSelectedRow } = this.props;
+        const rowspanList = orderList.filter(item => item._rowspan);
+        const checkedListLen = rowspanList.filter(item => item._checked).length;
+        let indeterminate = false, checked = false;
+        if (rowspanList.length === checkedListLen) {
+            checked = true; 
+        } else if (checkedListLen) {
+            indeterminate = true;
+        }
         // console.log(111, colList);
-        return colList.map(key => {
+        const allColumns: ColumnProps<IOrderItem>[]  = [
+            {
+                fixed: true,
+                key: '_checked',
+                title: () => <Checkbox indeterminate={indeterminate} checked={checked} onChange={e => onCheckAllChange(e.target.checked)}/>,
+                dataIndex: '_checked',
+                align: 'center',
+                width: 60,
+                render: (value: boolean, row: IOrderItem) => {
+                    return {
+                        children: (
+                            <Checkbox 
+                                checked={value}
+                                onChange={() => onSelectedRow(row)}
+                            />
+                        ),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    }
+                }
+            },
+        ]
+        colList.forEach(key => {
             const i = this.allColumns.findIndex(item => item.key === key);
             // console.log('key', key, i);
-            return this.allColumns[i]
+            if (i === -1) {
+                // console.log('colList没找到', key);
+            } else {
+                allColumns.push(this.allColumns[i]);
+            }
         });
+        return allColumns;
     }
 
     // 合并单元格
@@ -289,24 +348,55 @@ class OrderTableAll extends React.PureComponent<IOrderTableAllProps, IOrderTable
         };
     }
 
+    hideGoodsDetailDialog = () => {
+        this.setState({
+            detailDialogStatus: false,
+            goodsDetail: null,
+        });
+    };
+
+    // 获取商品详情
+    private getOrderGoodsDetail = (middleground_order_id: string) => {
+        this.setState({
+            detailDialogStatus: true,
+        });
+        getOrderGoodsDetail({
+            middleground_order_id,
+        })
+            .then(res => {
+                // console.log('getOrderGoodsDetail', res);
+                this.setState({
+                    goodsDetail: res.data,
+                });
+            })
+    };
+
     render() {
 
         const { loading, orderList } = this.props;
+        const { detailDialogStatus, goodsDetail } = this.state;
         const columns = this.createColumns()
 
         return (
-            <Table
-                bordered={true}
-                rowKey="goods_commodity_id"
-                className="order-table"
-                loading={loading}
-                columns={columns}
-                // rowSelection={rowSelection}
-                dataSource={orderList}
-                scroll={{ x: true }}
-                pagination={false}
-                
-            />
+            <>
+                <Table
+                    bordered={true}
+                    rowKey="goods_commodity_id"
+                    className="order-table"
+                    loading={loading}
+                    columns={columns}
+                    // rowSelection={rowSelection}
+                    dataSource={orderList}
+                    scroll={{ x: true }}
+                    pagination={false}
+                />
+                <GoodsDetailDialog 
+                    visible={detailDialogStatus}
+                    goodsDetail={goodsDetail}
+                    hideGoodsDetailDialog={this.hideGoodsDetailDialog}
+                />
+            </>
+            
         )    
     }
 }

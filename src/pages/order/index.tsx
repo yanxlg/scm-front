@@ -96,7 +96,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="2">
                     <TabPane tab={`全部（1000）`} key="1">
                         <PaneAll />
                     </TabPane>
@@ -119,32 +119,6 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         <PaneError/>
                     </TabPane>
                 </Tabs>
-                {/* <OrderFilter
-                    ref={this.orderFilterRef}
-                />
-                <div className="order-operation">
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                        loading={loading}
-                        onClick={() => this.onSearch()}
-                    >查询</Button>
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                        onClick={this.placeOrder}
-                    >一键拍单</Button>
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                    >支付</Button>
-                    <Button className="order-btn">导出Excel</Button>
-                </div>
-                <OrderTable
-                    loading={loading}
-                    orderList={orderList}
-                    changeSelectedRows={this.changeSelectedRows}
-                /> */}
             </div>
         );
     }

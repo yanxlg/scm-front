@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Input } from 'antd';
+import { Table, Input, Modal } from 'antd';
 
 import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';
@@ -44,12 +44,16 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             title: '支付二维码',
             dataIndex: 'pay_url',
             align: 'center',
-            width: 120,
-            // render: (value: string) => {
-            //     return (
-            //         <img style={{width: '100%'}} src={value}/>
-            //     )
-            // }
+            width: 100,
+            render: (value: string) => {
+                return (
+                    <img 
+                        src={value}
+                        style={{width: '100%'}}
+                        onMouseEnter={() => this.mouseEnter(value)} 
+                    />
+                )
+            }
         },
         {
             key: 'purchase_p_order_id',
@@ -117,6 +121,16 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
 
     constructor(props: IProps) {
         super(props);
+    }
+
+    mouseEnter = (qrCodeurl: string) => {
+        // console.log('mouseEnter');
+        Modal.success({
+            icon: null,
+            okText: '关闭',
+            maskClosable: true,
+            content: <img style={{width: '100%'}} src={qrCodeurl} />
+        });
     }
 
     render() {

@@ -56,6 +56,7 @@ declare interface IBaseOrderItem {
 }
 
 export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
+    _checked?: boolean;
     _rowspan?: number;
 }
 
@@ -334,6 +335,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 let rowDataItem: IOrderItem = Object.assign({}, rest, goodsInfo);
                 if (index === 0) {
                     rowDataItem._rowspan = goods_list.length;
+                    rowDataItem._checked = false;
                 }
                 ret.push(rowDataItem);
             });
@@ -363,6 +365,43 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
     }
 
+    // 获取查询数据
+    getFieldsValue = () => {
+        // console.log('111', this.formRef.current!.getFieldsValue());
+    }
+
+    // 全选
+    onCheckAllChange = (status: boolean) => {
+        const { orderList } = this.state;
+        this.setState({
+            orderList: orderList.map(item => {
+                if (item._rowspan) {
+                    return {
+                        ...item,
+                        _checked: status
+                    }
+                }
+                return item;
+            })
+        });
+    }
+
+    // 单选
+    onSelectedRow = (row: IOrderItem) => {
+        const { orderList } = this.state;
+        this.setState({
+            orderList: orderList.map(item => {
+                if (row.channel_order_id === item.channel_order_id) {
+                    return {
+                        ...item,
+                        _checked: !row._checked
+                    }
+                }
+                return item;
+            })
+        });
+    }
+
     render() {
 
         const { 
@@ -386,7 +425,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
-                        <Button type="primary" className="order-btn">查询</Button>
+                        <Button 
+                            type="primary" 
+                            className="order-btn"
+                            onClick={() => this.getFieldsValue()}
+                        >查询</Button>
                         <Button type="primary" className="order-btn">一键拍单</Button>
                         <Button type="primary" className="order-btn">取消采购单</Button>
                         <Button type="primary" className="order-btn">取消渠道订单</Button>
@@ -413,6 +456,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         loading={loading}
                         colList={colList}
                         orderList={orderList}
+                        onCheckAllChange={this.onCheckAllChange}
+                        onSelectedRow={this.onSelectedRow}
                     />
                 </div>
             </>

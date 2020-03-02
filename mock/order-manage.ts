@@ -170,7 +170,7 @@ const payList = [
     {
         purchase_time: 1582703606,
         middleground_order_id: '111',
-        pay_url: 'pay_url',
+        pay_url: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
         purchase_p_order_id: 'purchase_p_order_id',
         purchase_order_id: 'purchase_order_id',
         purchase_price: 100,
@@ -183,7 +183,7 @@ const payList = [
     {
         purchase_time: 1582703606,
         middleground_order_id: '222',
-        pay_url: 'pay_url',
+        pay_url: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
         purchase_p_order_id: 'purchase_p_order_id',
         purchase_order_id: 'purchase_order_id',
         purchase_price: 100,

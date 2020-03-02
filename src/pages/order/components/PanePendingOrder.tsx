@@ -12,41 +12,6 @@ import {
     IFilterParams
 } from '@/services/order-manage';
 
-export declare interface IStyleData {
-    [key: string]: string;
-}
-
-export declare interface ICatagoryData {
-    id: string;
-    name: string;
-}
-
-export declare interface IPendingOrderItem {
-    order_create_time: number;
-    middleground_order_id: string;
-    goods_img: string;
-    style: IStyleData;
-    goods_num: number;
-    price: number;
-    shipping_fee: number;
-    sale_price: number;
-    sale_order_status: number;
-    purchase_order_status: number;
-    commodity_id: string;
-    second_catagory: ICatagoryData;
-    sku_id: string;
-    comment: string;
-}
-
-declare interface IState {
-    page: number;
-    pageNumber: number;
-    total: number;
-    loading: boolean;
-    showStatus: boolean;
-    orderList: IPendingOrderItem[]
-}
-
 const baseFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
@@ -124,6 +89,42 @@ const allFieldList: IFieldItem[] = [
     endFieldItem
 ];
 
+export declare interface IStyleData {
+    [key: string]: string;
+}
+
+export declare interface ICatagoryData {
+    id: string;
+    name: string;
+}
+
+export declare interface IPendingOrderItem {
+    order_create_time: number;
+    middleground_order_id: string;
+    goods_img: string;
+    style: IStyleData;
+    goods_num: number;
+    price: number;
+    shipping_fee: number;
+    sale_price: number;
+    sale_order_status: number;
+    purchase_order_status: number;
+    commodity_id: string;
+    second_catagory: ICatagoryData;
+    sku_id: string;
+    comment: string;
+}
+
+declare interface IState {
+    page: number;
+    pageNumber: number;
+    total: number;
+    loading: boolean;
+    showStatus: boolean;
+    selectedRowKeys: string[];
+    orderList: IPendingOrderItem[];
+}
+
 class PanePendingOrder extends React.PureComponent<{}, IState> {
 
     private formRef: RefObject<FormInstance> = React.createRef();
@@ -136,7 +137,8 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
             total: 0,
             loading: false,
             showStatus: false,
-            orderList: []
+            orderList: [],
+            selectedRowKeys: []
         }
     }
 
@@ -190,12 +192,19 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
         });
     }
 
+    changeSelectedKeys = (keys: string[]) => {
+        this.setState({
+            selectedRowKeys: keys
+        });
+    }
+
     render() {
 
         const {
             showStatus,
             loading,
-            orderList
+            orderList,
+            selectedRowKeys
         } = this.state;
 
         const initialValues = {
@@ -228,6 +237,8 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
                     <TablePendingOrder
                         loading={loading}
                         orderList={orderList}
+                        selectedRowKeys={selectedRowKeys}
+                        changeSelectedKeys={this.changeSelectedKeys}
                     />
                 </div>
             </>
