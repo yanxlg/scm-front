@@ -23,17 +23,16 @@ declare interface IState {
     currentRowData: IRowDataItem | null;
 }
 class GoodsTable extends React.PureComponent<IProps, IState> {
-
     private skuDialogRef: RefObject<SkuDialog> = React.createRef();
 
     constructor(props: IProps) {
         super(props);
         this.state = {
             skuDialogStatus: false,
-            currentRowData: null
-        }
+            currentRowData: null,
+        };
     }
-   
+
     private columns: ColumnProps<IRowDataItem>[] = [
         {
             fixed: true,
@@ -55,9 +54,8 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                         >
                             编辑
                         </Button>
-                        
                     </>
-                )
+                );
             },
         },
         {
@@ -74,13 +72,15 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                         <Link to={`/goods/local/version?id=${row.commodity_id}`}>
                             <Button
                                 ghost={true}
-                                size="small" 
+                                size="small"
                                 type="primary"
-                                className="goods-local-img-edit" 
-                            >查看更多版本</Button>
+                                className="goods-local-img-edit"
+                            >
+                                查看更多版本
+                            </Button>
                         </Link>
                     </>
-                )
+                );
             },
         },
         {
@@ -100,7 +100,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return <ZoomImage className="goods-local-img" src={value} />
+                return <ZoomImage className="goods-local-img" src={value} />;
             },
         },
         {
@@ -121,8 +121,8 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: ICatagoryData, row: IRowDataItem) => {
                 const { second_catagory, third_catagory } = row;
-                return <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>
-            }
+                return <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>;
+            },
         },
         {
             key: 'sku_number',
@@ -136,14 +136,16 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                         <div>{value}</div>
                         <Button
                             ghost={true}
-                            size="small" 
+                            size="small"
                             type="primary"
                             className="goods-local-img-edit"
-                            onClick={() => this.showSkuDialog(row)} 
-                        >查看sku信息</Button>
+                            onClick={() => this.showSkuDialog(row)}
+                        >
+                            查看sku信息
+                        </Button>
                     </>
-                )
-            }
+                );
+            },
         },
         {
             key: 'sku_price',
@@ -152,50 +154,50 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'sku_price',
             align: 'center',
             render: (value: number) => {
-                return `￥${value}`
-            }
+                return `￥${value}`;
+            },
         },
         {
             key: 'sales_volume',
             title: '销量',
             dataIndex: 'sales_volume',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'comments',
             title: '评价数量',
             dataIndex: 'comments',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'store_id',
             title: '店铺 id',
             dataIndex: 'store_id',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'store_name',
             title: '店铺名称',
             dataIndex: 'store_name',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'worm_task_id',
             title: '爬虫任务ID',
             dataIndex: 'worm_task_id',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'worm_goods_id',
             title: '爬虫商品ID',
             dataIndex: 'worm_goods_id',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'onsale_info',
@@ -212,7 +214,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                     >
                         {channelList.join('、')}
                     </Button>
-                ) : null
+                ) : null;
             },
         },
         {
@@ -222,7 +224,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')}</div>
+                return <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')}</div>;
             },
         },
         {
@@ -232,7 +234,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')}</div>
+                return <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')}</div>;
             },
         },
         {
@@ -242,7 +244,11 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 200,
             render: (value: string, row: IRowDataItem) => {
-                return <a href={value} target="_blank">{value}</a>
+                return (
+                    <a href={value} target="_blank">
+                        {value}
+                    </a>
+                );
             },
         },
     ];
@@ -250,22 +256,25 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
     private onSelectChange = (selectedRowKeys: React.Key[]) => {
         // console.log('onSelectChange', selectedRowKeys);
         this.props.changeSelectedRowKeys(selectedRowKeys as string[]);
-    }
+    };
 
     private showSkuDialog = (rowData: IRowDataItem) => {
-        this.setState({
-            currentRowData: rowData
-        }, () => {
-            this.toggleSkuDialog(true);
-            this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
-        });
-    }
+        this.setState(
+            {
+                currentRowData: rowData,
+            },
+            () => {
+                this.toggleSkuDialog(true);
+                this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
+            },
+        );
+    };
 
     private toggleSkuDialog = (status: boolean) => {
         this.setState({
-            skuDialogStatus: status
+            skuDialogStatus: status,
         });
-    }
+    };
 
     render() {
         const { goodsList, searchLoading, selectedRowKeys } = this.props;
@@ -273,7 +282,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
         const rowSelection = {
             fixed: true,
             selectedRowKeys: selectedRowKeys,
-            onChange: this.onSelectChange
+            onChange: this.onSelectChange,
         };
         return (
             <>
@@ -295,7 +304,6 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                     toggleSkuDialog={this.toggleSkuDialog}
                 />
             </>
-            
         );
     }
 }

@@ -73,9 +73,7 @@ declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
     sku_info: ISkuItem[];
 }
 
-export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {
-
-}
+export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {}
 
 declare interface IGoodsVersionBase {
     title: string;
@@ -159,7 +157,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                     allCount: all_count,
                     page: data.page,
                     page_count: data.page_count,
-                    versionGoodsList: goodsList
+                    versionGoodsList: goodsList,
                 });
             })
             .finally(() => {
@@ -190,10 +188,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     private addRowSpanData(list: IGoodsVersionItem[]): IGoodsVersionRowItem[] {
         let ret: IGoodsVersionRowItem[] = [];
         const len = list.length;
-        list.forEach((item) => {
+        list.forEach(item => {
             const { sku_info, ...rest } = item;
             // 目前只有一条默认的sku
-            sku_info.forEach((skuItem) => {
+            sku_info.forEach(skuItem => {
                 const retItem: IGoodsVersionRowItem = {
                     ...Object.assign(rest, {
                         _update_time: formatDate(
@@ -252,12 +250,11 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     postGoodsOnsale = (product_id: string) => {
         postGoodsOnsale({
             scm_goods_id: [product_id],
-        })
-            .then(res => {
-                message.success(`${product_id}应用成功`);
-                this.onSearch();
-                this.searchReleasedGoods();
-            })
+        }).then(res => {
+            message.success(`${product_id}应用成功`);
+            this.onSearch();
+            this.searchReleasedGoods();
+        });
     };
 
     // 忽略版本
@@ -374,7 +371,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         pageSizeOptions={pageSizeOptions}
                         onChange={this.onChangePage}
                         onShowSizeChange={this.pageCountChange}
-                        showTotal={(total) => `共${total}条`}
+                        showTotal={total => `共${total}条`}
                     />
                 </div>
                 <VersionTable

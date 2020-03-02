@@ -1,11 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { 
-    IGoodsVersionRowItem,
-    IOnsaleItem,
-    ICatagoryData
-} from '../version';
+import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData } from '../version';
 
 import VersionImgDialog from './VersionImgDialog';
 import SkuDialog from './SkuDialog';
@@ -23,7 +19,6 @@ declare interface VersionTableState {
 }
 
 class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableState> {
-
     private skuDialogRef: RefObject<SkuDialog> = React.createRef();
 
     private columns: ColumnProps<IGoodsVersionRowItem>[] = [
@@ -65,7 +60,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             width: 140,
             title: 'Product ID',
             dataIndex: 'product_id',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'onsale_info',
@@ -74,8 +69,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'onsale_info',
             align: 'center',
             render: (value: IOnsaleItem[], row: IGoodsVersionRowItem) => {
-                return <div>{value.map(item => item.onsale_channel).join('、')}</div>
-            }
+                return <div>{value.map(item => item.onsale_channel).join('、')}</div>;
+            },
         },
         {
             key: 'inventory_status',
@@ -106,7 +101,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                             查看详情
                         </Button>
                     </div>
-                )
+                );
             },
         },
         {
@@ -121,7 +116,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             width: 200,
             title: '商品描述',
             dataIndex: 'description',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'sku_number',
@@ -135,14 +130,16 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         <div>{value}</div>
                         <Button
                             ghost={true}
-                            size="small" 
+                            size="small"
                             type="primary"
                             className="goods-local-img-edit"
-                            onClick={() => this.showSkuDialog(row)} 
-                        >查看sku信息</Button>
+                            onClick={() => this.showSkuDialog(row)}
+                        >
+                            查看sku信息
+                        </Button>
                     </>
-                )
-            }
+                );
+            },
         },
         {
             key: 'sku_price',
@@ -151,22 +148,22 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'sku_price',
             align: 'center',
             render: (value: number) => {
-                return `￥${value}`
-            }
+                return `￥${value}`;
+            },
         },
         {
             key: 'sales_volume',
             width: 120,
             title: '销量',
             dataIndex: 'sales_volume',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'comments',
             width: 160,
             title: '评价数量',
             dataIndex: 'comments',
-            align: 'center'
+            align: 'center',
         },
         {
             key: 'first_catagory',
@@ -203,8 +200,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             width: 180,
             title: '变更时间',
             dataIndex: '_update_time',
-            align: 'center'
-        }
+            align: 'center',
+        },
     ];
 
     constructor(props: IVersionTableProps) {
@@ -236,19 +233,22 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
     };
 
     private showSkuDialog = (rowData: IGoodsVersionRowItem) => {
-        this.setState({
-            activeRow: rowData
-        }, () => {
-            this.toggleSkuDialog(true);
-            this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
-        });
-    }
+        this.setState(
+            {
+                activeRow: rowData,
+            },
+            () => {
+                this.toggleSkuDialog(true);
+                this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
+            },
+        );
+    };
 
     private toggleSkuDialog = (status: boolean) => {
         this.setState({
-            skuDialogStatus: status
+            skuDialogStatus: status,
         });
-    }
+    };
 
     render() {
         const { versionGoodsList, loading } = this.props;
