@@ -84,6 +84,13 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: 'goods_status',
+            title: '版本状态',
+            dataIndex: 'goods_status',
+            align: 'center',
+            width: 110
+        },
+        {
             key: 'inventory_status',
             title: '销售状态',
             dataIndex: 'inventory_status',
@@ -176,14 +183,22 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             title: '店铺 id',
             dataIndex: 'store_id',
             align: 'center',
+<<<<<<< HEAD
             width: 100,
+=======
+            width: 110
+>>>>>>> feature/bbhuang/fix_phase_1_v4
         },
         {
             key: 'store_name',
             title: '店铺名称',
             dataIndex: 'store_name',
             align: 'center',
+<<<<<<< HEAD
             width: 100,
+=======
+            width: 140
+>>>>>>> feature/bbhuang/fix_phase_1_v4
         },
         {
             key: 'worm_task_id',
