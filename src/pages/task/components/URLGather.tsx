@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Radio, Spin } from 'antd';
+import { Button, DatePicker, Form, Input, Modal, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import moment, { Moment } from 'moment';
@@ -9,6 +9,7 @@ import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { isUrl } from '@/utils/validate';
 import { TaskExecuteType, TaskIntervalConfigType, TaskStatusMap } from '@/enums/StatusEnum';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 
 declare interface IFormData {
     urls?: string;
@@ -259,6 +260,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                         ]}
                     >
                         <DatePicker
+                            locale={locale}
                             showTime={true}
                             disabledDate={disabledStartDate}
                             placeholder="立即开始"

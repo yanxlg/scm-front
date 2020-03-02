@@ -14,6 +14,7 @@ import {
     TimerUpdateTaskRangeType,
 } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 
 declare interface IFormData {
     task_name: string;
@@ -327,7 +328,11 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                     },
                                 ]}
                             >
-                                <DatePicker showTime={true} disabledDate={this.disabledStartDate} />
+                                <DatePicker
+                                    locale={locale}
+                                    showTime={true}
+                                    disabledDate={this.disabledStartDate}
+                                />
                             </Form.Item>
                             <Form.Item
                                 validateTrigger={'onChange'}
@@ -345,7 +350,11 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                     },
                                 ]}
                             >
-                                <DatePicker showTime={true} disabledDate={this.disabledEndDate} />
+                                <DatePicker
+                                    locale={locale}
+                                    showTime={true}
+                                    disabledDate={this.disabledEndDate}
+                                />
                             </Form.Item>
                         </Form.Item>
                         <Form.Item
