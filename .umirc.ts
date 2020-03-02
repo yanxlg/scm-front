@@ -1,7 +1,6 @@
 import { IConfig } from 'umi-types';
 const shajs = require('sha.js');
 import path from 'path';
-const eslint = require('eslint');
 
 // ref: https://umijs.org/config/
 const config: IConfig = {

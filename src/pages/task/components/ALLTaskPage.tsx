@@ -15,6 +15,7 @@ import { utcToLocal } from '@/utils/date';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import TimerUpdate from '@/pages/task/components/TimerUpdate';
 import { TaskRangeMap, TaskStatus, TaskStatusMap } from '@/enums/StatusEnum';
+import AutoPurchaseTask from '@/pages/task/components/AutoPurchaseTask';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -308,6 +309,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             case '5':
                 Modal.info({
                     content: <TimerUpdate taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '6':
+                Modal.info({
+                    content: <AutoPurchaseTask taskId={task_id} />,
                     className: 'modal-empty config-modal-hot',
                     icon: null,
                     maskClosable: true,

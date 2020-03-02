@@ -2,7 +2,7 @@ import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
 import { isNull } from '@/utils/validate';
-import { TaskExecuteType } from '@/enums/StatusEnum';
+import { AutoPurchaseTaskType, TaskExecuteType } from '@/enums/StatusEnum';
 
 declare interface ITaskListSearch extends IFormData {
     page: number;
@@ -13,6 +13,7 @@ export declare interface IPddHotTaskParams {
     range?: number;
     category_level_one?: string;
     category_level_two?: string;
+    category_level_three?: string;
     sort_type?: string;
     keywords?: string;
     task_type?: TaskExecuteType;
@@ -49,11 +50,16 @@ export async function getTaskList(params: ITaskListSearch) {
     });
 }
 
-export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskParams) {
+export async function addPddHotTask({
+    grab_count_max,
+    grab_page_count,
+    ...params
+}: IPddHotTaskParams) {
     return request.post(ApiPathEnum.AddPDDHotTask, {
         data: {
             ...params,
             grab_count_max: isNull(grab_count_max) ? 10000 : grab_count_max,
+            grab_page_count: isNull(grab_page_count) ? 20 : grab_page_count,
             version: '1.0',
             platform: 'PDD',
         },
@@ -141,6 +147,24 @@ export async function queryTaskLog(task_id: number) {
     return request.get(ApiPathEnum.QueryTaskLog, {
         params: {
             task_id,
+        },
+    });
+}
+
+declare interface IAutoPurchaseTaskData {
+    task_name: string;
+    type: AutoPurchaseTaskType;
+    task_start_time?: number;
+    task_end_time?: number;
+    purchase_times: string[];
+}
+
+export async function addAutoPurchaseTask(data: IAutoPurchaseTaskData) {
+    return request.post(ApiPathEnum.ADDAutoPurchaseTask, {
+        data: {
+            ...data,
+            version: '1.0',
+            platform: 'PDD',
         },
     });
 }

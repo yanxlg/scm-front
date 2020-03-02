@@ -27,6 +27,7 @@ export const TaskRangeMap: { [key: number]: string } = {
     3: '指定店铺',
     4: '全部已上架',
     5: '有销量已上架',
+    6: '采购',
 };
 export const TaskRangeList = transStatusList(TaskRangeMap);
 
@@ -79,4 +80,10 @@ export enum TimerUpdateTaskRangeType {
 export enum HotTaskFilterType {
     ByCategory,
     ByKeywords,
+}
+
+//======================= AutoPurchase 任务类型 ======================//
+export enum AutoPurchaseTaskType {
+    OnlyOnce = 1,
+    EveryDay,
 }
