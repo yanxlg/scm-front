@@ -5,8 +5,7 @@ import { BindAll } from 'lodash-decorators';
 import { transEndDate, transStartDate } from '@/utils/date';
 import { FormInstance } from 'antd/es/form';
 
-
-export declare interface IApiParams{
+export declare interface IApiParams {
     start_time?: number;
     end_time?: number;
     virtual_id?: string;
@@ -24,10 +23,9 @@ declare interface IVersionSearchState {
     activeLoading: boolean;
 }
 
-
 @BindAll()
 class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSearchState> {
-    private formRef:RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<FormInstance> = React.createRef();
     constructor(props: IVersionSearchProps) {
         super(props);
         this.state = {
@@ -76,88 +74,69 @@ class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSea
         });
     }
 
-    private convertFromData(){
-        const {start_time,end_time,...extra} = this.formRef.current!.getFieldsValue();
+    private convertFromData() {
+        const { start_time, end_time, ...extra } = this.formRef.current!.getFieldsValue();
         return {
             ...extra,
-            start_time:transStartDate(start_time),
-            end_time:transEndDate(end_time)
-        }
+            start_time: transStartDate(start_time),
+            end_time: transEndDate(end_time),
+        };
     }
 
     render() {
         const { searchLoading, exportLoading, activeLoading } = this.state;
         return (
             <React.Fragment>
-                <Form
-                    ref={this.formRef}
-                    layout="inline"
-                    autoComplete={'off'}
-                >
-                    <Form.Item
-                        label="时间"
-                        className="form-item"
-                    >
+                <Form ref={this.formRef} layout="inline" autoComplete={'off'}>
+                    <Form.Item label="时间" className="form-item">
                         <Form.Item
                             noStyle={true}
-                            shouldUpdate={
-                                (prevValues, currentValues) =>
-                                    prevValues.end_time !== currentValues.end_time
+                            shouldUpdate={(prevValues, currentValues) =>
+                                prevValues.end_time !== currentValues.end_time
                             }
                         >
-                            {
-                                ({getFieldValue})=>{
-                                    const end_time = getFieldValue("end_time");
-                                    return (
-                                        <Form.Item
-                                            name="start_time"
-                                            noStyle={true}
-                                        >
-                                            <DatePicker
-                                                disabledDate={currentDate =>
-                                                    currentDate
-                                                        ? end_time
+                            {({ getFieldValue }) => {
+                                const end_time = getFieldValue('end_time');
+                                return (
+                                    <Form.Item name="start_time" noStyle={true}>
+                                        <DatePicker
+                                            disabledDate={currentDate =>
+                                                currentDate
+                                                    ? end_time
                                                         ? currentDate.isAfter(end_time)
                                                         : false
-                                                        : false
-                                                }
-                                                className="picker-small"
-                                            />
-                                        </Form.Item>
-                                    )
-                                }
-                            }
+                                                    : false
+                                            }
+                                            className="picker-small"
+                                        />
+                                    </Form.Item>
+                                );
+                            }}
                         </Form.Item>
                         <span className="config-colon">-</span>
                         <Form.Item
                             noStyle={true}
-                            shouldUpdate={
-                                (prevValues, currentValues) =>
-                                    prevValues.start_time !== currentValues.start_time
+                            shouldUpdate={(prevValues, currentValues) =>
+                                prevValues.start_time !== currentValues.start_time
                             }
                         >
-                            {
-                                ({getFieldValue})=>{
-                                    const start_time = getFieldValue("start_time");
-                                    return (
-                                        <Form.Item
-                                            name="end_time"
-                                            noStyle={true}
-                                        >
-                                            <DatePicker
-                                                disabledDate={currentDate =>
-                                                    currentDate
-                                                        ? start_time
+                            {({ getFieldValue }) => {
+                                const start_time = getFieldValue('start_time');
+                                return (
+                                    <Form.Item name="end_time" noStyle={true}>
+                                        <DatePicker
+                                            disabledDate={currentDate =>
+                                                currentDate
+                                                    ? start_time
                                                         ? currentDate.isBefore(start_time)
                                                         : false
-                                                        : false
-                                                }
-                                                className="picker-small"
-                                            />
-                                        </Form.Item>
-                                    )
-                                }
-                            }
+                                                    : false
+                                            }
+                                            className="picker-small"
+                                        />
+                                    </Form.Item>
+                                );
+                            }}
                         </Form.Item>
                     </Form.Item>
                     <Form.Item className="form-item" name="virtual_id" label="虚拟ID">

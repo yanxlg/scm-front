@@ -1,8 +1,8 @@
 import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
 import { IFormData } from '@/pages/task/components/TaskSearch';
-import { TaskIntervalType, TaskRange, TaskType } from '@/enums/ConfigEnum';
-import { validateNull } from '@/utils/validate';
+import { isNull } from '@/utils/validate';
+import { TaskExecuteType } from '@/enums/StatusEnum';
 
 declare interface ITaskListSearch extends IFormData {
     page: number;
@@ -15,7 +15,7 @@ export declare interface IPddHotTaskParams {
     category_level_two?: string;
     sort_type?: string;
     keywords?: string;
-    task_type?: TaskType;
+    task_type?: TaskExecuteType;
     sales_volume_min?: number;
     sales_volume_max?: number;
     price_min?: number;
@@ -36,7 +36,7 @@ export declare interface IPddHotTaskParams {
 declare interface IPddURLTaskParams {
     urls: string;
     task_name: string;
-    task_type: TaskType;
+    task_type: TaskExecuteType;
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;
@@ -53,7 +53,7 @@ export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskPa
     return request.post(ApiPathEnum.AddPDDHotTask, {
         data: {
             ...params,
-            grab_count_max: validateNull(grab_count_max) ? 10000 : grab_count_max,
+            grab_count_max: isNull(grab_count_max) ? 10000 : grab_count_max,
             version: '1.0',
             platform: 'PDD',
         },
@@ -63,6 +63,21 @@ export async function addPddHotTask({ grab_count_max, ...params }: IPddHotTaskPa
 
 export async function addPddURLTask(params: IPddURLTaskParams) {
     return request.post(ApiPathEnum.AddPDDURLTask, {
+        data: {
+            ...params,
+            version: '1.0',
+            platform: 'PDD',
+        },
+        errorHandler: errorHandlerFactory(true),
+    });
+}
+
+declare interface IPDDTimerUpdateTaskParams {
+    task_name: string;
+}
+
+export async function addPDDTimerUpdateTask(params: IPDDTimerUpdateTaskParams) {
+    return request.post(ApiPathEnum.ADDTimerUpdate, {
         data: {
             ...params,
             version: '1.0',

@@ -51,7 +51,7 @@ data:
         location /api/{
             add_header Access-Control-Allow-Origin *;
             rewrite ^/api(.*)$ /$1 break;
-            proxy_pass https://scm-api-t.vova.com.hk/;
+            proxy_pass https://scm-api.vova.com.hk/;
         }
     }
 ---
@@ -211,3 +211,4 @@ spec:
     - 58.247.99.18/32
     - 116.228.132.228/32
     - 180.169.144.154/32
+    - 180.168.193.50/32

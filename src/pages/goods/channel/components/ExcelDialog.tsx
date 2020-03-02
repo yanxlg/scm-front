@@ -7,20 +7,22 @@ declare interface IExcelDialogProps {
     visible: boolean;
     total: number;
     // saleStatusList: ISaleStatausItem[];
-    getExcelData(pageNumber: number,pageSize:number): void;
+    getExcelData(pageNumber: number, pageSize: number): Promise<unknown>;
     toggleExcelDialog(status: boolean): void;
 }
 
 declare interface IExcelDialogState {
     val: number;
+    confirmLoading: boolean;
 }
 
 class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogState> {
-    private excelPageSize:number = 10000;
+    private excelPageSize: number = 10000;
     constructor(props: IExcelDialogProps) {
         super(props);
         this.state = {
             val: 0,
+            confirmLoading: false,
         };
     }
 
@@ -30,7 +32,14 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
 
     private handleOk = () => {
         const { val } = this.state;
-        this.props.getExcelData(val,this.excelPageSize);
+        this.setState({
+            confirmLoading: true,
+        });
+        return this.props.getExcelData(val, this.excelPageSize).finally(() => {
+            this.setState({
+                confirmLoading: false,
+            });
+        });
     };
 
     private onChange = (e: RadioChangeEvent) => {
@@ -41,7 +50,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
 
     render() {
         const { visible, total } = this.props;
-        const { val } = this.state;
+        const { val, confirmLoading } = this.state;
 
         if (total < 1) {
             return null;
@@ -58,6 +67,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
                 width={660}
                 onCancel={this.handleCancel}
                 onOk={this.handleOk}
+                confirmLoading={confirmLoading}
             >
                 <div>
                     <Radio.Group onChange={this.onChange} value={val}>

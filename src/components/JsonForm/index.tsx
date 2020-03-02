@@ -1,8 +1,10 @@
 import React, { ReactNode, RefObject } from 'react';
-import { Checkbox, DatePicker, Form, Input, Select } from 'antd';
+import { Checkbox, DatePicker, Form, Input, InputNumber, Select } from 'antd';
 import { FormProps } from 'antd/lib/form/Form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance } from 'antd/es/form';
+import NumberInput from '@/components/NumberInput';
+import IntegerInput from '@/components/IntegerInput';
 
 const { Option } = Select;
 
@@ -12,7 +14,7 @@ declare interface IOptionItem {
 }
 
 export interface IFieldItem extends FormItemLabelProps {
-    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'dateRanger';
+    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'dateRanger' | 'number' | 'integer';
     name: string | [string, string];
     placeholder?: string;
     optionList?: IOptionItem[];
@@ -42,9 +44,39 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
                 return this.addDatePicker(field);
             case 'dateRanger':
                 return this.addDateRanger(field);
+            case 'integer':
+                return this.addInteger(field);
+            case 'number':
+                return this.addNumber(field);
             default:
                 return null;
         }
+    };
+    private addNumber = (field: IFieldItem) => {
+        const { name, placeholder, label, className, formItemClassName } = field;
+        const { labelClassName } = this.props;
+        return (
+            <Form.Item
+                className={formItemClassName}
+                name={name}
+                label={<span className={labelClassName}>{label}</span>}
+            >
+                <NumberInput min={0} placeholder={placeholder} className={className} />
+            </Form.Item>
+        );
+    };
+    private addInteger = (field: IFieldItem) => {
+        const { name, placeholder, label, className, formItemClassName } = field;
+        const { labelClassName } = this.props;
+        return (
+            <Form.Item
+                className={formItemClassName}
+                name={name}
+                label={<span className={labelClassName}>{label}</span>}
+            >
+                <IntegerInput min={0} placeholder={placeholder} className={className} />
+            </Form.Item>
+        );
     };
 
     private addDateRanger = (field: IFieldItem) => {

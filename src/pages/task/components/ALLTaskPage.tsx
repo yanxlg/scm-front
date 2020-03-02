@@ -5,15 +5,16 @@ import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
 import '@/styles/config.less';
 import '@/styles/table.less';
-import { getTaskList, deleteTasks, activeTasks, abortTasks, reActiveTasks } from '@/services/task';
+import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { TaskRangeList, TaskStatus, TaskStatusList, TaskType } from '@/enums/ConfigEnum';
 import HotGather from '@/pages/task/components/HotGather';
 import URLGather from '@/pages/task/components/URLGather';
 import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import TimerUpdate from '@/pages/task/components/TimerUpdate';
+import { TaskRangeMap, TaskStatus, TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -24,9 +25,9 @@ declare interface IALLTaskPageState {
     page: number;
     total: number;
     deleteLoading: boolean;
-    activeLoading:boolean;
-    abortLoading:boolean;
-    reActiveLoading:boolean;
+    activeLoading: boolean;
+    abortLoading: boolean;
+    reActiveLoading: boolean;
 }
 
 declare interface IDataItem {
@@ -66,12 +67,12 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         this.queryList();
     }
 
-    private onSearch(){
+    private onSearch() {
         this.queryList({
             searchLoading: true,
             page: 1,
         });
-    };
+    }
     private queryList(
         params: { page?: number; page_number?: number; searchLoading?: boolean } = {},
     ) {
@@ -80,14 +81,15 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page_number = this.state.pageNumber,
             searchLoading = false,
         } = params;
-        const values = this.searchRef.current!.getFieldsValue();
+        const { task_status, ...values } = this.searchRef.current!.getFieldsValue();
         this.setState({
             dataLoading: true,
             searchLoading,
-            selectedRowKeys:[],
+            selectedRowKeys: [],
         });
+
         getTaskList({
-            task_status:this.props.task_status,
+            task_status: task_status ?? this.props.task_status,
             page: page,
             page_number: page_number,
             ...values,
@@ -107,9 +109,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 });
             });
     }
-    private columns?:ColumnProps<IDataItem>[] = undefined;
+    private columns?: ColumnProps<IDataItem>[] = undefined;
     private getColumns(): ColumnProps<IDataItem>[] {
-        if(this.columns){
+        if (this.columns) {
             return this.columns;
         }
         const { task_status } = this.props;
@@ -120,7 +122,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'index',
                 fixed: 'left',
                 align: 'center',
-                render: (text: string, record: any, index: number) =>{
+                render: (text: string, record: any, index: number) => {
                     const { page, pageNumber } = this.state;
                     return index + 1 + pageNumber * (page - 1);
                 },
@@ -150,51 +152,73 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 dataIndex: 'task_range',
                 width: '182px',
                 align: 'center',
-                render:(text:number)=>TaskRangeList[text]
+                render: (text: number) => TaskRangeMap[text],
             },
             {
                 title: '任务类型',
                 dataIndex: 'task_type',
                 width: '223px',
-                align: 'center'
+                align: 'center',
             },
             {
                 title: '开始时间',
                 dataIndex: 'start_time',
                 width: '223px',
                 align: 'center',
-                render:(dateString)=>utcToLocal(dateString)
+                render: dateString => utcToLocal(dateString),
             },
             {
                 title: '任务状态',
                 dataIndex: 'status',
                 width: '130px',
                 align: 'center',
-                render:(status:string)=>{
-                    const percent = status === "0"?0:status === "1"?50:status==="2"?100:100;
+                render: (status: string) => {
+                    const percent =
+                        status === '0' ? 0 : status === '1' ? 50 : status === '2' ? 100 : 100;
                     return (
                         <>
-                            <Progress className="task-progress" width={20} strokeWidth={15} strokeLinecap="round" type="circle" percent={percent} status={status==="2"?"success":status==="3"?"exception":"normal"} format={() => ""}/>
-                            {TaskStatusList[status]}
+                            <Progress
+                                className="task-progress"
+                                width={20}
+                                strokeWidth={15}
+                                strokeLinecap="round"
+                                type="circle"
+                                percent={percent}
+                                status={
+                                    status === '2'
+                                        ? 'success'
+                                        : status === '3'
+                                        ? 'exception'
+                                        : 'normal'
+                                }
+                                format={() => ''}
+                            />
+                            {TaskStatusMap[status]}
                         </>
-                    )
-                }
+                    );
+                },
             },
             {
                 title: '创建时间',
                 dataIndex: 'create_time',
                 width: '200px',
                 align: 'center',
-                render:(dateString)=>utcToLocal(dateString)
+                render: dateString => utcToLocal(dateString),
             },
             {
                 title: '操作',
                 dataIndex: 'operation',
                 align: 'center',
-                width:"200px",
+                width: '200px',
                 render: (text: any, record: IDataItem) => {
                     const { task_status } = this.props;
-                    if (task_status === void 0) {
+                    if (task_status === TaskStatus.UnExecuted) {
+                        return [
+                            <Button type="link" key="1" onClick={() => this.viewTaskDetail(record)}>
+                                查看任务详情
+                            </Button>,
+                        ];
+                    } else {
                         return [
                             <Button
                                 type="link"
@@ -214,12 +238,6 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 查看日志
                             </Button>,
                         ];
-                    } else {
-                        return [
-                            <Button type="link" key="1" onClick={() => this.viewTaskDetail(record)}>
-                                查看任务详情
-                            </Button>,
-                        ];
                     }
                 },
             },
@@ -230,7 +248,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         this.columns = columns;
         return columns;
     }
-    private onSelectChange(selectedRowKeys:React.Key[]) {
+    private onSelectChange(selectedRowKeys: React.Key[]) {
         this.setState({ selectedRowKeys: selectedRowKeys as string[] });
     }
     private showTotal(total: number) {
@@ -267,26 +285,41 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     private viewTaskDetail(task: IDataItem) {
         // task_range 分别弹不同的弹窗
         const { task_range, task_id } = task;
-        if (task_range === "1") {
-            // url
-            Modal.info({
-                content: <URLGather taskId={task_id} />,
-                className: 'modal-empty config-modal-hot',
-                icon: null,
-                maskClosable: true,
-            });
-        } else {
-            Modal.info({
-                content: <HotGather taskId={task_id} />,
-                className: 'modal-empty config-modal-hot',
-                icon: null,
-                maskClosable: true,
-            });
+        switch (task_range) {
+            case '1':
+                // url
+                Modal.info({
+                    content: <URLGather taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '2':
+            case '3':
+                Modal.info({
+                    content: <HotGather taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '4':
+            case '5':
+                Modal.info({
+                    content: <TimerUpdate taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            default:
+                break;
         }
     }
     private deleteTasks() {
         const { selectedRowKeys } = this.state;
-        const ids = selectedRowKeys.join(",");
+        const ids = selectedRowKeys.join(',');
         Modal.confirm({
             title: '确定要删除选中的任务吗？',
             icon: <ExclamationCircleOutlined />,
@@ -294,17 +327,18 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             okText: '确定',
             okType: 'danger',
             cancelText: '取消',
-            onOk:()=>{
+            onOk: () => {
                 this.setState({
                     deleteLoading: true,
                 });
                 deleteTasks(selectedRowKeys.join(','))
                     .then(() => {
-                        message.success("任务删除成功!");
+                        message.success('任务删除成功!');
                         this.queryList({
                             searchLoading: true,
                         });
-                    }).finally(() => {
+                    })
+                    .finally(() => {
                         this.setState({
                             deleteLoading: false,
                         });
@@ -313,7 +347,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         });
     }
 
-    private activeTasks(){
+    private activeTasks() {
         const { selectedRowKeys } = this.state;
         this.setState({
             activeLoading: true,
@@ -331,7 +365,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             });
     }
 
-    private reActiveTasks(){
+    private reActiveTasks() {
         const { selectedRowKeys } = this.state;
         this.setState({
             reActiveLoading: true,
@@ -349,14 +383,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             });
     }
 
-    private abortTasks(){
+    private abortTasks() {
         const { selectedRowKeys } = this.state;
         this.setState({
             abortLoading: true,
         });
         abortTasks(selectedRowKeys.join(','))
             .then(() => {
-                message.success("任务已终止!");
+                message.success('任务已终止!');
                 this.queryList({
                     searchLoading: true,
                 });
@@ -380,7 +414,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             total,
             activeLoading,
             abortLoading,
-            reActiveLoading
+            reActiveLoading,
         } = this.state;
         const rowSelection = {
             fixed: true,
@@ -394,24 +428,38 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             <div>
                 <TaskSearch ref={this.searchRef} task_status={task_status} />
                 <div className="form-item">
-                    <div className="block">
+                    <div className="block float-clear">
                         <Button loading={searchLoading} onClick={this.onSearch} type="primary">
                             查询
                         </Button>
                         {(task_status === void 0 ||
                             task_status === TaskStatus.Executed ||
                             task_status === TaskStatus.Failed) && (
-                            <Button type="link" loading={reActiveLoading} disabled={selectTaskSize === 0} onClick={this.reActiveTasks}>
+                            <Button
+                                type="link"
+                                loading={reActiveLoading}
+                                disabled={selectTaskSize === 0}
+                                onClick={this.reActiveTasks}
+                            >
                                 重新执行任务
                             </Button>
                         )}
-                        {(task_status === void 0 ||
-                            task_status === TaskStatus.UnExecuted) && (
-                            <Button loading={activeLoading} type="link" disabled={selectTaskSize === 0} onClick={this.activeTasks}>
+                        {(task_status === void 0 || task_status === TaskStatus.UnExecuted) && (
+                            <Button
+                                loading={activeLoading}
+                                type="link"
+                                disabled={selectTaskSize === 0}
+                                onClick={this.activeTasks}
+                            >
                                 立即执行任务
                             </Button>
                         )}
-                        <Button type="link" loading={abortLoading} disabled={selectTaskSize === 0} onClick={this.abortTasks}>
+                        <Button
+                            type="link"
+                            loading={abortLoading}
+                            disabled={selectTaskSize === 0}
+                            onClick={this.abortTasks}
+                        >
                             终止任务
                         </Button>
                         <Button
@@ -423,11 +471,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                             删除任务
                         </Button>
                         <Pagination
-                            className="float-right"
+                            className="float-right float-clear"
                             pageSize={pageNumber}
                             current={page}
                             total={total}
-                            pageSizeOptions={['50','100','500','1000']}
+                            pageSizeOptions={['50', '100', '500', '1000']}
                             onChange={this.onPageChange}
                             onShowSizeChange={this.onShowSizeChange}
                             showSizeChanger={true}

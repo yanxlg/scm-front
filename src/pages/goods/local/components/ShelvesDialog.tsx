@@ -7,10 +7,10 @@ import { formatDate } from '@/utils/date';
 
 export declare interface ISaleStatausItem {
     order?: number;
-    channel: string;
+    onsale_channel: string;
     onsale_time: number;
-    product_id: string;
-    onsale_status: number;
+    product_id?: string;
+    status_label: string;
 }
 
 declare interface ShelvesDialogProps {
@@ -32,12 +32,12 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             title: '时间',
             dataIndex: 'onsale_time',
             align: 'center',
-            render: (val: number) => formatDate(new Date(val), 'yyyy-MM-dd'),
+            render: (val: number) => formatDate(new Date(val * 1000), 'yyyy-MM-dd'),
         },
         {
-            key: 'channel',
+            key: 'onsale_channel',
             title: '销售平台',
-            dataIndex: 'channel',
+            dataIndex: 'onsale_channel',
             align: 'center',
         },
         {
@@ -47,11 +47,10 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             align: 'center',
         },
         {
-            key: 'onsale_status',
+            key: 'status_label',
             title: '操作',
-            dataIndex: 'onsale_status',
+            dataIndex: 'status_label',
             align: 'center',
-            render: (value: number) => (value === 0 ? '下架' : '上架'),
         },
     ];
 
@@ -72,6 +71,7 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             >
                 <Table
                     bordered={true}
+                    rowKey="order"
                     pagination={pagination}
                     dataSource={saleStatusList}
                     columns={this.columns}

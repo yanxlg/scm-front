@@ -1,19 +1,22 @@
-
 import React, { RefObject } from 'react';
 import SearchCondition from './components/SearchCondition';
 import DataStatusUpdate from './components/DataStatusUpdate';
 import ExcelDialog from './components/ExcelDialog';
 import {
     getVovaGoodsList,
-    postVovaGoodsListExport, putVovaGoodsSales,
+    postVovaGoodsListExport,
+    putVovaGoodsSales,
 } from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
+import '@/styles/product.less';
 import { Modal, message, Button, Pagination } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
-import {BindAll} from 'lodash-decorators';
+import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
+import { checkLowerShelf, checkUpperShelf, GoodsStatusMap } from '@/enums/StatusEnum';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 declare interface IVoVaListState {
     dataSet: Array<IRowDataItem>;
@@ -49,17 +52,15 @@ export declare interface IRowDataItem extends IBaseData {
     _rowspan?: number;
 }
 
-
-
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
-    private formRef:RefObject<SearchCondition> = React.createRef();
+    private formRef: RefObject<SearchCondition> = React.createRef();
     constructor(props: {}) {
         super(props);
         this.state = {
             dataSet: [],
             dataLoading: false,
-            searchLoading: false,
+            searchLoading: true,
             total: 0,
             pageNumber: 50,
             page: 1,
@@ -88,178 +89,229 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             page: page,
             page_count: page_number,
             ...values,
-        }).then(({data:{list=[],total=0}}) => {
-            this.setState({
-                page: page,
-                pageNumber: page_number,
-                dataSet: list,
-                total,
+        })
+            .then(({ data: { list = [], total = 0 } }) => {
+                this.setState({
+                    page: page,
+                    pageNumber: page_number,
+                    dataSet: list,
+                    total,
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    dataLoading: false,
+                    searchLoading: false,
+                });
             });
-        }).finally(() => {
-            this.setState({
-                dataLoading: false,
-                searchLoading:false
-            });
-        });
     }
 
-    private onSearch(){
+    private onSearch() {
         this.queryList({
             searchLoading: true,
             page: 1,
         });
-    };
+    }
 
     // 上架操作
-    private onShelves(row: IRowDataItem){
-        putVovaGoodsSales({
-            type: 'onsale',
-            info: {
-                product_id: row.product_id,
-                commodity_id: row.commodity_id,
-                sale_domain: 'vova'
-            }
-        }).then(res => {
-            message.success('上架成功');
-        }).catch(()=>{
-            message.success('上架失败');
-        })
+    private onShelves(row: IRowDataItem) {
+        Modal.confirm({
+            title: '确定需要上架该商品吗?',
+            okText: '确定',
+            cancelText: '取消',
+            icon: <ExclamationCircleOutlined />,
+            onOk: () => {
+                return putVovaGoodsSales({
+                    type: 'onsale',
+                    info: {
+                        onsale: {
+                            task_body: {
+                                product_id: row.product_id,
+                                commodity_id: row.commodity_id,
+                                sale_domain: 'vova',
+                            },
+                        },
+                    },
+                })
+                    .then(res => {
+                        message.success('上架成功');
+                        this.queryList();
+                    })
+                    .catch(() => {
+                        message.success('上架失败');
+                    });
+            },
+        });
     }
 
     // 下架操作
-    private offShelves(row: IRowDataItem){
-        putVovaGoodsSales({
-            type: 'offsale',
-            info: {
-                product_id: row.product_id,
-                commodity_id: row.commodity_id,
-                sale_domain: 'vova'
-            }
-        }).then(res => {
-            message.success('下架成功');
-        }).catch(()=>{
-            message.error('下架失败');
-        })
+    private offShelves(row: IRowDataItem) {
+        Modal.confirm({
+            title: '确定需要下架该商品吗?',
+            okText: '确定',
+            cancelText: '取消',
+            icon: <ExclamationCircleOutlined />,
+            onOk: () => {
+                return putVovaGoodsSales({
+                    type: 'offsale',
+                    info: {
+                        offsale: {
+                            task_body: {
+                                product_id: row.product_id,
+                                commodity_id: row.commodity_id,
+                                sale_domain: 'vova',
+                            },
+                        },
+                    },
+                })
+                    .then(res => {
+                        message.success('下架成功');
+                        this.queryList();
+                    })
+                    .catch(() => {
+                        message.error('下架失败');
+                    });
+            },
+        });
     }
 
     private columns: ColumnProps<IRowDataItem>[] = [
         {
-            key: 'storeName',
             title: '店铺名称',
             dataIndex: 'shop_name',
             align: 'center',
             width: 130,
         },
         {
-            key: 'virtualGoodsId',
             title: '虚拟ID',
-            dataIndex: 'vova_virtual_id',
+            dataIndex: 'virtual_id',
             align: 'center',
             width: 100,
         },
         {
-            key: 'goodsImg',
             title: '商品图片',
-            dataIndex: 'sku_pics',
+            dataIndex: 'main_image',
             align: 'center',
-            width: 100,
+            width: 120,
             render: (value: string, row: IRowDataItem, index: number) => (
-                <img className="goods-vova-img" src={row.sku_pics} />
-            )
+                <img className="goods-vova-img" src={value} alt="" />
+            ),
         },
         {
-            key: 'commodityId',
             title: 'Commodity_ID',
             dataIndex: 'commodity_id',
             align: 'center',
-            width: 130,
+            width: 160,
         },
         {
-            key: 'productId',
             title: 'Product_ID',
             dataIndex: 'product_id',
             align: 'center',
-            width: 130,
+            width: 160,
         },
         {
-            key: 'salesVolume',
             title: '销量',
             dataIndex: 'sales_volume',
             align: 'center',
             width: 100,
         },
         {
-            key: 'productDetail',
             title: '商品详情',
             dataIndex: 'product_detail',
             align: 'center',
             width: 150,
             render: (value: string, row: IRowDataItem, index: number) => {
-                return <Button onClick={() => { this.toggleDetailDialog(row) }}>查看详情</Button>
-            }
+                return (
+                    <Button
+                        onClick={() => {
+                            this.toggleDetailDialog(row);
+                        }}
+                    >
+                        查看详情
+                    </Button>
+                );
+            },
         },
         {
-            key: 'evaluateVolume',
             title: '评价数量',
             dataIndex: 'evaluate_volume',
             align: 'center',
             width: 100,
         },
         {
-            key: 'averageScore',
             title: '平均评分',
             dataIndex: 'average_score',
             align: 'center',
             width: 100,
         },
         {
-            key: 'levelOneCategory',
             title: '一级类目',
             dataIndex: 'level_one_category',
             align: 'center',
-            width: 100,
+            width: 120,
         },
         {
-            key: 'levelTwoCategory',
             title: '二级类目',
             dataIndex: 'level_two_category',
             align: 'center',
-            width: 100,
+            width: 120,
         },
         {
-            key: 'productStatus',
             title: '商品状态',
             dataIndex: 'product_status',
             align: 'center',
             width: 100,
-            render: status => {
-                return status === 1?"已上架":status===2?"待上架":status===3?"已下架":"";
-            }
+            render: (status: number) => {
+                return GoodsStatusMap[status];
+            },
         },
         {
-            key: 'vovaProductLink',
             title: '链接',
             dataIndex: 'vova_product_link',
             align: 'center',
-            width: 100,
+            width: 240,
+            render: (url: string) => {
+                return (
+                    url && (
+                        <Button type="link" href={url} className="product-link">
+                            {url}
+                        </Button>
+                    )
+                );
+            },
         },
         {
-            key: 'operation',
             title: '操作',
             dataIndex: 'product_status',
             align: 'center',
             width: 100,
-            render: row => {
+            render: (status, item) => {
                 return {
                     children: (
                         <>
-                            <Button className="shelves-btn" onClick={() => { this.onShelves(row) }} disabled={row !== 3}>上架</Button>
-                            <Button className="unshelves-btn" onClick={() => { this.offShelves(row) }} disabled={row !== 1}>下架</Button>
+                            <Button
+                                className="shelves-btn"
+                                onClick={() => {
+                                    this.onShelves(item);
+                                }}
+                                disabled={!checkUpperShelf(status)}
+                            >
+                                上架
+                            </Button>
+                            <Button
+                                className="unshelves-btn"
+                                onClick={() => {
+                                    this.offShelves(item);
+                                }}
+                                disabled={!checkLowerShelf(status)}
+                            >
+                                下架
+                            </Button>
                         </>
-                    )
+                    ),
                 };
-            }
-        }
+            },
+        },
     ];
 
     private showTotal(total: number) {
@@ -284,21 +336,23 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         });
     };
 
-    private getExcelData(pageNumber: number,pageSize:number){
+    private getExcelData(pageNumber: number, pageSize: number) {
         const values = this.formRef.current!.getFieldsValue();
-        postVovaGoodsListExport({
+        return postVovaGoodsListExport({
             page: pageNumber,
             page_count: pageSize,
             ...values,
-        }).catch(err => {
-            message.error('导出表格失败！');
-        }).finally(() => {
-            this.toggleExcelDialog(false);
-        });
+        })
+            .catch(err => {
+                message.error('导出表格失败！');
+            })
+            .finally(() => {
+                this.toggleExcelDialog(false);
+            });
     }
 
     // 查看详情弹窗
-    private toggleDetailDialog(row: IRowDataItem){
+    private toggleDetailDialog(row: IRowDataItem) {
         Modal.info({
             className: 'product-modal modal-empty',
             icon: null,
@@ -306,27 +360,36 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             cancelText: null,
             okText: null,
             content: <ProductEditModal product_id={row.product_id} channel="vova" />,
-            maskClosable:true
+            maskClosable: true,
         });
     }
 
     render() {
-        const { dataSet, total, excelDialogStatus, dataLoading,page,pageNumber } = this.state;
+        const {
+            dataSet,
+            total,
+            excelDialogStatus,
+            dataLoading,
+            page,
+            pageNumber,
+            searchLoading,
+        } = this.state;
         return (
             <div className="container">
                 <SearchCondition
                     ref={this.formRef}
+                    searchLoading={searchLoading}
                     onSearch={this.onSearch}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
-                <DataStatusUpdate/>
+                {/*<DataStatusUpdate />*/}
                 <div className="float-clear">
                     <Pagination
-                        className="float-right"
+                        className="float-right form-item"
                         pageSize={pageNumber}
                         current={page}
                         total={total}
-                        pageSizeOptions={['50','100','500','1000']}
+                        pageSizeOptions={['50', '100', '500', '1000']}
                         onChange={this.onPageChange}
                         onShowSizeChange={this.onShowSizeChange}
                         showSizeChanger={true}
@@ -339,17 +402,18 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                 </div>
                 <FitTable
                     className="form-item goods-vova-table"
-                    rowKey="scmSkuSn"
+                    rowKey="product_id"
                     bordered={true}
                     columns={this.columns}
                     dataSource={dataSet}
                     pagination={false}
                     loading={dataLoading}
                     scroll={{
-                        x: 1500,
+                        x: true,
                         scrollToFirstRowOnChange: true,
                     }}
-                    bottom={100}
+                    minHeight={600}
+                    bottom={130}
                 />
                 <ExcelDialog
                     visible={excelDialogStatus}
@@ -361,6 +425,5 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         );
     }
 }
-
 
 export default Index;

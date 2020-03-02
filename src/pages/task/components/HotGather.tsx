@@ -1,5 +1,5 @@
 import React, { RefObject, useCallback } from 'react';
-import { Bind } from 'lodash-decorators';
+import { BindAll } from 'lodash-decorators';
 import {
     Button,
     Card,
@@ -18,13 +18,6 @@ import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import {
-    TaskIntervalType,
-    TaskRange,
-    TaskStatus,
-    TaskStatusList,
-    TaskType,
-} from '@/enums/ConfigEnum';
-import {
     addPddHotTask,
     IPddHotTaskParams,
     queryCategory,
@@ -32,21 +25,29 @@ import {
     queryTaskDetail,
 } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import { numberFormatter } from '@/utils/common';
 import moment, { Moment } from 'moment';
-import { validateNull } from '@/utils/validate';
+import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
+import { RadioChangeEvent } from 'antd/lib/radio/interface';
+import {
+    TaskStatusMap,
+    HotTaskRange,
+    TaskExecuteType,
+    TaskIntervalConfigType,
+    HotTaskFilterType,
+} from '@/enums/StatusEnum';
+import IntegerInput from '@/components/IntegerInput';
 
 export declare interface IFormData {
-    range?: TaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
+    range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
     shopId?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     category_level_one?: string;
     category_level_two?: string;
     sort_type?: string;
     keywords?: string;
-    task_type?: TaskType;
-    taskIntervalType?: TaskIntervalType; // 调用接口前需要进行处理 && 编辑数据源需要处理
+    task_type?: TaskExecuteType;
+    taskIntervalType?: TaskIntervalConfigType; // 调用接口前需要进行处理 && 编辑数据源需要处理
     sales_volume_min?: number;
     sales_volume_max?: number;
     price_min?: number;
@@ -94,8 +95,10 @@ declare interface IPDDSortItem {
 
 const Option = Select.Option;
 
+@BindAll()
 class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+
     constructor(props: IHotGatherProps) {
         super(props);
         this.state = {
@@ -108,6 +111,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             sortLoading: true,
         };
     }
+
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
@@ -130,7 +134,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         this.querySortCondition();
     }
 
-    @Bind
     private querySortCondition() {
         querySortCondition()
             .then(({ data: { sortCondition } }) => {
@@ -146,7 +149,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             });
     }
 
-    @Bind
     private queryCategory() {
         queryCategory()
             .then(({ data }) => {
@@ -162,7 +164,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             });
     }
 
-    @Bind
     private convertDetail(info: IPddHotTaskParams) {
         const {
             range,
@@ -170,38 +171,46 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             task_end_time,
             task_start_time,
             task_interval_seconds,
+            keywords,
             ...extra
         } = info;
-        const taskType = (task_type as any) === '单次任务' ? TaskType.once : TaskType.interval;
+        const taskType =
+            (task_type as any) === '单次任务' ? TaskExecuteType.once : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
         return {
-            range: range === TaskRange.fullStack ? range : TaskRange.store,
-            shopId: range !== TaskRange.fullStack ? range : undefined,
+            keywords,
+            range: range === HotTaskRange.fullStack ? range : HotTaskRange.store,
+            shopId: range !== HotTaskRange.fullStack ? range : undefined,
             task_end_time:
-                taskType === TaskType.interval && task_end_time
+                taskType === TaskExecuteType.interval && task_end_time
                     ? moment(task_end_time * 1000)
                     : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
-                    ? TaskIntervalType.day
-                    : TaskIntervalType.second
-                : TaskIntervalType.day,
+                    ? TaskIntervalConfigType.day
+                    : TaskIntervalConfigType.second
+                : TaskIntervalConfigType.day,
             onceStartTime:
-                taskType === TaskType.once && task_start_time
+                taskType === TaskExecuteType.once && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             timerStartTime:
-                taskType === TaskType.interval && task_start_time
+                taskType === TaskExecuteType.interval && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             task_type: taskType,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
+            filterType:
+                range === HotTaskRange.fullStack
+                    ? keywords
+                        ? HotTaskFilterType.ByKeywords
+                        : HotTaskFilterType.ByCategory
+                    : HotTaskFilterType.ByKeywords,
             ...extra,
         };
     }
 
-    @Bind
     private convertFormData(values: IFormData) {
         const {
             range,
@@ -218,26 +227,27 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return {
             ...extra,
             task_type,
-            range: range === TaskRange.store ? shopId : range,
-            is_immediately_execute: task_type === TaskType.once && !onceStartTime,
+            range: range === HotTaskRange.store ? shopId : range,
+            is_immediately_execute: task_type === TaskExecuteType.once && !onceStartTime,
             task_start_time:
-                task_type === TaskType.once
+                task_type === TaskExecuteType.once
                     ? onceStartTime?.unix() ?? undefined
                     : timerStartTime?.unix() ?? undefined,
-            ...(task_type === TaskType.once
+            ...(task_type === TaskExecuteType.once
                 ? {}
                 : {
                       task_interval_seconds:
-                          taskIntervalType === TaskIntervalType.second
+                          taskIntervalType === TaskIntervalConfigType.second
                               ? second
                               : day * 60 * 60 * 24,
                   }),
             task_end_time:
-                task_type === TaskType.interval ? task_end_time?.unix() ?? undefined : undefined,
+                task_type === TaskExecuteType.interval
+                    ? task_end_time?.unix() ?? undefined
+                    : undefined,
         };
     }
 
-    @Bind
     private onGather(is_upper_shelf: boolean = false) {
         this.formRef
             .current!.validateFields()
@@ -321,32 +331,27 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             });
     }
 
-    @Bind
     private onStartGather() {
         this.onGather();
     }
 
-    @Bind
     private onAcquisitionRack() {
         this.onGather(true);
     }
 
-    @Bind
     private onFirstCategoryChange() {
         this.formRef.current!.resetFields(['category_level_two', 'category_level_three']);
     }
 
-    @Bind
     private onSecondCategoryChange() {
         this.formRef.current!.resetFields(['category_level_three']);
     }
 
-    @Bind
     private checkMinSaleNum(rule: any, value: any) {
         const { sales_volume_max } = this.formRef.current!.getFieldsValue(['sales_volume_max']);
         if (
-            !validateNull(sales_volume_max) &&
-            !validateNull(value) &&
+            !isNull(sales_volume_max) &&
+            !isNull(value) &&
             Number(value) > Number(sales_volume_max)
         ) {
             return Promise.reject('最小销量不能大于最大销量');
@@ -354,12 +359,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return Promise.resolve();
     }
 
-    @Bind
     private checkMaxSaleNum(rule: any, value: any) {
         const { sales_volume_min } = this.formRef.current!.getFieldsValue(['sales_volume_min']);
         if (
-            !validateNull(sales_volume_min) &&
-            !validateNull(value) &&
+            !isNull(sales_volume_min) &&
+            !isNull(value) &&
             Number(value) < Number(sales_volume_min)
         ) {
             return Promise.reject('最大销量不能小于最小销量');
@@ -367,29 +371,26 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return Promise.resolve();
     }
 
-    @Bind
     private checkMinPrice(rule: any, value: any) {
         const { price_max } = this.formRef.current!.getFieldsValue(['price_max']);
-        if (!validateNull(price_max) && !validateNull(value) && Number(value) > Number(price_max)) {
+        if (!isNull(price_max) && !isNull(value) && Number(value) > Number(price_max)) {
             return Promise.reject('最小价格不能大于最大价格');
         }
         return Promise.resolve();
     }
 
-    @Bind
     private checkMaxPrice(rule: any, value: any) {
         const { price_min } = this.formRef.current!.getFieldsValue(['price_min']);
-        if (!validateNull(price_min) && !validateNull(value) && Number(value) < Number(price_min)) {
+        if (!isNull(price_min) && !isNull(value) && Number(value) < Number(price_min)) {
             return Promise.reject('最大价格不能小于最小价格');
         }
         return Promise.resolve();
     }
 
-    @Bind
     private disabledStartDate(startTime: Moment | null) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
         const endTime =
-            taskType === TaskType.interval
+            taskType === TaskExecuteType.interval
                 ? this.formRef.current!.getFieldValue('task_end_time')
                 : null;
         if (!startTime) {
@@ -403,7 +404,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return startValue > endTime.clone().endOf('day') || startTime < currentDay;
     }
 
-    @Bind
     private disabledEndDate(endTime: Moment | null) {
         const startTime = this.formRef.current!.getFieldValue('timerStartTime');
         if (!endTime) {
@@ -417,7 +417,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return startTime.clone().startOf('day') > endValue || endTime < currentDay;
     }
 
-    @Bind
     private resetTaskTypeError() {
         this.formRef.current!.setFields([
             {
@@ -435,10 +434,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         ]);
     }
 
-    @Bind
     private checkDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.interval) {
+        if (!value || taskType === TaskExecuteType.interval) {
             return Promise.resolve();
         }
         const now = moment();
@@ -449,10 +447,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    @Bind
     private checkStartDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const endDate = this.formRef.current!.getFieldValue('task_end_time');
@@ -467,10 +464,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    @Bind
     private checkEndDate(type: any, value: Moment) {
         const taskType = this.formRef.current!.getFieldValue('task_type');
-        if (!value || taskType === TaskType.once) {
+        if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const startDate = this.formRef.current!.getFieldValue('timerStartTime');
@@ -482,6 +478,37 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             return Promise.resolve();
         } else {
             return Promise.reject('结束时间不能早于当前时间');
+        }
+    }
+
+    private taskRangeChange(e: RadioChangeEvent) {
+        const value = e.target.value;
+        if (value === HotTaskRange.fullStack) {
+            // 全站
+            this.formRef.current!.resetFields(['shopId']);
+        } else {
+            this.formRef.current!.resetFields([
+                'category_level_one',
+                'category_level_two',
+                'category_level_three',
+            ]);
+            this.formRef.current!.setFieldsValue({
+                filterType: HotTaskFilterType.ByKeywords,
+            });
+        }
+    }
+
+    private onFilterTypeChange(e: RadioChangeEvent) {
+        const value = e.target.value;
+        if (value === HotTaskFilterType.ByCategory) {
+            // 类目筛选
+            this.formRef.current!.resetFields(['keywords']);
+        } else {
+            this.formRef.current!.resetFields([
+                'category_level_one',
+                'category_level_two',
+                'category_level_three',
+            ]);
         }
     }
 
@@ -507,7 +534,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
                         <div className="config-task-label">
-                            任务状态: {TaskStatusList[status ?? '']}
+                            任务状态: {TaskStatusMap[status ?? '']}
                         </div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>
@@ -519,9 +546,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     autoComplete={'off'}
                     ref={this.formRef}
                     initialValues={{
-                        range: TaskRange.fullStack,
-                        task_type: TaskType.once,
-                        taskIntervalType: TaskIntervalType.day,
+                        range: HotTaskRange.fullStack,
+                        task_type: TaskExecuteType.once,
+                        taskIntervalType: TaskIntervalConfigType.day,
+                        filterType: HotTaskFilterType.ByCategory,
                     }}
                 >
                     <Form.Item
@@ -543,13 +571,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         title={<span className="form-required">任务范围：</span>}
                     >
                         <Form.Item validateTrigger={'onBlur'} name="range" noStyle={true}>
-                            <Radio.Group>
-                                <Radio className="block" value={TaskRange.fullStack}>
+                            <Radio.Group onChange={this.taskRangeChange}>
+                                <Radio className="block" value={HotTaskRange.fullStack}>
                                     全站
                                 </Radio>
                                 <Form.Item
                                     className="form-item form-item-inline"
-                                    label={<Radio value={TaskRange.store}>指定店铺</Radio>}
+                                    label={<Radio value={HotTaskRange.store}>指定店铺</Radio>}
                                     colon={false}
                                 >
                                     <Form.Item
@@ -568,17 +596,16 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                     name="shopId"
                                                     rules={[
                                                         {
-                                                            required: range === TaskRange.store,
+                                                            required: range === HotTaskRange.store,
                                                             message: '请输入店铺ID',
                                                         },
                                                     ]}
                                                 >
-                                                    <InputNumber
+                                                    <IntegerInput
                                                         min={0}
                                                         placeholder={'请输入'}
                                                         className="input-default input-handler"
-                                                        formatter={numberFormatter}
-                                                        disabled={range !== TaskRange.store}
+                                                        disabled={range !== HotTaskRange.store}
                                                     />
                                                 </Form.Item>
                                             );
@@ -590,115 +617,275 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     </Card>
                     <Card className="form-item" title="指定类目/关键词：">
                         <div>
-                            <Form.Item
-                                validateTrigger={'onBlur'}
-                                name="category_level_one"
-                                label="一级类目"
-                                className="form-item-horizon form-item-inline"
-                            >
-                                <Select
-                                    loading={categoryLoading}
-                                    className="select-default"
-                                    onChange={this.onFirstCategoryChange}
-                                >
-                                    {pddCategory.map(category => {
-                                        return (
-                                            <Option
-                                                key={category.platform_cate_id}
-                                                value={category.platform_cate_id}
-                                            >
-                                                {category.platform_cate_name}
-                                            </Option>
-                                        );
-                                    })}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                noStyle={true}
-                                shouldUpdate={(prevValues, currentValues) =>
-                                    prevValues.category_level_one !==
-                                    currentValues.category_level_one
-                                }
-                            >
-                                {({ getFieldValue }) => {
-                                    const levelOne = getFieldValue('category_level_one');
-                                    const childCategory =
-                                        pddCategory.find(category => {
-                                            return category.platform_cate_id === levelOne;
-                                        })?.children || [];
-                                    return (
+                            <Form.Item validateTrigger={'onBlur'} name="filterType" noStyle={true}>
+                                <Radio.Group onChange={this.onFilterTypeChange}>
+                                    <Form.Item
+                                        noStyle={true}
+                                        shouldUpdate={(prevValues, currentValues) =>
+                                            prevValues.range !== currentValues.range
+                                        }
+                                    >
+                                        {({ getFieldValue }) => {
+                                            const range = getFieldValue('range');
+                                            return (
+                                                <Form.Item
+                                                    className="form-item-inline"
+                                                    label={
+                                                        <Radio
+                                                            disabled={range === HotTaskRange.store}
+                                                            value={HotTaskFilterType.ByCategory}
+                                                        />
+                                                    }
+                                                    colon={false}
+                                                >
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.range !==
+                                                                currentValues.range ||
+                                                            prevValues.filterType !==
+                                                                currentValues.filterType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const range = getFieldValue('range');
+                                                            const filterType = getFieldValue(
+                                                                'filterType',
+                                                            );
+                                                            return (
+                                                                <Form.Item
+                                                                    validateTrigger={'onBlur'}
+                                                                    name="category_level_one"
+                                                                    label="一级类目"
+                                                                    className="form-item-horizon form-item-inline"
+                                                                >
+                                                                    <Select
+                                                                        disabled={
+                                                                            range ===
+                                                                                HotTaskRange.store ||
+                                                                            filterType ===
+                                                                                HotTaskFilterType.ByKeywords
+                                                                        }
+                                                                        loading={categoryLoading}
+                                                                        className="select-default"
+                                                                        onChange={
+                                                                            this
+                                                                                .onFirstCategoryChange
+                                                                        }
+                                                                    >
+                                                                        {pddCategory.map(
+                                                                            category => {
+                                                                                return (
+                                                                                    <Option
+                                                                                        key={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                        value={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            category.platform_cate_name
+                                                                                        }
+                                                                                    </Option>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.category_level_one !==
+                                                                currentValues.category_level_one ||
+                                                            prevValues.range !==
+                                                                currentValues.range ||
+                                                            prevValues.filterType !==
+                                                                currentValues.filterType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const levelOne = getFieldValue(
+                                                                'category_level_one',
+                                                            );
+                                                            const range = getFieldValue('range');
+                                                            const filterType = getFieldValue(
+                                                                'filterType',
+                                                            );
+                                                            const childCategory =
+                                                                pddCategory.find(category => {
+                                                                    return (
+                                                                        category.platform_cate_id ===
+                                                                        levelOne
+                                                                    );
+                                                                })?.children || [];
+                                                            return (
+                                                                <Form.Item
+                                                                    validateTrigger={'onBlur'}
+                                                                    name="category_level_two"
+                                                                    label="二级类目"
+                                                                    className="form-item-horizon form-item-inline"
+                                                                >
+                                                                    <Select
+                                                                        disabled={
+                                                                            range ===
+                                                                                HotTaskRange.store ||
+                                                                            filterType ===
+                                                                                HotTaskFilterType.ByKeywords
+                                                                        }
+                                                                        loading={categoryLoading}
+                                                                        className="select-default"
+                                                                        onChange={
+                                                                            this
+                                                                                .onSecondCategoryChange
+                                                                        }
+                                                                    >
+                                                                        {childCategory.map(
+                                                                            category => {
+                                                                                return (
+                                                                                    <Option
+                                                                                        key={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                        value={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            category.platform_cate_name
+                                                                                        }
+                                                                                    </Option>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.category_level_two !==
+                                                                currentValues.category_level_two ||
+                                                            prevValues.range !==
+                                                                currentValues.range ||
+                                                            prevValues.filterType !==
+                                                                currentValues.filterType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const levelOne = getFieldValue(
+                                                                'category_level_one',
+                                                            );
+                                                            const range = getFieldValue('range');
+                                                            const filterType = getFieldValue(
+                                                                'filterType',
+                                                            );
+                                                            const childCategory =
+                                                                pddCategory.find(category => {
+                                                                    return (
+                                                                        category.platform_cate_id ===
+                                                                        levelOne
+                                                                    );
+                                                                })?.children || [];
+                                                            const parentLevel = getFieldValue(
+                                                                'category_level_two',
+                                                            );
+                                                            const parentCategory =
+                                                                childCategory.find(category => {
+                                                                    return (
+                                                                        category.platform_cate_id ===
+                                                                        parentLevel
+                                                                    );
+                                                                })?.children || [];
+                                                            return (
+                                                                <Form.Item
+                                                                    validateTrigger={'onBlur'}
+                                                                    name="category_level_three"
+                                                                    label="三级类目"
+                                                                    className="form-item-horizon form-item-inline"
+                                                                >
+                                                                    <Select
+                                                                        disabled={
+                                                                            range ===
+                                                                                HotTaskRange.store ||
+                                                                            filterType ===
+                                                                                HotTaskFilterType.ByKeywords
+                                                                        }
+                                                                        loading={categoryLoading}
+                                                                        className="select-default"
+                                                                    >
+                                                                        {parentCategory.map(
+                                                                            category => {
+                                                                                return (
+                                                                                    <Option
+                                                                                        key={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                        value={
+                                                                                            category.platform_cate_id
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            category.platform_cate_name
+                                                                                        }
+                                                                                    </Option>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+                                                </Form.Item>
+                                            );
+                                        }}
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        className="form-item form-item-inline"
+                                        label={<Radio value={HotTaskFilterType.ByKeywords} />}
+                                        colon={false}
+                                    >
                                         <Form.Item
-                                            validateTrigger={'onBlur'}
-                                            name="category_level_two"
-                                            label="二级类目"
-                                            className="form-item-horizon form-item-inline"
+                                            noStyle={true}
+                                            shouldUpdate={(prevValues, currentValues) =>
+                                                prevValues.filterType !== currentValues.filterType
+                                            }
                                         >
-                                            <Select
-                                                loading={categoryLoading}
-                                                className="select-default"
-                                                onChange={this.onSecondCategoryChange}
-                                            >
-                                                {childCategory.map(category => {
-                                                    return (
-                                                        <Option
-                                                            key={category.platform_cate_id}
-                                                            value={category.platform_cate_id}
-                                                        >
-                                                            {category.platform_cate_name}
-                                                        </Option>
-                                                    );
-                                                })}
-                                            </Select>
+                                            {({ getFieldValue }) => {
+                                                const filterType = getFieldValue('filterType');
+                                                return (
+                                                    <Form.Item
+                                                        className="form-item-horizon form-item-inline"
+                                                        validateTrigger={'onBlur'}
+                                                        name="keywords"
+                                                        label="关&ensp;键&ensp;词"
+                                                    >
+                                                        <Input
+                                                            disabled={
+                                                                filterType ===
+                                                                HotTaskFilterType.ByCategory
+                                                            }
+                                                            className="input-large"
+                                                            spellCheck={'false'}
+                                                            placeholder="iPhone XR，国行，白"
+                                                        />
+                                                    </Form.Item>
+                                                );
+                                            }}
                                         </Form.Item>
-                                    );
-                                }}
-                            </Form.Item>
-                            <Form.Item
-                                noStyle={true}
-                                shouldUpdate={(prevValues, currentValues) =>
-                                    prevValues.category_level_two !==
-                                    currentValues.category_level_two
-                                }
-                            >
-                                {({ getFieldValue }) => {
-                                    const levelOne = getFieldValue('category_level_one');
-                                    const childCategory =
-                                        pddCategory.find(category => {
-                                            return category.platform_cate_id === levelOne;
-                                        })?.children || [];
-                                    const parentLevel = getFieldValue('category_level_two');
-                                    const parentCategory =
-                                        childCategory.find(category => {
-                                            return category.platform_cate_id === parentLevel;
-                                        })?.children || [];
-                                    return (
-                                        <Form.Item
-                                            validateTrigger={'onBlur'}
-                                            name="category_level_three"
-                                            label="三级类目"
-                                            className="form-item-horizon form-item-inline"
-                                        >
-                                            <Select
-                                                loading={categoryLoading}
-                                                className="select-default"
-                                            >
-                                                {parentCategory.map(category => {
-                                                    return (
-                                                        <Option
-                                                            key={category.platform_cate_id}
-                                                            value={category.platform_cate_id}
-                                                        >
-                                                            {category.platform_cate_name}
-                                                        </Option>
-                                                    );
-                                                })}
-                                            </Select>
-                                        </Form.Item>
-                                    );
-                                }}
+                                    </Form.Item>
+                                </Radio.Group>
                             </Form.Item>
                         </div>
-                        <div>
+                        <div className="config-radio">
                             <Form.Item
                                 validateTrigger={'onBlur'}
                                 name="sort_type"
@@ -714,18 +901,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         );
                                     })}
                                 </Select>
-                            </Form.Item>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline form-item"
-                                validateTrigger={'onBlur'}
-                                name="keywords"
-                                label="关&ensp;键&ensp;词"
-                            >
-                                <Input
-                                    className="input-large"
-                                    spellCheck={'false'}
-                                    placeholder="iPhone XR，国行，白"
-                                />
                             </Form.Item>
                         </div>
                     </Card>
@@ -745,11 +920,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={numberFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                                 <span className="config-colon">-</span>
                                 <Form.Item
@@ -762,11 +933,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={numberFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                             </Form.Item>
                             <Form.Item
@@ -783,11 +950,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={numberFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                                 <span className="config-colon">-</span>
                                 <Form.Item
@@ -800,11 +963,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         },
                                     ]}
                                 >
-                                    <InputNumber
-                                        min={0}
-                                        className="input-small input-handler"
-                                        formatter={numberFormatter}
-                                    />
+                                    <IntegerInput min={0} className="input-small input-handler" />
                                 </Form.Item>
                             </Form.Item>
                         </div>
@@ -815,11 +974,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                 label="爬取页数"
                                 className="form-item-horizon form-item-inline"
                             >
-                                <InputNumber
+                                <IntegerInput
                                     min={0}
                                     className="config-input-pages input-handler"
-                                    formatter={numberFormatter}
-                                    width={200}
                                 />
                             </Form.Item>
                             <Form.Item
@@ -838,11 +995,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     </span>
                                 }
                             >
-                                <InputNumber
+                                <IntegerInput
                                     placeholder="默认值：10000"
                                     min={0}
                                     className="config-input-count input-handler"
-                                    formatter={numberFormatter}
                                 />
                             </Form.Item>
                         </div>
@@ -858,7 +1014,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         >
                             <Radio.Group onChange={this.resetTaskTypeError}>
                                 <Form.Item
-                                    label={<Radio value={TaskType.once}>单次任务</Radio>}
+                                    label={<Radio value={TaskExecuteType.once}>单次任务</Radio>}
                                     colon={false}
                                 >
                                     <Form.Item
@@ -883,7 +1039,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                 >
                                                     <DatePicker
                                                         showTime={true}
-                                                        disabled={taskType !== TaskType.once}
+                                                        disabled={taskType !== TaskExecuteType.once}
                                                         placeholder="立即开始"
                                                         disabledDate={this.disabledStartDate}
                                                     />
@@ -893,7 +1049,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     </Form.Item>
                                 </Form.Item>
                                 <Form.Item
-                                    label={<Radio value={TaskType.interval}>定时任务</Radio>}
+                                    label={<Radio value={TaskExecuteType.interval}>定时任务</Radio>}
                                     className="form-item-inline"
                                     colon={false}
                                 >
@@ -910,13 +1066,14 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                     <Form.Item
                                                         label="开始时间"
                                                         validateTrigger={'onChange'}
-                                                        className="form-required-absolute"
+                                                        className="form-required-absolute form-item-inline"
                                                         name="timerStartTime"
                                                         dependencies={['task_end_time']}
                                                         rules={[
                                                             {
                                                                 required:
-                                                                    taskType === TaskType.interval,
+                                                                    taskType ===
+                                                                    TaskExecuteType.interval,
                                                                 message: '请选择开始时间',
                                                             },
                                                             {
@@ -927,7 +1084,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                             disabledDate={this.disabledStartDate}
                                                         />
@@ -937,11 +1095,12 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         label="结束时间"
                                                         name="task_end_time"
                                                         dependencies={['timerStartTime']}
-                                                        className="form-required-absolute form-item"
+                                                        className="form-required-absolute form-item form-item-inline"
                                                         rules={[
                                                             {
                                                                 required:
-                                                                    taskType === TaskType.interval,
+                                                                    taskType ===
+                                                                    TaskExecuteType.interval,
                                                                 message: '请选择结束时间',
                                                             },
                                                             {
@@ -952,7 +1111,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         <DatePicker
                                                             showTime={true}
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                             disabledDate={this.disabledEndDate}
                                                         />
@@ -962,14 +1122,19 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         label="任务间隔"
                                                         name="taskIntervalType"
                                                         className="form-required-absolute form-item-inline form-item"
-                                                        required={taskType === TaskType.interval}
+                                                        required={
+                                                            taskType === TaskExecuteType.interval
+                                                        }
                                                     >
                                                         <Radio.Group
                                                             disabled={
-                                                                taskType !== TaskType.interval
+                                                                taskType !==
+                                                                TaskExecuteType.interval
                                                             }
                                                         >
-                                                            <Radio value={TaskIntervalType.day}>
+                                                            <Radio
+                                                                value={TaskIntervalConfigType.day}
+                                                            >
                                                                 <div className="inline-block vertical-middle">
                                                                     <Form.Item
                                                                         noStyle={true}
@@ -999,25 +1164,22 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             {
                                                                                                 required:
                                                                                                     taskType ===
-                                                                                                        TaskType.interval &&
+                                                                                                        TaskExecuteType.interval &&
                                                                                                     taskIntervalType ===
-                                                                                                        TaskIntervalType.day,
+                                                                                                        TaskIntervalConfigType.day,
                                                                                                 message:
                                                                                                     '请输入间隔天数',
                                                                                             },
                                                                                         ]}
                                                                                     >
-                                                                                        <InputNumber
+                                                                                        <IntegerInput
                                                                                             min={0}
                                                                                             className="input-small input-handler"
-                                                                                            formatter={
-                                                                                                numberFormatter
-                                                                                            }
                                                                                             disabled={
                                                                                                 taskType !==
-                                                                                                    TaskType.interval ||
+                                                                                                    TaskExecuteType.interval ||
                                                                                                 taskIntervalType !==
-                                                                                                    TaskIntervalType.day
+                                                                                                    TaskIntervalConfigType.day
                                                                                             }
                                                                                         />
                                                                                     </Form.Item>
@@ -1030,7 +1192,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     </Form.Item>
                                                                 </div>
                                                             </Radio>
-                                                            <Radio value={TaskIntervalType.second}>
+                                                            <Radio
+                                                                value={
+                                                                    TaskIntervalConfigType.second
+                                                                }
+                                                            >
                                                                 <div className="inline-block vertical-middle">
                                                                     <Form.Item
                                                                         noStyle={true}
@@ -1060,26 +1226,23 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                             {
                                                                                                 required:
                                                                                                     taskType ===
-                                                                                                        TaskType.interval &&
+                                                                                                        TaskExecuteType.interval &&
                                                                                                     taskIntervalType ===
-                                                                                                        TaskIntervalType.second,
+                                                                                                        TaskIntervalConfigType.second,
                                                                                                 message:
                                                                                                     '请输入间隔秒数',
                                                                                             },
                                                                                         ]}
                                                                                         className="inline-block"
                                                                                     >
-                                                                                        <InputNumber
+                                                                                        <IntegerInput
                                                                                             min={0}
                                                                                             className="input-small input-handler"
-                                                                                            formatter={
-                                                                                                numberFormatter
-                                                                                            }
                                                                                             disabled={
                                                                                                 taskType !==
-                                                                                                    TaskType.interval ||
+                                                                                                    TaskExecuteType.interval ||
                                                                                                 taskIntervalType !==
-                                                                                                    TaskIntervalType.second
+                                                                                                    TaskIntervalConfigType.second
                                                                                             }
                                                                                         />
                                                                                     </Form.Item>
