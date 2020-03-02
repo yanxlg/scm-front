@@ -6,6 +6,7 @@ import { IGoodsVersionRowItem } from '../version';
 
 declare interface IDataSource {
     product_id: string;
+    main_image: string;
     sku_image: string[];
 }
 
@@ -19,47 +20,40 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
     private columns: ColumnProps<IDataSource>[] = [
         {
             key: 'product_id',
+            className: 'top',
             width: 160,
             title: '商品版本号',
             dataIndex: 'product_id',
             align: 'center',
         },
         {
-            key: 'sku_image',
+            key: 'main_image',
+            className: 'top',
             width: 200,
             title: '主图',
-            dataIndex: 'sku_image',
+            dataIndex: 'main_image',
             align: 'center',
-            className: 'top',
-            render: (value: string[], row: IDataSource) => {
-                // const classStr = this.isAddImg(value[0])
-                //     ? 'main-item add'
-                //     : 'main-item';
+            render: (value: string, row: IDataSource) => {
                 return (
                     <div className="main-item">
-                        <img className="main-img" src={value[0]} />
+                        <img className="main-img" src={value} />
                     </div>
                 );
             },
         },
         {
-            key: 'a3',
+            key: 'sku_image',
             title: '副图',
-            // dataIndex: 'a3',
+            dataIndex: 'sku_image',
             align: 'center',
             className: 'top',
-            render: (value, row: IDataSource) => {
+            render: (value: string[]) => {
                 return (
-                    // <div>111</div>
                     <div className="list">
-                        {row.sku_image.slice(1).map(item => {
-                            // const classStr = this.isAddImg(item)
-                            //     ? 'item add'
-                            //     : 'item';
+                        {value.map(item => {
                             return (
                                 <div className="item" key={item}>
                                     <img src={item} />
-                                    {/* <div className="desc">sku id：{item}</div> */}
                                 </div>
                             );
                         })}
@@ -68,15 +62,6 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             },
         },
     ];
-
-    // 判断当前图片是否为新增
-    // isAddImg = (imgUrl: string): boolean => {
-    //     const { activeRow } = this.props;
-    //     if (activeRow && activeRow._prevVersion) {
-    //         return activeRow._prevVersion.sku_image.indexOf(imgUrl) === -1;
-    //     }
-    //     return false;
-    // };
 
     private handleCancel = () => {
         this.props.toggleVersionImgDialog(false);
@@ -89,12 +74,22 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             const dataSource: IDataSource[] = [
                 {
                     product_id: activeRow.product_id,
+                    main_image: activeRow.goods_img,
                     sku_image: activeRow.sku_image,
                 },
             ];
 
             return (
-                <Modal footer={null} width={900} visible={visible} onCancel={this.handleCancel}>
+                <Modal 
+                    footer={null} 
+                    width={920} 
+                    visible={visible} 
+                    onCancel={this.handleCancel}
+                    bodyStyle={{
+                        maxHeight: 640,
+                        overflow: 'auto'
+                    }}
+                >
                     <Table
                         bordered={true}
                         rowKey="product_id"
