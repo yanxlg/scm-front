@@ -268,6 +268,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     initialValues={{
                         range: TimerUpdateTaskRangeType.AllOnShelves,
                         taskIntervalType: TaskIntervalConfigType.day,
+                        day: 1,
                     }}
                 >
                     <Form.Item
