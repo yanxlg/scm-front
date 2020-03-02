@@ -109,37 +109,37 @@ const allColumnList = [
 
 // 未勾选仅展示父订单ID
 const defaultColList = [
-    'order_confirm_time',
-    'middleground_c_order_id',
-    'goods_detail',
-    'product_id',
-    'channel_order_status',
-    'channel_delivery_status',
-    'middleground_order_status',
-    'goods_commodity_id',
-    'goods_purchase_status',
-    'goods_purchase_payment_status',
-    'goods_purchase_delivery_status',
-    'goods_purchase_order_time',
-    'goods_purchase_order_sn',
-    'goods_purchase_waybill_sn'
+    'order_confirm_time',                   // 订单时间
+    'middleground_c_order_id',              // 中台订单子ID
+    'goods_detail',                         // 商品详情
+    'product_id',                           // Product_id
+    'channel_order_status',                 // 渠道订单状态
+    'channel_delivery_status',              // 渠道发货状态
+    'middleground_order_status',            // 中台订单状态
+    'goods_commodity_id',                   // 中台商品ID
+    'goods_purchase_status',                // 采购订单状态
+    'goods_purchase_payment_status',        // 采购支付状态
+    'goods_purchase_delivery_status',       // 采购配送状态
+    'goods_purchase_order_time',            // 采购生成时间
+    'goods_purchase_order_sn',              // 采购订单号
+    'goods_purchase_waybill_sn'             // 采购运单号
 ]
 // 勾选仅展示
 const defaultParentColList = [
-    'order_confirm_time',
-    'middleground_c_order_id',
-    'goods_detatil',
-    'product_id',
-    'channel_order_status',
-    'channel_delivery_status',
-    'middleground_order_status',
-    'goods_commodity_id',
-    'goods_purchase_status',
-    'goods_purchase_payment_status',
-    'goods_purchase_delivery_status',
-    'goods_purchase_order_time',
-    'goods_purchase_order_sn',
-    'goods_purchase_waybill_sn'
+    'order_confirm_time',                   // 订单时间
+    'middleground_p_order_id',              // 中台订单父订单ID
+    'middleground_order_status',            // 中台订单状态
+    'goods_detatil',                        // 商品详情
+    'channel_order_status',                 // 渠道订单状态
+    'channel_delivery_status',              // 渠道发货状态
+    'goods_commodity_id',                   // 中台商品ID
+    // 'goods_commodity_id',                   // 中台子订单ID
+    'goods_purchase_status',                // 采购订单状态
+    'goods_purchase_payment_status',        // 采购支付状态
+    'goods_purchase_delivery_status',       // 采购配送状态
+    'goods_purchase_order_time',            // 采购生成时间
+    'goods_purchase_order_sn',              // 采购订单号
+    'goods_purchase_waybill_sn'             // 采购运单号
 ]
 
 /*** 采购未发货 ***/

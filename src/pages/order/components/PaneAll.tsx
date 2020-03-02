@@ -12,6 +12,7 @@ import {
     IFilterParams
 } from '@/services/order-manage';
 import { allColumnList, defaultColList, defaultParentColList } from '@/enums/OrderEnum';
+import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
 
 export declare interface IPurchaseStatus {
     status: number;
@@ -237,7 +238,7 @@ const allFieldList: IFieldItem[] = [
 
 declare interface IPaneAllState {
     page: number;
-    pageNumber: number;
+    pageCount: number;
     total: number;
     loading: boolean;
     showFilterStatus: boolean;
@@ -266,7 +267,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         super(props);
         this.state = {
             page: 1,
-            pageNumber: 50,
+            pageCount: 50,
             total: 0,
             loading: false,
             showFilterStatus: false,
@@ -286,10 +287,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     }
 
     onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
+        const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
+            page_count: pageCount
         }
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
@@ -308,7 +309,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             this.setState({
                 total,
                 page: params.page,
-                pageNumber: params.page_number,
+                pageCount: params.page_count,
                 orderList: this.addRowSpanData(list)
             })
         }).finally(() => {
@@ -368,6 +369,21 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     // 获取查询数据
     getFieldsValue = () => {
         // console.log('111', this.formRef.current!.getFieldsValue());
+        const fields = this.formRef.current!.getFieldsValue();
+        const {
+            order_start_time,
+            order_end_time,
+            purchase_start_time,
+            purchase_end_time,
+            only_p_order
+        } = fields
+        return Object.assign(fields, {
+            order_start_time: order_start_time ? transStartDate(order_start_time) : order_start_time,
+            order_end_time: order_end_time ? transEndDate(order_end_time) : order_end_time,
+            purchase_start_time: purchase_start_time ? transStartDate(purchase_start_time) : purchase_start_time,
+            purchase_end_time: purchase_end_time ? transStartDate(purchase_end_time) : purchase_end_time,
+            only_p_order: only_p_order ? 1 : 0
+        });
     }
 
     // 全选
