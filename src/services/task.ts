@@ -135,12 +135,24 @@ export async function queryTaskDetail(task_id: number) {
     });
 }
 
+export async function queryPurchaseIds(task_id: number) {
+    return request.post(ApiPathEnum.QueryPurchaseIds, {
+        data: {
+            task_id,
+        },
+    });
+}
+
 export async function queryCategory() {
     return request.get(ApiPathEnum.QueryPDDCategory);
 }
 
-export async function querySortCondition() {
-    return request.get(ApiPathEnum.QueryPDDSortCondition);
+export async function querySortCondition(type: 'list' | 'merchant') {
+    return request.get(ApiPathEnum.QueryPDDSortCondition, {
+        params: {
+            type: type,
+        },
+    });
 }
 
 export async function queryTaskLog(task_id: number) {

@@ -27,6 +27,7 @@ enum ApiPathEnum {
     ActiveTask = '/api/v1/task/plan',
     AbortTask = '/api/v1/task/termination',
     QueryTaskDetail = '/api/v1/task/detail',
+    QueryPurchaseIds = '/api/v1/orders/purchase',
     QueryPDDCategory = '/api/v1/spider/pdd_category',
     QueryPDDSortCondition = '/api/v1/spider/pdd_sort_type',
     QueryTaskLog = '/api/v1/task/exec_log',

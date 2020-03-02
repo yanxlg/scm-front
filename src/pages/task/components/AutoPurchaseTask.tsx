@@ -1,12 +1,12 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import { Button, Card, DatePicker, Form, Input, Modal, Radio, Spin, TimePicker } from 'antd';
+import { Button, Card, DatePicker, Form, Input, Modal, Radio, Spin, Table, TimePicker } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
-import { addAutoPurchaseTask, addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
+import { addAutoPurchaseTask, queryPurchaseIds, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { AutoPurchaseTaskType, TaskStatusMap, TimerUpdateTaskRangeType } from '@/enums/StatusEnum';
@@ -30,6 +30,7 @@ declare interface IAutoPurchaseTaskState {
     status?: string;
     successTimes?: number;
     failTimes?: number;
+    idList: string[];
 }
 
 declare interface ITaskDetail {
@@ -58,25 +59,28 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
         this.state = {
             createLoading: false,
             queryLoading: props.taskId !== void 0,
+            idList: [],
         };
     }
 
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
-                // const initValues = this.convertDetail(task_detail_info);
-                // const { success, fail, status } = initValues;
-                // this.formRef.current!.setFieldsValue({
-                //     ...initValues,
-                // });
-                // this.setState({
-                //     queryLoading: false,
-                //     status: status,
-                //     successTimes: success,
-                //     failTimes: fail,
-                // });
-            });
+            Promise.all([queryTaskDetail(taskId), queryPurchaseIds(taskId)]).then(
+                ([
+                    { data: { task_detail_info = {} } = {} } = {},
+                    { data: { order_id_list = [] } = {} } = {},
+                ]) => {
+                    const { success, fail, status } = task_detail_info;
+                    this.setState({
+                        queryLoading: false,
+                        status: status,
+                        successTimes: success,
+                        failTimes: fail,
+                        idList: order_id_list,
+                    });
+                },
+            );
         }
     }
 
@@ -204,7 +208,14 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
     }
 
     render() {
-        const { createLoading, queryLoading, status, successTimes, failTimes } = this.state;
+        const {
+            createLoading,
+            queryLoading,
+            status,
+            successTimes,
+            failTimes,
+            idList = [],
+        } = this.state;
         const { taskId } = this.props;
         const edit = taskId !== void 0;
         if (edit) {
@@ -214,6 +225,16 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     <div className="config-task-label">任务状态: {TaskStatusMap[status ?? '']}</div>
                     <div className="config-task-label">执行成功：{successTimes}次</div>
                     <div className="config-task-label">执行失败：{failTimes}次</div>
+                    <div className="task-id-title">中台订单id({idList.length})</div>
+                    <div>
+                        {idList.map(id => {
+                            return (
+                                <div key={id} className="task-id-item">
+                                    {id}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </Spin>
             );
         }
