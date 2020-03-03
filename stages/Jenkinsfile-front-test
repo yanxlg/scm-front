@@ -15,6 +15,10 @@ pipeline {
             defaultValue: 'master',
             description: 'which branch or commit id?'
         )
+        choice(name: 'vid',
+              choices: "1\n2\n3\n4",
+              description: 'vid'
+        )
         booleanParam(name: 'NpmInstall',
             defaultValue: false,
             description: 'Need run npm install?'
@@ -54,11 +58,9 @@ pipeline {
                         git rev-parse --short HEAD > dist/version; \
                     "
                     sh "${docker_login}"
-                    sh "docker build --no-cache --network=host -f Dockerfile -t 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page .; \
-                        docker push 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page; \
-                        docker tag 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front; \
-                        docker push 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front; \
-                        docker rmi 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page; \
+                    sh "docker build --no-cache --network=host -f Dockerfile -t 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-${vid} .; \
+                        docker push 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-${vid}; \
+                        docker rmi 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-${vid}; \
                        "
                 }
             }
@@ -76,10 +78,13 @@ pipeline {
                                branches: [[name: "$refspec"]],
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
                     sh """export KUBECONFIG=~/.kube/config--vv-supplychain; \
-                          kubectl apply -f stages/manifests/test/scm-front-test.yaml; \
-                          kubectl get pod -n default | grep 'trigram-scm-front-page' | awk '{print \$1}' \
+                          cp stages/manifests/test/scm-front-test.yaml stages/manifests/test/scm-front-test-${vid}.yaml; \
+                          sed -E "s/@@VID@@/${vid}/g" stages/manifests/test/scm-front-test-${vid}.yaml; \
+                          kubectl apply -f stages/manifests/test/scm-front-test-${vid}.yaml; \
+                          kubectl get pod -n default | grep 'trigram-scm-front-page-${vid}' | awk '{print \$1}' \
                               | while read podName; do kubectl get pod \$podName -n default -o yaml \
                               | kubectl replace --force -f -; done; \
+                              rm -f stages/manifests/test/scm-front-test-${vid}.yaml; \
                     """
                 }
             }
