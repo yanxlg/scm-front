@@ -282,7 +282,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             </Select.Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item>
+                    <div>
                         <Form.Item
                             label="开始时间"
                             validateTrigger={'onChange'}
@@ -329,7 +329,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                 disabledDate={this.disabledEndDate}
                             />
                         </Form.Item>
-                    </Form.Item>
+                    </div>
                     <Form.Item
                         validateTrigger={'onBlur'}
                         label="任务间隔"
@@ -352,7 +352,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                 'taskIntervalType',
                                             );
                                             return (
-                                                <Form.Item className="form-item-inline">
+                                                <React.Fragment>
                                                     <Form.Item
                                                         noStyle={true}
                                                         validateTrigger={'onBlur'}
@@ -376,7 +376,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                         />
                                                     </Form.Item>
                                                     <span className="form-unit">天</span>
-                                                </Form.Item>
+                                                </React.Fragment>
                                             );
                                         }}
                                     </Form.Item>
@@ -396,7 +396,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                 'taskIntervalType',
                                             );
                                             return (
-                                                <Form.Item className="form-item-inline">
+                                                <React.Fragment>
                                                     <Form.Item
                                                         noStyle={true}
                                                         validateTrigger={'onBlur'}
@@ -421,7 +421,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                         />
                                                     </Form.Item>
                                                     <span className="form-unit">秒</span>
-                                                </Form.Item>
+                                                </React.Fragment>
                                             );
                                         }}
                                     </Form.Item>
