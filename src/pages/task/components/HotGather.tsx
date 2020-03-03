@@ -983,6 +983,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     ]}
                                                                 >
                                                                     <TreeSelect
+                                                                        treeNodeFilterProp="title"
                                                                         onChange={
                                                                             this
                                                                                 .onFirstCategoryChange
@@ -1046,6 +1047,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     ]}
                                                                 >
                                                                     <TreeSelect
+                                                                        treeNodeFilterProp="title"
                                                                         disabled={
                                                                             range ===
                                                                                 HotTaskRange.store ||
@@ -1111,6 +1113,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                     ]}
                                                                 >
                                                                     <TreeSelect
+                                                                        treeNodeFilterProp="title"
                                                                         disabled={
                                                                             range ===
                                                                                 HotTaskRange.store ||
