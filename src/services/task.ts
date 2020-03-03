@@ -50,16 +50,10 @@ export async function getTaskList(params: ITaskListSearch) {
     });
 }
 
-export async function addPddHotTask({
-    grab_count_max,
-    grab_page_count,
-    ...params
-}: IPddHotTaskParams) {
+export async function addPddHotTask(params: IPddHotTaskParams) {
     return request.post(ApiPathEnum.AddPDDHotTask, {
         data: {
             ...params,
-            grab_count_max: isNull(grab_count_max) ? 10000 : grab_count_max,
-            grab_page_count: isNull(grab_page_count) ? 20 : grab_page_count,
             version: '1.0',
             platform: 'PDD',
         },

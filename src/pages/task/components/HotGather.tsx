@@ -2,7 +2,6 @@ import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
 import {
     Button,
-    Card,
     DatePicker,
     Input,
     Modal,
@@ -72,9 +71,6 @@ declare interface IHotGatherState {
     gatherLoading: boolean;
     groundLoading: boolean;
     queryLoading: boolean;
-    status?: string;
-    successTimes?: number;
-    failTimes?: number;
 
     pddCategory: IPDDCategory;
     categoryLoading: boolean;
@@ -125,23 +121,49 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
+            Promise.all([this.queryDetail(taskId), this.queryCategory()]).then(
+                ([{ category_level_one = [], category_level_two = [] }, data]) => {
+                    const firstTreeData = this.getTreeNodeList(data);
+                    const middleTreeData = this.getTreeNodeList(data, category_level_one);
+                    const lastTreeData = this.getTreeNodeList(
+                        data,
+                        category_level_one,
+                        category_level_two,
+                    );
+                    this.setState({
+                        categoryLoading: false,
+                        pddCategory: data,
+                        firstTreeData,
+                        middleTreeData,
+                        lastTreeData,
+                    });
+                },
+            );
+        } else {
+            // query category
+            this.initCategory();
+        }
+        this.querySortCondition();
+    }
+
+    private queryDetail(taskId: number) {
+        return queryTaskDetail(taskId)
+            .then(({ data: { task_detail_info = {} } = {} } = {}) => {
                 const initValues = this.convertDetail(task_detail_info);
-                const { success, fail, status } = initValues;
                 this.formRef.current!.setFieldsValue({
                     ...initValues,
                 });
                 this.setState({
                     queryLoading: false,
-                    status: status,
-                    successTimes: success,
-                    failTimes: fail,
                 });
+                return initValues;
+            })
+            .catch(() => {
+                this.setState({
+                    queryLoading: false,
+                });
+                return {};
             });
-        }
-        // query category
-        this.queryCategory();
-        this.querySortCondition();
     }
 
     private querySortCondition() {
@@ -181,10 +203,25 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 });
             });
     }
-
     private queryCategory() {
-        queryCategory()
+        return queryCategory()
             .then(({ data }) => {
+                this.setState({
+                    categoryLoading: false,
+                    pddCategory: data,
+                });
+                return data;
+            })
+            .catch(() => {
+                this.setState({
+                    categoryLoading: false,
+                });
+                return [];
+            });
+    }
+    private initCategory() {
+        this.queryCategory().then(data => {
+            if (data && data.length > 0) {
                 // calc treeData
                 const firstTreeData = this.getTreeNodeList(data);
                 const firstInitId = firstTreeData[0]?.key ?? '';
@@ -204,12 +241,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     category_level_two: middleInitId ? [middleInitId] : [],
                     category_level_three: lastInitId ? [lastInitId] : [],
                 });
-            })
-            .catch(() => {
-                this.setState({
-                    categoryLoading: false,
-                });
-            });
+            }
+        });
     }
     private getCategoryIdList(categoryIds?: string[]) {
         return categoryIds && categoryIds.length === 1 ? categoryIds[0].split(',') : categoryIds;
@@ -433,7 +466,6 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                               groundLoading: false,
                           },
                 );
-                return;
                 addPddHotTask(
                     Object.assign({}, params, {
                         is_upper_shelf: is_upper_shelf,
@@ -684,13 +716,34 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    private onFilterTypeChange() {
-        this.formRef.current!.resetFields([
-            'category_level_one',
-            'category_level_two',
-            'category_level_three',
-            'keywords',
-        ]);
+    private onFilterTypeChange(value: number) {
+        if (value === HotTaskFilterType.ByKeywords) {
+            this.formRef.current!.resetFields([
+                'category_level_one',
+                'category_level_two',
+                'category_level_three',
+                'keywords',
+            ]);
+        } else {
+            // 重新计算
+            const data = this.state.pddCategory;
+            const firstTreeData = this.getTreeNodeList(data);
+            const firstInitId = firstTreeData[0]?.key ?? '';
+            const middleTreeData = this.getTreeNodeList(data, [firstInitId]);
+            const middleInitId = middleTreeData[0]?.key ?? '';
+            const lastTreeData = this.getTreeNodeList(data, [firstInitId], [middleInitId]);
+            const lastInitId = lastTreeData[0]?.key ?? '';
+            this.setState({
+                firstTreeData,
+                middleTreeData,
+                lastTreeData,
+            });
+            this.formRef.current!.setFieldsValue({
+                category_level_one: firstInitId ? [firstInitId] : [],
+                category_level_two: middleInitId ? [middleInitId] : [],
+                category_level_three: lastInitId ? [lastInitId] : [],
+            });
+        }
     }
 
     private checkSecondCategory() {
@@ -987,7 +1040,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         validateTrigger={'onBlur'}
                                         name="category_level_one"
                                         label="一级类目"
-                                        className="form-item form-item-horizon form-item-inline"
+                                        className="form-item form-item-horizon form-item-inline config-hot-category"
                                         validateFirst={true}
                                         rules={[
                                             {
@@ -1014,7 +1067,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         validateTrigger={'onBlur'}
                                         name="category_level_two"
                                         label="二级类目"
-                                        className="form-item form-item-horizon form-item-inline form-required-absolute"
+                                        className="form-item form-item-horizon form-item-inline form-required-absolute config-hot-category"
                                         rules={[
                                             {
                                                 validator: this.checkSecondCategory,
