@@ -131,7 +131,7 @@ spec:
             path: /opt/data1/logs/scm-front/nginx
         - name: nginx-conf
           configMap:
-            name: trigram-scm-front-page-nginx-conf
+            name: trigram-scm-front-page-nginx-conf-@@VID@@
             items:
               - key: nginx.conf
                 path: nginx.conf
