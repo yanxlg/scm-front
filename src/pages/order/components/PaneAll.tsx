@@ -1,17 +1,27 @@
 import React, { RefObject } from 'react';
-import { Button } from 'antd';
+import { Pagination, Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
+import TableParentAll from './TableParentAll';
 
 import { 
     getAllOrderList,
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
-import { allColumnList, defaultColList, defaultParentColList } from '@/enums/OrderEnum';
+import { 
+    childDefaultFieldList,
+    childAllFieldList,
+    childOptionalColList, 
+    parentDefaultFieldList,
+    parentAllFieldList,
+    defaultColChildList, 
+    defaultParentColList, 
+    pageSizeOptions 
+} from '@/enums/OrderEnum';
 import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
 
 export declare interface IPurchaseStatus {
@@ -56,185 +66,18 @@ declare interface IBaseOrderItem {
     middleground_c_order_id: string;      // 中台子订单ID 
 }
 
-export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
-    _checked?: boolean;
-    _rowspan?: number;
+// export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
+//     _checked?: boolean;
+//     _rowspan?: number;
+// }
+
+export declare interface IChildOrderItem {
+    [key: string]: any;
 }
 
-const baseFieldList: IFieldItem[] = [
-    {
-        type: 'dateRanger',
-        name: ['order_start_time', 'order_end_time'],
-        label: '订单时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
-    {
-        type: 'input',
-        name: 'middleground_order_id',
-        label: '中台订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单ID',
-    },
-    {
-        type: 'input',
-        name: 'sale_order_id',
-        label: '销售订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入销售订单ID',
-    },
-    {
-        type: 'input',
-        name: 'purchase_order_id',
-        label: '采购订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购订单ID',
-    },
-    {
-        type: 'select',
-        name: 'channel',
-        label: '销售渠道',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    }
-]
-
-const endFieldItem: IFieldItem = {
-    type: 'checkbox',
-    name: 'only_p_order',
-    label: '仅展示父订单ID',
+export declare interface IParentOrderItem {
+    [key: string]: any;
 }
-
-const defaultFieldList: IFieldItem[] = [
-    ...baseFieldList,
-    endFieldItem
-];
-
-const allFieldList: IFieldItem[] = [
-    ...baseFieldList,
-    {
-        type: 'dateRanger',
-        name: ['purchase_start_time', 'purchase_end_time'],
-        label: '采购时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
-    {
-        type: 'input',
-        name: 'middleground_p_order_id',
-        label: '中台父订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台父订单ID',
-    },
-    {
-        type: 'input',
-        name: 'purchase_shipping_no',
-        label: '采购运单号',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购运单号',
-    },
-    {
-        type: 'input',
-        name: 'last_waybill_no',
-        label: '尾程运单号',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入尾程运单号',
-    },
-    {
-        type: 'input',
-        name: 'commodity_id',
-        label: '中台商品ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台商品ID',
-    },
-    {
-        type: 'input',
-        name: 'sku_id',
-        label: '中台SKU ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台SKU ID',
-    },
-    {
-        type: 'select',
-        name: 'sale_order_status',
-        label: '销售订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    {
-        type: 'select',
-        name: 'purchase_order_status',
-        label: '采购订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    {
-        type: 'select',
-        name: 'purchase_pay_status',
-        label: '采购支付状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    {
-        type: 'select',
-        name: 'purchase_shipping_status',
-        label: '采购配送状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    {
-        type: 'select',
-        name: 'purchase_cancel_res',
-        label: '采购取消原因',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    endFieldItem
-];
 
 declare interface IPaneAllState {
     page: number;
@@ -243,11 +86,15 @@ declare interface IPaneAllState {
     loading: boolean;
     showFilterStatus: boolean;
     showColStatus: boolean;
-    orderList: IOrderItem[];
+    showParentStatus: boolean;
+    childOrderList: IChildOrderItem[];
+    parentOrderList: IParentOrderItem[];
     fieldList: IFieldItem[];
     selectedColKeyList: string[];
-    colList: string[];
-    optionalColList: IOptionalColItem[];
+    colChildList: string[];
+    colParentList: string[];
+    childOptionalColList: IOptionalColItem[];
+
 }
 
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
@@ -263,6 +110,15 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         purchase_cancel_res: 100
     }
 
+    private endFieldItem: IFieldItem = {
+        type: 'checkbox',
+        name: 'only_p_order',
+        label: '仅展示父订单ID',
+        onChange: (status: boolean) => {
+            this.changeParentOrder(status);
+        }
+    }
+
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -272,12 +128,18 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             loading: false,
             showFilterStatus: false,
             showColStatus: false,
-            orderList: [],
-            fieldList: defaultFieldList,
+            showParentStatus: false,
+            childOrderList: [],
+            parentOrderList: [],
+            fieldList: [
+                ...childDefaultFieldList,
+                this.endFieldItem
+            ],
             selectedColKeyList: [],
-            optionalColList: allColumnList.filter(item => defaultColList.indexOf(item.key) === -1),
+            childOptionalColList: childOptionalColList,
             // 表格展示的列
-            colList: defaultColList
+            colChildList: defaultColChildList,
+            colParentList: defaultParentColList
         }
     }
 
@@ -286,7 +148,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
+    private onSearch = (baseParams?: IFilterBaseParams) => {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
@@ -305,12 +167,18 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         })
         getAllOrderList(params).then(res => {
             // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
+            const { all_count, list } = res.data;
+            const childList: any[] = [];
+            list.forEach((item: any) => {
+                item.orderGoods.forEach((goodsItem: any) => {
+                    childList.push(goodsItem);
+                })
+            })
             this.setState({
-                total,
+                total: all_count,
                 page: params.page,
                 pageCount: params.page_count,
-                orderList: this.addRowSpanData(list)
+                childOrderList: this.getChildOrderData(childList)
             })
         }).finally(() => {
             this.setState({
@@ -319,36 +187,166 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         })
     }
 
-    // 处理表格数据，用于合并单元格
-    private addRowSpanData(list: any[]): IOrderItem[] {
-        let ret: IOrderItem[] = [];
-        // let goodsId: string | number = 0;
-        for (let i = 0, len = list.length; i < len; i++) {
-            let {
-                goods_list,
-                ...rest
-            } = list[i];
-            goods_list.forEach((item: any, index: number) => {
-                const goodsInfo: any = {};
-                Object.keys(item).forEach(key => {
-                    goodsInfo[`goods_${key}`] = item[key];
-                })
-                let rowDataItem: IOrderItem = Object.assign({}, rest, goodsInfo);
-                if (index === 0) {
-                    rowDataItem._rowspan = goods_list.length;
-                    rowDataItem._checked = false;
+    // 获取子订单=>采购计划数据
+    private getChildOrderData(list: any[]): IChildOrderItem[] {
+        const childOrderList: IChildOrderItem[] = [];
+        list.forEach((goodsItem: any) => {
+            const {
+                orderGoodsPurchasePlan,
+                channelOrderGoodsSn,
+                createTime: goodsCreateTime,
+                lastUpdateTime: goodsLastUpdateTime,
+                goodsAmount,
+                goodsNumber,
+                orderGoodsExtension,
+                orderGoodsId,
+                orderGoodsShippingStatus,
+                orderGoodsStatus,
+                // orderId,
+                productId,
+                productPlatform,
+                productShop,
+                skuId
+            } = goodsItem;
+            // console.log(111, goodsCreateTime);
+            orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                const {
+                    createTime: purchaseCreateTime,
+                    lastUpdateTime: purchaseLastUpdateTime,
+                    // orderGoodsId,
+                    purchaseAmount,
+                    purchaseNumber,
+                    purchaseOrderPayStatus,
+                    purchaseOrderShippingStatus,
+                    purchaseOrderStatus,
+                    purchasePlanId,
+                    purchasePlatform
+                } = purchaseItem;
+                const childOrderItem: any = {
+                    channelOrderGoodsSn,
+                    goodsCreateTime,
+                    goodsLastUpdateTime,
+                    goodsAmount,
+                    goodsNumber,
+                    orderGoodsExtension,
+                    orderGoodsId,
+                    orderGoodsShippingStatus,
+                    orderGoodsStatus,
+                    // orderId,
+                    productId,
+                    productPlatform,
+                    productShop,
+                    skuId,
+                    purchaseAmount,
+                    purchaseNumber,
+                    purchaseOrderPayStatus,
+                    purchaseOrderShippingStatus,
+                    purchaseOrderStatus,
+                    purchasePlanId,
+                    purchasePlatform,
+                    purchaseCreateTime,
+                    purchaseLastUpdateTime
                 }
-                ret.push(rowDataItem);
-            });
+                if (index === 0) {
+                    childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                    childOrderItem._checked = false;
+                }
+                childOrderList.push(childOrderItem);
+            })
+        });
+        // console.log(1111, childOrderList);
+        return childOrderList;
+    }
+
+    // 获取中单订单=>子订单数据
+    private getParentOrderData(list: any[]) {
+        const parentOrderList: IParentOrderItem[] = [];
+        list.forEach(item => {
+            const {
+                orderGoods,
+                // channelOrderSn,
+                // channelSource,
+                // confirmTime,
+                // createTime,
+                // currency,
+                // lastUpdateTime,
+                // orderAddress,
+                // orderAmount,
+                // orderId,
+                // orderStatus,
+                // orderTime
+                ...rest
+            } = item;
+            orderGoods.forEach((goodsItem: any, index: number) => {
+                const {
+                    // orderId,
+                    createTime: goodsCreateTime,
+                    lastUpdateTime: goodsLastUpdateTime,
+                    ...goodsRest
+                    // orderGoodsPurchasePlan,
+                    // channelOrderGoodsSn,
+                    // goodsAmount,
+                    // goodsNumber,
+                    // orderGoodsExtension,
+                    // orderGoodsId,
+                    // orderGoodsShippingStatus,
+                    // orderGoodsStatus,
+                    // productId,
+                    // productPlatform,
+                    // productShop,
+                    // skuId
+                } = goodsItem;
+                const parentOrderItem: any = {
+                    goodsCreateTime,
+                    goodsLastUpdateTime,
+                    ...rest,
+                    ...goodsRest
+                }
+                if (index === 0) {
+                    parentOrderItem._rowspan = orderGoods.length;
+                }
+                parentOrderList.push(parentOrderItem);
+            })
+        });
+    }
+
+    private changeParentOrder = (status: boolean) => {
+        // console.log('changeParentOrder', status);
+        this.setState({
+            showParentStatus: status
+        }, () => {
+            // 切换过滤条件
+            this.changeFilter();
+        });
+    }
+
+    // 展示过滤条件
+    private changeFilter = () => {
+        const { showParentStatus, showFilterStatus } = this.state;
+        let fieldList: IFieldItem[] = [];
+        if ( showParentStatus && showFilterStatus ) {
+            fieldList = parentAllFieldList
+        } else if (showParentStatus && !showFilterStatus) {
+            fieldList = parentDefaultFieldList
+        } else if (!showParentStatus && showFilterStatus) {
+            fieldList = childAllFieldList
+        } else {
+            fieldList = childDefaultFieldList
         }
-        return ret;
+        this.setState({
+            fieldList: [
+                ...fieldList,
+                this.endFieldItem
+            ]
+        })
     }
 
     changeShowFilterStatus = () => {
         const { showFilterStatus } = this.state;
         this.setState({
-            showFilterStatus: !showFilterStatus,
-            fieldList: showFilterStatus ? defaultFieldList : allFieldList
+            showFilterStatus: !showFilterStatus
+        }, () => {
+            this.changeFilter();
         });
     }
 
@@ -362,7 +360,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     changeSelectedColList = (list: string[]) => {
         this.setState({
             selectedColKeyList: list,
-            colList: [...defaultColList, ...list]
+            colChildList: [...defaultColChildList, ...list]
         });
     }
 
@@ -388,9 +386,9 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     // 全选
     onCheckAllChange = (status: boolean) => {
-        const { orderList } = this.state;
+        const { childOrderList } = this.state;
         this.setState({
-            orderList: orderList.map(item => {
+            childOrderList: childOrderList.map(item => {
                 if (item._rowspan) {
                     return {
                         ...item,
@@ -403,11 +401,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     }
 
     // 单选
-    onSelectedRow = (row: IOrderItem) => {
-        const { orderList } = this.state;
+    onSelectedRow = (row: IChildOrderItem) => {
+        const { childOrderList } = this.state;
         this.setState({
-            orderList: orderList.map(item => {
-                if (row.channel_order_id === item.channel_order_id) {
+            childOrderList: childOrderList.map(item => {
+                if (row._rowspan && row.orderGoodsId === item.orderGoodsId) {
                     return {
                         ...item,
                         _checked: !row._checked
@@ -419,16 +417,21 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     }
 
     render() {
-
         const { 
+            page,
+            pageCount,
+            total,
             loading,
             showFilterStatus,
+            showParentStatus,
             showColStatus,
-            orderList,
+            childOrderList,
+            parentOrderList,
             fieldList,
             selectedColKeyList,
-            optionalColList,
-            colList
+            childOptionalColList,
+            colChildList,
+            colParentList
         } = this.state;
     
         return (
@@ -446,9 +449,21 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                             className="order-btn"
                             onClick={() => this.getFieldsValue()}
                         >查询</Button>
-                        <Button type="primary" className="order-btn">一键拍单</Button>
-                        <Button type="primary" className="order-btn">取消采购单</Button>
-                        <Button type="primary" className="order-btn">取消渠道订单</Button>
+                        {
+                            !showParentStatus ? (
+                                <Button type="primary" className="order-btn">一键拍单</Button>
+                            ) : null
+                        }
+                        {
+                            !showParentStatus ? (
+                                <Button type="primary" className="order-btn">取消采购单</Button>
+                            ) : null
+                        }
+                        {
+                            !showParentStatus ? (
+                                <Button type="primary" className="order-btn">取消渠道订单</Button>
+                            ) : null
+                        }
                         <Button type="primary" className="order-btn">导出数据</Button>
                         <Button 
                             className="order-btn"
@@ -462,18 +477,42 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     {
                         showColStatus ? (
                             <OptionalColumn
-                                optionalColList={optionalColList}
+                                optionalColList={childOptionalColList}
                                 selectedColKeyList={selectedColKeyList}
                                 changeSelectedColList={this.changeSelectedColList}
                             />
                         ) : null
                     }
-                    <TableAll
-                        loading={loading}
-                        colList={colList}
-                        orderList={orderList}
-                        onCheckAllChange={this.onCheckAllChange}
-                        onSelectedRow={this.onSelectedRow}
+                    {
+                        !showParentStatus ? (
+                            <TableAll
+                                loading={loading}
+                                colList={colChildList}
+                                orderList={childOrderList}
+                                onCheckAllChange={this.onCheckAllChange}
+                                onSelectedRow={this.onSelectedRow}
+                            />
+                        ) : (
+                            <TableParentAll
+                                loading={loading}
+                                colList={colParentList}
+                                orderList={parentOrderList}
+                            />
+                        )
+                    }
+                    
+                    <Pagination
+                        className="order-pagination"
+                        // size="small"
+                        total={total}
+                        current={page}
+                        pageSize={pageCount}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        // onChange={this.onChangePage}
+                        // onShowSizeChange={this.pageCountChange}
+                        showTotal={(total) => `共${total}条`}
                     />
                 </div>
             </>

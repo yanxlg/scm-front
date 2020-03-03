@@ -30,7 +30,7 @@ export declare interface IFilterParams extends IFilterBaseParams {
 
  
 export async function getAllOrderList(params: IFilterParams) {
-    return request.get(ApiPathEnum.getAllOrderList, {
+    return request.post(ApiPathEnum.getAllOrderList, {
         requestType: 'form',
         params
     });

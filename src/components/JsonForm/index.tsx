@@ -20,6 +20,7 @@ export interface IFieldItem extends FormItemLabelProps {
     optionList?: IOptionItem[];
     className?: string;
     formItemClassName?: string;
+    onChange?(status: boolean): void;
 }
 
 declare interface IJsonFormProps extends FormProps {
@@ -194,10 +195,10 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
     };
 
     private addCheckbox = (field: IFieldItem) => {
-        const { name, label, formItemClassName, className } = field;
+        const { name, label, formItemClassName, className, onChange } = field;
         return (
             <Form.Item name={name} className={formItemClassName} valuePropName="checked">
-                <Checkbox className={className}>{label}</Checkbox>
+                <Checkbox onChange={e => onChange && onChange(e.target.checked)} className={className}>{label}</Checkbox>
             </Form.Item>
         );
     };

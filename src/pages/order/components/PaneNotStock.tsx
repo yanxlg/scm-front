@@ -11,7 +11,7 @@ import {
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
-import { defaultStockColList, notStockoptionalColList } from '@/enums/OrderEnum';
+import { defaultStockColList, notStockOptionalColList } from '@/enums/OrderEnum';
 
 
 
@@ -69,7 +69,7 @@ const allFieldList: IFieldItem[] = [
 
 declare interface IState {
     page: number;
-    pageNumber: number;
+    pageCount: number;
     total: number;
     loading: boolean;
     showColStatus: boolean;
@@ -91,7 +91,7 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             page: 1,
-            pageNumber: 50,
+            pageCount: 50,
             total: 0,
             loading: false,
             showColStatus: false,
@@ -109,10 +109,10 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
     }
 
     onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
+        const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
+            page_count: pageCount
         }
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
@@ -131,7 +131,7 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
             this.setState({
                 total,
                 page: params.page,
-                pageNumber: params.page_number,
+                pageCount: params.page_count,
                 orderList: list
             })
         }).finally(() => {
@@ -187,7 +187,7 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
                     {
                         showColStatus ? (
                             <OptionalColumn
-                                optionalColList={notStockoptionalColList}
+                                optionalColList={notStockOptionalColList}
                                 selectedColKeyList={selectedColKeyList}
                                 changeSelectedColList={this.changeSelectedColList}
                             />
