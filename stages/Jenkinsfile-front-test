@@ -79,7 +79,7 @@ pipeline {
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
                     sh """export KUBECONFIG=~/.kube/config--vv-supplychain; \
                           cp stages/manifests/test/scm-front-test.yaml stages/manifests/test/scm-front-test-${vid}.yaml; \
-                          sed -E "s/@@VID@@/${vid}/g" stages/manifests/test/scm-front-test-${vid}.yaml; \
+                          sed -Ei "s/@@VID@@/${vid}/g" stages/manifests/test/scm-front-test-${vid}.yaml; \
                           kubectl apply -f stages/manifests/test/scm-front-test-${vid}.yaml; \
                           kubectl get pod -n default | grep 'trigram-scm-front-page-${vid}' | awk '{print \$1}' \
                               | while read podName; do kubectl get pod \$podName -n default -o yaml \
