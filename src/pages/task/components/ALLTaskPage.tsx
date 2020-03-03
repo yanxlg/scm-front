@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import TaskSearch from '@/pages/task/components/TaskSearch';
-import { Button, message, Modal, Pagination, Progress } from 'antd';
+import { Button, message, Modal, Pagination, Progress, Popconfirm } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import TaskLogView from '@/pages/task/components/TaskLogView';
 import '@/styles/config.less';
@@ -329,31 +329,21 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     private deleteTasks() {
         const { selectedRowKeys } = this.state;
         const ids = selectedRowKeys.join(',');
-        Modal.confirm({
-            title: '确定要删除选中的任务吗？',
-            icon: <ExclamationCircleOutlined />,
-            content: `任务ID包括:${ids}`,
-            okText: '确定',
-            okType: 'danger',
-            cancelText: '取消',
-            onOk: () => {
-                this.setState({
-                    deleteLoading: true,
-                });
-                deleteTasks(selectedRowKeys.join(','))
-                    .then(() => {
-                        message.success('任务删除成功!');
-                        this.queryList({
-                            searchLoading: true,
-                        });
-                    })
-                    .finally(() => {
-                        this.setState({
-                            deleteLoading: false,
-                        });
-                    });
-            },
+        this.setState({
+            deleteLoading: true,
         });
+        deleteTasks(ids)
+            .then(() => {
+                message.success('任务删除成功!');
+                this.queryList({
+                    searchLoading: true,
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    deleteLoading: false,
+                });
+            });
     }
 
     private activeTasks() {
@@ -471,14 +461,20 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         >
                             终止任务
                         </Button>
-                        <Button
-                            type="link"
-                            loading={deleteLoading}
-                            disabled={selectTaskSize === 0}
-                            onClick={this.deleteTasks}
+                        <Popconfirm
+                            title="确定要删除选中的任务吗?"
+                            onConfirm={this.deleteTasks}
+                            okText="确定"
+                            cancelText="取消"
                         >
-                            删除任务
-                        </Button>
+                            <Button
+                                type="link"
+                                loading={deleteLoading}
+                                disabled={selectTaskSize === 0}
+                            >
+                                删除任务
+                            </Button>
+                        </Popconfirm>
                         <Pagination
                             className="float-right float-clear"
                             pageSize={pageNumber}

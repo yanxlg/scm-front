@@ -1,4 +1,4 @@
-import React, { RefObject, useCallback } from 'react';
+import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
 import {
     Button,
@@ -38,8 +38,7 @@ import {
     HotTaskFilterType,
 } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
-import { doc } from 'prettier';
-import concat = doc.builders.concat;
+import locale from 'antd/es/date-picker/locale/zh_CN';
 
 export declare interface IFormData {
     range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -1346,6 +1345,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                     ]}
                                                 >
                                                     <DatePicker
+                                                        locale={locale}
                                                         showTime={true}
                                                         disabled={taskType !== TaskExecuteType.once}
                                                         placeholder="立即开始"
@@ -1390,6 +1390,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         ]}
                                                     >
                                                         <DatePicker
+                                                            locale={locale}
                                                             showTime={true}
                                                             disabled={
                                                                 taskType !==
@@ -1417,6 +1418,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                         ]}
                                                     >
                                                         <DatePicker
+                                                            locale={locale}
                                                             showTime={true}
                                                             disabled={
                                                                 taskType !==

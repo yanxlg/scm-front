@@ -12,6 +12,7 @@ import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { AutoPurchaseTaskType, TaskStatusMap, TimerUpdateTaskRangeType } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { transStartDate } from '@/utils/date';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 
 declare interface IFormData {
     task_name: string;
@@ -301,6 +302,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                                 ]}
                                             >
                                                 <DatePicker.RangePicker
+                                                    locale={locale}
                                                     allowEmpty={[disabled, disabled]}
                                                     disabled={[disabled, disabled]}
                                                     disabledDate={disabledDate}
@@ -356,6 +358,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                                             ]}
                                                         >
                                                             <TimePicker
+                                                                locale={locale}
                                                                 className="task-picker-time"
                                                                 placeholder="请选择时间"
                                                             />
@@ -379,6 +382,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                                             ]}
                                                         >
                                                             <DatePicker
+                                                                locale={locale}
                                                                 placeholder="请选择时间"
                                                                 className="task-picker-time"
                                                                 showTime={true}

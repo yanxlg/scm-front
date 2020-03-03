@@ -41,9 +41,9 @@ const config: IConfig = {
                 dynamicImport: { webpackChunkName: true },
                 dll: process.env.NODE_ENV === 'production',
                 locale: {
-                    enable: false,
+                    enable: true,
                     default: 'zh-CN',
-                    baseNavigator: false,
+                    baseNavigator: true,
                 },
                 routes: {
                     exclude: [

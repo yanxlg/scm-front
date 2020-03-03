@@ -39,3 +39,7 @@ export const getCookie = (name: string) => {
     }
     return '';
 };
+
+export function cloneSet<T>(set: Set<T>) {
+    return new Set(Array.from(set));
+}
