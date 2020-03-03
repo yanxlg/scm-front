@@ -52,6 +52,7 @@ export declare interface ICatagoryData {
 
 declare interface IGoodsVersionItemBase {
     product_id: string;
+    commodity_id: string;
     onsale_info: IOnsaleItem[];
     sku_image: string[];
     title: string;
@@ -188,6 +189,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         let ret: IGoodsVersionRowItem[] = [];
         const len = list.length;
         list.forEach((item) => {
+            item.commodity_id = this.id;
             const { sku_info, ...rest } = item;
             // 目前只有一条默认的sku
             sku_info.forEach((skuItem) => {
