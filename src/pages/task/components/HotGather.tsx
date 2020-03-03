@@ -31,7 +31,6 @@ import { FormInstance } from 'antd/es/form';
 import { QuestionCircleOutlined } from '@ant-design/icons/lib';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 import {
-    TaskStatusMap,
     HotTaskRange,
     TaskExecuteType,
     TaskIntervalConfigType,
@@ -39,6 +38,7 @@ import {
 } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
+import { TreeNodeNormal } from 'antd/es/tree/Tree';
 
 export declare interface IFormData {
     range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -56,8 +56,7 @@ export declare interface IFormData {
     price_max?: number;
     grab_page_count?: number;
     grab_count_max?: number;
-    onceStartTime?: Moment; // 单次任务开始时间，提交及编辑时需要进行数据处理
-    timerStartTime?: Moment; // 定时任务开始时间，提交及编辑时需要进行数据处理
+    task_start_time?: Moment; // 单次任务开始时间，提交及编辑时需要进行数据处理
     task_end_time?: Moment;
     day?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     second?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -82,6 +81,9 @@ declare interface IHotGatherState {
     listSort: Array<IPDDSortItem>;
     merchantSort: Array<IPDDSortItem>;
     sortLoading: boolean;
+    firstTreeData: Array<TreeNodeNormal>;
+    middleTreeData: Array<TreeNodeNormal>;
+    lastTreeData: Array<TreeNodeNormal>;
 }
 
 declare interface IPDDCategoryItem {
@@ -114,6 +116,9 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             listSort: [],
             merchantSort: [],
             sortLoading: true,
+            firstTreeData: [],
+            middleTreeData: [],
+            lastTreeData: [],
         };
     }
 
@@ -180,9 +185,24 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     private queryCategory() {
         queryCategory()
             .then(({ data }) => {
+                // calc treeData
+                const firstTreeData = this.getTreeNodeList(data);
+                const firstInitId = firstTreeData[0]?.key ?? '';
+                const middleTreeData = this.getTreeNodeList(data, [firstInitId]);
+                const middleInitId = middleTreeData[0]?.key ?? '';
+                const lastTreeData = this.getTreeNodeList(data, [firstInitId], [middleInitId]);
+                const lastInitId = lastTreeData[0]?.key ?? '';
                 this.setState({
                     categoryLoading: false,
                     pddCategory: data,
+                    firstTreeData,
+                    middleTreeData,
+                    lastTreeData,
+                });
+                this.formRef.current!.setFieldsValue({
+                    category_level_one: firstInitId ? [firstInitId] : [],
+                    category_level_two: middleInitId ? [middleInitId] : [],
+                    category_level_three: lastInitId ? [lastInitId] : [],
                 });
             })
             .catch(() => {
@@ -190,6 +210,107 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     categoryLoading: false,
                 });
             });
+    }
+    private getCategoryIdList(categoryIds?: string[]) {
+        return categoryIds && categoryIds.length === 1 ? categoryIds[0].split(',') : categoryIds;
+    }
+
+    private getTreeNodeList(
+        pddCategory: IPDDCategory,
+        firstFilterIds?: string[],
+        secondFilterIds?: string[],
+    ) {
+        // 不能调用setFieldsValue方法重置，会重复render
+        if (pddCategory.length === 0) {
+            return [];
+        }
+        let idArr: string[] = [];
+        let childrenArr: any[] = [];
+        let ids = '';
+        const firstFilterIdArray = this.getCategoryIdList(firstFilterIds);
+        const secondFilterIdArray = this.getCategoryIdList(secondFilterIds);
+        if (!firstFilterIdArray) {
+            pddCategory.forEach(category => {
+                idArr.push(category.platform_cate_id);
+                childrenArr.push({
+                    title: category.platform_cate_name,
+                    value: category.platform_cate_id,
+                    key: category.platform_cate_id,
+                });
+            });
+            ids = idArr.join(',');
+            const hasChildren = ids.length > 0;
+            return hasChildren
+                ? [
+                      {
+                          title: '全选',
+                          value: ids,
+                          key: ids,
+                          children: childrenArr,
+                      },
+                  ]
+                : [];
+        }
+        if (!secondFilterIdArray) {
+            pddCategory
+                .filter(category => {
+                    return firstFilterIdArray.indexOf(category.platform_cate_id) > -1;
+                })
+                .forEach(({ children = [] }) => {
+                    children.forEach(category => {
+                        idArr.push(category.platform_cate_id);
+                        childrenArr.push({
+                            title: category.platform_cate_name,
+                            value: category.platform_cate_id,
+                            key: category.platform_cate_id,
+                        });
+                    });
+                });
+            ids = idArr.join(',');
+            const hasChildren = ids.length > 0;
+            return hasChildren
+                ? [
+                      {
+                          title: '全选',
+                          value: ids,
+                          key: ids,
+                          children: childrenArr,
+                      },
+                  ]
+                : [];
+        }
+        pddCategory
+            .filter(category => {
+                return firstFilterIdArray.indexOf(category.platform_cate_id) > -1;
+            })
+            .forEach(({ children = [] }) => {
+                children
+                    .filter(category => {
+                        return secondFilterIdArray.indexOf(category.platform_cate_id) > -1;
+                    })
+                    .forEach(({ children = [] }) => {
+                        children.forEach(category => {
+                            idArr.push(category.platform_cate_id);
+                            childrenArr.push({
+                                title: category.platform_cate_name,
+                                value: category.platform_cate_id,
+                                key: category.platform_cate_id,
+                            });
+                        });
+                    });
+            });
+        ids = idArr.join(',');
+        const hasChildren = ids.length > 0;
+        return hasChildren
+            ? [
+                  {
+                      title: '全选',
+                      value: ids,
+                      key: ids,
+                      children: childrenArr,
+                  },
+              ]
+            : [];
     }
 
     private convertDetail(info: IPddHotTaskParams) {
@@ -224,12 +345,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     ? TaskIntervalConfigType.day
                     : TaskIntervalConfigType.second
                 : TaskIntervalConfigType.day,
-            onceStartTime:
+            task_start_time:
                 taskType === TaskExecuteType.once && task_start_time
-                    ? moment(task_start_time * 1000)
-                    : undefined,
-            timerStartTime:
-                taskType === TaskExecuteType.interval && task_start_time
                     ? moment(task_start_time * 1000)
                     : undefined,
             task_type: taskType,
@@ -249,8 +366,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         const {
             range,
             shopId,
-            onceStartTime,
-            timerStartTime,
+            task_start_time,
             day = 0,
             second,
             taskIntervalType,
@@ -284,11 +400,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         ? category_level_three
                         : category_level_three?.join(',')
                     : undefined,
-            is_immediately_execute: task_type === TaskExecuteType.once && !onceStartTime,
-            task_start_time:
-                task_type === TaskExecuteType.once
-                    ? onceStartTime?.unix() ?? undefined
-                    : timerStartTime?.unix() ?? undefined,
+            is_immediately_execute: task_type === TaskExecuteType.once && !task_start_time,
+            task_start_time: task_start_time?.unix() ?? undefined,
             ...(task_type === TaskExecuteType.once
                 ? {}
                 : {
@@ -320,6 +433,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                               groundLoading: false,
                           },
                 );
+                return;
                 addPddHotTask(
                     Object.assign({}, params, {
                         is_upper_shelf: is_upper_shelf,
@@ -349,14 +463,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     })
                     .catch(() => {
                         Modal.info({
-                            content: (
-                                <GatherFailureModal
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        this.onGather(is_upper_shelf);
-                                    }}
-                                />
-                            ),
+                            content: <GatherFailureModal />,
                             className: 'modal-empty',
                             icon: null,
                             maskClosable: true,
@@ -395,12 +502,37 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         this.onGather(true);
     }
 
-    private onFirstCategoryChange() {
-        this.formRef.current!.resetFields(['category_level_two', 'category_level_three']);
+    private onFirstCategoryChange(value: string[]) {
+        // 重新计算level_2,level_3 数据
+        const levelOne = value || [];
+        const middleTreeData = this.getTreeNodeList(this.state.pddCategory, levelOne);
+        const middleInitId = middleTreeData[0]?.key || '';
+        const lastTreeData = this.getTreeNodeList(this.state.pddCategory, levelOne, [middleInitId]);
+        const lastInitId = lastTreeData[0]?.key || '';
+        this.setState({
+            middleTreeData,
+            lastTreeData,
+        });
+        this.formRef.current!.setFieldsValue({
+            category_level_two: middleInitId ? [middleInitId] : [],
+            category_level_three: lastInitId ? [lastInitId] : [],
+        });
     }
 
-    private onSecondCategoryChange() {
-        this.formRef.current!.resetFields(['category_level_three']);
+    private onMiddleCategoryChange(value: string[]) {
+        // 重新计算level_2,level_3 数据
+
+        const middleLevel = value || [];
+        const firstInitId = this.formRef.current!.getFieldValue('category_level_one') || [];
+
+        const lastTreeData = this.getTreeNodeList(this.state.pddCategory, firstInitId, middleLevel);
+        const lastInitId = lastTreeData[0]?.key || '';
+        this.setState({
+            lastTreeData,
+        });
+        this.formRef.current!.setFieldsValue({
+            category_level_three: lastInitId ? [lastInitId] : [],
+        });
     }
 
     private checkMinSaleNum(rule: any, value: any) {
@@ -474,19 +606,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     }
 
     private resetTaskTypeError() {
-        this.formRef.current!.setFields([
-            {
-                name: 'onceStartTime',
-                errors: [],
-            },
-            {
-                name: 'timerStartTime',
-                errors: [],
-            },
-            {
-                name: 'task_end_time',
-                errors: [],
-            },
+        // 重置所有管控字段
+        this.formRef.current!.resetFields([
+            'task_end_time',
+            'task_start_time',
+            'day',
+            'second',
+            'taskIntervalType',
         ]);
     }
 
@@ -558,152 +684,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         }
     }
 
-    private onFilterTypeChange(e: RadioChangeEvent) {
-        const value = e.target.value;
-        if (value === HotTaskFilterType.ByCategory) {
-            // 类目筛选
-            this.formRef.current!.resetFields(['keywords']);
-        } else {
-            this.formRef.current!.resetFields([
-                'category_level_one',
-                'category_level_two',
-                'category_level_three',
-            ]);
-        }
-    }
-
-    private getTreeNodeList(firstFilterIds?: string[], secondFilterIds?: string[]) {
-        const { pddCategory = [] } = this.state;
-        const filterType =
-            this.formRef.current?.getFieldValue('filterType') ?? HotTaskFilterType.ByCategory;
-        if (filterType === HotTaskFilterType.ByKeywords) {
-            const form = this.formRef.current;
-            if (form) {
-                form.setFieldsValue({
-                    category_level_one: undefined,
-                    category_level_two: undefined,
-                    category_level_three: undefined,
-                });
-            }
-            return [];
-        }
-        let idArr: string[] = [];
-        let childrenArr: any[] = [];
-        let ids = '';
-        const firstFilterIdArray =
-            firstFilterIds && firstFilterIds.length === 1
-                ? firstFilterIds[0].split(',')
-                : firstFilterIds;
-        const secondFilterIdArray =
-            secondFilterIds && secondFilterIds.length === 1
-                ? secondFilterIds[0].split(',')
-                : secondFilterIds;
-        if (!firstFilterIdArray) {
-            pddCategory.forEach(category => {
-                idArr.push(category.platform_cate_id);
-                childrenArr.push({
-                    title: category.platform_cate_name,
-                    value: category.platform_cate_id,
-                    key: category.platform_cate_id,
-                });
-            });
-            ids = idArr.join(',');
-            const form = this.formRef.current;
-            if (form) {
-                const category_level_one = form.getFieldValue('category_level_one');
-                if (!category_level_one || category_level_one.length === 0) {
-                    form.setFieldsValue({
-                        category_level_one: ids,
-                    });
-                }
-            }
-            return [
-                {
-                    title: '全选',
-                    value: ids,
-                    key: ids,
-                    children: childrenArr,
-                },
-            ];
-        }
-        if (!secondFilterIdArray) {
-            pddCategory
-                .filter(category => {
-                    return firstFilterIdArray.indexOf(category.platform_cate_id) > -1;
-                })
-                .forEach(({ children = [] }) => {
-                    children.forEach(category => {
-                        idArr.push(category.platform_cate_id);
-                        childrenArr.push({
-                            title: category.platform_cate_name,
-                            value: category.platform_cate_id,
-                            key: category.platform_cate_id,
-                        });
-                    });
-                });
-            ids = idArr.join(',');
-            const form = this.formRef.current;
-            const hasChildren = ids.length > 0;
-            if (form) {
-                const category_level_two = form.getFieldValue('category_level_two');
-                if (!category_level_two || category_level_two.length === 0) {
-                    form.setFieldsValue({
-                        category_level_two: hasChildren ? ids : undefined,
-                    });
-                }
-            }
-            return hasChildren
-                ? [
-                      {
-                          title: '全选',
-                          value: ids,
-                          key: ids,
-                          children: childrenArr,
-                      },
-                  ]
-                : [];
-        }
-        pddCategory
-            .filter(category => {
-                return firstFilterIdArray.indexOf(category.platform_cate_id) > -1;
-            })
-            .forEach(({ children = [] }) => {
-                children
-                    .filter(category => {
-                        return secondFilterIdArray.indexOf(category.platform_cate_id) > -1;
-                    })
-                    .forEach(({ children = [] }) => {
-                        children.forEach(category => {
-                            idArr.push(category.platform_cate_id);
-                            childrenArr.push({
-                                title: category.platform_cate_name,
-                                value: category.platform_cate_id,
-                                key: category.platform_cate_id,
-                            });
-                        });
-                    });
-            });
-        ids = idArr.join(',');
-        const hasChildren = ids.length > 0;
-        const form = this.formRef.current;
-        if (form) {
-            const category_level_three = form.getFieldValue('category_level_three');
-            if (!category_level_three || category_level_three.length === 0) {
-                form.setFieldsValue({
-                    category_level_three: hasChildren ? ids : undefined,
-                });
-            }
-        }
-        return hasChildren
-            ? [
-                  {
-                      title: '全选',
-                      value: ids,
-                      key: ids,
-                      children: childrenArr,
-                  },
-              ]
-            : [];
+    private onFilterTypeChange() {
+        this.formRef.current!.resetFields([
+            'category_level_one',
+            'category_level_two',
+            'category_level_three',
+            'keywords',
+        ]);
     }
 
     private checkSecondCategory() {
@@ -830,27 +817,17 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             gatherLoading,
             groundLoading,
             queryLoading,
-            status,
-            failTimes,
-            successTimes,
             categoryLoading,
             sortLoading,
             listSort = [],
             merchantSort = [],
+            firstTreeData,
+            middleTreeData,
+            lastTreeData,
         } = this.state;
 
         return (
             <Spin spinning={queryLoading} tip="Loading...">
-                {edit && (
-                    <React.Fragment>
-                        <div className="config-task-label">任务ID：{taskId}</div>
-                        <div className="config-task-label">
-                            任务状态: {TaskStatusMap[status ?? '']}
-                        </div>
-                        <div className="config-task-label">执行成功：{successTimes}次</div>
-                        <div className="config-task-label">执行失败：{failTimes}次</div>
-                    </React.Fragment>
-                )}
                 <Form
                     className="form-help-absolute"
                     layout="horizontal"
@@ -862,10 +839,12 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         taskIntervalType: TaskIntervalConfigType.day,
                         filterType: HotTaskFilterType.ByCategory,
                         day: 1,
+                        grab_page_count: 20,
+                        grab_count_max: 10000,
                     }}
                 >
                     <Form.Item
-                        className="form-item"
+                        className="form-item form-item-inline"
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -876,705 +855,525 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             },
                         ]}
                     >
-                        <Input className="input-default" />
+                        <Input className="picker-default" />
                     </Form.Item>
-                    <Card
-                        className="form-item"
-                        title={<span className="form-required">任务范围：</span>}
+                    <Form.Item
+                        label="任务范围"
+                        name="range"
+                        className="form-item form-item-inline form-item-horizon"
+                        required={true}
                     >
-                        <Form.Item validateTrigger={'onBlur'} name="range" noStyle={true}>
-                            <Radio.Group onChange={this.taskRangeChange}>
-                                <Radio className="block" value={HotTaskRange.fullStack}>
-                                    全站
-                                </Radio>
+                        <Radio.Group onChange={this.taskRangeChange}>
+                            <Radio value={HotTaskRange.fullStack}>全站</Radio>
+                            {/*<Radio value={HotTaskRange.store}>指定店铺</Radio>*/}
+                        </Radio.Group>
+                    </Form.Item>
+                    {/*<Form.Item
+                        noStyle={true}
+                        shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.range !== currentValues.range
+                        }
+                    >
+                        {({ getFieldValue }) => {
+                            const range = getFieldValue('range');
+                            const required = range === HotTaskRange.store;
+                            return (
                                 <Form.Item
-                                    className="form-item form-item-inline"
-                                    label={<Radio value={HotTaskRange.store}>指定店铺</Radio>}
-                                    colon={false}
+                                    className="form-required-absolute form-item form-item-inline form-item-horizon"
+                                    validateTrigger={'onBlur'}
+                                    label="店铺ID"
+                                    name="shopId"
+                                    rules={[
+                                        {
+                                            required: required,
+                                            message: '请输入店铺ID',
+                                        },
+                                    ]}
                                 >
-                                    <Form.Item
-                                        noStyle={true}
-                                        shouldUpdate={(prevValues, currentValues) =>
-                                            prevValues.range !== currentValues.range
-                                        }
-                                    >
-                                        {({ getFieldValue }) => {
-                                            const range = getFieldValue('range');
-                                            return (
-                                                <Form.Item
-                                                    className="form-required-absolute form-item-inline"
-                                                    validateTrigger={'onBlur'}
-                                                    label="店铺ID"
-                                                    name="shopId"
-                                                    rules={[
-                                                        {
-                                                            required: range === HotTaskRange.store,
-                                                            message: '请输入店铺ID',
-                                                        },
-                                                    ]}
-                                                >
-                                                    <IntegerInput
-                                                        min={0}
-                                                        placeholder={'请输入'}
-                                                        className="input-default input-handler"
-                                                        disabled={range !== HotTaskRange.store}
-                                                    />
-                                                </Form.Item>
-                                            );
-                                        }}
-                                    </Form.Item>
+                                    <IntegerInput
+                                        min={0}
+                                        placeholder={'请输入'}
+                                        className="input-default input-handler"
+                                        disabled={!required}
+                                    />
                                 </Form.Item>
-                            </Radio.Group>
-                        </Form.Item>
-                    </Card>
-                    <Card className="form-item" title="指定类目/关键词：">
-                        <div>
-                            <Form.Item validateTrigger={'onBlur'} name="filterType" noStyle={true}>
-                                <Radio.Group onChange={this.onFilterTypeChange}>
-                                    <Form.Item
-                                        noStyle={true}
-                                        shouldUpdate={(prevValues, currentValues) =>
-                                            prevValues.range !== currentValues.range
-                                        }
-                                    >
-                                        {({ getFieldValue }) => {
-                                            const range = getFieldValue('range');
+                            );
+                        }}
+                    </Form.Item>*/}
+
+                    <Form.Item
+                        noStyle={true}
+                        shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.range !== currentValues.range
+                        }
+                    >
+                        {({ getFieldValue }) => {
+                            const range = getFieldValue('range');
+                            const list = range === HotTaskRange.fullStack ? listSort : merchantSort;
+                            return (
+                                <Form.Item
+                                    validateTrigger={'onBlur'}
+                                    name="sort_type"
+                                    label="排序类型"
+                                    className="form-item-horizon form-item-inline form-item"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: '',
+                                        },
+                                    ]}
+                                >
+                                    <Select loading={sortLoading} className="picker-default">
+                                        {list.map(sort => {
                                             return (
-                                                <Form.Item
-                                                    className="form-item-inline"
-                                                    label={
-                                                        <Radio
-                                                            disabled={range === HotTaskRange.store}
-                                                            value={HotTaskFilterType.ByCategory}
-                                                        />
-                                                    }
-                                                    colon={false}
-                                                >
-                                                    <Form.Item
-                                                        noStyle={true}
-                                                        shouldUpdate={(prevValues, currentValues) =>
-                                                            prevValues.range !==
-                                                                currentValues.range ||
-                                                            prevValues.filterType !==
-                                                                currentValues.filterType
-                                                        }
-                                                    >
-                                                        {({ getFieldValue }) => {
-                                                            const range = getFieldValue('range');
-                                                            const filterType = getFieldValue(
-                                                                'filterType',
-                                                            );
-                                                            const treData = this.getTreeNodeList();
-                                                            return (
-                                                                <Form.Item
-                                                                    validateTrigger={'onBlur'}
-                                                                    name="category_level_one"
-                                                                    label="一级类目"
-                                                                    className="form-item-horizon form-item-inline form-required-absolute"
-                                                                    validateFirst={true}
-                                                                    rules={[
-                                                                        {
-                                                                            required:
-                                                                                filterType ===
-                                                                                HotTaskFilterType.ByCategory,
-                                                                            message:
-                                                                                '必须选择一级分类',
-                                                                        },
-                                                                    ]}
-                                                                >
-                                                                    <TreeSelect
-                                                                        onChange={
-                                                                            this
-                                                                                .onFirstCategoryChange
-                                                                        }
-                                                                        disabled={
-                                                                            range ===
-                                                                                HotTaskRange.store ||
-                                                                            filterType ===
-                                                                                HotTaskFilterType.ByKeywords
-                                                                        }
-                                                                        loading={categoryLoading}
-                                                                        showArrow={true}
-                                                                        className="select-default"
-                                                                        showCheckedStrategy={
-                                                                            'SHOW_PARENT'
-                                                                        }
-                                                                        showSearch={true}
-                                                                        treeDefaultExpandAll={true}
-                                                                        treeCheckable={true}
-                                                                        treeData={treData}
-                                                                    />
-                                                                </Form.Item>
-                                                            );
-                                                        }}
-                                                    </Form.Item>
-
-                                                    <Form.Item
-                                                        noStyle={true}
-                                                        shouldUpdate={(prevValues, currentValues) =>
-                                                            prevValues.category_level_one !==
-                                                                currentValues.category_level_one ||
-                                                            prevValues.range !==
-                                                                currentValues.range ||
-                                                            prevValues.filterType !==
-                                                                currentValues.filterType
-                                                        }
-                                                    >
-                                                        {({ getFieldValue }) => {
-                                                            const levelOne = getFieldValue(
-                                                                'category_level_one',
-                                                            );
-                                                            const range = getFieldValue('range');
-                                                            const filterType = getFieldValue(
-                                                                'filterType',
-                                                            );
-                                                            const treData = this.getTreeNodeList(
-                                                                levelOne || [],
-                                                            );
-
-                                                            return (
-                                                                <Form.Item
-                                                                    validateTrigger={'onBlur'}
-                                                                    name="category_level_two"
-                                                                    label="二级类目"
-                                                                    className="form-item-horizon form-item-inline form-required-absolute"
-                                                                    rules={[
-                                                                        {
-                                                                            validator: this
-                                                                                .checkSecondCategory,
-                                                                        },
-                                                                    ]}
-                                                                >
-                                                                    <TreeSelect
-                                                                        disabled={
-                                                                            range ===
-                                                                                HotTaskRange.store ||
-                                                                            filterType ===
-                                                                                HotTaskFilterType.ByKeywords
-                                                                        }
-                                                                        loading={categoryLoading}
-                                                                        className="select-default"
-                                                                        onChange={
-                                                                            this
-                                                                                .onSecondCategoryChange
-                                                                        }
-                                                                        showArrow={true}
-                                                                        showCheckedStrategy={
-                                                                            'SHOW_PARENT'
-                                                                        }
-                                                                        showSearch={true}
-                                                                        treeDefaultExpandAll={true}
-                                                                        treeCheckable={true}
-                                                                        treeData={treData}
-                                                                    />
-                                                                </Form.Item>
-                                                            );
-                                                        }}
-                                                    </Form.Item>
-                                                    <Form.Item
-                                                        noStyle={true}
-                                                        shouldUpdate={(prevValues, currentValues) =>
-                                                            prevValues.category_level_two !==
-                                                                currentValues.category_level_two ||
-                                                            prevValues.range !==
-                                                                currentValues.range ||
-                                                            prevValues.filterType !==
-                                                                currentValues.filterType
-                                                        }
-                                                    >
-                                                        {({ getFieldValue }) => {
-                                                            const levelOne = getFieldValue(
-                                                                'category_level_one',
-                                                            );
-                                                            const range = getFieldValue('range');
-                                                            const filterType = getFieldValue(
-                                                                'filterType',
-                                                            );
-                                                            const parentLevel = getFieldValue(
-                                                                'category_level_two',
-                                                            );
-                                                            const treData = this.getTreeNodeList(
-                                                                levelOne || [],
-                                                                parentLevel || [],
-                                                            );
-                                                            return (
-                                                                <Form.Item
-                                                                    validateTrigger={'onBlur'}
-                                                                    name="category_level_three"
-                                                                    label="三级类目"
-                                                                    className="form-item-horizon form-item-inline form-required-absolute"
-                                                                    rules={[
-                                                                        {
-                                                                            validator: this
-                                                                                .checkLastCategory,
-                                                                        },
-                                                                    ]}
-                                                                >
-                                                                    <TreeSelect
-                                                                        disabled={
-                                                                            range ===
-                                                                                HotTaskRange.store ||
-                                                                            filterType ===
-                                                                                HotTaskFilterType.ByKeywords
-                                                                        }
-                                                                        loading={categoryLoading}
-                                                                        className="select-default"
-                                                                        showArrow={true}
-                                                                        showCheckedStrategy={
-                                                                            'SHOW_PARENT'
-                                                                        }
-                                                                        showSearch={true}
-                                                                        treeDefaultExpandAll={true}
-                                                                        treeCheckable={true}
-                                                                        treeData={treData}
-                                                                    />
-                                                                </Form.Item>
-                                                            );
-                                                        }}
-                                                    </Form.Item>
-                                                </Form.Item>
+                                                <Option key={sort.value} value={sort.value}>
+                                                    {sort.display}
+                                                </Option>
                                             );
-                                        }}
-                                    </Form.Item>
+                                        })}
+                                    </Select>
+                                </Form.Item>
+                            );
+                        }}
+                    </Form.Item>
+                    <Form.Item
+                        label="爬虫条件"
+                        name="filterType"
+                        className="form-item form-item-inline"
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择爬虫条件',
+                            },
+                        ]}
+                    >
+                        <Select onChange={this.onFilterTypeChange} className="picker-default">
+                            <Select.Option value={HotTaskFilterType.ByCategory}>
+                                指定分类
+                            </Select.Option>
+                            <Select.Option value={HotTaskFilterType.ByKeywords}>
+                                指定关键词
+                            </Select.Option>
+                        </Select>
+                    </Form.Item>
 
+                    <Form.Item
+                        noStyle={true}
+                        shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.filterType !== currentValues.filterType
+                        }
+                    >
+                        {({ getFieldValue }) => {
+                            const filterType = getFieldValue('filterType');
+                            if (filterType === HotTaskFilterType.ByKeywords) {
+                                return (
                                     <Form.Item
                                         className="form-item form-item-inline"
-                                        label={<Radio value={HotTaskFilterType.ByKeywords} />}
-                                        colon={false}
+                                        validateTrigger={'onBlur'}
+                                        name="keywords"
+                                        label="关&ensp;键&ensp;词"
                                     >
-                                        <Form.Item
-                                            noStyle={true}
-                                            shouldUpdate={(prevValues, currentValues) =>
-                                                prevValues.filterType !== currentValues.filterType
-                                            }
-                                        >
-                                            {({ getFieldValue }) => {
-                                                const filterType = getFieldValue('filterType');
-                                                return (
-                                                    <Form.Item
-                                                        className="form-item-horizon form-item-inline"
-                                                        validateTrigger={'onBlur'}
-                                                        name="keywords"
-                                                        label="关&ensp;键&ensp;词"
-                                                    >
-                                                        <Input
-                                                            disabled={
-                                                                filterType ===
-                                                                HotTaskFilterType.ByCategory
-                                                            }
-                                                            className="input-large"
-                                                            spellCheck={'false'}
-                                                            placeholder="iPhone XR，国行，白"
-                                                        />
-                                                    </Form.Item>
-                                                );
-                                            }}
-                                        </Form.Item>
+                                        <Input
+                                            className="input-large"
+                                            spellCheck={'false'}
+                                            placeholder="iPhone XR，国行，白"
+                                        />
                                     </Form.Item>
-                                </Radio.Group>
-                            </Form.Item>
-                        </div>
-                        <div className="config-radio">
-                            <Form.Item
-                                noStyle={true}
-                                shouldUpdate={(prevValues, currentValues) =>
-                                    prevValues.range !== currentValues.range
-                                }
-                            >
-                                {({ getFieldValue }) => {
-                                    const range = getFieldValue('range');
-                                    const list =
-                                        range === HotTaskRange.fullStack ? listSort : merchantSort;
-                                    return (
-                                        <Form.Item
-                                            validateTrigger={'onBlur'}
-                                            name="sort_type"
-                                            label="排序类型"
-                                            className="form-item-horizon form-item-inline form-item"
-                                        >
-                                            <Select
-                                                loading={sortLoading}
-                                                className="select-default"
-                                            >
-                                                {list.map(sort => {
-                                                    return (
-                                                        <Option key={sort.value} value={sort.value}>
-                                                            {sort.display}
-                                                        </Option>
-                                                    );
-                                                })}
-                                            </Select>
-                                        </Form.Item>
-                                    );
-                                }}
-                            </Form.Item>
-                        </div>
-                    </Card>
-                    <Card className="form-item" title="设置商品条件：">
-                        <div>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline"
-                                label="销&emsp;&emsp;量"
-                            >
-                                <Form.Item
-                                    noStyle={true}
-                                    validateTrigger={'onBlur'}
-                                    name="sales_volume_min"
-                                    rules={[
-                                        {
-                                            validator: this.checkMinSaleNum,
-                                        },
-                                    ]}
-                                >
-                                    <IntegerInput min={0} className="input-small input-handler" />
+                                );
+                            }
+                            return (
+                                <Form.Item noStyle={true}>
+                                    <Form.Item
+                                        validateTrigger={'onBlur'}
+                                        name="category_level_one"
+                                        label="一级类目"
+                                        className="form-item form-item-horizon form-item-inline"
+                                        validateFirst={true}
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: '必须选择一级分类',
+                                            },
+                                        ]}
+                                    >
+                                        <TreeSelect
+                                            treeNodeFilterProp="title"
+                                            onChange={this.onFirstCategoryChange}
+                                            loading={categoryLoading}
+                                            showArrow={true}
+                                            className="picker-default"
+                                            showCheckedStrategy={'SHOW_PARENT'}
+                                            showSearch={true}
+                                            treeDefaultExpandAll={true}
+                                            treeCheckable={true}
+                                            treeData={firstTreeData}
+                                            maxTagCount={10}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        validateTrigger={'onBlur'}
+                                        name="category_level_two"
+                                        label="二级类目"
+                                        className="form-item form-item-horizon form-item-inline form-required-absolute"
+                                        rules={[
+                                            {
+                                                validator: this.checkSecondCategory,
+                                            },
+                                        ]}
+                                    >
+                                        <TreeSelect
+                                            treeNodeFilterProp="title"
+                                            loading={categoryLoading}
+                                            className="picker-default"
+                                            onChange={this.onMiddleCategoryChange}
+                                            showArrow={true}
+                                            showCheckedStrategy={'SHOW_PARENT'}
+                                            showSearch={true}
+                                            treeDefaultExpandAll={true}
+                                            treeCheckable={true}
+                                            treeData={middleTreeData}
+                                            maxTagCount={10}
+                                        />
+                                    </Form.Item>
+                                    <Form.Item
+                                        validateTrigger={'onBlur'}
+                                        name="category_level_three"
+                                        label="三级类目"
+                                        className="form-item form-item-horizon form-item-inline form-required-absolute"
+                                        rules={[
+                                            {
+                                                validator: this.checkLastCategory,
+                                            },
+                                        ]}
+                                    >
+                                        <TreeSelect
+                                            treeNodeFilterProp="title"
+                                            loading={categoryLoading}
+                                            className="picker-default"
+                                            showArrow={true}
+                                            showCheckedStrategy={'SHOW_PARENT'}
+                                            showSearch={true}
+                                            treeDefaultExpandAll={true}
+                                            treeCheckable={true}
+                                            treeData={lastTreeData}
+                                            maxTagCount={10}
+                                        />
+                                    </Form.Item>
                                 </Form.Item>
-                                <span className="config-colon">-</span>
-                                <Form.Item
-                                    noStyle={true}
-                                    validateTrigger={'onBlur'}
-                                    name="sales_volume_max"
-                                    rules={[
-                                        {
-                                            validator: this.checkMaxSaleNum,
-                                        },
-                                    ]}
-                                >
-                                    <IntegerInput min={0} className="input-small input-handler" />
-                                </Form.Item>
-                            </Form.Item>
-                            <Form.Item
-                                className="form-item-horizon form-item-inline"
-                                label="价格范围(￥)"
-                            >
-                                <Form.Item
-                                    noStyle={true}
-                                    validateTrigger={'onBlur'}
-                                    name="price_min"
-                                    rules={[
-                                        {
-                                            validator: this.checkMinPrice,
-                                        },
-                                    ]}
-                                >
-                                    <IntegerInput min={0} className="input-small input-handler" />
-                                </Form.Item>
-                                <span className="config-colon">-</span>
-                                <Form.Item
-                                    noStyle={true}
-                                    validateTrigger={'onBlur'}
-                                    name="price_max"
-                                    rules={[
-                                        {
-                                            validator: this.checkMaxPrice,
-                                        },
-                                    ]}
-                                >
-                                    <IntegerInput min={0} className="input-small input-handler" />
-                                </Form.Item>
-                            </Form.Item>
-                        </div>
-                        <div className="form-item">
-                            <Form.Item
-                                validateTrigger={'onBlur'}
-                                name="grab_page_count"
-                                label="爬取页数"
-                                className="form-item-horizon form-item-inline"
-                            >
-                                <IntegerInput
-                                    min={0}
-                                    placeholder="默认值：20"
-                                    className="config-input-pages input-handler"
-                                />
-                            </Form.Item>
-                            <Form.Item
-                                validateTrigger={'onBlur'}
-                                name="grab_count_max"
-                                className="form-item-horizon form-item-inline"
-                                label={
-                                    <span>
-                                        爬取数量
-                                        <Tooltip
-                                            placement="bottom"
-                                            title="各指定类目筛选前可爬取的最大数量"
-                                        >
-                                            <QuestionCircleOutlined className="config-ques" />
-                                        </Tooltip>
-                                    </span>
-                                }
-                            >
-                                <IntegerInput
-                                    placeholder="默认值：10000"
-                                    min={0}
-                                    className="config-input-count input-handler"
-                                />
-                            </Form.Item>
-                        </div>
-                    </Card>
-                    <Card
-                        className="form-item"
-                        title={<span className="form-required">任务类型：</span>}
-                    >
+                            );
+                        }}
+                    </Form.Item>
+                    <div>
                         <Form.Item
                             validateTrigger={'onBlur'}
-                            name="task_type"
-                            className="form-item-inline"
+                            name="grab_page_count"
+                            label="爬取页数"
+                            className="form-item form-item-horizon form-item-inline"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请输入爬取页数',
+                                },
+                            ]}
                         >
-                            <Radio.Group onChange={this.resetTaskTypeError}>
-                                <Form.Item
-                                    label={<Radio value={TaskExecuteType.once}>单次任务</Radio>}
-                                    colon={false}
-                                >
-                                    <Form.Item
-                                        noStyle={true}
-                                        shouldUpdate={(prevValues, currentValues) =>
-                                            prevValues.task_type !== currentValues.task_type
-                                        }
+                            <IntegerInput
+                                positive={true}
+                                className="picker-default input-handler"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            validateTrigger={'onBlur'}
+                            name="grab_count_max"
+                            className="form-item form-item-horizon form-item-inline"
+                            label={
+                                <span>
+                                    爬取数量
+                                    <Tooltip
+                                        placement="bottom"
+                                        title="各指定类目筛选前可爬取的最大数量"
                                     >
-                                        {({ getFieldValue }) => {
-                                            const taskType = getFieldValue('task_type');
-                                            return (
-                                                <Form.Item
-                                                    validateTrigger={'onBlur'}
-                                                    label="开始时间"
-                                                    name="onceStartTime"
-                                                    className="form-item-inline"
-                                                    rules={[
-                                                        {
-                                                            validator: this.checkDate,
-                                                        },
-                                                    ]}
-                                                >
-                                                    <DatePicker
-                                                        locale={locale}
-                                                        showTime={true}
-                                                        disabled={taskType !== TaskExecuteType.once}
-                                                        placeholder="立即开始"
-                                                        disabledDate={this.disabledStartDate}
-                                                    />
-                                                </Form.Item>
-                                            );
-                                        }}
+                                        <QuestionCircleOutlined className="config-ques" />
+                                    </Tooltip>
+                                </span>
+                            }
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请输入爬取数量',
+                                },
+                            ]}
+                        >
+                            <IntegerInput
+                                positive={true}
+                                className="picker-default input-handler"
+                            />
+                        </Form.Item>
+                    </div>
+                    <div>
+                        <div className="flex-inline flex-align form-item">
+                            <Form.Item
+                                label="销量区间"
+                                required={true}
+                                className="form-item-inline flex-inline form-required-hide"
+                                validateTrigger={'onBlur'}
+                                name="sales_volume_min"
+                                rules={[
+                                    {
+                                        validator: this.checkMinSaleNum,
+                                    },
+                                ]}
+                            >
+                                <IntegerInput min={0} className="input-small input-handler" />
+                            </Form.Item>
+                            <span className="config-colon">-</span>
+                            <Form.Item
+                                className="form-item-inline form-item-horizon"
+                                validateTrigger={'onBlur'}
+                                name="sales_volume_max"
+                                rules={[
+                                    {
+                                        validator: this.checkMaxSaleNum,
+                                    },
+                                ]}
+                            >
+                                <IntegerInput min={0} className="input-small input-handler" />
+                            </Form.Item>
+                        </div>
+                        <div className="flex-inline flex-align form-item">
+                            <Form.Item
+                                label="价格区间(￥)"
+                                validateTrigger={'onBlur'}
+                                name="price_min"
+                                required={true}
+                                className="form-item-inline flex-inline form-required-hide"
+                                rules={[
+                                    {
+                                        validator: this.checkMinPrice,
+                                    },
+                                ]}
+                            >
+                                <IntegerInput min={0} className="input-small input-handler" />
+                            </Form.Item>
+                            <span className="config-colon">-</span>
+                            <Form.Item
+                                className="form-item-inline form-item-horizon"
+                                validateTrigger={'onBlur'}
+                                name="price_max"
+                                rules={[
+                                    {
+                                        validator: this.checkMaxPrice,
+                                    },
+                                ]}
+                            >
+                                <IntegerInput min={0} className="input-small input-handler" />
+                            </Form.Item>
+                        </div>
+                    </div>
+                    <Form.Item
+                        label="任务周期"
+                        name="task_type"
+                        className="form-item form-item-inline"
+                        required={true}
+                    >
+                        <Select onChange={this.resetTaskTypeError} className="picker-default">
+                            <Select.Option value={TaskExecuteType.once}>单次任务</Select.Option>
+                            <Select.Option value={TaskExecuteType.interval}>定时任务</Select.Option>
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                        noStyle={true}
+                        shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.task_type !== currentValues.task_type
+                        }
+                    >
+                        {({ getFieldValue }) => {
+                            const taskType = getFieldValue('task_type');
+                            if (taskType === TaskExecuteType.once) {
+                                return (
+                                    <Form.Item
+                                        validateTrigger={'onBlur'}
+                                        label="开始时间"
+                                        name="task_start_time"
+                                        className="form-item-inline form-item form-required-hide"
+                                        required={true}
+                                        rules={[
+                                            {
+                                                validator: this.checkDate,
+                                            },
+                                        ]}
+                                    >
+                                        <DatePicker
+                                            className="picker-default"
+                                            locale={locale}
+                                            showTime={true}
+                                            disabled={taskType !== TaskExecuteType.once}
+                                            placeholder="立即开始"
+                                            disabledDate={this.disabledStartDate}
+                                        />
                                     </Form.Item>
-                                </Form.Item>
-                                <Form.Item
-                                    label={<Radio value={TaskExecuteType.interval}>定时任务</Radio>}
-                                    className="form-item-inline"
-                                    colon={false}
-                                >
+                                );
+                            }
+                            return (
+                                <React.Fragment>
+                                    <div>
+                                        <Form.Item
+                                            label="开始时间"
+                                            validateTrigger={'onChange'}
+                                            className="form-item-inline form-item form-item-horizon"
+                                            name="task_start_time"
+                                            dependencies={['task_end_time']}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: '请选择开始时间',
+                                                },
+                                                {
+                                                    validator: this.checkStartDate,
+                                                },
+                                            ]}
+                                        >
+                                            <DatePicker
+                                                locale={locale}
+                                                showTime={true}
+                                                disabledDate={this.disabledStartDate}
+                                            />
+                                        </Form.Item>
+                                        <Form.Item
+                                            validateTrigger={'onChange'}
+                                            label="结束时间"
+                                            name="task_end_time"
+                                            dependencies={['timerStartTime']}
+                                            className="form-item form-item-inline form-item-horizon"
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: '请选择结束时间',
+                                                },
+                                                {
+                                                    validator: this.checkEndDate,
+                                                },
+                                            ]}
+                                        >
+                                            <DatePicker
+                                                locale={locale}
+                                                showTime={true}
+                                                disabledDate={this.disabledEndDate}
+                                            />
+                                        </Form.Item>
+                                    </div>
                                     <Form.Item
-                                        noStyle={true}
-                                        shouldUpdate={(prevValues, currentValues) =>
-                                            prevValues.task_type !== currentValues.task_type
-                                        }
+                                        validateTrigger={'onBlur'}
+                                        label="任务间隔"
+                                        name="taskIntervalType"
+                                        className="form-item-inline form-item"
+                                        required={true}
                                     >
-                                        {({ getFieldValue }) => {
-                                            const taskType = getFieldValue('task_type');
-                                            return (
-                                                <React.Fragment>
+                                        <Radio.Group
+                                            disabled={taskType !== TaskExecuteType.interval}
+                                        >
+                                            <Radio value={TaskIntervalConfigType.day}>
+                                                <div className="inline-block vertical-middle">
                                                     <Form.Item
-                                                        label="开始时间"
-                                                        validateTrigger={'onChange'}
-                                                        className="form-required-absolute form-item-inline"
-                                                        name="timerStartTime"
-                                                        dependencies={['task_end_time']}
-                                                        rules={[
-                                                            {
-                                                                required:
-                                                                    taskType ===
-                                                                    TaskExecuteType.interval,
-                                                                message: '请选择开始时间',
-                                                            },
-                                                            {
-                                                                validator: this.checkStartDate,
-                                                            },
-                                                        ]}
-                                                    >
-                                                        <DatePicker
-                                                            locale={locale}
-                                                            showTime={true}
-                                                            disabled={
-                                                                taskType !==
-                                                                TaskExecuteType.interval
-                                                            }
-                                                            disabledDate={this.disabledStartDate}
-                                                        />
-                                                    </Form.Item>
-                                                    <Form.Item
-                                                        validateTrigger={'onChange'}
-                                                        label="结束时间"
-                                                        name="task_end_time"
-                                                        dependencies={['timerStartTime']}
-                                                        className="form-required-absolute form-item form-item-inline"
-                                                        rules={[
-                                                            {
-                                                                required:
-                                                                    taskType ===
-                                                                    TaskExecuteType.interval,
-                                                                message: '请选择结束时间',
-                                                            },
-                                                            {
-                                                                validator: this.checkEndDate,
-                                                            },
-                                                        ]}
-                                                    >
-                                                        <DatePicker
-                                                            locale={locale}
-                                                            showTime={true}
-                                                            disabled={
-                                                                taskType !==
-                                                                TaskExecuteType.interval
-                                                            }
-                                                            disabledDate={this.disabledEndDate}
-                                                        />
-                                                    </Form.Item>
-                                                    <Form.Item
-                                                        validateTrigger={'onBlur'}
-                                                        label="任务间隔"
-                                                        name="taskIntervalType"
-                                                        className="form-required-absolute form-item-inline form-item"
-                                                        required={
-                                                            taskType === TaskExecuteType.interval
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.taskIntervalType !==
+                                                            currentValues.taskIntervalType
                                                         }
                                                     >
-                                                        <Radio.Group
-                                                            disabled={
-                                                                taskType !==
-                                                                TaskExecuteType.interval
-                                                            }
-                                                        >
-                                                            <Radio
-                                                                value={TaskIntervalConfigType.day}
-                                                            >
-                                                                <div className="inline-block vertical-middle">
+                                                        {({ getFieldValue }) => {
+                                                            const taskIntervalType = getFieldValue(
+                                                                'taskIntervalType',
+                                                            );
+                                                            return (
+                                                                <Form.Item className="form-item-inline">
                                                                     <Form.Item
                                                                         noStyle={true}
-                                                                        shouldUpdate={(
-                                                                            prevValues,
-                                                                            currentValues,
-                                                                        ) =>
-                                                                            prevValues.taskIntervalType !==
-                                                                            currentValues.taskIntervalType
-                                                                        }
+                                                                        validateTrigger={'onBlur'}
+                                                                        name="day"
+                                                                        rules={[
+                                                                            {
+                                                                                required:
+                                                                                    taskIntervalType ===
+                                                                                    TaskIntervalConfigType.day,
+                                                                                message:
+                                                                                    '请输入间隔天数',
+                                                                            },
+                                                                        ]}
                                                                     >
-                                                                        {({ getFieldValue }) => {
-                                                                            const taskIntervalType = getFieldValue(
-                                                                                'taskIntervalType',
-                                                                            );
-                                                                            return (
-                                                                                <Form.Item className="form-item-inline">
-                                                                                    <Form.Item
-                                                                                        noStyle={
-                                                                                            true
-                                                                                        }
-                                                                                        validateTrigger={
-                                                                                            'onBlur'
-                                                                                        }
-                                                                                        name="day"
-                                                                                        rules={[
-                                                                                            {
-                                                                                                required:
-                                                                                                    taskType ===
-                                                                                                        TaskExecuteType.interval &&
-                                                                                                    taskIntervalType ===
-                                                                                                        TaskIntervalConfigType.day,
-                                                                                                message:
-                                                                                                    '请输入间隔天数',
-                                                                                            },
-                                                                                        ]}
-                                                                                    >
-                                                                                        <IntegerInput
-                                                                                            min={0}
-                                                                                            className="input-small input-handler"
-                                                                                            disabled={
-                                                                                                taskType !==
-                                                                                                    TaskExecuteType.interval ||
-                                                                                                taskIntervalType !==
-                                                                                                    TaskIntervalConfigType.day
-                                                                                            }
-                                                                                        />
-                                                                                    </Form.Item>
-                                                                                    <span className="form-unit">
-                                                                                        天
-                                                                                    </span>
-                                                                                </Form.Item>
-                                                                            );
-                                                                        }}
+                                                                        <IntegerInput
+                                                                            min={0}
+                                                                            className="input-small input-handler"
+                                                                            disabled={
+                                                                                taskIntervalType !==
+                                                                                TaskIntervalConfigType.day
+                                                                            }
+                                                                        />
                                                                     </Form.Item>
-                                                                </div>
-                                                            </Radio>
-                                                            <Radio
-                                                                value={
-                                                                    TaskIntervalConfigType.second
-                                                                }
-                                                            >
-                                                                <div className="inline-block vertical-middle">
-                                                                    <Form.Item
-                                                                        noStyle={true}
-                                                                        shouldUpdate={(
-                                                                            prevValues,
-                                                                            currentValues,
-                                                                        ) =>
-                                                                            prevValues.taskIntervalType !==
-                                                                            currentValues.taskIntervalType
-                                                                        }
-                                                                    >
-                                                                        {({ getFieldValue }) => {
-                                                                            const taskIntervalType = getFieldValue(
-                                                                                'taskIntervalType',
-                                                                            );
-                                                                            return (
-                                                                                <Form.Item className="form-item-inline">
-                                                                                    <Form.Item
-                                                                                        noStyle={
-                                                                                            true
-                                                                                        }
-                                                                                        validateTrigger={
-                                                                                            'onBlur'
-                                                                                        }
-                                                                                        name="second"
-                                                                                        rules={[
-                                                                                            {
-                                                                                                required:
-                                                                                                    taskType ===
-                                                                                                        TaskExecuteType.interval &&
-                                                                                                    taskIntervalType ===
-                                                                                                        TaskIntervalConfigType.second,
-                                                                                                message:
-                                                                                                    '请输入间隔秒数',
-                                                                                            },
-                                                                                        ]}
-                                                                                        className="inline-block"
-                                                                                    >
-                                                                                        <IntegerInput
-                                                                                            min={0}
-                                                                                            className="input-small input-handler"
-                                                                                            disabled={
-                                                                                                taskType !==
-                                                                                                    TaskExecuteType.interval ||
-                                                                                                taskIntervalType !==
-                                                                                                    TaskIntervalConfigType.second
-                                                                                            }
-                                                                                        />
-                                                                                    </Form.Item>
-                                                                                    <span className="form-unit">
-                                                                                        秒
-                                                                                    </span>
-                                                                                </Form.Item>
-                                                                            );
-                                                                        }}
-                                                                    </Form.Item>
-                                                                </div>
-                                                            </Radio>
-                                                        </Radio.Group>
+                                                                    <span className="form-unit">
+                                                                        天
+                                                                    </span>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
                                                     </Form.Item>
-                                                </React.Fragment>
-                                            );
-                                        }}
+                                                </div>
+                                            </Radio>
+                                            <Radio value={TaskIntervalConfigType.second}>
+                                                <div className="inline-block vertical-middle">
+                                                    <Form.Item
+                                                        noStyle={true}
+                                                        shouldUpdate={(prevValues, currentValues) =>
+                                                            prevValues.taskIntervalType !==
+                                                            currentValues.taskIntervalType
+                                                        }
+                                                    >
+                                                        {({ getFieldValue }) => {
+                                                            const taskIntervalType = getFieldValue(
+                                                                'taskIntervalType',
+                                                            );
+                                                            return (
+                                                                <Form.Item className="form-item-inline">
+                                                                    <Form.Item
+                                                                        noStyle={true}
+                                                                        validateTrigger={'onBlur'}
+                                                                        name="second"
+                                                                        rules={[
+                                                                            {
+                                                                                required:
+                                                                                    taskIntervalType ===
+                                                                                    TaskIntervalConfigType.second,
+                                                                                message:
+                                                                                    '请输入间隔秒数',
+                                                                            },
+                                                                        ]}
+                                                                        className="inline-block"
+                                                                    >
+                                                                        <IntegerInput
+                                                                            min={0}
+                                                                            className="input-small input-handler"
+                                                                            disabled={
+                                                                                taskIntervalType !==
+                                                                                TaskIntervalConfigType.second
+                                                                            }
+                                                                        />
+                                                                    </Form.Item>
+                                                                    <span className="form-unit">
+                                                                        秒
+                                                                    </span>
+                                                                </Form.Item>
+                                                            );
+                                                        }}
+                                                    </Form.Item>
+                                                </div>
+                                            </Radio>
+                                        </Radio.Group>
                                     </Form.Item>
-                                </Form.Item>
-                            </Radio.Group>
-                        </Form.Item>
-                    </Card>
+                                </React.Fragment>
+                            );
+                        }}
+                    </Form.Item>
+
                     <div className="form-item">
                         <Button
                             loading={gatherLoading}
