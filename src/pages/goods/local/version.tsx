@@ -182,7 +182,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     private addRowSpanData(list: IGoodsVersionItem[]): IGoodsVersionRowItem[] {
         let ret: IGoodsVersionRowItem[] = [];
         const len = list.length;
-        list.forEach((item) => {
+        list.forEach(item => {
             item.commodity_id = this.id;
             const { sku_info, ...rest } = item;
             // 目前只有一条默认的sku
@@ -335,10 +335,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 <div className="goods-version-filter">
                     <div className="left-item">
                         <span className="">商品调价跟踪</span>
-                        <RangePicker
-                            className="date"
-                            onChange={this.selectedDate}
-                        />
+                        <RangePicker className="date" onChange={this.selectedDate} />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
                     </div>
                     <Pagination

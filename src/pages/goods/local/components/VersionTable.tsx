@@ -67,7 +67,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '版本状态',
             dataIndex: 'goods_status',
             align: 'center',
-            width: 110
+            width: 110,
         },
         {
             key: 'onsale_info',
