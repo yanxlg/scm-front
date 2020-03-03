@@ -135,7 +135,7 @@ spec:
             items:
               - key: nginx.conf
                 path: nginx.conf
-        - name: trigram-scm-front-page-conf-@@VID@@
+        - name: trigram-scm-front-page-conf
           configMap:
             name: trigram-scm-front-page-nginx-conf-@@VID@@
             items:
