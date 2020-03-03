@@ -14,7 +14,7 @@ import {
     postGoodsOnsale,
     postGoodsIgnoreVersion,
 } from '@/services/goods';
-import { formatDate } from '@/utils/date';
+import { utcToLocal, transStartDate, transEndDate } from '@/utils/date';
 
 const { RangePicker } = DatePicker;
 
@@ -52,6 +52,7 @@ export declare interface ICatagoryData {
 
 declare interface IGoodsVersionItemBase {
     product_id: string;
+    commodity_id: string;
     onsale_info: IOnsaleItem[];
     sku_image: string[];
     title: string;
@@ -125,13 +126,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log();
     }
 
-    private getTimeSecond = (millisecond: number, isStart?: boolean) => {
-        const date = formatDate(new Date(millisecond), 'yyyy-MM-dd');
-        const zero = new Date(`${date} ${isStart ? '00:00:00' : '23:59:59'}`).getTime();
-        // console.log(formatDate(new Date(zero), 'yyyy-MM-dd hh:mm:ss'));
-        return Math.round(zero / 1000);
-    };
-
     private onSearch = (pageData?: IPageData) => {
         const { start_time, end_time, page, page_count } = this.state;
         this.setState({
@@ -188,16 +182,14 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     private addRowSpanData(list: IGoodsVersionItem[]): IGoodsVersionRowItem[] {
         let ret: IGoodsVersionRowItem[] = [];
         const len = list.length;
-        list.forEach(item => {
+        list.forEach((item) => {
+            item.commodity_id = this.id;
             const { sku_info, ...rest } = item;
             // 目前只有一条默认的sku
             sku_info.forEach(skuItem => {
                 const retItem: IGoodsVersionRowItem = {
                     ...Object.assign(rest, {
-                        _update_time: formatDate(
-                            new Date(rest.update_time * 1000),
-                            'yyyy-MM-dd hh:mm:ss',
-                        ),
+                        _update_time: utcToLocal(rest.update_time),
                     }),
                     ...Object.assign(skuItem, {
                         sku_price: Number(skuItem.sku_price),
@@ -216,8 +208,8 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: dates && dates[0] ? this.getTimeSecond(dates[0].valueOf(), true) : 0,
-                end_time: dates && dates[1] ? this.getTimeSecond(dates[1].valueOf()) : 0,
+                start_time: dates && dates[0] ? transStartDate(dates[0]) : 0,
+                end_time: dates && dates[1] ? transEndDate(dates[1]) : 0,
             },
             () => {
                 this.onSearch();
@@ -345,18 +337,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         <span className="">商品调价跟踪</span>
                         <RangePicker
                             className="date"
-                            defaultValue={
-                                start_time
-                                    ? [
-                                          moment(
-                                              formatDate(new Date(start_time * 1000), 'yyyy-MM-dd'),
-                                          ),
-                                          moment(
-                                              formatDate(new Date(end_time * 1000), 'yyyy-MM-dd'),
-                                          ),
-                                      ]
-                                    : [null, null]
-                            }
                             onChange={this.selectedDate}
                         />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>

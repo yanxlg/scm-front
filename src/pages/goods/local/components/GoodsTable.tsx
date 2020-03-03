@@ -7,7 +7,7 @@ import SkuDialog from './SkuDialog';
 import { ColumnProps } from 'antd/es/table';
 import { IRowDataItem, ISaleItem, ICatagoryData } from '../index';
 
-import { formatDate } from '@/utils/date';
+import { utcToLocal } from '@/utils/date';
 
 declare interface IProps {
     searchLoading: boolean;
@@ -231,7 +231,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')}</div>;
+                return <div>{utcToLocal(value)}</div>;
             },
         },
         {
@@ -241,7 +241,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return <div>{formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')}</div>;
+                return <div>{utcToLocal(value)}</div>;
             },
         },
         {
