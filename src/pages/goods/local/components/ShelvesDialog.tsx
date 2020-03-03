@@ -3,7 +3,7 @@ import { Modal, Table } from 'antd';
 
 import { ColumnProps } from 'antd/es/table';
 
-import { formatDate } from '@/utils/date';
+import { utcToLocal } from '@/utils/date';
 
 export declare interface ISaleStatausItem {
     order?: number;
@@ -32,7 +32,7 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             title: '时间',
             dataIndex: 'onsale_time',
             align: 'center',
-            render: (val: number) => formatDate(new Date(val * 1000), 'yyyy-MM-dd hh:mm:ss'),
+            render: (val: number) => utcToLocal(val),
         },
         {
             key: 'onsale_channel',
