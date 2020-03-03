@@ -510,9 +510,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 if (success.length) {
                     str += `删除成功${success.join('、')}。`;
                 } else if (failed.length) {
-                    str += `删除失败${failed.join('、')}。`;
+                    str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
                 }
-                message.success(str);
+                message.info(str);
             })
             .catch(err => {
                 // console.log('getGoodsDelete ERR');
