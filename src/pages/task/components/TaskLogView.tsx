@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import '@/styles/config.less';
 import { Button, Pagination, Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
-import { queryTaskLog } from '@/services/task';
+import { getTaskList, queryTaskLog } from '@/services/task';
 import { TaskStatusMap } from '@/enums/StatusEnum';
 
 declare interface ITaskLogViewProps {
@@ -75,7 +75,6 @@ declare interface ITaskLogViewState {
 
 const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
     const [loading, setLoading] = useState(true);
-    const [dataSet, setDataSet] = useState<ILogItem[]>([]);
     const [state, setState] = useState<ITaskLogViewState>({
         pageNumber: 50,
         page: 1,
@@ -83,23 +82,58 @@ const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
         list: [],
     });
 
-    useEffect(() => {
-        queryTaskLog(task_Id)
-            .then(({ data = [] }) => {
-                setDataSet(data);
+    const queryList = useCallback(
+        (params: { page?: number; page_number?: number } = {}) => {
+            const { page = state.page, page_number = state.pageNumber } = params;
+            setLoading(true);
+            queryTaskLog({
+                page: page,
+                page_number: page_number,
+                task_id: task_Id,
             })
-            .finally(() => {
-                setLoading(false);
-            });
+                .then(({ data: { list = [], total = 0 } = {} }) => {
+                    setState({
+                        ...state,
+                        list,
+                        total,
+                    });
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [state],
+    );
+
+    useEffect(() => {
+        queryList();
     }, []);
+
+    const showTotal = useCallback((total: number) => {
+        return <span className="data-grid-total">共有{total}条</span>;
+    }, []);
+    const onPageChange = useCallback((page: number, pageSize?: number) => {
+        queryList({
+            page: page,
+        });
+    }, []);
+
+    const onShowSizeChange = useCallback((page: number, size: number) => {
+        queryList({
+            page: page,
+            page_number: size,
+        });
+    }, []);
+
     return useMemo(() => {
+        const { list, page, pageNumber, total } = state;
         return (
             <div className="config-console-content">
                 <Table
                     className="form-item"
                     rowKey="order_goods_sn"
                     columns={columns}
-                    dataSource={dataSet}
+                    dataSource={list}
                     pagination={false}
                     loading={loading}
                     scroll={{ y: 280 }}
@@ -109,18 +143,18 @@ const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
                     current={page}
                     total={total}
                     pageSizeOptions={['50', '100', '500', '1000']}
-                    onChange={this.onPageChange}
-                    onShowSizeChange={this.onShowSizeChange}
+                    onChange={onPageChange}
+                    onShowSizeChange={onShowSizeChange}
                     showSizeChanger={true}
                     showQuickJumper={{
                         goButton: <Button className="btn-go">Go</Button>,
                     }}
                     showLessItems={true}
-                    showTotal={this.showTotal}
+                    showTotal={showTotal}
                 />
             </div>
         );
-    }, [loading, dataSet]);
+    }, [loading, state]);
 };
 
 export default TaskLogView;

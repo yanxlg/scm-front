@@ -8,16 +8,13 @@ import AutoPurchaseTask from '@/pages/task/components/AutoPurchaseTask';
 
 const { TabPane } = Tabs;
 
-const Config: React.FC = (props: {}) => {
-    const [activeKey, setActiveKey] = useState('3');
-    const onChange = useCallback((activeKey: string) => setActiveKey(activeKey), []);
+const Config: React.FC = () => {
     return useMemo(() => {
         return (
             <div className="container">
                 <Tabs
                     className="tabs-margin-none"
-                    onChange={onChange}
-                    activeKey={activeKey}
+                    defaultActiveKey="2"
                     type="card"
                     children={[
                         /*<TabPane tab="指定URL采集" key="1">
@@ -36,7 +33,7 @@ const Config: React.FC = (props: {}) => {
                 />
             </div>
         );
-    }, [activeKey, props]);
+    }, []);
 };
 
 export default Config;

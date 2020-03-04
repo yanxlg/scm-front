@@ -158,11 +158,9 @@ export async function querySortCondition(type: 'list' | 'merchant') {
     });
 }
 
-export async function queryTaskLog(task_id: number) {
+export async function queryTaskLog(params: { task_id: number; page: number; page_number: number }) {
     return request.get(ApiPathEnum.QueryTaskLog, {
-        params: {
-            task_id,
-        },
+        params: params,
     });
 }
 

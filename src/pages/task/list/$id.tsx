@@ -3,10 +3,11 @@ import '@/styles/task.less';
 import { Card, Tabs } from 'antd';
 import HotGather from '@/pages/task/components/HotGather';
 import TimerUpdate from '@/pages/task/components/TimerUpdate';
+import TaskLogView from '@/pages/task/components/TaskLogView';
 
 const { TabPane } = Tabs;
 
-class TaskDetailPage extends React.PureComponent {
+class TaskDetailPage extends React.PureComponent<{}> {
     render() {
         return (
             <div>
@@ -28,14 +29,14 @@ class TaskDetailPage extends React.PureComponent {
                     </Card>
                     <Tabs
                         className="tabs-margin-none"
-                        activeKey={'1'}
                         type="card"
+                        defaultActiveKey="1"
                         children={[
                             <TabPane tab="子任务进度" key="1">
                                 <div>子任务进度</div>
                             </TabPane>,
                             <TabPane tab="任务日志" key="2">
-                                <div>任务日志</div>
+                                <TaskLogView task_Id={1} />
                             </TabPane>,
                         ]}
                     />
