@@ -10,7 +10,11 @@ export default [
     {
         path: '/task',
         name: '任务中心',
-        icon: <Icon type="task" className="menu-icon" />,
+        icon: (
+            <span className="anticon">
+                <Icon type="task" className="menu-icon" />
+            </span>
+        ),
         children: [
             {
                 path: '/task/config',
@@ -30,7 +34,11 @@ export default [
     {
         path: '/goods',
         name: '商品中心',
-        icon: <Icon type="goods" className="menu-icon" />,
+        icon: (
+            <span className="anticon">
+                <Icon type="goods" className="menu-icon" />
+            </span>
+        ),
         children: [
             {
                 path: '/goods/local',
@@ -55,17 +63,29 @@ export default [
     {
         path: '/order',
         name: '订单管理',
-        icon: <Icon type="order" className="menu-icon" />,
+        icon: (
+            <span className="anticon">
+                <Icon type="order" className="menu-icon" />
+            </span>
+        ),
     },
     {
         path: '/stock',
         name: '出入库管理',
-        icon: <Icon type="order" className="menu-icon" />,
+        icon: (
+            <span className="anticon">
+                <Icon type="order" className="menu-icon" />
+            </span>
+        ),
     },
     {
         path: '/setting',
         name: '基本设置',
-        icon: <Icon type="setting" className="menu-icon" />,
+        icon: (
+            <span className="anticon">
+                <Icon type="setting" className="menu-icon" />
+            </span>
+        ),
         children: [
             {
                 path: '/setting/store',
