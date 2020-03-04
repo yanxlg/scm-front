@@ -77,15 +77,4 @@ export default {
             },
         });
     },
-    'POST /api/v1/orders/purchase': (req: Request, res: Response) => {
-        res.status(200).send({
-            code: 200,
-            message: 'By mock.js',
-            data: {
-                order_id_list: Mock.mock({
-                    'data|100-500': ['@increment'],
-                }).data,
-            },
-        });
-    },
 };
