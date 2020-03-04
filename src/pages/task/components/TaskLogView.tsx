@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import '@/styles/config.less';
 import { Button, Pagination, Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
-import { getTaskList, queryTaskLog } from '@/services/task';
-import { TaskStatusMap } from '@/enums/StatusEnum';
+import { queryTaskLog } from '@/services/task';
+import { BindAll } from 'lodash-decorators';
 
 declare interface ITaskLogViewProps {
     task_Id: number;
@@ -71,62 +71,61 @@ declare interface ITaskLogViewState {
     pageNumber: number;
     page: number;
     list: ILogItem[];
+    loading: boolean;
 }
 
-const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
-    const [loading, setLoading] = useState(true);
-    const [state, setState] = useState<ITaskLogViewState>({
-        pageNumber: 50,
-        page: 1,
-        total: 0,
-        list: [],
-    });
-
-    const queryList = useCallback(
-        (params: { page?: number; page_number?: number } = {}) => {
-            const { page = state.page, page_number = state.pageNumber } = params;
-            setLoading(true);
-            queryTaskLog({
-                page: page,
-                page_number: page_number,
-                task_id: task_Id,
-            })
-                .then(({ data: { list = [], total = 0 } = {} }) => {
-                    setState({
-                        ...state,
-                        list,
-                        total,
-                    });
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        },
-        [state],
-    );
-
-    useEffect(() => {
-        queryList();
-    }, []);
-
-    const showTotal = useCallback((total: number) => {
+@BindAll()
+class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewState> {
+    constructor(props: ITaskLogViewProps) {
+        super(props);
+        this.state = {
+            pageNumber: 50,
+            page: 1,
+            total: 0,
+            list: [],
+            loading: true,
+        };
+    }
+    private showTotal(total: number) {
         return <span className="data-grid-total">共有{total}条</span>;
-    }, []);
-    const onPageChange = useCallback((page: number, pageSize?: number) => {
-        queryList({
+    }
+    private onPageChange(page: number, pageSize?: number) {
+        this.queryList({
             page: page,
         });
-    }, []);
-
-    const onShowSizeChange = useCallback((page: number, size: number) => {
-        queryList({
+    }
+    private onShowSizeChange(page: number, size: number) {
+        this.queryList({
             page: page,
             page_number: size,
         });
-    }, []);
-
-    return useMemo(() => {
-        const { list, page, pageNumber, total } = state;
+    }
+    private queryList(params: { page?: number; page_number?: number } = {}) {
+        const { page = this.state.page, page_number = this.state.pageNumber } = params;
+        this.setState({
+            loading: true,
+        });
+        queryTaskLog({
+            page: page,
+            page_number: page_number,
+            task_id: this.props.task_Id,
+        })
+            .then(({ data: { list = [], total = 0 } = {} }) => {
+                this.setState({
+                    list,
+                    total,
+                    page: page,
+                    pageNumber: page_number,
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    }
+    render() {
+        const { list, page, pageNumber, total, loading } = this.state;
         return (
             <div className="config-console-content">
                 <Table
@@ -143,18 +142,18 @@ const TaskLogView: React.FC<ITaskLogViewProps> = ({ task_Id }) => {
                     current={page}
                     total={total}
                     pageSizeOptions={['50', '100', '500', '1000']}
-                    onChange={onPageChange}
-                    onShowSizeChange={onShowSizeChange}
+                    onChange={this.onPageChange}
+                    onShowSizeChange={this.onShowSizeChange}
                     showSizeChanger={true}
                     showQuickJumper={{
                         goButton: <Button className="btn-go">Go</Button>,
                     }}
                     showLessItems={true}
-                    showTotal={showTotal}
+                    showTotal={this.showTotal}
                 />
             </div>
         );
-    }, [loading, state]);
-};
+    }
+}
 
 export default TaskLogView;
