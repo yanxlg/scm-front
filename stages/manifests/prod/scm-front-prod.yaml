@@ -40,17 +40,35 @@ data:
         set $prjroot /usr/share/nginx/html;
         root $prjroot/;
         index index.html;
-        location ~ /version {
+        location /version {
             root $prjroot/;
             add_header Content-Type text/plain;
         }
         location / {
+            if ($cookie_jsessionid = "")
+            {
+                return 302 https://cas.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
+            }
             try_files $uri $uri/ /index.html;
         }
-
+        location /auth/{
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass https://scm-api.vova.com.hk;
+            }
         location /api/{
             add_header Access-Control-Allow-Origin *;
             rewrite ^/api(.*)$ /$1 break;
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass https://scm-api.vova.com.hk/;
         }
     }
@@ -65,7 +83,7 @@ spec:
   selector:
     matchLabels:
       name: trigram-scm-front-page-prod
-  replicas: 1
+  replicas: 3
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -125,11 +143,11 @@ spec:
                 path: trigram-scm-front-page.conf
       affinity:
         podAntiAffinity:
-          prodferredDuringSchedulingIgnoredDuringExecution:
+          preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               podAffinityTerm:
                 labelSelector:
-                  matchExprodssions:
+                  matchExpressions:
                     - key: name
                       operator: In
                       values:
