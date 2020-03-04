@@ -31,6 +31,7 @@ enum ApiPathEnum {
     QueryPDDCategory = '/api/v1/spider/pdd_category',
     QueryPDDSortCondition = '/api/v1/spider/pdd_sort_type',
     QueryTaskLog = '/api/v1/task/exec_log',
+    QuerySubTaskProgress = '/api/v1/task/progress',
     ADDAutoPurchaseTask = '/api/v1/task/spider/auto_purchase',
 
     QueryGoodsVersion = '/api/v1/vova_goods/version_list',

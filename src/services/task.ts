@@ -164,6 +164,16 @@ export async function queryTaskLog(params: { task_id: number; page: number; page
     });
 }
 
+export async function querySubTaskProgress(params: {
+    task_id: number;
+    page: number;
+    page_number: number;
+}) {
+    return request.get(ApiPathEnum.QuerySubTaskProgress, {
+        params: params,
+    });
+}
+
 declare interface IAutoPurchaseTaskData {
     task_name: string;
     type: AutoPurchaseTaskType;

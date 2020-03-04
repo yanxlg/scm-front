@@ -48,7 +48,7 @@ export const TaskStatusMap: { [key: string]: string } = {
 export const TaskStatusList = transStatusList(TaskStatusMap);
 
 //======================= 任务类型 ======================//
-export const TaskTypeMap: { [key: string]: string } = {
+export const TaskTypeMap: { [key: number]: string } = {
     0: '采集任务',
     1: '上架任务',
     2: '更新任务',
@@ -57,6 +57,14 @@ export const TaskTypeMap: { [key: string]: string } = {
 
 export const TaskTypeList = transStatusList(TaskTypeMap);
 
+export enum TaskTypeEnum {
+    Gather = 0,
+    Grounding = 1,
+    Update = 2,
+    Purchase = 3,
+}
+
+//======================= 任务状态 ======================//
 export enum TaskStatus {
     UnExecuted, // 未执行
     Executing, // 执行中

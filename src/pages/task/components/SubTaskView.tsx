@@ -1,82 +1,42 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import '@/styles/config.less';
-import { Button, Pagination, Table } from 'antd';
-import { ColumnProps } from 'antd/lib/table';
-import { queryTaskLog } from '@/services/task';
+import React from 'react';
+import { Button, Modal, Pagination, Table } from 'antd';
+import { querySubTaskProgress } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
+import '@/styles/config.less';
+import '@/styles/modal.less';
+import TaskProgressModal from '@/pages/task/components/TaskProgressModal';
+import { TaskTypeEnum } from '@/enums/StatusEnum';
+import { ColumnProps } from 'antd/es/table';
 
-declare interface ITaskLogViewProps {
+declare interface ISubTaskViewProps {
     task_Id: number;
 }
 
-declare interface ILogItem {
-    task_send_time: string;
-    status: string;
+declare interface ITaskItem {
     sub_task_id: number;
-    node: number;
+    start_time: number;
+    end_time: number;
+    create_status: 0 | 1;
+    status: 0 | 1;
+    incoming_num: number;
+    grab_num: number;
+    transform_incoming_num: number;
+    incoming_fail_num: number;
+    progress: number;
+    task_type: TaskTypeEnum;
 }
 
-const TaskNodeMap: { [key: number]: string } = {
-    0: '创建任务',
-    1: '爬取入库',
-    2: '爬虫采集',
-    3: '转化入库',
-};
-
-const TaskActionMap: { [key: number]: string } = {
-    0: '发起',
-    1: '推进',
-    2: '完结',
-    3: '终止',
-    4: '失败',
-};
-
-const columns: ColumnProps<ILogItem>[] = [
-    {
-        title: '时间',
-        width: '100px',
-        dataIndex: 'task_send_time',
-        align: 'center',
-    },
-    {
-        title: '子任务ID',
-        width: '100px',
-        dataIndex: 'sub_task_id',
-        align: 'center',
-    },
-    {
-        title: '节点',
-        width: '100px',
-        dataIndex: 'node',
-        align: 'center',
-        render: (node: number) => TaskNodeMap[node],
-    },
-    {
-        title: '动作',
-        width: '126px',
-        dataIndex: 'action',
-        align: 'center',
-        render: (action: number) => TaskActionMap[action],
-    },
-    {
-        title: '内容',
-        width: '126px',
-        dataIndex: 'content',
-        align: 'center',
-    },
-];
-
-declare interface ITaskLogViewState {
+declare interface ISubTaskViewState {
     total: number;
     pageNumber: number;
     page: number;
-    list: ILogItem[];
+    list: ITaskItem[];
     loading: boolean;
 }
 
 @BindAll()
-class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewState> {
-    constructor(props: ITaskLogViewProps) {
+class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewState> {
+    constructor(props: ISubTaskViewProps) {
         super(props);
         this.state = {
             pageNumber: 50,
@@ -89,7 +49,57 @@ class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewSta
     componentDidMount(): void {
         this.queryList();
     }
-
+    private showSubTaskProgressModal(record: ITaskItem) {
+        Modal.info({
+            content: (
+                <TaskProgressModal sub_task_id={record.sub_task_id} task_type={record.task_type} />
+            ),
+            className: 'modal-empty',
+            icon: null,
+            maskClosable: true,
+        });
+    }
+    private columns: ColumnProps<ITaskItem>[] = [
+        {
+            title: '子任务ID',
+            width: '100px',
+            dataIndex: 'sub_task_id',
+            align: 'center',
+        },
+        {
+            title: '任务开始时间',
+            width: '100px',
+            dataIndex: 'start_time',
+            align: 'center',
+        },
+        {
+            title: '任务创建状态',
+            width: '100px',
+            dataIndex: 'create_status',
+            align: 'center',
+        },
+        {
+            title: '上架状态',
+            width: '100px',
+            dataIndex: 'status',
+            align: 'center',
+        },
+        {
+            title: '已入库的商品数',
+            width: '100px',
+            dataIndex: 'node',
+            align: 'center',
+        },
+        {
+            title: '操作',
+            width: '126px',
+            dataIndex: 'action',
+            align: 'center',
+            render: (_, record) => (
+                <Button onClick={() => this.showSubTaskProgressModal(record)}>查看任务进度</Button>
+            ),
+        },
+    ];
     private showTotal(total: number) {
         return <span className="data-grid-total">共有{total}条</span>;
     }
@@ -109,7 +119,7 @@ class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewSta
         this.setState({
             loading: true,
         });
-        queryTaskLog({
+        querySubTaskProgress({
             page: page,
             page_number: page_number,
             task_id: this.props.task_Id,
@@ -134,7 +144,7 @@ class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewSta
             <div>
                 <Table
                     rowKey="order_goods_sn"
-                    columns={columns}
+                    columns={this.columns}
                     dataSource={list}
                     pagination={false}
                     loading={loading}
@@ -159,4 +169,4 @@ class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewSta
     }
 }
 
-export default TaskLogView;
+export default SubTaskView;
