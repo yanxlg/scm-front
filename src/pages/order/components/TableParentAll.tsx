@@ -20,9 +20,9 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
 
     private allColumns: ColumnProps<IParentOrderItem>[] = [
         {
-            key: 'goodsCreateTime',
+            key: 'createTime',
             title: '订单时间',
-            dataIndex: 'goodsCreateTime',
+            dataIndex: 'createTime',
             align: 'center',
             width: 120,
             render: (value: number, row: IParentOrderItem) => {
@@ -35,18 +35,18 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             }
         },
         {
-            key: 'orderGoodsId',
-            title: '中台订单子ID',
-            dataIndex: 'orderGoodsId',
+            key: 'orderId',
+            title: '中台订单父订单ID',
+            dataIndex: 'orderId',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
         // 缺失
         {
-            key: 'product_sn',
-            title: 'Product SN',
-            dataIndex: 'product_sn',
+            key: 'a1',
+            title: '运费',
+            dataIndex: 'a1',
             align: 'center',
             width: 120,
             render: this.mergeCell
@@ -70,70 +70,39 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell
         },
         {
-            key: 'orderGoodsStatus',
-            title: '中台订单状态',
-            dataIndex: 'orderGoodsStatus',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell
-        },
-        {
             key: 'productId',
             title: '中台商品ID',
             dataIndex: 'productId',
             align: 'center',
-            width: 120,
-            render: this.mergeCell
-        },
-        {
-            key: 'purchaseOrderStatus',
-            title: '采购订单状态',
-            dataIndex: 'purchaseOrderStatus',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'purchaseOrderPayStatus',
-            title: '采购支付状态',
-            dataIndex: 'purchaseOrderPayStatus',
-            align: 'center',
             width: 120
         },
         {
-            key: 'purchaseOrderShippingStatus',
-            title: '采购配送状态',
-            dataIndex: 'purchaseOrderShippingStatus',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'purchaseCreateTime',
-            title: '采购生成时间',
-            dataIndex: 'purchaseCreateTime',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'goods_purchase_order_sn',
-            title: '采购订单号',
-            dataIndex: 'goods_purchase_order_sn',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'goods_purchase_waybill_sn',
-            title: '采购运单号',
-            dataIndex: 'goods_purchase_waybill_sn',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'channel_shipping_fee',
-            title: '运费',
-            dataIndex: 'channel_shipping_fee',
+            key: 'goodsNumber',
+            title: '商品数量',
+            dataIndex: 'goodsNumber',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+        },
+        {
+            key: 'orderGoodsId',
+            title: '中台订单ID',
+            dataIndex: 'orderGoodsId',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'orderGoodsStatus',
+            title: '中台订单状态',
+            dataIndex: 'orderGoodsStatus',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'orderGoodsShippingStatus',
+            title: '中台订单配送状态',
+            dataIndex: 'orderGoodsShippingStatus',
+            align: 'center',
+            width: 120
         }
     ]
 
@@ -144,18 +113,18 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     private createColumns = ():ColumnProps<IParentOrderItem>[] => {
         const { colList } = this.props;
         // console.log(111, colList);
-        const allColumns: ColumnProps<IParentOrderItem>[]  = [];
-        colList.forEach(key => {
+        // const allColumns: ColumnProps<IParentOrderItem>[]  = [];
+        return colList.map(key => {
             const i = this.allColumns.findIndex(item => item.key === key);
             // console.log('key', key, i);
-            if (i === -1) {
-                // console.log('colList没找到', key);
-            } else {
-                // allColumns.push(this.allColumns[i]);
-                return this.allColumns[i];
-            }
+            // if (i === -1) {
+            //     console.log('colList没找到', key);
+            // } else {
+            //     return this.allColumns[i];
+            // }
+            return this.allColumns[i];
         });
-        return allColumns;
+        // return allColumns;
     }
 
     // 合并单元格
@@ -168,14 +137,13 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         };
     }
 
-
     render() {
         const { loading, orderList } = this.props;
         const columns = this.createColumns()
         return (
             <Table
                 bordered={true}
-                rowKey="purchasePlanId"
+                rowKey="orderGoodsId"
                 className="order-table"
                 loading={loading}
                 columns={columns}

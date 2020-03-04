@@ -1,9 +1,8 @@
 import React, { RefObject } from 'react';
-import { Button } from 'antd';
+import { Button, Pagination } from 'antd';
 import { FormInstance } from 'antd/es/form';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
-
 import TablePay from './TablePay';
 
 import { 
@@ -11,6 +10,13 @@ import {
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
+import { 
+    defaultOptionItem, 
+    channelOptionList, 
+    purchaseOrderOptionList,
+    pageSizeOptions
+} from '@/enums/OrderEnum';
+import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
 
 export declare interface IStyleData {
     [key: string]: string;
@@ -22,22 +28,23 @@ export declare interface ICatagoryData {
 }
 
 export declare interface IPayItem {
-    purchase_time: number;
-    middleground_order_id: string;
-    pay_url: string;
-    purchase_p_order_id: string;
-    purchase_order_id: string;
-    purchase_price: number;
-    sale_order_status: number;
-    purchase_order_status: number;
-    purchase_pay_status: number;
-    order_create_time: number;
-    comment: string;
+    [key: string]: any;
+    // purchase_time: number;
+    // middleground_order_id: string;
+    // pay_url: string;
+    // purchase_p_order_id: string;
+    // purchase_order_id: string;
+    // purchase_price: number;
+    // sale_order_status: number;
+    // purchase_order_status: number;
+    // purchase_pay_status: number;
+    // order_create_time: number;
+    // comment: string;
 }
 
 declare interface IState {
     page: number;
-    pageNumber: number;
+    pageCount: number;
     total: number;
     loading: boolean;
     showStatus: boolean;
@@ -67,10 +74,8 @@ const defaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
+            defaultOptionItem,
+            ...channelOptionList
         ],
     }
 ];
@@ -86,14 +91,6 @@ const allFieldList: IFieldItem[] = [
     },
     {
         type: 'input',
-        name: 'purchase_p_order_id',
-        label: '采购父订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购父订单ID',
-    },
-    {
-        type: 'input',
         name: 'purchase_order_id',
         label: '采购订单ID',
         className: 'order-input',
@@ -102,31 +99,23 @@ const allFieldList: IFieldItem[] = [
     },
     {
         type: 'select',
-        name: 'channel_order_status',
-        label: '渠道订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    {
-        type: 'select',
         name: 'purchase_order_status',
         label: '采购订单状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
+            defaultOptionItem,
+            ...purchaseOrderOptionList
         ],
     },
-   
+    {
+        type: 'input',
+        name: 'purchase_p_order_id',
+        label: '采购父订单ID',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        placeholder: '请输入采购父订单ID',
+    },
 ];
 
 class PanePaid extends React.PureComponent<{}, IState> {
@@ -137,7 +126,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             page: 1,
-            pageNumber: 50,
+            pageCount: 30,
             total: 0,
             loading: false,
             showStatus: false,
@@ -151,10 +140,10 @@ class PanePaid extends React.PureComponent<{}, IState> {
     }
 
     onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
+        const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
+            page_count: pageCount
         }
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
@@ -169,12 +158,38 @@ class PanePaid extends React.PureComponent<{}, IState> {
         })
         getPayOrderList(params).then(res => {
             // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
+            const { all_count, list } = res.data;
+            const mockList = [
+                {
+                    a1: '采购订单生成时间',
+                    a2: '采购父订单号',
+                    a3: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
+                    a4: '采购支付状态',
+                    a5: '采购价',
+                    x: [
+                        {
+                            a6: '采购子订单号1',
+                            a7: '采购订单状态',
+                            a8: '计划子项ID',
+                            a9: '中台子订单ID',
+                            a10: '订单时间',
+                        },
+                        {
+                            a6: '采购子订单号2',
+                            a7: '采购订单状态',
+                            a8: '计划子项ID',
+                            a9: '中台子订单ID',
+                            a10: '订单时间',
+                        }
+                    ],
+                    a11: '备注'
+                }
+            ]
             this.setState({
-                total,
-                // page: params.page,
-                // pageNumber: params.page_number,
-                orderList: list
+                total: all_count,
+                page: params.page,
+                pageCount: params.page_count,
+                orderList: this.getOrderData(mockList)
             })
         }).finally(() => {
             this.setState({
@@ -183,9 +198,48 @@ class PanePaid extends React.PureComponent<{}, IState> {
         })
     }
 
+    // 获取待支付列表
+    private getOrderData(list: any[]): IPayItem[] {
+        const ret: IPayItem[] = [];
+        list.forEach(item => {
+            const {
+                x,
+                ...rest
+            } = item;
+            x.forEach((childItem: any, index: number) => {
+                const payItem = {
+                    ...rest,
+                    ...childItem
+                }
+                if (index === 0) {
+                    payItem._rowspan = x.length;
+                    payItem._checked = false;
+                }
+                ret.push(payItem);
+            })
+        })
+        return ret;
+    }
+
     // 获取查询数据
     getFieldsValue = () => {
         // console.log('111', this.formRef.current!.getFieldsValue());
+        const fields = this.formRef.current!.getFieldsValue();
+        const {
+            purchase_start_time,
+            purchase_end_time,
+            order_start_time,
+            order_end_time,
+            // middleground_order_id,
+            // purchase_order_id,
+            // purchase_p_order_id
+        } = fields
+        return Object.assign(fields, {
+            purchase_start_time: purchase_start_time ? transStartDate(purchase_start_time) : purchase_start_time,
+            purchase_end_time: purchase_end_time ? transEndDate(purchase_end_time) : purchase_end_time,
+            order_start_time: order_start_time ? transStartDate(order_start_time) : order_start_time,
+            order_end_time: order_end_time ? transEndDate(order_end_time) : order_end_time,
+        });
     }
 
     changeShowStatus = () => {
@@ -195,12 +249,47 @@ class PanePaid extends React.PureComponent<{}, IState> {
         });
     }
 
+    // 全选
+    onCheckAllChange = (status: boolean) => {
+        const { orderList } = this.state;
+        this.setState({
+            orderList: orderList.map(item => {
+                if (item._rowspan) {
+                    return {
+                        ...item,
+                        _checked: status
+                    }
+                }
+                return item;
+            })
+        });
+    }
+
+    // 单选
+    onSelectedRow = (row: IPayItem) => {
+        const { orderList } = this.state;
+        this.setState({
+            orderList: orderList.map(item => {
+                if (row._rowspan && row.a2 === item.a2) {
+                    return {
+                        ...item,
+                        _checked: !row._checked
+                    }
+                }
+                return item;
+            })
+        });
+    }
+
     render() {
 
         const {
             showStatus,
             loading,
-            orderList
+            orderList,
+            total,
+            page,
+            pageCount
         } = this.state;
 
         const initialValues = {
@@ -234,6 +323,21 @@ class PanePaid extends React.PureComponent<{}, IState> {
                     <TablePay
                         loading={loading}
                         orderList={orderList}
+                        onCheckAllChange={this.onCheckAllChange}
+                        onSelectedRow={this.onSelectedRow}
+                    />
+                    <Pagination
+                        className="order-pagination"
+                        // size="small"
+                        total={total}
+                        current={page}
+                        pageSize={pageCount}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        // onChange={this.onChangePage}
+                        // onShowSizeChange={this.pageCountChange}
+                        showTotal={(total) => `共${total}条`}
                     />
                 </div>
             </>

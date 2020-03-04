@@ -5,20 +5,20 @@ declare interface optionItem {
     value: number;
 }
 
-const defaultOptionItem: optionItem = { name: '全部', value: 100 }
+export const defaultOptionItem: optionItem = { name: '全部', value: 100 }
 
-const channelOptionList = [
+export const channelOptionList = [
     { name: 'VOVA', value: 1 },
     { name: 'FD', value: 2 },
     { name: 'AZ', value: 3 }
 ]
 
-const channelOrderOptionList = [
+export const orderStatusOptionList = [
     { name: '已确认', value: 1 },
     { name: '已取消', value: 2 }
 ]
 
-const purchaseOrderOptionList = [
+export const purchaseOrderOptionList = [
     { name: '待拍单', value: 1 },
     { name: '已取消', value: 2 },
     { name: '拍单失败', value: 3 },
@@ -26,22 +26,22 @@ const purchaseOrderOptionList = [
     { name: '已拍单', value: 5 }
 ]
 
-const purchasePayOptionList = [
+export const purchasePayOptionList = [
     { name: '未支付', value: 1 },
     { name: '已支付', value: 2 },
     { name: '已退款', value: 3 }
 ]
 
-const purchaseShippingOptionList = [
+export const purchaseShippingOptionList = [
     { name: '未配送', value: 1 },
     { name: '已发货', value: 2 },
     { name: '已妥投', value: 3 }
 ]
 
-const pageSizeOptions = ['30', '50', '100', '500'];
+export const pageSizeOptions = ['30', '50', '100', '500'];
 
 
-const childDefaultFieldList: IFieldItem[] = [
+export const childDefaultFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
         name: ['order_start_time', 'order_end_time'],
@@ -86,7 +86,7 @@ const childDefaultFieldList: IFieldItem[] = [
     }
 ]
 
-const childAllFieldList: IFieldItem[] = [
+export const childAllFieldList: IFieldItem[] = [
     ...childDefaultFieldList,
     {
         type: 'dateRanger',
@@ -143,7 +143,7 @@ const childAllFieldList: IFieldItem[] = [
         formItemClassName: 'order-form-item',
         optionList: [
             defaultOptionItem,
-            ...channelOrderOptionList
+            ...orderStatusOptionList
         ],
     },
     {
@@ -192,7 +192,7 @@ const childAllFieldList: IFieldItem[] = [
     // endFieldItem
 ];
 
-const childOptionalColList = [
+export const childOptionalColList = [
     {
         key: 'channel_shipping_fee',
         name: '运费'
@@ -304,7 +304,7 @@ const childOptionalColList = [
     // }
 ];
 
-const parentDefaultFieldList: IFieldItem[] = [
+export const parentDefaultFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
         name: ['order_start_time', 'order_end_time'],
@@ -333,7 +333,7 @@ const parentDefaultFieldList: IFieldItem[] = [
     }
 ]
 
-const parentAllFieldList: IFieldItem[] = [
+export const parentAllFieldList: IFieldItem[] = [
     ...parentDefaultFieldList,
     {
         type: 'select',
@@ -380,7 +380,7 @@ const parentAllFieldList: IFieldItem[] = [
 ]
 
 // 未勾选仅展示父订单ID
-const defaultColChildList = [
+export const defaultColChildList = [
     'goodsCreateTime',                      // 订单时间
     'orderGoodsId',                         // 中台订单子ID
     'goods_detail',                         // 商品详情
@@ -397,10 +397,10 @@ const defaultColChildList = [
     'goods_purchase_waybill_sn'             // 采购运单号
 ]
 // 勾选仅展示
-const defaultParentColList = [
+export const defaultParentColList = [
     'createTime',                  // 订单时间
     'orderId',                     // 中台订单父订单ID
-    // 'xxx',                      // 运费
+    'a1',                      // 运费
     'channel_order_status',        // 渠道订单状态
     'channel_delivery_status',     // 渠道发货状态
     'productId',                   // 中台商品ID
@@ -411,7 +411,7 @@ const defaultParentColList = [
 ]
 
 /*** 采购未发货 ***/
-const defaultStockColList = [
+export const defaultStockColList = [
     'order_create_time',
     'middleground_order_id',
     'commodity_id',
@@ -422,7 +422,7 @@ const defaultStockColList = [
     'purchase_num'
 ]
 
-const notStockOptionalColList = [
+export const notStockOptionalColList = [
     {
         key: 'a1',
         name: '订单确认时间'
@@ -446,7 +446,7 @@ const notStockOptionalColList = [
 ]
 
 /*** 仓库未发货 ***/
-const defaultStockNotShipColList = [
+export const defaultStockNotShipColList = [
     'order_create_time',
     'middleground_order_id',
     'commodity_id',
@@ -457,7 +457,7 @@ const defaultStockNotShipColList = [
     'xxx_time'
 ]
 
-const stockNotShipOptionalColList = [
+export const stockNotShipOptionalColList = [
     {
         key: 'a1',
         name: '订单确认时间'
@@ -492,17 +492,4 @@ const stockNotShipOptionalColList = [
     },
 ]
 
-export {
-    pageSizeOptions,
-    childDefaultFieldList,
-    childAllFieldList,
-    childOptionalColList,
-    parentDefaultFieldList,
-    parentAllFieldList,
-    defaultColChildList,
-    defaultParentColList,
-    defaultStockColList,
-    notStockOptionalColList,
-    defaultStockNotShipColList,
-    stockNotShipOptionalColList
-};
+

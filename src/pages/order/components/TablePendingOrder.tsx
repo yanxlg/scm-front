@@ -1,20 +1,19 @@
 import React from 'react';
-import { Table, Input } from 'antd';
+import { Table, Input, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { TableRowSelection } from 'antd/lib/table/interface';
 
-import { IPendingOrderItem, IStyleData, ICatagoryData } from './PanePendingOrder';
+import { IOrderItem, IStyleData, ICatagoryData } from './PanePendingOrder';
 
-import { formatDate } from '@/utils/date';
+// import { formatDate } from '@/utils/date';
 
 const { TextArea } = Input;
 
 declare interface IProps {
     loading: boolean;
-    orderList: IPendingOrderItem[];
-    selectedRowKeys: string[];
-    changeSelectedKeys(keys: string[]): void;
-    // changeSelectedRows(selectedRows: IOrderItem[]): void;
+    orderList: IOrderItem[];
+    onCheckAllChange(status: boolean): void;
+    onSelectedRow(row: IOrderItem): void;
 }
 
 declare interface IState {
@@ -23,119 +22,196 @@ declare interface IState {
 
 class TablePendingOrder extends React.PureComponent<IProps, IState> {
 
-    private columns: ColumnProps<IPendingOrderItem>[] = [
+    private columns: ColumnProps<IOrderItem>[] = [
         {
             fixed: true,
-            key: 'order_create_time',
-            title: '订单时间',
-            dataIndex: 'order_create_time',
+            key: '_checked',
+            title: () => {
+                const { orderList, onCheckAllChange } = this.props;
+                const rowspanList = orderList.filter(item => item._rowspan);
+                const checkedListLen = rowspanList.filter(item => item._checked).length;
+                let indeterminate = false, checked = false;
+                if (rowspanList.length && rowspanList.length === checkedListLen) {
+                    checked = true; 
+                } else if (checkedListLen) {
+                    indeterminate = true;
+                }
+                return (
+                    <Checkbox 
+                        indeterminate={indeterminate} 
+                        checked={checked} 
+                        onChange={e => onCheckAllChange(e.target.checked)}
+                    />
+                )
+            },
+            dataIndex: '_checked',
             align: 'center',
-            width: 120,
-            render: (value: number) => {
-                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')
+            width: 60,
+            render: (value: boolean, row: IOrderItem) => {
+                return {
+                    children: (
+                        <Checkbox 
+                            checked={value}
+                            onChange={() => this.props.onSelectedRow(row)}
+                        />
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
             }
         },
         {
             fixed: true,
-            key: 'middleground_order_id',
-            title: '中台订单ID',
-            dataIndex: 'middleground_order_id',
+            key: 'goodsCreateTime',
+            title: '订单时间',
+            dataIndex: 'goodsCreateTime',
             align: 'center',
-            width: 120
+            width: 120,
+            render: this.mergeCell
         },
+        {
+            fixed: true,
+            key: 'orderId',
+            title: '中台订单ID',
+            dataIndex: 'orderId',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        // 缺少
         {
             key: 'goods_img',
             title: '商品图片',
             dataIndex: 'goods_img',
             align: 'center',
-            width: 140,
-            render: (value: string) => {
-                return (
-                    <img style={{width: '100%'}} src={value}/>
-                )
-            }
+            width: 120,
+            render: this.mergeCell
+            // render: (value: string) => {
+            //     return (
+            //         <img style={{width: '100%'}} src={value}/>
+            //     )
+            // }
         },
+        // 缺少
         {
             key: 'style',
             title: '商品信息',
             dataIndex: 'style',
             align: 'center',
             width: 120,
-            render: (value: IStyleData) => {
-                return (
-                    <>
-                        {
-                            Object.keys(value).map(key => (
-                                <div key={key}>{key}: {value[key]}</div>
-                            ))
-                        }
-                    </>
-                )
-            }
+            render: this.mergeCell
         },
         {
-            key: 'goods_num',
+            key: 'goodsNumber',
             title: '商品数量',
-            dataIndex: 'goods_num',
+            dataIndex: 'goodsNumber',
             align: 'center',
-            width: 120
+            width: 120,
+            render: this.mergeCell
         },
         {
-            key: 'price',
+            key: 'goodsAmount',
             title: '商品价格',
-            dataIndex: 'price',
+            dataIndex: 'goodsAmount',
             align: 'center',
-            width: 120
+            width: 120,
+            render: this.mergeCell
         },
+        // 缺少
         {
             key: 'shipping_fee',
             title: '预估运费',
             dataIndex: 'shipping_fee',
             align: 'center',
-            width: 120
+            width: 120,
+            render: this.mergeCell
         },
+        // 缺少
         {
             key: 'sale_price',
             title: '销售价',
             dataIndex: 'sale_price',
             align: 'center',
-            width: 120
+            width: 120,
+            render: this.mergeCell
         },
+        // 缺少
         {
             key: 'sale_order_status',
             title: '销售订单状态',
             dataIndex: 'sale_order_status',
             align: 'center',
-            width: 120
+            width: 120,
+            render: this.mergeCell
         },
         {
-            key: 'purchase_order_status',
-            title: '采购订单状态',
-            dataIndex: 'purchase_order_status',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'commodity_id',
+            key: 'productId',
             title: '中台商品ID',
-            dataIndex: 'commodity_id',
+            dataIndex: 'productId',
             align: 'center',
             width: 120,
+            render: this.mergeCell
         },
+        // 缺少
         {
             key: 'second_catagory',
             title: '中台二级分类',
             dataIndex: 'second_catagory',
             align: 'center',
             width: 120,
-            render: (value: ICatagoryData) => {
-                return value.name
-            }
+            render: this.mergeCell
+            // render: (value: ICatagoryData) => {
+            //     return value.name
+            // }
         },
         {
-            key: 'sku_id',
-            title: '中台sku id',
-            dataIndex: 'sku_id',
+            key: 'skuId',
+            title: '中台SKU ID',
+            dataIndex: 'skuId',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'purchasePlatform',
+            title: '采购平台',
+            dataIndex: 'purchasePlatform',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'purchaseNumber',
+            title: '采购数量',
+            dataIndex: 'purchaseNumber',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'purchaseAmount',
+            title: '采购价格',
+            dataIndex: 'purchaseAmount',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'purchaseOrderStatus',
+            title: '采购订单状态',
+            dataIndex: 'purchaseOrderStatus',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'purchaseOrderPayStatus',
+            title: '采购支付状态',
+            dataIndex: 'purchaseOrderPayStatus',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'purchaseOrderShippingStatus',
+            title: '采购物流状态',
+            dataIndex: 'purchaseOrderShippingStatus',
             align: 'center',
             width: 120
         },
@@ -145,23 +221,33 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'comment',
             align: 'center',
             width: 200,
-            render: (value: string) => {
-                return <TextArea autoSize={true} defaultValue={value}/> 
+            render: (value: string, row: IOrderItem) => {
+                return {
+                    children: <TextArea autoSize={true} defaultValue={value}/>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
             }
-        }
+        },
     ]
 
     constructor(props: IProps) {
         super(props);
     }
 
-    selectedRow = (selectedRowKeys: React.Key[]) => {
-        // console.log('selectedRowKeys', selectedRowKeys);
-        this.props.changeSelectedKeys(selectedRowKeys as string[]);
+    // 合并单元格
+    private mergeCell(value: string | number, row: IOrderItem) {
+        return {
+            children: value,
+            props: {
+                rowSpan: row._rowspan || 0,
+            },
+        };
     }
 
     render() {
-        const { loading, orderList, selectedRowKeys } = this.props;
+        const { loading, orderList } = this.props;
     
         return (
             <Table
@@ -170,12 +256,6 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 className="order-table"
                 loading={loading}
                 columns={this.columns}
-                rowSelection={{
-                    selectedRowKeys,
-                    fixed: true,
-                    columnWidth: 60,
-                    onChange: this.selectedRow
-                }}
                 dataSource={orderList}
                 scroll={{ x: true }}
                 pagination={false}

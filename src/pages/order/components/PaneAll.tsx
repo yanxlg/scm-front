@@ -178,7 +178,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 total: all_count,
                 page: params.page,
                 pageCount: params.page_count,
-                childOrderList: this.getChildOrderData(childList)
+                childOrderList: this.getChildOrderData(childList),
+                parentOrderList: this.getParentOrderData(list)
             })
         }).finally(() => {
             this.setState({
@@ -259,7 +260,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     }
 
     // 获取中单订单=>子订单数据
-    private getParentOrderData(list: any[]) {
+    private getParentOrderData(list: any[]): IParentOrderItem[] {
         const parentOrderList: IParentOrderItem[] = [];
         list.forEach(item => {
             const {
@@ -308,12 +309,15 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 parentOrderList.push(parentOrderItem);
             })
         });
+        return parentOrderList;
     }
 
     private changeParentOrder = (status: boolean) => {
         // console.log('changeParentOrder', status);
         this.setState({
-            showParentStatus: status
+            showParentStatus: status,
+            // childOrderList: [],
+            // parentOrderList: []
         }, () => {
             // 切换过滤条件
             this.changeFilter();

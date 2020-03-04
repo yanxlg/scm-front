@@ -38,7 +38,7 @@ export async function getAllOrderList(params: IFilterParams) {
 
 // 获取待拍单
 export async function getPendingOrderList(params = {}) {
-    return request.get(ApiPathEnum.getPendingOrderList, {
+    return request.post(ApiPathEnum.getPendingOrderList, {
         requestType: 'form',
         params
     });
@@ -46,7 +46,7 @@ export async function getPendingOrderList(params = {}) {
 
 // 获取待支付
 export async function getPayOrderList(params = {}) {
-    return request.get(ApiPathEnum.getPayOrderList, {
+    return request.post(ApiPathEnum.getPayOrderList, {
         requestType: 'form',
         params
     });
