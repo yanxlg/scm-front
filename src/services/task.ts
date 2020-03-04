@@ -1,8 +1,17 @@
 import request, { errorHandlerFactory } from '@/utils/request';
 import { ApiPathEnum } from '@/enums/ApiPathEnum';
-import { IFormData } from '@/pages/task/components/TaskSearch';
-import { isNull } from '@/utils/validate';
 import { AutoPurchaseTaskType, TaskExecuteType } from '@/enums/StatusEnum';
+
+export declare interface IFormData {
+    task_id?: string;
+    task_name?: string;
+    task_range?: number;
+    task_status?: number;
+    task_begin_time?: number;
+    task_end_time?: number;
+    task_create_time1?: number;
+    task_create_time2?: number;
+}
 
 declare interface ITaskListSearch extends IFormData {
     page: number;

@@ -23,6 +23,13 @@ export default [
             {
                 path: '/task/list',
                 name: '任务列表',
+                extract: true,
+            },
+            {
+                path: '/task/list/:id',
+                name: '任务详情',
+                hideInMenu: true,
+                extract: true,
             },
             {
                 path: '/task/drafts',

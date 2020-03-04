@@ -137,14 +137,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     })
                     .catch(() => {
                         Modal.info({
-                            content: (
-                                <GatherFailureModal
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        this.onCreate();
-                                    }}
-                                />
-                            ),
+                            content: <GatherFailureModal />,
                             className: 'modal-empty',
                             icon: null,
                             maskClosable: true,

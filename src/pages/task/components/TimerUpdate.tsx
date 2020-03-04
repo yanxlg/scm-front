@@ -341,7 +341,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             <Radio value={TaskIntervalConfigType.day}>
                                 <div className="inline-block vertical-middle">
                                     <Form.Item
-                                        noStyle={true}
+                                        className="form-item-inline flex-inline"
                                         shouldUpdate={(prevValues, currentValues) =>
                                             prevValues.taskIntervalType !==
                                             currentValues.taskIntervalType
@@ -354,9 +354,9 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                             return (
                                                 <React.Fragment>
                                                     <Form.Item
-                                                        noStyle={true}
                                                         validateTrigger={'onBlur'}
                                                         name="day"
+                                                        className="form-item-inline inline-block vertical-middle"
                                                         rules={[
                                                             {
                                                                 required:
@@ -375,7 +375,9 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                             }
                                                         />
                                                     </Form.Item>
-                                                    <span className="form-unit">天</span>
+                                                    <span className="form-unit inline-block vertical-middle">
+                                                        天
+                                                    </span>
                                                 </React.Fragment>
                                             );
                                         }}
@@ -385,7 +387,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             <Radio value={TaskIntervalConfigType.second}>
                                 <div className="inline-block vertical-middle">
                                     <Form.Item
-                                        noStyle={true}
+                                        className="form-item-inline flex-inline"
                                         shouldUpdate={(prevValues, currentValues) =>
                                             prevValues.taskIntervalType !==
                                             currentValues.taskIntervalType
@@ -398,7 +400,6 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                             return (
                                                 <React.Fragment>
                                                     <Form.Item
-                                                        noStyle={true}
                                                         validateTrigger={'onBlur'}
                                                         name="second"
                                                         rules={[
@@ -409,7 +410,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 message: '请输入间隔秒数',
                                                             },
                                                         ]}
-                                                        className="inline-block"
+                                                        className="form-item-inline inline-block vertical-middle"
                                                     >
                                                         <IntegerInput
                                                             positive={true}
@@ -420,7 +421,9 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                             }
                                                         />
                                                     </Form.Item>
-                                                    <span className="form-unit">秒</span>
+                                                    <span className="form-unit inline-block vertical-middle">
+                                                        秒
+                                                    </span>
                                                 </React.Fragment>
                                             );
                                         }}

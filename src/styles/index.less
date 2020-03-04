@@ -5,10 +5,8 @@
     padding:20px 30px;
 }
 
-.padding{
-    &-none{
-        padding: 0;
-    }
+.padding-none{
+    padding: 0;
 }
 
 .margin{
@@ -105,6 +103,12 @@
         color:rgba(0,0,0,0.65);
         margin-left: 32px;
         padding: 0;
+    }
+    &-clear{
+        &:extend(.padding-none);
+        .ant-btn{
+            &:extend(.padding-none);
+        }
     }
 }
 

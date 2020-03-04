@@ -6,8 +6,8 @@ import { getSearchConditionOptions, IFilterParams } from '@/services/VovaGoodsSe
 import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/product.less';
 import '@/styles/card.less';
-import { transSelectValue, transStatusList } from '@/utils/transform';
-import { GoodsStatusList, GoodsStatusMap } from '@/enums/StatusEnum';
+import { transNullValue } from '@/utils/transform';
+import { GoodsStatusList } from '@/enums/StatusEnum';
 
 declare interface ISearchProps {
     onSearch: Function;
@@ -123,8 +123,8 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
             ...values,
             onshelf_time_start: transStartDate(onshelf_time_start),
             onshelf_time_end: transEndDate(onshelf_time_end),
-            level_one_category: transSelectValue(level_one_category),
-            level_two_category: transSelectValue(level_two_category),
+            level_one_category: transNullValue(level_one_category),
+            level_two_category: transNullValue(level_two_category),
         } as IFilterParams;
     }
 

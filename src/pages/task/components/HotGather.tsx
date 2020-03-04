@@ -1322,13 +1322,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         className="form-item-inline form-item"
                                         required={true}
                                     >
-                                        <Radio.Group
-                                            disabled={taskType !== TaskExecuteType.interval}
-                                        >
+                                        <Radio.Group>
                                             <Radio value={TaskIntervalConfigType.day}>
                                                 <div className="inline-block vertical-middle">
                                                     <Form.Item
-                                                        noStyle={true}
+                                                        className="form-item-inline flex-inline"
                                                         shouldUpdate={(prevValues, currentValues) =>
                                                             prevValues.taskIntervalType !==
                                                             currentValues.taskIntervalType
@@ -1339,11 +1337,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                 'taskIntervalType',
                                                             );
                                                             return (
-                                                                <Form.Item className="form-item-inline">
+                                                                <React.Fragment>
                                                                     <Form.Item
-                                                                        noStyle={true}
                                                                         validateTrigger={'onBlur'}
                                                                         name="day"
+                                                                        className="form-item-inline inline-block vertical-middle"
                                                                         rules={[
                                                                             {
                                                                                 required:
@@ -1355,7 +1353,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                         ]}
                                                                     >
                                                                         <IntegerInput
-                                                                            min={0}
+                                                                            positive={true}
                                                                             className="input-small input-handler"
                                                                             disabled={
                                                                                 taskIntervalType !==
@@ -1363,10 +1361,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                             }
                                                                         />
                                                                     </Form.Item>
-                                                                    <span className="form-unit">
+                                                                    <span className="form-unit inline-block vertical-middle">
                                                                         天
                                                                     </span>
-                                                                </Form.Item>
+                                                                </React.Fragment>
                                                             );
                                                         }}
                                                     </Form.Item>
@@ -1375,7 +1373,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             <Radio value={TaskIntervalConfigType.second}>
                                                 <div className="inline-block vertical-middle">
                                                     <Form.Item
-                                                        noStyle={true}
+                                                        className="form-item-inline flex-inline"
                                                         shouldUpdate={(prevValues, currentValues) =>
                                                             prevValues.taskIntervalType !==
                                                             currentValues.taskIntervalType
@@ -1386,9 +1384,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                 'taskIntervalType',
                                                             );
                                                             return (
-                                                                <Form.Item className="form-item-inline">
+                                                                <React.Fragment>
                                                                     <Form.Item
-                                                                        noStyle={true}
                                                                         validateTrigger={'onBlur'}
                                                                         name="second"
                                                                         rules={[
@@ -1400,10 +1397,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                                     '请输入间隔秒数',
                                                                             },
                                                                         ]}
-                                                                        className="inline-block"
+                                                                        className="form-item-inline inline-block vertical-middle"
                                                                     >
                                                                         <IntegerInput
-                                                                            min={0}
+                                                                            positive={true}
                                                                             className="input-small input-handler"
                                                                             disabled={
                                                                                 taskIntervalType !==
@@ -1411,10 +1408,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                                                             }
                                                                         />
                                                                     </Form.Item>
-                                                                    <span className="form-unit">
+                                                                    <span className="form-unit inline-block vertical-middle">
                                                                         秒
                                                                     </span>
-                                                                </Form.Item>
+                                                                </React.Fragment>
                                                             );
                                                         }}
                                                     </Form.Item>

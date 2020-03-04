@@ -28,6 +28,8 @@ export const TaskRangeMap: { [key: number]: string } = {
     4: '全部已上架',
     5: '有销量已上架',
     6: '采购',
+    7: '商品上架',
+    8: '商品下架',
 };
 export const TaskRangeList = transStatusList(TaskRangeMap);
 
@@ -38,18 +40,29 @@ export const TaskStatusMap: { [key: string]: string } = {
     1: '执行中',
     2: '已执行',
     3: '执行失败',
-    4: '已取消',
+    // 4: '已取消',
     5: '已完成',
-    6: '终止',
+    6: '已终止',
 };
 
 export const TaskStatusList = transStatusList(TaskStatusMap);
+
+//======================= 任务类型 ======================//
+export const TaskTypeMap: { [key: string]: string } = {
+    0: '采集任务',
+    1: '上架任务',
+    2: '更新任务',
+    3: '采购任务',
+};
+
+export const TaskTypeList = transStatusList(TaskTypeMap);
 
 export enum TaskStatus {
     UnExecuted, // 未执行
     Executing, // 执行中
     Executed, // 已执行
     Failed, // 执行失败
+    Terminated = 6,
 }
 
 //======================= Hot 任务范围 ======================//
