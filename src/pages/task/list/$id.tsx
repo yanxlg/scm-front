@@ -1,6 +1,5 @@
 import React from 'react';
-import { Button, Card, Descriptions, Steps, Tabs } from 'antd';
-import TaskLogView from '@/pages/task/components/TaskLogView';
+import { Button, Card, Descriptions, Modal, Steps, Tabs } from 'antd';
 import SubTaskView from '@/pages/task/components/SubTaskView';
 import '@/styles/index.less';
 import '@/styles/form.less';
@@ -9,8 +8,14 @@ import '@/styles/card.less';
 import { RouteComponentProps } from 'dva/router';
 import { queryTaskDetail } from '@/services/task';
 import { Bind } from 'lodash-decorators';
-import { ITaskDetail } from '@/interface/ITask';
+import { ITaskDetailInfo } from '@/interface/ITask';
 import { TaskExecuteType } from '@/enums/StatusEnum';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
+import URLGather from '@/pages/task/components/URLGather';
+import HotGather from '../components/HotGather';
+import TimerUpdate from '../components/TimerUpdate';
+import AutoPurchaseTask from '@/pages/task/components/AutoPurchaseTask';
 
 const { TabPane } = Tabs;
 const { Step } = Steps;
@@ -18,7 +23,7 @@ const { Step } = Steps;
 type TaskDetailPageProps = RouteComponentProps<{ id: string }>;
 
 declare interface ITaskDetailPagePropsState {
-    detail?: ITaskDetail;
+    detail?: ITaskDetailInfo;
 }
 
 class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetailPagePropsState> {
@@ -30,24 +35,74 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
     }
     @Bind
     private queryDetail(taskId: number) {
-        queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
-            this.setState({
-                detail: task_detail_info,
-            });
-        });
+        queryTaskDetail(taskId).then(
+            ({ data: { task_detail_info = EmptyObject } = {} } = EmptyObject) => {
+                this.setState({
+                    detail: task_detail_info,
+                });
+            },
+        );
+    }
+    @Bind
+    private copyTask() {
+        // task_range 分别弹不同的弹窗
+        const task_id = this.taskId;
+        const { detail = EmptyObject } = this.state;
+        const { task_range } = detail!;
+        switch (task_range) {
+            case '1':
+                // url
+                Modal.info({
+                    content: <URLGather taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '2':
+            case '3':
+                Modal.info({
+                    content: <HotGather taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '4':
+            case '5':
+                Modal.info({
+                    content: <TimerUpdate taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            case '6':
+                Modal.info({
+                    content: <AutoPurchaseTask taskId={task_id} />,
+                    className: 'modal-empty config-modal-hot',
+                    icon: null,
+                    maskClosable: true,
+                });
+                break;
+            default:
+                break;
+        }
     }
     componentDidMount(): void {
         this.queryDetail(this.taskId);
     }
 
     render() {
-        const { detail = {} as ITaskDetail } = this.state;
+        const { detail = {} as ITaskDetailInfo } = this.state;
+        const type = detail.type;
+        const category = detail.category_level_one;
         return (
             <div className="body-transparent">
                 <Card title="【采集任务】啦啦啦 - 定时 - 333 - 执行中" className="card-nobody" />
                 <Card className="form-item">
                     <Card>
-                        <div className="flex">
+                        {/* <div className="flex">
                             <div className="task-progress-tag">
                                 任 务
                                 <br />进 度
@@ -60,43 +115,100 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                             <Button type="primary" ghost={true} size="large" className="task-btn">
                                 查看任务进度
                             </Button>
-                        </div>
-
-                        <Descriptions column={1} className="form-item task-desc">
-                            <Descriptions.Item label="任务SN">{detail.task_sn}</Descriptions.Item>
-                            <Descriptions.Item label="任务名称">
-                                {detail.task_name}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="任务范围">
-                                Hangzhou, Zhejiang
-                            </Descriptions.Item>
-                            <Descriptions.Item label="排序类型">empty</Descriptions.Item>
-                            <Descriptions.Item label="爬虫条件">
-                                No. 18, Wantang Road, Xihu District, Hangzhou, Zhejiang, China
-                            </Descriptions.Item>
-                            <Descriptions.Item label="关键词">{detail.keywords}</Descriptions.Item>
-                            <Descriptions.Item label="爬取页数">
-                                {detail.grab_page_count}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="爬取数量">
-                                {detail.grab_count_max}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="销量区间">
-                                {detail.sales_volume_min}-{detail.sales_volume_max}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="价格区间(￥)">
-                                {detail.price_min}-{detail.price_min}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="任务周期">
-                                {detail.task_type === TaskExecuteType.once
-                                    ? '一次性任务'
-                                    : '定时任务'}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="任务开始时间">
-                                {detail.task_start_time}
-                            </Descriptions.Item>
-                        </Descriptions>
-                        <Button className="task-btn-copy" type="primary" size="large" ghost={true}>
+                        </div>*/}
+                        {type === 0 ? (
+                            <Descriptions column={1} className="form-item task-desc">
+                                <Descriptions.Item label="任务SN">
+                                    {detail.task_sn}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务名称">
+                                    {detail.task_name}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务范围">
+                                    {detail.range === 0 ? '全站' : '指定店铺'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="排序类型">empty</Descriptions.Item>
+                                <Descriptions.Item label="爬虫条件">
+                                    {category ? '指定类目' : '指定关键词'}
+                                </Descriptions.Item>
+                                {category ? (
+                                    <Descriptions.Item label="类目">
+                                        {detail.keywords}
+                                    </Descriptions.Item>
+                                ) : (
+                                    <Descriptions.Item label="关键词">
+                                        {detail.keywords}
+                                    </Descriptions.Item>
+                                )}
+                                <Descriptions.Item label="爬取页数">
+                                    {detail.grab_page_count}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="爬取数量">
+                                    {detail.grab_count_max}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="销量区间">
+                                    {detail.sales_volume_min}-{detail.sales_volume_max}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="价格区间(￥)">
+                                    {detail.price_min}-{detail.price_min}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务周期">
+                                    {detail.task_type === TaskExecuteType.once
+                                        ? '一次性任务'
+                                        : '定时任务'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务开始时间">
+                                    {detail.task_start_time}
+                                </Descriptions.Item>
+                            </Descriptions>
+                        ) : type === 1 ? (
+                            <Descriptions column={1} className="form-item task-desc">
+                                <Descriptions.Item label="任务SN">
+                                    {detail.task_sn}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务名称">
+                                    {detail.task_name}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务范围">
+                                    {detail.update_type === 2 ? '' : '指定店铺'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务周期">
+                                    {detail.task_type === TaskExecuteType.once
+                                        ? '一次性任务'
+                                        : '定时任务'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务开始时间">
+                                    {detail.task_start_time}
+                                </Descriptions.Item>
+                            </Descriptions>
+                        ) : type === 2 ? (
+                            <Descriptions column={1} className="form-item task-desc">
+                                <Descriptions.Item label="任务SN">
+                                    {detail.task_sn}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务名称">
+                                    {detail.task_name}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="商品范围">
+                                    {detail.update_type === 2
+                                        ? '全部已上架商品'
+                                        : '有销量的已上架商品'}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务时间">
+                                    {detail.task_start_time}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="任务间隔">
+                                    {detail.time_interval}
+                                </Descriptions.Item>
+                            </Descriptions>
+                        ) : null}
+                        <Button
+                            className="task-btn-copy"
+                            type="primary"
+                            size="large"
+                            ghost={true}
+                            onClick={this.copyTask}
+                        >
                             复制创建新任务
                         </Button>
                     </Card>
@@ -108,9 +220,9 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                             <TabPane tab="子任务进度" key="1">
                                 <SubTaskView task_Id={this.taskId} />
                             </TabPane>,
-                            <TabPane tab="任务日志" key="2">
+                            /*<TabPane tab="任务日志" key="2">
                                 <TaskLogView task_Id={this.taskId} />
-                            </TabPane>,
+                            </TabPane>,*/
                         ]}
                     />
                 </Card>

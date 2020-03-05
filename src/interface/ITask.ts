@@ -126,6 +126,7 @@ export interface ITaskQuery {
 }
 
 export interface ITaskDetailInfo {
+    task_sn?: string;
     task_name: string;
     range?: number;
     category_level_one?: string;
@@ -150,6 +151,10 @@ export interface ITaskDetailInfo {
     update_type?: PUTaskRangeType;
     time_interval?: number;
     urls?: string;
+
+    // 新增的
+    type?: TaskTypeCode;
+    task_range?: TaskRangeCode;
 }
 
 export interface ITaskDetailResponse {
