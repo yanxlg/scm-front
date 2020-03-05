@@ -263,7 +263,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                             </Button>
                             <Button
                                 loading={syncLoading}
-                                className="btn-group vertical-middle form-item"
+                                className="btn-group vertical-middle form-item btn-clear"
                                 type="link"
                                 onClick={this.syncStock}
                             >

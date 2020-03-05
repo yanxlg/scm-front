@@ -1,18 +1,19 @@
 import React, { RefObject } from 'react';
 import { Button, message, Pagination, Progress } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import '@/styles/config.less';
-import '@/styles/table.less';
 import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
 import {
+    TaskRangeCode,
     TaskRangeMap,
+    TaskStatusCode,
     TaskStatusEnum,
     TaskStatusList,
     TaskStatusMap,
+    TaskTypeCode,
     TaskTypeList,
     TaskTypeMap,
 } from '@/enums/StatusEnum';
@@ -21,27 +22,21 @@ import CollapsePopOver from '@/components/CollapsePopOver';
 import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
+import '@/styles/config.less';
+import '@/styles/table.less';
+import '@/styles/task.less';
+import { ITaskListItem } from '@/interface/ITask';
+import { EmptyObject } from '@/enums/ConfigEnum';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
     dataLoading: boolean;
-    dataSet: IDataItem[];
+    dataSet: ITaskListItem[];
     searchLoading: boolean;
     pageNumber: number;
     page: number;
     total: number;
     showMore: boolean;
-}
-
-declare interface IDataItem {
-    task_id: number;
-    task_name: string;
-    task_range: string;
-    task_type: number;
-    start_time: string;
-    status: number;
-    create_time: string;
-    result: 0 | 1; //执行结果，0没有，1有，只针对执行中的任务
 }
 
 declare interface IALLTaskPageProps {
@@ -110,7 +105,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page_number: page_number,
             ...values,
         })
-            .then(({ data: { task_info = [], total = 0 } = {} } = {}) => {
+            .then(({ data: { task_info = [], total = 0 } = {} } = EmptyObject) => {
                 this.setState({
                     page: page,
                     pageNumber: page_number,
@@ -125,14 +120,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                 });
             });
     }
-    private columns: ColumnProps<IDataItem>[] = [
+    private columns: ColumnProps<ITaskListItem>[] = [
         {
             title: '操作',
             dataIndex: 'operation',
             align: 'center',
             fixed: 'left',
             width: '150px',
-            render: (text: any, record: IDataItem) => {
+            render: (text: any, record: ITaskListItem) => {
                 return (
                     <Button type="link" onClick={() => this.viewTaskDetail(record.task_id)}>
                         查看任务详情
@@ -172,7 +167,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                     <>
                         <div>
                             <Progress
-                                className="task-progress"
+                                className="task-progress-circle"
                                 width={20}
                                 strokeWidth={15}
                                 strokeLinecap="round"
@@ -187,7 +182,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 }
                                 format={() => ''}
                             />
-                            {TaskStatusMap[status]}
+                            {TaskStatusMap[(status as unknown) as TaskStatusCode]}
                         </div>
                         {status === '0' || (status === '1' && record.result === 0) ? null : (
                             <Button type="link" onClick={() => this.viewTaskResult(record.task_id)}>
@@ -203,14 +198,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             dataIndex: 'task_type',
             width: '223px',
             align: 'center',
-            render: (text: number) => TaskTypeMap[text],
+            render: (text: TaskTypeCode) => TaskTypeMap[text],
         },
         {
             title: '任务范围',
             dataIndex: 'task_range',
             width: '182px',
             align: 'center',
-            render: (text: number) => TaskRangeMap[text],
+            render: (text: TaskRangeCode) => TaskRangeMap[text],
         },
         {
             title: '任务周期',

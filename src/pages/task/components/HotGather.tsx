@@ -16,13 +16,7 @@ import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import {
-    addPddHotTask,
-    IPddHotTaskParams,
-    queryCategory,
-    querySortCondition,
-    queryTaskDetail,
-} from '@/services/task';
+import { addPddHotTask, queryCategory, querySortCondition, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import moment, { Moment } from 'moment';
 import { isNull } from '@/utils/validate';
@@ -38,28 +32,20 @@ import {
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { TreeNodeNormal } from 'antd/es/tree/Tree';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import {
+    IHotTaskBody,
+    IPDDCategoryResponse,
+    IPDDSortItem,
+    ITaskDetailInfo,
+} from '@/interface/ITask';
+import { dateToUnix } from '@/utils/date';
 
-export declare interface IFormData {
-    range?: HotTaskRange; // 调用接口前需要进行处理 && 编辑数据源需要处理
-    shopId?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
-    category_level_one?: string[] | string;
-    category_level_two?: string[] | string;
-    category_level_three?: string[] | string;
-    sort_type?: string;
-    keywords?: string;
-    task_type?: TaskExecuteType;
+export declare interface IFormData extends IHotTaskBody {
+    shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     taskIntervalType?: TaskIntervalConfigType; // 调用接口前需要进行处理 && 编辑数据源需要处理
-    sales_volume_min?: number;
-    sales_volume_max?: number;
-    price_min?: number;
-    price_max?: number;
-    grab_page_count?: number;
-    grab_count_max?: number;
-    task_start_time?: Moment; // 单次任务开始时间，提交及编辑时需要进行数据处理
-    task_end_time?: Moment;
     day?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
     second?: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
-    task_name?: string;
     filterType?: HotTaskFilterType;
 }
 
@@ -72,7 +58,7 @@ declare interface IHotGatherState {
     groundLoading: boolean;
     queryLoading: boolean;
 
-    pddCategory: IPDDCategory;
+    pddCategory: IPDDCategoryResponse;
     categoryLoading: boolean;
     listSort: Array<IPDDSortItem>;
     merchantSort: Array<IPDDSortItem>;
@@ -80,19 +66,6 @@ declare interface IHotGatherState {
     firstTreeData: Array<TreeNodeNormal>;
     middleTreeData: Array<TreeNodeNormal>;
     lastTreeData: Array<TreeNodeNormal>;
-}
-
-declare interface IPDDCategoryItem {
-    platform_cate_id: string;
-    platform_cate_name: string;
-    children?: Array<IPDDCategoryItem>;
-}
-
-type IPDDCategory = Array<IPDDCategoryItem>;
-
-declare interface IPDDSortItem {
-    display: string;
-    value: string;
 }
 
 const Option = Select.Option;
@@ -148,8 +121,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private queryDetail(taskId: number) {
         return queryTaskDetail(taskId)
-            .then(({ data: { task_detail_info = {} } = {} } = {}) => {
-                const initValues = this.convertDetail(task_detail_info);
+            .then(({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
+                const initValues = this.convertDetail(task_detail_info as ITaskDetailInfo);
                 this.formRef.current?.setFieldsValue({
                     ...initValues,
                 });
@@ -162,7 +135,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 this.setState({
                     queryLoading: false,
                 });
-                return {};
+                return {} as any;
             });
     }
 
@@ -249,7 +222,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     }
 
     private getTreeNodeList(
-        pddCategory: IPDDCategory,
+        pddCategory: IPDDCategoryResponse,
         firstFilterIds?: string[],
         secondFilterIds?: string[],
     ) {
@@ -346,7 +319,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             : [];
     }
 
-    private convertDetail(info: IPddHotTaskParams) {
+    private convertDetail(info: ITaskDetailInfo) {
         const {
             range,
             task_type,
@@ -416,25 +389,13 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             task_type,
             range: range === HotTaskRange.store ? shopId : range,
             category_level_one:
-                range === HotTaskRange.fullStack
-                    ? typeof category_level_one === 'string'
-                        ? category_level_one
-                        : category_level_one?.join(',')
-                    : undefined,
+                range === HotTaskRange.fullStack ? category_level_one?.toString() : undefined,
             category_level_two:
-                range === HotTaskRange.fullStack
-                    ? typeof category_level_two === 'string'
-                        ? category_level_two
-                        : category_level_two?.join(',')
-                    : undefined,
+                range === HotTaskRange.fullStack ? category_level_two?.toString() : undefined,
             category_level_three:
-                range === HotTaskRange.fullStack
-                    ? typeof category_level_three === 'string'
-                        ? category_level_three
-                        : category_level_three?.join(',')
-                    : undefined,
+                range === HotTaskRange.fullStack ? category_level_three?.toString() : undefined,
             is_immediately_execute: task_type === TaskExecuteType.once && !task_start_time,
-            task_start_time: task_start_time?.unix() ?? undefined,
+            task_start_time: dateToUnix(task_start_time),
             ...(task_type === TaskExecuteType.once
                 ? {}
                 : {
@@ -444,9 +405,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                               : day * 60 * 60 * 24,
                   }),
             task_end_time:
-                task_type === TaskExecuteType.interval
-                    ? task_end_time?.unix() ?? undefined
-                    : undefined,
+                task_type === TaskExecuteType.interval ? dateToUnix(task_end_time) : undefined,
         };
     }
 
@@ -471,7 +430,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         is_upper_shelf: is_upper_shelf,
                     }),
                 )
-                    .then(({ data: { task_id = -1 } = {} } = {}) => {
+                    .then(({ data: { task_id = -1 } = {} } = EmptyObject) => {
                         this.formRef.current?.resetFields();
                         Modal.info({
                             content: (
@@ -972,7 +931,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                     rules={[
                                         {
                                             required: true,
-                                            message: '',
+                                            message: '请选择排序类型',
                                         },
                                     ]}
                                 >

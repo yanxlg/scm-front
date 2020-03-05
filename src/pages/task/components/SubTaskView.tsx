@@ -1,37 +1,24 @@
 import React from 'react';
 import { Button, Modal, Pagination, Table } from 'antd';
-import { querySubTaskProgress } from '@/services/task';
+import { queryTaskProgressList } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import '@/styles/config.less';
 import '@/styles/modal.less';
 import '@/styles/form.less';
 import TaskProgressModal from '@/pages/task/components/TaskProgressModal';
-import { TaskTypeEnum } from '@/enums/StatusEnum';
 import { ColumnProps } from 'antd/es/table';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { ITaskProgressItem } from '@/interface/ITask';
 
 declare interface ISubTaskViewProps {
     task_Id: number;
-}
-
-declare interface ITaskItem {
-    sub_task_id: number;
-    start_time: number;
-    end_time: number;
-    create_status: 0 | 1;
-    status: 0 | 1;
-    incoming_num: number;
-    grab_num: number;
-    transform_incoming_num: number;
-    incoming_fail_num: number;
-    progress: number;
-    task_type: TaskTypeEnum;
 }
 
 declare interface ISubTaskViewState {
     total: number;
     pageNumber: number;
     page: number;
-    list: ITaskItem[];
+    list: ITaskProgressItem[];
     loading: boolean;
 }
 
@@ -50,7 +37,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
     componentDidMount(): void {
         this.queryList();
     }
-    private showSubTaskProgressModal(record: ITaskItem) {
+    private showSubTaskProgressModal(record: ITaskProgressItem) {
         Modal.info({
             content: (
                 <TaskProgressModal sub_task_id={record.sub_task_id} task_type={record.task_type} />
@@ -60,7 +47,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
             maskClosable: true,
         });
     }
-    private columns: ColumnProps<ITaskItem>[] = [
+    private columns: ColumnProps<ITaskProgressItem>[] = [
         {
             title: '子任务ID',
             width: '100px',
@@ -120,12 +107,12 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
         this.setState({
             loading: true,
         });
-        querySubTaskProgress({
+        queryTaskProgressList({
             page: page,
             page_number: page_number,
             task_id: this.props.task_Id,
         })
-            .then(({ data: { list = [], total = 0 } = {} }) => {
+            .then(({ data: { list = [], total = 0 } = EmptyObject }) => {
                 this.setState({
                     list,
                     total,

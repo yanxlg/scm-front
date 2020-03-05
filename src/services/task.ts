@@ -1,22 +1,25 @@
 import request, { errorHandlerFactory } from '@/utils/request';
-import { ApiPathEnum } from '@/enums/ApiPathEnum';
-import { AutoPurchaseTaskType, TaskExecuteType } from '@/enums/StatusEnum';
-
-export declare interface IFormData {
-    task_id?: string;
-    task_name?: string;
-    task_range?: number;
-    task_status?: number;
-    task_begin_time?: number;
-    task_end_time?: number;
-    task_create_time1?: number;
-    task_create_time2?: number;
-}
-
-declare interface ITaskListSearch extends IFormData {
-    page: number;
-    page_number: number;
-}
+import { TaskExecuteType, TaskStatusCode } from '@/enums/StatusEnum';
+import {
+    IHotTaskBody,
+    ITaskCreatedResponse,
+    ITaskListQuery,
+    ITaskListResponse,
+    IURLTaskBody,
+    ITaskDetailResponse,
+    IPDDCategoryResponse,
+    IPDDSortQueryType,
+    IPDDSortResponse,
+    ITaskLogResponse,
+    IPUTaskBody,
+    IAPTaskBody,
+    ITaskProgressQuery,
+    ITaskProgressResponse,
+    ISubTaskProgressQuery,
+    ISubTaskProgressResponse,
+} from '@/interface/ITask';
+import { IResponse } from '@/interface/IGlobal';
+import { TaskApiPath } from '@/enums/TaskApiPath';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -40,27 +43,17 @@ export declare interface IPddHotTaskParams {
     success?: number;
     fail?: number;
     urls?: string;
-    status?: string;
+    status?: TaskStatusCode;
 }
 
-declare interface IPddURLTaskParams {
-    urls: string;
-    task_name: string;
-    task_type: TaskExecuteType;
-    task_start_time?: number;
-    task_end_time?: number;
-    task_interval_seconds?: number;
-    is_upper_shelf: boolean;
-}
-
-export async function getTaskList(params: ITaskListSearch) {
-    return request.get(ApiPathEnum.QueryTaskList, {
+export async function getTaskList(params: ITaskListQuery) {
+    return request.get<IResponse<ITaskListResponse>>(TaskApiPath.QueryTaskList, {
         params: params,
     });
 }
 
-export async function addPddHotTask(params: IPddHotTaskParams) {
-    return request.post(ApiPathEnum.AddPDDHotTask, {
+export async function addPddHotTask(params: IHotTaskBody) {
+    return request.post<IResponse<ITaskCreatedResponse>>(TaskApiPath.AddPDDHotTask, {
         data: {
             ...params,
             version: '1.0',
@@ -70,8 +63,8 @@ export async function addPddHotTask(params: IPddHotTaskParams) {
     });
 }
 
-export async function addPddURLTask(params: IPddURLTaskParams) {
-    return request.post(ApiPathEnum.AddPDDURLTask, {
+export async function addPddURLTask(params: IURLTaskBody) {
+    return request.post<IResponse<ITaskCreatedResponse>>(TaskApiPath.AddPDDURLTask, {
         data: {
             ...params,
             version: '1.0',
@@ -81,12 +74,8 @@ export async function addPddURLTask(params: IPddURLTaskParams) {
     });
 }
 
-declare interface IPDDTimerUpdateTaskParams {
-    task_name: string;
-}
-
-export async function addPDDTimerUpdateTask(params: IPDDTimerUpdateTaskParams) {
-    return request.post(ApiPathEnum.ADDTimerUpdate, {
+export async function addPDDTimerUpdateTask(params: IPUTaskBody) {
+    return request.post(TaskApiPath.AddPUTask, {
         data: {
             ...params,
             version: '1.0',
@@ -97,7 +86,7 @@ export async function addPDDTimerUpdateTask(params: IPDDTimerUpdateTaskParams) {
 }
 
 export async function activeTasks(task_ids: string) {
-    return request.post(ApiPathEnum.ActiveTask, {
+    return request.post(TaskApiPath.ActiveTask, {
         data: {
             task_ids,
             type: 0,
@@ -106,7 +95,7 @@ export async function activeTasks(task_ids: string) {
 }
 
 export async function reActiveTasks(task_ids: string) {
-    return request.post(ApiPathEnum.ActiveTask, {
+    return request.post(TaskApiPath.ActiveTask, {
         data: {
             task_ids,
             type: 1,
@@ -115,7 +104,7 @@ export async function reActiveTasks(task_ids: string) {
 }
 
 export async function abortTasks(task_ids: string) {
-    return request.post(ApiPathEnum.AbortTask, {
+    return request.post(TaskApiPath.AbortTask, {
         data: {
             task_ids,
         },
@@ -123,7 +112,7 @@ export async function abortTasks(task_ids: string) {
 }
 
 export async function deleteTasks(task_ids: string) {
-    return request.put(ApiPathEnum.DeleteTask, {
+    return request.put(TaskApiPath.DeleteTask, {
         data: {
             task_ids,
         },
@@ -131,7 +120,7 @@ export async function deleteTasks(task_ids: string) {
 }
 
 export async function queryTaskDetail(task_id: number) {
-    return request.get(ApiPathEnum.QueryTaskDetail, {
+    return request.get<IResponse<ITaskDetailResponse>>(TaskApiPath.QueryTaskDetail, {
         params: {
             task_id,
         },
@@ -139,7 +128,7 @@ export async function queryTaskDetail(task_id: number) {
 }
 
 export async function queryPurchaseIds(task_id: number) {
-    return request.post(ApiPathEnum.QueryPurchaseIds, {
+    return request.post(TaskApiPath.QueryPurchaseIds, {
         data: {
             task_id,
         },
@@ -147,11 +136,11 @@ export async function queryPurchaseIds(task_id: number) {
 }
 
 export async function queryCategory() {
-    return request.get(ApiPathEnum.QueryPDDCategory);
+    return request.get<IResponse<IPDDCategoryResponse>>(TaskApiPath.QueryPDDCategory);
 }
 
-export async function querySortCondition(type: 'list' | 'merchant') {
-    return request.get(ApiPathEnum.QueryPDDSortCondition, {
+export async function querySortCondition(type: IPDDSortQueryType) {
+    return request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
         params: {
             type: type,
         },
@@ -159,35 +148,29 @@ export async function querySortCondition(type: 'list' | 'merchant') {
 }
 
 export async function queryTaskLog(params: { task_id: number; page: number; page_number: number }) {
-    return request.get(ApiPathEnum.QueryTaskLog, {
+    return request.get<IResponse<ITaskLogResponse>>(TaskApiPath.QueryTaskLog, {
         params: params,
     });
 }
 
-export async function querySubTaskProgress(params: {
-    task_id: number;
-    page: number;
-    page_number: number;
-}) {
-    return request.get(ApiPathEnum.QuerySubTaskProgress, {
+export async function queryTaskProgressList(params: ITaskProgressQuery) {
+    return request.get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
         params: params,
     });
 }
 
-declare interface IAutoPurchaseTaskData {
-    task_name: string;
-    type: AutoPurchaseTaskType;
-    task_start_time?: number;
-    task_end_time?: number;
-    purchase_times: string[];
-}
-
-export async function addAutoPurchaseTask(data: IAutoPurchaseTaskData) {
-    return request.post(ApiPathEnum.ADDAutoPurchaseTask, {
+export async function addAutoPurchaseTask(data: IAPTaskBody) {
+    return request.post(TaskApiPath.AddAPTask, {
         data: {
             ...data,
             version: '1.0',
             platform: 'PDD',
         },
+    });
+}
+
+export async function querySubTaskProgress(query: ISubTaskProgressQuery) {
+    return request.get<IResponse<ISubTaskProgressResponse>>(TaskApiPath.QuerySubTaskProgress, {
+        params: query,
     });
 }

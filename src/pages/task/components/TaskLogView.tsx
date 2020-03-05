@@ -5,16 +5,11 @@ import { queryTaskLog } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import '@/styles/config.less';
 import '@/styles/form.less';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { ITaskLogItem } from '@/interface/ITask';
 
 declare interface ITaskLogViewProps {
     task_Id: number;
-}
-
-declare interface ILogItem {
-    task_send_time: string;
-    status: string;
-    sub_task_id: number;
-    node: number;
 }
 
 const TaskNodeMap: { [key: number]: string } = {
@@ -32,7 +27,7 @@ const TaskActionMap: { [key: number]: string } = {
     4: '失败',
 };
 
-const columns: ColumnProps<ILogItem>[] = [
+const columns: ColumnProps<ITaskLogItem>[] = [
     {
         title: '时间',
         width: '100px',
@@ -71,7 +66,7 @@ declare interface ITaskLogViewState {
     total: number;
     pageNumber: number;
     page: number;
-    list: ILogItem[];
+    list: ITaskLogItem[];
     loading: boolean;
 }
 
@@ -115,7 +110,7 @@ class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewSta
             page_number: page_number,
             task_id: this.props.task_Id,
         })
-            .then(({ data: { list = [], total = 0 } = {} }) => {
+            .then(({ data: { list = [], total = 0 } = EmptyObject }) => {
                 this.setState({
                     list,
                     total,

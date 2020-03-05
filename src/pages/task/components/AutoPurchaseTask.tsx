@@ -9,10 +9,12 @@ import { FormInstance } from 'antd/es/form';
 import { addAutoPurchaseTask, queryPurchaseIds, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { AutoPurchaseTaskType, TaskStatusMap, TimerUpdateTaskRangeType } from '@/enums/StatusEnum';
+import { AutoPurchaseTaskType, TaskStatusCode, TaskStatusMap } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { transStartDate } from '@/utils/date';
 import locale from 'antd/es/date-picker/locale/zh_CN';
+import { IResponse } from '@/interface/IGlobal';
+import { ITaskDetailResponse } from '@/interface/ITask';
 
 declare interface IFormData {
     task_name: string;
@@ -28,23 +30,10 @@ declare interface IAutoPurchaseTaskProps {
 declare interface IAutoPurchaseTaskState {
     createLoading: boolean;
     queryLoading: boolean;
-    status?: string;
+    status?: TaskStatusCode;
     successTimes?: number;
     failTimes?: number;
     idList: string[];
-}
-
-declare interface ITaskDetail {
-    update_type: TimerUpdateTaskRangeType;
-    task_id: string;
-    task_name: string;
-    execute_count: string;
-    task_start_time: number;
-    task_end_time: number;
-    time_interval: number;
-    status: string;
-    success: number;
-    fail: number;
 }
 
 function disabledDate(current: Moment) {
@@ -67,7 +56,10 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
-            Promise.all([queryTaskDetail(taskId), queryPurchaseIds(taskId)]).then(
+            Promise.all<IResponse<ITaskDetailResponse>, IResponse<any>>([
+                queryTaskDetail(taskId),
+                queryPurchaseIds(taskId),
+            ]).then(
                 ([
                     { data: { task_detail_info = {} } = {} } = {},
                     { data: { order_id_list = [] } = {} } = {},
@@ -216,7 +208,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
             return (
                 <Spin spinning={queryLoading} tip="Loading...">
                     <div className="config-task-label">任务ID：{taskId}</div>
-                    <div className="config-task-label">任务状态: {TaskStatusMap[status ?? '']}</div>
+                    <div className="config-task-label">任务状态: {TaskStatusMap[status!]}</div>
                     <div className="config-task-label">执行成功：{successTimes}次</div>
                     <div className="config-task-label">执行失败：{failTimes}次</div>
                     <div className="task-id-title">中台订单id({idList.length})</div>

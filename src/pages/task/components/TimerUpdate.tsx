@@ -8,18 +8,17 @@ import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { TaskIntervalConfigType, TimerUpdateTaskRangeType } from '@/enums/StatusEnum';
+import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
+import { dateToUnix } from '@/utils/date';
 
-declare interface IFormData {
-    task_name: string;
-    range: TimerUpdateTaskRangeType;
-    task_start_time?: Moment;
-    task_end_time?: Moment;
+declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
-    day?: number;
-    second?: number;
+    day: number;
+    second: number;
 }
 
 declare interface ITimerUpdateProps {
@@ -29,22 +28,9 @@ declare interface ITimerUpdateProps {
 declare interface ITimerUpdateState {
     createLoading: boolean;
     queryLoading: boolean;
-    status?: string;
+    status?: TaskStatusCode;
     successTimes?: number;
     failTimes?: number;
-}
-
-declare interface ITaskDetail {
-    update_type: TimerUpdateTaskRangeType;
-    task_id: string;
-    task_name: string;
-    execute_count: string;
-    task_start_time: number;
-    task_end_time: number;
-    time_interval: number;
-    status: string;
-    success: number;
-    fail: number;
 }
 
 @BindAll()
@@ -60,23 +46,25 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     componentDidMount(): void {
         const { taskId } = this.props;
         if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
-                const initValues = this.convertDetail(task_detail_info);
-                const { success, fail, status } = initValues;
-                this.formRef.current!.setFieldsValue({
-                    ...initValues,
-                });
-                this.setState({
-                    queryLoading: false,
-                    status: status,
-                    successTimes: success,
-                    failTimes: fail,
-                });
-            });
+            queryTaskDetail(taskId).then(
+                ({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
+                    const initValues = this.convertDetail(task_detail_info as ITaskDetailInfo);
+                    const { success, fail, status } = initValues;
+                    this.formRef.current!.setFieldsValue({
+                        ...initValues,
+                    });
+                    this.setState({
+                        queryLoading: false,
+                        status: status,
+                        successTimes: success,
+                        failTimes: fail,
+                    });
+                },
+            );
         }
     }
 
-    private convertDetail(info: ITaskDetail) {
+    private convertDetail(info: ITaskDetailInfo) {
         const { update_type, task_end_time, task_start_time, time_interval, ...extra } = info;
         const isDay = time_interval && time_interval % 86400 === 0;
         return {
@@ -107,8 +95,8 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
         return {
             task_name,
             range,
-            task_start_time: task_start_time?.unix() ?? undefined,
-            task_end_time: task_end_time?.unix() ?? undefined,
+            task_start_time: dateToUnix(task_start_time),
+            task_end_time: dateToUnix(task_end_time),
             task_interval_seconds:
                 taskIntervalType === TaskIntervalConfigType.second ? second : day * 60 * 60 * 24,
         };
@@ -246,7 +234,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        range: TimerUpdateTaskRangeType.AllOnShelves,
+                        range: PUTaskRangeType.AllOnShelves,
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
                     }}
@@ -274,10 +262,10 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                         className="form-item form-item-inline"
                     >
                         <Select className="picker-default">
-                            <Select.Option value={TimerUpdateTaskRangeType.AllOnShelves}>
+                            <Select.Option value={PUTaskRangeType.AllOnShelves}>
                                 全部已上架商品
                             </Select.Option>
-                            <Select.Option value={TimerUpdateTaskRangeType.HasSales}>
+                            <Select.Option value={PUTaskRangeType.HasSales}>
                                 有销量的已上架商品
                             </Select.Option>
                         </Select>

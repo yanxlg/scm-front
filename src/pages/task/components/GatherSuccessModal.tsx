@@ -10,7 +10,7 @@ declare interface ITaskListProps {
     }>;
 }
 
-const GatherSuccessModal: React.FC<{ taskId: string; onClick: () => void }> = ({
+const GatherSuccessModal: React.FC<{ taskId: number; onClick: () => void }> = ({
     taskId,
     onClick,
 }) => {
