@@ -4,6 +4,7 @@ import { querySubTaskProgress } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import '@/styles/config.less';
 import '@/styles/modal.less';
+import '@/styles/form.less';
 import TaskProgressModal from '@/pages/task/components/TaskProgressModal';
 import { TaskTypeEnum } from '@/enums/StatusEnum';
 import { ColumnProps } from 'antd/es/table';
@@ -151,6 +152,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
                     scroll={{ y: 280 }}
                 />
                 <Pagination
+                    className="form-item"
                     pageSize={pageNumber}
                     current={page}
                     total={total}

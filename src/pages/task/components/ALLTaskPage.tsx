@@ -10,7 +10,7 @@ import router from 'umi/router';
 import { utcToLocal } from '@/utils/date';
 import {
     TaskRangeMap,
-    TaskStatus,
+    TaskStatusEnum,
     TaskStatusList,
     TaskStatusMap,
     TaskTypeList,
@@ -45,7 +45,7 @@ declare interface IDataItem {
 }
 
 declare interface IALLTaskPageProps {
-    task_status?: TaskStatus;
+    task_status?: TaskStatusEnum;
 }
 
 declare interface ISearchFormConfig {
@@ -133,7 +133,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             fixed: 'left',
             width: '150px',
             render: (text: any, record: IDataItem) => {
-                return <Button type="link">查看任务详情</Button>;
+                return (
+                    <Button type="link" onClick={() => this.viewTaskDetail(record.task_id)}>
+                        查看任务详情
+                    </Button>
+                );
             },
         },
         {
@@ -262,6 +266,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             },
         });
     }
+
+    private viewTaskDetail(task_id: number) {
+        router.push(`/task/list/${task_id}`);
+    }
+
     private deleteTasks() {
         const { selectedRowKeys } = this.state;
         return deleteTasks(selectedRowKeys.join(',')).then(() => {
@@ -546,7 +555,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
 
                 <div className="form-item">
                     <div className="block float-clear">
-                        {(task_status === void 0 || task_status === TaskStatus.UnExecuted) && (
+                        {(task_status === void 0 || task_status === TaskStatusEnum.UnExecuted) && (
                             <LoadingButton
                                 type="link"
                                 disabled={selectTaskSize === 0}
@@ -556,7 +565,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 立即执行任务
                             </LoadingButton>
                         )}
-                        {(task_status === void 0 || task_status === TaskStatus.Failed) && (
+                        {(task_status === void 0 || task_status === TaskStatusEnum.Failed) && (
                             <LoadingButton
                                 type="link"
                                 disabled={selectTaskSize === 0}
@@ -566,9 +575,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                                 重新执行任务
                             </LoadingButton>
                         )}
-                        {task_status === TaskStatus.Executed ||
-                        task_status === TaskStatus.Failed ||
-                        task_status === TaskStatus.Terminated ? null : (
+                        {task_status === TaskStatusEnum.Executed ||
+                        task_status === TaskStatusEnum.Failed ||
+                        task_status === TaskStatusEnum.Terminated ? null : (
                             <LoadingButton
                                 type="link"
                                 disabled={selectTaskSize === 0}

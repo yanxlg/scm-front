@@ -150,7 +150,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         return queryTaskDetail(taskId)
             .then(({ data: { task_detail_info = {} } = {} } = {}) => {
                 const initValues = this.convertDetail(task_detail_info);
-                this.formRef.current!.setFieldsValue({
+                this.formRef.current?.setFieldsValue({
                     ...initValues,
                 });
                 this.setState({
@@ -186,11 +186,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         // 设置默认排序类型
                         const range = this.formRef.current!.getFieldValue('range');
                         if (range === HotTaskRange.fullStack) {
-                            this.formRef.current!.setFieldsValue({
+                            this.formRef.current?.setFieldsValue({
                                 sort_type: listSort[0]?.value,
                             });
                         } else {
-                            this.formRef.current!.setFieldsValue({
+                            this.formRef.current?.setFieldsValue({
                                 sort_type: merchantSort[0]?.value,
                             });
                         }
@@ -236,7 +236,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     middleTreeData,
                     lastTreeData,
                 });
-                this.formRef.current!.setFieldsValue({
+                this.formRef.current?.setFieldsValue({
                     category_level_one: firstInitId ? [firstInitId] : [],
                     category_level_two: middleInitId ? [middleInitId] : [],
                     category_level_three: lastInitId ? [lastInitId] : [],
@@ -472,7 +472,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     }),
                 )
                     .then(({ data: { task_id = -1 } = {} } = {}) => {
-                        this.formRef.current!.resetFields();
+                        this.formRef.current?.resetFields();
                         Modal.info({
                             content: (
                                 <GatherSuccessModal
@@ -545,7 +545,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             middleTreeData,
             lastTreeData,
         });
-        this.formRef.current!.setFieldsValue({
+        this.formRef.current?.setFieldsValue({
             category_level_two: middleInitId ? [middleInitId] : [],
             category_level_three: lastInitId ? [lastInitId] : [],
         });
@@ -562,7 +562,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         this.setState({
             lastTreeData,
         });
-        this.formRef.current!.setFieldsValue({
+        this.formRef.current?.setFieldsValue({
             category_level_three: lastInitId ? [lastInitId] : [],
         });
     }
@@ -639,7 +639,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private resetTaskTypeError() {
         // 重置所有管控字段
-        this.formRef.current!.resetFields([
+        this.formRef.current?.resetFields([
             'task_end_time',
             'task_start_time',
             'day',
@@ -699,17 +699,17 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         const value = e.target.value;
         if (value === HotTaskRange.fullStack) {
             // 全站
-            this.formRef.current!.resetFields(['shopId']);
-            this.formRef.current!.setFieldsValue({
+            this.formRef.current?.resetFields(['shopId']);
+            this.formRef.current?.setFieldsValue({
                 sort_type: this.state.listSort[0].value,
             });
         } else {
-            this.formRef.current!.resetFields([
+            this.formRef.current?.resetFields([
                 'category_level_one',
                 'category_level_two',
                 'category_level_three',
             ]);
-            this.formRef.current!.setFieldsValue({
+            this.formRef.current?.setFieldsValue({
                 filterType: HotTaskFilterType.ByKeywords,
                 sort_type: this.state.merchantSort[0].value,
             });
@@ -718,7 +718,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private onFilterTypeChange(value: number) {
         if (value === HotTaskFilterType.ByKeywords) {
-            this.formRef.current!.resetFields([
+            this.formRef.current?.resetFields([
                 'category_level_one',
                 'category_level_two',
                 'category_level_three',
@@ -738,7 +738,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 middleTreeData,
                 lastTreeData,
             });
-            this.formRef.current!.setFieldsValue({
+            this.formRef.current?.setFieldsValue({
                 category_level_one: firstInitId ? [firstInitId] : [],
                 category_level_two: middleInitId ? [middleInitId] : [],
                 category_level_three: lastInitId ? [lastInitId] : [],

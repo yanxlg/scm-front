@@ -9,6 +9,8 @@ import IntegerInput from '@/components/IntegerInput';
 import moment, { Moment } from 'moment';
 import { transNumber, transNullValue } from '@/utils/transform';
 import { transEndDate, transStartDate } from '@/utils/date';
+import '@/styles/form.less';
+import '@/styles/index.less';
 
 const { Option } = Select;
 
@@ -148,18 +150,18 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
         return (
             <Form.Item
                 label={<span className={labelClassName}>{label}</span>}
-                className={formItemClassName}
+                className={`${formItemClassName}`}
             >
                 <Form.Item
-                    noStyle={true}
                     shouldUpdate={(prevValues, currentValues) =>
                         prevValues[name2] !== currentValues[name2]
                     }
+                    className="form-item-inline inline-block margin-none vertical-middle"
                 >
                     {({ getFieldValue }) => {
                         const endTime = getFieldValue(name2);
                         return (
-                            <Form.Item name={name1} noStyle={true}>
+                            <Form.Item name={name1} className="margin-none">
                                 <DatePicker
                                     disabledDate={currentDate =>
                                         currentDate
@@ -174,9 +176,9 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
                         );
                     }}
                 </Form.Item>
-                <span className="config-colon">-</span>
+                <span className="config-colon vertical-middle">-</span>
                 <Form.Item
-                    noStyle={true}
+                    className="form-item-inline inline-block vertical-middle"
                     shouldUpdate={(prevValues, currentValues) =>
                         prevValues[name1] !== currentValues[name1]
                     }
@@ -184,7 +186,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
                     {({ getFieldValue }) => {
                         const startTime = getFieldValue(name1);
                         return (
-                            <Form.Item name={name2} noStyle={true}>
+                            <Form.Item name={name2}>
                                 <DatePicker
                                     disabledDate={currentDate =>
                                         currentDate

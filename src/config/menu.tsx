@@ -12,7 +12,7 @@ export default [
         name: '任务中心',
         icon: (
             <span className="anticon">
-                <Icon type="task" className="menu-icon" />
+                <Icon type="task" />
             </span>
         ),
         children: [
@@ -43,7 +43,7 @@ export default [
         name: '商品中心',
         icon: (
             <span className="anticon">
-                <Icon type="goods" className="menu-icon" />
+                <Icon type="goods" />
             </span>
         ),
         children: [
@@ -72,7 +72,7 @@ export default [
         name: '订单管理',
         icon: (
             <span className="anticon">
-                <Icon type="order" className="menu-icon" />
+                <Icon type="order" />
             </span>
         ),
     },
@@ -81,7 +81,7 @@ export default [
         name: '出入库管理',
         icon: (
             <span className="anticon">
-                <Icon type="io" className="menu-icon" />
+                <Icon type="io" />
             </span>
         ),
     },
@@ -90,7 +90,7 @@ export default [
         name: '基本设置',
         icon: (
             <span className="anticon">
-                <Icon type="setting" className="menu-icon" />
+                <Icon type="setting" />
             </span>
         ),
         children: [

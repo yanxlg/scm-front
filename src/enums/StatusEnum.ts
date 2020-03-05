@@ -65,11 +65,12 @@ export enum TaskTypeEnum {
 }
 
 //======================= 任务状态 ======================//
-export enum TaskStatus {
+export enum TaskStatusEnum {
     UnExecuted, // 未执行
     Executing, // 执行中
     Executed, // 已执行
     Failed, // 执行失败
+    Finished = 5,
     Terminated = 6,
 }
 

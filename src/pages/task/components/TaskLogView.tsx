@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import '@/styles/config.less';
+import React from 'react';
 import { Button, Pagination, Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
 import { queryTaskLog } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
+import '@/styles/config.less';
+import '@/styles/form.less';
 
 declare interface ITaskLogViewProps {
     task_Id: number;
@@ -141,6 +142,7 @@ class TaskLogView extends React.PureComponent<ITaskLogViewProps, ITaskLogViewSta
                     scroll={{ y: 280 }}
                 />
                 <Pagination
+                    className="form-item"
                     pageSize={pageNumber}
                     current={page}
                     total={total}
