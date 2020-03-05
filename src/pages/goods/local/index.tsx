@@ -19,7 +19,7 @@ import {
     IFilterParams,
     getCatagoryList,
 } from '@/services/goods';
-import { strToNumber } from '@/utils/common';
+import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
@@ -530,7 +530,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     pageCountChange = (current: number, size: number) => {
+        // console.log('current', current);
+        const { page, page_count } = this.state;
         this.onSearch({
+            page: getCurrentPage(size, (page - 1) * page_count + 1),
             page_count: size,
         });
     };
