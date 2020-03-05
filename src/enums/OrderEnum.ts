@@ -5,6 +5,8 @@ declare interface optionItem {
     value: number;
 }
 
+export const pageSizeOptions = ['30', '50', '100', '500'];
+
 export const defaultOptionItem: optionItem = { name: '全部', value: 100 }
 
 export const channelOptionList = [
@@ -38,7 +40,24 @@ export const purchaseShippingOptionList = [
     { name: '已妥投', value: 3 }
 ]
 
-export const pageSizeOptions = ['30', '50', '100', '500'];
+export const errorTypeOptionList = [
+    { name: '仓库异常', value: 1 },
+    { name: '尾程异常', value: 2 },
+    { name: '采购异常', value: 3 },
+    { name: '其他', value: 4 }
+]
+
+export const errorDetailOptionList = [
+    { name: '12小时未支付', value: 1 },
+    { name: '24小时未拍单', value: 2 },
+    { name: '48小时未发货', value: 3 },
+    { name: '48小时未出库', value: 4 },
+    { name: '72小时未入库', value: 5 },
+    { name: '6天未标记发货', value: 6 },
+    { name: '7天未上线', value: 7 },
+    { name: '14天未上线', value: 8 },
+    { name: '30天未妥投', value: 9 }
+]
 
 
 export const childDefaultFieldList: IFieldItem[] = [

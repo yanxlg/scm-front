@@ -1,10 +1,9 @@
 import React, { RefObject } from 'react';
-import { Button, Checkbox } from 'antd';
+import { Button, Checkbox, Pagination } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
-
 import TableError from './TableError';
 
 import { 
@@ -12,6 +11,13 @@ import {
     IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
+import {
+    pageSizeOptions,
+    defaultOptionItem, 
+    channelOptionList,
+    errorTypeOptionList,
+    errorDetailOptionList
+} from '@/enums/OrderEnum';
 
 export declare interface IErrorOrderItem {
     order_create_time: number;
@@ -26,7 +32,7 @@ export declare interface IErrorOrderItem {
 
 declare interface IState {
     page: number;
-    pageNumber: number;
+    pageCount: number;
     total: number;
     loading: boolean;
     orderList: IErrorOrderItem[]
@@ -56,10 +62,8 @@ const fieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
+            defaultOptionItem,
+            ...channelOptionList
         ],
     },
     {
@@ -77,52 +81,12 @@ const fieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
+            defaultOptionItem,
+            ...errorTypeOptionList
+                
         ],
     },
    
-];
-
-const allErrDetailList = [
-    {
-        key: 1,
-        name: '12小时未支付'
-    },
-    {
-        key: 2,
-        name: '24小时未拍单'
-    },
-    {
-        key: 3,
-        name: '48小时未发货'
-    },
-    {
-        key: 4,
-        name: '48小时未出库'
-    },
-    {
-        key: 5,
-        name: '72小时未入库'
-    },
-    {
-        key: 6,
-        name: '6天未标记发货'
-    },
-    {
-        key: 7,
-        name: '7天未上线'
-    },
-    {
-        key: 8,
-        name: '14天未上线'
-    },
-    {
-        key: 9,
-        name: '30天未妥投'
-    }
 ];
 
 class PanePaid extends React.PureComponent<{}, IState> {
@@ -133,7 +97,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             page: 1,
-            pageNumber: 50,
+            pageCount: 30,
             total: 0,
             loading: false,
             orderList: []
@@ -146,10 +110,10 @@ class PanePaid extends React.PureComponent<{}, IState> {
     }
 
     onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
+        const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
+            page_count: pageCount
         }
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
@@ -168,7 +132,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
             this.setState({
                 total,
                 // page: params.page,
-                // pageNumber: params.page_number,
+                // pageCount: params.page_count,
                 orderList: list
             })
         }).finally(() => {
@@ -192,7 +156,11 @@ class PanePaid extends React.PureComponent<{}, IState> {
 
         const {
             loading,
-            orderList
+            orderList,
+            total,
+            page,
+            pageCount,
+
         } = this.state;
 
         const initialValues = {
@@ -217,8 +185,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
                         <div className="wrap">
                             <Checkbox.Group onChange={this.onCheckErrDetail}>
                                 {
-                                    allErrDetailList.map(item => (
-                                        <Checkbox className="checkbox-item" key={item.key} value={item.key}>{item.name}</Checkbox>
+                                    errorDetailOptionList.map(item => (
+                                        <Checkbox className="checkbox-item" key={item.value} value={item.value}>{item.name}</Checkbox>
                                     ))
                                 }
                             </Checkbox.Group>
@@ -228,6 +196,19 @@ class PanePaid extends React.PureComponent<{}, IState> {
                     <TableError
                         loading={loading}
                         orderList={orderList}
+                    />
+                    <Pagination
+                        className="order-pagination"
+                        // size="small"
+                        total={total}
+                        current={page}
+                        pageSize={pageCount}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        // onChange={this.onChangePage}
+                        // onShowSizeChange={this.pageCountChange}
+                        showTotal={(total) => `共${total}条`}
                     />
                 </div>
             </>

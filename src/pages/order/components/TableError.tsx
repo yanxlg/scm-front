@@ -5,7 +5,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IErrorOrderItem } from './PaneError';
 // import { TableRowSelection } from 'antd/lib/table/interface';
 
-import { formatDate } from '@/utils/date';
+// import { formatDate } from '@/utils/date';
 
 declare interface IProps {
     loading: boolean;
@@ -25,20 +25,14 @@ class TableError extends React.PureComponent<IProps, IState> {
             title: '订单时间',
             dataIndex: 'order_create_time',
             align: 'center',
-            width: 120,
-            render: (value: number) => {
-                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')
-            }
+            width: 120
         },
         {
             key: 'order_confirm_time',
             title: '订单确认时间',
             dataIndex: 'order_confirm_time',
             align: 'center',
-            width: 120,
-            render: (value: number) => {
-                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')
-            }
+            width: 120
         },
         {
             key: 'middleground_order_id',
@@ -65,6 +59,62 @@ class TableError extends React.PureComponent<IProps, IState> {
             key: 'error_detail',
             title: '异常详情',
             dataIndex: 'error_detail',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '采购订单发货时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '入库时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '发送指令时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '出库时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '采购订单生成时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '拍单时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '支付时间',
+            dataIndex: '',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: '',
+            title: '标记发货时间',
+            dataIndex: '',
             align: 'center',
             width: 120
         },
@@ -103,7 +153,7 @@ class TableError extends React.PureComponent<IProps, IState> {
                 columns={this.columns}
                 // rowSelection={rowSelection}
                 dataSource={orderList}
-                scroll={{ x: true }}
+                scroll={{ x: true, y: 600 }}
                 pagination={false}
                 
             />
