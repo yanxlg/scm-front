@@ -5,6 +5,7 @@ import { RangeValue } from 'rc-picker/lib/interface';
 import moment from 'moment';
 
 import VersionTable from './components/VersionTable';
+import { getCurrentPage } from '@/utils/common';
 
 import '../../../styles/goods-version.less';
 
@@ -273,7 +274,9 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     };
 
     pageCountChange = (current: number, size: number) => {
+        const { page, page_count } = this.state;
         this.onSearch({
+            page: getCurrentPage(size, (page - 1) * page_count + 1),
             page_count: size,
         });
     };
