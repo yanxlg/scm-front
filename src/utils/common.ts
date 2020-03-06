@@ -2,6 +2,8 @@
  * 将换行替换成逗号
  * @param text
  */
+import { FormInstance } from 'antd/es/form';
+
 export const stringifyText = (text: string) => {
     // 不同系统换行符不一样
     return text
@@ -46,4 +48,27 @@ export function cloneSet<T>(set: Set<T>) {
 
 export function isNumber(value?: string | number) {
     return /^\d+$/.test(String(value));
+}
+
+export function scrollToFirstError(
+    form: FormInstance,
+    errorFields: {
+        name: (string | number)[];
+        errors: string[];
+    }[],
+) {
+    form.scrollToField(errorFields[0].name, {
+        scrollMode: 'if-needed',
+        behavior: actions => {
+            if (!actions || actions.length === 0) {
+                return;
+            }
+            const [{ top }] = actions;
+            const to = Math.max(top - 80, 0);
+            window.scrollTo({
+                top: to,
+                behavior: 'smooth',
+            });
+        },
+    });
 }

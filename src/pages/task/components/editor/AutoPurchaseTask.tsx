@@ -1,20 +1,22 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import { Button, Card, DatePicker, Form, Input, Modal, Radio, Spin, Table, TimePicker } from 'antd';
+import { Button, Card, DatePicker, Form, Input, Radio, Spin, TimePicker } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
 import { addAutoPurchaseTask, queryPurchaseIds, queryTaskDetail } from '@/services/task';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
+import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { AutoPurchaseTaskType, TaskStatusCode, TaskStatusMap } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { transStartDate } from '@/utils/date';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { IResponse } from '@/interface/IGlobal';
 import { ITaskDetailResponse } from '@/interface/ITask';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { scrollToFirstError } from '@/utils/common';
 
 declare interface IFormData {
     task_name: string;
@@ -105,35 +107,12 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     createLoading: true,
                 });
                 addAutoPurchaseTask(params)
-                    .then(({ data: { task_id = -1 } = {} } = {}) => {
+                    .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current!.resetFields();
-                        Modal.info({
-                            content: (
-                                <GatherSuccessModal
-                                    taskId={task_id}
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        Modal.info({
-                                            content: <AutoPurchaseTask taskId={task_id} />,
-                                            className: 'modal-empty config-modal-hot',
-                                            icon: null,
-                                            maskClosable: true,
-                                        });
-                                    }}
-                                />
-                            ),
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showSuccessModal(data);
                     })
                     .catch(() => {
-                        Modal.info({
-                            content: <GatherFailureModal />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showFailureModal();
                     })
                     .finally(() => {
                         this.setState({
@@ -142,20 +121,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     });
             })
             .catch(({ errorFields }) => {
-                this.formRef.current!.scrollToField(errorFields[0].name, {
-                    scrollMode: 'if-needed',
-                    behavior: actions => {
-                        if (!actions || actions.length === 0) {
-                            return;
-                        }
-                        const [{ top }] = actions;
-                        const to = Math.max(top - 80, 0);
-                        window.scrollTo({
-                            top: to,
-                            behavior: 'smooth',
-                        });
-                    },
-                });
+                scrollToFirstError(this.formRef.current!, errorFields);
             });
     }
 

@@ -26,4 +26,11 @@ const GatherFailureModal: React.FC = () => {
     }, []);
 };
 
-export default GatherFailureModal;
+export function showFailureModal() {
+    Modal.info({
+        content: <GatherFailureModal />,
+        className: 'modal-empty',
+        icon: null,
+        maskClosable: true,
+    });
+}

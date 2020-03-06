@@ -1,19 +1,20 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import { Button, DatePicker, Input, Radio, Form, Modal, Spin, Select } from 'antd';
+import { Button, DatePicker, Input, Radio, Form, Spin, Select } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
+import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { EmptyObject } from '@/enums/ConfigEnum';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
+import { scrollToFirstError } from '@/utils/common';
 
 declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
@@ -65,7 +66,13 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     }
 
     private convertDetail(info: ITaskDetailInfo) {
-        const { update_type, task_end_time, task_start_time, time_interval, ...extra } = info;
+        const {
+            update_type = PUTaskRangeType.AllOnShelves,
+            task_end_time,
+            task_start_time,
+            time_interval,
+            ...extra
+        } = info;
         const isDay = time_interval && time_interval % 86400 === 0;
         return {
             range: update_type,
@@ -111,35 +118,12 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     createLoading: true,
                 });
                 addPDDTimerUpdateTask(params)
-                    .then(({ data: { task_id = -1 } = {} } = {}) => {
+                    .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current!.resetFields();
-                        Modal.info({
-                            content: (
-                                <GatherSuccessModal
-                                    taskId={task_id}
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        Modal.info({
-                                            content: <TimerUpdate taskId={task_id} />,
-                                            className: 'modal-empty config-modal-hot',
-                                            icon: null,
-                                            maskClosable: true,
-                                        });
-                                    }}
-                                />
-                            ),
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showSuccessModal(data);
                     })
                     .catch(() => {
-                        Modal.info({
-                            content: <GatherFailureModal />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showFailureModal();
                     })
                     .finally(() => {
                         this.setState({
@@ -148,20 +132,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     });
             })
             .catch(({ errorFields }) => {
-                this.formRef.current!.scrollToField(errorFields[0].name, {
-                    scrollMode: 'if-needed',
-                    behavior: actions => {
-                        if (!actions || actions.length === 0) {
-                            return;
-                        }
-                        const [{ top }] = actions;
-                        const to = Math.max(top - 80, 0);
-                        window.scrollTo({
-                            top: to,
-                            behavior: 'smooth',
-                        });
-                    },
-                });
+                scrollToFirstError(this.formRef.current!, errorFields);
             });
     }
 

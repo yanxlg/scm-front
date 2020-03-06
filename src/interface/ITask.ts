@@ -58,7 +58,7 @@ export interface ITaskListItem {
     result: 0 | 1;
     create_time: number;
     end_time: number;
-    task_cycle: string;
+    execute_count: number;
 }
 
 export interface ITaskListResponse {
@@ -119,7 +119,7 @@ export interface IAPTaskBody {
 }
 export interface ITaskCreateItem {
     task_type: TaskTypeCode;
-    task_id: number;
+    task_sn: number;
 }
 
 export type ITaskCreatedResponse = ITaskCreateItem;
@@ -131,7 +131,8 @@ export interface ITaskQuery {
 export interface ITaskDetailInfo {
     task_sn?: string;
     task_name: string;
-    range?: number;
+    shopId?: number; // 指定店铺类型任务转换出改字段
+
     category_level_one?: string;
     category_level_two?: string;
     category_level_three?: string;
@@ -143,7 +144,6 @@ export interface ITaskDetailInfo {
     price_max?: number;
     grab_page_count?: number;
     grab_count_max?: number;
-    task_type: TaskExecuteType;
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;
@@ -156,8 +156,12 @@ export interface ITaskDetailInfo {
     urls?: string;
 
     // 新增的
-    type?: TaskTypeCode;
-    task_range?: TaskRangeCode;
+    task_type?: TaskTypeCode;
+    execute_count: number; //TaskExecuteType
+    sub_cat_id: TaskRangeCode;
+    sort_type_name?: string;
+    cat_name?: string;
+    task_cycle?: TaskExecuteType;
 }
 
 export interface ITaskDetailResponse {
@@ -211,7 +215,7 @@ export interface ITaskProgressItem {
     create_status: TaskCreateStatusCode;
     status: TaskStatusCode;
     progress: number;
-    task_type: TaskTypeCode;
+    task_type: TaskTypeEnum;
 }
 
 export interface ITaskProgressResponse {

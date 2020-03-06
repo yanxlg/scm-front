@@ -1,23 +1,12 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import {
-    Button,
-    DatePicker,
-    Input,
-    Modal,
-    Radio,
-    Select,
-    Spin,
-    Tooltip,
-    Form,
-    TreeSelect,
-} from 'antd';
+import { Button, DatePicker, Input, Radio, Select, Spin, Tooltip, Form, TreeSelect } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
-import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { addPddHotTask, queryCategory, querySortCondition, queryTaskDetail } from '@/services/task';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
+import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import moment, { Moment } from 'moment';
 import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
@@ -28,6 +17,8 @@ import {
     TaskExecuteType,
     TaskIntervalConfigType,
     HotTaskFilterType,
+    TaskRangeMap,
+    TaskRangeEnum,
 } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
@@ -40,6 +31,7 @@ import {
     ITaskDetailInfo,
 } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
+import { scrollToFirstError } from '@/utils/common';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -321,7 +313,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private convertDetail(info: ITaskDetailInfo) {
         const {
-            range,
+            shopId,
             task_type,
             task_end_time,
             task_start_time,
@@ -330,18 +322,24 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             category_level_one = '',
             category_level_two = '',
             category_level_three = '',
+            execute_count,
+            sub_cat_id,
             ...extra
         } = info;
         const taskType =
-            (task_type as any) === '单次任务' ? TaskExecuteType.once : TaskExecuteType.interval;
+            Number(execute_count) === TaskExecuteType.once
+                ? TaskExecuteType.once
+                : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
+        const range =
+            sub_cat_id === TaskRangeEnum.FullStack ? HotTaskRange.fullStack : HotTaskRange.store;
         return {
             keywords,
             category_level_one: category_level_one.split(','),
             category_level_two: category_level_two.split(','),
             category_level_three: category_level_three.split(','),
-            range: range === HotTaskRange.fullStack ? range : HotTaskRange.store,
-            shopId: range !== HotTaskRange.fullStack ? range : undefined,
+            range: range,
+            shopId: shopId,
             task_end_time:
                 taskType === TaskExecuteType.interval && task_end_time
                     ? moment(task_end_time * 1000)
@@ -351,10 +349,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     ? TaskIntervalConfigType.day
                     : TaskIntervalConfigType.second
                 : TaskIntervalConfigType.day,
-            task_start_time:
-                taskType === TaskExecuteType.once && task_start_time
-                    ? moment(task_start_time * 1000)
-                    : undefined,
+            task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
             task_type: taskType,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
@@ -430,22 +425,12 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         is_upper_shelf: is_upper_shelf,
                     }),
                 )
-                    .then(({ data = [] } = EmptyObject) => {
+                    .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current?.resetFields();
-                        Modal.info({
-                            content: <GatherSuccessModal list={data} />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showSuccessModal(data);
                     })
                     .catch(() => {
-                        Modal.info({
-                            content: <GatherFailureModal />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showFailureModal();
                     })
                     .finally(() => {
                         this.setState({
@@ -455,20 +440,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     });
             })
             .catch(({ errorFields }) => {
-                this.formRef.current!.scrollToField(errorFields[0].name, {
-                    scrollMode: 'if-needed',
-                    behavior: actions => {
-                        if (!actions || actions.length === 0) {
-                            return;
-                        }
-                        const [{ top }] = actions;
-                        const to = Math.max(top - 80, 0);
-                        window.scrollTo({
-                            top: to,
-                            behavior: 'smooth',
-                        });
-                    },
-                });
+                scrollToFirstError(this.formRef.current!, errorFields);
             });
     }
 
@@ -859,7 +831,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     <Form.Item
                         label="任务范围"
                         name="range"
-                        className="form-item form-item-inline form-item-horizon"
+                        className="form-item form-item-inline form-item-horizon form-horizon-always"
                         required={true}
                     >
                         <Radio.Group onChange={this.taskRangeChange}>
@@ -967,10 +939,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             if (filterType === HotTaskFilterType.ByKeywords) {
                                 return (
                                     <Form.Item
-                                        className="form-item form-item-inline"
+                                        className="form-item form-item-inline form-required-hide"
                                         validateTrigger={'onBlur'}
                                         name="keywords"
                                         label="关&ensp;键&ensp;词"
+                                        required={true}
                                     >
                                         <Input
                                             className="input-large"
@@ -1013,7 +986,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         validateTrigger={'onBlur'}
                                         name="category_level_two"
                                         label="二级类目"
-                                        className="form-item form-item-horizon form-item-inline form-required-absolute config-hot-category"
+                                        className="form-item form-item-horizon form-item-inline form-required-hide config-hot-category"
+                                        required={true}
                                         rules={[
                                             {
                                                 validator: this.checkSecondCategory,
@@ -1038,7 +1012,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         validateTrigger={'onBlur'}
                                         name="category_level_three"
                                         label="三级类目"
-                                        className="form-item form-item-horizon form-item-inline form-required-absolute"
+                                        required={true}
+                                        className="form-item form-item-horizon form-item-inline form-required-hide"
                                         rules={[
                                             {
                                                 validator: this.checkLastCategory,
@@ -1113,58 +1088,66 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             <Form.Item
                                 label="销量区间"
                                 required={true}
-                                className="form-item-inline flex-inline form-required-hide"
-                                validateTrigger={'onBlur'}
-                                name="sales_volume_min"
-                                rules={[
-                                    {
-                                        validator: this.checkMinSaleNum,
-                                    },
-                                ]}
+                                className="form-item-inline flex-inline form-required-hide form-item-horizon"
                             >
-                                <IntegerInput min={0} className="input-small input-handler" />
-                            </Form.Item>
-                            <span className="config-colon">-</span>
-                            <Form.Item
-                                className="form-item-inline form-item-horizon"
-                                validateTrigger={'onBlur'}
-                                name="sales_volume_max"
-                                rules={[
-                                    {
-                                        validator: this.checkMaxSaleNum,
-                                    },
-                                ]}
-                            >
-                                <IntegerInput min={0} className="input-small input-handler" />
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="sales_volume_min"
+                                    rules={[
+                                        {
+                                            validator: this.checkMinSaleNum,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
+                                <span className="config-colon vertical-middle">-</span>
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="sales_volume_max"
+                                    rules={[
+                                        {
+                                            validator: this.checkMaxSaleNum,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
                             </Form.Item>
                         </div>
-                        <div className="flex-inline flex-align form-item">
+                        <div className="flex-inline flex-align form-item form-item-horizon">
                             <Form.Item
                                 label="价格区间(￥)"
-                                validateTrigger={'onBlur'}
-                                name="price_min"
                                 required={true}
                                 className="form-item-inline flex-inline form-required-hide"
-                                rules={[
-                                    {
-                                        validator: this.checkMinPrice,
-                                    },
-                                ]}
                             >
-                                <IntegerInput min={0} className="input-small input-handler" />
-                            </Form.Item>
-                            <span className="config-colon">-</span>
-                            <Form.Item
-                                className="form-item-inline form-item-horizon"
-                                validateTrigger={'onBlur'}
-                                name="price_max"
-                                rules={[
-                                    {
-                                        validator: this.checkMaxPrice,
-                                    },
-                                ]}
-                            >
-                                <IntegerInput min={0} className="input-small input-handler" />
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="price_min"
+                                    rules={[
+                                        {
+                                            validator: this.checkMinPrice,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
+                                <span className="config-colon vertical-middle">-</span>
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="price_max"
+                                    rules={[
+                                        {
+                                            validator: this.checkMaxPrice,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
                             </Form.Item>
                         </div>
                     </div>
@@ -1377,16 +1360,16 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             className="btn-default"
                             onClick={this.onStartGather}
                         >
-                            {edit ? '创建新任务' : '开始采集'}
+                            {edit ? '创建新采集任务' : '开始采集'}
                         </Button>
-                        <Button
+                        {/*    <Button
                             loading={groundLoading}
                             type="primary"
                             className="btn-default"
                             onClick={this.onAcquisitionRack}
                         >
                             {edit ? '创建任务且上架' : '一键采集上架'}
-                        </Button>
+                        </Button>*/}
                     </div>
                 </Form>
             </Spin>

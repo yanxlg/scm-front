@@ -3,13 +3,18 @@ import { Tabs } from 'antd';
 import ALLTaskPage from '@/pages/task/components/ALLTaskPage';
 import '@/styles/index.less';
 import { TaskStatusEnum } from '@/enums/StatusEnum';
+import { RouteComponentProps } from 'dva/router';
+import { ITaskListQuery } from '@/interface/ITask';
 
 const { TabPane } = Tabs;
 
-const Index: React.FC = (props: {}) => {
+type LocalPageProps = RouteComponentProps<{}, any, ITaskListQuery>;
+
+const Index: React.FC<LocalPageProps> = props => {
     const [activeKey, setActiveKey] = useState('1');
     const onChange = useCallback((activeKey: string) => setActiveKey(activeKey), []);
     return useMemo(() => {
+        const initialValues = props.location.state;
         return (
             <div className="container">
                 <Tabs
@@ -19,7 +24,7 @@ const Index: React.FC = (props: {}) => {
                     type="card"
                     children={[
                         <TabPane tab="全部任务" key="1">
-                            <ALLTaskPage />
+                            <ALLTaskPage initialValues={initialValues} />
                         </TabPane>,
                         <TabPane tab="未执行" key="2">
                             <ALLTaskPage task_status={TaskStatusEnum.UnExecuted} />

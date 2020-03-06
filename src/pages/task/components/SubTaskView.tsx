@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button, Modal, Pagination, Table } from 'antd';
+import { Button, Pagination, Table } from 'antd';
 import { queryTaskProgressList } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
-import TaskProgressModal from '@/pages/task/components/TaskProgressModal';
+import { showTaskProgressModal } from '@/pages/task/components/modal/TaskProgressModal';
 import { ColumnProps } from 'antd/es/table';
 import { EmptyObject } from '@/enums/ConfigEnum';
 import { ITaskProgressItem } from '@/interface/ITask';
@@ -21,7 +21,7 @@ import '@/styles/task.less';
 
 declare interface ISubTaskViewProps {
     task_Id: number;
-    task_type: TaskTypeCode;
+    task_type?: TaskTypeCode;
 }
 
 declare interface ISubTaskViewState {
@@ -48,12 +48,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
         this.queryList();
     }
     private showSubTaskProgressModal(record: ITaskProgressItem) {
-        Modal.info({
-            content: <TaskProgressModal {...record} />,
-            className: 'modal-empty task-modal-progress',
-            icon: null,
-            maskClosable: true,
-        });
+        showTaskProgressModal(Object.assign({}, record, { task_type: this.props.task_type }));
     }
     private gatherColumns: ColumnProps<ITaskProgressItem>[] = [
         {
@@ -254,7 +249,9 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
                 <Table
                     rowKey="order_goods_sn"
                     columns={
-                        task_type === 0
+                        task_type === void 0
+                            ? undefined
+                            : task_type === 0
                             ? this.gatherColumns
                             : task_type === 1
                             ? this.groundingColumns
