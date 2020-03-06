@@ -54,6 +54,7 @@ export const TaskStatusMap = {
     // 4: '已取消',
     5: '已完成',
     6: '已终止',
+    7: '部分失败',
 };
 
 export type TaskStatusCode = keyof typeof TaskStatusMap;
@@ -67,6 +68,7 @@ export enum TaskStatusEnum {
     Failed, // 执行失败
     Finished = 5,
     Terminated = 6,
+    PartFailed,
 }
 
 //======================= 任务类型 ======================//

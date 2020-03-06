@@ -427,6 +427,29 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 )
                     .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current?.resetFields();
+                        // 初始化其他数据
+                        const { pddCategory, listSort = [] } = this.state;
+                        const firstTreeData = this.getTreeNodeList(pddCategory);
+                        const firstInitId = firstTreeData[0]?.key ?? '';
+                        const middleTreeData = this.getTreeNodeList(pddCategory, [firstInitId]);
+                        const middleInitId = middleTreeData[0]?.key ?? '';
+                        const lastTreeData = this.getTreeNodeList(
+                            pddCategory,
+                            [firstInitId],
+                            [middleInitId],
+                        );
+                        const lastInitId = lastTreeData[0]?.key ?? '';
+                        this.setState({
+                            firstTreeData,
+                            middleTreeData,
+                            lastTreeData,
+                        });
+                        this.formRef.current?.setFieldsValue({
+                            sort_type: listSort[0]?.value,
+                            category_level_one: firstInitId ? [firstInitId] : [],
+                            category_level_two: middleInitId ? [middleInitId] : [],
+                            category_level_three: lastInitId ? [lastInitId] : [],
+                        });
                         showSuccessModal(data);
                     })
                     .catch(() => {
@@ -543,7 +566,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
     }
 
     private disabledEndDate(endTime: Moment | null) {
-        const startTime = this.formRef.current!.getFieldValue('timerStartTime');
+        const startTime = this.formRef.current!.getFieldValue('task_start_time');
         if (!endTime) {
             return false;
         }
@@ -601,7 +624,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
         if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
-        const startDate = this.formRef.current!.getFieldValue('timerStartTime');
+        const startDate = this.formRef.current!.getFieldValue('task_start_time');
         const now = moment();
         if (value.isAfter(now)) {
             if (startDate && value.isSameOrBefore(startDate)) {
@@ -1225,7 +1248,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                             validateTrigger={'onChange'}
                                             label="结束时间"
                                             name="task_end_time"
-                                            dependencies={['timerStartTime']}
+                                            dependencies={['task_start_time']}
                                             className="form-item form-item-inline form-item-horizon"
                                             rules={[
                                                 {
