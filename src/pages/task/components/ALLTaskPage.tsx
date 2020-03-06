@@ -120,6 +120,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                     data: {
                         task_info = [],
                         total = 0,
+                        task_total_num = 0,
                         task_not_execute_num = 0,
                         task_execting_num = 0,
                         task_exected_num = 0,
@@ -133,16 +134,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         dataSet: task_info,
                         total,
                     });
-                    if (this.props.task_status === void 0) {
-                        this.props.setCountArr([
-                            total,
-                            task_not_execute_num,
-                            task_execting_num,
-                            task_exected_num,
-                            task_exected_fail_num,
-                            task_ternimation_num,
-                        ]);
-                    }
+                    this.props.setCountArr([
+                        task_total_num,
+                        task_not_execute_num,
+                        task_execting_num,
+                        task_exected_num,
+                        task_exected_fail_num,
+                        task_ternimation_num,
+                    ]);
                 },
             )
             .finally(() => {

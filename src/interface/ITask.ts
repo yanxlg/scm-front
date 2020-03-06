@@ -63,6 +63,7 @@ export interface ITaskListItem {
 
 export interface ITaskListResponse {
     total: number;
+    task_total_num: number;
     task_not_execute_num: number;
     task_execting_num: number;
     task_exected_num: number;
