@@ -40,7 +40,7 @@ data:
         set $prjroot /usr/share/nginx/html;
         root $prjroot/;
         index index.html;
-        location /version {
+        location ~ /version {
             root $prjroot/;
             add_header Content-Type text/plain;
         }

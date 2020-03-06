@@ -5,6 +5,7 @@ import { RangeValue } from 'rc-picker/lib/interface';
 import moment from 'moment';
 
 import VersionTable from './components/VersionTable';
+import { getCurrentPage } from '@/utils/common';
 
 import '../../../styles/goods-version.less';
 
@@ -208,11 +209,13 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: dates && dates[0] ? transStartDate(dates[0]) : 0,
-                end_time: dates && dates[1] ? transEndDate(dates[1]) : 0,
+                start_time: (dates && dates[0]) ? transStartDate(dates[0]) as number : 0,
+                end_time: (dates && dates[1]) ? transEndDate(dates[1]) as number : 0,
             },
             () => {
-                this.onSearch();
+                this.onSearch({
+                    page: 1
+                });
             },
         );
     };
@@ -271,7 +274,9 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     };
 
     pageCountChange = (current: number, size: number) => {
+        const { page, page_count } = this.state;
         this.onSearch({
+            page: getCurrentPage(size, (page - 1) * page_count + 1),
             page_count: size,
         });
     };
@@ -282,8 +287,6 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             page,
             page_count,
             allCount,
-            start_time,
-            end_time,
             currentInfo,
             versionGoodsList,
         } = this.state;
