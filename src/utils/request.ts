@@ -114,8 +114,8 @@ request.interceptors.response.use(async (response: Response, options: RequestOpt
             const data = await response.clone().json();
             // code !== 0 当作error处理
             if (!data || data.code !== apiCodeMessage.success) {
-                // @ts-ignore
                 return Promise.reject(
+                    // @ts-ignore
                     new ResponseError<any>(
                         response,
                         'data Error',
@@ -130,8 +130,8 @@ request.interceptors.response.use(async (response: Response, options: RequestOpt
             }
             return response;
         } catch (error) {
-            // @ts-ignore
             return Promise.reject(
+                // @ts-ignore
                 new ResponseError<any>(
                     response,
                     'parse Error',

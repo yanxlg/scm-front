@@ -1,23 +1,12 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import {
-    Button,
-    DatePicker,
-    Input,
-    Modal,
-    Radio,
-    Select,
-    Spin,
-    Tooltip,
-    Form,
-    TreeSelect,
-} from 'antd';
+import { Button, DatePicker, Input, Radio, Select, Spin, Tooltip, Form, TreeSelect } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
-import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { addPddHotTask, queryCategory, querySortCondition, queryTaskDetail } from '@/services/task';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
+import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import moment, { Moment } from 'moment';
 import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
@@ -40,6 +29,7 @@ import {
     ITaskDetailInfo,
 } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
+import { scrollToFirstError } from '@/utils/common';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -432,20 +422,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                 )
                     .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current?.resetFields();
-                        Modal.info({
-                            content: <GatherSuccessModal list={data} />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showSuccessModal(data);
                     })
                     .catch(() => {
-                        Modal.info({
-                            content: <GatherFailureModal />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showFailureModal();
                     })
                     .finally(() => {
                         this.setState({
@@ -455,20 +435,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     });
             })
             .catch(({ errorFields }) => {
-                this.formRef.current!.scrollToField(errorFields[0].name, {
-                    scrollMode: 'if-needed',
-                    behavior: actions => {
-                        if (!actions || actions.length === 0) {
-                            return;
-                        }
-                        const [{ top }] = actions;
-                        const to = Math.max(top - 80, 0);
-                        window.scrollTo({
-                            top: to,
-                            behavior: 'smooth',
-                        });
-                    },
-                });
+                scrollToFirstError(this.formRef.current!, errorFields);
             });
     }
 

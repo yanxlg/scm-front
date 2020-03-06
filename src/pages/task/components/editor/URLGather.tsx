@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, DatePicker, Form, Input, Modal, Spin } from 'antd';
+import { Button, DatePicker, Form, Input, Spin } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import moment, { Moment } from 'moment';
-import { parseText, stringifyText } from '@/utils/common';
-import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/task';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
+import { parseText, stringifyText, scrollToFirstError } from '@/utils/common';
+import { addPddURLTask, queryTaskDetail } from '@/services/task';
+import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
+import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { isUrl } from '@/utils/validate';
 import {
     TaskExecuteType,
@@ -89,35 +89,12 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                         is_upper_shelf: is_upper_shelf,
                     }),
                 )
-                    .then(({ data: { task_id = -1 } = {} } = EmptyObject) => {
+                    .then(({ data = EmptyObject } = EmptyObject) => {
                         form.resetFields();
-                        Modal.info({
-                            content: (
-                                <GatherSuccessModal
-                                    taskId={task_id}
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        Modal.info({
-                                            content: <URLGather taskId={task_id} />,
-                                            className: 'modal-empty config-modal-hot',
-                                            icon: null,
-                                            maskClosable: true,
-                                        });
-                                    }}
-                                />
-                            ),
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showSuccessModal(data);
                     })
                     .catch(() => {
-                        Modal.info({
-                            content: <GatherFailureModal />,
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
+                        showFailureModal();
                     })
                     .finally(() => {
                         setGroundLoading(false);
@@ -125,20 +102,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                     });
             })
             .catch(({ errorFields }) => {
-                form.scrollToField(errorFields[0].name, {
-                    scrollMode: 'if-needed',
-                    behavior: actions => {
-                        if (!actions || actions.length === 0) {
-                            return;
-                        }
-                        const [{ top }] = actions;
-                        const to = Math.max(top - 80, 0);
-                        window.scrollTo({
-                            top: to,
-                            behavior: 'smooth',
-                        });
-                    },
-                });
+                scrollToFirstError(form, errorFields);
             });
     }, []);
 

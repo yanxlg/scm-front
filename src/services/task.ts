@@ -160,7 +160,7 @@ export async function queryTaskProgressList(params: ITaskProgressQuery) {
 }
 
 export async function addAutoPurchaseTask(data: IAPTaskBody) {
-    return request.post(TaskApiPath.AddAPTask, {
+    return request.post<IResponse<ITaskCreatedResponse>>(TaskApiPath.AddAPTask, {
         data: {
             ...data,
             version: '1.0',

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Modal, Pagination, Table } from 'antd';
 import { queryTaskProgressList } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
-import TaskProgressModal from '@/pages/task/components/TaskProgressModal';
+import TaskProgressModal from '@/pages/task/components/modal/TaskProgressModal';
 import { ColumnProps } from 'antd/es/table';
 import { EmptyObject } from '@/enums/ConfigEnum';
 import { ITaskProgressItem } from '@/interface/ITask';

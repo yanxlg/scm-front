@@ -1,11 +1,8 @@
 import React, { RefObject } from 'react';
 import { Bind } from 'lodash-decorators';
-import { Button, Card, Divider, Input, Modal, Form } from 'antd';
+import { Button, Card, Divider, Input, Form } from 'antd';
 import '@/styles/setting.less';
 import '@/styles/form.less';
-import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
-import { addPddHotTask } from '@/services/task';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import { FormInstance } from 'antd/es/form';
 import IntegerInput from '@/components/IntegerInput';
 
@@ -55,81 +52,7 @@ class StoreForm extends React.PureComponent<IStoreFormProps, IStoreFormState> {
         return values;
     }
     @Bind
-    private onGather(is_upper_shelf: boolean = false) {
-        this.formRef
-            .current!.validateFields()
-            .then((values: any) => {
-                const params = this.convertFormData(values);
-                this.setState(
-                    is_upper_shelf
-                        ? {
-                              groundLoading: true,
-                              gatherLoading: false,
-                          }
-                        : {
-                              gatherLoading: true,
-                              groundLoading: false,
-                          },
-                );
-                addPddHotTask(
-                    Object.assign({}, params, {
-                        is_upper_shelf: is_upper_shelf,
-                    }),
-                )
-                    .then(({ data: { task_id = -1 } = {} } = {}) => {
-                        Modal.info({
-                            content: (
-                                <GatherSuccessModal
-                                    taskId={task_id}
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                    }}
-                                />
-                            ),
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
-                    })
-                    .catch(() => {
-                        Modal.info({
-                            content: (
-                                <GatherFailureModal
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        this.onGather(is_upper_shelf);
-                                    }}
-                                />
-                            ),
-                            className: 'modal-empty',
-                            icon: null,
-                            maskClosable: true,
-                        });
-                    })
-                    .finally(() => {
-                        this.setState({
-                            gatherLoading: false,
-                            groundLoading: false,
-                        });
-                    });
-            })
-            .catch(({ errorFields }) => {
-                this.formRef.current!.scrollToField(errorFields[0].name, {
-                    scrollMode: 'if-needed',
-                    behavior: actions => {
-                        if (!actions || actions.length === 0) {
-                            return;
-                        }
-                        const [{ top }] = actions;
-                        const to = Math.max(top - 80, 0);
-                        window.scrollTo({
-                            top: to,
-                            behavior: 'smooth',
-                        });
-                    },
-                });
-            });
-    }
+    private onGather(is_upper_shelf: boolean = false) {}
     @Bind
     private onStartGather() {
         this.onGather();

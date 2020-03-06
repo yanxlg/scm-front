@@ -11,11 +11,11 @@ import { Bind } from 'lodash-decorators';
 import { ITaskDetailInfo } from '@/interface/ITask';
 import { TaskExecuteType } from '@/enums/StatusEnum';
 import { EmptyObject } from '@/enums/ConfigEnum';
-import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
-import URLGather from '@/pages/task/components/URLGather';
-import HotGather from '../components/HotGather';
-import TimerUpdate from '../components/TimerUpdate';
-import AutoPurchaseTask from '@/pages/task/components/AutoPurchaseTask';
+import GatherSuccessModal from '@/pages/task/components/modal/GatherSuccessModal';
+import URLGather from '@/pages/task/components/editor/URLGather';
+import HotGather from '../components/editor/HotGather';
+import TimerUpdate from '../components/editor/TimerUpdate';
+import AutoPurchaseTask from '@/pages/task/components/editor/AutoPurchaseTask';
 
 const { TabPane } = Tabs;
 const { Step } = Steps;
