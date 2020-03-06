@@ -72,3 +72,7 @@ export function scrollToFirstError(
         },
     });
 }
+
+export function getCurrentPage(pageSize: number, firstPos: number) {
+    return Math.ceil(firstPos / pageSize);
+}
