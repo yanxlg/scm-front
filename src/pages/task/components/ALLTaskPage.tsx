@@ -43,6 +43,7 @@ declare interface IALLTaskPageState {
 declare interface IALLTaskPageProps {
     task_status?: TaskStatusEnum;
     initialValues?: ITaskListQuery;
+    setCountArr: (count: number[]) => void;
 }
 
 declare interface ISearchFormConfig {
@@ -114,14 +115,36 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             page_number: page_number,
             ...values,
         })
-            .then(({ data: { task_info = [], total = 0 } = {} } = EmptyObject) => {
-                this.setState({
-                    page: page,
-                    pageNumber: page_number,
-                    dataSet: task_info,
-                    total,
-                });
-            })
+            .then(
+                ({
+                    data: {
+                        task_info = [],
+                        total = 0,
+                        task_not_execute_num = 0,
+                        task_execting_num = 0,
+                        task_exected_num = 0,
+                        task_exected_fail_num = 0,
+                        task_ternimation_num = 0,
+                    } = {},
+                } = EmptyObject) => {
+                    this.setState({
+                        page: page,
+                        pageNumber: page_number,
+                        dataSet: task_info,
+                        total,
+                    });
+                    if (this.props.task_status === void 0) {
+                        this.props.setCountArr([
+                            total,
+                            task_not_execute_num,
+                            task_execting_num,
+                            task_exected_num,
+                            task_exected_fail_num,
+                            task_ternimation_num,
+                        ]);
+                    }
+                },
+            )
             .finally(() => {
                 this.setState({
                     dataLoading: false,
