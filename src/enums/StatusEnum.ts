@@ -115,3 +115,11 @@ export enum AutoPurchaseTaskType {
     OnlyOnce = 1,
     EveryDay,
 }
+
+//任务创建状态
+export const TaskCreateStatusMap = {
+    0: '未创建',
+    1: '已创建',
+};
+
+export type TaskCreateStatusCode = keyof typeof TaskCreateStatusMap;

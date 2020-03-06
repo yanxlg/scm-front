@@ -430,23 +430,10 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         is_upper_shelf: is_upper_shelf,
                     }),
                 )
-                    .then(({ data: { task_id = -1 } = {} } = EmptyObject) => {
+                    .then(({ data = [] } = EmptyObject) => {
                         this.formRef.current?.resetFields();
                         Modal.info({
-                            content: (
-                                <GatherSuccessModal
-                                    taskId={task_id}
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        Modal.info({
-                                            content: <HotGather taskId={task_id} />,
-                                            className: 'modal-empty config-modal-hot',
-                                            icon: null,
-                                            maskClosable: true,
-                                        });
-                                    }}
-                                />
-                            ),
+                            content: <GatherSuccessModal list={data} />,
                             className: 'modal-empty',
                             icon: null,
                             maskClosable: true,

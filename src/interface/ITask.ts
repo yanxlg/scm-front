@@ -8,6 +8,7 @@ import {
     TaskStatusCode,
     PUTaskRangeType,
     AutoPurchaseTaskType,
+    TaskCreateStatusCode,
 } from '@/enums/StatusEnum';
 import { IRequestPagination, IRequestPagination2 } from '@/interface/IGlobal';
 
@@ -116,10 +117,12 @@ export interface IAPTaskBody {
     purchase_times?: string[];
     type: AutoPurchaseTaskType;
 }
-
-export interface ITaskCreatedResponse {
+export interface ITaskCreateItem {
+    task_type: TaskTypeCode;
     task_id: number;
 }
+
+export type ITaskCreatedResponse = ITaskCreateItem;
 
 export interface ITaskQuery {
     task_id: number;
@@ -205,7 +208,7 @@ export interface ITaskProgressItem {
     sub_task_id: number;
     start_time: number;
     end_time: number;
-    create_status: 0 | 1;
+    create_status: TaskCreateStatusCode;
     status: TaskStatusCode;
     progress: number;
     task_type: TaskTypeCode;

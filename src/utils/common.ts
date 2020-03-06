@@ -43,3 +43,7 @@ export const getCookie = (name: string) => {
 export function cloneSet<T>(set: Set<T>) {
     return new Set(Array.from(set));
 }
+
+export function isNumber(value?: string | number) {
+    return /^\d+$/.test(String(value));
+}
