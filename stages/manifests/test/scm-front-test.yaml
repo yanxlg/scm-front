@@ -55,7 +55,7 @@ data:
         }
         location /auth/{
             proxy_set_header   Cookie $http_cookie;
-            proxy_set_header   Host scm-api-t2.vova.com.hk;
+            proxy_set_header   Host "scm-api-t2.vova.com.hk";
             proxy_set_header   Remote_Addr $remote_addr;
             proxy_set_header   X-Real-IP $remote_addr;
             proxy_set_header   REMOTE-HOST $remote_addr;
@@ -64,7 +64,7 @@ data:
         }
         location /api/{
             proxy_set_header   Cookie $http_cookie;
-            proxy_set_header   Host scm-api-t2.vova.com.hk;
+            proxy_set_header   Host "scm-api-t2.vova.com.hk";
             proxy_set_header   Remote_Addr $remote_addr;
             proxy_set_header   X-Real-IP $remote_addr;
             proxy_set_header   REMOTE-HOST $remote_addr;
