@@ -143,7 +143,6 @@ export interface ITaskDetailInfo {
     price_max?: number;
     grab_page_count?: number;
     grab_count_max?: number;
-    task_type: TaskExecuteType;
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;
@@ -156,7 +155,8 @@ export interface ITaskDetailInfo {
     urls?: string;
 
     // 新增的
-    type?: TaskTypeCode;
+    task_type?: TaskTypeCode;
+    execute_count: number; //TaskExecuteType
     task_range?: TaskRangeCode;
 }
 

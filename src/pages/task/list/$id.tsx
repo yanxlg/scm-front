@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, Descriptions, Modal, Steps, Tabs } from 'antd';
+import { Button, Card, Descriptions, Modal, Steps, Tabs, Spin } from 'antd';
 import SubTaskView from '@/pages/task/components/SubTaskView';
 import '@/styles/index.less';
 import '@/styles/form.less';
@@ -9,13 +9,13 @@ import { RouteComponentProps } from 'dva/router';
 import { queryTaskDetail } from '@/services/task';
 import { Bind } from 'lodash-decorators';
 import { ITaskDetailInfo } from '@/interface/ITask';
-import { TaskExecuteType } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskStatusMap, TaskTypeMap } from '@/enums/StatusEnum';
 import { EmptyObject } from '@/enums/ConfigEnum';
-import GatherSuccessModal from '@/pages/task/components/modal/GatherSuccessModal';
 import URLGather from '@/pages/task/components/editor/URLGather';
 import HotGather from '../components/editor/HotGather';
 import TimerUpdate from '../components/editor/TimerUpdate';
 import AutoPurchaseTask from '@/pages/task/components/editor/AutoPurchaseTask';
+import { utcToLocal } from '@/utils/date';
 
 const { TabPane } = Tabs;
 const { Step } = Steps;
@@ -24,6 +24,7 @@ type TaskDetailPageProps = RouteComponentProps<{ id: string }>;
 
 declare interface ITaskDetailPagePropsState {
     detail?: ITaskDetailInfo;
+    loading: boolean;
 }
 
 class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetailPagePropsState> {
@@ -31,17 +32,23 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
     constructor(props: TaskDetailPageProps) {
         super(props);
         this.taskId = Number(props.match.params.id);
-        this.state = {};
+        this.state = {
+            loading: true,
+        };
     }
     @Bind
     private queryDetail(taskId: number) {
-        queryTaskDetail(taskId).then(
-            ({ data: { task_detail_info = EmptyObject } = {} } = EmptyObject) => {
+        queryTaskDetail(taskId)
+            .then(({ data: { task_detail_info = EmptyObject } = {} } = EmptyObject) => {
                 this.setState({
                     detail: task_detail_info,
                 });
-            },
-        );
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
     }
     @Bind
     private copyTask() {
@@ -93,15 +100,48 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
         this.queryDetail(this.taskId);
     }
 
+    private getTimeIntervalString(time_interval?: number) {
+        if (time_interval === void 0) {
+            return '--';
+        }
+        const timeInterval = Number(time_interval);
+        const isDay = timeInterval % 86400 === 0;
+        return time_interval === void 0
+            ? undefined
+            : isDay
+            ? `${timeInterval / 86400}天`
+            : `${timeInterval}秒`;
+    }
     render() {
-        const { detail = {} as ITaskDetailInfo } = this.state;
-        const type = detail.type;
+        const { detail = {} as ITaskDetailInfo, loading } = this.state;
         const category = detail.category_level_one;
+        const {
+            task_name = '',
+            task_type,
+            execute_count,
+            task_range,
+            time_interval,
+            status,
+        } = detail;
         return (
             <div className="body-transparent">
-                <Card title="【采集任务】啦啦啦 - 定时 - 333 - 执行中" className="card-nobody" />
+                <Card
+                    loading={loading}
+                    title={
+                        <Spin spinning={loading}>
+                            {task_name
+                                ? `【${TaskTypeMap[task_type!] ?? ''}】${task_name} - ${
+                                      Number(execute_count) === TaskExecuteType.once
+                                          ? '单次'
+                                          : '定时'
+                                  } - ${this.taskId} - ${TaskStatusMap[status] ?? ''}`
+                                : null}
+                        </Spin>
+                    }
+                    className="card-nobody"
+                />
                 <Card className="form-item">
-                    <Card>
+                    <Card loading={loading}>
                         {/* <div className="flex">
                             <div className="task-progress-tag">
                                 任 务
@@ -116,8 +156,8 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                 查看任务进度
                             </Button>
                         </div>*/}
-                        {type === 0 ? (
-                            <Descriptions column={1} className="form-item task-desc">
+                        {task_type === 0 ? (
+                            <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
                                 </Descriptions.Item>
@@ -153,16 +193,16 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                     {detail.price_min}-{detail.price_min}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务周期">
-                                    {detail.task_type === TaskExecuteType.once
+                                    {Number(execute_count) === TaskExecuteType.once
                                         ? '一次性任务'
                                         : '定时任务'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务开始时间">
-                                    {detail.task_start_time}
+                                    {utcToLocal(detail.task_start_time)}
                                 </Descriptions.Item>
                             </Descriptions>
-                        ) : type === 1 ? (
-                            <Descriptions column={1} className="form-item task-desc">
+                        ) : task_type === 1 ? (
+                            <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
                                 </Descriptions.Item>
@@ -173,16 +213,16 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                     {detail.update_type === 2 ? '' : '指定店铺'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务周期">
-                                    {detail.task_type === TaskExecuteType.once
+                                    {Number(execute_count) === TaskExecuteType.once
                                         ? '一次性任务'
                                         : '定时任务'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务开始时间">
-                                    {detail.task_start_time}
+                                    {utcToLocal(detail.task_start_time)}
                                 </Descriptions.Item>
                             </Descriptions>
-                        ) : type === 2 ? (
-                            <Descriptions column={1} className="form-item task-desc">
+                        ) : task_type === 2 ? (
+                            <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
                                 </Descriptions.Item>
@@ -195,22 +235,24 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                         : '有销量的已上架商品'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务时间">
-                                    {detail.task_start_time}
+                                    {utcToLocal(detail.task_start_time)}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务间隔">
-                                    {detail.time_interval}
+                                    {this.getTimeIntervalString(time_interval)}
                                 </Descriptions.Item>
                             </Descriptions>
                         ) : null}
-                        <Button
-                            className="task-btn-copy"
-                            type="primary"
-                            size="large"
-                            ghost={true}
-                            onClick={this.copyTask}
-                        >
-                            复制创建新任务
-                        </Button>
+                        {task_range && (
+                            <Button
+                                className="task-btn-copy"
+                                type="primary"
+                                size="large"
+                                ghost={true}
+                                onClick={this.copyTask}
+                            >
+                                复制创建新任务
+                            </Button>
+                        )}
                     </Card>
                     <Tabs
                         className="tabs-margin-none form-item"

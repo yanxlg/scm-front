@@ -826,7 +826,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     <Form.Item
                         label="任务范围"
                         name="range"
-                        className="form-item form-item-inline form-item-horizon"
+                        className="form-item form-item-inline form-item-horizon form-horizon-always"
                         required={true}
                     >
                         <Radio.Group onChange={this.taskRangeChange}>
@@ -1082,7 +1082,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             <Form.Item
                                 label="销量区间"
                                 required={true}
-                                className="form-item-inline flex-inline form-required-hide"
+                                className="form-item-inline flex-inline form-required-hide form-item-horizon"
                             >
                                 <Form.Item
                                     className="form-item-inline inline-block vertical-middle"
@@ -1111,7 +1111,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                 </Form.Item>
                             </Form.Item>
                         </div>
-                        <div className="flex-inline flex-align form-item">
+                        <div className="flex-inline flex-align form-item form-item-horizon">
                             <Form.Item
                                 label="价格区间(￥)"
                                 required={true}
