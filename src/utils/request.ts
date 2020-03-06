@@ -21,7 +21,7 @@ const newMessage = (msg: string) => {
     }
 };
 
-const codeMessage:{[key:number]:string} = {
+const codeMessage: { [key: number]: string } = {
     200: '服务器成功返回请求的数据。',
     201: '新建或修改数据成功。',
     202: '一个请求已经进入后台排队（异步任务）。',
@@ -29,7 +29,7 @@ const codeMessage:{[key:number]:string} = {
     400: '发出的请求有错误，服务器没有进行新建或修改数据的操作。',
     401: '用户没有权限（令牌、用户名、密码错误）。',
     403: '用户得到授权，但是访问是被禁止的。',
-    404: '发出的请求针对的是不存在的记录，服务器没有进行操作。',
+    404: '请求地址不存在。',
     406: '请求的格式不可得。',
     410: '请求的资源被永久删除，且不会再得到的。',
     422: '当创建一个对象时，发生一个验证错误。',
@@ -48,14 +48,18 @@ export const apiCodeMessage = {
  */
 
 export function errorHandlerFactory(skipError: boolean = false) {
-    const errorHandler = (error: { response: Response; data: any ;request:{
+    const errorHandler = (error: {
+        response: Response;
+        data: any;
+        request: {
             url: string;
             options: RequestOptionsInit;
-        }}) => {
-        const { response, data} = error;
+        };
+    }) => {
+        const { response, data } = error;
         if (response && response.status) {
             if (response.status !== 200) {
-                if(response.status === 401){
+                if (response.status === 401) {
                     const msg = '身份已过期，需要重新登录';
                     newMessage(msg);
                     const { redirect } = getPageQuery();
@@ -67,7 +71,7 @@ export function errorHandlerFactory(skipError: boolean = false) {
                             }),
                         });
                     }
-                }else{
+                } else {
                     const errorText = codeMessage[response.status] || response.statusText;
                     const { status, url } = response;
                     notification.error({
@@ -76,7 +80,7 @@ export function errorHandlerFactory(skipError: boolean = false) {
                     });
                 }
             } else {
-                if (!skipError&&(!data || data.code !== apiCodeMessage.success)) {
+                if (!skipError && (!data || data.code !== apiCodeMessage.success)) {
                     const msg = (data && data.message) || '接口异常';
                     newMessage(msg);
                 }
@@ -96,51 +100,65 @@ export function errorHandlerFactory(skipError: boolean = false) {
     return errorHandler;
 }
 
-
 /**
  * 配置request请求时的默认参数
  */
 const request = extend({
-    errorHandler:errorHandlerFactory(), // 默认错误处理
+    errorHandler: errorHandlerFactory(), // 默认错误处理
     credentials: 'include', // 默认请求是否带上cookie
 });
 
 request.interceptors.response.use(async (response: Response, options: RequestOptionsInit) => {
-    if(!options.responseType||options.responseType==="json"){
+    if (!options.responseType || options.responseType === 'json') {
         try {
             const data = await response.clone().json();
             // code !== 0 当作error处理
             if (!data || data.code !== apiCodeMessage.success) {
                 // @ts-ignore
-                return Promise.reject(new ResponseError<any>(response, 'data Error', data, {
-                    url:response.url,
-                    options
-                }, 'DataError')); // invalid user 不传递到业务层
+                return Promise.reject(
+                    new ResponseError<any>(
+                        response,
+                        'data Error',
+                        data,
+                        {
+                            url: response.url,
+                            options,
+                        },
+                        'DataError',
+                    ),
+                ); // invalid user 不传递到业务层
             }
             return response;
         } catch (error) {
             // @ts-ignore
-            return Promise.reject(new ResponseError<any>(response, 'parse Error', null, {
-                url:response.url,
-                options
-            }, 'ParseError')); // invalid user 不传递到业务层
+            return Promise.reject(
+                new ResponseError<any>(
+                    response,
+                    'parse Error',
+                    null,
+                    {
+                        url: response.url,
+                        options,
+                    },
+                    'ParseError',
+                ),
+            ); // invalid user 不传递到业务层
         }
     }
     return response;
 });
 
-
 // 登录身份设置
-request.interceptors.request.use(( url: string,options: RequestOptionsInit)=>{
-    if(User.token){
-        options.headers = Object.assign({},options.headers,{
-            "X-Token":User.token
+request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
+    if (User.token) {
+        options.headers = Object.assign({}, options.headers, {
+            'X-Token': User.token,
         });
     }
     return {
         url,
-        options
-    }
+        options,
+    };
 });
 
 export default request;

@@ -1,6 +1,6 @@
 import { IStockIOFormData } from '@/pages/stock/components/InOutStock';
 import request from '@/utils/request';
-import { StockApiPathEnum } from '@/enums/StockApiPathEnum';
+import { StockApiPathEnum } from '@/config/api/StockApiPathEnum';
 import { IRequestPagination } from '@/interface/IGlobal';
 import { IStockFormData } from '@/pages/stock/components/StockControl';
 import Stock from '@/pages/stock';

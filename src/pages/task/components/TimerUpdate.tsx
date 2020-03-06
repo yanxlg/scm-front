@@ -111,23 +111,10 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     createLoading: true,
                 });
                 addPDDTimerUpdateTask(params)
-                    .then(({ data: { task_id = -1 } = {} } = {}) => {
+                    .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current!.resetFields();
                         Modal.info({
-                            content: (
-                                <GatherSuccessModal
-                                    taskId={task_id}
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        Modal.info({
-                                            content: <TimerUpdate taskId={task_id} />,
-                                            className: 'modal-empty config-modal-hot',
-                                            icon: null,
-                                            maskClosable: true,
-                                        });
-                                    }}
-                                />
-                            ),
+                            content: <GatherSuccessModal list={data} />,
                             className: 'modal-empty',
                             icon: null,
                             maskClosable: true,

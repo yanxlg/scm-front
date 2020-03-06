@@ -58,7 +58,7 @@ export interface ITaskListItem {
     result: 0 | 1;
     create_time: number;
     end_time: number;
-    task_cycle: string;
+    execute_count: number;
 }
 
 export interface ITaskListResponse {
@@ -119,7 +119,7 @@ export interface IAPTaskBody {
 }
 export interface ITaskCreateItem {
     task_type: TaskTypeCode;
-    task_id: number;
+    task_sn: number;
 }
 
 export type ITaskCreatedResponse = ITaskCreateItem;

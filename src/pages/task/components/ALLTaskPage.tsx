@@ -25,7 +25,7 @@ import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import '@/styles/config.less';
 import '@/styles/table.less';
 import '@/styles/task.less';
-import { ITaskListItem } from '@/interface/ITask';
+import { ITaskListItem, ITaskListQuery } from '@/interface/ITask';
 import { EmptyObject } from '@/enums/ConfigEnum';
 
 declare interface IALLTaskPageState {
@@ -41,6 +41,7 @@ declare interface IALLTaskPageState {
 
 declare interface IALLTaskPageProps {
     task_status?: TaskStatusEnum;
+    initialValues?: ITaskListQuery;
 }
 
 declare interface ISearchFormConfig {
@@ -65,6 +66,13 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             total: 0,
             showMore: false,
         };
+        if (props.initialValues) {
+            this.allFieldsList.initialValues = Object.assign(
+                {},
+                this.allFieldsList.initialValues,
+                props.initialValues,
+            );
+        }
     }
     componentDidMount(): void {
         this.queryList();
@@ -209,9 +217,10 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         },
         {
             title: '任务周期',
-            dataIndex: 'task_cycle',
+            dataIndex: 'execute_count',
             width: '223px',
             align: 'center',
+            render: count => (count === '1' ? '单次' : '定时'),
         },
         {
             title: '创建时间',

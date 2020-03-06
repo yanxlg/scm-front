@@ -19,7 +19,7 @@ import {
     ISubTaskProgressResponse,
 } from '@/interface/ITask';
 import { IResponse } from '@/interface/IGlobal';
-import { TaskApiPath } from '@/enums/TaskApiPath';
+import { TaskApiPath } from '@/config/api/TaskApiPath';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -75,7 +75,7 @@ export async function addPddURLTask(params: IURLTaskBody) {
 }
 
 export async function addPDDTimerUpdateTask(params: IPUTaskBody) {
-    return request.post(TaskApiPath.AddPUTask, {
+    return request.post<IResponse<ITaskCreatedResponse>>(TaskApiPath.AddPUTask, {
         data: {
             ...params,
             version: '1.0',

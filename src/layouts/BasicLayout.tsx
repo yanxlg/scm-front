@@ -11,7 +11,7 @@ import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
-import '@/styles/index.less';
+import '@/styles/menu.less';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {

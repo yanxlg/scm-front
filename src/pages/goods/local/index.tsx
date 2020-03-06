@@ -124,15 +124,13 @@ declare interface IIndexState {
 
 const pageSizeOptions = ['50', '100', '500', '1000'];
 
-type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
-
-class Local extends React.PureComponent<LocalPageProps, IIndexState> {
+class Local extends React.PureComponent<{}, IIndexState> {
     localSearchRef: LocalSearch | null = null;
     // goodsTableRef: GoodsTable | null = null;
     // 保存搜索条件
     searchFilter: IFilterParams | null = null;
 
-    constructor(props: LocalPageProps) {
+    constructor(props: {}) {
         super(props);
 
         this.state = {
@@ -579,12 +577,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             originEditGoods,
         } = this.state;
 
-        const task_id = this.props.location.state?.task_id;
-
         return (
             <div className="goods-local">
                 <LocalSearch
-                    task_id={task_id}
                     // toggleUpdateDialog={this.toggleUpdateDialog}
                     ref={node => (this.localSearchRef = node)}
                     searchLoading={searchLoading}

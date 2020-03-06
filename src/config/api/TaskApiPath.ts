@@ -1,3 +1,6 @@
+/**
+ * 任务中心api地址枚举
+ */
 export enum TaskApiPath {
     QueryTaskList = '/api/v1/task/list',
     AddPDDHotTask = '/api/v1/task/spider/pdd_hotsale',

@@ -18,8 +18,6 @@ enum ApiPathEnum {
     putVovaGoodsSales = '/api/v1/vova_goods/sales',
     postVovaGoodsListExport = '/api/v1/vova_goods/exports',
 
-    // 任务中心相关接口
-
     QueryGoodsVersion = '/api/v1/vova_goods/version_list',
     QueryGoodsDetail = '/api/v1/vova_goods/detail',
     EditGoodsDetail = '/api/v1/vova_goods/edits',

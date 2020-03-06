@@ -430,7 +430,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                         is_upper_shelf: is_upper_shelf,
                     }),
                 )
-                    .then(({ data = [] } = EmptyObject) => {
+                    .then(({ data = EmptyObject } = EmptyObject) => {
                         this.formRef.current?.resetFields();
                         Modal.info({
                             content: <GatherSuccessModal list={data} />,
@@ -1377,16 +1377,16 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             className="btn-default"
                             onClick={this.onStartGather}
                         >
-                            {edit ? '创建新任务' : '开始采集'}
+                            {edit ? '创建新采集任务' : '开始采集'}
                         </Button>
-                        <Button
+                        {/*    <Button
                             loading={groundLoading}
                             type="primary"
                             className="btn-default"
                             onClick={this.onAcquisitionRack}
                         >
                             {edit ? '创建任务且上架' : '一键采集上架'}
-                        </Button>
+                        </Button>*/}
                     </div>
                 </Form>
             </Spin>

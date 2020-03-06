@@ -12,9 +12,9 @@ declare interface ITaskListProps {
 const GatherSuccessModal: React.FC<ITaskListProps> = ({ list }) => {
     const onClick = useCallback(() => {
         router.push({
-            pathname: '/goods/local',
+            pathname: '/task/list',
             state: {
-                task_id: list.task_id,
+                task_sn: list.task_sn,
             },
         });
     }, []);
@@ -23,12 +23,12 @@ const GatherSuccessModal: React.FC<ITaskListProps> = ({ list }) => {
             <div>
                 <div className="config-modal-title">任务创建成功</div>
                 <div className="config-modal-title">
-                    【{TaskTypeMap[list.task_type]}】ID：{list.task_id}
+                    【{TaskTypeMap[list.task_type]}】SN：{list.task_sn}
                 </div>
                 <Button type="primary" onClick={onClick} className="config-modal-btn">
                     查看任务进度
                 </Button>
-                <div className="config-modal-tip">任务执行结果可在本地产品库查看</div>
+                <div className="config-modal-tip">任务执行结果可在【本地产品库】查看</div>
             </div>
         );
     }, [list]);
