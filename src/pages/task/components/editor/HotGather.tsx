@@ -980,7 +980,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         validateTrigger={'onBlur'}
                                         name="category_level_two"
                                         label="二级类目"
-                                        className="form-item form-item-horizon form-item-inline form-required-absolute config-hot-category"
+                                        className="form-item form-item-horizon form-item-inline form-required-hide config-hot-category"
+                                        required={true}
                                         rules={[
                                             {
                                                 validator: this.checkSecondCategory,
@@ -1005,7 +1006,8 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                         validateTrigger={'onBlur'}
                                         name="category_level_three"
                                         label="三级类目"
-                                        className="form-item form-item-horizon form-item-inline form-required-absolute"
+                                        required={true}
+                                        className="form-item form-item-horizon form-item-inline form-required-hide"
                                         rules={[
                                             {
                                                 validator: this.checkLastCategory,
@@ -1081,57 +1083,65 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                                 label="销量区间"
                                 required={true}
                                 className="form-item-inline flex-inline form-required-hide"
-                                validateTrigger={'onBlur'}
-                                name="sales_volume_min"
-                                rules={[
-                                    {
-                                        validator: this.checkMinSaleNum,
-                                    },
-                                ]}
                             >
-                                <IntegerInput min={0} className="input-small input-handler" />
-                            </Form.Item>
-                            <span className="config-colon">-</span>
-                            <Form.Item
-                                className="form-item-inline form-item-horizon"
-                                validateTrigger={'onBlur'}
-                                name="sales_volume_max"
-                                rules={[
-                                    {
-                                        validator: this.checkMaxSaleNum,
-                                    },
-                                ]}
-                            >
-                                <IntegerInput min={0} className="input-small input-handler" />
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="sales_volume_min"
+                                    rules={[
+                                        {
+                                            validator: this.checkMinSaleNum,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
+                                <span className="config-colon vertical-middle">-</span>
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="sales_volume_max"
+                                    rules={[
+                                        {
+                                            validator: this.checkMaxSaleNum,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
                             </Form.Item>
                         </div>
                         <div className="flex-inline flex-align form-item">
                             <Form.Item
                                 label="价格区间(￥)"
-                                validateTrigger={'onBlur'}
-                                name="price_min"
                                 required={true}
                                 className="form-item-inline flex-inline form-required-hide"
-                                rules={[
-                                    {
-                                        validator: this.checkMinPrice,
-                                    },
-                                ]}
                             >
-                                <IntegerInput min={0} className="input-small input-handler" />
-                            </Form.Item>
-                            <span className="config-colon">-</span>
-                            <Form.Item
-                                className="form-item-inline form-item-horizon"
-                                validateTrigger={'onBlur'}
-                                name="price_max"
-                                rules={[
-                                    {
-                                        validator: this.checkMaxPrice,
-                                    },
-                                ]}
-                            >
-                                <IntegerInput min={0} className="input-small input-handler" />
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="price_min"
+                                    rules={[
+                                        {
+                                            validator: this.checkMinPrice,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
+                                <span className="config-colon vertical-middle">-</span>
+                                <Form.Item
+                                    className="form-item-inline inline-block vertical-middle"
+                                    validateTrigger={'onBlur'}
+                                    name="price_max"
+                                    rules={[
+                                        {
+                                            validator: this.checkMaxPrice,
+                                        },
+                                    ]}
+                                >
+                                    <IntegerInput min={0} className="input-small input-handler" />
+                                </Form.Item>
                             </Form.Item>
                         </div>
                     </div>
