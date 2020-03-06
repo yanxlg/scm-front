@@ -1,9 +1,8 @@
-# trigram-scm-front-page
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: trigram-scm-front-page-nginx-conf-@@VID@@
+  name: trigram-scm-front-page-nginx-conf
 data:
   nginx.conf: |
     user  www-data;
@@ -76,13 +75,13 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: trigram-scm-front-page-@@VID@@
+  name: trigram-scm-front-page
   labels:
-    name: trigram-scm-front-page-@@VID@@
+    name: trigram-scm-front-page
 spec:
   selector:
     matchLabels:
-      name: trigram-scm-front-page-@@VID@@
+      name: trigram-scm-front-page
   replicas: 1
   strategy:
     rollingUpdate:
@@ -91,14 +90,14 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      name: trigram-scm-front-page-@@VID@@
+      name: trigram-scm-front-page
       labels:
-        name: trigram-scm-front-page-@@VID@@
+        name: trigram-scm-front-page
     spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: trigram-scm-front-page
-          image: 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-@@VID@@
+          image: 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -131,13 +130,13 @@ spec:
             path: /opt/data1/logs/scm-front/nginx
         - name: nginx-conf
           configMap:
-            name: trigram-scm-front-page-nginx-conf-@@VID@@
+            name: trigram-scm-front-page-nginx-conf
             items:
               - key: nginx.conf
                 path: nginx.conf
         - name: trigram-scm-front-page-conf
           configMap:
-            name: trigram-scm-front-page-nginx-conf-@@VID@@
+            name: trigram-scm-front-page-nginx-conf
             items:
               - key: trigram-scm-front-page.conf
                 path: trigram-scm-front-page.conf
@@ -151,7 +150,7 @@ spec:
                     - key: name
                       operator: In
                       values:
-                        - trigram-scm-front-page-@@VID@@
+                        - trigram-scm-front-page
                 topologyKey: kubernetes.io/hostname
 
 #---
@@ -205,12 +204,15 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: trigram-scm-front-page-svc-@@VID@@
+  name: trigram-scm-front-page-external-elb
   annotations:
-    alb.ingress.kubernetes.io/healthcheck-path: /version
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:724258426085:certificate/72dafeb0-99e6-4b84-a43c-466641f76c63
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+    service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-08c9c5365a5311eae
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
 spec:
   selector:
-    name: trigram-scm-front-page-@@VID@@
+    name: trigram-scm-front-page
   ports:
     - name: svc-http
       port: 80
@@ -219,4 +221,4 @@ spec:
     - name: svc-https
       port: 443
       targetPort: http-port
-  type: NodePort
+  type: LoadBalancer
