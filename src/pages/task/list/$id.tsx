@@ -143,6 +143,8 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
             price_max,
             sales_volume_min,
             sales_volume_max,
+            task_end_time,
+            task_start_time,
         } = detail;
         return (
             <div className="body-transparent">
@@ -175,7 +177,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                 查看任务进度
                             </Button>
                         </div>*/}
-                        {task_type === 0 ? (
+                        {task_type === TaskTypeEnum.Gather ? (
                             <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
@@ -219,11 +221,11 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                         : '定时任务'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务开始时间">
-                                    {utcToLocal(detail.task_start_time)}
+                                    {utcToLocal(task_start_time)}
                                 </Descriptions.Item>
                                 {task_cycle === TaskExecuteType.once ? null : (
                                     <Descriptions.Item label="任务结束时间">
-                                        {utcToLocal(detail.task_end_time)}
+                                        {utcToLocal(task_end_time)}
                                     </Descriptions.Item>
                                 )}
                                 {task_cycle === TaskExecuteType.once ? null : (
@@ -232,7 +234,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                     </Descriptions.Item>
                                 )}
                             </Descriptions>
-                        ) : task_type === 1 ? (
+                        ) : task_type === TaskTypeEnum.Grounding ? (
                             <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
@@ -249,10 +251,10 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                         : '定时任务'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务开始时间">
-                                    {utcToLocal(detail.task_start_time)}
+                                    {utcToLocal(task_start_time)}
                                 </Descriptions.Item>
                             </Descriptions>
-                        ) : task_type === 2 ? (
+                        ) : task_type === TaskTypeEnum.Update ? (
                             <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
@@ -266,7 +268,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                         : ''}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务时间">
-                                    {utcToLocal(detail.task_start_time)}
+                                    {utcToLocal(task_start_time)} - {utcToLocal(task_end_time)}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务间隔">
                                     {this.getTimeIntervalString(time_interval)}
