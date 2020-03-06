@@ -21,35 +21,63 @@ export const checkLowerShelf = function(status: number) {
 };
 
 //======================= 任务范围 ======================//
-export const TaskRangeMap: { [key: number]: string } = {
+export const TaskRangeMap = {
     1: '指定URL',
     2: '全站',
     3: '指定店铺',
     4: '全部已上架',
     5: '有销量已上架',
     6: '采购',
+    7: '商品上架',
+    8: '商品下架',
 };
+
+export type TaskRangeCode = keyof typeof TaskRangeMap;
+
 export const TaskRangeList = transStatusList(TaskRangeMap);
 
 //======================= 任务状态 ======================//
 
-export const TaskStatusMap: { [key: string]: string } = {
+export const TaskStatusMap = {
     0: '未执行',
     1: '执行中',
     2: '已执行',
     3: '执行失败',
-    4: '已取消',
+    // 4: '已取消',
     5: '已完成',
-    6: '终止',
+    6: '已终止',
 };
+
+export type TaskStatusCode = keyof typeof TaskStatusMap;
 
 export const TaskStatusList = transStatusList(TaskStatusMap);
 
-export enum TaskStatus {
+export enum TaskStatusEnum {
     UnExecuted, // 未执行
     Executing, // 执行中
     Executed, // 已执行
     Failed, // 执行失败
+    Finished = 5,
+    Terminated = 6,
+}
+
+//======================= 任务类型 ======================//
+export const TaskTypeMap = {
+    0: '采集任务',
+    1: '上架任务',
+    2: '更新任务',
+    3: '采购任务',
+};
+
+export type TaskTypeCode = keyof typeof TaskTypeMap;
+
+export const TaskTypeList = transStatusList(TaskTypeMap);
+
+export enum TaskTypeEnum {
+    Gather = 0,
+    Grounding = 1,
+    Update = 2,
+    Purchase = 3,
 }
 
 //======================= Hot 任务范围 ======================//
@@ -71,7 +99,7 @@ export enum TaskIntervalConfigType {
 }
 
 //======================= 定时更新任务商品范围 ======================//
-export enum TimerUpdateTaskRangeType {
+export enum PUTaskRangeType {
     AllOnShelves = 2,
     HasSales,
 }
@@ -87,3 +115,11 @@ export enum AutoPurchaseTaskType {
     OnlyOnce = 1,
     EveryDay,
 }
+
+//任务创建状态
+export const TaskCreateStatusMap = {
+    0: '未创建',
+    1: '已创建',
+};
+
+export type TaskCreateStatusCode = keyof typeof TaskCreateStatusMap;

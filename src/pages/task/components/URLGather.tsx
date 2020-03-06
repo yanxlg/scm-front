@@ -8,14 +8,16 @@ import { addPddURLTask, IPddHotTaskParams, queryTaskDetail } from '@/services/ta
 import GatherSuccessModal from '@/pages/task/components/GatherSuccessModal';
 import GatherFailureModal from '@/pages/task/components/GatherFailureModal';
 import { isUrl } from '@/utils/validate';
-import { TaskExecuteType, TaskIntervalConfigType, TaskStatusMap } from '@/enums/StatusEnum';
+import {
+    TaskExecuteType,
+    TaskIntervalConfigType,
+    TaskStatusCode,
+    TaskStatusMap,
+} from '@/enums/StatusEnum';
 import locale from 'antd/es/date-picker/locale/zh_CN';
-
-declare interface IFormData {
-    urls?: string;
-    task_name: string;
-    task_start_time?: Moment;
-}
+import { ITaskDetailInfo, IURLTaskBody } from '@/interface/ITask';
+import { dateToUnix } from '@/utils/date';
+import { EmptyObject } from '@/enums/ConfigEnum';
 
 declare interface IURLGatherProps {
     taskId?: number;
@@ -26,11 +28,11 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
     const [gatherLoading, setGatherLoading] = useState(false);
     const [groundLoading, setGroundLoading] = useState(false);
     const [queryLoading, setQueryLoading] = useState(taskId !== void 0);
-    const [taskStatus, setTaskStatus] = useState<string | undefined>();
+    const [taskStatus, setTaskStatus] = useState<TaskStatusCode | undefined>();
     const [successTimes, setSuccessTimes] = useState<number | undefined>();
     const [failTimes, setFailTimes] = useState<number | undefined>();
 
-    const convertDetail = useCallback((info: IPddHotTaskParams) => {
+    const convertDetail = useCallback((info: ITaskDetailInfo) => {
         const {
             range,
             task_end_time,
@@ -45,7 +47,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
             ...extra,
         };
     }, []);
-    const convertFormData = useCallback((values: IFormData) => {
+    const convertFormData = useCallback((values: IURLTaskBody) => {
         const { urls = '', task_start_time, ...extra } = values;
         // 如果单次任务且无时间，则需要设置is_immediately_execute为true
 
@@ -53,24 +55,26 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
             ...extra,
             urls: stringifyText(urls),
             is_immediately_execute: !task_start_time,
-            task_start_time: task_start_time?.unix() ?? undefined,
+            task_start_time: dateToUnix(task_start_time),
             task_type: TaskExecuteType.once,
         };
     }, []);
 
     useEffect(() => {
         if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(({ data: { task_detail_info = {} } = {} } = {}) => {
-                const initValues = convertDetail(task_detail_info);
-                const { status, success, fail } = initValues;
-                form.setFieldsValue({
-                    ...initValues,
-                });
-                setQueryLoading(false);
-                setTaskStatus(status);
-                setSuccessTimes(success);
-                setFailTimes(fail);
-            });
+            queryTaskDetail(taskId).then(
+                ({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
+                    const initValues = convertDetail(task_detail_info as ITaskDetailInfo);
+                    const { status, success, fail } = initValues;
+                    form.setFieldsValue({
+                        ...initValues,
+                    });
+                    setQueryLoading(false);
+                    setTaskStatus(status);
+                    setSuccessTimes(success);
+                    setFailTimes(fail);
+                },
+            );
         }
     }, []);
 
@@ -85,7 +89,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                         is_upper_shelf: is_upper_shelf,
                     }),
                 )
-                    .then(({ data: { task_id = -1 } = {} } = {}) => {
+                    .then(({ data: { task_id = -1 } = {} } = EmptyObject) => {
                         form.resetFields();
                         Modal.info({
                             content: (
@@ -109,14 +113,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                     })
                     .catch(() => {
                         Modal.info({
-                            content: (
-                                <GatherFailureModal
-                                    onClick={() => {
-                                        Modal.destroyAll();
-                                        onGather(is_upper_shelf);
-                                    }}
-                                />
-                            ),
+                            content: <GatherFailureModal />,
                             className: 'modal-empty',
                             icon: null,
                             maskClosable: true,
@@ -193,7 +190,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                     <React.Fragment>
                         <div className="config-task-label">任务ID：{taskId}</div>
                         <div className="config-task-label">
-                            任务状态: {TaskStatusMap[taskStatus ?? '']}
+                            任务状态: {TaskStatusMap[taskStatus!]}
                         </div>
                         <div className="config-task-label">执行成功：{successTimes}次</div>
                         <div className="config-task-label">执行失败：{failTimes}次</div>

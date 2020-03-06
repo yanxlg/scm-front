@@ -114,7 +114,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
     onSearch = () => {
         // console.log('onSearch', this.state);
         this.props.onSearch({
-            page: 1
+            page: 1,
         });
     };
 

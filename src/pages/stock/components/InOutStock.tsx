@@ -47,12 +47,17 @@ export declare interface IStockIOFormData {
     purchase_order_sn?: string;
     product_id?: string;
     last_waybill_no?: string;
+    type: 1 | 2;
+}
+
+declare interface IInOutStockProps {
+    type: 1 | 2; //1:出库管理，2入库管理
 }
 
 @BindAll()
-class InOutStock extends React.PureComponent<{}, IInOutStockState> {
+class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState> {
     private formRef: RefObject<FormInstance> = React.createRef();
-    private columns: ColumnProps<ITableData>[] = [
+    private inColumns: ColumnProps<ITableData>[] = [
         {
             title: '入库时间',
             width: '200px',
@@ -96,6 +101,14 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             dataIndex: 'product_id',
             align: 'center',
         },
+    ];
+    private outColumns: ColumnProps<ITableData>[] = [
+        {
+            title: '中台商品ID',
+            width: '128px',
+            dataIndex: 'product_id',
+            align: 'center',
+        },
         {
             title: '出库时间',
             width: '200px',
@@ -128,34 +141,13 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             align: 'center',
         },
     ];
-    private fieldList: IFieldItem[] = [
-        {
-            type: 'dateRanger',
-            label: <span>出库&emsp;时间</span>,
-            name: ['outgoing_start_time', 'outgoing_end_time'],
-            formItemClassName: 'form-item',
-            className: 'stock-form-picker',
-        },
+    private inFieldsList: IFieldItem[] = [
         {
             type: 'dateRanger',
             label: <span>入库&emsp;时间</span>,
             name: ['warehousing_start_time', 'warehousing_end_time'],
             formItemClassName: 'form-item',
             className: 'stock-form-picker',
-        },
-        {
-            type: 'input',
-            label: '尾程运单号',
-            name: 'last_waybill_no',
-            formItemClassName: 'form-item',
-            className: 'input-default',
-        },
-        {
-            type: 'input',
-            label: '出库订单号',
-            name: 'outgoing_order_sn',
-            formItemClassName: 'form-item',
-            className: 'input-default',
         },
         {
             type: 'input',
@@ -179,8 +171,38 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             className: 'input-default',
         },
     ];
+    private outFieldsList: IFieldItem[] = [
+        {
+            type: 'dateRanger',
+            label: <span>出库&emsp;时间</span>,
+            name: ['outgoing_start_time', 'outgoing_end_time'],
+            formItemClassName: 'form-item',
+            className: 'stock-form-picker',
+        },
+        {
+            type: 'input',
+            label: '出库订单号',
+            name: 'outgoing_order_sn',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+        {
+            type: 'input',
+            label: '尾程运单号',
+            name: 'last_waybill_no',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+        {
+            type: 'input',
+            label: '中台商品ID',
+            name: 'product_id',
+            formItemClassName: 'form-item',
+            className: 'input-default',
+        },
+    ];
 
-    constructor(props: {}) {
+    constructor(props: IInOutStockProps) {
         super(props);
         this.state = {
             dataSet: [],
@@ -226,7 +248,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
         this.setState({
             exportingLoading: true,
         });
-        exportIOList(values).finally(() => {
+        exportIOList(Object.assign({ ...values, type: this.props.type })).finally(() => {
             this.setState({
                 exportingLoading: false,
             });
@@ -250,6 +272,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             ...values,
             page: pageNumber,
             page_count: pageSize,
+            type: this.props.type,
         })
             .then(({ data: { all_count = 0, list = [] } }) => {
                 this.setState({
@@ -294,13 +317,14 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
             pageSize,
             total,
         } = this.state;
+        const { type } = this.props;
         return (
             <div>
                 <div className="float-clear">
                     <JsonForm
                         labelClassName="stock-form-label"
                         formRef={this.formRef}
-                        fieldList={this.fieldList}
+                        fieldList={type === 1 ? this.outFieldsList : this.inFieldsList}
                     />
                     <Button
                         type="primary"
@@ -337,7 +361,7 @@ class InOutStock extends React.PureComponent<{}, IInOutStockState> {
                     className="form-item"
                     rowKey="in_order"
                     bordered={true}
-                    columns={this.columns}
+                    columns={type === 1 ? this.outColumns : this.inColumns}
                     dataSource={dataSet}
                     pagination={false}
                     loading={dataLoading}

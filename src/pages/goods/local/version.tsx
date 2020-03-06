@@ -209,12 +209,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: (dates && dates[0]) ? transStartDate(dates[0]) as number : 0,
-                end_time: (dates && dates[1]) ? transEndDate(dates[1]) as number : 0,
+                start_time: dates && dates[0] ? (transStartDate(dates[0]) as number) : 0,
+                end_time: dates && dates[1] ? (transEndDate(dates[1]) as number) : 0,
             },
             () => {
                 this.onSearch({
-                    page: 1
+                    page: 1,
                 });
             },
         );
@@ -282,14 +282,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     };
 
     render() {
-        const {
-            loading,
-            page,
-            page_count,
-            allCount,
-            currentInfo,
-            versionGoodsList,
-        } = this.state;
+        const { loading, page, page_count, allCount, currentInfo, versionGoodsList } = this.state;
         let currentDom = null;
         if (currentInfo) {
             const {

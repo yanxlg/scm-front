@@ -19,19 +19,6 @@ enum ApiPathEnum {
     postVovaGoodsListExport = '/api/v1/vova_goods/exports',
 
     // 任务中心相关接口
-    QueryTaskList = '/api/v1/task/list',
-    AddPDDHotTask = '/api/v1/task/spider/pdd_hotsale',
-    AddPDDURLTask = '/api/v1/task/spider/url',
-    ADDTimerUpdate = '/api/v1/task/spider/goods_update',
-    DeleteTask = '/api/v1/task/delete',
-    ActiveTask = '/api/v1/task/plan',
-    AbortTask = '/api/v1/task/termination',
-    QueryTaskDetail = '/api/v1/task/detail',
-    QueryPurchaseIds = '/api/v1/orders/purchase',
-    QueryPDDCategory = '/api/v1/spider/pdd_category',
-    QueryPDDSortCondition = '/api/v1/spider/pdd_sort_type',
-    QueryTaskLog = '/api/v1/task/exec_log',
-    ADDAutoPurchaseTask = '/api/v1/task/spider/auto_purchase',
 
     QueryGoodsVersion = '/api/v1/vova_goods/version_list',
     QueryGoodsDetail = '/api/v1/vova_goods/detail',

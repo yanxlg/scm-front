@@ -1,4 +1,5 @@
 import moment, { Moment } from 'moment';
+import { isNumber } from '@/utils/common';
 
 export function formatDate(date: Date, fmt: string): string {
     if (/(y+)/.test(fmt)) {
@@ -51,11 +52,15 @@ export function transEndDate(moment?: Moment) {
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 
 export function utcToLocal(dateString?: string | number) {
-    const dateValue = typeof dateString === 'number' ? dateString * 1000 : dateString;
+    const dateValue = isNumber(dateString) ? (dateString as number) * 1000 : dateString;
     return dateString
         ? moment
               .utc(dateValue)
               .local()
               .format(dateFormat)
         : '';
+}
+
+export function dateToUnix(date?: Moment | number) {
+    return typeof date === 'number' ? date : (date?.unix() as number);
 }

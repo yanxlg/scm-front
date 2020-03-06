@@ -44,6 +44,6 @@ export function cloneSet<T>(set: Set<T>) {
     return new Set(Array.from(set));
 }
 
-export function getCurrentPage(pageSize: number, firstPos: number) {
-    return Math.ceil(firstPos / pageSize);
+export function isNumber(value?: string | number) {
+    return /^\d+$/.test(String(value));
 }
