@@ -131,7 +131,8 @@ export interface ITaskQuery {
 export interface ITaskDetailInfo {
     task_sn?: string;
     task_name: string;
-    range?: number;
+    shopId?: number; // 指定店铺类型任务转换出改字段
+
     category_level_one?: string;
     category_level_two?: string;
     category_level_three?: string;
@@ -157,7 +158,10 @@ export interface ITaskDetailInfo {
     // 新增的
     task_type?: TaskTypeCode;
     execute_count: number; //TaskExecuteType
-    task_range?: TaskRangeCode;
+    sub_cat_id: TaskRangeCode;
+    sort_type_name?: string;
+    cat_name?: string;
+    task_cycle?: TaskExecuteType;
 }
 
 export interface ITaskDetailResponse {
@@ -211,7 +215,7 @@ export interface ITaskProgressItem {
     create_status: TaskCreateStatusCode;
     status: TaskStatusCode;
     progress: number;
-    task_type: TaskTypeCode;
+    task_type: TaskTypeEnum;
 }
 
 export interface ITaskProgressResponse {

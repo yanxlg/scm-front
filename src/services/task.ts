@@ -1,5 +1,5 @@
 import request, { errorHandlerFactory } from '@/utils/request';
-import { TaskExecuteType, TaskStatusCode } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskStatusCode, TaskTypeEnum, TaskRangeEnum } from '@/enums/StatusEnum';
 import {
     IHotTaskBody,
     ITaskCreatedResponse,
@@ -20,6 +20,7 @@ import {
 } from '@/interface/ITask';
 import { IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
+import { EmptyObject } from '@/enums/ConfigEnum';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -119,12 +120,40 @@ export async function deleteTasks(task_ids: string) {
     });
 }
 
-export async function queryTaskDetail(task_id: number) {
-    return request.get<IResponse<ITaskDetailResponse>>(TaskApiPath.QueryTaskDetail, {
-        params: {
-            task_id,
-        },
-    });
+export async function queryTaskDetail(task_id: number): Promise<IResponse<ITaskDetailResponse>> {
+    return request
+        .get(TaskApiPath.QueryTaskDetail, {
+            params: {
+                task_id,
+            },
+        })
+        .then(
+            ({
+                data: {
+                    task_detail_info: { range, sub_cat_id, execute_count, ...extra } = EmptyObject,
+                } = EmptyObject,
+                ...other
+            } = EmptyObject) => {
+                const subCatId = Number(sub_cat_id);
+                const executeCount = Number(execute_count);
+                // parse
+                return {
+                    data: {
+                        task_detail_info: {
+                            sub_cat_id: subCatId,
+                            shopId: subCatId === TaskRangeEnum.Store ? range : undefined,
+                            task_cycle:
+                                executeCount === 1
+                                    ? TaskExecuteType.once
+                                    : TaskExecuteType.interval,
+                            execute_count: executeCount,
+                            ...extra,
+                        },
+                    },
+                    ...other,
+                };
+            },
+        );
 }
 
 export async function queryPurchaseIds(task_id: number) {

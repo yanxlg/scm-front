@@ -51,14 +51,14 @@ export function transEndDate(moment?: Moment) {
 
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 
-export function utcToLocal(dateString?: string | number) {
+export function utcToLocal(dateString?: string | number, placeholder: string = '--') {
     const dateValue = isNumber(dateString) ? (dateString as number) * 1000 : dateString;
-    return dateString
+    return dateValue
         ? moment
               .utc(dateValue)
               .local()
               .format(dateFormat)
-        : '';
+        : placeholder;
 }
 
 export function dateToUnix(date?: Moment | number) {

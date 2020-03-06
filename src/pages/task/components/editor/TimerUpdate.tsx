@@ -66,7 +66,13 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
     }
 
     private convertDetail(info: ITaskDetailInfo) {
-        const { update_type, task_end_time, task_start_time, time_interval, ...extra } = info;
+        const {
+            update_type = PUTaskRangeType.AllOnShelves,
+            task_end_time,
+            task_start_time,
+            time_interval,
+            ...extra
+        } = info;
         const isDay = time_interval && time_interval % 86400 === 0;
         return {
             range: update_type,

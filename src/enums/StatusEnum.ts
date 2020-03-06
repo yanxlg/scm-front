@@ -36,6 +36,14 @@ export type TaskRangeCode = keyof typeof TaskRangeMap;
 
 export const TaskRangeList = transStatusList(TaskRangeMap);
 
+export enum TaskRangeEnum {
+    URL = 1,
+    FullStack,
+    Store,
+    AllOnShelf,
+    SalesOnShelves,
+}
+
 //======================= 任务状态 ======================//
 
 export const TaskStatusMap = {

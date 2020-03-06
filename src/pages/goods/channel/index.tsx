@@ -1,6 +1,5 @@
 import React, { RefObject } from 'react';
 import SearchCondition from './components/SearchCondition';
-import DataStatusUpdate from './components/DataStatusUpdate';
 import ExcelDialog from './components/ExcelDialog';
 import {
     getVovaGoodsList,
@@ -10,14 +9,12 @@ import {
 import '@/styles/index.less';
 import './index.less';
 import '@/styles/product.less';
-import { Modal, message, Button, Pagination, Popconfirm } from 'antd';
+import { Modal, message, Button, Pagination } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
 import { checkLowerShelf, checkUpperShelf, GoodsStatusMap } from '@/enums/StatusEnum';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { cloneSet } from '@/utils/common';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 
 declare interface IVoVaListState {
@@ -259,7 +256,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             render: (url: string) => {
                 return (
                     url && (
-                        <Button type="link" href={url} className="product-link">
+                        <Button target="_blank" type="link" href={url} className="product-link">
                             {url}
                         </Button>
                     )

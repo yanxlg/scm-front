@@ -21,6 +21,7 @@ declare interface ILocalSearchProps {
     getGoodsDelete(): void;
     toggleExcelDialog(status: boolean): void;
     getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
+    task_id?: number; // 默认task_id
 }
 
 declare interface ILocalSearchState {
@@ -49,7 +50,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
     constructor(props: ILocalSearchProps) {
         super(props);
         this.state = {
-            task_number: '',
+            task_number: props.task_id !== void 0 ? `${props.task_id}` : '',
             store_id: '',
             commodity_id: '',
             inventory_status: '',

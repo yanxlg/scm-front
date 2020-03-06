@@ -16,6 +16,7 @@ import {
     TaskTypeCode,
     TaskTypeList,
     TaskTypeMap,
+    TaskTypeEnum,
 } from '@/enums/StatusEnum';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import CollapsePopOver from '@/components/CollapsePopOver';
@@ -169,8 +170,10 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             width: '130px',
             align: 'center',
             render: (status: string, record) => {
+                // 目前只有采集任务支持查看结果
                 const percent =
                     status === '0' ? 0 : status === '1' ? 50 : status === '2' ? 100 : 100;
+                const { result = 0, task_type } = record;
                 return (
                     <>
                         <div>
@@ -192,7 +195,10 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                             />
                             {TaskStatusMap[(status as unknown) as TaskStatusCode]}
                         </div>
-                        {status === '0' || (status === '1' && record.result === 0) ? null : (
+                        {task_type !== TaskTypeEnum.Gather ||
+                        status === '0' ||
+                        status === '1' ||
+                        result < 1 ? null : (
                             <Button type="link" onClick={() => this.viewTaskResult(record.task_id)}>
                                 查看结果
                             </Button>

@@ -17,6 +17,8 @@ import {
     TaskExecuteType,
     TaskIntervalConfigType,
     HotTaskFilterType,
+    TaskRangeMap,
+    TaskRangeEnum,
 } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
@@ -311,7 +313,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
 
     private convertDetail(info: ITaskDetailInfo) {
         const {
-            range,
+            shopId,
             task_type,
             task_end_time,
             task_start_time,
@@ -320,18 +322,24 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             category_level_one = '',
             category_level_two = '',
             category_level_three = '',
+            execute_count,
+            sub_cat_id,
             ...extra
         } = info;
         const taskType =
-            (task_type as any) === '单次任务' ? TaskExecuteType.once : TaskExecuteType.interval;
+            Number(execute_count) === TaskExecuteType.once
+                ? TaskExecuteType.once
+                : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
+        const range =
+            sub_cat_id === TaskRangeEnum.FullStack ? HotTaskRange.fullStack : HotTaskRange.store;
         return {
             keywords,
             category_level_one: category_level_one.split(','),
             category_level_two: category_level_two.split(','),
             category_level_three: category_level_three.split(','),
-            range: range === HotTaskRange.fullStack ? range : HotTaskRange.store,
-            shopId: range !== HotTaskRange.fullStack ? range : undefined,
+            range: range,
+            shopId: shopId,
             task_end_time:
                 taskType === TaskExecuteType.interval && task_end_time
                     ? moment(task_end_time * 1000)
@@ -341,10 +349,7 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     ? TaskIntervalConfigType.day
                     : TaskIntervalConfigType.second
                 : TaskIntervalConfigType.day,
-            task_start_time:
-                taskType === TaskExecuteType.once && task_start_time
-                    ? moment(task_start_time * 1000)
-                    : undefined,
+            task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
             task_type: taskType,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
@@ -934,10 +939,11 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                             if (filterType === HotTaskFilterType.ByKeywords) {
                                 return (
                                     <Form.Item
-                                        className="form-item form-item-inline"
+                                        className="form-item form-item-inline form-required-hide"
                                         validateTrigger={'onBlur'}
                                         name="keywords"
                                         label="关&ensp;键&ensp;词"
+                                        required={true}
                                     >
                                         <Input
                                             className="input-large"
