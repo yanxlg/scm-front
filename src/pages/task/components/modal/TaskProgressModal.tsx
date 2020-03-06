@@ -1,5 +1,5 @@
 import React from 'react';
-import { Descriptions } from 'antd';
+import { Descriptions, Modal } from 'antd';
 import LoadingButton from '@/components/LoadingButton';
 import { Bind } from 'lodash-decorators';
 import { querySubTaskProgress } from '@/services/task';
@@ -94,4 +94,11 @@ class TaskProgressModal extends React.PureComponent<ITaskProgressItem, ITaskProg
     }
 }
 
-export default TaskProgressModal;
+export function showTaskProgressModal(record: ITaskProgressItem) {
+    Modal.info({
+        content: <TaskProgressModal {...record} />,
+        className: 'modal-empty task-modal-progress',
+        icon: null,
+        maskClosable: true,
+    });
+}
