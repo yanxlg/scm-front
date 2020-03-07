@@ -1,6 +1,6 @@
 import React from 'react';
 import { DashboardOutlined } from '@ant-design/icons/lib';
-import Icon from '@/components/Icons/Icon';
+import { Icons } from '@/components/Icon';
 export default [
     {
         path: '/',
@@ -10,11 +10,7 @@ export default [
     {
         path: '/task',
         name: '任务中心',
-        icon: (
-            <span className="anticon">
-                <Icon type="task" />
-            </span>
-        ),
+        icon: <Icons type="scm-task" />,
         children: [
             {
                 path: '/task/config',
@@ -41,11 +37,7 @@ export default [
     {
         path: '/goods',
         name: '商品中心',
-        icon: (
-            <span className="anticon">
-                <Icon type="goods" />
-            </span>
-        ),
+        icon: <Icons type="scm-goods" />,
         children: [
             {
                 path: '/goods/local',
@@ -70,29 +62,17 @@ export default [
     {
         path: '/order',
         name: '订单管理',
-        icon: (
-            <span className="anticon">
-                <Icon type="order" />
-            </span>
-        ),
+        icon: <Icons type="scm-order" />,
     },
     {
         path: '/stock',
         name: '出入库管理',
-        icon: (
-            <span className="anticon">
-                <Icon type="io" />
-            </span>
-        ),
+        icon: <Icons type="scm-io" />,
     },
     {
         path: '/setting',
         name: '基本设置',
-        icon: (
-            <span className="anticon">
-                <Icon type="setting" />
-            </span>
-        ),
+        icon: <Icons type="scm-setting" />,
         children: [
             {
                 path: '/setting/store',

@@ -6,7 +6,7 @@ import { genBreadcrumbProps } from '@ant-design/pro-layout/es/utils/getBreadcrum
 import { BasicLayoutProps, getMenuData, MenuDataItem } from '@ant-design/pro-layout';
 
 export type SiderTheme = 'light' | 'dark';
-export interface GlobalHeaderRightProps extends BasicLayoutProps{
+export interface GlobalHeaderRightProps extends BasicLayoutProps {
     theme?: SiderTheme;
     layout?: 'sidemenu' | 'topmenu';
     breadcrumb?: {
@@ -20,21 +20,37 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
     if (theme === 'dark' && layout === 'topmenu') {
         className = `${styles.right}  ${styles.dark}`;
     }
-    const {route={},menu,formatMessage,menuDataRender,itemRender} = props;
+    const { route = {}, menu, formatMessage, menuDataRender, itemRender } = props;
     const { routes = [] } = route;
-    const {breadcrumbMap} = getMenuData(routes,menu,formatMessage,menuDataRender);
-    const breadcrumbData = genBreadcrumbProps(Object.assign({},props,{
-        breadcrumbMap:breadcrumbMap
-    }));
+    const { breadcrumbMap } = getMenuData(routes, menu, formatMessage, menuDataRender);
+    const breadcrumbData = genBreadcrumbProps(
+        Object.assign({}, props, {
+            breadcrumbMap: breadcrumbMap,
+        }),
+    );
     return (
-      <div>
-          {
-              breadcrumbData ? <Breadcrumb className={styles.breadcrumb} routes={breadcrumbData} itemRender={itemRender}/> : null}
-          <div className={className}>
-              用户名，<Button type="link" className="padding-none" onClick={()=>{alert("退出")}}>退出</Button>
-          </div>
-      </div>
+        <div>
+            {breadcrumbData ? (
+                <Breadcrumb
+                    className={styles.breadcrumb}
+                    routes={breadcrumbData}
+                    itemRender={itemRender}
+                />
+            ) : null}
+            <div className={className}>
+                用户名，
+                <Button
+                    type="link"
+                    className="padding-none"
+                    onClick={() => {
+                        alert('退出');
+                    }}
+                >
+                    退出
+                </Button>
+            </div>
+        </div>
     );
 };
 
-export default GlobalHeaderRight
+export default GlobalHeaderRight;

@@ -12,6 +12,7 @@ import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
 import '@/styles/menu.less';
+import CopyLink from '@/components/copyLink';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
