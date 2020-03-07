@@ -8,6 +8,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IRowDataItem, ISaleItem, ICatagoryData } from '../index';
 
 import { utcToLocal } from '@/utils/date';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 declare interface IProps {
     searchLoading: boolean;
@@ -107,7 +108,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return <ZoomImage className="goods-local-img" src={value} />;
+                return <AutoEnLargeImg src={value} className="goods-local-img" />;
             },
         },
         {

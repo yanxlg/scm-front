@@ -1,36 +1,36 @@
 import React, { useMemo } from 'react';
-import { Tooltip } from 'antd';
+import { Popover } from 'antd';
+import styles from './_index.less';
 
 declare interface IAutoEnLargeImgProps {
     className?: string;
-    tipClassName?: string;
-    largeImgClassName?: string;
-    url?: string;
+    enLargeClassName?: string;
+    src?: string;
 }
 
 const AutoEnLargeImg: React.FC<IAutoEnLargeImgProps> = ({
-    className,
-    tipClassName,
-    largeImgClassName,
-    url,
+    className = '',
+    enLargeClassName = '',
+    src,
 }) => {
     return useMemo(() => {
-        return url ? (
-            <Tooltip
+        return src ? (
+            <Popover
                 placement="right"
-                title={
+                content={
                     <img
-                        src={url.replace('150_150', '240_240')}
+                        src={src.replace('150_150', '240_240')}
                         alt=""
-                        className={largeImgClassName}
+                        className={`${styles.enlarge} ${enLargeClassName}`}
                     />
                 }
-                overlayClassName={tipClassName}
+                title={null}
+                autoAdjustOverflow={true}
             >
-                <img src={url} className={className} alt="" />
-            </Tooltip>
+                <img src={src} className={className} alt="" />
+            </Popover>
         ) : null;
-    }, [className, tipClassName, largeImgClassName, url]);
+    }, [className, enLargeClassName, src]);
 };
 
 export default AutoEnLargeImg;

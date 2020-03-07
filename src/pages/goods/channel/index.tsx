@@ -16,6 +16,7 @@ import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
 import { checkLowerShelf, checkUpperShelf, GoodsStatusMap } from '@/enums/StatusEnum';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 declare interface IVoVaListState {
     dataSet: Array<IRowDataItem>;
@@ -177,7 +178,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem, index: number) => (
-                <img className="goods-vova-img" src={value} alt="" />
+                <AutoEnLargeImg src={value} className="goods-vova-img" />
             ),
         },
         {
