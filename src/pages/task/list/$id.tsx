@@ -178,7 +178,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                             </Button>
                         </div>*/}
                         {task_type === TaskTypeEnum.Gather ? (
-                            <Descriptions column={1} className="task-desc">
+                            <Descriptions column={1} className="task-desc" size="small">
                                 <Descriptions.Item label="任务SN">
                                     {detail.task_sn}
                                 </Descriptions.Item>
