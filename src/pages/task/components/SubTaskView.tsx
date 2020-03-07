@@ -88,7 +88,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
         {
             title: '已入库商品数',
             width: '100px',
-            dataIndex: 'create_status',
+            dataIndex: 'progress',
             align: 'center',
         },
         {
@@ -139,7 +139,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
         {
             title: '已上架的商品数',
             width: '100px',
-            dataIndex: 'node',
+            dataIndex: 'progress',
             align: 'center',
         },
         {
@@ -190,7 +190,7 @@ class SubTaskView extends React.PureComponent<ISubTaskViewProps, ISubTaskViewSta
         {
             title: '已更新的商品数',
             width: '100px',
-            dataIndex: 'node',
+            dataIndex: 'progress',
             align: 'center',
         },
         {
