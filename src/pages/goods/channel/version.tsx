@@ -5,11 +5,12 @@ import '@/styles/product.less';
 import { ColumnType } from 'antd/lib/table/interface';
 import { BindAll } from 'lodash-decorators';
 import {
-    activeVovaGoodsVersion,
-    clearGoodsVersionRecord,
-    exportVovaGoodsVersion,
-    queryGoodsVersion,
+    activeChannelProductVersion,
+    cleanChannelChangedProperties,
+    exportChannelProductVersion,
+    queryChannelProductVersion,
 } from '@/services/channel';
+import { EmptyObject } from '@/enums/ConfigEnum';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -66,15 +67,19 @@ class Version extends React.PureComponent<{}, IVersionState> {
         this.setState({
             dataLoading: true,
         });
-        return queryGoodsVersion(params)
-            .then(({ data: { changed_property_list = [], goods_list = [] } }) => {
-                const { dataSet, keys } = this.combineDataSet(goods_list);
-                this.setState({
-                    dataSet,
-                    keys,
-                    attributes: changed_property_list,
-                });
-            })
+        return queryChannelProductVersion(params)
+            .then(
+                ({
+                    data: { changed_property_list = [], goods_list = [] } = EmptyObject,
+                } = EmptyObject) => {
+                    const { dataSet, keys } = this.combineDataSet(goods_list);
+                    this.setState({
+                        dataSet,
+                        keys,
+                        attributes: changed_property_list,
+                    });
+                },
+            )
             .finally(() => {
                 this.setState({
                     dataLoading: false,
@@ -83,7 +88,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
     }
 
     private exportGoodsVersion(params?: IApiParams) {
-        return exportVovaGoodsVersion(params);
+        return exportChannelProductVersion(params);
     }
 
     private activeGoodsVersion() {
@@ -98,7 +103,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
                 virtual_id: dataSet.find(item => item.product_id === product_id)!.vova_virtual_id,
             });
         });
-        return activeVovaGoodsVersion(params).then(() => {
+        return activeChannelProductVersion(params).then(() => {
             message.success('应用新版本成功!');
         });
     }
@@ -169,7 +174,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
 
     private clearRecord() {
         this.setState({ clearLoading: true });
-        clearGoodsVersionRecord()
+        cleanChannelChangedProperties()
             .then(() => {
                 this.setState({
                     clearLoading: false,
@@ -378,13 +383,11 @@ class Version extends React.PureComponent<{}, IVersionState> {
         const { dataLoading, attributes, dataSet, clearLoading } = this.state;
         return (
             <div className="container">
-                <Card className="card-affix-top">
-                    <VersionSearch
-                        onActive={this.activeGoodsVersion}
-                        onExport={this.exportGoodsVersion}
-                        onSearch={this.queryData}
-                    />
-                </Card>
+                <VersionSearch
+                    onActive={this.activeGoodsVersion}
+                    onExport={this.exportGoodsVersion}
+                    onSearch={this.queryData}
+                />
                 <Card className="product-card" title="数据/状态更新">
                     <Spin spinning={dataLoading} tip="Loading...">
                         <div className="product-tags">

@@ -12,7 +12,7 @@ import {
     AutoPurchaseTaskType,
     TaskCreateStatusCode,
 } from '@/enums/StatusEnum';
-import { IRequestPagination, IRequestPagination2 } from '@/interface/IGlobal';
+import { IRequestPagination, IRequestPagination2, IBoolean } from '@/interface/IGlobal';
 
 export type ITaskListQuery = {
     task_id?: string;
@@ -126,7 +126,7 @@ export interface ITaskDetailInfo {
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;
-    is_upper_shelf: 0 | 1;
+    is_upper_shelf: IBoolean;
     status: TaskStatusCode;
     success: number;
     fail: number;

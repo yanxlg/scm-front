@@ -6,8 +6,10 @@ import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/product.less';
 import '@/styles/card.less';
 import { transNullValue } from '@/utils/transform';
-import { queryChannelCategory, IFilterParams } from '@/services/channel';
+import { queryChannelCategory } from '@/services/channel';
 import { ProductStatusList } from '@/config/dictionaries/Product';
+import { IChannelCategoryItem, IChannelProductListBody } from '@/interface/IChannel';
+import { EmptyObject } from '@/enums/ConfigEnum';
 
 declare interface ISearchProps {
     onSearch: Function;
@@ -15,15 +17,9 @@ declare interface ISearchProps {
     searchLoading: boolean;
 }
 
-declare interface SelectOptionsItem {
-    id: string;
-    name: string;
-    children?: SelectOptionsItem[];
-}
-
 declare interface ISearchState {
     categoryLoading: boolean;
-    searchOptions: SelectOptionsItem[];
+    searchOptions: IChannelCategoryItem[];
 }
 
 const Option = Select.Option;
@@ -88,7 +84,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
     @Bind
     private queryCategory() {
         queryChannelCategory()
-            .then(({ data = [] }) => {
+            .then(({ data = [] } = EmptyObject) => {
                 this.setState({
                     categoryLoading: false,
                     searchOptions: data,
@@ -125,7 +121,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
             onshelf_time_end: transEndDate(onshelf_time_end),
             level_one_category: transNullValue(level_one_category),
             level_two_category: transNullValue(level_two_category),
-        } as IFilterParams;
+        } as IChannelProductListBody;
     }
 
     @Bind
@@ -137,184 +133,184 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
         const { searchOptions, categoryLoading } = this.state;
         const { searchLoading } = this.props;
         return (
-            <Card className="card-affix-top">
-                <Form
-                    ref={this.formRef}
-                    className="form-help-absolute"
-                    layout="inline"
-                    autoComplete={'off'}
-                    initialValues={{
-                        level_one_category: '',
-                        level_two_category: '',
-                        sales_volume: salesVolumeList[0].id,
-                        product_status: ProductStatusList[0].id,
-                    }}
+            <Form
+                ref={this.formRef}
+                className="form-help-absolute"
+                layout="inline"
+                autoComplete={'off'}
+                initialValues={{
+                    level_one_category: '',
+                    level_two_category: '',
+                    sales_volume: salesVolumeList[0].id,
+                    product_status: ProductStatusList[0].id,
+                }}
+            >
+                <Form.Item
+                    label={<span className="product-form-label">时&emsp;&emsp;&emsp;间</span>}
+                    className="form-item"
                 >
-                    <Form.Item
-                        label={<span className="product-form-label">时&emsp;&emsp;&emsp;间</span>}
-                        className="form-item"
-                    >
-                        <Form.Item
-                            noStyle={true}
-                            shouldUpdate={(prevValues, currentValues) =>
-                                prevValues.onshelf_time_end !== currentValues.onshelf_time_end
-                            }
-                        >
-                            {({ getFieldValue }) => {
-                                const onshelf_time_end = getFieldValue('onshelf_time_end');
-                                return (
-                                    <Form.Item name="onshelf_time_start" noStyle={true}>
-                                        <DatePicker
-                                            disabledDate={currentDate =>
-                                                currentDate
-                                                    ? onshelf_time_end
-                                                        ? currentDate.isAfter(onshelf_time_end)
-                                                        : false
-                                                    : false
-                                            }
-                                            className="product-picker"
-                                        />
-                                    </Form.Item>
-                                );
-                            }}
-                        </Form.Item>
-                        <span className="config-colon">-</span>
-                        <Form.Item
-                            noStyle={true}
-                            shouldUpdate={(prevValues, currentValues) =>
-                                prevValues.onshelf_time_start !== currentValues.onshelf_time_start
-                            }
-                        >
-                            {({ getFieldValue }) => {
-                                const onshelf_time_start = getFieldValue('onshelf_time_start');
-                                return (
-                                    <Form.Item name="onshelf_time_end" noStyle={true}>
-                                        <DatePicker
-                                            disabledDate={currentDate =>
-                                                currentDate
-                                                    ? onshelf_time_start
-                                                        ? currentDate.isBefore(onshelf_time_start)
-                                                        : false
-                                                    : false
-                                            }
-                                            className="product-picker"
-                                        />
-                                    </Form.Item>
-                                );
-                            }}
-                        </Form.Item>
-                    </Form.Item>
-
-                    <Form.Item
-                        className="form-item"
-                        validateTrigger={'onBlur'}
-                        name="commodity_id"
-                        label={<span className="product-form-label">Commodity ID</span>}
-                    >
-                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
-                    </Form.Item>
-
-                    <Form.Item
-                        className="form-item"
-                        validateTrigger={'onBlur'}
-                        name="vova_virtual_id"
-                        label={<span className="product-form-label">虚拟&emsp;ID</span>}
-                    >
-                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
-                    </Form.Item>
-
-                    <Form.Item
-                        className="form-item"
-                        validateTrigger={'onBlur'}
-                        name="product_id"
-                        label={<span className="product-form-label">Product ID</span>}
-                    >
-                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
-                    </Form.Item>
-
-                    <Form.Item
-                        className="form-item"
-                        validateTrigger={'onBlur'}
-                        name="sales_volume"
-                        label={<span className="product-form-label">销&emsp;&emsp;&emsp;量</span>}
-                    >
-                        <Select className="select-default">
-                            {salesVolumeList.map(item => (
-                                <Option value={item.id}>{item.name}</Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        className="form-item"
-                        validateTrigger={'onBlur'}
-                        name="shop_name"
-                        label={<span className="product-form-label">店&ensp;铺&ensp;名</span>}
-                    >
-                        <Input className="input-default input-handler" placeholder="多个逗号隔开" />
-                    </Form.Item>
-
-                    <Form.Item
-                        className="form-item"
-                        validateTrigger={'onBlur'}
-                        name="level_one_category"
-                        label={<span className="product-form-label">一级类目</span>}
-                    >
-                        <Select
-                            loading={categoryLoading}
-                            className="select-default"
-                            onChange={this.onFirstCategoryChange}
-                        >
-                            <Option value="">全部</Option>
-                            {searchOptions.map(item => (
-                                <Option value={item.id}>{item.name}</Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
                     <Form.Item
                         noStyle={true}
                         shouldUpdate={(prevValues, currentValues) =>
-                            prevValues.level_one_category !== currentValues.level_one_category
+                            prevValues.onshelf_time_end !== currentValues.onshelf_time_end
                         }
                     >
                         {({ getFieldValue }) => {
-                            const levelOne = getFieldValue('level_one_category');
-                            const childCategory =
-                                searchOptions.find(category => {
-                                    return category.id === levelOne;
-                                })?.children || [];
+                            const onshelf_time_end = getFieldValue('onshelf_time_end');
                             return (
-                                <Form.Item
-                                    validateTrigger={'onBlur'}
-                                    name="level_two_category"
-                                    label={<span className="product-form-label">二级类目</span>}
-                                    className="form-item"
-                                >
-                                    <Select loading={categoryLoading} className="select-default">
-                                        <Option value="">全部</Option>
-                                        {childCategory.map(category => {
-                                            return (
-                                                <Option key={category.id} value={category.id}>
-                                                    {category.name}
-                                                </Option>
-                                            );
-                                        })}
-                                    </Select>
+                                <Form.Item name="onshelf_time_start" noStyle={true}>
+                                    <DatePicker
+                                        disabledDate={currentDate =>
+                                            currentDate
+                                                ? onshelf_time_end
+                                                    ? currentDate.isAfter(onshelf_time_end)
+                                                    : false
+                                                : false
+                                        }
+                                        className="product-picker"
+                                    />
                                 </Form.Item>
                             );
                         }}
                     </Form.Item>
+                    <span className="config-colon">-</span>
                     <Form.Item
-                        validateTrigger={'onBlur'}
-                        className="form-item"
-                        name="product_status"
-                        label={<span className="product-form-label">商品状态</span>}
+                        noStyle={true}
+                        shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.onshelf_time_start !== currentValues.onshelf_time_start
+                        }
                     >
-                        <Select className="select-default">
-                            {ProductStatusList.map(item => (
-                                <Option value={item.id}>{item.name}</Option>
-                            ))}
-                        </Select>
+                        {({ getFieldValue }) => {
+                            const onshelf_time_start = getFieldValue('onshelf_time_start');
+                            return (
+                                <Form.Item name="onshelf_time_end" noStyle={true}>
+                                    <DatePicker
+                                        disabledDate={currentDate =>
+                                            currentDate
+                                                ? onshelf_time_start
+                                                    ? currentDate.isBefore(onshelf_time_start)
+                                                    : false
+                                                : false
+                                        }
+                                        className="product-picker"
+                                    />
+                                </Form.Item>
+                            );
+                        }}
                     </Form.Item>
+                </Form.Item>
+
+                <Form.Item
+                    className="form-item"
+                    validateTrigger={'onBlur'}
+                    name="commodity_id"
+                    label={<span className="product-form-label">Commodity ID</span>}
+                >
+                    <Input className="input-default input-handler" placeholder="多个逗号隔开" />
+                </Form.Item>
+
+                <Form.Item
+                    className="form-item"
+                    validateTrigger={'onBlur'}
+                    name="vova_virtual_id"
+                    label={<span className="product-form-label">虚拟&emsp;ID</span>}
+                >
+                    <Input className="input-default input-handler" placeholder="多个逗号隔开" />
+                </Form.Item>
+
+                <Form.Item
+                    className="form-item"
+                    validateTrigger={'onBlur'}
+                    name="product_id"
+                    label={<span className="product-form-label">Product ID</span>}
+                >
+                    <Input className="input-default input-handler" placeholder="多个逗号隔开" />
+                </Form.Item>
+
+                <Form.Item
+                    className="form-item"
+                    validateTrigger={'onBlur'}
+                    name="sales_volume"
+                    label={<span className="product-form-label">销&emsp;&emsp;&emsp;量</span>}
+                >
+                    <Select className="select-default">
+                        {salesVolumeList.map(item => (
+                            <Option value={item.id}>{item.name}</Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+                <Form.Item
+                    className="form-item"
+                    validateTrigger={'onBlur'}
+                    name="shop_name"
+                    label={<span className="product-form-label">店&ensp;铺&ensp;名</span>}
+                >
+                    <Input className="input-default input-handler" placeholder="多个逗号隔开" />
+                </Form.Item>
+
+                <Form.Item
+                    className="form-item"
+                    validateTrigger={'onBlur'}
+                    name="level_one_category"
+                    label={<span className="product-form-label">一级类目</span>}
+                >
+                    <Select
+                        loading={categoryLoading}
+                        className="select-default"
+                        onChange={this.onFirstCategoryChange}
+                    >
+                        <Option value="">全部</Option>
+                        {searchOptions.map(item => (
+                            <Option value={item.id}>{item.name}</Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+                <Form.Item
+                    noStyle={true}
+                    shouldUpdate={(prevValues, currentValues) =>
+                        prevValues.level_one_category !== currentValues.level_one_category
+                    }
+                >
+                    {({ getFieldValue }) => {
+                        const levelOne = getFieldValue('level_one_category');
+                        const childCategory =
+                            searchOptions.find(category => {
+                                return category.id === levelOne;
+                            })?.children || [];
+                        return (
+                            <Form.Item
+                                validateTrigger={'onBlur'}
+                                name="level_two_category"
+                                label={<span className="product-form-label">二级类目</span>}
+                                className="form-item"
+                            >
+                                <Select loading={categoryLoading} className="select-default">
+                                    <Option value="">全部</Option>
+                                    {childCategory.map(category => {
+                                        return (
+                                            <Option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </Option>
+                                        );
+                                    })}
+                                </Select>
+                            </Form.Item>
+                        );
+                    }}
+                </Form.Item>
+                <Form.Item
+                    validateTrigger={'onBlur'}
+                    className="form-item"
+                    name="product_status"
+                    label={<span className="product-form-label">商品状态</span>}
+                >
+                    <Select className="select-default">
+                        {ProductStatusList.map(item => (
+                            <Option value={item.id}>{item.name}</Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+                <div>
                     <Button
                         type="primary"
                         className="btn-group vertical-middle form-item"
@@ -330,8 +326,8 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                     >
                         导出
                     </Button>
-                </Form>
-            </Card>
+                </div>
+            </Form>
         );
     }
 }

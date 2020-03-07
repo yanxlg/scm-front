@@ -20,6 +20,7 @@ import {
 import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
 import { EmptyObject } from '@/enums/ConfigEnum';
 import { IChannelProductListItem } from '@/interface/IChannel';
+import JsonForm, { IFieldItem } from '@/components/JsonForm';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -305,11 +306,11 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     }
 
     // 显示下载弹框
-    toggleExcelDialog = (status: boolean) => {
+    private toggleExcelDialog(status: boolean) {
         this.setState({
             excelDialogStatus: status,
         });
-    };
+    }
 
     private getExcelData(pageNumber: number, pageSize: number) {
         const values = this.formRef.current!.getFieldsValue();
