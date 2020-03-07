@@ -2,12 +2,12 @@ import React, { RefObject } from 'react';
 import { Button, Card, Input, DatePicker, Select, Form } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import { Bind } from 'lodash-decorators';
-import { getSearchConditionOptions, IFilterParams } from '@/services/VovaGoodsService';
 import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/product.less';
 import '@/styles/card.less';
 import { transNullValue } from '@/utils/transform';
-import { GoodsStatusList } from '@/enums/StatusEnum';
+import { queryChannelCategory, IFilterParams } from '@/services/channel';
+import { ProductStatusList } from '@/config/dictionaries/Product';
 
 declare interface ISearchProps {
     onSearch: Function;
@@ -87,7 +87,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
 
     @Bind
     private queryCategory() {
-        getSearchConditionOptions()
+        queryChannelCategory()
             .then(({ data = [] }) => {
                 this.setState({
                     categoryLoading: false,
@@ -147,7 +147,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         level_one_category: '',
                         level_two_category: '',
                         sales_volume: salesVolumeList[0].id,
-                        product_status: GoodsStatusList[0].id,
+                        product_status: ProductStatusList[0].id,
                     }}
                 >
                     <Form.Item
@@ -310,7 +310,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         label={<span className="product-form-label">商品状态</span>}
                     >
                         <Select className="select-default">
-                            {GoodsStatusList.map(item => (
+                            {ProductStatusList.map(item => (
                                 <Option value={item.id}>{item.name}</Option>
                             ))}
                         </Select>

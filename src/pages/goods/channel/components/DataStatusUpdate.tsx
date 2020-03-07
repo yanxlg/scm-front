@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, Spin } from 'antd';
 import router from 'umi/router';
-import { getVovaChangedProperties } from '@/services/VovaGoodsService';
 import '@/styles/form.less';
+import { queryChannelChangedProperties } from '@/services/channel';
 
 export declare interface PropertyItem {
     property: string;
@@ -14,7 +14,7 @@ const DataStatusUpdate: React.FC = () => {
     const [list, setList] = useState([]);
 
     useEffect(() => {
-        getVovaChangedProperties()
+        queryChannelChangedProperties()
             .then(({ data: { changed_property_list = [] } }) => {
                 setList(changed_property_list);
                 setLoading(false);

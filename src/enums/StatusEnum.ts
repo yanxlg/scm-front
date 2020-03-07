@@ -1,15 +1,5 @@
 import { transStatusList } from '@/utils/transform';
 
-//======================= 商品状态 ======================//
-export const GoodsStatusMap: { [key: number]: string } = {
-    0: '全部',
-    1: '待上架',
-    2: '已上架',
-    3: '已下架',
-};
-
-export const GoodsStatusList = transStatusList(GoodsStatusMap);
-
 // 返回哪些状态可以执行上架操作
 export const checkUpperShelf = function(status: number) {
     return status === 1; // 待上架
@@ -30,6 +20,7 @@ export const TaskRangeMap = {
     6: '采购',
     7: '商品上架',
     8: '商品下架',
+    // 11 :'',
 };
 
 export type TaskRangeCode = keyof typeof TaskRangeMap;
