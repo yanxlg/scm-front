@@ -3,6 +3,7 @@
  * @param text
  */
 import { FormInstance } from 'antd/es/form';
+import { ResponseError } from 'umi-request';
 
 export const stringifyText = (text: string) => {
     // 不同系统换行符不一样
@@ -75,4 +76,36 @@ export function scrollToFirstError(
 
 export function getCurrentPage(pageSize: number, firstPos: number) {
     return Math.ceil(firstPos / pageSize);
+}
+
+export function downloadExcel(response: Response) {
+    const contentType = response.headers.get('content-type') ?? '';
+    if (/json/.test(contentType)) {
+        // 错误过滤
+        return Promise.reject(
+            // @ts-ignore
+            new ResponseError<any>(
+                response.json(),
+                'data Error',
+                null,
+                {
+                    url: response.url,
+                },
+                'DataError',
+            ),
+        );
+    }
+    const disposition = response.headers.get('content-disposition') ?? '';
+    const fileName = decodeURI(
+        disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
+    );
+    response.blob().then((blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    });
 }

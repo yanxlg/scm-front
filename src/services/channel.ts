@@ -7,83 +7,62 @@ import {
     IChannelCategoryResponse,
     IChannelChangedPropertiesResponse,
     IChannelShelveStateBody,
+    IChannelProductVersionQuery,
+    IChannelProductVersionResponse,
+    IChannelProductDetailQuery,
+    IChannelProductDetailResponse,
+    IEditChannelProductDetailBody,
+    IActiveChannelProductVersionBody,
 } from '@/interface/IChannel';
-import { IResponse } from '@/interface/IGlobal';
+import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
+import { downloadExcel } from '@/utils/common';
 
-export async function queryGoodsVersion(params?: IApiParams) {
-    return request.get(ChannelApiPath.QueryGoodsVersion, {
-        params: params,
+export async function queryChannelProductVersion(query?: IChannelProductVersionQuery) {
+    return request.get<IResponse<IChannelProductVersionResponse>>(
+        ChannelApiPath.QueryProductVersion,
+        {
+            params: query,
+        },
+    );
+}
+
+export async function queryChannelProductDetail(query: IChannelProductDetailQuery) {
+    return request.get<IResponse<IChannelProductDetailResponse>>(
+        ChannelApiPath.QueryProductDetail,
+        {
+            params: query,
+        },
+    );
+}
+
+export async function editChannelProductDetail(body: IEditChannelProductDetailBody) {
+    return request.put<IResponse<null>>(ChannelApiPath.EditProductDetail, {
+        data: body,
     });
 }
 
-export async function queryGoodsDetail(params: { product_id: string; channel?: string }) {
-    return request.get(ChannelApiPath.QueryGoodsDetail, {
-        params: params,
-    });
-}
-
-export async function editGoodsDetail(params: { product_id: string; sku_list: string }) {
-    return request.put(ChannelApiPath.EditGoodsDetail, {
-        data: params,
-    });
-}
-
-export async function exportVovaGoodsVersion(data?: IApiParams) {
+export async function exportChannelProductVersion(data?: IChannelProductVersionQuery) {
     return request
-        .post(ChannelApiPath.ExportGoodsVersion, {
+        .post(ChannelApiPath.ExportProductVersion, {
             data: data,
             responseType: 'blob',
             parseResponse: false,
         })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+        .then(downloadExcel);
 }
 
-export async function activeVovaGoodsVersion(
-    params: Array<{
-        virtual_id: number;
-        product_id: number;
-    }>,
-) {
-    return request.post(ChannelApiPath.ActiveGoodsVersion, {
-        data: params,
+export async function activeChannelProductVersion(body: IActiveChannelProductVersionBody) {
+    return request.post<IResponse<null>>(ChannelApiPath.ActiveProductVersion, {
+        data: body,
     });
 }
 
-export async function clearGoodsVersionRecord() {
-    return request.post(ChannelApiPath.CleanChangedProperties);
+export async function cleanChannelChangedProperties() {
+    return request.post<IResponse<null>>(ChannelApiPath.CleanChangedProperties);
 }
 
-export declare interface IFilterParams {
-    page: number;
-    page_count: number;
-    onshelf_time_start: number;
-    onshelf_time_end: number;
-    commodity_id: string; // commodity_id
-    vova_virtual_id: string; // 虚拟 ID
-    product_id: string; // product_id
-    level_one_category: string; // 一级类目
-    level_two_category: string; // 二级类目
-    sales_volume: number; // 销量
-    shop_name: string; // 店铺名称
-    product_status: string; //上架状态
-}
-
-export async function queryChannelGoodsList(data: IChannelProductListBody) {
-    return request.post<IResponse<IChannelProductListResponse>>(ChannelApiPath.QueryGoodsList, {
+export async function queryChannelGoodsList(data: IChannelProductListBody & IRequestPagination1) {
+    return request.post<IResponse<IChannelProductListResponse>>(ChannelApiPath.QueryProductList, {
         requestType: 'json',
         data,
     });
@@ -107,26 +86,14 @@ export async function updateChannelShelveState(data: IChannelShelveStateBody) {
     });
 }
 
-export async function exportChannelProductList(data: IFilterParams) {
+export async function exportChannelProductList(
+    data: IChannelProductListBody & IRequestPagination1,
+) {
     return request
-        .post(ChannelApiPath.ExportGoodsList, {
+        .post(ChannelApiPath.ExportProductList, {
             data,
             responseType: 'blob',
             parseResponse: false,
         })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+        .then(downloadExcel);
 }
