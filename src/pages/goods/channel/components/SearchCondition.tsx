@@ -9,7 +9,7 @@ import { transNullValue } from '@/utils/transform';
 import { queryChannelCategory } from '@/services/channel';
 import { ProductStatusList } from '@/config/dictionaries/Product';
 import { IChannelCategoryItem, IChannelProductListBody } from '@/interface/IChannel';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface ISearchProps {
     onSearch: Function;
@@ -87,7 +87,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
             .then(({ data = [] } = EmptyObject) => {
                 this.setState({
                     categoryLoading: false,
-                    searchOptions: data,
+                    searchOptions: data || [],
                 });
             })
             .catch(() => {

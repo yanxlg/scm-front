@@ -5,7 +5,7 @@ import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import router from 'umi/router';
-import { utcToLocal } from '@/utils/date';
+import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import {
     TaskRangeCode,
     TaskRangeMap,
@@ -14,9 +14,9 @@ import {
     TaskStatusList,
     TaskStatusMap,
     TaskTypeCode,
+    TaskTypeEnum,
     TaskTypeList,
     TaskTypeMap,
-    TaskTypeEnum,
 } from '@/enums/StatusEnum';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import CollapsePopOver from '@/components/CollapsePopOver';
@@ -27,7 +27,8 @@ import '@/styles/config.less';
 import '@/styles/table.less';
 import '@/styles/task.less';
 import { ITaskListItem, ITaskListQuery } from '@/interface/ITask';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject, global } from '@/config/global';
+import queryString from 'query-string';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -56,30 +57,63 @@ declare interface ISearchFormConfig {
 class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
     private defaultFormRef: RefObject<JsonForm> = React.createRef();
     private expendFormRef: RefObject<JsonForm> = React.createRef();
+    private copiedQueryData: { [key: string]: any } = {};
     constructor(props: IALLTaskPageProps) {
         super(props);
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+            this.copiedQueryData = query;
+        }
+        const { page = 1, page_number = 50 } = this.copiedQueryData;
         this.state = {
             selectedRowKeys: [],
             dataLoading: false,
             searchLoading: false,
             dataSet: [],
-            pageNumber: 50,
-            page: 1,
+            pageNumber: Number(page_number),
+            page: Number(page),
             total: 0,
             showMore: false,
         };
-        if (props.initialValues) {
-            this.allFieldsList.initialValues = Object.assign(
-                {},
-                this.allFieldsList.initialValues,
-                props.initialValues,
-            );
-        }
+        const defaultInitialValues = this.computeInitialValues();
+        this.allFieldsList.initialValues = Object.assign(
+            {},
+            this.allFieldsList.initialValues,
+            defaultInitialValues,
+        );
+        this.unExecutedFieldsList.initialValues = Object.assign(
+            {},
+            this.allFieldsList.initialValues,
+            defaultInitialValues,
+        );
     }
     componentDidMount(): void {
         this.queryList();
     }
 
+    private computeInitialValues() {
+        const routeInitialValues = this.props.initialValues ?? {};
+        const {
+            task_id = '',
+            task_sn = '',
+            task_status = '',
+            task_name = '',
+            task_type = '',
+            task_begin_time = 0,
+            task_end_time = 0,
+        } = this.copiedQueryData;
+        return {
+            ...routeInitialValues,
+            task_id,
+            task_sn,
+            task_status,
+            task_name,
+            task_type,
+            task_begin_time: convertStartDate(Number(task_begin_time)),
+            task_end_time: convertEndDate(Number(task_end_time)),
+        };
+    }
     private onSearch() {
         this.queryList({
             searchLoading: true,
@@ -108,13 +142,29 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             searchLoading,
             selectedRowKeys: [],
         });
-
-        return getTaskList({
+        const query = {
             task_status: task_status ?? this.props.task_status,
             page: page,
             page_number: page_number,
             ...values,
-        })
+        };
+        const initialTaskStatus = this.props.task_status;
+        global.copiedQueryData = {
+            ...query,
+            tabKey:
+                initialTaskStatus === void 0
+                    ? '1'
+                    : initialTaskStatus === TaskStatusEnum.UnExecuted
+                    ? '2'
+                    : initialTaskStatus === TaskStatusEnum.Executing
+                    ? '3'
+                    : initialTaskStatus === TaskStatusEnum.Executed
+                    ? '4'
+                    : initialTaskStatus === TaskStatusEnum.Failed
+                    ? 5
+                    : '6',
+        };
+        return getTaskList(query)
             .then(
                 ({
                     data: {

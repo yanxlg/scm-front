@@ -17,11 +17,11 @@ import {
     TaskTypeEnum,
     TaskTypeMap,
 } from '@/enums/StatusEnum';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import URLGather from '@/pages/task/components/editor/URLGather';
 import HotGather from '../components/editor/HotGather';
 import { utcToLocal } from '@/utils/date';
 import TimerUpdate from '../components/editor/TimerUpdate';
+import { EmptyObject } from '@/config/global';
 
 const { TabPane } = Tabs;
 const { Step } = Steps;

@@ -18,9 +18,9 @@ import {
     updateChannelShelveState,
 } from '@/services/channel';
 import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import { EmptyObject } from '@/config/global';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;

@@ -23,7 +23,6 @@ import {
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { TreeNodeNormal } from 'antd/es/tree/Tree';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import {
     IHotTaskBody,
     IPDDCategoryResponse,
@@ -32,6 +31,7 @@ import {
 } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
+import { EmptyObject } from '@/config/global';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理

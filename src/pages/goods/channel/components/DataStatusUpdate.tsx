@@ -3,8 +3,8 @@ import { Card, Spin } from 'antd';
 import router from 'umi/router';
 import '@/styles/form.less';
 import { queryChannelChangedProperties } from '@/services/channel';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { IChannelChangedProperty } from '@/interface/IChannel';
+import { EmptyObject } from '@/config/global';
 
 const DataStatusUpdate: React.FC = () => {
     const [loading, setLoading] = useState(true);

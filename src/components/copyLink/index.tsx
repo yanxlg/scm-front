@@ -1,17 +1,25 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './_index.less';
 import { Popover } from 'antd';
 import { Icons } from '@/components/Icon';
 import { CheckCircleTwoTone } from '@ant-design/icons';
+import queryString from 'query-string';
+import { global } from '@/config/global';
 
 const CopyLink: React.FC = props => {
     const [copied, setCopied] = useState(false);
+    useEffect(() => {
+        global.copiedQueryData = {}; // 重置
+    }, []);
     const onClick = useCallback(() => {
         if (copied) return;
         setCopied(true);
-
+        const href = window.location.href;
+        const url = global.copiedQueryData
+            ? queryString.stringifyUrl({ url: href, query: global.copiedQueryData })
+            : href;
         let copyInput = document.createElement('input');
-        copyInput.value = window.location.href;
+        copyInput.value = url;
         document.body.appendChild(copyInput);
         copyInput.select(); // 选择对象
         document.execCommand('Copy'); // 执行浏览器复制命令

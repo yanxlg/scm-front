@@ -6,8 +6,8 @@ import { querySubTaskProgress } from '@/services/task';
 import { ISubTaskProgressResponse, ITaskProgressItem } from '@/interface/ITask';
 import { utcToLocal } from '@/utils/date';
 import '@/styles/task.less';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { TaskTypeEnum } from '@/enums/StatusEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface ITaskProgressModalState {
     detail?: ISubTaskProgressResponse;

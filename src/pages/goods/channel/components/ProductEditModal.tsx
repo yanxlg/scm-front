@@ -7,8 +7,8 @@ import { editChannelProductDetail, queryChannelProductDetail } from '@/services/
 import { FormInstance } from 'antd/es/form';
 import NumberInput from '@/components/NumberInput';
 import IntegerInput from '@/components/IntegerInput';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { IChannelProductDetailResponse, ISku } from '@/interface/IChannel';
+import { EmptyObject } from '@/config/global';
 
 declare interface IProductEditProps {
     product_id: string;
