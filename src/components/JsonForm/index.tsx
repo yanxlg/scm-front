@@ -23,7 +23,8 @@ export interface IFieldItem extends FormItemLabelProps {
     type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'dateRanger' | 'number' | 'integer';
     name: string | [string, string];
     placeholder?: string;
-    optionList?: IOptionItem[];
+    optionList?: IOptionItem[] | (() => Promise<IOptionItem[]>);
+    syncDefaultOption?: IOptionItem;
     className?: string;
     formItemClassName?: string;
     dateBeginWith?: string[];
@@ -39,8 +40,55 @@ declare interface IJsonFormProps extends FormProps {
 
 type formatter = 'number' | 'start_date' | 'end_date';
 
-export default class JsonForm extends React.PureComponent<IJsonFormProps> {
+declare interface IJsonFormState {
+    optionMap: {
+        [key: string]: IOptionItem[];
+    };
+}
+
+export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonFormState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+    constructor(props: IJsonFormProps) {
+        super(props);
+        this.state = {
+            optionMap: {},
+        };
+    }
+
+    private loadOptions = () => {
+        const { fieldList } = this.props;
+        fieldList.forEach(field => {
+            if (field.type === 'select') {
+                const optionList = field.optionList;
+                if (typeof optionList === 'function') {
+                    const name = field.name as string;
+                    optionList()
+                        .then(optionList => {
+                            this.setState(({ optionMap, ...state }) => {
+                                return {
+                                    ...state,
+                                    optionMap: {
+                                        ...optionMap,
+                                        [name]: optionList,
+                                    },
+                                };
+                            });
+                        })
+                        .catch(() => {
+                            this.setState(({ optionMap, ...state }) => {
+                                return {
+                                    ...state,
+                                    optionMap: {
+                                        ...optionMap,
+                                        [name]: [],
+                                    },
+                                };
+                            });
+                        });
+                }
+            }
+        });
+    };
     private disabledStartDate = (dateBeginWith?: string[]) => {
         if (!dateBeginWith || dateBeginWith.length === 0) {
             return undefined;
@@ -220,16 +268,26 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
     };
 
     private addSelect = (field: IFieldItem) => {
-        const { name, optionList, label, className, formItemClassName } = field;
+        const { name, optionList, label, className, formItemClassName, syncDefaultOption } = field;
         const { labelClassName } = this.props;
+        const { optionMap } = this.state;
+        const syncOptionList = optionMap[name as string];
+        const isFunction = typeof optionList === 'function';
+        const loading = isFunction && !syncOptionList;
+        const mergeList = isFunction
+            ? syncOptionList || ([] as IOptionItem[])
+            : (optionList as IOptionItem[]);
         return (
             <Form.Item
                 name={name}
                 className={formItemClassName}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <Select className={className}>
-                    {optionList!.map(item => (
+                <Select className={className} loading={loading}>
+                    {syncDefaultOption ? (
+                        <Option value={syncDefaultOption.value}>{syncDefaultOption.name}</Option>
+                    ) : null}
+                    {mergeList!.map(item => (
                         <Option key={item.value} value={item.value}>
                             {item.name}
                         </Option>
@@ -324,6 +382,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps> {
     };
     componentDidMount(): void {
         this.resetFormatterMap();
+        this.loadOptions();
     }
     componentDidUpdate(
         prevProps: Readonly<IJsonFormProps>,
