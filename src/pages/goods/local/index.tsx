@@ -173,7 +173,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const {
             task_number,
             store_id,
-            commodity_id,
+            // commodity_id,
             min_sku,
             max_sku,
             min_price,
@@ -190,10 +190,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             message.error('店铺ID输入了非法字符，只支持检索数字！');
             return false;
         }
-        if (commodity_id && reg.test(commodity_id.trim())) {
-            message.error('Commodity ID输入了非法字符，只支持检索数字！');
-            return false;
-        }
+        // if (commodity_id && reg.test(commodity_id.trim())) {
+        //     message.error('Commodity ID输入了非法字符，只支持检索数字！');
+        //     return false;
+        // }
         if (min_sku >= 0 && max_sku >= 0 && min_sku - max_sku > 0) {
             message.error('sku数量最小值大于最大值！');
             return false;
@@ -229,7 +229,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory,
                 ...searhParams
             } = this.localSearchRef.state;
-            if (!this.validateSearhParam({ ...searhParams, task_number, store_id, commodity_id })) {
+            // commodity_id
+            if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
                 return;
             }
             // 转换数据格式
