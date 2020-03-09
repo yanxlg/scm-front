@@ -625,10 +625,23 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
             return Promise.resolve();
         }
         const startDate = this.formRef.current!.getFieldValue('task_start_time');
+        const { taskIntervalType, day = 0, second = 0 } = this.formRef.current!.getFieldsValue([
+            'taskIntervalType',
+            'day',
+            'second',
+        ]);
+        const offsetSeconds =
+            taskIntervalType === TaskIntervalConfigType.day ? day * 60 * 60 * 24 : second;
+
         const now = moment();
         if (value.isAfter(now)) {
-            if (startDate && value.isSameOrBefore(startDate)) {
-                return Promise.reject('结束时间不能早于开始时间');
+            if (startDate) {
+                if (value.isSameOrBefore(startDate)) {
+                    return Promise.reject('结束时间不能早于开始时间');
+                }
+                if (value.unix() - startDate.unix() <= offsetSeconds) {
+                    return Promise.reject('开始和结束时间的间隔必须大于时间间隔');
+                }
             }
             return Promise.resolve();
         } else {
