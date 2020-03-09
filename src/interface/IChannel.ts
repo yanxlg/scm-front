@@ -41,8 +41,8 @@ export interface IChannelProductListResponse {
 }
 
 export declare interface IChannelCategoryItem {
-    id: number;
-    name: string;
+    platform_cate_id: number;
+    platform_cate_name: string;
     children?: IChannelCategoryItem[];
 }
 
