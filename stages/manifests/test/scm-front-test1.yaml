@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: trigram-scm-front-page-nginx-conf-@@VID@@
+  name: trigram-scm-front-page-nginx-conf-1
 data:
   nginx.conf: |
     user  www-data;
@@ -59,7 +59,7 @@ data:
             proxy_set_header   X-Real-IP $remote_addr;
             proxy_set_header   REMOTE-HOST $remote_addr;
             proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass https://scm-api-t@@VID@@.vova.com.hk;
+            proxy_pass https://scm-api-t.vova.com.hk;
         }
         location /api/{
             proxy_set_header   Cookie $http_cookie;
@@ -68,20 +68,20 @@ data:
             proxy_set_header   X-Real-IP $remote_addr;
             proxy_set_header   REMOTE-HOST $remote_addr;
             proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass https://scm-api-t@@VID@@.vova.com.hk/;
+            proxy_pass https://scm-api-t.vova.com.hk/;
         }
     }
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: trigram-scm-front-page-@@VID@@
+  name: trigram-scm-front-page-1
   labels:
-    name: trigram-scm-front-page-@@VID@@
+    name: trigram-scm-front-page-1
 spec:
   selector:
     matchLabels:
-      name: trigram-scm-front-page-@@VID@@
+      name: trigram-scm-front-page-1
   replicas: 1
   strategy:
     rollingUpdate:
@@ -90,14 +90,14 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      name: trigram-scm-front-page-@@VID@@
+      name: trigram-scm-front-page-1
       labels:
-        name: trigram-scm-front-page-@@VID@@
+        name: trigram-scm-front-page-1
     spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: trigram-scm-front-page
-          image: 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-@@VID@@
+          image: 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-1
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -130,13 +130,13 @@ spec:
             path: /opt/data1/logs/scm-front/nginx
         - name: nginx-conf
           configMap:
-            name: trigram-scm-front-page-nginx-conf-@@VID@@
+            name: trigram-scm-front-page-nginx-conf-1
             items:
               - key: nginx.conf
                 path: nginx.conf
         - name: trigram-scm-front-page-conf
           configMap:
-            name: trigram-scm-front-page-nginx-conf-@@VID@@
+            name: trigram-scm-front-page-nginx-conf-1
             items:
               - key: trigram-scm-front-page.conf
                 path: trigram-scm-front-page.conf
@@ -150,7 +150,7 @@ spec:
                     - key: name
                       operator: In
                       values:
-                        - trigram-scm-front-page-@@VID@@
+                        - trigram-scm-front-page-1
                 topologyKey: kubernetes.io/hostname
 
 
@@ -158,12 +158,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: trigram-scm-front-page-svc-@@VID@@
+  name: trigram-scm-front-page-svc-1
   annotations:
     alb.ingress.kubernetes.io/healthcheck-path: /version
 spec:
   selector:
-    name: trigram-scm-front-page-@@VID@@
+    name: trigram-scm-front-page-1
   ports:
     - name: svc-http
       port: 80
