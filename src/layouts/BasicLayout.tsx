@@ -12,7 +12,6 @@ import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
 import '@/styles/menu.less';
-import CopyLink from '@/components/copyLink';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -42,6 +41,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
         return (
             <ProLayout
                 multiple={false}
+                menu={{ locale: false }}
                 logo={<img src={logo} className="menu-logo" alt="" />}
                 title="供应链中台"
                 onCollapse={this.handleMenuCollapse}

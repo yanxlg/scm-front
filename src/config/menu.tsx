@@ -20,6 +20,7 @@ export default [
                 path: '/task/list',
                 name: '任务列表',
                 extract: true,
+                copyLink: true,
             },
             {
                 path: '/task/list/:id',
