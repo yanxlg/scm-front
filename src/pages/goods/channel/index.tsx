@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import SearchCondition from './components/SearchCondition';
+import SearchCondition, { salesVolumeList } from './components/SearchCondition';
 import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import './index.less';
@@ -9,7 +9,7 @@ import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
-import { checkLowerShelf, checkUpperShelf } from '@/enums/StatusEnum';
+import { checkLowerShelf, checkUpperShelf, TaskStatusEnum } from '@/enums/StatusEnum';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 import {
@@ -17,10 +17,17 @@ import {
     exportChannelProductList,
     updateChannelShelveState,
 } from '@/services/channel';
-import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
+import {
+    ProductStatusMap,
+    ProductStatusCode,
+    ProductStatusList,
+} from '@/config/dictionaries/Product';
 import { IChannelProductListItem } from '@/interface/IChannel';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import { EmptyObject } from '@/config/global';
+import { connect } from '@/compatibility/connect';
+import { ConnectProps } from '@/models/connect';
+import { convertEndDate, convertStartDate } from '@/utils/date';
+import queryString from 'query-string';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -30,26 +37,69 @@ declare interface IVoVaListState {
     pageNumber: number;
     page: number;
     total: number;
+    defaultInitialValues?: { [key: string]: any };
 }
 
+@connect(() => {
+    return {};
+})
 @BindAll()
-class Index extends React.PureComponent<{}, IVoVaListState> {
+class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
     private formRef: RefObject<SearchCondition> = React.createRef();
-    constructor(props: {}) {
+    constructor(props: ConnectProps) {
         super(props);
+        const { page, page_count, ...extra } = this.computeInitialValues();
         this.state = {
             dataSet: [],
             dataLoading: false,
             searchLoading: true,
             total: 0,
-            pageNumber: 50,
-            page: 1,
+            pageNumber: page_count,
+            page: page,
             excelDialogStatus: false,
+            defaultInitialValues: extra,
         };
     }
 
     componentDidMount() {
-        this.onSearch();
+        this.queryList({
+            searchLoading: true,
+        });
+    }
+
+    private computeInitialValues() {
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const {
+            page = 1,
+            page_count = 50,
+            onshelf_time_start = 0,
+            onshelf_time_end = 0,
+            commodity_id = '',
+            vova_virtual_id = '',
+            product_id = '',
+            sales_volume = salesVolumeList[0].id,
+            product_status = ProductStatusList[0].id,
+            shop_name = '',
+            level_one_category = '',
+            level_two_category = '',
+        } = query;
+        return {
+            page: Number(page),
+            page_count: Number(page_count),
+            onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
+            onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
+            commodity_id,
+            vova_virtual_id,
+            product_id,
+            sales_volume,
+            shop_name,
+            level_one_category,
+            level_two_category,
+            product_status,
+        };
     }
 
     private queryList(
@@ -65,11 +115,19 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataLoading: true,
             searchLoading,
         });
-        queryChannelGoodsList({
+        const query = {
             page: page,
             page_count: page_number,
             ...values,
-        })
+        };
+        this.props.dispatch!({
+            type: 'global/cacheQueryData',
+            queryData: {
+                ...query,
+            },
+        });
+
+        queryChannelGoodsList(query)
             .then(({ data: { list = [], total = 0 } = EmptyObject } = EmptyObject) => {
                 this.setState({
                     page: page,
@@ -349,10 +407,12 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             page,
             pageNumber,
             searchLoading,
+            defaultInitialValues,
         } = this.state;
         return (
             <div className="container">
                 <SearchCondition
+                    defaultInitialValues={defaultInitialValues}
                     ref={this.formRef}
                     searchLoading={searchLoading}
                     onSearch={this.onSearch}

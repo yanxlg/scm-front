@@ -29,6 +29,8 @@ import '@/styles/task.less';
 import { ITaskListItem, ITaskListQuery } from '@/interface/ITask';
 import { EmptyObject, global } from '@/config/global';
 import queryString from 'query-string';
+import { connect } from '@/compatibility/connect';
+import { ConnectProps } from '@/models/connect';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -53,30 +55,27 @@ declare interface ISearchFormConfig {
     initialValues?: { [key: string]: any };
 }
 
+@connect(() => {
+    return {};
+})
 @BindAll()
-class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
+class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, IALLTaskPageState> {
     private defaultFormRef: RefObject<JsonForm> = React.createRef();
     private expendFormRef: RefObject<JsonForm> = React.createRef();
-    private copiedQueryData: { [key: string]: any } = {};
-    constructor(props: IALLTaskPageProps) {
+    constructor(props: IALLTaskPageProps & ConnectProps) {
         super(props);
-        const { query, url } = queryString.parseUrl(window.location.href);
-        if (query) {
-            window.history.replaceState({}, '', url);
-            this.copiedQueryData = query;
-        }
-        const { page = 1, page_number = 50 } = this.copiedQueryData;
+        const { page, page_number, ...defaultInitialValues } = this.computeInitialValues();
         this.state = {
             selectedRowKeys: [],
             dataLoading: false,
             searchLoading: false,
             dataSet: [],
-            pageNumber: Number(page_number),
-            page: Number(page),
+            pageNumber: page_number,
+            page: page,
             total: 0,
             showMore: false,
         };
-        const defaultInitialValues = this.computeInitialValues();
+
         this.allFieldsList.initialValues = Object.assign(
             {},
             this.allFieldsList.initialValues,
@@ -93,8 +92,14 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     }
 
     private computeInitialValues() {
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
         const routeInitialValues = this.props.initialValues ?? {};
         const {
+            page = 1,
+            page_number = 50,
             task_id = '',
             task_sn = '',
             task_status = '',
@@ -102,9 +107,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             task_type = '',
             task_begin_time = 0,
             task_end_time = 0,
-        } = this.copiedQueryData;
+        } = query;
         return {
             ...routeInitialValues,
+            page: Number(page),
+            page_number: Number(page_number),
             task_id,
             task_sn,
             task_status,
@@ -149,21 +156,26 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             ...values,
         };
         const initialTaskStatus = this.props.task_status;
-        global.copiedQueryData = {
-            ...query,
-            tabKey:
-                initialTaskStatus === void 0
-                    ? '1'
-                    : initialTaskStatus === TaskStatusEnum.UnExecuted
-                    ? '2'
-                    : initialTaskStatus === TaskStatusEnum.Executing
-                    ? '3'
-                    : initialTaskStatus === TaskStatusEnum.Executed
-                    ? '4'
-                    : initialTaskStatus === TaskStatusEnum.Failed
-                    ? 5
-                    : '6',
-        };
+        // 设置方法后才显示copylink
+        this.props.dispatch!({
+            type: 'global/cacheQueryData',
+            queryData: {
+                ...query,
+                tabKey:
+                    initialTaskStatus === void 0
+                        ? '1'
+                        : initialTaskStatus === TaskStatusEnum.UnExecuted
+                        ? '2'
+                        : initialTaskStatus === TaskStatusEnum.Executing
+                        ? '3'
+                        : initialTaskStatus === TaskStatusEnum.Executed
+                        ? '4'
+                        : initialTaskStatus === TaskStatusEnum.Failed
+                        ? 5
+                        : '6',
+            },
+        });
+
         return getTaskList(query)
             .then(
                 ({

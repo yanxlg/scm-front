@@ -13,6 +13,7 @@ import {
     TaskExecuteType,
     TaskRangeEnum,
     TaskRangeMap,
+    TaskStatusEnum,
     TaskStatusMap,
     TaskTypeEnum,
     TaskTypeMap,
@@ -22,6 +23,8 @@ import HotGather from '../components/editor/HotGather';
 import { utcToLocal } from '@/utils/date';
 import TimerUpdate from '../components/editor/TimerUpdate';
 import { EmptyObject } from '@/config/global';
+import { connect } from '@/compatibility/connect';
+import { ConnectProps } from '@/models/connect';
 
 const { TabPane } = Tabs;
 const { Step } = Steps;
@@ -33,9 +36,15 @@ declare interface ITaskDetailPagePropsState {
     loading: boolean;
 }
 
-class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetailPagePropsState> {
+@connect(() => {
+    return {};
+})
+class TaskDetailPage extends React.PureComponent<
+    TaskDetailPageProps & ConnectProps,
+    ITaskDetailPagePropsState
+> {
     private readonly taskId: number;
-    constructor(props: TaskDetailPageProps) {
+    constructor(props: TaskDetailPageProps & ConnectProps) {
         super(props);
         this.taskId = Number(props.match.params.id);
         this.state = {
@@ -112,6 +121,10 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
         }
     }
     componentDidMount(): void {
+        this.props.dispatch!({
+            type: 'global/cacheQueryData',
+            queryData: {},
+        });
         this.queryDetail(this.taskId);
     }
 

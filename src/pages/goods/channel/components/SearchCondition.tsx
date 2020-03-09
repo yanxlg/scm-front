@@ -15,6 +15,7 @@ declare interface ISearchProps {
     onSearch: Function;
     toggleExcelDialog: Function;
     searchLoading: boolean;
+    defaultInitialValues?: { [key: string]: any };
 }
 
 declare interface ISearchState {
@@ -24,7 +25,7 @@ declare interface ISearchState {
 
 const Option = Select.Option;
 
-const salesVolumeList = [
+export const salesVolumeList = [
     {
         id: 'all',
         name: '全部',
@@ -131,19 +132,24 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
 
     render() {
         const { searchOptions, categoryLoading } = this.state;
-        const { searchLoading } = this.props;
+        const { searchLoading, defaultInitialValues } = this.props;
+        const initialValues = Object.assign(
+            {},
+            {
+                level_one_category: '',
+                level_two_category: '',
+                sales_volume: salesVolumeList[0].id,
+                product_status: ProductStatusList[0].id,
+            },
+            defaultInitialValues,
+        );
         return (
             <Form
                 ref={this.formRef}
                 className="form-help-absolute"
                 layout="inline"
                 autoComplete={'off'}
-                initialValues={{
-                    level_one_category: '',
-                    level_two_category: '',
-                    sales_volume: salesVolumeList[0].id,
-                    product_status: ProductStatusList[0].id,
-                }}
+                initialValues={initialValues}
             >
                 <Form.Item
                     label={<span className="product-form-label">时&emsp;&emsp;&emsp;间</span>}

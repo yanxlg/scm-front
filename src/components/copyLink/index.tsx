@@ -1,23 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styles from './_index.less';
 import { Popover } from 'antd';
 import { Icons } from '@/components/Icon';
 import { CheckCircleTwoTone } from '@ant-design/icons';
+import { useSelector } from 'dva';
+import { ConnectState } from '@/models/connect';
 import queryString from 'query-string';
-import { global } from '@/config/global';
 
 const CopyLink: React.FC = props => {
     const [copied, setCopied] = useState(false);
-    useEffect(() => {
-        global.copiedQueryData = {}; // 重置
-    }, []);
+    const queryData = useSelector((state: ConnectState) => state.global.queryData);
     const onClick = useCallback(() => {
         if (copied) return;
         setCopied(true);
         const href = window.location.href;
-        const url = global.copiedQueryData
-            ? queryString.stringifyUrl({ url: href, query: global.copiedQueryData })
-            : href;
+        const url = queryData ? queryString.stringifyUrl({ url: href, query: queryData }) : href;
         let copyInput = document.createElement('input');
         copyInput.value = url;
         document.body.appendChild(copyInput);
@@ -28,7 +25,7 @@ const CopyLink: React.FC = props => {
         setTimeout(() => {
             setCopied(false);
         }, 2000);
-    }, [copied]);
+    }, [copied, queryData]);
     return (
         <div className={styles.fixedWidgets}>
             <Popover

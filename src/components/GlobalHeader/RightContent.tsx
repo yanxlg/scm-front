@@ -6,6 +6,8 @@ import { genBreadcrumbProps } from '@ant-design/pro-layout/es/utils/getBreadcrum
 import { BasicLayoutProps, getMenuData, MenuDataItem } from '@ant-design/pro-layout';
 import CopyLink from '@/components/copyLink';
 import { matchPath } from 'dva/router';
+import { connect } from 'dva';
+import { ConnectState } from '@/models/connect';
 
 export type SiderTheme = 'light' | 'dark';
 export interface GlobalHeaderRightProps extends BasicLayoutProps {
@@ -14,26 +16,18 @@ export interface GlobalHeaderRightProps extends BasicLayoutProps {
     breadcrumb?: {
         [path: string]: MenuDataItem;
     };
+    queryData?: { [key: string]: any };
 }
 
 const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
-    const { route = {}, menu, formatMessage, menuDataRender, itemRender } = props;
+    const { route = {}, menu, formatMessage, menuDataRender, itemRender, queryData } = props;
     const { routes = [] } = route;
-    const { breadcrumbMap, breadcrumb } = getMenuData(routes, menu, formatMessage, menuDataRender);
+    const { breadcrumbMap } = getMenuData(routes, menu, formatMessage, menuDataRender);
     const breadcrumbData = genBreadcrumbProps(
         Object.assign({}, props, {
             breadcrumbMap: breadcrumbMap,
         }),
     );
-    const currentRoute = routes.find(_ =>
-        matchPath(props.location!.pathname!, {
-            path: _.path,
-            exact: _.exact,
-        }),
-    );
-    const routePath = currentRoute?.path;
-    const menuConfig = routePath ? breadcrumb[routePath] : undefined;
-    const copyLink = menuConfig?.copyLink ?? false;
     return (
         <div>
             {breadcrumbData ? (
@@ -55,9 +49,11 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
                     退出
                 </Button>
             </div>
-            {copyLink && <CopyLink />}
+            {queryData ? <CopyLink /> : null}
         </div>
     );
 };
 
-export default GlobalHeaderRight;
+export default connect(({ global }: ConnectState) => ({
+    queryData: global.queryData,
+}))(GlobalHeaderRight);
