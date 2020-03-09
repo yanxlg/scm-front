@@ -38,9 +38,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
 
     private allColumns: ColumnProps<IChildOrderItem>[] = [
         {
-            key: 'goodsCreateTime',
+            key: 'createTime',
             title: '订单时间',
-            dataIndex: 'goodsCreateTime',
+            dataIndex: 'createTime',
             align: 'center',
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
@@ -61,9 +61,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell
         },
         {
-            key: 'goods_detail',
+            key: 'orderGoodsId',
             title: '商品详情',
-            dataIndex: 'goods_detail',
+            dataIndex: 'orderGoodsId',
             align: 'center',
             width: 120,
             render: (value: any, row: IChildOrderItem) => {
@@ -75,33 +75,32 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 }
             }
         },
-        // 缺失
         {
-            key: 'product_sn',
+            key: 'channelOrderGoodsSn',
             title: 'Product SN',
-            dataIndex: 'product_sn',
+            dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
         // 缺失
-        {
-            key: 'channel_order_status',
-            title: '渠道订单状态',
-            dataIndex: 'channel_order_status',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell
-        },
+        // {
+        //     key: 'channel_order_status',
+        //     title: '渠道订单状态',
+        //     dataIndex: 'channel_order_status',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell
+        // },
         // 缺失
-        {
-            key: 'channel_delivery_status',
-            title: '渠道发货状态',
-            dataIndex: 'channel_delivery_status',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell
-        },
+        // {
+        //     key: 'channel_delivery_status',
+        //     title: '渠道发货状态',
+        //     dataIndex: 'channel_delivery_status',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell
+        // },
         {
             key: 'orderGoodsStatus',
             title: '中台订单状态',
@@ -116,7 +115,15 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'productId',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            // render: this.mergeCell
+        },
+        {
+            key: 'purchasePlanId',
+            title: '计划子项ID',
+            dataIndex: 'purchasePlanId',
+            align: 'center',
+            width: 120,
+            // render: this.mergeCell
         },
         {
             key: 'purchaseOrderStatus',
@@ -146,148 +153,126 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120
         },
+        // 待确定
         {
-            key: 'goods_purchase_order_sn',
+            key: 'purchasePlatformOrderId',
             title: '采购订单号',
-            dataIndex: 'goods_purchase_order_sn',
+            dataIndex: 'purchasePlatformOrderId',
             align: 'center',
             width: 120
         },
         {
-            key: 'goods_purchase_waybill_sn',
+            key: 'purchaseWaybillNo',
             title: '采购运单号',
-            dataIndex: 'goods_purchase_waybill_sn',
+            dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120
         },
         {
-            key: 'channel_shipping_fee',
-            title: '运费',
-            dataIndex: 'channel_shipping_fee',
+            key: 'purchaseCancelReason',
+            title: '采购取消原因',
+            dataIndex: 'purchaseCancelReason',
+            align: 'center',
+            width: 120
+        },
+        {
+            key: 'confirmTime',
+            title: '订单确认时间',
+            dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
+        {
+            key: 'channelOrderGoodsSn',
+            title: '渠道订单ID',
+            dataIndex: 'channelOrderGoodsSn',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'goodsAmount',
+            title: '价格',
+            dataIndex: 'goodsAmount',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        // 待确定
         // {
-        //     key: 'channel_order_id',
-        //     title: '渠道订单ID',
-        //     dataIndex: 'channel_order_id',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'channel_goods_price',
-        //     title: '价格',
-        //     dataIndex: 'channel_goods_price',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'channel_shipping_fee',
+        //     key: 'a4',
         //     title: '运费',
-        //     dataIndex: 'channel_shipping_fee',
+        //     dataIndex: 'a4',
         //     align: 'center',
         //     width: 120,
         //     render: this.mergeCell
         // },
-        // {
-        //     key: 'goods_number',
-        //     title: '商品数量',
-        //     dataIndex: 'goods_number',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'cancel_order_time',
-        //     title: '取消订单时间',
-        //     dataIndex: 'cancel_order_time',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'goods_purchase_shipping_no',
-        //     title: '采购运单号',
-        //     dataIndex: 'goods_purchase_shipping_no',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'channel',
-        //     title: '销售渠道',
-        //     dataIndex: 'channel',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'middleground_p_order_id',
-        //     title: '中台父订单ID',
-        //     dataIndex: 'middleground_p_order_id',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'currency_type',
-        //     title: '货币类型',
-        //     dataIndex: 'currency_type',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'remain_delivery_time',
-        //     title: '发货剩余时间',
-        //     dataIndex: 'remain_delivery_time',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'channel_store_name',
-        //     title: '渠道店铺名',
-        //     dataIndex: 'channel_store_name',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'purchase_cancel_reason',
-        //     title: '采购取消原因',
-        //     dataIndex: 'purchase_cancel_reason',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'goods_amount',
-        //     title: '商品总金额',
-        //     dataIndex: 'goods_amount',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'p_order_id',
-        //     title: '父订单ID',
-        //     dataIndex: 'p_order_id',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // {
-        //     key: 'child_order_id',
-        //     title: '子订单ID',
-        //     dataIndex: 'child_order_id',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
+        {
+            key: 'goodsNumber',
+            title: '商品数量',
+            dataIndex: 'goodsNumber',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: '_goodsTotalAmount',
+            title: '商品总金额',
+            dataIndex: '_goodsTotalAmount',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'productPlatform',
+            title: '销售渠道',
+            dataIndex: 'productPlatform',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'orderId',
+            title: '中台父订单ID',
+            dataIndex: 'orderId',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'currency',
+            title: '货币类型',
+            dataIndex: 'currency',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'productShop',
+            title: '渠道店铺名',
+            dataIndex: 'productShop',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        
+        {
+            key: 'a14',
+            title: '渠道订单状态',
+            dataIndex: 'a14',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        },
+        {
+            key: 'orderGoodsId',
+            title: '中台子订单ID',
+            dataIndex: 'orderGoodsId',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell
+        }
     ]
 
     constructor(props: IProps) {

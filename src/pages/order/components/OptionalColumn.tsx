@@ -30,6 +30,24 @@ class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptional
         }
     }
 
+    componentDidMount() {
+        const { selectedColKeyList, optionalColList } = this.props;
+        const selectedLen = selectedColKeyList.length;
+        const optionalLen = optionalColList.length;
+        // console.log('111', selectedLen);
+        this.setState({
+            indeterminate: selectedLen > 0 && selectedLen !== optionalLen,
+            checkAll: !!selectedLen && selectedLen === optionalLen
+        });
+    }
+
+    cancelCheckAll = () => {
+        this.setState({
+            indeterminate: false,
+            checkAll: false
+        })
+    }
+
     onCheckAll = (e: CheckboxChangeEvent) => {
         const { changeSelectedColList, optionalColList } = this.props;
         const checked = e.target.checked;

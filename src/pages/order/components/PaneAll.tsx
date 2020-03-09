@@ -9,7 +9,6 @@ import TableParentAll from './TableParentAll';
 
 import { 
     getAllOrderList,
-    IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 import { 
@@ -19,7 +18,8 @@ import {
     parentDefaultFieldList,
     parentAllFieldList,
     defaultColChildList, 
-    defaultParentColList, 
+    defaultParentColList,
+    parentOptionalColList, 
     pageSizeOptions 
 } from '@/enums/OrderEnum';
 import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
@@ -100,6 +100,7 @@ declare interface IPaneAllState {
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     private formRef: RefObject<FormInstance> = React.createRef();
+    private optionalRef: RefObject<OptionalColumn> = React.createRef();
 
     private initialValues = {
         channel: 100,
@@ -144,11 +145,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     }
 
     componentDidMount() {
-        // console.log('PaneAll');
         this.onSearch();
     }
 
-    private onSearch = (baseParams?: IFilterBaseParams) => {
+    private onSearch = (filterParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
@@ -158,8 +158,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
         //     params = Object.assign(params, this.orderFilterRef.current.getValues());
         // }
-        if (baseParams) {
-            params = Object.assign(params, baseParams);
+        if (filterParams) {
+            params = Object.assign(params, filterParams);
         }
         // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
@@ -168,19 +168,21 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         getAllOrderList(params).then(res => {
             // console.log('getProductOrderList', res);
             const { all_count, list } = res.data;
-            const childList: any[] = [];
-            list.forEach((item: any) => {
-                item.orderGoods.forEach((goodsItem: any) => {
-                    childList.push(goodsItem);
-                })
-            })
+            const { page, page_count, only_p_order } = params;
             this.setState({
                 total: all_count,
-                page: params.page,
-                pageCount: params.page_count,
-                childOrderList: this.getChildOrderData(childList),
-                parentOrderList: this.getParentOrderData(list)
+                page: page as number,
+                pageCount: page_count as number
             })
+            if (only_p_order) {
+                this.setState({
+                    parentOrderList: this.getParentOrderData(list),
+                })
+            } else {
+                this.setState({
+                    childOrderList: this.getChildOrderData(list)
+                })
+            }
         }).finally(() => {
             this.setState({
                 loading: false
@@ -192,59 +194,18 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     private getChildOrderData(list: any[]): IChildOrderItem[] {
         const childOrderList: IChildOrderItem[] = [];
         list.forEach((goodsItem: any) => {
-            const {
-                orderGoodsPurchasePlan,
-                channelOrderGoodsSn,
-                createTime: goodsCreateTime,
-                lastUpdateTime: goodsLastUpdateTime,
-                goodsAmount,
-                goodsNumber,
-                orderGoodsExtension,
-                orderGoodsId,
-                orderGoodsShippingStatus,
-                orderGoodsStatus,
-                // orderId,
-                productId,
-                productPlatform,
-                productShop,
-                skuId
-            } = goodsItem;
+            const { orderGoods } = goodsItem;
+            const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
             // console.log(111, goodsCreateTime);
             orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
                 const {
                     createTime: purchaseCreateTime,
                     lastUpdateTime: purchaseLastUpdateTime,
-                    // orderGoodsId,
-                    purchaseAmount,
-                    purchaseNumber,
-                    purchaseOrderPayStatus,
-                    purchaseOrderShippingStatus,
-                    purchaseOrderStatus,
-                    purchasePlanId,
-                    purchasePlatform
+                    ...purchaseRest
                 } = purchaseItem;
                 const childOrderItem: any = {
-                    channelOrderGoodsSn,
-                    goodsCreateTime,
-                    goodsLastUpdateTime,
-                    goodsAmount,
-                    goodsNumber,
-                    orderGoodsExtension,
-                    orderGoodsId,
-                    orderGoodsShippingStatus,
-                    orderGoodsStatus,
-                    // orderId,
-                    productId,
-                    productPlatform,
-                    productShop,
-                    skuId,
-                    purchaseAmount,
-                    purchaseNumber,
-                    purchaseOrderPayStatus,
-                    purchaseOrderShippingStatus,
-                    purchaseOrderStatus,
-                    purchasePlanId,
-                    purchasePlatform,
+                    ...orderRest,
+                    ...purchaseRest,
                     purchaseCreateTime,
                     purchaseLastUpdateTime
                 }
@@ -265,18 +226,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         list.forEach(item => {
             const {
                 orderGoods,
-                // channelOrderSn,
-                // channelSource,
-                // confirmTime,
-                // createTime,
-                // currency,
-                // lastUpdateTime,
-                // orderAddress,
-                // orderAmount,
-                // orderId,
-                // orderStatus,
-                // orderTime
-                ...rest
+                ...parentRest
             } = item;
             orderGoods.forEach((goodsItem: any, index: number) => {
                 const {
@@ -284,23 +234,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     createTime: goodsCreateTime,
                     lastUpdateTime: goodsLastUpdateTime,
                     ...goodsRest
-                    // orderGoodsPurchasePlan,
-                    // channelOrderGoodsSn,
-                    // goodsAmount,
-                    // goodsNumber,
-                    // orderGoodsExtension,
-                    // orderGoodsId,
-                    // orderGoodsShippingStatus,
-                    // orderGoodsStatus,
-                    // productId,
-                    // productPlatform,
-                    // productShop,
-                    // skuId
                 } = goodsItem;
                 const parentOrderItem: any = {
                     goodsCreateTime,
                     goodsLastUpdateTime,
-                    ...rest,
+                    ...parentRest,
                     ...goodsRest
                 }
                 if (index === 0) {
@@ -314,14 +252,27 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     private changeParentOrder = (status: boolean) => {
         // console.log('changeParentOrder', status);
+        const { showColStatus } = this.state;
         this.setState({
             showParentStatus: status,
+            selectedColKeyList: [],
+            childOptionalColList: status ? parentOptionalColList : childOptionalColList,
             // childOrderList: [],
             // parentOrderList: []
+            
         }, () => {
             // 切换过滤条件
             this.changeFilter();
+            if (showColStatus) {
+                this.optionalRef.current!.cancelCheckAll();
+            }
+            this.onSearch({
+                page: 1,
+                page_count: 50,
+                only_p_order: status ? 1 : 0
+            });
         });
+        
     }
 
     // 展示过滤条件
@@ -345,7 +296,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         })
     }
 
-    changeShowFilterStatus = () => {
+    private changeShowFilterStatus = () => {
         const { showFilterStatus } = this.state;
         this.setState({
             showFilterStatus: !showFilterStatus
@@ -362,10 +313,20 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     }
 
     changeSelectedColList = (list: string[]) => {
+        const { showParentStatus } = this.state;
         this.setState({
             selectedColKeyList: list,
-            colChildList: [...defaultColChildList, ...list]
+            // colChildList: [...defaultColChildList, ...list]
         });
+        if (showParentStatus) {
+            this.setState({
+                colParentList: [...defaultParentColList, ...list]
+            })
+        } else {
+            this.setState({
+                colChildList: [...defaultColChildList, ...list]
+            })
+        }
     }
 
     // 获取查询数据
@@ -481,6 +442,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     {
                         showColStatus ? (
                             <OptionalColumn
+                                ref={this.optionalRef}
                                 optionalColList={childOptionalColList}
                                 selectedColKeyList={selectedColKeyList}
                                 changeSelectedColList={this.changeSelectedColList}

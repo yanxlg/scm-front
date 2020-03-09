@@ -7,7 +7,6 @@ import TablePay from './TablePay';
 
 import { 
     getPayOrderList,
-    IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 import { 
@@ -54,73 +53,48 @@ declare interface IState {
 const defaultFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
-        name: ['purchase_start_time', 'purchase_end_time'],
+        name: ['purchase_order_stime', 'purchase_order_etime'],
         label: '采购时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
     },
     {
+        type: 'select',
+        name: 'purchase_platform',
+        label: '采购渠道',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [
+            defaultOptionItem,
+            // ...channelOptionList
+        ],
+    },
+    {
         type: 'input',
-        name: 'middleground_order_id',
-        label: '中台订单ID',
+        name: 'purchase_order_sn',
+        label: '采购子订单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台订单ID',
     },
     {
-        type: 'select',
-        name: 'channel',
-        label: '销售渠道',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...channelOptionList
-        ],
-    }
-];
-
-const allFieldList: IFieldItem[] = [
-    ...defaultFieldList,
-    {
-        type: 'dateRanger',
-        name: ['order_start_time', 'order_end_time'],
-        label: '订单时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
-    {
         type: 'input',
-        name: 'purchase_order_id',
-        label: '采购订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购订单ID',
-    },
-    {
-        type: 'select',
-        name: 'purchase_order_status',
-        label: '采购订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...purchaseOrderOptionList
-        ],
-    },
-    {
-        type: 'input',
-        name: 'purchase_p_order_id',
+        name: 'purchase_parent_order_sn',
         label: '采购父订单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购父订单ID',
     },
+    
 ];
 
-class PanePaid extends React.PureComponent<{}, IState> {
+// const allFieldList: IFieldItem[] = [];
 
+class PanePaid extends React.PureComponent<{}, IState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+    private initialValues = {
+        purchase_platform: 100
+    }
 
     constructor(props: {}) {
         super(props);
@@ -139,7 +113,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
+    onSearch = (baseParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
@@ -187,8 +161,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
             ]
             this.setState({
                 total: all_count,
-                page: params.page,
-                pageCount: params.page_count,
+                page: params.page as number,
+                pageCount: params.page_count as number,
                 orderList: this.getOrderData(mockList)
             })
         }).finally(() => {
@@ -292,33 +266,27 @@ class PanePaid extends React.PureComponent<{}, IState> {
             pageCount
         } = this.state;
 
-        const initialValues = {
-            channel: 100,
-            channel_order_status: 100,
-            purchase_order_status: 100
-        }
-
-        const fieldList = showStatus ? allFieldList : defaultFieldList;
+        // const fieldList = showStatus ? allFieldList : defaultFieldList;
 
         return (
             <>
                 <div>
                     <JsonForm
                         labelClassName="order-label"
-                        fieldList={fieldList}
+                        fieldList={defaultFieldList}
                         formRef={this.formRef}
-                        initialValues={initialValues}
+                        initialValues={this.initialValues}
                     />
                     <div className="order-operation">
                         <Button type="primary" className="order-btn" onClick={() => this.getFieldsValue()}>查询</Button>
                         <Button type="primary" className="order-btn">取消采购单</Button>
                         <Button type="primary" className="order-btn">取消渠道订单</Button>
                         <Button type="primary" className="order-btn">导出数据</Button>
-                        <Button 
+                        {/* <Button 
                             type="default" 
                             className="order-btn"
                             onClick={this.changeShowStatus}
-                        >{ showStatus ? '收起' : '展示'}搜索条件</Button>
+                        >{ showStatus ? '收起' : '展示'}搜索条件</Button> */}
                     </div>
                     <TablePay
                         loading={loading}

@@ -54,7 +54,7 @@ enum ApiPathEnum {
     ActiveVovaGoodsVersion = '/api/v1/vova_goods/apply_version',
 
     // 全部订单
-    getAllOrderList="/api/v1/orders/list/1",
+    getAllOrderList="/v1/orders/list/1",
     // 待拍单
     getPendingOrderList="/api/v1/orders/list/2",
     // 待支付

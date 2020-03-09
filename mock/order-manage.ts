@@ -1,135 +1,150 @@
 import { Request, Response } from 'express';
 
-const list = [{
-    "order_goods": [{
-        "order_goods_extension": [{
-            "metadata_id": "76721584925065218",
-            "order_goods_id": "76721584925065217",
-            "metadata_name": "",
-            "metadata_value": "mock metadata value 1",
-            "create_time": "2020-03-02 16:29:58",
-            "last_update_time": "2020-03-02 16:29:58"
-        }, {
-            "metadata_id": "76721584925065219",
-            "order_goods_id": "76721584925065217",
-            "metadata_name": "",
-            "metadata_value": "mock metadata value 1",
-            "create_time": "2020-03-02 16:29:58",
-            "last_update_time": "2020-03-02 16:29:58"
-        }],
-        "order_goods_purchase_plan": [{
-            "purchase_plan_id": "76721584925065220",
-            "order_goods_id": "76721584925065217",
-            "purchase_platform_order_id": "",
-            "purchase_platform_parent_order_id": "",
-            "purchase_platform": "mock1 platform",
-            "purchase_number": 2,
-            "pay_url": "",
-            "pay_time": "",
-            "platform_order_time": "",
-            "platform_shipping_time": "",
-            "purchase_amount": "0.00",
-            "purchase_order_status": 1,
-            "purchase_cancel_reason": "",
-            "purchase_order_pay_status": 1,
-            "purchase_order_shipping_status": 1,
-            "purchase_waybill_no": "",
-            "last_waybill_no": "",
-            "task_id": "0",
-            "storage_time": "",
-            "create_time": "2020-03-02 16:29:58",
-            "last_update_time": "2020-03-02 16:29:58"
-        }],
-        "order_id": "76721584925065216",
-        "order_goods_id": "76721584925065217",
-        "channel_order_goods_sn": "52cb878c-4c88-4cb6-b346-a055fce90ffb",
-        "product_platform": "mock1 platform",
-        "product_shop": "mock1 shop",
-        "product_id": "1583166596356", 
-        "sku_id": "1583166596356",
-        "goods_amount": "11.10",
-        "goods_number": 2,
-        "purchase_comment": "",
-        "purchase_time": "",
-        "send_delivery_time": "",
-        "delivery_time": "",
-        "collect_time": "",
-        "receive_time": "",
-        "order_goods_status": 1,
-        "order_goods_shipping_status": 1,
-        "create_time": "2020-03-02 16:29:58",
-        "last_update_time": "2020-03-02 16:29:58"
-    }, {
-        "order_goods_extension": [{
-            "metadata_id": "76721584925065222",
-            "order_goods_id": "76721584925065221",
-            "metadata_name": "",
-            "metadata_value": "mock metadata value 1",
-            "create_time": "2020-03-02 16:29:58",
-            "last_update_time": "2020-03-02 16:29:58"
-        }, {
-            "metadata_id": "76721584925065223",
-            "order_goods_id": "76721584925065221",
-            "metadata_name": "",
-            "metadata_value": "mock metadata value 1",
-            "create_time": "2020-03-02 16:29:58",
-            "last_update_time": "2020-03-02 16:29:58"
-        }],
-        "order_goods_purchase_plan": [{
-            "purchase_plan_id": "76721584925065224",
-            "order_goods_id": "76721584925065221",
-            "purchase_platform_order_id": "",
-            "purchase_platform_parent_order_id": "",
-            "purchase_platform": "mock2 platform",
-            "purchase_number": 3,
-            "pay_url": "",
-            "pay_time": "",
-            "platform_order_time": "",
-            "platform_shipping_time": "",
-            "purchase_amount": "0.00",
-            "purchase_order_status": 1,
-            "purchase_cancel_reason": "",
-            "purchase_order_pay_status": 1,
-            "purchase_order_shipping_status": 1,
-            "purchase_waybill_no": "",
-            "last_waybill_no": "",
-            "task_id": "0",
-            "storage_time": "",
-            "create_time": "2020-03-02 16:29:58",
-            "last_update_time": "2020-03-02 16:29:58"
-        }],
-        "order_id": "76721584925065216",
-        "order_goods_id": "76721584925065221",
-        "channel_order_goods_sn": "5bb0abd1-020a-4042-bf8e-13a60542ca0c",
-        "product_platform": "mock2 platform",
-        "product_shop": "mock2 shop",
-        "product_id": "1583166596357",
-        "sku_id": "1583166596357",
-        "goods_amount": "22.20",
-        "goods_number": 3,
-        "purchase_comment": "",
-        "purchase_time": "",
-        "send_delivery_time": "",
-        "delivery_time": "",
-        "collect_time": "",
-        "receive_time": "",
-        "order_goods_status": 1,
-        "order_goods_shipping_status": 1,
-        "create_time": "2020-03-02 16:29:58",
-        "last_update_time": "2020-03-02 16:29:58"
-    }],
-    "order_id": "76721584925065216",
-    "channel_order_sn": "e0479c2f-7e7b-4445-be5b-152b8cf719f5",
-    "order_time": "2020-03-02 16:29:58",
-    "order_amount": "56.20",
-    "currency": "RMB",
-    "confirm_time": "2020-03-02 16:29:56",
-    "order_status": 1,
-    "address": "mock address",
-    "channel_source": "mock source",
-    "create_time": "2020-03-02 16:29:58",
-    "last_update_time": "2020-03-02 16:29:58"
-}]
+const list = [
+    {
+        orderGoods: {
+            orderId: 111111,
+            orderGoodsId: 222222,
+            channelOrderGoodsSn: 'channel_order_goods_sn',
+            productPlatform: 'product_platform',
+            productShop: 'product_shop',
+            productId: 1,
+            skuId: 1,
+            goodsAmount: 'goods_amount',
+            goodsNumber: 1,
+            referWaybillNo: 'refer_waybill_no',
+            purchaseTime: '11',
+            deliveryTime: '13', //出库时间
+            collectTime: '14',  //揽收时间
+            receiveTime: '15',  //收货时间
+            orderGoodsStatus: 1, //订单状态 1：已确认 2：已取消
+            orderGoodsShippingStatus: 1, //订单配送状态 1：未配送 2：头程已配送 3：已妥投未入库 4： 已入库 5：出库中 6：出库失败  7：取消出库 8：已出库 9：尾程已揽收 10：已妥投
+            lastWaybillNo: '18', //尾程订单号
+            storageTime: '19',
+            createTime: '20',
+            lastUpdateTime: '21',
+            orderGoodsExtension: {},
+            orderGoodsPurchasePlan: [
+                {
+                    purchasePlanId: 1,
+                    orderGoodsId: 2,
+                    purchasePlatformOrderId: '3',
+                    purchasePlatformParentOrderId: '4',
+                    purchasePlatform: '5',
+                    purchaseNumber: 6,
+                    payUrl: 'pay_url',
+                    payTime: '8',
+                    platformOrderTime: '9',
+                    platformShippingTime: '10',
+                    purchaseAmount: '11',
+                    purchaseOrderStatus: 1,
+                    purchaseCancelReason: '13',
+                    purchaseOrderPayStatus: 1,
+                    purchaseOrderShippingStatus: 1,
+                    purchaseWaybillNo: '16',
+                    taskId: 1,
+                    createTime: '18',
+                    lastUpdateTime: '19'
+                },
+                {
+                    purchasePlanId: 1,
+                    orderGoodsId: 2,
+                    purchasePlatformOrderId: '3',
+                    purchasePlatformParentOrderId: '4',
+                    purchasePlatform: '5',
+                    purchaseNumber: 6,
+                    payUrl: 'pay_url',
+                    payTime: '8',
+                    platformOrderTime: '9',
+                    platformShippingTime: '10',
+                    purchaseAmount: '11',
+                    purchaseOrderStatus: 12,
+                    purchaseCancelReason: '13',
+                    purchaseOrderPayStatus: 1,
+                    purchaseOrderShippingStatus: 1,
+                    purchaseWaybillNo: '16',
+                    taskId: 1,
+                    createTime: '18',
+                    lastUpdateTime: '19'
+                }
+            ]
+            
+        },
+        orderInfo: {
+            orderId: 1,
+            channelOrderSn: '1',
+            orderTime: '1',
+            orderAmount: '1',
+            currency: '1',
+            confirmTime: '1',
+            orderStatus: 1,
+            channelSource: '1',
+            createTime: '1',
+            lastUpdateTime: '1'
+        }
+    }
+]
+
+const _list = [
+    {
+        orderId: 1,
+        channelOrderSn: 'channel_order_sn',
+        orderTime: '3',
+        orderAmount: '4',
+        currency: '5',
+        confirmTime: '6',
+        orderStatus: 1,//订单状态 1：已确认 2：采购成功、3：采购失败
+        channelSource: '8',
+        createTime: '9',
+        lastUpdateTime: '10',
+        orderGoods: [
+            {
+                orderId: 1,
+                orderGoodsId: 1,
+                channelOrderGoodsSn: '3',
+                productPlatform: '4',
+                productShop: '5',
+                productId: 6,
+                skuId: 7,
+                goodsAmount: '8',
+                goodsNumber: 9,
+                referWaybillNo: '10', //参考运单号
+                purchaseTime: '11', //采购完成时间
+                deliveryTime: '13', //出库时间
+                collectTime: '14', //揽收时间
+                receiveTime: '15', //收货时间
+                orderGoodsStatus: 1, //订单状态 1：已确认 2：已取消
+                orderGoodsShippingStatus: 1, //订单配送状态 1：未配送 2：头程已配送 3：已妥投未入库 4： 已入库 5：出库中 6：出库失败  7：取消出库 8：已出库 9：尾程已揽收 10：已妥投
+                lastWaybillNo: '18', //尾程订单号
+                storageTime: '19',
+                createTime: '20',
+                lastUpdateTime: '21',
+            },
+            {
+                orderId: 1,
+                orderGoodsId: 2,
+                channelOrderGoodsSn: '3',
+                productPlatform: '4',
+                productShop: '5',
+                productId: 6,
+                skuId: 7,
+                goodsAmount: '8',
+                goodsNumber: 9,
+                referWaybillNo: '10', //参考运单号
+                purchaseTime: '11', //采购完成时间
+                deliveryTime: '13', //出库时间
+                collectTime: '14', //揽收时间
+                receiveTime: '15', //收货时间
+                orderGoodsStatus: 1, //订单状态 1：已确认 2：已取消
+                orderGoodsShippingStatus: 1, //订单配送状态 1：未配送 2：头程已配送 3：已妥投未入库 4： 已入库 5：出库中 6：出库失败  7：取消出库 8：已出库 9：尾程已揽收 10：已妥投
+                lastWaybillNo: '18', //尾程订单号
+                storageTime: '19',
+                createTime: '20',
+                lastUpdateTime: '21',
+            },
+        ]
+    }
+]
 
 const pendingList = [
     {
@@ -305,13 +320,13 @@ const errorOrderList = [
 
 export default {
     'POST /v1/orders/list/1': (req: Request, res: Response) => {
-        // const { page } = req.params;
-        // console.log('params', req.params);
+        const { only_p_order } = req.query;
+        // console.log('params', req);
         setTimeout(() => {
             res.status(200).send({
                 code: 200,
                 data: {
-                    list,
+                    list: only_p_order ? _list : list,
                     all_count: 200
                 }
             })
