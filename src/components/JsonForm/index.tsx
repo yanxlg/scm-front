@@ -33,23 +33,33 @@ type setStateFunc = <K extends keyof IJsonFormState>(
     callback?: () => void,
 ) => void;
 
-export interface IFieldItem extends FormItemLabelProps {
-    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'number' | 'integer' | 'dateRanger';
-    name: FormItemName | [FormItemName, FormItemName];
+type SingleField = {
+    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'number' | 'integer';
+    name: FormItemName;
+    formatter?: formatter;
+};
+
+type DoubleFields = {
+    type: 'dateRanger';
+    name: [FormItemName, FormItemName];
+    formatter?: [formatter, formatter];
+};
+
+export type IFieldItem = FormItemLabelProps & {
     placeholder?: string;
     optionList?: IOptionItem[] | (() => Promise<IOptionItem[]>); // 支持异步获取
     syncDefaultOption?: IOptionItem; // 异步获取options是默认选项，通常用于胚子'全部'
     optionListDependence?: {
         name: FormItemName; // 异步存储在state中的数据
         key: string; // 关联key
+        convert?: (item: any) => IOptionItem;
     };
     className?: string;
     formItemClassName?: string;
     dateBeginWith?: Array<FormItemName | 'now'>;
     dateEndWith?: Array<FormItemName | 'now'>;
-    formatter?: formatter;
     onChange?: (name: FormItemName, form: FormInstance, setState: setStateFunc) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-}
+} & (SingleField | DoubleFields);
 
 declare interface IJsonFormProps extends FormProps {
     fieldList: IFieldItem[];
@@ -354,10 +364,53 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
         );
     };
 
+    private getOptionList(field: IFieldItem): { loading: boolean; optionList: IOptionItem[] } {
+        const { name, optionList, optionListDependence } = field;
+        const isFunction = typeof optionList === 'function';
+        if (isFunction) {
+            const { optionMap } = this.state;
+            const syncOptionList = optionMap[name as string];
+            const loading = isFunction && !syncOptionList;
+            const mergeList = syncOptionList || ([] as IOptionItem[]);
+            return {
+                loading: loading,
+                optionList: mergeList,
+            };
+        } else if (optionList === void 0) {
+            if (optionListDependence) {
+                const { name: dependenceName, key: dependenceKey, convert } = optionListDependence;
+                const { optionMap } = this.state;
+                const form = this.formRef.current;
+                const dependenceValue = form?.getFieldValue(dependenceName);
+                const parentList = optionMap[dependenceName];
+                const parentItem = parentList?.find(({ value }) => value === dependenceValue);
+                const dependenceList = parentItem?.[dependenceKey] ?? undefined;
+                const convertList = dependenceList?.map((item: any) =>
+                    convert ? convert(item) : item,
+                );
+                const loading = !parentList;
+                const mergeList = convertList || ([] as IOptionItem[]);
+                return {
+                    loading: loading,
+                    optionList: mergeList,
+                };
+            } else {
+                return {
+                    loading: false,
+                    optionList: [] as IOptionItem[],
+                };
+            }
+        } else {
+            return {
+                loading: false,
+                optionList: (optionList || []) as IOptionItem[],
+            };
+        }
+    }
+
     private addSelect = (field: IFieldItem) => {
         const {
             name,
-            optionList,
             label,
             className,
             formItemClassName,
@@ -366,20 +419,6 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
             onChange,
         } = field;
         const { labelClassName } = this.props;
-        const { optionMap } = this.state;
-        const syncOptionList = optionMap[name as string];
-        const dependenceName = optionListDependence?.name;
-        const dependenceKey = optionListDependence?.key;
-        const dependenceList =
-            dependenceName && dependenceKey ? optionMap[dependenceName][dependenceKey] : undefined;
-        const isFunction = typeof optionList === 'function';
-        const loading =
-            (isFunction && !syncOptionList) || (optionListDependence && !dependenceList);
-        const mergeList = isFunction
-            ? syncOptionList || ([] as IOptionItem[])
-            : optionListDependence
-            ? dependenceList || ([] as IOptionItem[])
-            : (optionList as IOptionItem[]);
         const eventProps = onChange
             ? {
                   onChange: () => {
@@ -391,24 +430,64 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
                   },
               }
             : {};
-        return (
-            <Form.Item
-                name={name}
-                className={formItemClassName}
-                label={<span className={labelClassName}>{label}</span>}
-            >
-                <Select className={className} loading={loading} {...eventProps}>
-                    {syncDefaultOption ? (
-                        <Option value={syncDefaultOption.value}>{syncDefaultOption.name}</Option>
-                    ) : null}
-                    {mergeList!.map(item => (
-                        <Option key={item.value} value={item.value}>
-                            {item.name}
-                        </Option>
-                    ))}
-                </Select>
-            </Form.Item>
-        );
+
+        if (optionListDependence === void 0) {
+            const { loading, optionList } = this.getOptionList(field);
+            return (
+                <Form.Item
+                    name={name}
+                    className={formItemClassName}
+                    label={<span className={labelClassName}>{label}</span>}
+                >
+                    <Select className={className} loading={loading} {...eventProps}>
+                        {syncDefaultOption ? (
+                            <Option value={syncDefaultOption.value}>
+                                {syncDefaultOption.name}
+                            </Option>
+                        ) : null}
+                        {optionList!.map(item => (
+                            <Option key={item.value} value={item.value}>
+                                {item.name}
+                            </Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+            );
+        } else {
+            return (
+                <Form.Item
+                    noStyle={true}
+                    shouldUpdate={(prevValues, currentValues) =>
+                        prevValues[optionListDependence?.name] !==
+                        currentValues[optionListDependence?.name]
+                    }
+                >
+                    {({ getFieldValue }) => {
+                        const { loading, optionList } = this.getOptionList(field);
+                        return (
+                            <Form.Item
+                                name={name}
+                                className={formItemClassName}
+                                label={<span className={labelClassName}>{label}</span>}
+                            >
+                                <Select className={className} loading={loading} {...eventProps}>
+                                    {syncDefaultOption ? (
+                                        <Option value={syncDefaultOption.value}>
+                                            {syncDefaultOption.name}
+                                        </Option>
+                                    ) : null}
+                                    {optionList!.map(item => (
+                                        <Option key={item.value} value={item.value}>
+                                            {item.name}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        );
+                    }}
+                </Form.Item>
+            );
+        }
     };
 
     private addDatePicker = (field: IFieldItem) => {
@@ -512,10 +591,10 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
         fieldList.forEach(({ name, formatter }) => {
             if (formatter) {
                 if (typeof name === 'string') {
-                    this.formatterMap.set(name, formatter);
+                    this.formatterMap.set(name, formatter as formatter);
                 } else {
-                    name.forEach(item => {
-                        this.formatterMap.set(item, formatter);
+                    name.forEach((item, index) => {
+                        this.formatterMap.set(item, (formatter as [formatter, formatter])[index]);
                     });
                 }
             }

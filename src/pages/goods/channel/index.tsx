@@ -24,7 +24,7 @@ import {
     ProductStatusList,
 } from '@/config/dictionaries/Product';
 import { EmptyObject } from '@/enums/ConfigEnum';
-import { IChannelProductListItem } from '@/interface/IChannel';
+import { IChannelProductListItem, IChannelCategoryItem } from '@/interface/IChannel';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
 
 declare interface IVoVaListState {
@@ -87,6 +87,7 @@ const formFields: IFieldItem[] = [
         label: <span>时&emsp;&emsp;&emsp;间</span>,
         className: 'product-picker',
         formItemClassName: 'form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'input',
@@ -134,6 +135,10 @@ const formFields: IFieldItem[] = [
         name: 'level_one_category',
         className: 'select-default',
         formItemClassName: 'form-item',
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
         optionList: () =>
             queryChannelCategory()
                 .then(({ data = [] } = EmptyObject) => {
@@ -148,7 +153,9 @@ const formFields: IFieldItem[] = [
                 .catch(() => {
                     return [];
                 }),
-        onChange: (name, form, setState) => {},
+        onChange: (name, form, setState) => {
+            form.resetFields(['level_two_category']);
+        },
     },
     {
         type: 'select',
@@ -156,7 +163,20 @@ const formFields: IFieldItem[] = [
         name: 'level_two_category',
         className: 'select-default',
         formItemClassName: 'form-item',
-        optionList: () => new Promise(() => {}),
+        optionListDependence: {
+            name: 'level_one_category',
+            key: 'children',
+            convert: ({ platform_cate_id, platform_cate_name }: IChannelCategoryItem) => {
+                return {
+                    value: String(platform_cate_id),
+                    name: platform_cate_name,
+                };
+            },
+        },
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
     },
     {
         type: 'select',
@@ -490,7 +510,34 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         } = this.state;
         return (
             <div className="container">
-                <JsonForm fieldList={formFields} labelClassName="product-form-label" />
+                <JsonForm
+                    fieldList={formFields}
+                    labelClassName="product-form-label"
+                    initialValues={{
+                        level_one_category: '',
+                        level_two_category: '',
+                        sales_volume: salesVolumeList[0].value,
+                        product_status: ProductStatusList[0].id,
+                    }}
+                >
+                    <div>
+                        <Button
+                            type="primary"
+                            className="btn-group vertical-middle form-item"
+                            loading={searchLoading}
+                            onClick={this.onSearch}
+                        >
+                            查询
+                        </Button>
+                        <Button
+                            type="primary"
+                            className="btn-group vertical-middle form-item"
+                            onClick={this.toggleExcelDialog}
+                        >
+                            导出
+                        </Button>
+                    </div>
+                </JsonForm>
                 <SearchCondition
                     ref={this.formRef}
                     searchLoading={searchLoading}
