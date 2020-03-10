@@ -4,7 +4,7 @@ import { ColumnProps } from 'antd/es/table';
 import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import router from 'umi/router';
+import { history } from 'umi';
 import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import {
     TaskRangeCode,
@@ -29,8 +29,6 @@ import '@/styles/task.less';
 import { ITaskListItem, ITaskListQuery } from '@/interface/ITask';
 import { EmptyObject } from '@/config/global';
 import queryString from 'query-string';
-import { connect } from '@/compatibility/connect';
-import { ConnectProps } from '@/models/connect';
 import CopyLink from '@/components/copyLink';
 
 declare interface IALLTaskPageState {
@@ -350,7 +348,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     }
 
     private viewTaskResult(task_id: number) {
-        router.push({
+        history.push({
             pathname: '/goods/local',
             state: {
                 task_id,
@@ -359,7 +357,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     }
 
     private viewTaskDetail(task_id: number) {
-        router.push(`/task/list/${task_id}`);
+        history.push(`/task/list/${task_id}`);
     }
 
     private deleteTasks() {

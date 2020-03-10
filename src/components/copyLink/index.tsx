@@ -3,8 +3,6 @@ import styles from './_index.less';
 import { Popover } from 'antd';
 import { Icons } from '@/components/Icon';
 import { CheckCircleTwoTone } from '@ant-design/icons';
-import { useSelector } from 'dva';
-import { ConnectState } from '@/models/connect';
 import queryString from 'query-string';
 
 declare interface ICopyLinkProps {

@@ -15,7 +15,7 @@ export interface GlobalHeaderRightProps extends BasicLayoutProps {
 }
 
 const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
-    const { route = {}, menu, formatMessage, menuDataRender, itemRender, queryData } = props;
+    const { route = {}, menu, formatMessage, menuDataRender, itemRender } = props;
     const { routes = [] } = route;
     const { breadcrumbMap } = getMenuData(routes, menu, formatMessage, menuDataRender);
     const breadcrumbData = genBreadcrumbProps(

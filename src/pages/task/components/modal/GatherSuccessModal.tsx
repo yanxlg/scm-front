@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import router from 'umi/router';
+import { history } from 'umi';
 import { Button, Modal } from 'antd';
 import { ITaskCreatedResponse } from '@/interface/ITask';
 import { TaskTypeMap } from '@/enums/StatusEnum';
@@ -11,7 +11,7 @@ declare interface ITaskListProps {
 
 const GatherSuccessModal: React.FC<ITaskListProps> = ({ result }) => {
     const onClick = useCallback(() => {
-        router.push({
+        history.push({
             pathname: '/task/list',
             state: {
                 task_sn: result.task_sn,
