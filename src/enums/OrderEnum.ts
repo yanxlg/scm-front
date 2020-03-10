@@ -5,7 +5,7 @@ declare interface optionItem {
     value: number;
 }
 
-export const pageSizeOptions = ['30', '50', '100', '500'];
+export const pageSizeOptions = ['50', '100', '500', '1000'];
 
 export const defaultOptionItem: optionItem = { name: '全部', value: 100 }
 

@@ -60,25 +60,25 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             }
         },
         {
-            key: 'a1',
+            key: 'purchaseOrderTime',
             title: '采购订单生成时间',
-            dataIndex: 'a1',
+            dataIndex: 'purchaseOrderTime',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
         {
-            key: 'a2',
+            key: 'purchaseParentOrderSn',
             title: '采购父订单号',
-            dataIndex: 'a2',
+            dataIndex: 'purchaseParentOrderSn',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
         {
-            key: 'a3',
+            key: 'purchasePayUrl',
             title: '支付二维码',
-            dataIndex: 'a3',
+            dataIndex: 'purchasePayUrl',
             align: 'center',
             width: 140,
             render: (value: string, row: IPayItem) => {
@@ -105,71 +105,78 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             }
         },
         {
-            key: 'a4',
+            key: 'parentPurchasePayStatusDesc',
             title: '采购支付状态',
-            dataIndex: 'a4',
+            dataIndex: 'parentPurchasePayStatusDesc',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
         {
-            key: 'a5',
+            key: 'purchaseTotalAmount',
             title: '采购价',
-            dataIndex: 'a5',
+            dataIndex: 'purchaseTotalAmount',
             align: 'center',
             width: 120,
             render: this.mergeCell
         },
         {
-            key: 'a6',
+            key: 'purchaseOrderSn',
             title: '采购子订单号',
-            dataIndex: 'a6',
+            dataIndex: 'purchaseOrderSn',
             align: 'center',
             width: 120
         },
         {
-            key: 'a7',
-            title: '采购订单状态',
-            dataIndex: 'a7',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'a8',
+            key: 'purchasePlanId',
             title: '计划子项ID',
-            dataIndex: 'a8',
+            dataIndex: 'purchasePlanId',
             align: 'center',
             width: 120
         },
         {
-            key: 'a9',
-            title: '中台子订单ID',
-            dataIndex: 'a9',
+            key: 'purchaseOrderStatusDesc',
+            title: '采购订单状态',
+            dataIndex: 'purchaseOrderStatusDesc',
             align: 'center',
             width: 120
         },
         {
-            key: 'a10',
-            title: '订单时间',
-            dataIndex: 'a10',
+            key: 'purchasePayStatusDesc',
+            title: '采购子订单支付状态',
+            dataIndex: 'purchasePayStatusDesc',
             align: 'center',
             width: 120
         },
-        {
-            key: 'a11',
-            title: '备注',
-            dataIndex: 'a11',
-            align: 'center',
-            width: 200,
-            render: (value: string, row: IPayItem) => {
-                return {
-                    children: <TextArea autoSize={true} defaultValue={value}/>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                }
-            }
-        }
+        // {
+        //     key: 'a9',
+        //     title: '中台子订单ID',
+        //     dataIndex: 'a9',
+        //     align: 'center',
+        //     width: 120
+        // },
+        // {
+        //     key: 'a10',
+        //     title: '订单时间',
+        //     dataIndex: 'a10',
+        //     align: 'center',
+        //     width: 120
+        // },
+        // {
+        //     key: 'a11',
+        //     title: '备注',
+        //     dataIndex: 'a11',
+        //     align: 'center',
+        //     width: 200,
+        //     render: (value: string, row: IPayItem) => {
+        //         return {
+        //             children: <TextArea autoSize={true} defaultValue={value}/>,
+        //             props: {
+        //                 rowSpan: row._rowspan || 0,
+        //             },
+        //         }
+        //     }
+        // }
     ]
 
     constructor(props: IProps) {

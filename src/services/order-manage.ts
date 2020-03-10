@@ -1,6 +1,5 @@
 import request from '@/utils/request';
-import { ApiPathEnum } from '@/enums/ApiPathEnum';
-
+import { OrderApiPath } from '@/config/api/OrderApiPath';
 
 export declare interface IFilterParams {
     page?: number;
@@ -8,65 +7,64 @@ export declare interface IFilterParams {
     only_p_order?: number;
 }
 
- 
-export async function getAllOrderList(params: IFilterParams) {
-    return request.post(ApiPathEnum.getAllOrderList, {
-        requestType: 'form',
-        params
+export async function getAllOrderList(data: IFilterParams) {
+    return request.post(OrderApiPath.getAllOrderList, {
+        requestType: 'json',
+        data
     });
 }
 
 // 获取待拍单
-export async function getPendingOrderList(params = {}) {
-    return request.post(ApiPathEnum.getPendingOrderList, {
-        requestType: 'form',
-        params
+export async function getPendingOrderList(data = {}) {
+    return request.post(OrderApiPath.getPendingOrderList, {
+        requestType: 'json',
+        data
     });
 }
 
 // 获取待支付
-export async function getPayOrderList(params = {}) {
-    return request.post(ApiPathEnum.getPayOrderList, {
-        requestType: 'form',
-        params
+export async function getPayOrderList(data = {}) {
+    return request.post(OrderApiPath.getPayOrderList, {
+        requestType: 'json',
+        data
     });
 }
 
 // 获取待发货
-export async function getWaitShipList(params = {}) {
-    return request.get(ApiPathEnum.getWaitShipList, {
-        requestType: 'form',
-        params
+export async function getWaitShipList(data = {}) {
+    return request.post(OrderApiPath.getWaitShipList, {
+        requestType: 'json',
+        data
     });
 }
 
 // 采购未发货
-export async function getPurchasedNotStockList(params = {}) {
-    return request.get(ApiPathEnum.getPurchasedNotStockList, {
-        requestType: 'form',
-        params
+export async function getPurchasedNotStockList(data = {}) {
+    return request.post(OrderApiPath.getPurchasedNotStockList, {
+        requestType: 'json',
+        data
     });
 }
 
 // 仓库未发货
-export async function getStockNotShipList(params = {}) {
-    return request.get(ApiPathEnum.getStockNotShipList, {
-        requestType: 'form',
-        params
+export async function getStockNotShipList(data = {}) {
+    return request.post(OrderApiPath.getStockNotShipList, {
+        requestType: 'json',
+        data
     });
 }
 
 // 获取异常订单
-export async function getErrorOrderList(params = {}) {
-    return request.get(ApiPathEnum.getErrorOrderList, {
-        requestType: 'form',
-        params
+export async function getErrorOrderList(data = {}) {
+    return request.post(OrderApiPath.getErrorOrderList, {
+        requestType: 'json',
+        data
     });
 }
 
 
 export async function getOrderGoodsDetail(params: { middleground_order_id: string }) {
-    return request.get(ApiPathEnum.getOrderGoodsDetail, {
+    return request.get(OrderApiPath.getOrderGoodsDetail, {
         requestType: 'form',
         params
     });

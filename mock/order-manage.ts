@@ -195,30 +195,29 @@ const pendingList = [
 
 const payList = [
     {
-        purchase_time: 1582703606,
-        middleground_order_id: '111',
-        pay_url: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
-        purchase_p_order_id: 'purchase_p_order_id',
-        purchase_order_id: 'purchase_order_id',
-        purchase_price: 100,
-        sale_order_status: 1,
-        purchase_order_status: 1,
-        purchase_pay_status: 1,
-        order_create_time: 1582703606,
-        comment: '待支付'
-    },
-    {
-        purchase_time: 1582703606,
-        middleground_order_id: '222',
-        pay_url: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
-        purchase_p_order_id: 'purchase_p_order_id',
-        purchase_order_id: 'purchase_order_id',
-        purchase_price: 100,
-        sale_order_status: 1,
-        purchase_order_status: 1,
-        purchase_pay_status: 1,
-        order_create_time: 1582703606,
-        comment: '待支付222'
+        purchasePayUrl: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg', // 二维码地址	
+        purchaseTotalAmount: 88, // 采购价格	
+        purchaseParentOrderSn: '111', // 采购父订单id	
+        purchaseOrderTime: 'purchaseOrderTime', // 采购下单时间
+        purchasePayStatusDesc: 'purchasePayStatusDesc',
+        childOrder: [
+            {
+                purchasePlanId: 1, // 采购计划id	
+                purchaseOrderSn: 1, // 采购子订单id	
+                purchaseOrderStatus: 1, // 采购子订单状态	
+                purchaseOrderStatusDesc: 'purchaseOrderStatusDesc', // 采购子订单状态描述	
+                purchasePayStatus: 1, // 采购子订单支付状态	
+                purchasePayStatusDesc: 'purchasePayStatusDesc', // 采购子订单支付状态描述	
+            },
+            {
+                purchasePlanId: 2, // 采购计划id	
+                purchaseOrderSn: 2, // 采购子订单id	
+                purchaseOrderStatus: 1, // 采购子订单状态	
+                purchaseOrderStatusDesc: 'purchaseOrderStatusDesc', // 采购子订单状态描述	
+                purchasePayStatus: 1, // 采购子订单支付状态	
+                purchasePayStatusDesc: 'purchasePayStatusDesc', // 采购子订单支付状态描述	
+            }
+        ]
     }
 ]
 
@@ -321,18 +320,18 @@ const errorOrderList = [
 export default {
     'POST /v1/orders/list/1': (req: Request, res: Response) => {
         const { only_p_order } = req.query;
-        // console.log('params', req);
+        // console.log('params', only_p_order);
         setTimeout(() => {
             res.status(200).send({
                 code: 200,
                 data: {
-                    list: only_p_order ? _list : list,
+                    list: Number(only_p_order) ? _list : list,
                     all_count: 200
                 }
             })
         }, 500);
     },
-    'GET /v1/orders/list/2': (req: Request, res: Response) => {
+    'POST /v1/orders/list/2': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({
@@ -344,7 +343,7 @@ export default {
             })
         }, 500);
     },
-    'GET /v1/orders/list/3': (req: Request, res: Response) => {
+    'POST /v1/orders/list/3': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({
@@ -356,7 +355,7 @@ export default {
             })
         }, 500);
     },
-    'GET /v1/orders/list/4': (req: Request, res: Response) => {
+    'POST /v1/orders/list/4': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({
@@ -368,7 +367,7 @@ export default {
             })
         }, 500);
     },
-    'GET /v1/orders/list/5': (req: Request, res: Response) => {
+    'POST /v1/orders/list/5': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({
@@ -380,7 +379,7 @@ export default {
             })
         }, 500);
     },
-    'GET /v1/orders/list/6': (req: Request, res: Response) => {
+    'POST /v1/orders/list/6': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({
@@ -392,7 +391,7 @@ export default {
             })
         }, 500);
     },
-    'GET /v1/orders/list/7': (req: Request, res: Response) => {
+    'POST /v1/orders/list/7': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({
@@ -404,7 +403,7 @@ export default {
             })
         }, 500);
     },
-    'GET /v1/order/goods_detail': (req: Request, res: Response) => {
+    'POST /v1/order/goods_detail': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({

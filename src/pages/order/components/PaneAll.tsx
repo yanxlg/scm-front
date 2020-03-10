@@ -192,29 +192,41 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     // 获取子订单=>采购计划数据
     private getChildOrderData(list: any[]): IChildOrderItem[] {
+        // console.log(1111, list);
         const childOrderList: IChildOrderItem[] = [];
         list.forEach((goodsItem: any) => {
             const { orderGoods } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            // console.log(111, goodsCreateTime);
-            orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
-                const {
-                    createTime: purchaseCreateTime,
-                    lastUpdateTime: purchaseLastUpdateTime,
-                    ...purchaseRest
-                } = purchaseItem;
-                const childOrderItem: any = {
+            // console.log(111, orderGoodsPurchasePlan, orderGoods);
+            if (orderGoodsPurchasePlan) {
+                // 生成采购计划
+                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                    const {
+                        createTime: purchaseCreateTime,
+                        lastUpdateTime: purchaseLastUpdateTime,
+                        ...purchaseRest
+                    } = purchaseItem;
+                    const childOrderItem: any = {
+                        ...orderRest,
+                        ...purchaseRest,
+                        purchaseCreateTime,
+                        purchaseLastUpdateTime
+                    }
+                    if (index === 0) {
+                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._checked = false;
+                    }
+                    childOrderList.push(childOrderItem);
+                })
+            } else {
+                // 没有生成采购计划
+                childOrderList.push({
                     ...orderRest,
-                    ...purchaseRest,
-                    purchaseCreateTime,
-                    purchaseLastUpdateTime
-                }
-                if (index === 0) {
-                    childOrderItem._rowspan = orderGoodsPurchasePlan.length;
-                    childOrderItem._checked = false;
-                }
-                childOrderList.push(childOrderItem);
-            })
+                    _rowspan: 1,
+                    _checked: false
+                });
+            }
+            
         });
         // console.log(1111, childOrderList);
         return childOrderList;

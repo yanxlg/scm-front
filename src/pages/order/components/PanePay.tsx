@@ -90,7 +90,7 @@ const defaultFieldList: IFieldItem[] = [
 
 // const allFieldList: IFieldItem[] = [];
 
-class PanePaid extends React.PureComponent<{}, IState> {
+class PanePay extends React.PureComponent<{}, IState> {
     private formRef: RefObject<FormInstance> = React.createRef();
     private initialValues = {
         purchase_platform: 100
@@ -133,37 +133,12 @@ class PanePaid extends React.PureComponent<{}, IState> {
         getPayOrderList(params).then(res => {
             // console.log('getProductOrderList', res);
             const { all_count, list } = res.data;
-            const mockList = [
-                {
-                    a1: '采购订单生成时间',
-                    a2: '采购父订单号',
-                    a3: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
-                    a4: '采购支付状态',
-                    a5: '采购价',
-                    x: [
-                        {
-                            a6: '采购子订单号1',
-                            a7: '采购订单状态',
-                            a8: '计划子项ID',
-                            a9: '中台子订单ID',
-                            a10: '订单时间',
-                        },
-                        {
-                            a6: '采购子订单号2',
-                            a7: '采购订单状态',
-                            a8: '计划子项ID',
-                            a9: '中台子订单ID',
-                            a10: '订单时间',
-                        }
-                    ],
-                    a11: '备注'
-                }
-            ]
+            // console.log('getPayOrderList', list);
             this.setState({
                 total: all_count,
                 page: params.page as number,
                 pageCount: params.page_count as number,
-                orderList: this.getOrderData(mockList)
+                orderList: this.getOrderData(list)
             })
         }).finally(() => {
             this.setState({
@@ -177,16 +152,18 @@ class PanePaid extends React.PureComponent<{}, IState> {
         const ret: IPayItem[] = [];
         list.forEach(item => {
             const {
-                x,
-                ...rest
+                childOrder,
+                purchasePayStatusDesc: parentPurchasePayStatusDesc,
+                ...parentRest
             } = item;
-            x.forEach((childItem: any, index: number) => {
+            childOrder.forEach((childItem: any, index: number) => {
                 const payItem = {
-                    ...rest,
-                    ...childItem
+                    ...parentRest,
+                    ...childItem,
+                    parentPurchasePayStatusDesc
                 }
                 if (index === 0) {
-                    payItem._rowspan = x.length;
+                    payItem._rowspan = childOrder.length;
                     payItem._checked = false;
                 }
                 ret.push(payItem);
@@ -313,4 +290,4 @@ class PanePaid extends React.PureComponent<{}, IState> {
     }
 }
 
-export default PanePaid;
+export default PanePay;
