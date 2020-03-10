@@ -13,7 +13,7 @@ const GatherFailureModal: React.FC = () => {
     return useMemo(() => {
         return (
             <div>
-                <div className="config-modal-title">采集任务创建失败</div>
+                <div className="config-modal-title">任务创建失败</div>
                 <div className="config-modal-title">请重新尝试</div>
                 <Button onClick={onClick} type="primary" className="config-modal-btn">
                     重新创建任务
