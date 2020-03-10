@@ -166,11 +166,11 @@ class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
             },
         })
             .then(res => {
-                message.success('上架成功');
-                this.queryList();
+                message.success('上架任务已发送');
+                // this.queryList();
             })
             .catch(() => {
-                message.success('上架失败');
+                message.success('上架任务发送失败');
             });
     }
 
@@ -189,11 +189,11 @@ class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
             },
         })
             .then(res => {
-                message.success('下架成功');
-                this.queryList();
+                message.success('下架任务已发送');
+                // this.queryList();
             })
             .catch(() => {
-                message.error('下架失败');
+                message.error('下架任务发送失败');
             });
     }
 

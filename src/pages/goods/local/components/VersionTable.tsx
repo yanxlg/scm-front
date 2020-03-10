@@ -41,7 +41,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                             size="small"
                             onClick={() => operationVersion(row.product_id, 'apply')}
                         >
-                            应用
+                            上架此版本
                         </Button>
                     );
                 } else {
