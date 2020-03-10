@@ -2,13 +2,12 @@ import React, { RefObject } from 'react';
 import { Button, Pagination } from 'antd';
 import { FormInstance } from 'antd/es/form';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 import TablePendingOrder from './TablePendingOrder';
 
 import { 
     getPendingOrderList,
-    IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
@@ -131,7 +130,7 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
+    onSearch = (baseParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
@@ -160,8 +159,8 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
             })
             this.setState({
                 total: all_count,
-                page: params.page,
-                pageCount: params.page_count,
+                page: params.page as number,
+                pageCount: params.page_count as number,
                 orderList: this.getOrderData(childList)
             })
         }).finally(() => {
@@ -317,7 +316,7 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
                         labelClassName="order-label"
                         fieldList={fieldList}
                         formRef={this.formRef}

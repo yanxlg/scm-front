@@ -2,13 +2,12 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import OptionalColumn from './OptionalColumn';
 import TableStockNotShip from './TableStockNotShip';
 
 import { 
     getPurchasedNotStockList,
-    IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 import { defaultStockNotShipColList, stockNotShipOptionalColList } from '@/enums/OrderEnum';
@@ -76,7 +75,7 @@ const allFieldList: IFieldItem[] = [
 
 declare interface IState {
     page: number;
-    pageNumber: number;
+    pageCount: number;
     total: number;
     loading: boolean;
     showColStatus: boolean;
@@ -98,7 +97,7 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             page: 1,
-            pageNumber: 50,
+            pageCount: 50,
             total: 0,
             loading: false,
             showColStatus: false,
@@ -115,11 +114,11 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
+    onSearch = (baseParams?: IFilterParams) => {
+        const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
+            page_count: pageCount
         }
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
@@ -137,8 +136,8 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
             const { total, list } = res.data;
             this.setState({
                 total,
-                page: params.page,
-                pageNumber: params.page_number,
+                page: params.page as number,
+                pageCount: params.page_count as number,
                 orderList: list
             })
         }).finally(() => {
@@ -176,7 +175,7 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
                         fieldList={fieldList}
                         labelClassName="order-label"
                         formRef={this.formRef}

@@ -403,7 +403,7 @@ export default {
             })
         }, 500);
     },
-    'POST /v1/order/goods_detail': (req: Request, res: Response) => {
+    'GET /v1/order/goods_detail': (req: Request, res: Response) => {
         // const { page, page_number } = req.params;
         setTimeout(() => {
             res.status(200).send({

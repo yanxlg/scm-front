@@ -2,13 +2,12 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import OptionalColumn from './OptionalColumn';
 import TableNotStock from './TableNotStock';
 
 import { 
     getPurchasedNotStockList,
-    IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 import { defaultStockColList, notStockOptionalColList } from '@/enums/OrderEnum';
@@ -108,7 +107,7 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
+    onSearch = (baseParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
@@ -130,8 +129,8 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
             const { total, list } = res.data;
             this.setState({
                 total,
-                page: params.page,
-                pageCount: params.page_count,
+                page: params.page as number,
+                pageCount: params.page_count as number,
                 orderList: list
             })
         }).finally(() => {
@@ -169,7 +168,7 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
                         fieldList={fieldList}
                         labelClassName="order-label"
                         formRef={this.formRef}

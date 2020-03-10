@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button, Pagination } from 'antd';
 import { FormInstance } from 'antd/es/form';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TablePay from './TablePay';
 
 import { 
@@ -248,7 +248,7 @@ class PanePay extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
                         labelClassName="order-label"
                         fieldList={defaultFieldList}
                         formRef={this.formRef}

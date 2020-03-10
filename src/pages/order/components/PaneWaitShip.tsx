@@ -2,13 +2,12 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import { FormInstance } from 'antd/es/form';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 import TableWaitShip from './TableWaitShip';
 
 import { 
     getWaitShipList,
-    IFilterBaseParams,
     IFilterParams
 } from '@/services/order-manage';
 
@@ -27,7 +26,7 @@ export declare interface IWaitShipItem {
 
 declare interface IState {
     page: number;
-    pageNumber: number;
+    pageCount: number;
     total: number;
     loading: boolean;
     showStatus: boolean;
@@ -127,7 +126,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             page: 1,
-            pageNumber: 50,
+            pageCount: 50,
             total: 0,
             loading: false,
             showStatus: false,
@@ -140,11 +139,11 @@ class PanePaid extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
+    onSearch = (baseParams?: IFilterParams) => {
+        const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_number: pageNumber
+            page_count: pageCount
         }
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
@@ -163,7 +162,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
             this.setState({
                 total,
                 // page: params.page,
-                // pageNumber: params.page_number,
+                // pageCount: params.page_count,
                 orderList: list
             })
         }).finally(() => {
@@ -204,7 +203,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
                         labelClassName="order-label"
                         fieldList={fieldList}
                         formRef={this.formRef}

@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Pagination, Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
@@ -61,8 +61,7 @@ declare interface IPaneAllState {
 }
 
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
-
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchForm> = React.createRef();
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
 
     private initialValues = {
@@ -78,9 +77,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         type: 'checkbox',
         name: 'only_p_order',
         label: '仅展示父订单ID',
-        onChange: (status: boolean) => {
-            this.changeParentOrder(status);
-        }
+        // name, form, setState
+        onChange: (name, form, setState) => {
+            this.changeParentOrder(form.getFieldValue(name));
+        },
     }
 
     constructor(props: {}) {
@@ -158,8 +158,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         // console.log(1111, list);
         const childOrderList: IChildOrderItem[] = [];
         list.forEach((goodsItem: any) => {
-            const { orderGoods } = goodsItem;
+            const { orderGoods, orderInfo } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
+            const {
+                currency,
+                confirmTime,
+                channelOrderSn,
+                channelSource
+            } = orderInfo;
             // console.log(111, orderGoodsPurchasePlan, orderGoods);
             if (orderGoodsPurchasePlan) {
                 // 生成采购计划
@@ -173,7 +179,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         ...orderRest,
                         ...purchaseRest,
                         purchaseCreateTime,
-                        purchaseLastUpdateTime
+                        purchaseLastUpdateTime,
+                        currency,
+                        confirmTime,
+                        channelOrderSn,
+                        channelSource
                     }
                     if (index === 0) {
                         childOrderItem._rowspan = orderGoodsPurchasePlan.length;
@@ -184,6 +194,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             } else {
                 // 没有生成采购计划
                 childOrderList.push({
+                    currency,
+                    confirmTime,
+                    channelOrderSn,
+                    channelSource,
                     ...orderRest,
                     _rowspan: 1,
                     _checked: false
@@ -377,10 +391,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
+                        ref={this.formRef}
                         fieldList={fieldList}
                         labelClassName="order-label"
-                        formRef={this.formRef}
+                        
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">

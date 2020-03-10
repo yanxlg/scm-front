@@ -5,7 +5,14 @@ import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import { IChildOrderItem, IPurchaseStatus } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { utcToLocal } from '@/utils/date';
+import { getStatusDesc } from '@/utils/transform';
+import { 
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    purchasePayOptionList,
+    purchaseShippingOptionList
+} from '@/enums/OrderEnum';
 
 declare interface ISpecs {
     [key: string]: string;
@@ -45,7 +52,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
                 return {
-                    children: value,
+                    children: utcToLocal(value),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -61,9 +68,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell
         },
         {
-            key: 'orderGoodsId',
+            key: 'goodsDetail',
             title: '商品详情',
-            dataIndex: 'orderGoodsId',
+            dataIndex: 'goodsDetail',
             align: 'center',
             width: 120,
             render: (value: any, row: IChildOrderItem) => {
@@ -107,7 +114,14 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderGoodsStatus',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: (value: number, row: IChildOrderItem) => {
+                return {
+                    children: getStatusDesc(orderStatusOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
+            }
         },
         {
             key: 'productId',
@@ -131,27 +145,40 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
             width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return getStatusDesc(purchaseOrderOptionList, value)
+            }
         },
         {
             key: 'purchaseOrderPayStatus',
             title: '采购支付状态',
             dataIndex: 'purchaseOrderPayStatus',
             align: 'center',
-            width: 120
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return getStatusDesc(purchasePayOptionList, value)
+            }
         },
         {
             key: 'purchaseOrderShippingStatus',
             title: '采购配送状态',
             dataIndex: 'purchaseOrderShippingStatus',
             align: 'center',
-            width: 120
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return getStatusDesc(purchaseShippingOptionList, value)
+            }
         },
         {
             key: 'purchaseCreateTime',
             title: '采购生成时间',
             dataIndex: 'purchaseCreateTime',
             align: 'center',
-            width: 120
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return utcToLocal(value)
+            }
+
         },
         // 待确定
         {
@@ -176,17 +203,51 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120
         },
         {
+            key: 'purchaseCreateTime',
+            title: '采购时间',
+            dataIndex: 'purchaseCreateTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return utcToLocal(value);
+            }
+        },
+
+        {
             key: 'confirmTime',
             title: '订单确认时间',
             dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
+            }
         },
         {
-            key: 'channelOrderGoodsSn',
+            key: 'deliveryTime',
+            title: '出库时间',
+            dataIndex: 'deliveryTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
+            }
+        },
+        // 待确定
+        {
+            key: 'channelOrderSn',
             title: '渠道订单ID',
-            dataIndex: 'channelOrderGoodsSn',
+            dataIndex: 'channelOrderSn',
             align: 'center',
             width: 120,
             render: this.mergeCell
@@ -225,9 +286,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell
         },
         {
-            key: 'productPlatform',
+            key: 'channelSource',
             title: '销售渠道',
-            dataIndex: 'productPlatform',
+            dataIndex: 'channelSource',
             align: 'center',
             width: 120,
             render: this.mergeCell
@@ -301,7 +362,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 title: () => <Checkbox indeterminate={indeterminate} checked={checked} onChange={e => onCheckAllChange(e.target.checked)}/>,
                 dataIndex: '_checked',
                 align: 'center',
-                width: 60,
+                width: 50,
                 render: (value: boolean, row: IChildOrderItem) => {
                     return {
                         children: (
@@ -372,7 +433,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             <>
                 <Table
                     bordered={true}
-                    rowKey="purchasePlanId"
+                    // "purchasePlanId"
+                    rowKey={(record) => {
+                        return record.purchasePlanId || record.orderGoodsId
+                    }}
                     className="order-table"
                     loading={loading}
                     columns={columns}

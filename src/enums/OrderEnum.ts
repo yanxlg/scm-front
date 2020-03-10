@@ -1,4 +1,4 @@
-import { IFieldItem } from '@/components/JsonForm';
+import { IFieldItem } from '@/components/SearchForm';
 
 declare interface optionItem {
     name: string;
@@ -339,10 +339,11 @@ export const childOptionalColList = [
     { key: 'purchaseCancelReason', name: '采购取消原因' }, // 2
     // orderInfo
     { key: 'confirmTime', name: '订单确认时间' }, // 1
-    { key: 'channelOrderGoodsSn', name: '渠道订单ID' }, // 1
+    { key: 'channelOrderSn', name: '渠道订单ID' }, // 1
     { key: 'goodsAmount', name: '价格' }, // 1
     // { key: 'a4', name: '运费' },
     { key: 'goodsNumber', name: '商品数量' }, // 1
+    { key: '_goodsTotalAmount', name: '商品总金额' }, // 1
     // { key: 'a6', name: '取消订单时间' },
     { key: 'productPlatform', name: '销售渠道' }, // 1
     { key: 'orderId', name: '中台父订单ID' }, // 1
@@ -350,12 +351,10 @@ export const childOptionalColList = [
     { key: 'currency', name: '货币类型' }, // 1
     // { key: 'a10', name: '发货剩余时间' },
     { key: 'productShop', name: '渠道店铺名' }, // 1
-    
-    { key: '_goodsTotalAmount', name: '商品总金额' }, // 1
     // { key: 'a14', name: '渠道订单状态' },
     // { key: 'a15', name: '父订单ID' },
     // { key: 'a16', name: '子订单ID' },
-    { key: 'orderGoodsId', name: '中台子订单ID' }, // 1
+    // { key: 'orderGoodsId', name: '中台子订单ID' }, // 1
     // { key: 'a18', name: '一级类目' },
     // { key: 'a19', name: '二级类目' },
     // { key: 'a20', name: '三级类目' },

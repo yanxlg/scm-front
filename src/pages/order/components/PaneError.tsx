@@ -3,7 +3,7 @@ import { Button, Checkbox, Pagination } from 'antd';
 import { FormInstance } from 'antd/es/form';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TableError from './TableError';
 
 import { 
@@ -170,7 +170,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <JsonForm
+                    <SearchForm
                         labelClassName="order-label"
                         fieldList={fieldList}
                         formRef={this.formRef}

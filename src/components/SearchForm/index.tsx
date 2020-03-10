@@ -16,7 +16,7 @@ const { Option } = Select;
 
 declare interface IOptionItem {
     name: string;
-    value: string;
+    value: string | number;
     [key: string]: any;
 }
 
@@ -549,7 +549,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
               }
             : {};
         return (
-            <Form.Item name={name} className={formItemClassName}>
+            <Form.Item name={name} className={formItemClassName} valuePropName="checked">
                 <Checkbox className={className} {...eventProps}>
                     {label}
                 </Checkbox>
