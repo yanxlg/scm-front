@@ -147,7 +147,7 @@ export interface IChannelProductDetailResponse {
     sku_list?: ISku[];
 }
 
-declare interface ISkuBody {
+export declare interface ISkuBody {
     sku: string;
     shop_price: number;
     shipping_fee: number;
