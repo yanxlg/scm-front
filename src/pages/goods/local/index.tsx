@@ -615,9 +615,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     onShowSizeChange={this.pageCountChange}
                     showTotal={total => {
                         if (total > 10000) {
-                            return ''
+                            return '';
                         }
-                        return `共${total}条`
+                        return `共${total}条`;
                     }}
                 />
                 <GoodsTable
