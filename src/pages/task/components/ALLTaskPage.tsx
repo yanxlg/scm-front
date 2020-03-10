@@ -91,6 +91,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
     }
 
     private computeInitialValues() {
+        // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
         if (query) {
             window.history.replaceState({}, '', url);
@@ -422,10 +423,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         任务<span className="task-justify-1">SN</span>
                     </span>
                 ),
-                type: 'input',
+                type: 'number',
                 name: 'task_sn',
-                className: 'input-default',
+                className: 'input-default input-handler',
                 formItemClassName: 'form-item',
+                formatter: 'number',
             },
             {
                 label: '任务状态',
@@ -520,10 +522,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         任务<span className="task-justify-1">SN</span>
                     </span>
                 ),
-                type: 'input',
+                type: 'number',
                 name: 'task_sn',
-                className: 'input-default',
+                className: 'input-default input-handler',
                 formItemClassName: 'form-item',
+                formatter: 'number',
             },
         ],
         expend: [

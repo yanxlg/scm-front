@@ -65,6 +65,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     }
 
     private computeInitialValues() {
+        // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
         if (query) {
             window.history.replaceState({}, '', url);
