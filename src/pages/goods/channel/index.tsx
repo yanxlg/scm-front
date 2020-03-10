@@ -137,13 +137,18 @@ const formFields: IFieldItem[] = [
         optionList: () =>
             queryChannelCategory()
                 .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ id, name, children }) => {
-                        return { value: id, name, children };
+                    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
+                        return {
+                            value: String(platform_cate_id),
+                            name: platform_cate_name,
+                            children,
+                        };
                     });
                 })
                 .catch(() => {
                     return [];
                 }),
+        onChange: (name, form, setState) => {},
     },
     {
         type: 'select',
@@ -151,7 +156,7 @@ const formFields: IFieldItem[] = [
         name: 'level_two_category',
         className: 'select-default',
         formItemClassName: 'form-item',
-        optionList: [],
+        optionList: () => new Promise(() => {}),
     },
     {
         type: 'select',

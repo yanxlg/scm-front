@@ -39,6 +39,10 @@ export interface IFieldItem extends FormItemLabelProps {
     placeholder?: string;
     optionList?: IOptionItem[] | (() => Promise<IOptionItem[]>); // 支持异步获取
     syncDefaultOption?: IOptionItem; // 异步获取options是默认选项，通常用于胚子'全部'
+    optionListDependence?: {
+        name: FormItemName; // 异步存储在state中的数据
+        key: string; // 关联key
+    };
     className?: string;
     formItemClassName?: string;
     dateBeginWith?: Array<FormItemName | 'now'>;
@@ -358,15 +362,23 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
             className,
             formItemClassName,
             syncDefaultOption,
+            optionListDependence,
             onChange,
         } = field;
         const { labelClassName } = this.props;
         const { optionMap } = this.state;
         const syncOptionList = optionMap[name as string];
+        const dependenceName = optionListDependence?.name;
+        const dependenceKey = optionListDependence?.key;
+        const dependenceList =
+            dependenceName && dependenceKey ? optionMap[dependenceName][dependenceKey] : undefined;
         const isFunction = typeof optionList === 'function';
-        const loading = isFunction && !syncOptionList;
+        const loading =
+            (isFunction && !syncOptionList) || (optionListDependence && !dependenceList);
         const mergeList = isFunction
             ? syncOptionList || ([] as IOptionItem[])
+            : optionListDependence
+            ? dependenceList || ([] as IOptionItem[])
             : (optionList as IOptionItem[]);
         const eventProps = onChange
             ? {
