@@ -4,10 +4,6 @@ import styles from './_index.less';
 import { Breadcrumb, Button } from 'antd';
 import { genBreadcrumbProps } from '@ant-design/pro-layout/es/utils/getBreadcrumbProps';
 import { BasicLayoutProps, getMenuData, MenuDataItem } from '@ant-design/pro-layout';
-import CopyLink from '@/components/copyLink';
-import { matchPath } from 'dva/router';
-import { connect } from 'dva';
-import { ConnectState } from '@/models/connect';
 
 export type SiderTheme = 'light' | 'dark';
 export interface GlobalHeaderRightProps extends BasicLayoutProps {
@@ -16,7 +12,6 @@ export interface GlobalHeaderRightProps extends BasicLayoutProps {
     breadcrumb?: {
         [path: string]: MenuDataItem;
     };
-    queryData?: { [key: string]: any };
 }
 
 const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
@@ -49,11 +44,8 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
                     退出
                 </Button>
             </div>
-            {queryData ? <CopyLink /> : null}
         </div>
     );
 };
 
-export default connect(({ global }: ConnectState) => ({
-    queryData: global.queryData,
-}))(GlobalHeaderRight);
+export default GlobalHeaderRight;

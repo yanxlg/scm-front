@@ -8,6 +8,7 @@ import styles from './_index.less';
 declare interface IRouter {
     path: string;
     extract?: boolean;
+    live?: boolean;
     component: React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any>;
 }
 
@@ -25,7 +26,7 @@ class LivePages extends React.PureComponent<ILivePagesProps> {
         routers.forEach((router, index) => {
             const match = matchPath(location.pathname, router);
             const route = this.routerList[index] || { ...router };
-            if (match) {
+            if (match && match.isExact) {
                 route.match = match;
                 if (activeIndex === void 0) {
                     activeIndex = index;
@@ -33,7 +34,7 @@ class LivePages extends React.PureComponent<ILivePagesProps> {
             }
             route.location = location;
             route.history = history;
-            this.routerList[index] = { ...route, ...props };
+            this.routerList[index] = { ...props, ...route };
         });
         return {
             routerList: this.routerList,
@@ -44,15 +45,14 @@ class LivePages extends React.PureComponent<ILivePagesProps> {
         const { activeIndex, routerList } = this.getRouterList();
         return (
             <React.Fragment>
-                {routerList.map(({ component: Component, path, ...props }, index) => {
-                    return (
-                        <div
-                            key={path}
-                            className={activeIndex === index ? styles.pageShow : styles.pageHide}
-                        >
+                {routerList.map(({ component: Component, live, path, ...props }, index) => {
+                    const show = activeIndex === index;
+                    const mounted = live || show;
+                    return mounted ? (
+                        <div key={path} className={show ? styles.pageShow : styles.pageHide}>
                             <Component {...props} />
                         </div>
-                    );
+                    ) : null;
                 })}
             </React.Fragment>
         );

@@ -9,7 +9,7 @@ import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
-import { checkLowerShelf, checkUpperShelf, TaskStatusEnum } from '@/enums/StatusEnum';
+import { checkLowerShelf, checkUpperShelf } from '@/enums/StatusEnum';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 import {
@@ -24,10 +24,9 @@ import {
 } from '@/config/dictionaries/Product';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { EmptyObject } from '@/config/global';
-import { connect } from '@/compatibility/connect';
-import { ConnectProps } from '@/models/connect';
 import { convertEndDate, convertStartDate } from '@/utils/date';
 import queryString from 'query-string';
+import CopyLink from '@/components/copyLink';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -40,13 +39,11 @@ declare interface IVoVaListState {
     defaultInitialValues?: { [key: string]: any };
 }
 
-@connect(() => {
-    return {};
-})
 @BindAll()
-class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
+class Index extends React.PureComponent<{}, IVoVaListState> {
     private formRef: RefObject<SearchCondition> = React.createRef();
-    constructor(props: ConnectProps) {
+    private queryData: any = {};
+    constructor(props: {}) {
         super(props);
         const { page, page_count, ...extra } = this.computeInitialValues();
         this.state = {
@@ -120,12 +117,9 @@ class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
             page_count: page_number,
             ...values,
         };
-        this.props.dispatch!({
-            type: 'global/cacheQueryData',
-            queryData: {
-                ...query,
-            },
-        });
+        this.queryData = {
+            ...query,
+        };
 
         queryChannelGoodsList(query)
             .then(({ data: { list = [], total = 0 } = EmptyObject } = EmptyObject) => {
@@ -398,6 +392,10 @@ class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
         });
     }
 
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
     render() {
         const {
             dataSet,
@@ -457,6 +455,7 @@ class Index extends React.PureComponent<ConnectProps, IVoVaListState> {
                     getExcelData={this.getExcelData}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

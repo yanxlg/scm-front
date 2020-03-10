@@ -7,13 +7,18 @@ import { useSelector } from 'dva';
 import { ConnectState } from '@/models/connect';
 import queryString from 'query-string';
 
-const CopyLink: React.FC = props => {
+declare interface ICopyLinkProps {
+    getCopiedLinkQuery: () => { [key: string]: any };
+}
+
+const CopyLink: React.FC<ICopyLinkProps> = ({ getCopiedLinkQuery }) => {
     const [copied, setCopied] = useState(false);
-    const queryData = useSelector((state: ConnectState) => state.global.queryData);
+    // const queryData = useSelector((state: ConnectState) => state.global.queryData);
     const onClick = useCallback(() => {
         if (copied) return;
         setCopied(true);
         const href = window.location.href;
+        const queryData = getCopiedLinkQuery();
         const url = queryData ? queryString.stringifyUrl({ url: href, query: queryData }) : href;
         let copyInput = document.createElement('input');
         copyInput.value = url;
@@ -25,7 +30,7 @@ const CopyLink: React.FC = props => {
         setTimeout(() => {
             setCopied(false);
         }, 2000);
-    }, [copied, queryData]);
+    }, [copied]);
     return (
         <div className={styles.fixedWidgets}>
             <Popover

@@ -206,6 +206,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             : {};
         return (
             <Form.Item
+                key={String(name)}
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
@@ -235,6 +236,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             : {};
         return (
             <Form.Item
+                key={String(name)}
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
@@ -282,6 +284,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             : {};
         return (
             <Form.Item
+                key={String([name1, name2])}
                 label={<span className={labelClassName}>{label}</span>}
                 className={`${formItemClassName}`}
             >
@@ -356,6 +359,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             : {};
         return (
             <Form.Item
+                key={String(name)}
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
@@ -436,6 +440,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             const { loading, optionList } = this.getOptionList(field);
             return (
                 <Form.Item
+                    key={String(name)}
                     name={name}
                     className={formItemClassName}
                     label={<span className={labelClassName}>{label}</span>}
@@ -457,6 +462,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
         } else {
             return (
                 <Form.Item
+                    key={String(name)}
                     noStyle={true}
                     shouldUpdate={(prevValues, currentValues) =>
                         prevValues[optionListDependence?.name] !==
@@ -521,6 +527,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             : {};
         return (
             <Form.Item
+                key={String(name)}
                 name={name}
                 className={formItemClassName}
                 label={<span className={labelClassName}>{label}</span>}
@@ -549,7 +556,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
               }
             : {};
         return (
-            <Form.Item name={name} className={formItemClassName}>
+            <Form.Item key={String(name)} name={name} className={formItemClassName}>
                 <Checkbox className={className} {...eventProps}>
                     {label}
                 </Checkbox>
