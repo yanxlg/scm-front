@@ -29,43 +29,6 @@ export declare interface IPurchaseStatus {
     comment: string;
 }
 
-declare interface IGoodsItem {
-    goods_commodity_id: string;
-    goods_purchase_status: IPurchaseStatus;   // 采购订单状态
-    goods_purchase_payment_status: number;    // 采购支付状态
-    goods_purchase_delivery_status: number;   // 采购配送状态
-    goods_purchase_order_time: number;        // 采购生成时间
-    goods_purchase_order_sn: string;          // 采购订单号
-    goods_purchase_waybill_sn: string;        // 采购运单号
-}
-
-declare interface IBaseOrderItem {
-    order_confirm_time: number;           // 订单确认时间
-    channel_order_id: string;             // 渠道订单ID
-    channel_goods_price: number;          // 价格
-    channel_shipping_fee: number;         // 运费
-    goods_number: number;                 // 商品数量
-    cancel_order_time: number;            // 取消订单时间
-    middleground_order_status: number;    // 中台订单状态
-    purchase_payment_status: number;      // 采购支付状态
-    purchase_order_time: number;          // 采购生成时间
-    purchase_shipping_no: string;         // 采购运单号
-    channel: number;                      // 销售渠道
-    middleground_p_order_id: string;      // 中台父订单ID
-    currency_type: string;                // 货币类型
-    remain_delivery_time: string;         // 发货剩余时间
-    channel_store_name: string;           // 渠道店铺名
-    purchase_cancel_reason: number;       // 采购取消原因
-    goods_amount: number;                 // 商品总金额
-    channel_order_status: number;         // 渠道订单状态
-    purchase_order_status: number;        // 采购订单状态
-    purchase_delivery_status: number;     // 采购配送状态
-    purchase_order_no: string;            // 采购订单号
-    p_order_id: string;                   // 父订单ID
-    child_order_id: string;               // 子订单ID
-    middleground_c_order_id: string;      // 中台子订单ID 
-}
-
 // export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
 //     _checked?: boolean;
 //     _rowspan?: number;

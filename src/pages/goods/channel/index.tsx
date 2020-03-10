@@ -16,11 +16,16 @@ import {
     queryChannelGoodsList,
     exportChannelProductList,
     updateChannelShelveState,
+    queryChannelCategory,
 } from '@/services/channel';
-import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
+import {
+    ProductStatusMap,
+    ProductStatusCode,
+    ProductStatusList,
+} from '@/config/dictionaries/Product';
 import { EmptyObject } from '@/enums/ConfigEnum';
-import { IChannelProductListItem } from '@/interface/IChannel';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import { IChannelProductListItem, IChannelCategoryItem } from '@/interface/IChannel';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -32,9 +37,162 @@ declare interface IVoVaListState {
     total: number;
 }
 
+const salesVolumeList = [
+    {
+        value: 'all',
+        name: '全部',
+    },
+    {
+        value: 'day_10',
+        name: '日销量大于10',
+    },
+    {
+        value: 'day_50',
+        name: '日销量大于50',
+    },
+    {
+        value: 'day_100',
+        name: '日销量大于100',
+    },
+    {
+        value: 'week_100',
+        name: '周销量大于100',
+    },
+    {
+        value: 'week_200',
+        name: '周销量大于200',
+    },
+    {
+        value: 'week_500',
+        name: '周销量大于500',
+    },
+    {
+        value: 'month_100',
+        name: '月销量大于100',
+    },
+    {
+        value: 'month_500',
+        name: '月销量大于500',
+    },
+    {
+        value: 'month_1000',
+        name: '月销量大于1000',
+    },
+];
+
+const formFields: IFieldItem[] = [
+    {
+        type: 'dateRanger',
+        name: ['onshelf_time_start', 'onshelf_time_end'],
+        label: <span>时&emsp;&emsp;&emsp;间</span>,
+        className: 'product-picker',
+        formItemClassName: 'form-item',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'input',
+        label: 'Commodity ID',
+        name: 'commodity_id',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: <span>虚拟&emsp;ID</span>,
+        name: 'vova_virtual_id',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: 'Product ID',
+        name: 'product_id',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'select',
+        label: <span>销&emsp;&emsp;&emsp;量</span>,
+        name: 'sales_volume',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionList: salesVolumeList,
+    },
+    {
+        type: 'input',
+        label: <span>店&ensp;铺&ensp;名</span>,
+        name: 'shop_name',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'select',
+        label: '一级类目',
+        name: 'level_one_category',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () =>
+            queryChannelCategory()
+                .then(({ data = [] } = EmptyObject) => {
+                    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
+                        return {
+                            value: String(platform_cate_id),
+                            name: platform_cate_name,
+                            children,
+                        };
+                    });
+                })
+                .catch(() => {
+                    return [];
+                }),
+        onChange: (name, form, setState) => {
+            form.resetFields(['level_two_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        name: 'level_two_category',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionListDependence: {
+            name: 'level_one_category',
+            key: 'children',
+            convert: ({ platform_cate_id, platform_cate_name }: IChannelCategoryItem) => {
+                return {
+                    value: String(platform_cate_id),
+                    name: platform_cate_name,
+                };
+            },
+        },
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+    },
+    {
+        type: 'select',
+        label: '商品状态',
+        name: 'product_status',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionList: ProductStatusList.map(({ name, id }) => {
+            return { name: name, value: id };
+        }),
+    },
+];
+
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
-    private formRef: RefObject<SearchCondition> = React.createRef();
+    private formRef: RefObject<SearchForm> = React.createRef();
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -305,6 +463,12 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         });
     }
 
+    private showExcelDialog() {
+        this.setState({
+            excelDialogStatus: true,
+        });
+    }
+
     // 显示下载弹框
     private toggleExcelDialog(status: boolean) {
         this.setState({
@@ -352,12 +516,35 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         } = this.state;
         return (
             <div className="container">
-                <SearchCondition
+                <SearchForm
                     ref={this.formRef}
-                    searchLoading={searchLoading}
-                    onSearch={this.onSearch}
-                    toggleExcelDialog={this.toggleExcelDialog}
-                />
+                    fieldList={formFields}
+                    labelClassName="product-form-label"
+                    initialValues={{
+                        level_one_category: '',
+                        level_two_category: '',
+                        sales_volume: salesVolumeList[0].value,
+                        product_status: ProductStatusList[0].id,
+                    }}
+                >
+                    <div>
+                        <Button
+                            type="primary"
+                            className="btn-group vertical-middle form-item"
+                            loading={searchLoading}
+                            onClick={this.onSearch}
+                        >
+                            查询
+                        </Button>
+                        <Button
+                            type="primary"
+                            className="btn-group vertical-middle form-item"
+                            onClick={this.showExcelDialog}
+                        >
+                            导出
+                        </Button>
+                    </div>
+                </SearchForm>
                 {/*<DataStatusUpdate />*/}
                 <div className="float-clear">
                     <Pagination

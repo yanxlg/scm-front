@@ -18,7 +18,7 @@ import {
     TaskTypeMap,
     TaskTypeEnum,
 } from '@/enums/StatusEnum';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import CollapsePopOver from '@/components/CollapsePopOver';
 import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
@@ -54,8 +54,8 @@ declare interface ISearchFormConfig {
 
 @BindAll()
 class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
-    private defaultFormRef: RefObject<JsonForm> = React.createRef();
-    private expendFormRef: RefObject<JsonForm> = React.createRef();
+    private defaultFormRef: RefObject<SearchForm> = React.createRef();
+    private expendFormRef: RefObject<SearchForm> = React.createRef();
     constructor(props: IALLTaskPageProps) {
         super(props);
         this.state = {
@@ -547,7 +547,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         const formConfig = task_status === void 0 ? this.allFieldsList : this.unExecutedFieldsList;
         return (
             <div>
-                <JsonForm
+                <SearchForm
                     ref={this.defaultFormRef}
                     fieldList={formConfig.default}
                     initialValues={formConfig.initialValues}
@@ -575,9 +575,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                     >
                         刷新
                     </LoadingButton>
-                </JsonForm>
+                </SearchForm>
                 <CollapsePopOver collapse={showMore}>
-                    <JsonForm
+                    <SearchForm
                         ref={this.expendFormRef}
                         className="form-item-bottom"
                         fieldList={formConfig.expend}
