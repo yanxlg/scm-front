@@ -41,8 +41,8 @@ export interface IChannelProductListResponse {
 }
 
 export declare interface IChannelCategoryItem {
-    id: string;
-    name: string;
+    platform_cate_id: number;
+    platform_cate_name: string;
     children?: IChannelCategoryItem[];
 }
 
@@ -147,7 +147,7 @@ export interface IChannelProductDetailResponse {
     sku_list?: ISku[];
 }
 
-declare interface ISkuBody {
+export declare interface ISkuBody {
     sku: string;
     shop_price: number;
     shipping_fee: number;
