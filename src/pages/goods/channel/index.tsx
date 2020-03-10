@@ -25,7 +25,7 @@ import {
 } from '@/config/dictionaries/Product';
 import { EmptyObject } from '@/enums/ConfigEnum';
 import { IChannelProductListItem, IChannelCategoryItem } from '@/interface/IChannel';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -192,7 +192,7 @@ const formFields: IFieldItem[] = [
 
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
-    private formRef: RefObject<SearchCondition> = React.createRef();
+    private formRef: RefObject<SearchForm> = React.createRef();
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -463,6 +463,12 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         });
     }
 
+    private showExcelDialog() {
+        this.setState({
+            excelDialogStatus: true,
+        });
+    }
+
     // 显示下载弹框
     private toggleExcelDialog(status: boolean) {
         this.setState({
@@ -510,7 +516,8 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         } = this.state;
         return (
             <div className="container">
-                <JsonForm
+                <SearchForm
+                    ref={this.formRef}
                     fieldList={formFields}
                     labelClassName="product-form-label"
                     initialValues={{
@@ -532,18 +539,12 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                         <Button
                             type="primary"
                             className="btn-group vertical-middle form-item"
-                            onClick={this.toggleExcelDialog}
+                            onClick={this.showExcelDialog}
                         >
                             导出
                         </Button>
                     </div>
-                </JsonForm>
-                <SearchCondition
-                    ref={this.formRef}
-                    searchLoading={searchLoading}
-                    onSearch={this.onSearch}
-                    toggleExcelDialog={this.toggleExcelDialog}
-                />
+                </SearchForm>
                 {/*<DataStatusUpdate />*/}
                 <div className="float-clear">
                     <Pagination

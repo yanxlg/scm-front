@@ -6,7 +6,7 @@ import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
 import { utcToLocal } from '@/utils/date';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { FormInstance } from 'antd/es/form';
 import { exportIOList, exportStockList, queryStockList, syncStock } from '@/services/stock';
 
@@ -240,7 +240,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         return (
             <div>
                 <div className="float-clear">
-                    <JsonForm
+                    <SearchForm
                         labelClassName="stock-form-label"
                         fieldList={this.fieldsList}
                         formRef={this.formRef}
@@ -270,7 +270,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                                 点击同步库存
                             </Button>
                         </React.Fragment>
-                    </JsonForm>
+                    </SearchForm>
                     <Pagination
                         className="float-right form-item"
                         pageSize={pageSize}

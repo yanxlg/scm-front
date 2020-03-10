@@ -23,13 +23,14 @@ declare interface IOptionItem {
 type formatter = 'number' | 'start_date' | 'end_date';
 
 type FormItemName = string;
-type setStateFunc = <K extends keyof IJsonFormState>(
+
+type setStateFunc = <K extends keyof ISearchFormState>(
     state:
         | ((
-              prevState: Readonly<IJsonFormState>,
-              props: Readonly<IJsonFormProps>,
-          ) => Pick<IJsonFormState, K> | IJsonFormState | null)
-        | (Pick<IJsonFormState, K> | IJsonFormState | null),
+              prevState: Readonly<ISearchFormState>,
+              props: Readonly<ISearchFormProps>,
+          ) => Pick<ISearchFormState, K> | ISearchFormState | null)
+        | (Pick<ISearchFormState, K> | ISearchFormState | null),
     callback?: () => void,
 ) => void;
 
@@ -61,23 +62,23 @@ export type IFieldItem = FormItemLabelProps & {
     onChange?: (name: FormItemName, form: FormInstance, setState: setStateFunc) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
 } & (SingleField | DoubleFields);
 
-declare interface IJsonFormProps extends FormProps {
+declare interface ISearchFormProps extends FormProps {
     fieldList: IFieldItem[];
     labelClassName?: string;
     formRef?: RefObject<FormInstance>;
 }
 
-declare interface IJsonFormState {
+declare interface ISearchFormState {
     optionMap: {
         [key: string]: IOptionItem[];
     };
 }
 
-export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonFormState> {
+export default class SearchForm extends React.PureComponent<ISearchFormProps, ISearchFormState> {
     private formRef: RefObject<FormInstance> = React.createRef();
     private formatterMap = new Map<string, formatter>();
 
-    constructor(props: IJsonFormProps) {
+    constructor(props: ISearchFormProps) {
         super(props);
         this.state = {
             optionMap: {},
@@ -606,7 +607,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
     }
 
     componentDidUpdate(
-        prevProps: Readonly<IJsonFormProps>,
+        prevProps: Readonly<ISearchFormProps>,
         prevState: Readonly<{}>,
         snapshot?: any,
     ): void {

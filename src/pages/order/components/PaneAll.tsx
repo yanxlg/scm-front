@@ -1,6 +1,6 @@
 import React from 'react';
 
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 declare interface IPaneAllState {
     fieldList: IFieldItem[];
@@ -61,7 +61,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         return (
             <>
                 <div>
-                    <JsonForm fieldList={fieldList} />
+                    <SearchForm fieldList={fieldList} />
                     {/* <div className="order-operation-group">
 
                     </div> */}
