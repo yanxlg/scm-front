@@ -3,9 +3,7 @@ const shajs = require('sha.js');
 import path from 'path';
 
 const config = defineConfig({
-    // forkTSCheker: {
-    //     tsconfig: 'tsconfig.json',
-    // },
+    // forkTSCheker: {},
     hash: true,
     devtool: process.env.NODE_ENV !== 'production' ? 'source-map' : false,
     antd: {},
