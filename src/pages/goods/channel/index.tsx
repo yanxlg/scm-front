@@ -16,8 +16,13 @@ import {
     queryChannelGoodsList,
     exportChannelProductList,
     updateChannelShelveState,
+    queryChannelCategory,
 } from '@/services/channel';
-import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
+import {
+    ProductStatusMap,
+    ProductStatusCode,
+    ProductStatusList,
+} from '@/config/dictionaries/Product';
 import { EmptyObject } from '@/enums/ConfigEnum';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import JsonForm, { IFieldItem } from '@/components/JsonForm';
@@ -31,6 +36,134 @@ declare interface IVoVaListState {
     page: number;
     total: number;
 }
+
+const salesVolumeList = [
+    {
+        value: 'all',
+        name: '全部',
+    },
+    {
+        value: 'day_10',
+        name: '日销量大于10',
+    },
+    {
+        value: 'day_50',
+        name: '日销量大于50',
+    },
+    {
+        value: 'day_100',
+        name: '日销量大于100',
+    },
+    {
+        value: 'week_100',
+        name: '周销量大于100',
+    },
+    {
+        value: 'week_200',
+        name: '周销量大于200',
+    },
+    {
+        value: 'week_500',
+        name: '周销量大于500',
+    },
+    {
+        value: 'month_100',
+        name: '月销量大于100',
+    },
+    {
+        value: 'month_500',
+        name: '月销量大于500',
+    },
+    {
+        value: 'month_1000',
+        name: '月销量大于1000',
+    },
+];
+
+const formFields: IFieldItem[] = [
+    {
+        type: 'dateRanger',
+        name: ['onshelf_time_start', 'onshelf_time_end'],
+        label: <span>时&emsp;&emsp;&emsp;间</span>,
+        className: 'product-picker',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: 'Commodity ID',
+        name: 'commodity_id',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: <span>虚拟&emsp;ID</span>,
+        name: 'vova_virtual_id',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: 'Product ID',
+        name: 'product_id',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'select',
+        label: <span>销&emsp;&emsp;&emsp;量</span>,
+        name: 'sales_volume',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionList: salesVolumeList,
+    },
+    {
+        type: 'input',
+        label: <span>店&ensp;铺&ensp;名</span>,
+        name: 'shop_name',
+        placeholder: '多个逗号隔开',
+        className: 'input-default',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'select',
+        label: '一级类目',
+        name: 'level_one_category',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionList: () =>
+            queryChannelCategory()
+                .then(({ data = [] } = EmptyObject) => {
+                    return data.map(({ id, name, children }) => {
+                        return { value: id, name, children };
+                    });
+                })
+                .catch(() => {
+                    return [];
+                }),
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        name: 'level_two_category',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionList: [],
+    },
+    {
+        type: 'select',
+        label: '商品状态',
+        name: 'product_status',
+        className: 'select-default',
+        formItemClassName: 'form-item',
+        optionList: ProductStatusList.map(({ name, id }) => {
+            return { name: name, value: id };
+        }),
+    },
+];
 
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
@@ -352,6 +485,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         } = this.state;
         return (
             <div className="container">
+                <JsonForm fieldList={formFields} labelClassName="product-form-label" />
                 <SearchCondition
                     ref={this.formRef}
                     searchLoading={searchLoading}

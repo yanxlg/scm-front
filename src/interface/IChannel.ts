@@ -41,7 +41,7 @@ export interface IChannelProductListResponse {
 }
 
 export declare interface IChannelCategoryItem {
-    id: number;
+    id: string;
     name: string;
     children?: IChannelCategoryItem[];
 }

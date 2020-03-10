@@ -17,19 +17,34 @@ const { Option } = Select;
 declare interface IOptionItem {
     name: string;
     value: string;
+    [key: string]: any;
 }
 
+type formatter = 'number' | 'start_date' | 'end_date';
+
+type FormItemName = string;
+type setStateFunc = <K extends keyof IJsonFormState>(
+    state:
+        | ((
+              prevState: Readonly<IJsonFormState>,
+              props: Readonly<IJsonFormProps>,
+          ) => Pick<IJsonFormState, K> | IJsonFormState | null)
+        | (Pick<IJsonFormState, K> | IJsonFormState | null),
+    callback?: () => void,
+) => void;
+
 export interface IFieldItem extends FormItemLabelProps {
-    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'dateRanger' | 'number' | 'integer';
-    name: string | [string, string];
+    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'number' | 'integer' | 'dateRanger';
+    name: FormItemName | [FormItemName, FormItemName];
     placeholder?: string;
-    optionList?: IOptionItem[] | (() => Promise<IOptionItem[]>);
-    syncDefaultOption?: IOptionItem;
+    optionList?: IOptionItem[] | (() => Promise<IOptionItem[]>); // 支持异步获取
+    syncDefaultOption?: IOptionItem; // 异步获取options是默认选项，通常用于胚子'全部'
     className?: string;
     formItemClassName?: string;
-    dateBeginWith?: string[];
-    dateEndWith?: string[];
+    dateBeginWith?: Array<FormItemName | 'now'>;
+    dateEndWith?: Array<FormItemName | 'now'>;
     formatter?: formatter;
+    onChange?: (name: FormItemName, form: FormInstance, setState: setStateFunc) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
 }
 
 declare interface IJsonFormProps extends FormProps {
@@ -37,8 +52,6 @@ declare interface IJsonFormProps extends FormProps {
     labelClassName?: string;
     formRef?: RefObject<FormInstance>;
 }
-
-type formatter = 'number' | 'start_date' | 'end_date';
 
 declare interface IJsonFormState {
     optionMap: {
@@ -48,6 +61,8 @@ declare interface IJsonFormState {
 
 export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonFormState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+    private formatterMap = new Map<string, formatter>();
+
     constructor(props: IJsonFormProps) {
         super(props);
         this.state = {
@@ -161,28 +176,60 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
         }
     };
     private addNumber = (field: IFieldItem) => {
-        const { name, placeholder, label, className, formItemClassName } = field;
+        const { name, placeholder, label, className, formItemClassName, onChange } = field;
         const { labelClassName } = this.props;
+        const eventProps = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <NumberInput min={0} placeholder={placeholder} className={className} />
+                <NumberInput
+                    min={0}
+                    placeholder={placeholder}
+                    className={className}
+                    {...eventProps}
+                />
             </Form.Item>
         );
     };
     private addInteger = (field: IFieldItem) => {
-        const { name, placeholder, label, className, formItemClassName } = field;
+        const { name, placeholder, label, className, formItemClassName, onChange } = field;
         const { labelClassName } = this.props;
+        const eventProps = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <IntegerInput min={0} placeholder={placeholder} className={className} />
+                <IntegerInput
+                    min={0}
+                    placeholder={placeholder}
+                    className={className}
+                    {...eventProps}
+                />
             </Form.Item>
         );
     };
@@ -194,7 +241,30 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
             className,
             name: [name1, name2],
             formItemClassName,
+            onChange,
         } = field;
+        const event1Props = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name1 as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
+        const event2Props = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name2 as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item
                 label={<span className={labelClassName}>{label}</span>}
@@ -219,6 +289,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
                                             : false
                                     }
                                     className={className}
+                                    {...event1Props}
                                 />
                             </Form.Item>
                         );
@@ -226,7 +297,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
                 </Form.Item>
                 <span className="config-colon vertical-middle">-</span>
                 <Form.Item
-                    className="form-item-inline inline-block vertical-middle"
+                    className="form-item-inline inline-block vertical-middle margin-none"
                     shouldUpdate={(prevValues, currentValues) =>
                         prevValues[name1] !== currentValues[name1]
                     }
@@ -234,7 +305,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
                     {({ getFieldValue }) => {
                         const startTime = getFieldValue(name1);
                         return (
-                            <Form.Item name={name2}>
+                            <Form.Item name={name2} className="margin-none">
                                 <DatePicker
                                     disabledDate={currentDate =>
                                         currentDate
@@ -244,6 +315,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
                                             : false
                                     }
                                     className={className}
+                                    {...event2Props}
                                 />
                             </Form.Item>
                         );
@@ -254,21 +326,40 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
     };
 
     private addInput = (field: IFieldItem) => {
-        const { name, placeholder, label, className, formItemClassName } = field;
+        const { name, placeholder, label, className, formItemClassName, onChange } = field;
         const { labelClassName } = this.props;
+        const eventProps = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <Input placeholder={placeholder} className={className} />
+                <Input placeholder={placeholder} className={className} {...eventProps} />
             </Form.Item>
         );
     };
 
     private addSelect = (field: IFieldItem) => {
-        const { name, optionList, label, className, formItemClassName, syncDefaultOption } = field;
+        const {
+            name,
+            optionList,
+            label,
+            className,
+            formItemClassName,
+            syncDefaultOption,
+            onChange,
+        } = field;
         const { labelClassName } = this.props;
         const { optionMap } = this.state;
         const syncOptionList = optionMap[name as string];
@@ -277,13 +368,24 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
         const mergeList = isFunction
             ? syncOptionList || ([] as IOptionItem[])
             : (optionList as IOptionItem[]);
+        const eventProps = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item
                 name={name}
                 className={formItemClassName}
                 label={<span className={labelClassName}>{label}</span>}
             >
-                <Select className={className} loading={loading}>
+                <Select className={className} loading={loading} {...eventProps}>
                     {syncDefaultOption ? (
                         <Option value={syncDefaultOption.value}>{syncDefaultOption.name}</Option>
                     ) : null}
@@ -306,6 +408,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
             formItemClassName,
             dateBeginWith,
             dateEndWith,
+            onChange,
         } = field;
         const { labelClassName } = this.props;
         const disabledDate = dateBeginWith
@@ -313,6 +416,17 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
             : dateEndWith
             ? this.disabledEndDate(dateEndWith)
             : undefined;
+        const eventProps = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item
                 name={name}
@@ -323,16 +437,30 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
                     className={className}
                     placeholder={placeholder}
                     disabledDate={disabledDate}
+                    {...eventProps}
                 />
             </Form.Item>
         );
     };
 
     private addCheckbox = (field: IFieldItem) => {
-        const { name, label, formItemClassName, className } = field;
+        const { name, label, formItemClassName, className, onChange } = field;
+        const eventProps = onChange
+            ? {
+                  onChange: () => {
+                      onChange(
+                          name as FormItemName,
+                          this.formRef.current!,
+                          this.setState as setStateFunc,
+                      );
+                  },
+              }
+            : {};
         return (
             <Form.Item name={name} className={formItemClassName}>
-                <Checkbox className={className}>{label}</Checkbox>
+                <Checkbox className={className} {...eventProps}>
+                    {label}
+                </Checkbox>
             </Form.Item>
         );
     };
@@ -365,9 +493,10 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
         }
         return formattedValues;
     };
-    private formatterMap = new Map<string, formatter>();
+
     private resetFormatterMap = () => {
         const { fieldList } = this.props;
+        this.formatterMap.clear();
         fieldList.forEach(({ name, formatter }) => {
             if (formatter) {
                 if (typeof name === 'string') {
@@ -384,6 +513,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
         this.resetFormatterMap();
         this.loadOptions();
     }
+
     componentDidUpdate(
         prevProps: Readonly<IJsonFormProps>,
         prevState: Readonly<{}>,
@@ -391,6 +521,7 @@ export default class JsonForm extends React.PureComponent<IJsonFormProps, IJsonF
     ): void {
         if (prevProps.fieldList !== this.props.fieldList) {
             this.resetFormatterMap();
+            this.loadOptions();
         }
     }
 
