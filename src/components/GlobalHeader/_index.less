@@ -1,0 +1,24 @@
+@import '~antd/es/style/themes/default.less';
+
+@pro-header-hover-bg: rgba(0, 0, 0, 0.025);
+
+.right {
+    float: right;
+    height: 100%;
+    margin-left: auto;
+    overflow: hidden;
+    margin-right: 10px;
+}
+
+@media only screen and (max-width: @screen-md) {
+    .breadcrumb{
+        display: none;
+    }
+}
+
+.breadcrumb{
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+}

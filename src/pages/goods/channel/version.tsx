@@ -10,7 +10,7 @@ import {
     exportChannelProductVersion,
     queryChannelProductVersion,
 } from '@/services/channel';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface ITableItem {
     vova_virtual_id: number;

@@ -1,6 +1,7 @@
 import history from '@@/history';
 import { Modal } from 'antd';
 import NProgress from 'nprogress';
+const logger = require('dva-logger');
 
 NProgress.configure({ showSpinner: false });
 
@@ -29,4 +30,5 @@ export const dva = {
             err.preventDefault();
         },
     },
+    plugins: [logger()],
 };

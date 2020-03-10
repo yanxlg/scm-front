@@ -41,6 +41,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
         return (
             <ProLayout
                 multiple={false}
+                menu={{ locale: false }}
                 logo={<img src={logo} className="menu-logo" alt="" />}
                 title="供应链中台"
                 onCollapse={this.handleMenuCollapse}

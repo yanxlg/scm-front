@@ -20,7 +20,7 @@ import {
 } from '@/interface/ITask';
 import { IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -47,9 +47,9 @@ export declare interface IPddHotTaskParams {
     status?: TaskStatusCode;
 }
 
-export async function getTaskList(params: ITaskListQuery) {
+export async function getTaskList(query: ITaskListQuery) {
     return request.get<IResponse<ITaskListResponse>>(TaskApiPath.QueryTaskList, {
-        params: params,
+        params: query,
     });
 }
 

@@ -5,7 +5,7 @@ import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import router from 'umi/router';
-import { utcToLocal } from '@/utils/date';
+import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import {
     TaskRangeCode,
     TaskRangeMap,
@@ -14,11 +14,11 @@ import {
     TaskStatusList,
     TaskStatusMap,
     TaskTypeCode,
+    TaskTypeEnum,
     TaskTypeList,
     TaskTypeMap,
-    TaskTypeEnum,
 } from '@/enums/StatusEnum';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import JsonForm, { IFieldItem } from '@/components/JsonForm';
 import CollapsePopOver from '@/components/CollapsePopOver';
 import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
@@ -27,7 +27,10 @@ import '@/styles/config.less';
 import '@/styles/table.less';
 import '@/styles/task.less';
 import { ITaskListItem, ITaskListQuery } from '@/interface/ITask';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject, global } from '@/config/global';
+import queryString from 'query-string';
+import { connect } from '@/compatibility/connect';
+import { ConnectProps } from '@/models/connect';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -52,34 +55,72 @@ declare interface ISearchFormConfig {
     initialValues?: { [key: string]: any };
 }
 
+@connect(() => {
+    return {};
+})
 @BindAll()
-class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
-    private defaultFormRef: RefObject<SearchForm> = React.createRef();
-    private expendFormRef: RefObject<SearchForm> = React.createRef();
-    constructor(props: IALLTaskPageProps) {
+class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, IALLTaskPageState> {
+    private defaultFormRef: RefObject<JsonForm> = React.createRef();
+    private expendFormRef: RefObject<JsonForm> = React.createRef();
+    constructor(props: IALLTaskPageProps & ConnectProps) {
         super(props);
+        const { page, page_number, ...defaultInitialValues } = this.computeInitialValues();
         this.state = {
             selectedRowKeys: [],
             dataLoading: false,
             searchLoading: false,
             dataSet: [],
-            pageNumber: 50,
-            page: 1,
+            pageNumber: page_number,
+            page: page,
             total: 0,
             showMore: false,
         };
-        if (props.initialValues) {
-            this.allFieldsList.initialValues = Object.assign(
-                {},
-                this.allFieldsList.initialValues,
-                props.initialValues,
-            );
-        }
+
+        this.allFieldsList.initialValues = Object.assign(
+            {},
+            this.allFieldsList.initialValues,
+            defaultInitialValues,
+        );
+        this.unExecutedFieldsList.initialValues = Object.assign(
+            {},
+            this.allFieldsList.initialValues,
+            defaultInitialValues,
+        );
     }
     componentDidMount(): void {
         this.queryList();
     }
 
+    private computeInitialValues() {
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const routeInitialValues = this.props.initialValues ?? {};
+        const {
+            page = 1,
+            page_number = 50,
+            task_id = '',
+            task_sn = '',
+            task_status = '',
+            task_name = '',
+            task_type = '',
+            task_begin_time = 0,
+            task_end_time = 0,
+        } = query;
+        return {
+            ...routeInitialValues,
+            page: Number(page),
+            page_number: Number(page_number),
+            task_id,
+            task_sn,
+            task_status,
+            task_name,
+            task_type,
+            task_begin_time: convertStartDate(Number(task_begin_time)),
+            task_end_time: convertEndDate(Number(task_end_time)),
+        };
+    }
     private onSearch() {
         this.queryList({
             searchLoading: true,
@@ -108,13 +149,34 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
             searchLoading,
             selectedRowKeys: [],
         });
-
-        return getTaskList({
+        const query = {
             task_status: task_status ?? this.props.task_status,
             page: page,
             page_number: page_number,
             ...values,
-        })
+        };
+        const initialTaskStatus = this.props.task_status;
+        // 设置方法后才显示copylink
+        this.props.dispatch!({
+            type: 'global/cacheQueryData',
+            queryData: {
+                ...query,
+                tabKey:
+                    initialTaskStatus === void 0
+                        ? '1'
+                        : initialTaskStatus === TaskStatusEnum.UnExecuted
+                        ? '2'
+                        : initialTaskStatus === TaskStatusEnum.Executing
+                        ? '3'
+                        : initialTaskStatus === TaskStatusEnum.Executed
+                        ? '4'
+                        : initialTaskStatus === TaskStatusEnum.Failed
+                        ? 5
+                        : '6',
+            },
+        });
+
+        return getTaskList(query)
             .then(
                 ({
                     data: {
@@ -547,7 +609,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
         const formConfig = task_status === void 0 ? this.allFieldsList : this.unExecutedFieldsList;
         return (
             <div>
-                <SearchForm
+                <JsonForm
                     ref={this.defaultFormRef}
                     fieldList={formConfig.default}
                     initialValues={formConfig.initialValues}
@@ -575,9 +637,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                     >
                         刷新
                     </LoadingButton>
-                </SearchForm>
+                </JsonForm>
                 <CollapsePopOver collapse={showMore}>
-                    <SearchForm
+                    <JsonForm
                         ref={this.expendFormRef}
                         className="form-item-bottom"
                         fieldList={formConfig.expend}

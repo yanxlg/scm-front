@@ -17,7 +17,7 @@ import {
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IURLTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface IURLGatherProps {
     taskId?: number;
