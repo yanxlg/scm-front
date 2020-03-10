@@ -1,12 +1,6 @@
 import React, { RefObject } from 'react';
 import SearchCondition from './components/SearchCondition';
-import DataStatusUpdate from './components/DataStatusUpdate';
 import ExcelDialog from './components/ExcelDialog';
-import {
-    getVovaGoodsList,
-    postVovaGoodsListExport,
-    putVovaGoodsSales,
-} from '@/services/VovaGoodsService';
 import '@/styles/index.less';
 import './index.less';
 import '@/styles/product.less';
@@ -15,41 +9,27 @@ import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
-import { checkLowerShelf, checkUpperShelf, GoodsStatusMap } from '@/enums/StatusEnum';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { checkLowerShelf, checkUpperShelf } from '@/enums/StatusEnum';
+import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import {
+    queryChannelGoodsList,
+    exportChannelProductList,
+    updateChannelShelveState,
+} from '@/services/channel';
+import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { IChannelProductListItem } from '@/interface/IChannel';
+import JsonForm, { IFieldItem } from '@/components/JsonForm';
 
 declare interface IVoVaListState {
-    dataSet: Array<IRowDataItem>;
+    dataSet: Array<IChannelProductListItem>;
     dataLoading: boolean;
     searchLoading: boolean;
     excelDialogStatus: boolean;
     pageNumber: number;
     page: number;
     total: number;
-}
-
-declare interface IBaseData {
-    page: number;
-    pageCount: number;
-    commodity_id: string;
-    vova_virtual_id: string;
-    product_id: string;
-    shop_name: string;
-    evaluate_volume: number;
-    average_score: number;
-    sales_volume: number;
-    product_detail: string;
-    product_status: number;
-    shipping_refund_rate: number; // 物流原因退款率
-    non_shipping_refund_rate: number; // 非物流原因退款率
-    vova_product_link: string; // 商品跳转到vova前端的链接
-    level_two_category: string;
-    level_one_category: string;
-    sku_pics: string;
-}
-
-export declare interface IRowDataItem extends IBaseData {
-    _rowspan?: number;
 }
 
 @BindAll()
@@ -85,12 +65,12 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataLoading: true,
             searchLoading,
         });
-        getVovaGoodsList({
+        queryChannelGoodsList({
             page: page,
             page_count: page_number,
             ...values,
         })
-            .then(({ data: { list = [], total = 0 } }) => {
+            .then(({ data: { list = [], total = 0 } = EmptyObject } = EmptyObject) => {
                 this.setState({
                     page: page,
                     pageNumber: page_number,
@@ -114,68 +94,52 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     }
 
     // 上架操作
-    private onShelves(row: IRowDataItem) {
-        Modal.confirm({
-            title: '确定需要上架该商品吗?',
-            okText: '确定',
-            cancelText: '取消',
-            icon: <ExclamationCircleOutlined />,
-            onOk: () => {
-                return putVovaGoodsSales({
-                    type: 'onsale',
-                    info: {
-                        onsale: {
-                            task_body: {
-                                product_id: row.product_id,
-                                commodity_id: row.commodity_id,
-                                sale_domain: 'vova',
-                            },
-                        },
+    private onShelves(row: IChannelProductListItem) {
+        return updateChannelShelveState({
+            type: 'onsale',
+            info: {
+                onsale: {
+                    task_body: {
+                        product_id: row.product_id,
+                        commodity_id: row.commodity_id,
+                        sale_domain: 'vova',
                     },
-                })
-                    .then(res => {
-                        message.success('上架成功');
-                        this.queryList();
-                    })
-                    .catch(() => {
-                        message.success('上架失败');
-                    });
+                },
             },
-        });
+        })
+            .then(res => {
+                message.success('上架成功');
+                this.queryList();
+            })
+            .catch(() => {
+                message.success('上架失败');
+            });
     }
 
     // 下架操作
-    private offShelves(row: IRowDataItem) {
-        Modal.confirm({
-            title: '确定需要下架该商品吗?',
-            okText: '确定',
-            cancelText: '取消',
-            icon: <ExclamationCircleOutlined />,
-            onOk: () => {
-                return putVovaGoodsSales({
-                    type: 'offsale',
-                    info: {
-                        offsale: {
-                            task_body: {
-                                product_id: row.product_id,
-                                commodity_id: row.commodity_id,
-                                sale_domain: 'vova',
-                            },
-                        },
+    private offShelves(row: IChannelProductListItem) {
+        return updateChannelShelveState({
+            type: 'offsale',
+            info: {
+                offsale: {
+                    task_body: {
+                        product_id: row.product_id,
+                        commodity_id: row.commodity_id,
+                        sale_domain: 'vova',
                     },
-                })
-                    .then(res => {
-                        message.success('下架成功');
-                        this.queryList();
-                    })
-                    .catch(() => {
-                        message.error('下架失败');
-                    });
+                },
             },
-        });
+        })
+            .then(res => {
+                message.success('下架成功');
+                this.queryList();
+            })
+            .catch(() => {
+                message.error('下架失败');
+            });
     }
 
-    private columns: ColumnProps<IRowDataItem>[] = [
+    private columns: ColumnProps<IChannelProductListItem>[] = [
         {
             title: '店铺名称',
             dataIndex: 'shop_name',
@@ -193,8 +157,8 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataIndex: 'main_image',
             align: 'center',
             width: 120,
-            render: (value: string, row: IRowDataItem, index: number) => (
-                <img className="goods-vova-img" src={value} alt="" />
+            render: (value: string, row: IChannelProductListItem, index: number) => (
+                <AutoEnLargeImg src={value} className="goods-vova-img" />
             ),
         },
         {
@@ -220,7 +184,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataIndex: 'product_detail',
             align: 'center',
             width: 150,
-            render: (value: string, row: IRowDataItem, index: number) => {
+            render: (value: string, row: IChannelProductListItem, index: number) => {
                 return (
                     <Button
                         onClick={() => {
@@ -261,8 +225,8 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataIndex: 'product_status',
             align: 'center',
             width: 100,
-            render: (status: number) => {
-                return GoodsStatusMap[status];
+            render: (status: ProductStatusCode) => {
+                return ProductStatusMap[status];
             },
         },
         {
@@ -273,7 +237,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             render: (url: string) => {
                 return (
                     url && (
-                        <Button type="link" href={url} className="product-link">
+                        <Button target="_blank" type="link" href={url} className="product-link">
                             {url}
                         </Button>
                     )
@@ -284,29 +248,41 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             title: '操作',
             dataIndex: 'product_status',
             align: 'center',
-            width: 100,
+            width: 140,
             render: (status, item) => {
+                const canUpper = !checkUpperShelf(status);
+                const canDown = !checkLowerShelf(status);
                 return {
                     children: (
                         <>
-                            <Button
-                                className="shelves-btn"
-                                onClick={() => {
-                                    this.onShelves(item);
+                            <PopConfirmLoadingButton
+                                buttonProps={{
+                                    className: 'shelves-btn',
+                                    disabled: canUpper,
+                                    children: '上架',
                                 }}
-                                disabled={!checkUpperShelf(status)}
-                            >
-                                上架
-                            </Button>
-                            <Button
-                                className="unshelves-btn"
-                                onClick={() => {
-                                    this.offShelves(item);
+                                popConfirmProps={{
+                                    title: '确定需要上架该商品吗?',
+                                    okText: '确定',
+                                    cancelText: '取消',
+                                    disabled: canUpper,
+                                    onConfirm: () => this.onShelves(item),
                                 }}
-                                disabled={!checkLowerShelf(status)}
-                            >
-                                下架
-                            </Button>
+                            />
+                            <PopConfirmLoadingButton
+                                buttonProps={{
+                                    className: 'unshelves-btn',
+                                    disabled: canDown,
+                                    children: '下架',
+                                }}
+                                popConfirmProps={{
+                                    title: '确定需要下架该商品吗?',
+                                    okText: '确定',
+                                    cancelText: '取消',
+                                    disabled: canDown,
+                                    onConfirm: () => this.offShelves(item),
+                                }}
+                            />
                         </>
                     ),
                 };
@@ -330,15 +306,15 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     }
 
     // 显示下载弹框
-    toggleExcelDialog = (status: boolean) => {
+    private toggleExcelDialog(status: boolean) {
         this.setState({
             excelDialogStatus: status,
         });
-    };
+    }
 
     private getExcelData(pageNumber: number, pageSize: number) {
         const values = this.formRef.current!.getFieldsValue();
-        return postVovaGoodsListExport({
+        return exportChannelProductList({
             page: pageNumber,
             page_count: pageSize,
             ...values,
@@ -352,7 +328,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     }
 
     // 查看详情弹窗
-    private toggleDetailDialog(row: IRowDataItem) {
+    private toggleDetailDialog(row: IChannelProductListItem) {
         Modal.info({
             className: 'product-modal modal-empty',
             icon: null,

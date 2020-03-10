@@ -36,21 +36,20 @@ declare interface IState {
 }
 
 class SkuDialog extends React.PureComponent<IPorps, IState> {
-
     private columns: ColumnProps<ISkuItem>[] = [
         {
             key: 'serial',
             title: () => `序号(${this.state.allCount})`,
             dataIndex: 'serial',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'sku_id',
             title: 'sku id',
             dataIndex: 'sku_id',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'sku_style',
@@ -60,9 +59,11 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             width: 200,
             render: (value: ISkuStyle) => {
                 return Object.keys(value).map(key => (
-                    <div key={key}>{key}: {value[key]}</div>
+                    <div key={key}>
+                        {key}: {value[key]}
+                    </div>
                 ));
-            }
+            },
         },
         {
             key: 'sku_price',
@@ -72,21 +73,21 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             width: 100,
             render: (value: string) => {
                 return '￥' + value;
-            }
+            },
         },
         {
             key: 'sku_weight',
             title: '重量',
             dataIndex: 'sku_weight',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'sku_inventory',
             title: '库存',
             dataIndex: 'sku_inventory',
             align: 'center',
-            width: 100
+            width: 100,
         },
     ];
 
@@ -96,8 +97,8 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             loading: false,
             page: 1,
             allCount: 0,
-            skuList: []
-        }
+            skuList: [],
+        };
     }
 
     private handleCancel = () => {
@@ -109,56 +110,52 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         let params = {
             page,
             product_id: productId,
-            page_count: 50
-        }
+            page_count: 50,
+        };
         if (pageData) {
             params = Object.assign(params, pageData);
         }
         this.setState({
-            loading: true
+            loading: true,
         });
-        getGoodsSkuList(params).then(res => {
-            // console.log('getGoodsSkuList', res);
-            const { all_count, list } = res.data;
-            this.setState({
-                page: params.page,
-                allCount: all_count,
-                skuList: list.map((item: any, index: number) => {
-                    const {
-                        sku_id,
-                        sku_style,
-                        sku_price,
-                        sku_weight,
-                        sku_inventory
-                    } = item;
-                    return {
-                        serial: (params.page - 1) * 50 + index + 1,
-                        sku_id,
-                        sku_style,
-                        sku_price,
-                        sku_weight,
-                        sku_inventory
-                    }
-                })
+        getGoodsSkuList(params)
+            .then(res => {
+                // console.log('getGoodsSkuList', res);
+                const { all_count, list } = res.data;
+                this.setState({
+                    page: params.page,
+                    allCount: all_count,
+                    skuList: list.map((item: any, index: number) => {
+                        const { sku_id, sku_style, sku_price, sku_weight, sku_inventory } = item;
+                        return {
+                            serial: (params.page - 1) * 50 + index + 1,
+                            sku_id,
+                            sku_style,
+                            sku_price,
+                            sku_weight,
+                            sku_inventory,
+                        };
+                    }),
+                });
             })
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
-        })
-    }
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     onChangePage = (page: number) => {
         this.getSkuList(this.props.currentRowData!.product_id, {
-            page
-        })
-    }
+            page,
+        });
+    };
 
     render() {
         const { visible, currentRowData } = this.props;
         const { loading, page, allCount, skuList } = this.state;
         if (!currentRowData) {
-            return null
+            return null;
         } else {
             const {
                 goods_img,
@@ -169,8 +166,8 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                 worm_goods_id,
                 first_catagory,
                 second_catagory,
-                third_catagory
-            } = currentRowData
+                third_catagory,
+            } = currentRowData;
             return (
                 <Modal
                     width={1000}
@@ -219,15 +216,14 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                             size="small"
                             total={allCount}
                             current={page}
-                            defaultPageSize={50}             
+                            defaultPageSize={50}
                             showQuickJumper={true}
                             onChange={this.onChangePage}
-                            showTotal={(total) => `共${total}条`}
+                            showTotal={total => `共${total}条`}
                         />
                     </div>
-                    
                 </Modal>
-            )
+            );
         }
     }
 }

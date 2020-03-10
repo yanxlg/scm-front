@@ -196,6 +196,6 @@ export async function postGoodsIgnoreVersion(data: IProductId) {
 // 获取sku列表分页
 export async function getGoodsSkuList(params: ISkuParams) {
     return request.get(`/api/v1/goods/skus/${params.product_id}`, {
-        params
-    })
+        params,
+    });
 }

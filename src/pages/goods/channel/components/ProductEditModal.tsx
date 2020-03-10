@@ -3,39 +3,20 @@ import '@/styles/product.less';
 import '@/styles/form.less';
 import { Button, Modal, Form, Spin } from 'antd';
 import { Bind } from 'lodash-decorators';
-import { editGoodsDetail, queryGoodsDetail } from '@/services/channel';
+import { editChannelProductDetail, queryChannelProductDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
 import NumberInput from '@/components/NumberInput';
 import IntegerInput from '@/components/IntegerInput';
-
-declare interface ISku {
-    sku_name: string;
-    sku_image: string;
-    specs: Array<{
-        name: string;
-        value: string;
-    }>;
-    price: string;
-    shipping_fee: string;
-    storage: string;
-}
-
-declare interface IFormData {
-    sku_list: ISku[];
-}
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { IChannelProductDetailResponse, ISku } from '@/interface/IChannel';
 
 declare interface IProductEditProps {
     product_id: string;
     channel?: string;
 }
 
-declare interface IProductEditState {
+declare interface IProductEditState extends Partial<IChannelProductDetailResponse> {
     loading: boolean;
-    product_id?: string;
-    product_name?: string;
-    main_image?: string;
-    product_description?: string;
-    sku_list?: ISku[];
     submitting: boolean;
 }
 
@@ -54,19 +35,21 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
     @Bind
     private queryDetail() {
         const { product_id, channel } = this.props;
-        queryGoodsDetail({ product_id, channel }).then(({ data = {} }) => {
-            this.setState(
-                {
-                    loading: false,
-                    ...data,
-                },
-                () => {
-                    this.formRef.current!.setFieldsValue({
-                        sku_list: data.sku_list,
-                    });
-                },
-            );
-        });
+        queryChannelProductDetail({ product_id, channel }).then(
+            ({ data = EmptyObject } = EmptyObject) => {
+                this.setState(
+                    {
+                        loading: false,
+                        ...data,
+                    },
+                    () => {
+                        this.formRef.current!.setFieldsValue({
+                            sku_list: data.sku_list,
+                        });
+                    },
+                );
+            },
+        );
     }
 
     @Bind
@@ -104,7 +87,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
             this.setState({
                 submitting: true,
             });
-            editGoodsDetail({
+            editChannelProductDetail({
                 product_id: product_id,
                 sku_list: sku_list.map((sku: ISku) => {
                     return {
@@ -176,7 +159,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                             )}
                         </div>
                         {sku_list.map((sku: ISku, index: number) => {
-                            const { specs = [], sku_name, sku_image } = sku;
+                            const { specs = [], sku_name = '', sku_image } = sku;
                             return (
                                 <div className="form-item flex flex-align" key={sku_name + index}>
                                     <div

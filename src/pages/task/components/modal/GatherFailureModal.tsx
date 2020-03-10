@@ -1,12 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import router from 'umi/router';
 import '@/styles/modal.less';
 
-const GatherFailureModal: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+const GatherFailureModal: React.FC = () => {
     /*  const goToDrafts = useCallback(()=>{
         router.push("/config/drafts");
     },[]);*/
+    const onClick = useCallback(() => {
+        Modal.destroyAll();
+    }, []);
     return useMemo(() => {
         return (
             <div>
@@ -23,4 +26,11 @@ const GatherFailureModal: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     }, []);
 };
 
-export default GatherFailureModal;
+export function showFailureModal() {
+    Modal.info({
+        content: <GatherFailureModal />,
+        className: 'modal-empty',
+        icon: null,
+        maskClosable: true,
+    });
+}

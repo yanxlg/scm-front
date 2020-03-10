@@ -1,0 +1,23 @@
+@bgColor:#eee;
+.collapse{
+    &-arrow{
+        transform: rotate(45deg) translateX(-50%)!important;
+        border-top-color: @bgColor;
+        border-right-color: transparent;
+        border-bottom-color: transparent;
+        border-left-color: @bgColor;
+        -webkit-box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.06);
+        box-shadow: -2px -2px 5px rgba(0, 0, 0, 0.06);
+    }
+    &-pannel{
+        border: none!important;
+        background: @bgColor;
+        margin-top: 10px;
+        .ant-collapse-header{
+            display: none;
+        }
+        .ant-collapse-content-box{
+            padding: 0!important;
+        }
+    }
+}

@@ -244,34 +244,33 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                         labelClassName="stock-form-label"
                         fieldList={this.fieldsList}
                         formRef={this.formRef}
-                        appendChildren={
-                            <React.Fragment>
-                                <Button
-                                    type="primary"
-                                    loading={searchLoading}
-                                    className="btn-group vertical-middle form-item"
-                                    onClick={this.onSearch}
-                                >
-                                    查询
-                                </Button>
-                                <Button
-                                    loading={exportingLoading}
-                                    className="btn-group vertical-middle form-item"
-                                    onClick={this.onExport}
-                                >
-                                    导出Excel表
-                                </Button>
-                                <Button
-                                    loading={syncLoading}
-                                    className="btn-group vertical-middle form-item"
-                                    type="link"
-                                    onClick={this.syncStock}
-                                >
-                                    点击同步库存
-                                </Button>
-                            </React.Fragment>
-                        }
-                    />
+                    >
+                        <React.Fragment>
+                            <Button
+                                type="primary"
+                                loading={searchLoading}
+                                className="btn-group vertical-middle form-item"
+                                onClick={this.onSearch}
+                            >
+                                查询
+                            </Button>
+                            <Button
+                                loading={exportingLoading}
+                                className="btn-group vertical-middle form-item"
+                                onClick={this.onExport}
+                            >
+                                导出Excel表
+                            </Button>
+                            <Button
+                                loading={syncLoading}
+                                className="btn-group vertical-middle form-item btn-clear"
+                                type="link"
+                                onClick={this.syncStock}
+                            >
+                                点击同步库存
+                            </Button>
+                        </React.Fragment>
+                    </JsonForm>
                     <Pagination
                         className="float-right form-item"
                         pageSize={pageSize}

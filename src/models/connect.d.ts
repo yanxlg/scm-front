@@ -3,9 +3,7 @@ import { MenuDataItem } from '@ant-design/pro-layout';
 import { RouterTypes } from 'umi';
 import { GlobalModelState } from './global';
 
-export {
-    GlobalModelState,
-};
+export { GlobalModelState };
 
 export interface ConnectState {
     global: GlobalModelState;

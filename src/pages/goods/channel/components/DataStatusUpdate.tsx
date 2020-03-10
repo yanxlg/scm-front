@@ -1,21 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, Spin } from 'antd';
 import router from 'umi/router';
-import { getVovaChangedProperties } from '@/services/VovaGoodsService';
 import '@/styles/form.less';
-
-export declare interface PropertyItem {
-    property: string;
-    count: number;
-}
+import { queryChannelChangedProperties } from '@/services/channel';
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { IChannelChangedProperty } from '@/interface/IChannel';
 
 const DataStatusUpdate: React.FC = () => {
     const [loading, setLoading] = useState(true);
-    const [list, setList] = useState([]);
+    const [list, setList] = useState<IChannelChangedProperty[]>([]);
 
     useEffect(() => {
-        getVovaChangedProperties()
-            .then(({ data: { changed_property_list = [] } }) => {
+        queryChannelChangedProperties()
+            .then(({ data: { changed_property_list = [] } = EmptyObject } = EmptyObject) => {
                 setList(changed_property_list);
                 setLoading(false);
             })
@@ -33,7 +30,7 @@ const DataStatusUpdate: React.FC = () => {
             <Card title="数据/状态更新" className="form-item">
                 <Spin spinning={loading} tip="Loading...">
                     <div className="product-tags cursor-pointer" onClick={goTo}>
-                        {list.map((item: PropertyItem, index) => {
+                        {list.map((item, index) => {
                             return (
                                 <div key={item.property + index} className="product-tag">
                                     {item.property}(

@@ -80,14 +80,14 @@ class VersionImg extends React.PureComponent<VersionImgProps> {
             ];
 
             return (
-                <Modal 
-                    footer={null} 
-                    width={920} 
-                    visible={visible} 
+                <Modal
+                    footer={null}
+                    width={920}
+                    visible={visible}
                     onCancel={this.handleCancel}
                     bodyStyle={{
                         maxHeight: 640,
-                        overflow: 'auto'
+                        overflow: 'auto',
                     }}
                 >
                     <Table

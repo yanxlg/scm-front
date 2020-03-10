@@ -1,3 +1,4 @@
+@import "~antd/es/style/themes/default";
 .task{
     &-justify{
         &-1{
@@ -7,9 +8,108 @@
         }
     }
     &-progress{
-        margin-right: 10px;
+        &-circle{
+            margin-right: 10px;
+        }
+        &-tag{
+            width: 60px;
+            height: 60px;
+            background: #1890ff;
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-right: 20px;
+            line-height: 20px;
+            padding-top: 10px;
+        }
+    }
+    &-body{
+        margin-top: 10px;
+    }
+    &-detail{
+        &-card{
+            .ant-card-body{
+                padding: 0;
+            }
+        }
+        &-table{
+            text-align: center;
+        }
+    }
+    &-desc{
+        @labelWidth:100px;
+        .ant-descriptions-item{
+            &-label{
+                width: @labelWidth;
+                text-align: right;
+                position: absolute;
+            }
+            &-content{
+                margin-left: @labelWidth;
+            }
+        }
+        .ant-descriptions-row:last-child{
+            .ant-descriptions-item{
+                padding-bottom: 0;
+            }
+        }
+    }
+    &-btn{
+        margin-left: 20px;
+        margin-top: -5px;
+        &-copy{
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+        }
+        &-refresh{
+            position: absolute!important;
+            top: 40px;
+            right: 20px;
+        }
     }
     &-picker{
        width: 180px;
+        &-time{
+            width: 200px;
+        }
+    }
+    &-add{
+        color: @primary-color;
+        font-size: 26px;
+        cursor: pointer;
+        vertical-align: middle;
+        margin-left: 16px;
+    }
+    &-require{
+        padding-left: 11px!important;
+    }
+    &-id{
+        &-title{
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        &-item{
+            display: inline-block;
+            width: 33.33%;
+            border-left: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
+            padding: 5px 10px;
+            text-align: center;
+            &:nth-child(1),&:nth-child(2),&:nth-child(3){
+                border-top: 1px solid #cccccc;
+            }
+            &:nth-child(3n),&:last-child{
+                border-right: 1px solid #cccccc;
+            }
+        }
+    }
+    &-modal{
+        &-progress{
+            width: 500px!important;
+        }
     }
 }

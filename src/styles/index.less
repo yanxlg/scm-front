@@ -5,10 +5,8 @@
     padding:20px 30px;
 }
 
-.padding{
-    &-none{
-        padding: 0;
-    }
+.padding-none{
+    padding: 0;
 }
 
 .margin{
@@ -53,13 +51,13 @@
 
 .input{
     &-default{
-        width: @inputWidth;
+        width: @inputWidth!important;
     }
     &-large{
-        width: @inputLargeWidth;
+        width: @inputLargeWidth!important;
     }
     &-small{
-        width: @inputSmallWidth;
+        width: @inputSmallWidth!important;
     }
     &-handler{
         .ant-input-number-handler-wrap{
@@ -76,6 +74,9 @@
 .picker{
     &-small{
         width: @pickerSmallWidth;
+    }
+    &-default{
+        width: @pickerDefaultWidth!important;
     }
 }
 
@@ -102,6 +103,12 @@
         color:rgba(0,0,0,0.65);
         margin-left: 32px;
         padding: 0;
+    }
+    &-clear{
+        &:extend(.padding-none);
+        .ant-btn{
+            &:extend(.padding-none);
+        }
     }
 }
 
@@ -146,11 +153,10 @@
     }
     &-clear{
         clear: both;
-        overflow: hidden;
         &:after{
             content: "";
             clear: both;
-            display: inline-block;
+            display: block;
         }
     }
 }
@@ -183,15 +189,6 @@ body{
 }
 
 
-.menu{
-    &-icon{
-        margin-right: 10px;
-    }
-    &-logo{
-        width: 80px;
-        height: auto!important;
-    }
-}
 
 .text{
     &-center{
@@ -202,5 +199,11 @@ body{
 .cursor{
     &-pointer{
         cursor: pointer;
+    }
+}
+
+.body{
+    &-transparent{
+        background: @layout-body-background;
     }
 }

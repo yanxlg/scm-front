@@ -165,13 +165,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         };
                     } else {
                         const i = addImgList.findIndex(addItem => addItem.fileUrl === item);
-                        const {
-                            url,
-                            type,
-                            alt,
-                            width,
-                            height
-                        } = addImgList[i];
+                        const { url, type, alt, width, height } = addImgList[i];
                         ret = {
                             type,
                             url,
@@ -183,7 +177,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     }
                     ret.is_default = index === 0 ? 1 : 0;
                     return ret;
-                })
+                }),
             };
         }
     };

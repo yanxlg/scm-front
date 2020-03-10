@@ -19,7 +19,7 @@ import {
     IFilterParams,
     getCatagoryList,
 } from '@/services/goods';
-import { strToNumber } from '@/utils/common';
+import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
@@ -173,7 +173,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const {
             task_number,
             store_id,
-            commodity_id,
+            // commodity_id,
             min_sku,
             max_sku,
             min_price,
@@ -190,10 +190,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             message.error('店铺ID输入了非法字符，只支持检索数字！');
             return false;
         }
-        if (commodity_id && reg.test(commodity_id.trim())) {
-            message.error('Commodity ID输入了非法字符，只支持检索数字！');
-            return false;
-        }
+        // if (commodity_id && reg.test(commodity_id.trim())) {
+        //     message.error('Commodity ID输入了非法字符，只支持检索数字！');
+        //     return false;
+        // }
         if (min_sku >= 0 && max_sku >= 0 && min_sku - max_sku > 0) {
             message.error('sku数量最小值大于最大值！');
             return false;
@@ -229,7 +229,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory,
                 ...searhParams
             } = this.localSearchRef.state;
-            if (!this.validateSearhParam({ ...searhParams, task_number, store_id, commodity_id })) {
+            // commodity_id
+            if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
                 return;
             }
             // 转换数据格式
@@ -304,7 +305,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     // 设置选择行
     private changeSelectedRowKeys = (keys: string[]) => {
         this.setState({
-            selectedRowKeys: keys
+            selectedRowKeys: keys,
         });
     };
 
@@ -313,13 +314,13 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         let ret: IRowDataItem[] = [];
         // let goodsId: string | number = 0;
         for (let i = 0, len = list.length; i < len; i++) {
-            let { 
+            let {
                 sku_info,
                 first_catagory,
                 second_catagory,
                 third_catagory,
                 sku_image,
-                ...rest 
+                ...rest
             } = list[i];
             first_catagory = Array.isArray(first_catagory) ? {} : first_catagory;
             second_catagory = Array.isArray(second_catagory) ? {} : second_catagory;
@@ -490,11 +491,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             deleteLoading: true,
         });
-        getGoodsDelete({ 
-            commodity_ids: [...new Set(selectedRowKeys.map(productId => {
-                const index = goodsList.findIndex(item => item.product_id === productId)
-                return goodsList[index].commodity_id;
-            }))] 
+        getGoodsDelete({
+            commodity_ids: [
+                ...new Set(
+                    selectedRowKeys.map(productId => {
+                        const index = goodsList.findIndex(item => item.product_id === productId);
+                        return goodsList[index].commodity_id;
+                    }),
+                ),
+            ],
         })
             .then(res => {
                 this.setState({
@@ -506,9 +511,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 if (success.length) {
                     str += `删除成功${success.join('、')}。`;
                 } else if (failed.length) {
-                    str += `删除失败${failed.join('、')}。`;
+                    str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
                 }
-                message.success(str);
+                message.info(str);
             })
             .catch(err => {
                 // console.log('getGoodsDelete ERR');
@@ -526,7 +531,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     pageCountChange = (current: number, size: number) => {
+        // console.log('current', current);
+        const { page, page_count } = this.state;
         this.onSearch({
+            page: getCurrentPage(size, (page - 1) * page_count + 1),
             page_count: size,
         });
     };
@@ -604,7 +612,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     pageSizeOptions={pageSizeOptions}
                     onChange={this.onChangePage}
                     onShowSizeChange={this.pageCountChange}
-                    showTotal={(total) => `共${total}条`}
+                    showTotal={total => `共${total}条`}
                 />
                 <GoodsTable
                     // ref={node => (this.goodsTableRef = node)}
