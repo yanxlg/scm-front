@@ -17,6 +17,6 @@ body {
 
 
 .ant-table table{
-    width: auto!important;
+    width: max-content!important;
     min-width: 100%!important;
 }
