@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import { FitTable } from '@/components/FitTable';
-import { Button, Form, Pagination } from 'antd';
+import { Button, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/stock.less';

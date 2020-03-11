@@ -2,7 +2,6 @@ import React from 'react';
 import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
-
 import { IParentOrderItem } from './PaneAll';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -17,12 +16,9 @@ declare interface IProps {
     orderList: IParentOrderItem[];
 }
 
-declare interface IState {
-
-}
+declare interface IState {}
 
 class TableParentAll extends React.PureComponent<IProps, IState> {
-
     private allColumns: ColumnProps<IParentOrderItem>[] = [
         {
             key: 'createTime',
@@ -36,8 +32,8 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
-                }
-            }
+                };
+            },
         },
         {
             key: 'orderId',
@@ -45,7 +41,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderId',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         // 缺失
         // {
@@ -79,7 +75,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             title: '中台商品ID',
             dataIndex: 'productId',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'goodsNumber',
@@ -100,7 +96,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             title: '中台子订单ID',
             dataIndex: 'orderGoodsId',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'orderGoodsStatus',
@@ -141,14 +137,14 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             title: '商品详情',
             dataIndex: 'goodsDetail',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'productShop',
             title: '渠道店铺名',
             dataIndex: 'productShop',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'confirmTime',
@@ -156,7 +152,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'channelSource',
@@ -164,7 +160,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'channelSource',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'currency',
@@ -172,7 +168,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'currency',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'orderAmount',
@@ -180,15 +176,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderAmount',
             align: 'center',
             width: 120,
-            render: this.mergeCell
-        }
-    ]
+            render: this.mergeCell,
+        },
+    ];
 
     constructor(props: IProps) {
         super(props);
     }
 
-    private createColumns = ():ColumnProps<IParentOrderItem>[] => {
+    private createColumns = (): ColumnProps<IParentOrderItem>[] => {
         const { colList } = this.props;
         // console.log(111, colList);
         // const allColumns: ColumnProps<IParentOrderItem>[]  = [];
@@ -203,7 +199,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             return this.allColumns[i];
         });
         // return allColumns;
-    }
+    };
 
     // 合并单元格
     private mergeCell(value: string | number, row: IParentOrderItem) {
@@ -217,7 +213,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
 
     render() {
         const { loading, orderList } = this.props;
-        const columns = this.createColumns()
+        const columns = this.createColumns();
         return (
             <Table
                 bordered={true}
@@ -230,7 +226,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                 scroll={{ x: true, y: 600 }}
                 pagination={false}
             />
-        )    
+        );
     }
 }
 

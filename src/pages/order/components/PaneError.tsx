@@ -6,17 +6,13 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TableError from './TableError';
 
-import { 
-    getErrorOrderList,
-    IFilterBaseParams,
-    IFilterParams
-} from '@/services/order-manage';
+import { getErrorOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 import {
     pageSizeOptions,
-    defaultOptionItem, 
+    defaultOptionItem,
     channelOptionList,
     errorTypeOptionList,
-    errorDetailOptionList
+    errorDetailOptionList,
 } from '@/enums/OrderEnum';
 
 export declare interface IErrorOrderItem {
@@ -35,10 +31,8 @@ declare interface IState {
     pageCount: number;
     total: number;
     loading: boolean;
-    orderList: IErrorOrderItem[]
+    orderList: IErrorOrderItem[];
 }
-
-
 
 const fieldList: IFieldItem[] = [
     {
@@ -61,10 +55,7 @@ const fieldList: IFieldItem[] = [
         label: '销售渠道',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...channelOptionList
-        ],
+        optionList: [defaultOptionItem, ...channelOptionList],
     },
     {
         type: 'input',
@@ -73,24 +64,18 @@ const fieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购父订单ID',
-    },    
+    },
     {
         type: 'select',
         name: 'error_type',
         label: '异常类型',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...errorTypeOptionList
-                
-        ],
+        optionList: [defaultOptionItem, ...errorTypeOptionList],
     },
-   
 ];
 
 class PanePaid extends React.PureComponent<{}, IState> {
-
     private formRef: RefObject<FormInstance> = React.createRef();
 
     constructor(props: {}) {
@@ -100,8 +85,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
             pageCount: 30,
             total: 0,
             loading: false,
-            orderList: []
-        }
+            orderList: [],
+        };
     }
 
     componentDidMount() {
@@ -113,8 +98,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_count: pageCount
-        }
+            page_count: pageCount,
+        };
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
         //     params = Object.assign(params, this.orderFilterRef.current.getValues());
@@ -124,49 +109,41 @@ class PanePaid extends React.PureComponent<{}, IState> {
         }
         // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
-            loading: true
-        })
-        getErrorOrderList(params).then(res => {
-            // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
-            this.setState({
-                total,
-                // page: params.page,
-                // pageCount: params.page_count,
-                orderList: list
+            loading: true,
+        });
+        getErrorOrderList(params)
+            .then(res => {
+                // console.log('getProductOrderList', res);
+                const { total, list } = res.data;
+                this.setState({
+                    total,
+                    // page: params.page,
+                    // pageCount: params.page_count,
+                    orderList: list,
+                });
             })
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
-        })
-    }
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     // 获取查询数据
     getFieldsValue = () => {
         // console.log('111', this.formRef.current!.getFieldsValue());
-    }
+    };
 
     // 选择异常详情
-    onCheckErrDetail = (list: CheckboxValueType[]) => {
-
-    }
+    onCheckErrDetail = (list: CheckboxValueType[]) => {};
 
     render() {
-
-        const {
-            loading,
-            orderList,
-            total,
-            page,
-            pageCount,
-
-        } = this.state;
+        const { loading, orderList, total, page, pageCount } = this.state;
 
         const initialValues = {
             channel: 100,
-            error_type: 100
-        }
+            error_type: 100,
+        };
         return (
             <>
                 <div>
@@ -177,26 +154,32 @@ class PanePaid extends React.PureComponent<{}, IState> {
                         initialValues={initialValues}
                     />
                     <div className="order-operation">
-                        <Button type="primary" className="order-btn" onClick={() => this.getFieldsValue()}>查询</Button>
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            onClick={() => this.getFieldsValue()}
+                        >
+                            查询
+                        </Button>
                         <Button className="order-btn">导出数据</Button>
                     </div>
                     <div className="order-err-detail">
                         <strong>异常详情</strong>
                         <div className="wrap">
                             <Checkbox.Group onChange={this.onCheckErrDetail}>
-                                {
-                                    errorDetailOptionList.map(item => (
-                                        <Checkbox className="checkbox-item" key={item.value} value={item.value}>{item.name}</Checkbox>
-                                    ))
-                                }
+                                {errorDetailOptionList.map(item => (
+                                    <Checkbox
+                                        className="checkbox-item"
+                                        key={item.value}
+                                        value={item.value}
+                                    >
+                                        {item.name}
+                                    </Checkbox>
+                                ))}
                             </Checkbox.Group>
                         </div>
-                        
                     </div>
-                    <TableError
-                        loading={loading}
-                        orderList={orderList}
-                    />
+                    <TableError loading={loading} orderList={orderList} />
                     <Pagination
                         className="order-pagination"
                         // size="small"
@@ -208,7 +191,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
                         pageSizeOptions={pageSizeOptions}
                         // onChange={this.onChangePage}
                         // onShowSizeChange={this.pageCountChange}
-                        showTotal={(total) => `共${total}条`}
+                        showTotal={total => `共${total}条`}
                     />
                 </div>
             </>

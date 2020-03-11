@@ -7,18 +7,18 @@ declare interface optionItem {
 
 export const pageSizeOptions = ['50', '100', '500', '1000'];
 
-export const defaultOptionItem: optionItem = { name: '全部', value: 100 }
+export const defaultOptionItem: optionItem = { name: '全部', value: 100 };
 
 export const channelOptionList = [
     { name: 'VOVA', value: 1 },
     { name: 'FD', value: 2 },
-    { name: 'AZ', value: 3 }
-]
+    { name: 'AZ', value: 3 },
+];
 
 export const orderStatusOptionList = [
     { name: '已确认', value: 1 },
-    { name: '已取消', value: 2 }
-]
+    { name: '已取消', value: 2 },
+];
 
 export const orderShippingOptionList = [
     { name: '未配送', value: 1 },
@@ -30,40 +30,40 @@ export const orderShippingOptionList = [
     { name: '取消出库', value: 7 },
     { name: '已出库', value: 8 },
     { name: '尾程已揽收', value: 9 },
-    { name: '已妥投', value: 10 }
-]
+    { name: '已妥投', value: 10 },
+];
 
 export const hasOptionList = [
     { name: '有', value: 1 },
     { name: '没有', value: 2 },
-]
+];
 
 export const purchaseOrderOptionList = [
     { name: '待拍单', value: 1 },
     { name: '已取消', value: 2 },
     { name: '拍单失败', value: 3 },
     { name: '拍单中', value: 4 },
-    { name: '已拍单', value: 5 }
-]
+    { name: '已拍单', value: 5 },
+];
 
 export const purchasePayOptionList = [
     { name: '未支付', value: 1 },
     { name: '已支付', value: 2 },
-    { name: '已退款', value: 3 }
-]
+    { name: '已退款', value: 3 },
+];
 
 export const purchaseShippingOptionList = [
     { name: '未配送', value: 1 },
     { name: '已发货', value: 2 },
-    { name: '已妥投', value: 3 }
-]
+    { name: '已妥投', value: 3 },
+];
 
 export const errorTypeOptionList = [
     { name: '仓库异常', value: 1 },
     { name: '尾程异常', value: 2 },
     { name: '采购异常', value: 3 },
-    { name: '其他', value: 4 }
-]
+    { name: '其他', value: 4 },
+];
 
 export const errorDetailOptionList = [
     { name: '12小时未支付', value: 1 },
@@ -74,8 +74,8 @@ export const errorDetailOptionList = [
     { name: '6天未标记发货', value: 6 },
     { name: '7天未上线', value: 7 },
     { name: '14天未上线', value: 8 },
-    { name: '30天未妥投', value: 9 }
-]
+    { name: '30天未妥投', value: 9 },
+];
 
 export const childDefaultFieldList: IFieldItem[] = [
     {
@@ -116,16 +116,13 @@ export const childDefaultFieldList: IFieldItem[] = [
         label: '销售渠道',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...channelOptionList
-        ],
-    }
-]
+        optionList: [defaultOptionItem, ...channelOptionList],
+    },
+];
 
 export const childAllFieldList: IFieldItem[] = [
     ...childDefaultFieldList,
-    
+
     {
         type: 'input',
         name: 'order_id',
@@ -226,10 +223,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '订单状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...orderStatusOptionList
-        ],
+        optionList: [defaultOptionItem, ...orderStatusOptionList],
     },
     {
         type: 'select',
@@ -237,10 +231,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '订单配送状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...orderShippingOptionList
-        ],
+        optionList: [defaultOptionItem, ...orderShippingOptionList],
     },
     {
         type: 'select',
@@ -248,10 +239,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '采购计划',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...hasOptionList
-        ],
+        optionList: [defaultOptionItem, ...hasOptionList],
     },
     {
         type: 'dateRanger',
@@ -309,32 +297,30 @@ export const childAllFieldList: IFieldItem[] = [
         label: 'og订单取消时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
-    }
+    },
     // endFieldItem
 ];
 
-
 // bool non_purchase_plan = 30;//没有采购计划的 true 没有采购计划
-
 
 // 未勾选仅展示父订单ID
 export const defaultColChildList = [
-    'createTime',                      // 订单时间
-    'orderGoodsId',                    // 中台订单子ID
-    'goodsDetail',                     // 商品详情
-    'channelOrderGoodsSn',             // Product_sn
+    'createTime', // 订单时间
+    'orderGoodsId', // 中台订单子ID
+    'goodsDetail', // 商品详情
+    'channelOrderGoodsSn', // Product_sn
     // 'channel_order_status',         // 渠道订单状态
     // 'channel_delivery_status',      // 渠道发货状态
-    'orderGoodsStatus',                // 中台订单状态
-    'productId',                       // 中台商品ID
-    'purchasePlanId',                  // 计划子项ID
-    'purchaseOrderStatus',             // 采购订单状态
-    'purchaseOrderPayStatus',          // 采购支付状态
-    'purchaseOrderShippingStatus',     // 采购配送状态
-    'purchaseCreateTime',              // 采购生成时间
-    'purchasePlatformOrderId',         // 采购订单号
-    'purchaseWaybillNo'                // 采购运单号
-]
+    'orderGoodsStatus', // 中台订单状态
+    'productId', // 中台商品ID
+    'purchasePlanId', // 计划子项ID
+    'purchaseOrderStatus', // 采购订单状态
+    'purchaseOrderPayStatus', // 采购支付状态
+    'purchaseOrderShippingStatus', // 采购配送状态
+    'purchaseCreateTime', // 采购生成时间
+    'purchasePlatformOrderId', // 采购订单号
+    'purchaseWaybillNo', // 采购运单号
+];
 
 export const childOptionalColList = [
     { key: 'purchaseNumber', name: '采购数量' }, // 2
@@ -368,7 +354,6 @@ export const childOptionalColList = [
     // { key: 'a18', name: '一级类目' },
     // { key: 'a19', name: '二级类目' },
     // { key: 'a20', name: '三级类目' },
-    
 ];
 
 export const parentDefaultFieldList: IFieldItem[] = [
@@ -393,12 +378,9 @@ export const parentDefaultFieldList: IFieldItem[] = [
         label: '销售渠道',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [
-            defaultOptionItem,
-            ...channelOptionList
-        ],
-    }
-]
+        optionList: [defaultOptionItem, ...channelOptionList],
+    },
+];
 
 export const parentAllFieldList: IFieldItem[] = [
     ...parentDefaultFieldList,
@@ -417,12 +399,12 @@ export const parentAllFieldList: IFieldItem[] = [
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
     },
-]
+];
 
 // 勾选仅展示
 export const defaultParentColList = [
-    'createTime',                  // 订单时间
-    'orderId',                     // 中台订单父订单ID
+    'createTime', // 订单时间
+    'orderId', // 中台订单父订单ID
     // 'a1',                          // 运费
     // 'channel_order_status',        // 渠道订单状态
     // 'channel_delivery_status',     // 渠道发货状态
@@ -443,7 +425,7 @@ export const parentOptionalColList = [
     { key: 'channelSource', name: '销售渠道' }, // 1
     { key: 'currency', name: '货币类型' }, // 1
     { key: 'orderAmount', name: '商品总金额' }, // 1
-    // { key: 'a2', name: '渠道订单ID' }, 
+    // { key: 'a2', name: '渠道订单ID' },
     // { key: 'a4', name: '取消订单时间' },
     // { key: 'a8', name: '发货剩余时间' },
     // { key: 'a10', name: '一级类目' },
@@ -451,7 +433,7 @@ export const parentOptionalColList = [
     // { key: 'a12', name: '三级类目' },
     // { key: 'a14', name: '父订单ID' },
     // { key: 'a15', name: '子订单ID' },
-]
+];
 
 /*** 采购未发货 ***/
 export const defaultStockColList = [
@@ -462,31 +444,31 @@ export const defaultStockColList = [
     'purchase_order_status',
     'purchase_shipping_status',
     'purchase_pay_time',
-    'purchase_num'
-]
+    'purchase_num',
+];
 
 export const notStockOptionalColList = [
     {
         key: 'a1',
-        name: '订单确认时间'
+        name: '订单确认时间',
     },
     {
         key: 'a2',
-        name: '渠道订单ID'
+        name: '渠道订单ID',
     },
     {
         key: 'a3',
-        name: '采购支付状态'
+        name: '采购支付状态',
     },
     {
         key: 'a4',
-        name: '采购生成时间'
+        name: '采购生成时间',
     },
     {
         key: 'a5',
-        name: '采购订单号'
+        name: '采购订单号',
     },
-]
+];
 
 /*** 仓库未发货 ***/
 export const defaultStockNotShipColList = [
@@ -497,42 +479,40 @@ export const defaultStockNotShipColList = [
     'purchase_order_status',
     'purchase_shipping_status',
     'warehousing_time',
-    'xxx_time'
-]
+    'xxx_time',
+];
 
 export const stockNotShipOptionalColList = [
     {
         key: 'a1',
-        name: '订单确认时间'
+        name: '订单确认时间',
     },
     {
         key: 'a2',
-        name: '渠道订单ID'
+        name: '渠道订单ID',
     },
     {
         key: 'a3',
-        name: '价格'
+        name: '价格',
     },
     {
         key: 'a4',
-        name: '运费'
+        name: '运费',
     },
     {
         key: 'a5',
-        name: '商品数量'
+        name: '商品数量',
     },
     {
         key: 'a6',
-        name: '取消订单时间'
+        name: '取消订单时间',
     },
     {
         key: 'a7',
-        name: '商品总金额'
+        name: '商品总金额',
     },
     {
         key: 'a8',
-        name: '发货剩余时间'
+        name: '发货剩余时间',
     },
-]
-
-
+];

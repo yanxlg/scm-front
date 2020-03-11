@@ -40,7 +40,7 @@ export enum TaskRangeEnum {
 export const TaskStatusMap = {
     0: '未执行',
     1: '执行中',
-    2: '已执行',
+    2: '已发送',
     3: '执行失败',
     // 4: '已取消',
     5: '已完成',
@@ -55,7 +55,7 @@ export const TaskStatusList = transStatusList(TaskStatusMap);
 export enum TaskStatusEnum {
     UnExecuted, // 未执行
     Executing, // 执行中
-    Executed, // 已执行
+    Executed, // 已发送
     Failed, // 执行失败
     Finished = 5,
     Terminated = 6,

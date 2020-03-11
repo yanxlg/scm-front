@@ -7,20 +7,17 @@ import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
 
-import { 
-    getAllOrderList,
-    IFilterParams
-} from '@/services/order-manage';
-import { 
+import { getAllOrderList, IFilterParams } from '@/services/order-manage';
+import {
     childDefaultFieldList,
     childAllFieldList,
-    childOptionalColList, 
+    childOptionalColList,
     parentDefaultFieldList,
     parentAllFieldList,
-    defaultColChildList, 
+    defaultColChildList,
     defaultParentColList,
-    parentOptionalColList, 
-    pageSizeOptions 
+    parentOptionalColList,
+    pageSizeOptions,
 } from '@/enums/OrderEnum';
 import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
 
@@ -57,7 +54,6 @@ declare interface IPaneAllState {
     colChildList: string[];
     colParentList: string[];
     childOptionalColList: IOptionalColItem[];
-
 }
 
 class PaneAll extends React.PureComponent<{}, IPaneAllState> {
@@ -79,7 +75,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         onChange: (name, form, setState) => {
             this.changeParentOrder(form.getFieldValue(name));
         },
-    }
+    };
 
     constructor(props: {}) {
         super(props);
@@ -93,16 +89,13 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             showParentStatus: false,
             childOrderList: [],
             parentOrderList: [],
-            fieldList: [
-                ...childDefaultFieldList,
-                this.endFieldItem
-            ],
+            fieldList: [...childDefaultFieldList, this.endFieldItem],
             selectedColKeyList: [],
             childOptionalColList: childOptionalColList,
             // 表格展示的列
             colChildList: defaultColChildList,
-            colParentList: defaultParentColList
-        }
+            colParentList: defaultParentColList,
+        };
     }
 
     componentDidMount() {
@@ -113,8 +106,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_count: pageCount
-        }
+            page_count: pageCount,
+        };
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
         //     params = Object.assign(params, this.orderFilterRef.current.getValues());
@@ -124,32 +117,34 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         }
         // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
-            loading: true
-        })
-        getAllOrderList(params).then(res => {
-            // console.log('getProductOrderList', res);
-            const { all_count, list } = res.data;
-            const { page, page_count, only_p_order } = params;
-            this.setState({
-                total: all_count,
-                page: page as number,
-                pageCount: page_count as number
-            })
-            if (only_p_order) {
+            loading: true,
+        });
+        getAllOrderList(params)
+            .then(res => {
+                // console.log('getProductOrderList', res);
+                const { all_count, list } = res.data;
+                const { page, page_count, only_p_order } = params;
                 this.setState({
-                    parentOrderList: this.getParentOrderData(list),
-                })
-            } else {
-                this.setState({
-                    childOrderList: this.getChildOrderData(list)
-                })
-            }
-        }).finally(() => {
-            this.setState({
-                loading: false
+                    total: all_count,
+                    page: page as number,
+                    pageCount: page_count as number,
+                });
+                if (only_p_order) {
+                    this.setState({
+                        parentOrderList: this.getParentOrderData(list),
+                    });
+                } else {
+                    this.setState({
+                        childOrderList: this.getChildOrderData(list),
+                    });
+                }
             })
-        })
-    }
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     // 获取子订单=>采购计划数据
     private getChildOrderData(list: any[]): IChildOrderItem[] {
@@ -158,12 +153,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         list.forEach((goodsItem: any) => {
             const { orderGoods, orderInfo } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            const {
-                currency,
-                confirmTime,
-                channelOrderSn,
-                channelSource
-            } = orderInfo;
+            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
             // console.log(111, orderGoodsPurchasePlan, orderGoods);
             if (orderGoodsPurchasePlan) {
                 // 生成采购计划
@@ -181,14 +171,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         currency,
                         confirmTime,
                         channelOrderSn,
-                        channelSource
-                    }
+                        channelSource,
+                    };
                     if (index === 0) {
                         childOrderItem._rowspan = orderGoodsPurchasePlan.length;
                         childOrderItem._checked = false;
                     }
                     childOrderList.push(childOrderItem);
-                })
+                });
             } else {
                 // 没有生成采购计划
                 childOrderList.push({
@@ -198,10 +188,9 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     channelSource,
                     ...orderRest,
                     _rowspan: 1,
-                    _checked: false
+                    _checked: false,
                 });
             }
-            
         });
         // console.log(1111, childOrderList);
         return childOrderList;
@@ -211,10 +200,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     private getParentOrderData(list: any[]): IParentOrderItem[] {
         const parentOrderList: IParentOrderItem[] = [];
         list.forEach(item => {
-            const {
-                orderGoods,
-                ...parentRest
-            } = item;
+            const { orderGoods, ...parentRest } = item;
             orderGoods.forEach((goodsItem: any, index: number) => {
                 const {
                     // orderId,
@@ -226,13 +212,13 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     goodsCreateTime,
                     goodsLastUpdateTime,
                     ...parentRest,
-                    ...goodsRest
-                }
+                    ...goodsRest,
+                };
                 if (index === 0) {
                     parentOrderItem._rowspan = orderGoods.length;
                 }
                 parentOrderList.push(parentOrderItem);
-            })
+            });
         });
         return parentOrderList;
     }
@@ -240,64 +226,65 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     private changeParentOrder = (status: boolean) => {
         // console.log('changeParentOrder', status);
         const { showColStatus } = this.state;
-        this.setState({
-            showParentStatus: status,
-            selectedColKeyList: [],
-            childOptionalColList: status ? parentOptionalColList : childOptionalColList,
-            // childOrderList: [],
-            // parentOrderList: []
-            
-        }, () => {
-            // 切换过滤条件
-            this.changeFilter();
-            if (showColStatus) {
-                this.optionalRef.current!.cancelCheckAll();
-            }
-            this.onSearch({
-                page: 1,
-                page_count: 50,
-                only_p_order: status ? 1 : 0
-            });
-        });
-        
-    }
+        this.setState(
+            {
+                showParentStatus: status,
+                selectedColKeyList: [],
+                childOptionalColList: status ? parentOptionalColList : childOptionalColList,
+                // childOrderList: [],
+                // parentOrderList: []
+            },
+            () => {
+                // 切换过滤条件
+                this.changeFilter();
+                if (showColStatus) {
+                    this.optionalRef.current!.cancelCheckAll();
+                }
+                this.onSearch({
+                    page: 1,
+                    page_count: 50,
+                    only_p_order: status ? 1 : 0,
+                });
+            },
+        );
+    };
 
     // 展示过滤条件
     private changeFilter = () => {
         const { showParentStatus, showFilterStatus } = this.state;
         let fieldList: IFieldItem[] = [];
-        if ( showParentStatus && showFilterStatus ) {
-            fieldList = parentAllFieldList
+        if (showParentStatus && showFilterStatus) {
+            fieldList = parentAllFieldList;
         } else if (showParentStatus && !showFilterStatus) {
-            fieldList = parentDefaultFieldList
+            fieldList = parentDefaultFieldList;
         } else if (!showParentStatus && showFilterStatus) {
-            fieldList = childAllFieldList
+            fieldList = childAllFieldList;
         } else {
-            fieldList = childDefaultFieldList
+            fieldList = childDefaultFieldList;
         }
         this.setState({
-            fieldList: [
-                ...fieldList,
-                this.endFieldItem
-            ]
-        })
-    }
+            fieldList: [...fieldList, this.endFieldItem],
+        });
+    };
 
     private changeShowFilterStatus = () => {
         const { showFilterStatus } = this.state;
-        this.setState({
-            showFilterStatus: !showFilterStatus
-        }, () => {
-            this.changeFilter();
-        });
-    }
+        this.setState(
+            {
+                showFilterStatus: !showFilterStatus,
+            },
+            () => {
+                this.changeFilter();
+            },
+        );
+    };
 
     changeShowColStatus = () => {
         const { showColStatus } = this.state;
         this.setState({
-            showColStatus: !showColStatus
+            showColStatus: !showColStatus,
         });
-    }
+    };
 
     changeSelectedColList = (list: string[]) => {
         const { showParentStatus } = this.state;
@@ -307,14 +294,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
         if (showParentStatus) {
             this.setState({
-                colParentList: [...defaultParentColList, ...list]
-            })
+                colParentList: [...defaultParentColList, ...list],
+            });
         } else {
             this.setState({
-                colChildList: [...defaultColChildList, ...list]
-            })
+                colChildList: [...defaultColChildList, ...list],
+            });
         }
-    }
+    };
 
     // 获取查询数据
     getFieldsValue = () => {
@@ -329,13 +316,13 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 if (item._rowspan) {
                     return {
                         ...item,
-                        _checked: status
-                    }
+                        _checked: status,
+                    };
                 }
                 return item;
-            })
+            }),
         });
-    }
+    };
 
     // 单选
     onSelectedRow = (row: IChildOrderItem) => {
@@ -345,16 +332,16 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 if (row._rowspan && row.orderGoodsId === item.orderGoodsId) {
                     return {
                         ...item,
-                        _checked: !row._checked
-                    }
+                        _checked: !row._checked,
+                    };
                 }
                 return item;
-            })
+            }),
         });
-    }
+    };
 
     render() {
-        const { 
+        const {
             page,
             pageCount,
             total,
@@ -368,9 +355,9 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             selectedColKeyList,
             childOptionalColList,
             colChildList,
-            colParentList
+            colParentList,
         } = this.state;
-    
+
         return (
             <>
                 <div>
@@ -381,64 +368,62 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
-                        <Button 
-                            type="primary" 
+                        <Button
+                            type="primary"
                             className="order-btn"
                             onClick={() => this.getFieldsValue()}
-                        >查询</Button>
-                        {
-                            !showParentStatus ? (
-                                <Button type="primary" className="order-btn">一键拍单</Button>
-                            ) : null
-                        }
-                        {
-                            !showParentStatus ? (
-                                <Button type="primary" className="order-btn">取消采购单</Button>
-                            ) : null
-                        }
-                        {
-                            !showParentStatus ? (
-                                <Button type="primary" className="order-btn">取消渠道订单</Button>
-                            ) : null
-                        }
-                        <Button type="primary" className="order-btn">导出数据</Button>
-                        <Button 
-                            className="order-btn"
-                            onClick={this.changeShowFilterStatus}
-                        >{ showFilterStatus ? '收起' : '展示'}搜索条件</Button>
-                        <Button 
-                            className="order-btn"
-                            onClick={this.changeShowColStatus}
-                        >{ showColStatus ? '收起' : '展示'}字段设置</Button>
+                        >
+                            查询
+                        </Button>
+                        {!showParentStatus ? (
+                            <Button type="primary" className="order-btn">
+                                一键拍单
+                            </Button>
+                        ) : null}
+                        {!showParentStatus ? (
+                            <Button type="primary" className="order-btn">
+                                取消采购单
+                            </Button>
+                        ) : null}
+                        {!showParentStatus ? (
+                            <Button type="primary" className="order-btn">
+                                取消渠道订单
+                            </Button>
+                        ) : null}
+                        <Button type="primary" className="order-btn">
+                            导出数据
+                        </Button>
+                        <Button className="order-btn" onClick={this.changeShowFilterStatus}>
+                            {showFilterStatus ? '收起' : '展示'}搜索条件
+                        </Button>
+                        <Button className="order-btn" onClick={this.changeShowColStatus}>
+                            {showColStatus ? '收起' : '展示'}字段设置
+                        </Button>
                     </div>
-                    {
-                        showColStatus ? (
-                            <OptionalColumn
-                                ref={this.optionalRef}
-                                optionalColList={childOptionalColList}
-                                selectedColKeyList={selectedColKeyList}
-                                changeSelectedColList={this.changeSelectedColList}
-                            />
-                        ) : null
-                    }
-                    {
-                        !showParentStatus ? (
-                            <TableAll
-                                loading={loading}
-                                colList={colChildList}
-                                orderList={childOrderList}
-                                onCheckAllChange={this.onCheckAllChange}
-                                onSelectedRow={this.onSelectedRow}
-                            />
-                        ) : (
-                            <TableParentAll
-                                loading={loading}
-                                colList={colParentList}
-                                orderList={parentOrderList}
-                            />
-                        )
-                    }
-                    
+                    {showColStatus ? (
+                        <OptionalColumn
+                            ref={this.optionalRef}
+                            optionalColList={childOptionalColList}
+                            selectedColKeyList={selectedColKeyList}
+                            changeSelectedColList={this.changeSelectedColList}
+                        />
+                    ) : null}
+                    {!showParentStatus ? (
+                        <TableAll
+                            loading={loading}
+                            colList={colChildList}
+                            orderList={childOrderList}
+                            onCheckAllChange={this.onCheckAllChange}
+                            onSelectedRow={this.onSelectedRow}
+                        />
+                    ) : (
+                        <TableParentAll
+                            loading={loading}
+                            colList={colParentList}
+                            orderList={parentOrderList}
+                        />
+                    )}
+
                     <Pagination
                         className="order-pagination"
                         // size="small"
@@ -450,7 +435,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         pageSizeOptions={pageSizeOptions}
                         // onChange={this.onChangePage}
                         // onShowSizeChange={this.pageCountChange}
-                        showTotal={(total) => `共${total}条`}
+                        showTotal={total => `共${total}条`}
                     />
                 </div>
             </>

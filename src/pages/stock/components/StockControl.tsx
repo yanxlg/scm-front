@@ -8,7 +8,7 @@ import { BindAll } from 'lodash-decorators';
 import { utcToLocal } from '@/utils/date';
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { FormInstance } from 'antd/es/form';
-import { exportIOList, exportStockList, queryStockList, syncStock } from '@/services/stock';
+import { exportStockList, queryStockList, syncStock } from '@/services/stock';
 
 declare interface ITableData {
     product_id: number; // 中台商品ID

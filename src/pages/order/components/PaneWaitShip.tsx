@@ -6,10 +6,7 @@ import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 import TableWaitShip from './TableWaitShip';
 
-import { 
-    getWaitShipList,
-    IFilterParams
-} from '@/services/order-manage';
+import { getWaitShipList, IFilterParams } from '@/services/order-manage';
 
 export declare interface IWaitShipItem {
     purchase_time: number;
@@ -30,7 +27,7 @@ declare interface IState {
     total: number;
     loading: boolean;
     showStatus: boolean;
-    orderList: IWaitShipItem[]
+    orderList: IWaitShipItem[];
 }
 
 const defaultFieldList: IFieldItem[] = [
@@ -61,7 +58,7 @@ const defaultFieldList: IFieldItem[] = [
                 value: 100,
             },
         ],
-    }
+    },
 ];
 
 const allFieldList: IFieldItem[] = [
@@ -115,11 +112,9 @@ const allFieldList: IFieldItem[] = [
             },
         ],
     },
-   
 ];
 
 class PanePaid extends React.PureComponent<{}, IState> {
-
     private formRef: RefObject<FormInstance> = React.createRef();
 
     constructor(props: {}) {
@@ -130,8 +125,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
             total: 0,
             loading: false,
             showStatus: false,
-            orderList: []
-        }
+            orderList: [],
+        };
     }
 
     componentDidMount() {
@@ -143,8 +138,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_count: pageCount
-        }
+            page_count: pageCount,
+        };
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
         //     params = Object.assign(params, this.orderFilterRef.current.getValues());
@@ -154,49 +149,46 @@ class PanePaid extends React.PureComponent<{}, IState> {
         }
         // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
-            loading: true
-        })
-        getWaitShipList(params).then(res => {
-            // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
-            this.setState({
-                total,
-                // page: params.page,
-                // pageCount: params.page_count,
-                orderList: list
+            loading: true,
+        });
+        getWaitShipList(params)
+            .then(res => {
+                // console.log('getProductOrderList', res);
+                const { total, list } = res.data;
+                this.setState({
+                    total,
+                    // page: params.page,
+                    // pageCount: params.page_count,
+                    orderList: list,
+                });
             })
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
-        })
-    }
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     // 获取查询数据
     getFieldsValue = () => {
         // console.log('111', this.formRef.current!.getFieldsValue());
-    }
+    };
 
     changeShowStatus = () => {
         const { showStatus } = this.state;
         this.setState({
-            showStatus: !showStatus
+            showStatus: !showStatus,
         });
-    }
+    };
 
     render() {
-
-        const {
-            showStatus,
-            loading,
-            orderList
-        } = this.state;
+        const { showStatus, loading, orderList } = this.state;
 
         const initialValues = {
             channel: 100,
             channel_order_status: 100,
-            purchase_order_status: 100
-        }
+            purchase_order_status: 100,
+        };
 
         const fieldList = showStatus ? allFieldList : defaultFieldList;
 
@@ -210,20 +202,31 @@ class PanePaid extends React.PureComponent<{}, IState> {
                         initialValues={initialValues}
                     />
                     <div className="order-operation">
-                        <Button type="primary" className="order-btn" onClick={() => this.getFieldsValue()}>查询</Button>
-                        <Button type="primary" className="order-btn">取消采购单</Button>
-                        <Button type="primary" className="order-btn">取消渠道订单</Button>
-                        <Button type="primary" className="order-btn">导出数据</Button>
-                        <Button 
-                            type="default" 
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            onClick={() => this.getFieldsValue()}
+                        >
+                            查询
+                        </Button>
+                        <Button type="primary" className="order-btn">
+                            取消采购单
+                        </Button>
+                        <Button type="primary" className="order-btn">
+                            取消渠道订单
+                        </Button>
+                        <Button type="primary" className="order-btn">
+                            导出数据
+                        </Button>
+                        <Button
+                            type="default"
                             className="order-btn"
                             onClick={this.changeShowStatus}
-                        >{ showStatus ? '收起' : '展示'}搜索条件</Button>
+                        >
+                            {showStatus ? '收起' : '展示'}搜索条件
+                        </Button>
                     </div>
-                    <TableWaitShip
-                        loading={loading}
-                        orderList={orderList}
-                    />
+                    <TableWaitShip loading={loading} orderList={orderList} />
                 </div>
             </>
         );

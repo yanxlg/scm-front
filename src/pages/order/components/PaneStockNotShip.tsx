@@ -6,13 +6,8 @@ import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import OptionalColumn from './OptionalColumn';
 import TableStockNotShip from './TableStockNotShip';
 
-import { 
-    getPurchasedNotStockList,
-    IFilterParams
-} from '@/services/order-manage';
+import { getPurchasedNotStockList, IFilterParams } from '@/services/order-manage';
 import { defaultStockNotShipColList, stockNotShipOptionalColList } from '@/enums/OrderEnum';
-
-
 
 export declare interface IOrderItem {
     order_create_time: number;
@@ -57,7 +52,7 @@ const allFieldList: IFieldItem[] = [
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购运单号',
     },
- 
+
     {
         type: 'select',
         name: 'channel',
@@ -70,7 +65,7 @@ const allFieldList: IFieldItem[] = [
                 value: 100,
             },
         ],
-    }
+    },
 ];
 
 declare interface IState {
@@ -86,12 +81,11 @@ declare interface IState {
 }
 
 class PaneStockNotShip extends React.PureComponent<{}, IState> {
-
     private formRef: RefObject<FormInstance> = React.createRef();
 
     private initialValues = {
-        channel: 100
-    }
+        channel: 100,
+    };
 
     constructor(props: {}) {
         super(props);
@@ -105,8 +99,8 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
             fieldList: allFieldList,
             selectedColKeyList: [],
             // 表格展示的列
-            colList: defaultStockNotShipColList
-        }
+            colList: defaultStockNotShipColList,
+        };
     }
 
     componentDidMount() {
@@ -118,8 +112,8 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,
-            page_count: pageCount
-        }
+            page_count: pageCount,
+        };
         // if (this.orderFilterRef.current) {
         //     // console.log('onSearch', this.orderFilterRef.current.getValues());
         //     params = Object.assign(params, this.orderFilterRef.current.getValues());
@@ -129,49 +123,50 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
         }
         // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
-            loading: true
-        })
-        getPurchasedNotStockList(params).then(res => {
-            // console.log('getProductOrderList', res);
-            const { total, list } = res.data;
-            this.setState({
-                total,
-                page: params.page as number,
-                pageCount: params.page_count as number,
-                orderList: list
+            loading: true,
+        });
+        getPurchasedNotStockList(params)
+            .then(res => {
+                // console.log('getProductOrderList', res);
+                const { total, list } = res.data;
+                this.setState({
+                    total,
+                    page: params.page as number,
+                    pageCount: params.page_count as number,
+                    orderList: list,
+                });
             })
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
-        })
-    }
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     changeShowColStatus = () => {
         const { showColStatus } = this.state;
         this.setState({
-            showColStatus: !showColStatus
+            showColStatus: !showColStatus,
         });
-    }
+    };
 
     changeSelectedColList = (list: string[]) => {
         this.setState({
             selectedColKeyList: list,
-            colList: [...defaultStockNotShipColList, ...list]
+            colList: [...defaultStockNotShipColList, ...list],
         });
-    }
+    };
 
     render() {
-
-        const { 
+        const {
             loading,
             showColStatus,
             orderList,
             fieldList,
             selectedColKeyList,
-            colList
+            colList,
         } = this.state;
-    
+
         return (
             <>
                 <div>
@@ -182,28 +177,27 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
-                        <Button type="primary" className="order-btn">查询</Button>
-                        <Button type="primary" className="order-btn">取消渠道订单</Button>
-                        <Button type="primary" className="order-btn">导出数据</Button>
-                        <Button 
-                            className="order-btn"
-                            onClick={this.changeShowColStatus}
-                        >{ showColStatus ? '收起' : '展示'}字段设置</Button>
+                        <Button type="primary" className="order-btn">
+                            查询
+                        </Button>
+                        <Button type="primary" className="order-btn">
+                            取消渠道订单
+                        </Button>
+                        <Button type="primary" className="order-btn">
+                            导出数据
+                        </Button>
+                        <Button className="order-btn" onClick={this.changeShowColStatus}>
+                            {showColStatus ? '收起' : '展示'}字段设置
+                        </Button>
                     </div>
-                    {
-                        showColStatus ? (
-                            <OptionalColumn
-                                optionalColList={stockNotShipOptionalColList}
-                                selectedColKeyList={selectedColKeyList}
-                                changeSelectedColList={this.changeSelectedColList}
-                            />
-                        ) : null
-                    }
-                    <TableStockNotShip
-                        loading={loading}
-                        colList={colList}
-                        orderList={orderList}
-                    />
+                    {showColStatus ? (
+                        <OptionalColumn
+                            optionalColList={stockNotShipOptionalColList}
+                            selectedColKeyList={selectedColKeyList}
+                            changeSelectedColList={this.changeSelectedColList}
+                        />
+                    ) : null}
+                    <TableStockNotShip loading={loading} colList={colList} orderList={orderList} />
                 </div>
             </>
         );

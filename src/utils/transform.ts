@@ -29,10 +29,15 @@ export function transNumber(value?: any) {
     return _value && isNaN(_value) ? undefined : _value;
 }
 
-export function getStatusDesc(list: any[], val: any,  valKey: string = 'value', nameKey: string = 'name') {
+export function getStatusDesc(
+    list: any[],
+    val: any,
+    valKey: string = 'value',
+    nameKey: string = 'name',
+) {
     const index = list.findIndex(item => item[valKey] === val);
     if (index > -1) {
-        return list[index][nameKey]
+        return list[index][nameKey];
     }
     return '';
 }

@@ -15,12 +15,9 @@ declare interface IProps {
     // changeSelectedRows(selectedRows: IOrderItem[]): void;
 }
 
-declare interface IState {
-
-}
+declare interface IState {}
 
 class TablePendingOrder extends React.PureComponent<IProps, IState> {
-
     columns: ColumnProps<IWaitShipItem>[] = [
         {
             key: 'purchase_time',
@@ -29,57 +26,57 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')
-            }
+                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss');
+            },
         },
         {
             key: 'middleground_order_id',
             title: '中台订单ID',
             dataIndex: 'middleground_order_id',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchase_p_order_id',
             title: '采购父订单ID',
             dataIndex: 'purchase_p_order_id',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchase_order_id',
             title: '采购订单ID',
             dataIndex: 'purchase_order_id',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchase_price',
             title: '采购价',
             dataIndex: 'purchase_price',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'sale_order_status',
             title: '销售订单状态',
             dataIndex: 'sale_order_status',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchase_order_status',
             title: '采购订单状态',
             dataIndex: 'purchase_order_status',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchase_pay_status',
             title: '采购支付状态',
             dataIndex: 'purchase_pay_status',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'order_create_time',
@@ -88,8 +85,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss')
-            }
+                return formatDate(new Date(value * 1000), 'yyyy-MM-dd hh:mm:ss');
+            },
         },
         {
             key: 'comment',
@@ -98,18 +95,16 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 200,
             render: (value: string) => {
-                return <TextArea autoSize={true} defaultValue={value}/> 
-            }
-        }
-    ]
+                return <TextArea autoSize={true} defaultValue={value} />;
+            },
+        },
+    ];
 
     constructor(props: IProps) {
         super(props);
     }
 
     render() {
-
-        
         const { loading, orderList } = this.props;
         // const columns = this.createColumns()
 
@@ -124,9 +119,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 dataSource={orderList}
                 scroll={{ x: true }}
                 pagination={false}
-                
             />
-        )    
+        );
     }
 }
 

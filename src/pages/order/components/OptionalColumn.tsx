@@ -21,13 +21,12 @@ declare interface IOptionalColumnState {
 }
 
 class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptionalColumnState> {
-
     constructor(props: IOptionalColumnProps) {
         super(props);
         this.state = {
             indeterminate: false,
-            checkAll: false
-        }
+            checkAll: false,
+        };
     }
 
     componentDidMount() {
@@ -37,16 +36,16 @@ class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptional
         // console.log('111', selectedLen);
         this.setState({
             indeterminate: selectedLen > 0 && selectedLen !== optionalLen,
-            checkAll: !!selectedLen && selectedLen === optionalLen
+            checkAll: !!selectedLen && selectedLen === optionalLen,
         });
     }
 
     cancelCheckAll = () => {
         this.setState({
             indeterminate: false,
-            checkAll: false
-        })
-    }
+            checkAll: false,
+        });
+    };
 
     onCheckAll = (e: CheckboxChangeEvent) => {
         const { changeSelectedColList, optionalColList } = this.props;
@@ -57,7 +56,7 @@ class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptional
             checkAll: checked,
         });
         changeSelectedColList(checked ? optionalColList.map(item => item.key) : []);
-    }
+    };
 
     onCheckSingle = (keyList: CheckboxValueType[]) => {
         // console.log('onCheckSingle', keyList);
@@ -66,12 +65,11 @@ class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptional
         changeSelectedColList(keyList as string[]);
         this.setState({
             indeterminate: keyList.length > 0,
-            checkAll: keyList.length === optionalColList.length
+            checkAll: keyList.length === optionalColList.length,
         });
-    }
+    };
 
     render() {
-
         const { optionalColList, selectedColKeyList } = this.props;
 
         return (
@@ -86,15 +84,19 @@ class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptional
                         全选
                     </Checkbox>
                 </div>
-                <Checkbox.Group style={{ width: '100%' }} value={selectedColKeyList} onChange={this.onCheckSingle}>
-                    {
-                        optionalColList.map(item => (
-                            <Checkbox className="checkbox-item" key={item.key} value={item.key}>{item.name}</Checkbox>
-                        ))
-                    }
+                <Checkbox.Group
+                    style={{ width: '100%' }}
+                    value={selectedColKeyList}
+                    onChange={this.onCheckSingle}
+                >
+                    {optionalColList.map(item => (
+                        <Checkbox className="checkbox-item" key={item.key} value={item.key}>
+                            {item.name}
+                        </Checkbox>
+                    ))}
                 </Checkbox.Group>
             </div>
-        )
+        );
     }
 }
 

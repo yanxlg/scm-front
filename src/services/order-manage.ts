@@ -10,7 +10,7 @@ export declare interface IFilterParams {
 export async function getAllOrderList(data: IFilterParams) {
     return request.post(OrderApiPath.getAllOrderList, {
         requestType: 'json',
-        data
+        data,
     });
 }
 
@@ -18,7 +18,7 @@ export async function getAllOrderList(data: IFilterParams) {
 export async function getPendingOrderList(data = {}) {
     return request.post(OrderApiPath.getPendingOrderList, {
         requestType: 'json',
-        data
+        data,
     });
 }
 
@@ -26,7 +26,7 @@ export async function getPendingOrderList(data = {}) {
 export async function getPayOrderList(data = {}) {
     return request.post(OrderApiPath.getPayOrderList, {
         requestType: 'json',
-        data
+        data,
     });
 }
 
@@ -34,7 +34,7 @@ export async function getPayOrderList(data = {}) {
 export async function getWaitShipList(data = {}) {
     return request.post(OrderApiPath.getWaitShipList, {
         requestType: 'json',
-        data
+        data,
     });
 }
 
@@ -42,7 +42,7 @@ export async function getWaitShipList(data = {}) {
 export async function getPurchasedNotStockList(data = {}) {
     return request.post(OrderApiPath.getPurchasedNotStockList, {
         requestType: 'json',
-        data
+        data,
     });
 }
 
@@ -50,7 +50,7 @@ export async function getPurchasedNotStockList(data = {}) {
 export async function getStockNotShipList(data = {}) {
     return request.post(OrderApiPath.getStockNotShipList, {
         requestType: 'json',
-        data
+        data,
     });
 }
 
@@ -58,15 +58,13 @@ export async function getStockNotShipList(data = {}) {
 export async function getErrorOrderList(data = {}) {
     return request.post(OrderApiPath.getErrorOrderList, {
         requestType: 'json',
-        data
+        data,
     });
 }
-
 
 export async function getOrderGoodsDetail(params: { middleground_order_id: string }) {
     return request.get(OrderApiPath.getOrderGoodsDetail, {
         requestType: 'form',
-        params
+        params,
     });
 }
-

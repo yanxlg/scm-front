@@ -15,8 +15,8 @@ const list = [
             referWaybillNo: 'refer_waybill_no',
             purchaseTime: '11',
             deliveryTime: '13', //出库时间
-            collectTime: '14',  //揽收时间
-            receiveTime: '15',  //收货时间
+            collectTime: '14', //揽收时间
+            receiveTime: '15', //收货时间
             orderGoodsStatus: 1, //订单状态 1：已确认 2：已取消
             orderGoodsShippingStatus: 1, //订单配送状态 1：未配送 2：头程已配送 3：已妥投未入库 4： 已入库 5：出库中 6：出库失败  7：取消出库 8：已出库 9：尾程已揽收 10：已妥投
             lastWaybillNo: '18', //尾程订单号
@@ -44,7 +44,7 @@ const list = [
                     purchaseWaybillNo: '16',
                     taskId: 1,
                     createTime: '18',
-                    lastUpdateTime: '19'
+                    lastUpdateTime: '19',
                 },
                 {
                     purchasePlanId: 1,
@@ -65,10 +65,9 @@ const list = [
                     purchaseWaybillNo: '16',
                     taskId: 1,
                     createTime: '18',
-                    lastUpdateTime: '19'
-                }
-            ]
-            
+                    lastUpdateTime: '19',
+                },
+            ],
         },
         orderInfo: {
             orderId: 1,
@@ -80,10 +79,10 @@ const list = [
             orderStatus: 1,
             channelSource: '1',
             createTime: '1',
-            lastUpdateTime: '1'
-        }
-    }
-]
+            lastUpdateTime: '1',
+        },
+    },
+];
 
 const _list = [
     {
@@ -93,7 +92,7 @@ const _list = [
         orderAmount: '4',
         currency: '5',
         confirmTime: '6',
-        orderStatus: 1,//订单状态 1：已确认 2：采购成功、3：采购失败
+        orderStatus: 1, //订单状态 1：已确认 2：采购成功、3：采购失败
         channelSource: '8',
         createTime: '9',
         lastUpdateTime: '10',
@@ -142,18 +141,19 @@ const _list = [
                 createTime: '20',
                 lastUpdateTime: '21',
             },
-        ]
-    }
-]
+        ],
+    },
+];
 
 const pendingList = [
     {
         order_create_time: 1582703606,
         middleground_order_id: '111111',
-        goods_img: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
+        goods_img:
+            '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
         style: {
             color: 'Red',
-            size: 'M'
+            size: 'M',
         },
         goods_num: 1,
         price: 10,
@@ -164,18 +164,19 @@ const pendingList = [
         commodity_id: '111111',
         second_catagory: {
             id: '1',
-            name: '类目'
+            name: '类目',
         },
         sku_id: '111111',
-        comment: 'xxxx'
+        comment: 'xxxx',
     },
     {
         order_create_time: 1582703606,
         middleground_order_id: '222222',
-        goods_img: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
+        goods_img:
+            '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg',
         style: {
             color: 'Red',
-            size: 'M'
+            size: 'M',
         },
         goods_num: 1,
         price: 10,
@@ -186,40 +187,41 @@ const pendingList = [
         commodity_id: '222222',
         second_catagory: {
             id: '1',
-            name: '类目'
+            name: '类目',
         },
         sku_id: '222222',
-        comment: '你好，你好。'
-    }
-]
+        comment: '你好，你好。',
+    },
+];
 
 const payList = [
     {
-        purchasePayUrl: '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg', // 二维码地址	
-        purchaseTotalAmount: 88, // 采购价格	
-        purchaseParentOrderSn: '111', // 采购父订单id	
+        purchasePayUrl:
+            '//image-tb.vova.com/image/262_262/crop/89/77/f84c8de4ad38f03a4a6a3079a2e48977.jpg', // 二维码地址
+        purchaseTotalAmount: 88, // 采购价格
+        purchaseParentOrderSn: '111', // 采购父订单id
         purchaseOrderTime: 'purchaseOrderTime', // 采购下单时间
         purchasePayStatusDesc: 'purchasePayStatusDesc',
         childOrder: [
             {
-                purchasePlanId: 1, // 采购计划id	
-                purchaseOrderSn: 1, // 采购子订单id	
-                purchaseOrderStatus: 1, // 采购子订单状态	
-                purchaseOrderStatusDesc: 'purchaseOrderStatusDesc', // 采购子订单状态描述	
-                purchasePayStatus: 1, // 采购子订单支付状态	
-                purchasePayStatusDesc: 'purchasePayStatusDesc', // 采购子订单支付状态描述	
+                purchasePlanId: 1, // 采购计划id
+                purchaseOrderSn: 1, // 采购子订单id
+                purchaseOrderStatus: 1, // 采购子订单状态
+                purchaseOrderStatusDesc: 'purchaseOrderStatusDesc', // 采购子订单状态描述
+                purchasePayStatus: 1, // 采购子订单支付状态
+                purchasePayStatusDesc: 'purchasePayStatusDesc', // 采购子订单支付状态描述
             },
             {
-                purchasePlanId: 2, // 采购计划id	
-                purchaseOrderSn: 2, // 采购子订单id	
-                purchaseOrderStatus: 1, // 采购子订单状态	
-                purchaseOrderStatusDesc: 'purchaseOrderStatusDesc', // 采购子订单状态描述	
-                purchasePayStatus: 1, // 采购子订单支付状态	
-                purchasePayStatusDesc: 'purchasePayStatusDesc', // 采购子订单支付状态描述	
-            }
-        ]
-    }
-]
+                purchasePlanId: 2, // 采购计划id
+                purchaseOrderSn: 2, // 采购子订单id
+                purchaseOrderStatus: 1, // 采购子订单状态
+                purchaseOrderStatusDesc: 'purchaseOrderStatusDesc', // 采购子订单状态描述
+                purchasePayStatus: 1, // 采购子订单支付状态
+                purchasePayStatusDesc: 'purchasePayStatusDesc', // 采购子订单支付状态描述
+            },
+        ],
+    },
+];
 
 const waitShipList = [
     {
@@ -232,7 +234,7 @@ const waitShipList = [
         purchase_order_status: 1,
         purchase_pay_status: 1,
         order_create_time: 1582703606,
-        comment: '待支付'
+        comment: '待支付',
     },
     {
         purchase_time: 1582703606,
@@ -244,55 +246,55 @@ const waitShipList = [
         purchase_order_status: 1,
         purchase_pay_status: 1,
         order_create_time: 1582703606,
-        comment: '待支付222'
-    }
-]
+        comment: '待支付222',
+    },
+];
 
 const notStockList = [
     {
         order_create_time: 1582703606,
-        middleground_order_id: "111", 
-        commodity_id: "111",
-        purchase_shipping_no: "111",
+        middleground_order_id: '111',
+        commodity_id: '111',
+        purchase_shipping_no: '111',
         purchase_order_status: 1,
         purchase_shipping_status: 1,
         purchase_pay_time: 1582703606,
-        purchase_num: 1
+        purchase_num: 1,
     },
     {
         order_create_time: 1582703606,
-        middleground_order_id: "222", 
-        commodity_id: "222",
-        purchase_shipping_no: "222",
+        middleground_order_id: '222',
+        commodity_id: '222',
+        purchase_shipping_no: '222',
         purchase_order_status: 1,
         purchase_shipping_status: 1,
         purchase_pay_time: 1582703606,
-        purchase_num: 2
-    }
-]
+        purchase_num: 2,
+    },
+];
 
 const stockNotShipList = [
     {
         order_create_time: 1582703606,
-        middleground_order_id: "111",
-        commodity_id: "111",
-        purchase_shipping_no: "111",
+        middleground_order_id: '111',
+        commodity_id: '111',
+        purchase_shipping_no: '111',
         purchase_order_status: 1,
         purchase_shipping_status: 1,
         warehousing_time: 1582703606,
-        deliver_start_time: 1
+        deliver_start_time: 1,
     },
     {
         order_create_time: 1582703606,
-        middleground_order_id: "222",
-        commodity_id: "222",
-        purchase_shipping_no: "222",
+        middleground_order_id: '222',
+        commodity_id: '222',
+        purchase_shipping_no: '222',
         purchase_order_status: 1,
         purchase_shipping_status: 1,
         warehousing_time: 1582703606,
-        deliver_start_time: 2
-    }
-]
+        deliver_start_time: 2,
+    },
+];
 
 const errorOrderList = [
     {
@@ -303,7 +305,7 @@ const errorOrderList = [
         error_type: 1,
         error_detail: 1,
         first_waybill_no: '333',
-        last_waybill_no: '444'
+        last_waybill_no: '444',
     },
     {
         order_create_time: 1582703606,
@@ -313,9 +315,9 @@ const errorOrderList = [
         error_type: 1,
         error_detail: 1,
         first_waybill_no: '777',
-        last_waybill_no: '888'
-    }
-]
+        last_waybill_no: '888',
+    },
+];
 
 export default {
     'POST /v1/orders/list/1': (req: Request, res: Response) => {
@@ -326,9 +328,9 @@ export default {
                 code: 200,
                 data: {
                     list: Number(only_p_order) ? _list : list,
-                    all_count: 200
-                }
-            })
+                    all_count: 200,
+                },
+            });
         }, 500);
     },
     'POST /v1/orders/list/2': (req: Request, res: Response) => {
@@ -338,9 +340,9 @@ export default {
                 code: 200,
                 data: {
                     list: pendingList,
-                    total: 200
-                }
-            })
+                    total: 200,
+                },
+            });
         }, 500);
     },
     'POST /v1/orders/list/3': (req: Request, res: Response) => {
@@ -350,9 +352,9 @@ export default {
                 code: 200,
                 data: {
                     list: payList,
-                    total: 200
-                }
-            })
+                    total: 200,
+                },
+            });
         }, 500);
     },
     'POST /v1/orders/list/4': (req: Request, res: Response) => {
@@ -362,9 +364,9 @@ export default {
                 code: 200,
                 data: {
                     list: waitShipList,
-                    total: 200
-                }
-            })
+                    total: 200,
+                },
+            });
         }, 500);
     },
     'POST /v1/orders/list/5': (req: Request, res: Response) => {
@@ -374,9 +376,9 @@ export default {
                 code: 200,
                 data: {
                     list: notStockList,
-                    total: 200
-                }
-            })
+                    total: 200,
+                },
+            });
         }, 500);
     },
     'POST /v1/orders/list/6': (req: Request, res: Response) => {
@@ -386,9 +388,9 @@ export default {
                 code: 200,
                 data: {
                     list: stockNotShipList,
-                    total: 200
-                }
-            })
+                    total: 200,
+                },
+            });
         }, 500);
     },
     'POST /v1/orders/list/7': (req: Request, res: Response) => {
@@ -398,9 +400,9 @@ export default {
                 code: 200,
                 data: {
                     list: errorOrderList,
-                    total: 200
-                }
-            })
+                    total: 200,
+                },
+            });
         }, 500);
     },
     'GET /v1/order/goods_detail': (req: Request, res: Response) => {
@@ -411,16 +413,18 @@ export default {
                 data: {
                     channel_goods_id: 'channel_goods_id',
                     psku: 'psku',
-                    main_img: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                    main_img:
+                        '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
                     sku: 'sku',
-                    sku_img: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+                    sku_img:
+                        '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
                     goods_name: 'goods_name',
                     specs: {
                         size: 'size',
-                        color: 'color'
-                    }
-                }
-            })
+                        color: 'color',
+                    },
+                },
+            });
         }, 500);
-    }
+    },
 };

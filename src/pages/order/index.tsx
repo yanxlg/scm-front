@@ -16,7 +16,7 @@ import PaneStockNotShip from './components/PaneStockNotShip';
 import '@/styles/order.less';
 
 const { TabPane } = Tabs;
- 
+
 export declare interface IOrderItem {
     order_confirm_time: string;
     middleground_order_id: string;
@@ -45,9 +45,7 @@ export declare interface IOrderItem {
     purchase_waybill_number: string;
 }
 
-declare interface IOrderState {
-   
-}
+declare interface IOrderState {}
 
 class Order extends React.PureComponent<{}, IOrderState> {
     private orderFilterRef: RefObject<OrderFilter> = React.createRef();
@@ -88,7 +86,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         <PaneStockNotShip />
                     </TabPane> */}
                     <TabPane tab={`异常订单（1000）`} key="7">
-                        <PaneError/>
+                        <PaneError />
                     </TabPane>
                 </Tabs>
             </div>

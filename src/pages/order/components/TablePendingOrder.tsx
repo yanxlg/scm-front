@@ -16,12 +16,9 @@ declare interface IProps {
     onSelectedRow(row: IOrderItem): void;
 }
 
-declare interface IState {
-
-}
+declare interface IState {}
 
 class TablePendingOrder extends React.PureComponent<IProps, IState> {
-
     private columns: ColumnProps<IOrderItem>[] = [
         {
             fixed: true,
@@ -30,19 +27,20 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 const { orderList, onCheckAllChange } = this.props;
                 const rowspanList = orderList.filter(item => item._rowspan);
                 const checkedListLen = rowspanList.filter(item => item._checked).length;
-                let indeterminate = false, checked = false;
+                let indeterminate = false,
+                    checked = false;
                 if (rowspanList.length && rowspanList.length === checkedListLen) {
-                    checked = true; 
+                    checked = true;
                 } else if (checkedListLen) {
                     indeterminate = true;
                 }
                 return (
-                    <Checkbox 
-                        indeterminate={indeterminate} 
-                        checked={checked} 
+                    <Checkbox
+                        indeterminate={indeterminate}
+                        checked={checked}
                         onChange={e => onCheckAllChange(e.target.checked)}
                     />
-                )
+                );
             },
             dataIndex: '_checked',
             align: 'center',
@@ -50,16 +48,13 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             render: (value: boolean, row: IOrderItem) => {
                 return {
                     children: (
-                        <Checkbox 
-                            checked={value}
-                            onChange={() => this.props.onSelectedRow(row)}
-                        />
+                        <Checkbox checked={value} onChange={() => this.props.onSelectedRow(row)} />
                     ),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
-                }
-            }
+                };
+            },
         },
         {
             fixed: true,
@@ -68,7 +63,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'goodsCreateTime',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             fixed: true,
@@ -77,7 +72,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderId',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         // 缺少
         {
@@ -86,7 +81,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'goods_img',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
             // render: (value: string) => {
             //     return (
             //         <img style={{width: '100%'}} src={value}/>
@@ -100,7 +95,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'style',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'goodsNumber',
@@ -108,7 +103,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'goodsNumber',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'goodsAmount',
@@ -116,7 +111,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'goodsAmount',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         // 缺少
         {
@@ -125,7 +120,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'shipping_fee',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         // 缺少
         {
@@ -134,7 +129,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'sale_price',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         // 缺少
         {
@@ -143,7 +138,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'sale_order_status',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'productId',
@@ -151,7 +146,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'productId',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         // 缺少
         {
@@ -160,7 +155,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'second_catagory',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
             // render: (value: ICatagoryData) => {
             //     return value.name
             // }
@@ -171,49 +166,49 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'skuId',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: this.mergeCell,
         },
         {
             key: 'purchasePlatform',
             title: '采购平台',
             dataIndex: 'purchasePlatform',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchaseNumber',
             title: '采购数量',
             dataIndex: 'purchaseNumber',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchaseAmount',
             title: '采购价格',
             dataIndex: 'purchaseAmount',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchaseOrderStatus',
             title: '采购订单状态',
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchaseOrderPayStatus',
             title: '采购支付状态',
             dataIndex: 'purchaseOrderPayStatus',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'purchaseOrderShippingStatus',
             title: '采购物流状态',
             dataIndex: 'purchaseOrderShippingStatus',
             align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'comment',
@@ -223,14 +218,14 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 200,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: <TextArea autoSize={true} defaultValue={value}/>,
+                    children: <TextArea autoSize={true} defaultValue={value} />,
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
-                }
-            }
+                };
+            },
         },
-    ]
+    ];
 
     constructor(props: IProps) {
         super(props);
@@ -248,7 +243,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
 
     render() {
         const { loading, orderList } = this.props;
-    
+
         return (
             <Table
                 bordered={true}
@@ -259,9 +254,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 dataSource={orderList}
                 scroll={{ x: true }}
                 pagination={false}
-                
             />
-        )    
+        );
     }
 }
 
