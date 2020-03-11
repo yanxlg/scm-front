@@ -4,7 +4,12 @@ import { ColumnProps } from 'antd/es/table';
 
 
 import { IParentOrderItem } from './PaneAll';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { utcToLocal } from '@/utils/date';
+import { getStatusDesc } from '@/utils/transform';
+import { 
+    orderStatusOptionList,
+    orderShippingOptionList
+} from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;
@@ -25,9 +30,9 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
-            render: (value: number, row: IParentOrderItem) => {
+            render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: value,
+                    children: utcToLocal(value),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -84,25 +89,11 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
-            key: 'orderGoodsId',
-            title: '中台订单ID',
-            dataIndex: 'orderGoodsId',
+            key: 'goodsAmount',
+            title: '商品价格',
+            dataIndex: 'goodsAmount',
             align: 'center',
-            width: 120
-        },
-        {
-            key: 'orderGoodsStatus',
-            title: '中台订单状态',
-            dataIndex: 'orderGoodsStatus',
-            align: 'center',
-            width: 120
-        },
-        {
-            key: 'orderGoodsShippingStatus',
-            title: '中台订单配送状态',
-            dataIndex: 'orderGoodsShippingStatus',
-            align: 'center',
-            width: 120
+            width: 120,
         },
         {
             key: 'orderGoodsId',
@@ -112,12 +103,39 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120
         },
         {
-            key: 'goodsAmount',
-            title: '价格',
-            dataIndex: 'goodsAmount',
+            key: 'orderGoodsStatus',
+            title: '中台订单状态',
+            dataIndex: 'orderGoodsStatus',
             align: 'center',
-            width: 120
+            width: 120,
+            render: (value: number) => {
+                return getStatusDesc(orderStatusOptionList, value)
+            }
         },
+        {
+            key: 'orderGoodsShippingStatus',
+            title: '中台订单配送状态',
+            dataIndex: 'orderGoodsShippingStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number) => {
+                return getStatusDesc(orderShippingOptionList, value)
+            }
+        },
+        // {
+        //     key: 'orderGoodsId',
+        //     title: '中台子订单ID',
+        //     dataIndex: 'orderGoodsId',
+        //     align: 'center',
+        //     width: 120
+        // },
+        // {
+        //     key: 'goodsAmount',
+        //     title: '价格',
+        //     dataIndex: 'goodsAmount',
+        //     align: 'center',
+        //     width: 120
+        // },
         {
             key: 'goodsDetail',
             title: '商品详情',

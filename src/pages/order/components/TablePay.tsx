@@ -1,8 +1,10 @@
 import React from 'react';
 import { Table, Input, Modal, Button, Checkbox } from 'antd';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';
+
 
 
 const { TextArea } = Input;
@@ -85,11 +87,12 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 return {
                     children: (
                         <div>
-                            <img 
+                            {/* <img 
                                 src={value}
                                 style={{width: '100%'}}
                                 onMouseEnter={() => this.mouseEnter(value)} 
-                            />
+                            /> */}
+                            <AutoEnLargeImg src={value} className="order-img-auto"/>
                             <Button
                                 ghost={true}
                                 size="small"

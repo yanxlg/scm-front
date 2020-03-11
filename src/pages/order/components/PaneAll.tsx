@@ -65,12 +65,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
 
     private initialValues = {
-        channel: 100,
-        sale_order_status: 100,
-        purchase_order_status: 100,
-        purchase_pay_status: 100,
-        purchase_shipping_status: 100,
-        purchase_cancel_res: 100
+        channel_source: 100,
+        order_goods_status: 100,
+        order_goods_shipping_status: 100,
+        non_purchase_plan: 100
     }
 
     private endFieldItem: IFieldItem = {
@@ -321,21 +319,6 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     // 获取查询数据
     getFieldsValue = () => {
         // console.log('111', this.formRef.current!.getFieldsValue());
-        const fields = this.formRef.current!.getFieldsValue();
-        const {
-            order_start_time,
-            order_end_time,
-            purchase_start_time,
-            purchase_end_time,
-            only_p_order
-        } = fields
-        return Object.assign(fields, {
-            order_start_time: order_start_time ? transStartDate(order_start_time) : order_start_time,
-            order_end_time: order_end_time ? transEndDate(order_end_time) : order_end_time,
-            purchase_start_time: purchase_start_time ? transStartDate(purchase_start_time) : purchase_start_time,
-            purchase_end_time: purchase_end_time ? transStartDate(purchase_end_time) : purchase_end_time,
-            only_p_order: only_p_order ? 1 : 0
-        });
     }
 
     // 全选
@@ -395,7 +378,6 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         ref={this.formRef}
                         fieldList={fieldList}
                         labelClassName="order-label"
-                        
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">

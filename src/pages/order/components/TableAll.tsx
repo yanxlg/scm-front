@@ -140,6 +140,30 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             // render: this.mergeCell
         },
         {
+            key: 'purchaseNumber',
+            title: '采购数量',
+            dataIndex: 'purchaseNumber',
+            align: 'center',
+            width: 120,
+            // render: this.mergeCell
+        },
+        {
+            key: 'purchaseAmount',
+            title: '采购单价',
+            dataIndex: 'purchaseAmount',
+            align: 'center',
+            width: 120,
+            // render: this.mergeCell
+        },
+        {
+            key: 'purchasePlatform',
+            title: '采购平台',
+            dataIndex: 'purchasePlatform',
+            align: 'center',
+            width: 120,
+            // render: this.mergeCell
+        },
+        {
             key: 'purchaseOrderStatus',
             title: '采购订单状态',
             dataIndex: 'purchaseOrderStatus',
@@ -212,7 +236,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 return utcToLocal(value);
             }
         },
-
+        {
+            key: 'payTime',
+            title: '支付时间',
+            dataIndex: 'payTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return utcToLocal(value);
+            }
+        },
         {
             key: 'confirmTime',
             title: '订单确认时间',
@@ -229,9 +262,54 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             }
         },
         {
+            key: 'storageTime',
+            title: '入库时间',
+            dataIndex: 'storageTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
+            }
+        },
+        {
             key: 'deliveryTime',
             title: '出库时间',
             dataIndex: 'deliveryTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
+            }
+        },
+        {
+            key: 'collectTime',
+            title: '揽收时间',
+            dataIndex: 'collectTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                }
+            }
+        },
+        {
+            key: 'receiveTime',
+            title: '收货时间',
+            dataIndex: 'receiveTime',
             align: 'center',
             width: 120,
             render: (value: string, row: IChildOrderItem) => {
@@ -283,7 +361,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: '_goodsTotalAmount',
             align: 'center',
             width: 120,
-            render: this.mergeCell
+            render: (value, row: IChildOrderItem) => {
+                // console.log(row);
+                const { goodsAmount, goodsNumber } = row;
+                return {
+                    children: Number(goodsAmount) * goodsNumber,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            }
         },
         {
             key: 'channelSource',

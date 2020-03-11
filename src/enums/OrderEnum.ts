@@ -84,6 +84,7 @@ export const childDefaultFieldList: IFieldItem[] = [
         label: '订单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date']
     },
     {
         type: 'input',
@@ -336,9 +337,18 @@ export const defaultColChildList = [
 ]
 
 export const childOptionalColList = [
+    { key: 'purchaseNumber', name: '采购数量' }, // 2
+    { key: 'purchaseAmount', name: '采购单价' }, // 2
+    { key: 'purchasePlatform', name: '采购平台' }, // 2
     { key: 'purchaseCancelReason', name: '采购取消原因' }, // 2
+    { key: 'purchaseCreateTime', name: '采购时间' }, // 2
+    { key: 'payTime', name: '支付时间' }, // 2
     // orderInfo
     { key: 'confirmTime', name: '订单确认时间' }, // 1
+    { key: 'storageTime', name: '入库时间' }, // 1
+    { key: 'deliveryTime', name: '出库时间' }, // 1
+    { key: 'collectTime', name: '揽收时间' }, // 1
+    { key: 'receiveTime', name: '收货时间' }, // 1
     { key: 'channelOrderSn', name: '渠道订单ID' }, // 1
     { key: 'goodsAmount', name: '价格' }, // 1
     // { key: 'a4', name: '运费' },
@@ -418,6 +428,7 @@ export const defaultParentColList = [
     // 'channel_delivery_status',     // 渠道发货状态
     'productId',                   // 中台商品ID
     'goodsNumber',                 // 商品数量
+    'goodsAmount',                 // 商品价格
     'orderGoodsId',                // 中台子订单ID
     'orderGoodsStatus',            // 中台订单状态
     'orderGoodsShippingStatus'     // 中台订单配送状态
