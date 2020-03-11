@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { PageLoading } from '@ant-design/pro-layout';
 
 export default () => {
-    return <div>22222</div>;
+    return useMemo(() => <PageLoading />, []);
 };
