@@ -5,8 +5,8 @@ import { queryTaskLog } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import '@/styles/config.less';
 import '@/styles/form.less';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { ITaskLogItem } from '@/interface/ITask';
+import { EmptyObject } from '@/config/global';
 
 declare interface ITaskLogViewProps {
     task_Id: number;

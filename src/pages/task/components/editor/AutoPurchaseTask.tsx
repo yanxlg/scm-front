@@ -15,8 +15,8 @@ import { transStartDate } from '@/utils/date';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { IResponse } from '@/interface/IGlobal';
 import { ITaskDetailResponse } from '@/interface/ITask';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { scrollToFirstError } from '@/utils/common';
+import { EmptyObject } from '@/config/global';
 
 declare interface IFormData {
     task_name: string;

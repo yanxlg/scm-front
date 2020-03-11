@@ -471,9 +471,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     onsaleLoading: false,
                 });
                 this.onSearch();
-                message.success('一键上架成功');
+                message.success('上架任务已发送');
             })
             .catch(err => {
+                message.error('上架任务发送失败');
                 // console.log('postGoodsOnsale ERR');
                 this.setState({
                     onsaleLoading: false,
@@ -612,7 +613,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     pageSizeOptions={pageSizeOptions}
                     onChange={this.onChangePage}
                     onShowSizeChange={this.pageCountChange}
-                    showTotal={total => `共${total}条`}
+                    showTotal={total => {
+                        if (total > 10000) {
+                            return '';
+                        }
+                        return `共${total}条`;
+                    }}
                 />
                 <GoodsTable
                     // ref={node => (this.goodsTableRef = node)}

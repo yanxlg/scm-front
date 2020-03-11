@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, Upload, Icon, Progress } from 'antd';
+import { Modal, Upload, Progress } from 'antd';
+import { CloudDownloadOutlined } from '@ant-design/icons';
 
 const { Dragger } = Upload;
 
@@ -30,7 +31,7 @@ class ImportGoodsDialog extends React.PureComponent<ImportGoodsDialogProps> {
             >
                 <Dragger>
                     <div className="">
-                        <Icon type="cloud-download" style={{ fontSize: 40, color: '#1890ff' }} />
+                        <CloudDownloadOutlined style={{ fontSize: 40, color: '#1890ff' }} />
                         <p>点击选择或拖拽上传</p>
                     </div>
                 </Dragger>

@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import SearchCondition from './components/SearchCondition';
+import SearchCondition, { salesVolumeList } from './components/SearchCondition';
 import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import './index.less';
@@ -17,10 +17,16 @@ import {
     exportChannelProductList,
     updateChannelShelveState,
 } from '@/services/channel';
-import { ProductStatusMap, ProductStatusCode } from '@/config/dictionaries/Product';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import {
+    ProductStatusMap,
+    ProductStatusCode,
+    ProductStatusList,
+} from '@/config/dictionaries/Product';
 import { IChannelProductListItem } from '@/interface/IChannel';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import { EmptyObject } from '@/config/global';
+import { convertEndDate, convertStartDate } from '@/utils/date';
+import queryString from 'query-string';
+import CopyLink from '@/components/copyLink';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -30,26 +36,68 @@ declare interface IVoVaListState {
     pageNumber: number;
     page: number;
     total: number;
+    defaultInitialValues?: { [key: string]: any };
 }
 
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
     private formRef: RefObject<SearchCondition> = React.createRef();
+    private queryData: any = {};
     constructor(props: {}) {
         super(props);
+        const { page, page_count, ...extra } = this.computeInitialValues();
         this.state = {
             dataSet: [],
             dataLoading: false,
             searchLoading: true,
             total: 0,
-            pageNumber: 50,
-            page: 1,
+            pageNumber: page_count,
+            page: page,
             excelDialogStatus: false,
+            defaultInitialValues: extra,
         };
     }
 
     componentDidMount() {
-        this.onSearch();
+        this.queryList({
+            searchLoading: true,
+        });
+    }
+
+    private computeInitialValues() {
+        // copy link 解析
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const {
+            page = 1,
+            page_count = 50,
+            onshelf_time_start = 0,
+            onshelf_time_end = 0,
+            commodity_id = '',
+            vova_virtual_id = '',
+            product_id = '',
+            sales_volume = salesVolumeList[0].id,
+            product_status = ProductStatusList[0].id,
+            shop_name = '',
+            level_one_category = '',
+            level_two_category = '',
+        } = query;
+        return {
+            page: Number(page),
+            page_count: Number(page_count),
+            onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
+            onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
+            commodity_id,
+            vova_virtual_id,
+            product_id,
+            sales_volume,
+            shop_name,
+            level_one_category,
+            level_two_category,
+            product_status,
+        };
     }
 
     private queryList(
@@ -65,11 +113,16 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             dataLoading: true,
             searchLoading,
         });
-        queryChannelGoodsList({
+        const query = {
             page: page,
             page_count: page_number,
             ...values,
-        })
+        };
+        this.queryData = {
+            ...query,
+        };
+
+        queryChannelGoodsList(query)
             .then(({ data: { list = [], total = 0 } = EmptyObject } = EmptyObject) => {
                 this.setState({
                     page: page,
@@ -108,11 +161,11 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             },
         })
             .then(res => {
-                message.success('上架成功');
-                this.queryList();
+                message.success('上架任务已发送');
+                // this.queryList();
             })
             .catch(() => {
-                message.success('上架失败');
+                message.success('上架任务发送失败');
             });
     }
 
@@ -131,11 +184,11 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             },
         })
             .then(res => {
-                message.success('下架成功');
-                this.queryList();
+                message.success('下架任务已发送');
+                // this.queryList();
             })
             .catch(() => {
-                message.error('下架失败');
+                message.error('下架任务发送失败');
             });
     }
 
@@ -340,6 +393,10 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
         });
     }
 
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
     render() {
         const {
             dataSet,
@@ -349,10 +406,12 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             page,
             pageNumber,
             searchLoading,
+            defaultInitialValues,
         } = this.state;
         return (
             <div className="container">
                 <SearchCondition
+                    defaultInitialValues={defaultInitialValues}
                     ref={this.formRef}
                     searchLoading={searchLoading}
                     onSearch={this.onSearch}
@@ -397,6 +456,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                     getExcelData={this.getExcelData}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

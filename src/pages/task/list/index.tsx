@@ -1,28 +1,28 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Tabs } from 'antd';
 import ALLTaskPage from '@/pages/task/components/ALLTaskPage';
 import '@/styles/index.less';
 import { TaskStatusEnum } from '@/enums/StatusEnum';
 import { RouteComponentProps } from 'dva/router';
 import { ITaskListQuery } from '@/interface/ITask';
+import queryString from 'query-string';
 
 const { TabPane } = Tabs;
 
 type LocalPageProps = RouteComponentProps<{}, any, ITaskListQuery>;
 
 const Index: React.FC<LocalPageProps> = props => {
-    const [activeKey, setActiveKey] = useState('1');
     const [countArr, setCountArr] = useState<number[]>([]);
-    const onChange = useCallback((activeKey: string) => setActiveKey(activeKey), []);
+    const { query } = queryString.parseUrl(window.location.href);
+    const defaultActiveKey = ((query.tabKey ?? '1') as unknown) as string;
     return useMemo(() => {
         const initialValues = props.location.state;
         const [count1, count2, count3, count4, count5, count6] = countArr;
         return (
             <div className="container">
                 <Tabs
+                    defaultActiveKey={defaultActiveKey}
                     className="tabs-margin-none"
-                    onChange={onChange}
-                    activeKey={activeKey}
                     type="card"
                     children={[
                         <TabPane tab={`全部任务${count1 === void 0 ? '' : `(${count1})`}`} key="1">
@@ -40,7 +40,7 @@ const Index: React.FC<LocalPageProps> = props => {
                                 setCountArr={setCountArr}
                             />
                         </TabPane>,
-                        <TabPane tab={`已执行${count1 === void 0 ? '' : `(${count4})`}`} key="4">
+                        <TabPane tab={`已发送${count1 === void 0 ? '' : `(${count4})`}`} key="4">
                             <ALLTaskPage
                                 task_status={TaskStatusEnum.Executed}
                                 setCountArr={setCountArr}
@@ -62,7 +62,7 @@ const Index: React.FC<LocalPageProps> = props => {
                 />
             </div>
         );
-    }, [activeKey, props, countArr]);
+    }, [props, countArr]);
 };
 
 export default Index;

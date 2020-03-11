@@ -9,12 +9,13 @@ import { transNullValue } from '@/utils/transform';
 import { queryChannelCategory } from '@/services/channel';
 import { ProductStatusList } from '@/config/dictionaries/Product';
 import { IChannelCategoryItem, IChannelProductListBody } from '@/interface/IChannel';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface ISearchProps {
     onSearch: Function;
     toggleExcelDialog: Function;
     searchLoading: boolean;
+    defaultInitialValues?: { [key: string]: any };
 }
 
 declare interface ISearchState {
@@ -24,7 +25,7 @@ declare interface ISearchState {
 
 const Option = Select.Option;
 
-const salesVolumeList = [
+export const salesVolumeList = [
     {
         id: 'all',
         name: '全部',
@@ -87,7 +88,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
             .then(({ data = [] } = EmptyObject) => {
                 this.setState({
                     categoryLoading: false,
-                    searchOptions: data,
+                    searchOptions: data || [],
                 });
             })
             .catch(() => {
@@ -131,19 +132,24 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
 
     render() {
         const { searchOptions, categoryLoading } = this.state;
-        const { searchLoading } = this.props;
+        const { searchLoading, defaultInitialValues } = this.props;
+        const initialValues = Object.assign(
+            {},
+            {
+                level_one_category: '',
+                level_two_category: '',
+                sales_volume: salesVolumeList[0].id,
+                product_status: ProductStatusList[0].id,
+            },
+            defaultInitialValues,
+        );
         return (
             <Form
                 ref={this.formRef}
                 className="form-help-absolute"
                 layout="inline"
                 autoComplete={'off'}
-                initialValues={{
-                    level_one_category: '',
-                    level_two_category: '',
-                    sales_volume: salesVolumeList[0].id,
-                    product_status: ProductStatusList[0].id,
-                }}
+                initialValues={initialValues}
             >
                 <Form.Item
                     label={<span className="product-form-label">时&emsp;&emsp;&emsp;间</span>}
@@ -261,7 +267,9 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                     >
                         <Option value="">全部</Option>
                         {searchOptions.map(item => (
-                            <Option value={item.id}>{item.name}</Option>
+                            <Option key={item.platform_cate_id} value={item.platform_cate_id}>
+                                {item.platform_cate_name}
+                            </Option>
                         ))}
                     </Select>
                 </Form.Item>
@@ -275,7 +283,7 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                         const levelOne = getFieldValue('level_one_category');
                         const childCategory =
                             searchOptions.find(category => {
-                                return category.id === levelOne;
+                                return category.platform_cate_id === levelOne;
                             })?.children || [];
                         return (
                             <Form.Item
@@ -288,8 +296,11 @@ export default class SearchCondition extends React.PureComponent<ISearchProps, I
                                     <Option value="">全部</Option>
                                     {childCategory.map(category => {
                                         return (
-                                            <Option key={category.id} value={category.id}>
-                                                {category.name}
+                                            <Option
+                                                key={category.platform_cate_id}
+                                                value={category.platform_cate_id}
+                                            >
+                                                {category.platform_cate_name}
                                             </Option>
                                         );
                                     })}

@@ -6,8 +6,8 @@ import { querySubTaskProgress } from '@/services/task';
 import { ISubTaskProgressResponse, ITaskProgressItem } from '@/interface/ITask';
 import { utcToLocal } from '@/utils/date';
 import '@/styles/task.less';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { TaskTypeEnum } from '@/enums/StatusEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface ITaskProgressModalState {
     detail?: ISubTaskProgressResponse;
@@ -66,12 +66,7 @@ class TaskProgressModal extends React.PureComponent<ITaskProgressItem, ITaskProg
                     className="task-body task-detail-card task-detail-table"
                     bordered={false}
                 >
-                    <Descriptions
-                        size="small"
-                        layout="vertical"
-                        bordered={true}
-                        column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
-                    >
+                    <Descriptions size="small" layout="vertical" bordered={true} column={4}>
                         <Descriptions.Item label={label[0]}>{detail?.grab_num}</Descriptions.Item>
                         <Descriptions.Item label={label[1]}>
                             {detail?.transform_incoming_num}

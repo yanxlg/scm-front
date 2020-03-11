@@ -3,9 +3,9 @@ import ProLayout, {
     BasicLayoutProps as ProLayoutProps,
 } from '@ant-design/pro-layout';
 import React from 'react';
-import Link from 'umi/link';
+import { Link } from 'umi';
 import { Dispatch } from 'redux';
-import { connect } from 'dva';
+import { connect } from 'umi';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.png';
@@ -41,6 +41,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
         return (
             <ProLayout
                 multiple={false}
+                menu={{ locale: false }}
                 logo={<img src={logo} className="menu-logo" alt="" />}
                 title="供应链中台"
                 onCollapse={this.handleMenuCollapse}
