@@ -163,3 +163,68 @@ export type IActiveChannelProductVersionBody = Array<{
     virtual_id: number;
     product_id: number;
 }>;
+
+
+export interface IRegionShippingFeeBody {
+    product_id: string;
+    page?: number;
+    page_count?: number;
+}
+
+export interface IRegionShippingFeeItem {
+    country: string;
+    country_code: string;
+    country_name: string;
+    fee: number;
+    weight: number;
+}
+
+export interface IRegionShippingFeeResponse {
+    total: number;
+    page: string;
+    fee: IRegionShippingFeeItem[];
+}
+
+export interface IGoodsDetailBody {
+    product_id: string;
+    channel: string;
+}
+
+export interface IGoodsDetailResponse {
+    product_name: string;
+    product_description: string;
+    main_image: string;
+    product_id: string;
+    commodity_id: string;
+    spider_product_id: string;
+    category_level_1: string;
+    category_level_2: string;
+    category_level_3: string;
+}
+
+export interface IGoodsSkuBody {
+    product_id: string;
+    channel: string;
+    page: number;
+    page_count: number;
+}
+
+export interface ISpecsItem {
+    name: string;
+    value: string;
+}
+
+export interface IGoodsSkuItem {
+    sku_name: string;
+    sku_image: string;
+    price: string;
+    shipping_fee: string;
+    storage: string;
+    specs: ISpecsItem[];
+    serial?: number;
+}
+
+export interface IGoodsSkuResponse {
+    total: string;
+    sku_list: IGoodsSkuItem[];
+}

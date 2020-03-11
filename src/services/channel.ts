@@ -12,6 +12,12 @@ import {
     IChannelProductDetailResponse,
     IEditChannelProductDetailBody,
     IActiveChannelProductVersionBody,
+    IRegionShippingFeeBody,
+    IRegionShippingFeeResponse,
+    IGoodsDetailBody,
+    IGoodsDetailResponse,
+    IGoodsSkuBody,
+    IGoodsSkuResponse,
 } from '@/interface/IChannel';
 import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
@@ -96,3 +102,26 @@ export async function exportChannelProductList(
         })
         .then(downloadExcel);
 }
+
+// 查询国家运费
+export async function queryRegionShippingFee(data: IRegionShippingFeeBody) {
+    return request.post<IResponse<IRegionShippingFeeResponse>>(ChannelApiPath.QueryRegionShippingFee, {
+        data,
+    });
+}
+
+// 查询商品详情
+export async function queryGoodsDetail(params: IGoodsDetailBody) {
+    return request.get<IResponse<IGoodsDetailResponse>>(ChannelApiPath.QueryGoodsDetail, {
+        params,
+    });
+}
+
+// 查询商品sku
+export async function queryGoodsSkuList(data: IGoodsSkuBody) {
+    return request.post<IResponse<IGoodsSkuResponse>>(ChannelApiPath.QueryGoodsSkuList, {
+        data,
+    });
+}
+
+

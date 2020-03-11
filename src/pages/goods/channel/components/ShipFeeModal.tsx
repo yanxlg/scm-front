@@ -1,12 +1,10 @@
 import React from 'react';
-import { Table } from 'antd';
+import { Table, Pagination } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
-declare interface countryFeeItem {
-    country: string;
-    fee: number;
-    weight: number;
-}
+import { queryRegionShippingFee } from '@/services/channel';
+import { IRegionShippingFeeItem } from '@/interface/IChannel';
+
 
 declare interface IProps {
     product_id: string;
@@ -14,15 +12,17 @@ declare interface IProps {
 
 declare interface IState {
     loading: boolean;
-    fee_list: countryFeeItem[];
+    total: number;
+    page: number;
+    fee_list: IRegionShippingFeeItem[];
 }
 
 class ShipFeeModal extends React.PureComponent<IProps, IState> {
 
-    private columns: ColumnProps<countryFeeItem>[] = [
+    private columns: ColumnProps<IRegionShippingFeeItem>[] = [
         {
             title: '国家',
-            dataIndex: 'country',
+            dataIndex: 'country_name',
             align: 'center',
             width: 120,
         },
@@ -43,24 +43,73 @@ class ShipFeeModal extends React.PureComponent<IProps, IState> {
     constructor(props: IProps) {
         super(props);
         this.state = {
+            total: 0,
+            page: 1,
             loading: false,
             fee_list: []
         }
     }
 
+    componentDidMount() {
+        // this.queryDetail();
+        this.queryRegionShippingFee(1);
+    }
+
+    queryRegionShippingFee(page: number) {
+        const { product_id } = this.props;
+        this.setState({
+            loading: true
+        });
+        queryRegionShippingFee({
+            product_id,
+            page,
+            page_count: 50
+        }).then(res => {
+            // console.log('queryRegionShippingFee', res);
+            const { total, fee } = res.data;
+            this.setState({
+                total,
+                page,
+                fee_list: fee
+            })
+        }).finally(() => {
+            this.setState({
+                loading: false
+            })
+        })
+    }
+
+    onChangePage = (page: number) => {
+        // console.log('onChangePage', page);
+        this.queryRegionShippingFee(page);
+    }
+
     render() {
 
-        const { loading, fee_list } = this.state;
+        const { loading, page, total, fee_list } = this.state;
 
         return (
-            <Table
-                bordered={true}
-                loading={loading}
-                columns={this.columns}
-                dataSource={fee_list}
-                pagination={false}
-                scroll={{y: 500}}
-            />
+            <div>
+                <Table
+                    bordered={true}
+                    loading={loading}
+                    rowKey="country_code"
+                    columns={this.columns}
+                    dataSource={fee_list}
+                    pagination={false}
+                    scroll={{y: 280}}
+                />
+                <Pagination
+                    size="small"
+                    total={total}
+                    current={page}
+                    pageSize={50}
+                    onChange={this.onChangePage}
+                    showTotal={total => `共${total}条`}
+                    style={{marginTop: 12}}
+                />
+            </div>
+            
         )
     }
 }

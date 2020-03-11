@@ -4,6 +4,8 @@ import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import './index.less';
 import '@/styles/product.less';
+import '@/styles/form.less';
+import '@/styles/config.less';
 import { Modal, message, Button, Pagination } from 'antd';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
@@ -55,6 +57,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             searchLoading: true,
             total: 0,
             pageNumber: page_count,
+            // pageNumber: 1,
             page: page,
             excelDialogStatus: false,
             defaultInitialValues: extra,

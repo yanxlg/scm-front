@@ -3,22 +3,10 @@ import { Modal, Table, Pagination, Skeleton, Input, InputNumber } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 // import { getGoodsSkuList } from '@/services/goods';
+import { queryGoodsDetail, queryGoodsSkuList } from '@/services/channel';
+import { IGoodsDetailResponse, ISpecsItem, IGoodsSkuItem } from '@/interface/IChannel';
 
 const { TextArea } = Input;
-
-declare interface ISkuStyle {
-    [key: string]: string;
-}
-
-declare interface ISkuItem {
-    serial: number;
-    sku_id: string;
-    sku_style: ISkuStyle;
-    sku_price: number;
-    sku_fee: number;
-    sku_sale_price: number;
-    comment: string;
-}
 
 declare interface IEditPriceItem {
     sku_id: string;
@@ -26,60 +14,51 @@ declare interface IEditPriceItem {
     comment: string;
 }
 
-declare interface IPageData {
-    page?: number;
-    page_count?: number;
-}
-
-declare interface IGoodsDetail {
-    [key: string]: any;
-}
-
 declare interface IState {
     visible: boolean;
     loading: boolean;
     page: number;
-    allCount: number;
+    total: number;
     productId: string;
-    skuList: ISkuItem[];
-    goodsDetail: IGoodsDetail | null;
+    skuList: IGoodsSkuItem[];
+    goodsDetail: IGoodsDetailResponse | null;
     editList: IEditPriceItem[];
 }
 
 class SkuDialog extends React.PureComponent<{}, IState> {
-    private columns: ColumnProps<ISkuItem>[] = [
+    private columns: ColumnProps<IGoodsSkuItem>[] = [
         {
             key: 'serial',
-            title: () => `序号(${this.state.allCount})`,
+            title: () => `序号(${this.state.total})`,
             dataIndex: 'serial',
             align: 'center',
             width: 100,
         },
         {
-            key: 'sku_id',
+            key: 'sku_name',
             title: '子SKU',
-            dataIndex: 'sku_id',
-            align: 'center',
-            width: 100,
-        },
-        {
-            key: 'sku_style',
-            title: '规格',
-            dataIndex: 'sku_style',
+            dataIndex: 'sku_name',
             align: 'center',
             width: 160,
-            render: (value: ISkuStyle) => {
-                return Object.keys(value).map(key => (
-                    <div key={key}>
-                        {key}: {value[key]}
+        },
+        {
+            key: 'specs',
+            title: '规格',
+            dataIndex: 'specs',
+            align: 'center',
+            width: 160,
+            render: (value: ISpecsItem[]) => {
+                return value.map(item => (
+                    <div key={item.name}>
+                        {item.name}: {item.value}
                     </div>
                 ));
             },
         },
         {
-            key: 'sku_price',
+            key: 'price',
             title: '价格',
-            dataIndex: 'sku_price',
+            dataIndex: 'price',
             align: 'center',
             width: 100,
             render: (value: string) => {
@@ -87,19 +66,19 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             },
         },
         {
-            key: 'fee',
+            key: 'shipping_fee',
             title: '运费',
-            dataIndex: 'fee',
+            dataIndex: 'shipping_fee',
             align: 'center',
-            width: 100,
+            width: 60,
         },
         {
             key: 'sku_sale_price',
             title: '销售价格调整',
             dataIndex: 'sku_sale_price',
             align: 'center',
-            width: 150,
-            render: (value: number, row: ISkuItem) => {
+            width: 120,
+            render: (value: number, row: IGoodsSkuItem) => {
                 return (
                     <InputNumber 
                         min={0}
@@ -116,8 +95,8 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             title: '销售价格调整',
             dataIndex: 'comment',
             align: 'center',
-            width: 200,
-            render: (value: string, row: ISkuItem) => {
+            width: 180,
+            render: (value: string, row: IGoodsSkuItem) => {
                 return <TextArea autoSize={true} defaultValue={value} onChange={e => this.changeComment(e.target.value, row)} />
             }
         }
@@ -130,30 +109,9 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             loading: false,
             productId: '',
             page: 1,
-            allCount: 0,
-            skuList: [
-                {
-                    serial: 1,
-                    sku_id: '123',
-                    sku_style: {
-                        size: '1',
-                        color: '2'
-                    },
-                    sku_price: 88,
-                    sku_fee: 12,
-                    sku_sale_price: 120,
-                    comment: '太便宜'
-                }
-            ],
-            // goodsDetail: null,
-            goodsDetail: {
-                goods_img: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
-                title: 'title',
-                desc: 'desc',
-                product_id: 'product_id',
-                commodity_id: 'commodity_id',
-                worm_goods_id: 'worm_goods_id',
-            },
+            total: 0,
+            skuList: [],
+            goodsDetail: null,
             editList: []
         };
     }
@@ -162,6 +120,52 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         this.setState({
             productId,
             visible: true
+        }, () => {
+            this.queryGoodsDetail();
+            this.queryGoodsSkuList(1);
+        });
+    }
+
+    queryGoodsDetail = () => {
+        const { productId } = this.state;
+        queryGoodsDetail({
+            product_id: productId,
+            channel: 'vova'
+        }).then(res => {
+            // console.log('queryGoodsDetail', res);
+            this.setState({
+                goodsDetail: res.data
+            });
+        })
+    }
+
+    queryGoodsSkuList = (page: number) => {
+        const { productId } = this.state;
+        this.setState({
+            loading: true
+        });
+        const page_count = 10;
+        queryGoodsSkuList({
+            page,
+            page_count,
+            product_id: productId,
+            channel: 'vova'
+        }).then(res => {
+            // console.log('queryGoodsSkuList', res);
+            const { total, sku_list } = res.data;
+            this.setState({
+                total: Number(total),
+                skuList: sku_list.map((item, index: number) => {
+                    return {
+                        serial: (page - 1) * page_count + index + 1,
+                        ...item
+                    }
+                })
+            });
+        }).finally(() => {
+            this.setState({
+                loading: false
+            })
         })
     }
 
@@ -176,114 +180,72 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         // console.log('handleOk', this.state.editList);
     }
 
-    private getSkuList = (productId: string, pageData?: IPageData) => {
-        const { page } = this.state;
-        let params = {
-            page,
-            product_id: productId,
-            page_count: 50,
-        };
-        if (pageData) {
-            params = Object.assign(params, pageData);
-        }
-        this.setState({
-            loading: true,
-        });
-        // getGoodsSkuList(params)
-        //     .then(res => {
-        //         // console.log('getGoodsSkuList', res);
-        //         const { all_count, list } = res.data;
-        //         this.setState({
-        //             page: params.page,
-        //             allCount: all_count,
-        //             skuList: list.map((item: any, index: number) => {
-        //                 const { sku_id, sku_style, sku_price, sku_weight, sku_inventory } = item;
-        //                 return {
-        //                     serial: (params.page - 1) * 50 + index + 1,
-        //                     sku_id,
-        //                     sku_style,
-        //                     sku_price,
-        //                     sku_weight,
-        //                     sku_inventory,
-        //                 };
-        //             }),
-        //         });
-        //     })
-        //     .finally(() => {
-        //         this.setState({
-        //             loading: false,
-        //         });
-        //     });
-    };
-
     private onChangePage = (page: number) => {
-        // this.getSkuList(this.props.currentRowData!.product_id, {
-        //     page,
-        // });
+        this.queryGoodsSkuList(page);
     };
 
-    private changePrice = (val: number | undefined, rowData: ISkuItem) => {
+    private changePrice = (val: number | undefined, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
-        const { editList } = this.state;
-        const i =  editList.findIndex(item => item.sku_id === rowData.sku_id)
-        if (i > -1) {
-            this.setState({
-                editList: editList.map((item, index: number) => {
-                    if (i === index) {
-                        return {
-                            ...item,
-                            sku_sale_price: val
-                        }
-                    }
-                    return item;
-                })
-            })
-        } else {
-            this.setState({
-                editList: [
-                    ...editList,
-                    {
-                        sku_id: rowData.sku_id,
-                        sku_sale_price: val,
-                        comment: rowData.comment
-                    }
-                ]
-            })
-        }
+        // const { editList } = this.state;
+        // const i =  editList.findIndex(item => item.sku_id === rowData.sku_id)
+        // if (i > -1) {
+        //     this.setState({
+        //         editList: editList.map((item, index: number) => {
+        //             if (i === index) {
+        //                 return {
+        //                     ...item,
+        //                     sku_sale_price: val
+        //                 }
+        //             }
+        //             return item;
+        //         })
+        //     })
+        // } else {
+        //     this.setState({
+        //         editList: [
+        //             ...editList,
+        //             {
+        //                 sku_id: rowData.sku_id,
+        //                 sku_sale_price: val,
+        //                 comment: rowData.comment
+        //             }
+        //         ]
+        //     })
+        // }
     }
 
-    private changeComment = (val: string, rowData: ISkuItem) => {
+    private changeComment = (val: string, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
-        const { editList } = this.state;
-        const i =  editList.findIndex(item => item.sku_id === rowData.sku_id)
-        if (i > -1) {
-            this.setState({
-                editList: editList.map((item, index: number) => {
-                    if (i === index) {
-                        return {
-                            ...item,
-                            comment: val
-                        }
-                    }
-                    return item;
-                })
-            })
-        } else {
-            this.setState({
-                editList: [
-                    ...editList,
-                    {
-                        sku_id: rowData.sku_id,
-                        sku_sale_price: rowData.sku_sale_price,
-                        comment: val
-                    }
-                ]
-            })
-        }
+        // const { editList } = this.state;
+        // const i =  editList.findIndex(item => item.sku_id === rowData.sku_id)
+        // if (i > -1) {
+        //     this.setState({
+        //         editList: editList.map((item, index: number) => {
+        //             if (i === index) {
+        //                 return {
+        //                     ...item,
+        //                     comment: val
+        //                 }
+        //             }
+        //             return item;
+        //         })
+        //     })
+        // } else {
+        //     this.setState({
+        //         editList: [
+        //             ...editList,
+        //             {
+        //                 sku_id: rowData.sku_id,
+        //                 sku_sale_price: rowData.sku_sale_price,
+        //                 comment: val
+        //             }
+        //         ]
+        //     })
+        // }
     }
 
     render() {
-        const { visible, loading, page, allCount, skuList, goodsDetail } = this.state;
+        const { visible, loading, page, total, skuList, goodsDetail } = this.state;
         return (
             <Modal
                 width={980}
@@ -301,23 +263,42 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                     {
                         goodsDetail ? (
                             <div className="overflow-hidden">
-                                <img className="goods-img" src={goodsDetail.goods_img} />
+                                <img className="goods-img" src={goodsDetail.main_image} />
                                 <div className="overflow-hidden">
                                     <div className="text item">
-                                        标题：{goodsDetail.title}
+                                        标题：{goodsDetail.product_name}
                                     </div>
                                     <div className="text item">
-                                        描述：{goodsDetail.desc}
+                                        描述：{goodsDetail.product_description}
                                     </div>
                                     <div className="item">
-                                        <span>Product ID: {goodsDetail.product_id}</span>
-                                        <span>中台商品ID：{goodsDetail.commodity_id}</span>
-                                        <span>爬虫商品 id：{goodsDetail.worm_goods_id}</span>
+                                        <div className="desc">
+                                            <span className="float-left">Product ID:</span>
+                                            <div className="overflow-hidden">{goodsDetail.product_id}</div>
+                                             
+                                        </div>
+                                        <div className="desc center">
+                                            <span className="float-left">中台商品ID:</span>
+                                            <div className="overflow-hidden">{goodsDetail.commodity_id}</div>
+                                        </div>
+                                        <div className="desc">
+                                            <span className="float-left">爬虫商品 id:</span>
+                                            <div className="overflow-hidden">{goodsDetail.spider_product_id}</div>
+                                        </div>
                                     </div>
                                     <div className="item">
-                                        <span>一级分类: </span>
-                                        <span>二级分类：</span>
-                                        <span>三级分类：</span>
+                                        <div className="desc">
+                                            <span className="float-left">一级分类:</span>
+                                            <div className="overflow-hidden">{goodsDetail.category_level_1}</div>
+                                        </div>
+                                        <div className="desc center">
+                                            <span className="float-left">二级分类:</span>
+                                            <div className="overflow-hidden">{goodsDetail.category_level_2}</div>
+                                        </div>
+                                        <div className="desc">
+                                            <span className="float-left">三级分类:</span>
+                                            <div className="overflow-hidden">{goodsDetail.category_level_3}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -326,7 +307,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                     
                     <Table
                         bordered={true}
-                        rowKey="sku_id"
+                        rowKey="sku_name"
                         className="table"
                         loading={loading}
                         columns={this.columns}
@@ -334,15 +315,15 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                         scroll={{ y: 400 }}
                         pagination={false}
                     />
-                    {/* <Pagination
+                    <Pagination
                         size="small"
-                        total={allCount}
+                        total={total}
                         current={page}
-                        defaultPageSize={50}
-                        showQuickJumper={true}
+                        pageSize={10}
                         onChange={this.onChangePage}
                         showTotal={total => `共${total}条`}
-                    /> */}
+                        style={{marginTop: 12}}
+                    />
                 </div>
             </Modal>
         );

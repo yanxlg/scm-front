@@ -10,4 +10,7 @@ export enum ChannelApiPath {
     CleanChangedProperties = '/api/v1/vova_goods/readed_property',
     ExportProductVersion = '/api/v1/vova_goods/version_exports',
     ActiveProductVersion = '/api/v1/vova_goods/apply_version',
+    QueryRegionShippingFee = '/api/v1/vova_goods/region_shipping_fee',
+    QueryGoodsDetail = '/api/v1/vova_goods/detail',
+    QueryGoodsSkuList = '/api/v1/vova_goods/sku_list',
 }

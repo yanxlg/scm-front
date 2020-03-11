@@ -101,11 +101,21 @@
             width: 100px;
             margin-right: 12px;
         }
+        .text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .item {
             margin-bottom: 6px;
-            span {
+            .desc {
                 display: inline-block;
-                width: 200px;
+                vertical-align: top;
+                width: 260px;
+                word-break: break-all;
+            }
+            .center {
+                margin: 0 8px;
             }
         }
     }
