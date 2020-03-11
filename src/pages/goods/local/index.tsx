@@ -20,7 +20,7 @@ import {
     getCatagoryList,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
-import { RouteComponentProps } from 'dva/router';
+import { RouteComponentProps } from 'react-router';
 
 declare interface IPageData {
     page?: number;

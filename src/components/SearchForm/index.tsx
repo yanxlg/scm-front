@@ -11,6 +11,7 @@ import { transNumber, transNullValue } from '@/utils/transform';
 import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/form.less';
 import '@/styles/index.less';
+import '@/styles/config.less';
 
 const { Option } = Select;
 

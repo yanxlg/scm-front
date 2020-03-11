@@ -4,8 +4,11 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Route, RouteProps } from 'dva/router';
+import { router } from 'dva';
 import { getCookie } from '@/utils/common';
+import { RouteProps } from 'react-router';
+
+const { Route } = router;
 
 const host = window.location.host;
 

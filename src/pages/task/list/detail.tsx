@@ -5,7 +5,7 @@ import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import '@/styles/card.less';
-import { RouteComponentProps } from 'dva/router';
+import { RouteComponentProps } from 'react-router';
 import { queryTaskDetail } from '@/services/task';
 import { Bind } from 'lodash-decorators';
 import { ITaskDetailInfo } from '@/interface/ITask';
