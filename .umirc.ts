@@ -60,11 +60,10 @@ const config = defineConfig({
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
             {
-                tslint: true,
                 formatter: 'codeframe',
                 async: false,
                 checkSyntacticErrors: true,
-                reportFiles: ['!src/.umi/**', '!node_modules', 'src/!**/!*.{ts,tsx}'],
+                reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
             },
         ]);
     },

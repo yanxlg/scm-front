@@ -22,7 +22,6 @@ import HotGather from '../components/editor/HotGather';
 import { utcToLocal } from '@/utils/date';
 import TimerUpdate from '../components/editor/TimerUpdate';
 import { EmptyObject } from '@/config/global';
-import { ConnectProps } from '@/models/connect';
 import CopyLink from '@/components/copyLink';
 
 const { TabPane } = Tabs;
