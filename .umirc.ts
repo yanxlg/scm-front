@@ -61,7 +61,7 @@ const config = defineConfig({
         config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
             {
                 formatter: 'codeframe',
-                async: false,
+                async: true,
                 checkSyntacticErrors: true,
                 reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
             },

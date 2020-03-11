@@ -11,7 +11,7 @@
     "dependencies": {
         "@ant-design/pro-layout": "^5.0.5",
         "@ant-design/icons":"^4.0.2",
-        "antd": "^4.0.1",
+        "antd": "^4.0.2",
         "lodash-decorators": "^6.0.1",
         "moment": "^2.24.0",
         "react": "^16.13.0",
@@ -19,8 +19,7 @@
         "classnames": "^2.2.6",
         "nprogress": "^0.2.0",
         "dva-logger": "^1.0.0",
-        "query-string": "^6.11.1",
-        "eslint-plugin-react-hooks": "^2.5.0"
+        "query-string": "^6.11.1"
     },
     "devDependencies": {
         "prettier": "^1.19.1",
@@ -57,7 +56,8 @@
         "@typescript-eslint/parser": "^2.23.0",
         "fork-ts-checker-webpack-plugin": "^4.0.5",
         "stylelint": "^13.2.1",
-        "husky": "^4.2.3"
+        "husky": "^4.2.3",
+        "eslint-plugin-react-hooks": "^2.5.0"
     },
 
     "husky": {

@@ -444,7 +444,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                     pagination={false}
                     loading={dataLoading}
                     scroll={{
-                        x: true,
+                        x: 'max-content',
                         scrollToFirstRowOnChange: true,
                     }}
                     minHeight={600}
