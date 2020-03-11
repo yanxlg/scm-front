@@ -1,9 +1,13 @@
-import { defineConfig, utils } from 'umi';
+import { defineConfig } from 'umi';
 const shajs = require('sha.js');
-import path from 'path';
 
 const config = defineConfig({
-    // forkTSCheker: {},
+    /*    forkTSCheker: {
+        formatter: 'codeframe',
+        async: false,
+        checkSyntacticErrors: true,
+        reportFiles: ['!src/.umi/!**', '!node_modules', 'src/!**!/!*.{ts,tsx}'],
+    },*/
     hash: true,
     devtool: process.env.NODE_ENV !== 'production' ? 'source-map' : false,
     antd: {},
@@ -53,23 +57,16 @@ const config = defineConfig({
         },
     },
     chainWebpack(config, { webpack }) {
-        const appSrc = path.resolve(process.cwd(), 'src');
-        const umi = path.resolve(process.cwd(), 'src/pages/.umi');
-        config.module
-            .rule('lint')
-            .test(/\.(js|mjs|jsx|ts|tsx)$/)
-            .include.add(appSrc)
-            .end()
-            .exclude.add(umi)
-            .end()
-            .enforce('pre')
-            .use('eslint-loader')
-            .loader('eslint-loader')
-            .options({
-                cache: true,
-                resolvePluginsRelativeTo: __dirname,
-                useEslintrc: true,
-            });
+        // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
+        config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
+            {
+                tslint: true,
+                formatter: 'codeframe',
+                async: false,
+                checkSyntacticErrors: true,
+                reportFiles: ['!src/.umi/**', '!node_modules', 'src/!**/!*.{ts,tsx}'],
+            },
+        ]);
     },
 });
 

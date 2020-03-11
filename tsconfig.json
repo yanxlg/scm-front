@@ -20,6 +20,5 @@
             ]
         },
         "allowSyntheticDefaultImports": true
-    },
-    "exclude": ["node_modules","src/.umi/*"]
+    }
 }
