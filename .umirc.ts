@@ -14,14 +14,16 @@ const config = defineConfig({
     dva: {
         hmr: true,
     },
-    dynamicImport: {
-        loading: '@/components/PageLoading/index',
-    },
     title: '供应链管理中台',
     dll: process.env.NODE_ENV === 'production',
     locale: {
+        antd: true,
+        title: false,
         default: 'zh-CN',
         baseNavigator: false,
+    },
+    dynamicImport: {
+        loading: '@/components/PageLoading/index',
     },
     cssLoader: {
         localsConvention: 'camelCaseOnly',
@@ -50,8 +52,8 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            // target: 'https://scm-api-t.vova.com.hk/',
-            target: 'http://192.168.120.17:3026/',
+            target: 'https://scm-api-t.vova.com.hk/',
+            // target: 'http://192.168.120.17:3026/',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
         },
@@ -60,11 +62,10 @@ const config = defineConfig({
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
             {
-                tslint: true,
                 formatter: 'codeframe',
-                async: false,
+                async: true,
                 checkSyntacticErrors: true,
-                reportFiles: ['!src/.umi/**', '!node_modules', 'src/!**/!*.{ts,tsx}'],
+                reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
             },
         ]);
     },

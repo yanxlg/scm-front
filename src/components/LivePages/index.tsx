@@ -1,9 +1,11 @@
 import React from 'react';
 
-import { matchPath } from 'dva/router';
+import { router } from 'dva';
 import { RouteComponentProps } from 'react-router';
 
 import styles from './_index.less';
+
+const { matchPath } = router;
 
 declare interface IRouter {
     path: string;
