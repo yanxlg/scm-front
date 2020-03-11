@@ -17,4 +17,6 @@ export enum OrderApiPath {
     // 错误订单
     getErrorOrderList = '/v1/orders/list/7',
     getOrderGoodsDetail = '/v1/order/goods_detail',
+    // 取消渠道订单
+    delChannelOrders = '/api/v1/orders/channel'
 }

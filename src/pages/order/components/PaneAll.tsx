@@ -1,13 +1,12 @@
 import React, { RefObject } from 'react';
-import { Pagination, Button } from 'antd';
-import { FormInstance } from 'antd/lib/form';
+import { Pagination, Button, message } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
 
-import { getAllOrderList, IFilterParams } from '@/services/order-manage';
+import { getAllOrderList, IFilterParams, delChannelOrders } from '@/services/order-manage';
 import {
     childDefaultFieldList,
     childAllFieldList,
@@ -340,6 +339,23 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
     };
 
+    // 取消渠道订单
+    cancelChannelOrder = () => {
+        const { childOrderList } = this.state;
+        const orderGoodsIdList = childOrderList.filter(item => item._checked).map(item => item.orderGoodsId)
+        if (orderGoodsIdList.length) {
+            // console.log('orderGoodsIdList', orderGoodsIdList);
+            delChannelOrders({
+                order_goods_ids: orderGoodsIdList
+            }).then(res => {
+                // console.log('delChannelOrders', res);
+            })
+        } else {
+            message.error('请选择需要删除的订单！');
+        }
+        // console.log('cancelChannelOrder',childOrderList );
+    }
+
     render() {
         const {
             page,
@@ -386,7 +402,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                             </Button>
                         ) : null}
                         {!showParentStatus ? (
-                            <Button type="primary" className="order-btn">
+                            <Button 
+                                type="primary" 
+                                className="order-btn"
+                                onClick={this.cancelChannelOrder}
+                            >
                                 取消渠道订单
                             </Button>
                         ) : null}

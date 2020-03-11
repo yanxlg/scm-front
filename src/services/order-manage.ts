@@ -68,3 +68,11 @@ export async function getOrderGoodsDetail(params: { middleground_order_id: strin
         params,
     });
 }
+
+// 取消渠道订单
+export async function delChannelOrders(data: { order_goods_ids: string[] }) {
+    return request.delete(OrderApiPath.delChannelOrders, {
+        requestType: 'json',
+        data,
+    });
+}
