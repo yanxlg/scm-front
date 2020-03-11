@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { IGoodsVersionRowItem, ISkuStyle, IOnsaleItem, ICatagoryData } from '../version';
+import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData } from '../version';
 
 import VersionImgDialog from './VersionImgDialog';
-import { formatDate } from '@/utils/date';
+import SkuDialog from './SkuDialog';
 
 declare interface IVersionTableProps {
     loading: boolean;
@@ -13,13 +13,17 @@ declare interface IVersionTableProps {
 }
 
 declare interface VersionTableState {
+    skuDialogStatus: boolean;
     versionImgDialogStatus: boolean;
     activeRow: IGoodsVersionRowItem | null;
 }
 
 class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableState> {
+    private skuDialogRef: RefObject<SkuDialog> = React.createRef();
+
     private columns: ColumnProps<IGoodsVersionRowItem>[] = [
         {
+            fixed: true,
             key: 'goods_status',
             width: 160,
             title: '操作',
@@ -37,7 +41,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                             size="small"
                             onClick={() => operationVersion(row.product_id, 'apply')}
                         >
-                            应用
+                            上架此版本
                         </Button>
                     );
                 } else {
@@ -47,21 +51,23 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         </Button>
                     );
                 }
-                return {
-                    children,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return children;
             },
         },
         {
+            fixed: true,
             key: 'product_id',
             width: 140,
             title: 'Product ID',
             dataIndex: 'product_id',
             align: 'center',
-            render: this.mergeCell,
+        },
+        {
+            key: 'goods_status',
+            title: '版本状态',
+            dataIndex: 'goods_status',
+            align: 'center',
+            width: 110,
         },
         {
             key: 'onsale_info',
@@ -70,37 +76,29 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'onsale_info',
             align: 'center',
             render: (value: IOnsaleItem[], row: IGoodsVersionRowItem) => {
-                return {
-                    children: <div>{value.map(item => item.onsale_channel).join('、')}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return <div>{value.map(item => item.onsale_channel).join('、')}</div>;
             },
         },
         {
-            key: 'sku_image',
+            key: 'inventory_status',
+            title: '销售状态',
+            dataIndex: 'inventory_status',
+            align: 'center',
+            width: 100,
+            render: (value: number) => {
+                return value === 1 ? '可销售' : '不可销售';
+            },
+        },
+        {
+            key: 'goods_img',
             width: 120,
             title: '商品图片',
-            dataIndex: 'sku_image',
+            dataIndex: 'goods_img',
             align: 'center',
-            render: (value: string[], row: IGoodsVersionRowItem) => {
-                // let isChange = false;
-                // if (row._prevVersion) {
-                //     const prevImgList = row._prevVersion.sku_image;
-                //     if (value.length !== prevImgList.length) {
-                //         isChange = true;
-                //     } else {
-                //         value.forEach((item, index) => {
-                //             if (item !== prevImgList[index]) {
-                //                 isChange = true;
-                //             }
-                //         });
-                //     }
-                // }
-                const children = (
+            render: (value: string, row: IGoodsVersionRowItem) => {
+                return (
                     <div>
-                        <img src={value[0]} />
+                        <img src={value} />
                         <Button
                             type="link"
                             // className={isChange ? 'red' : ''}
@@ -111,12 +109,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         </Button>
                     </div>
                 );
-                return {
-                    children,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
             },
         },
         {
@@ -125,32 +117,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '商品标题',
             dataIndex: 'title',
             align: 'center',
-            render: (value: string, row: IGoodsVersionRowItem) => {
-                // let children = null;
-                // if (row._prevVersion) {
-                //     if (row._prevVersion.title === value) {
-                //         children = <div className="text-left">原标题: {value}</div>;
-                //     } else {
-                //         children = (
-                //             <>
-                //                 <div className="text-left">
-                //                     原标题: {row._prevVersion.title}
-                //                 </div>
-                //                 <div className="text-left red">新标题: {value}</div>
-                //             </>
-                //         );
-                //     }
-                // } else {
-                //     children = <div className="text-left red">新标题: {value}</div>;
-                // }
-                // className="text-left"
-                return {
-                    children: <div>{value}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
         },
         {
             key: 'description',
@@ -158,118 +124,39 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '商品描述',
             dataIndex: 'description',
             align: 'center',
-            render: (value: string, row: IGoodsVersionRowItem) => {
-                // let children = null;
-                // if (row._prevVersion) {
-                //     if (row._prevVersion.description === value) {
-                //         children = <div className="text-left">原描述: {value}</div>;
-                //     } else {
-                //         children = (
-                //             <>
-                //                 <div className="text-left">
-                //                     原描述: {row._prevVersion.description}
-                //                 </div>
-                //                 <div className="text-left red">新描述: {value}</div>
-                //             </>
-                //         );
-                //     }
-                // } else {
-                //     children = <div className="text-left red">新描述: {value}</div>;
-                // }
-                //  className="text-left red"
-                return {
-                    children: <div>{value}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
         },
         {
-            key: 'sku_id',
-            width: 140,
-            title: '中台sku ID',
-            dataIndex: 'sku_id',
+            key: 'sku_number',
+            title: 'sku数量',
+            dataIndex: 'sku_number',
             align: 'center',
-        },
-        {
-            key: 'origin_sku_id',
-            width: 130,
-            title: '源sku ID',
-            dataIndex: 'origin_sku_id',
-            align: 'center',
-        },
-        {
-            key: 'sku_style',
-            width: 140,
-            title: '规格',
-            dataIndex: 'sku_style',
-            align: 'center',
-            render: (value: ISkuStyle, row: IGoodsVersionRowItem) => {
+            width: 120,
+            render: (value: number, row: IGoodsVersionRowItem) => {
                 return (
-                    // className="border text-left"
-                    <div>
-                        {Object.keys(value).map(item => (
-                            <div key={item}>
-                                {item}: {value[item]}
-                            </div>
-                        ))}
-                        {/* <div className="nowrap">{value.split(',')}</div> */}
-                    </div>
+                    <>
+                        <div>{value}</div>
+                        <Button
+                            ghost={true}
+                            size="small"
+                            type="primary"
+                            className="goods-local-img-edit"
+                            onClick={() => this.showSkuDialog(row)}
+                        >
+                            查看sku信息
+                        </Button>
+                    </>
                 );
             },
         },
         {
             key: 'sku_price',
             width: 140,
-            title: '价格',
+            title: '爬虫价格',
             dataIndex: 'sku_price',
             align: 'center',
-            // render: (value: number, row: IGoodsVersionRowItem) =>
-            //     this.compareVersion(value, row, 'sku_price', '价格'),
-        },
-        // {
-        //     key: 'price1',
-        //     width: 120,
-        //     title: '价格变化',
-        //     // dataIndex: 'price',
-        //     align: 'center',
-        //     render: (a1, row: IGoodsVersionRowItem) => {
-        //         const value = row.sku_price;
-        //         let children = null;
-        //         if (row._prevVersion && row._prevVersion.sku_price != value) {
-        //             const prevPrice = row._prevVersion.sku_price;
-        //             const num = value - prevPrice;
-        //             //
-        //             children = (
-        //                 <div>
-        //                     <span className="red">{num > 0 ? '↑' : '↓'}</span>{' '}
-        //                     {Math.abs(prevPrice - value)}
-        //                 </div>
-        //             );
-        //         } else {
-        //             children = <div>-</div>;
-        //         }
-        //         return <div className="border">{children}</div>;
-        //     },
-        // },
-        {
-            key: 'sku_weight',
-            width: 120,
-            title: '重量',
-            dataIndex: 'sku_weight',
-            align: 'center',
-            // render: (value: number, row: IGoodsVersionRowItem) =>
-            //     this.compareVersion(value, row, 'sku_weight', '重量'),
-        },
-        {
-            key: 'sku_inventory',
-            width: 120,
-            title: '库存',
-            dataIndex: 'sku_inventory',
-            align: 'center',
-            // render: (value: number, row: IGoodsVersionRowItem) =>
-            //     this.compareVersion(value, row, 'sku_inventory', '库存'),
+            render: (value: number) => {
+                return `￥${value}`;
+            },
         },
         {
             key: 'sales_volume',
@@ -277,16 +164,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '销量',
             dataIndex: 'sales_volume',
             align: 'center',
-            // render: (value: number, row: IGoodsVersionRowItem) =>
-            //     this.compareVersion(value, row, 'sales_volume', '销量', true),
-            render: (value: string, row: IGoodsVersionRowItem) => {
-                return {
-                    children: <div>{value}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
         },
         {
             key: 'comments',
@@ -294,16 +171,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '评价数量',
             dataIndex: 'comments',
             align: 'center',
-            // render: (value: number, row: IGoodsVersionRowItem) =>
-            //     this.compareVersion(value, row, 'comments', '评论数', true),
-            render: (value: string, row: IGoodsVersionRowItem) => {
-                return {
-                    children: <div>{value}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
         },
         {
             key: 'first_catagory',
@@ -311,15 +178,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '一级类目',
             dataIndex: 'first_catagory',
             align: 'center',
-            // render: (value: ICatagoryData, row: IGoodsVersionRowItem) =>
-            //     this.compareCatagory(value, row, 'first_catagory', '类目', true),
             render: (value: ICatagoryData, row: IGoodsVersionRowItem) => {
-                return {
-                    children: <div>{value.name}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return value.name;
             },
         },
         {
@@ -328,15 +188,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '二级类目',
             dataIndex: 'second_catagory',
             align: 'center',
-            // render: (value: ICatagoryData, row: IGoodsVersionRowItem) =>
-            //     this.compareCatagory(value, row, 'second_catagory', '类目', true),
             render: (value: ICatagoryData, row: IGoodsVersionRowItem) => {
-                return {
-                    children: <div>{value.name}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return value.name;
             },
         },
         {
@@ -345,15 +198,8 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '三级类目',
             dataIndex: 'third_catagory',
             align: 'center',
-            // render: (value: ICatagoryData, row: IGoodsVersionRowItem) =>
-            //     this.compareCatagory(value, row, 'third_catagory', '类目', true),
             render: (value: ICatagoryData, row: IGoodsVersionRowItem) => {
-                return {
-                    children: <div>{value.name}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return value.name;
             },
         },
         {
@@ -362,117 +208,17 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             title: '变更时间',
             dataIndex: '_update_time',
             align: 'center',
-            render: (value: string, row: IGoodsVersionRowItem) => {
-                return {
-                    // children: (
-                    //     <div className="border">
-                    //         <div className="nowrap">{value}</div>
-                    //     </div>
-                    // ),
-                    children: <div>{value}</div>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
         },
     ];
 
     constructor(props: IVersionTableProps) {
         super(props);
         this.state = {
+            skuDialogStatus: false,
             versionImgDialogStatus: false,
             activeRow: null,
         };
     }
-
-    // 版本数据对比
-    // private compareVersion = (
-    //     value: number | string,
-    //     row: IGoodsVersionRowItem,
-    //     key: string,
-    //     desc: string,
-    //     isMerge?: boolean
-    // ) => {
-    //     let children = null;
-    //     if (row._prevVersion) {
-    //         const prevValue = row._prevVersion[key as 'sku_price'];
-    //         if (prevValue === value) {
-    //             children = (
-    //                 <div>
-    //                     原{desc}: {value}
-    //                 </div>
-    //             );
-    //         } else {
-    //             children = (
-    //                 <>
-    //                     <div>
-    //                         原{desc}: {prevValue}
-    //                     </div>
-    //                     <div className="red">
-    //                         新{desc}: {value}
-    //                     </div>
-    //                 </>
-    //             );
-    //         }
-    //     } else {
-    //         children = (
-    //             <div className="red">
-    //                 新{desc}: {value}
-    //             </div>
-    //         );
-    //     }
-    //     return {
-    //         children: <div className="border text-left">{children}</div>,
-    //         props: {
-    //             rowSpan: isMerge ? (row._rowspan || 0) : 1
-    //         },
-    //     };
-    // };
-
-    // 类目数据对比
-    // private compareCatagory = (
-    //     value: ICatagoryData,
-    //     row: IGoodsVersionRowItem,
-    //     key: string,
-    //     desc: string,
-    //     isMerge?: boolean
-    // ) => {
-    //     let children = null;
-    //     if (row._prevVersion) {
-    //         const prevValue = row._prevVersion[key as 'first_catagory'];
-    //         if (prevValue.id === value.id) {
-    //             children = (
-    //                 <div>
-    //                     原{desc}: {value.name}
-    //                 </div>
-    //             );
-    //         } else {
-    //             children = (
-    //                 <>
-    //                     <div>
-    //                         原{desc}: {prevValue.name}
-    //                     </div>
-    //                     <div className="red">
-    //                         新{desc}: {value.name}
-    //                     </div>
-    //                 </>
-    //             );
-    //         }
-    //     } else {
-    //         children = (
-    //             <div className="red">
-    //                 新{desc}: {value.name}
-    //             </div>
-    //         );
-    //     }
-    //     return {
-    //         children: <div className="border text-left">{children}</div>,
-    //         props: {
-    //             rowSpan: isMerge ? (row._rowspan || 0) : 1
-    //         },
-    //     };
-    // };
 
     // 展示图片弹框
     showImgs = (rowData: IGoodsVersionRowItem) => {
@@ -487,25 +233,33 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         );
     };
 
-    // 合并单元格
-    private mergeCell(value: string, row: IGoodsVersionRowItem, index: number) {
-        return {
-            children: value,
-            props: {
-                rowSpan: row._rowspan || 0,
-            },
-        };
-    }
-
     private toggleVersionImgDialog = (status: boolean) => {
         this.setState({
             versionImgDialogStatus: status,
         });
     };
 
+    private showSkuDialog = (rowData: IGoodsVersionRowItem) => {
+        this.setState(
+            {
+                activeRow: rowData,
+            },
+            () => {
+                this.toggleSkuDialog(true);
+                this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
+            },
+        );
+    };
+
+    private toggleSkuDialog = (status: boolean) => {
+        this.setState({
+            skuDialogStatus: status,
+        });
+    };
+
     render() {
         const { versionGoodsList, loading } = this.props;
-        const { versionImgDialogStatus, activeRow } = this.state;
+        const { versionImgDialogStatus, activeRow, skuDialogStatus } = this.state;
 
         return (
             <>
@@ -523,6 +277,12 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     visible={versionImgDialogStatus}
                     activeRow={activeRow}
                     toggleVersionImgDialog={this.toggleVersionImgDialog}
+                />
+                <SkuDialog
+                    visible={skuDialogStatus}
+                    ref={this.skuDialogRef}
+                    currentRowData={activeRow}
+                    toggleSkuDialog={this.toggleSkuDialog}
                 />
             </>
         );

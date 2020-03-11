@@ -3,6 +3,9 @@
 .form{
     &-item{
         margin-top: 24px;
+        &-bottom{
+            margin-bottom: 24px;
+        }
         &-block{
             display: block!important;
             margin-right:0!important;
@@ -71,6 +74,13 @@
         }
     }
     &-required{
+        &-hide{
+            .ant-form-item-required{
+                &:before{
+                    visibility: hidden;
+                }
+            }
+        }
         &:before{
             display: inline-block;
             margin-right: 4px;

@@ -1,16 +1,19 @@
 import React, { useCallback, useMemo } from 'react';
-import { Button } from 'antd';
+import { Button, Modal } from 'antd';
 import router from 'umi/router';
 import '@/styles/modal.less';
 
-const GatherFailureModal: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+const GatherFailureModal: React.FC = () => {
     /*  const goToDrafts = useCallback(()=>{
         router.push("/config/drafts");
     },[]);*/
+    const onClick = useCallback(() => {
+        Modal.destroyAll();
+    }, []);
     return useMemo(() => {
         return (
             <div>
-                <div className="config-modal-title">采集任务创建失败</div>
+                <div className="config-modal-title">任务创建失败</div>
                 <div className="config-modal-title">请重新尝试</div>
                 <Button onClick={onClick} type="primary" className="config-modal-btn">
                     重新创建任务
@@ -23,4 +26,11 @@ const GatherFailureModal: React.FC<{ onClick: () => void }> = ({ onClick }) => {
     }, []);
 };
 
-export default GatherFailureModal;
+export function showFailureModal() {
+    Modal.info({
+        content: <GatherFailureModal />,
+        className: 'modal-empty',
+        icon: null,
+        maskClosable: true,
+    });
+}

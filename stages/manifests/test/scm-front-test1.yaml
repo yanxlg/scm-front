@@ -1,0 +1,175 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trigram-scm-front-page-nginx-conf-1
+data:
+  nginx.conf: |
+    user  www-data;
+    worker_processes  1;
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+    events {
+        worker_connections  1024;
+    }
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format apache_format '$remote_addr - $remote_user [$time_local] "$request" '
+                           '$status $body_bytes_sent "$http_referer" '
+                           '"$http_user_agent"'
+                           ' "$http_x_forwarded_for" $host'
+                           ' "$upstream_cache_status" '
+                           ' $request_time';
+
+
+        access_log  /var/log/nginx/access.log  apache_format;
+        sendfile        on;
+        #tcp_nopush     on;
+        keepalive_timeout  65;
+        #gzip  on;
+        include /etc/nginx/conf.d/*.conf;
+    }
+  trigram-scm-front-page.conf: |
+    server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        access_log  /var/log/nginx/access.log  apache_format;
+        set $prjroot /usr/share/nginx/html;
+        root $prjroot/;
+        index index.html;
+
+        location /version {
+            root $prjroot/;
+            add_header Content-Type text/plain;
+        }
+        location / {
+            if ($cookie_jsessionid = "")
+            {
+                return 302 https://cas-t.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
+            }
+
+            try_files $uri $uri/ /index.html;
+        }
+        location /auth/{
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass https://scm-api-t.vova.com.hk;
+        }
+        location /api/{
+            proxy_set_header   Cookie $http_cookie;
+            proxy_set_header   Host $host;
+            proxy_set_header   Remote_Addr $remote_addr;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   REMOTE-HOST $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass https://scm-api-t.vova.com.hk/;
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trigram-scm-front-page-1
+  labels:
+    name: trigram-scm-front-page-1
+spec:
+  selector:
+    matchLabels:
+      name: trigram-scm-front-page-1
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      name: trigram-scm-front-page-1
+      labels:
+        name: trigram-scm-front-page-1
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: trigram-scm-front-page
+          image: 724258426085.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http-port
+          volumeMounts:
+            - name: trigram-scm-front-page-conf
+              mountPath: /etc/nginx/conf.d
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: nginx-log
+              mountPath: /var/log/nginx
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /version
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 12
+      volumes:
+        - name: nginx-log
+          hostPath:
+            path: /opt/data1/logs/scm-front/nginx
+        - name: nginx-conf
+          configMap:
+            name: trigram-scm-front-page-nginx-conf-1
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+        - name: trigram-scm-front-page-conf
+          configMap:
+            name: trigram-scm-front-page-nginx-conf-1
+            items:
+              - key: trigram-scm-front-page.conf
+                path: trigram-scm-front-page.conf
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: name
+                      operator: In
+                      values:
+                        - trigram-scm-front-page-1
+                topologyKey: kubernetes.io/hostname
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: trigram-scm-front-page-svc-1
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /version
+spec:
+  selector:
+    name: trigram-scm-front-page-1
+  ports:
+    - name: svc-http
+      port: 80
+      targetPort: http-port
+      protocol: TCP
+    - name: svc-https
+      port: 443
+      targetPort: http-port
+  type: NodePort

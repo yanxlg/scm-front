@@ -19,7 +19,7 @@ import {
     IFilterParams,
     getCatagoryList,
 } from '@/services/goods';
-import { strToNumber } from '@/utils/common';
+import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'dva/router';
 
 declare interface IPageData {
@@ -30,11 +30,6 @@ declare interface IPageData {
 export declare interface ICatagoryData {
     id?: string;
     name?: string;
-}
-
-declare interface ITranslateItem {
-    language: string;
-    updateTime: number;
 }
 
 export declare interface ISaleItem {
@@ -80,8 +75,10 @@ declare interface IBaseData {
     worm_goods_id: number;
     onsale_info: ISaleItem[];
     update_time: number;
+    create_time: number;
     worm_goodsinfo_link: string;
     hasnew_version: number;
+    inventory_status: number;
 }
 
 declare interface IDataItem extends IBaseData {
@@ -95,9 +92,7 @@ export declare interface IRowDataItem extends IBaseData {
     sku_weight: number;
     sku_inventory: number;
     sku_shopping_fee: number;
-    _rowspan?: number;
-    _sales_status?: string;
-    _sku_img_list?: string[];
+    // _sku_img_list?: string[];
 }
 
 export declare interface ICategoryItem {
@@ -121,7 +116,6 @@ declare interface IIndexState {
     allCount: number;
     goodsList: IRowDataItem[];
     selectedRowKeys: string[];
-    rowKeys: string[];
     saleStatusList: ISaleStatausItem[];
     allCatagoryList: ICategoryItem[];
     currentEditGoods: IRowDataItem | null;
@@ -134,7 +128,7 @@ type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     localSearchRef: LocalSearch | null = null;
-    goodsTableRef: GoodsTable | null = null;
+    // goodsTableRef: GoodsTable | null = null;
     // 保存搜索条件
     searchFilter: IFilterParams | null = null;
 
@@ -154,7 +148,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             allCount: 0,
             goodsList: [],
             selectedRowKeys: [],
-            rowKeys: [],
             saleStatusList: [],
             allCatagoryList: [],
             currentEditGoods: null,
@@ -173,10 +166,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             selectedRowKeys: [],
         });
-        if (this.goodsTableRef) {
-            // console.log(this.localSearchRef);
-            this.goodsTableRef.cancelCheckAll();
-        }
     };
 
     // 校验  sku数量、价格范围、销量 区间是否正常
@@ -184,7 +173,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const {
             task_number,
             store_id,
-            commodity_id,
+            // commodity_id,
             min_sku,
             max_sku,
             min_price,
@@ -201,10 +190,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             message.error('店铺ID输入了非法字符，只支持检索数字！');
             return false;
         }
-        if (commodity_id && reg.test(commodity_id.trim())) {
-            message.error('Commodity ID输入了非法字符，只支持检索数字！');
-            return false;
-        }
+        // if (commodity_id && reg.test(commodity_id.trim())) {
+        //     message.error('Commodity ID输入了非法字符，只支持检索数字！');
+        //     return false;
+        // }
         if (min_sku >= 0 && max_sku >= 0 && min_sku - max_sku > 0) {
             message.error('sku数量最小值大于最大值！');
             return false;
@@ -240,7 +229,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 third_catagory,
                 ...searhParams
             } = this.localSearchRef.state;
-            if (!this.validateSearhParam({ ...searhParams, task_number, store_id, commodity_id })) {
+            // commodity_id
+            if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
                 return;
             }
             // 转换数据格式
@@ -313,59 +303,46 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 设置选择行
-    private changeSelectedRowKeys = (keys: string[], productId?: string) => {
-        const { goodsList } = this.state;
+    private changeSelectedRowKeys = (keys: string[]) => {
         this.setState({
             selectedRowKeys: keys,
-            // 改变goodsList(执行column的render)
-            goodsList: goodsList.map(item => {
-                if ((!productId || item.product_id === productId) && item._rowspan) {
-                    return {
-                        ...item,
-                    };
-                }
-                return item;
-            }),
         });
     };
 
     // 处理表格数据，用于合并单元格
     private addRowSpanData(list: IDataItem[]): IRowDataItem[] {
         let ret: IRowDataItem[] = [];
-        let rowKeys: string[] = [];
         // let goodsId: string | number = 0;
         for (let i = 0, len = list.length; i < len; i++) {
-            let { sku_info, first_catagory, second_catagory, third_catagory, ...rest } = list[i];
+            let {
+                sku_info,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                sku_image,
+                ...rest
+            } = list[i];
             first_catagory = Array.isArray(first_catagory) ? {} : first_catagory;
             second_catagory = Array.isArray(second_catagory) ? {} : second_catagory;
             third_catagory = Array.isArray(third_catagory) ? {} : third_catagory;
+            // 把默认主图放第一位
+            const imgIndex = sku_image.findIndex(imgItem => imgItem === rest.goods_img);
+            sku_image.splice(imgIndex, 1);
+            sku_image = [rest.goods_img, ...sku_image];
+            // 只展示默认的一条sku
             sku_info.forEach((item, index) => {
                 let rowDataItem: IRowDataItem = {
                     ...rest,
                     ...item,
+                    sku_image,
                     first_catagory,
                     second_catagory,
                     third_catagory,
                 };
-                if (index === 0) {
-                    rowDataItem._rowspan = sku_info.length;
-                    const i = sku_info.findIndex(item => Number(item.sku_inventory) > 0);
-                    rowDataItem._sales_status = i > -1 ? '可销售' : '不可销售';
-                    rowKeys.push(rowDataItem.product_id);
-                    rowDataItem._sku_img_list = [...new Set(sku_info.map(item => item.sku_img))];
-                }
-                // rowDataItem._isCollapse = false;
-                // rowDataItem._isParent = true;
-                // rowDataItem._hidden = false;
                 ret.push(rowDataItem);
             });
         }
-        this.setState({
-            rowKeys,
-        });
-        // console.log('1111', ret);
         return ret;
-        // return list
     }
 
     // 导入商品弹框
@@ -494,9 +471,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     onsaleLoading: false,
                 });
                 this.onSearch();
-                message.success('一键上架成功');
+                message.success('上架任务已发送');
             })
             .catch(err => {
+                message.error('上架任务发送失败');
                 // console.log('postGoodsOnsale ERR');
                 this.setState({
                     onsaleLoading: false,
@@ -514,7 +492,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             deleteLoading: true,
         });
-        // console.log('selectedRowKeys', selectedRowKeys);
         getGoodsDelete({
             commodity_ids: [
                 ...new Set(
@@ -535,9 +512,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 if (success.length) {
                     str += `删除成功${success.join('、')}。`;
                 } else if (failed.length) {
-                    str += `删除失败${failed.join('、')}。`;
+                    str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
                 }
-                message.success(str);
+                message.info(str);
             })
             .catch(err => {
                 // console.log('getGoodsDelete ERR');
@@ -555,7 +532,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     pageCountChange = (current: number, size: number) => {
+        // console.log('current', current);
+        const { page, page_count } = this.state;
         this.onSearch({
+            page: getCurrentPage(size, (page - 1) * page_count + 1),
             page_count: size,
         });
     };
@@ -595,7 +575,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             goodsEditDialogStatus,
             excelDialogStataus,
             selectedRowKeys,
-            rowKeys,
             onsaleLoading,
             deleteLoading,
             searchLoading,
@@ -625,6 +604,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 />
                 <Pagination
                     className="goods-local-pagination"
+                    size="small"
                     total={allCount}
                     current={page}
                     pageSize={page_count}
@@ -633,14 +613,18 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     pageSizeOptions={pageSizeOptions}
                     onChange={this.onChangePage}
                     onShowSizeChange={this.pageCountChange}
+                    showTotal={total => {
+                        if (total > 10000) {
+                            return '';
+                        }
+                        return `共${total}条`;
+                    }}
                 />
                 <GoodsTable
-                    ref={node => (this.goodsTableRef = node)}
+                    // ref={node => (this.goodsTableRef = node)}
                     searchLoading={searchLoading}
                     goodsList={goodsList}
-                    allCatagoryList={allCatagoryList}
                     selectedRowKeys={selectedRowKeys}
-                    rowKeys={rowKeys}
                     toggleEditGoodsDialog={this.toggleEditGoodsDialog}
                     changeSelectedRowKeys={this.changeSelectedRowKeys}
                     searchGoodsSale={this.searchGoodsSale}

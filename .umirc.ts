@@ -40,6 +40,7 @@ const config: IConfig = {
                 antd: true,
                 dva: true,
                 dynamicImport: { webpackChunkName: true },
+                title: '供应链管理中台',
                 dll: process.env.NODE_ENV === 'production',
                 locale: {
                     enable: false,

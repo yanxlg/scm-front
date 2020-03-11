@@ -113,7 +113,9 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
 
     onSearch = () => {
         // console.log('onSearch', this.state);
-        this.props.onSearch();
+        this.props.onSearch({
+            page: 1,
+        });
     };
 
     refreshPage = () => {
@@ -184,7 +186,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                     />
                 </div>
                 <div className="local-search-item">
-                    <span className="local-search-label">库存</span>
+                    <span className="local-search-label">销售状态</span>
                     <Select
                         className="local-search-item-select"
                         value={inventory_status}

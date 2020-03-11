@@ -3,39 +3,20 @@ import '@/styles/product.less';
 import '@/styles/form.less';
 import { Button, Modal, Form, Spin } from 'antd';
 import { Bind } from 'lodash-decorators';
-import { editGoodsDetail, queryGoodsDetail } from '@/services/channel';
+import { editChannelProductDetail, queryChannelProductDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
 import NumberInput from '@/components/NumberInput';
 import IntegerInput from '@/components/IntegerInput';
-
-declare interface ISku {
-    sku_name: string;
-    sku_image: string;
-    specs: Array<{
-        name: string;
-        value: string;
-    }>;
-    price: string;
-    shipping_fee: string;
-    storage: string;
-}
-
-declare interface IFormData {
-    sku_list: ISku[];
-}
+import { EmptyObject } from '@/enums/ConfigEnum';
+import { IChannelProductDetailResponse, ISku, ISkuBody } from '@/interface/IChannel';
 
 declare interface IProductEditProps {
     product_id: string;
     channel?: string;
 }
 
-declare interface IProductEditState {
+declare interface IProductEditState extends Partial<IChannelProductDetailResponse> {
     loading: boolean;
-    product_id?: string;
-    product_name?: string;
-    main_image?: string;
-    product_description?: string;
-    sku_list?: ISku[];
     submitting: boolean;
 }
 
@@ -54,19 +35,21 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
     @Bind
     private queryDetail() {
         const { product_id, channel } = this.props;
-        queryGoodsDetail({ product_id, channel }).then(({ data = {} }) => {
-            this.setState(
-                {
-                    loading: false,
-                    ...data,
-                },
-                () => {
-                    this.formRef.current!.setFieldsValue({
-                        sku_list: data.sku_list,
-                    });
-                },
-            );
-        });
+        queryChannelProductDetail({ product_id, channel }).then(
+            ({ data = EmptyObject } = EmptyObject) => {
+                this.setState(
+                    {
+                        loading: false,
+                        ...data,
+                    },
+                    () => {
+                        this.formRef.current!.setFieldsValue({
+                            sku_list: data.sku_list,
+                        });
+                    },
+                );
+            },
+        );
     }
 
     @Bind
@@ -76,10 +59,9 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
     @Bind
     private diffSkuList(nextSkuList: ISku[], beforeSkuList: ISku[]) {
         // 仅 diff价格、运费、库存三个字段
-        let updated = false;
-        let i = 0;
         const length = nextSkuList.length;
-        while (!updated && i < length) {
+        let updatedItems: ISku[] = [];
+        for (let i = 0; i < length; i++) {
             const next = nextSkuList[i];
             const before = beforeSkuList[i];
             if (
@@ -87,33 +69,32 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                 Number(next.storage) !== Number(before.storage) ||
                 Number(next.shipping_fee) !== Number(before.shipping_fee)
             ) {
-                updated = true;
-            } else {
-                i++;
+                updatedItems.push(next);
             }
         }
-        return updated;
+        return updatedItems;
     }
     @Bind
     private onSubmit() {
         const { product_id } = this.props;
         const { sku_list = [] } = this.formRef.current!.getFieldsValue();
         const { sku_list: _sku_list = [] } = this.state;
+        const mergeList = this.diffSkuList(sku_list, _sku_list);
         // diff
-        if (sku_list.length > 0 && this.diffSkuList(sku_list, _sku_list)) {
+        if (sku_list.length > 0 && mergeList.length > 0) {
             this.setState({
                 submitting: true,
             });
-            editGoodsDetail({
+            editChannelProductDetail({
                 product_id: product_id,
-                sku_list: sku_list.map((sku: ISku) => {
+                sku_list: (mergeList.map((sku: ISku) => {
                     return {
-                        sku: sku.sku_name,
+                        sku: sku.sku_name as string,
                         shop_price: sku.price,
                         shipping_fee: sku.shipping_fee,
                         storage: sku.storage,
                     };
-                }),
+                }) as unknown) as ISkuBody[],
             })
                 .then(() => {
                     this.onClose();
@@ -176,7 +157,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                             )}
                         </div>
                         {sku_list.map((sku: ISku, index: number) => {
-                            const { specs = [], sku_name, sku_image } = sku;
+                            const { specs = [], sku_name = '', sku_image } = sku;
                             return (
                                 <div className="form-item flex flex-align" key={sku_name + index}>
                                     <div

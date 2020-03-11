@@ -35,7 +35,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
         this.setState({
             confirmLoading: true,
         });
-        return this.props.getExcelData(val, this.excelPageSize).finally(() => {
+        return this.props.getExcelData(val + 1, this.excelPageSize).finally(() => {
             this.setState({
                 confirmLoading: false,
             });
