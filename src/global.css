@@ -14,3 +14,9 @@ body {
 .ant-pro-basicLayout-content{
     background: #fff;
 }
+
+
+.ant-table table{
+    width: max-content!important;
+    min-width: 100%!important;
+}
