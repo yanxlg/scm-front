@@ -17,7 +17,7 @@ const config = defineConfig({
         hmr: true,
     },
     title: '供应链管理中台',
-    dll: !dev,
+    // dll: !dev,
     locale: {
         antd: true,
         title: false,
