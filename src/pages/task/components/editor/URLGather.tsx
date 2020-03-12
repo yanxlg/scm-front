@@ -33,14 +33,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
     const [failTimes, setFailTimes] = useState<number | undefined>();
 
     const convertDetail = useCallback((info: ITaskDetailInfo) => {
-        const {
-            range,
-            task_end_time,
-            task_start_time,
-            task_interval_seconds,
-            urls,
-            ...extra
-        } = info;
+        const { task_end_time, task_start_time, task_interval_seconds, urls, ...extra } = info;
         return {
             task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
             urls: parseText(urls),

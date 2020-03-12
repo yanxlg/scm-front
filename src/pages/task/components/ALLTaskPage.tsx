@@ -4,7 +4,7 @@ import { ColumnProps } from 'antd/es/table';
 import { abortTasks, activeTasks, deleteTasks, getTaskList, reActiveTasks } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import router from 'umi/router';
+import { history } from 'umi';
 import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import {
     TaskRangeCode,
@@ -18,7 +18,7 @@ import {
     TaskTypeList,
     TaskTypeMap,
 } from '@/enums/StatusEnum';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import CollapsePopOver from '@/components/CollapsePopOver';
 import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
@@ -27,10 +27,9 @@ import '@/styles/config.less';
 import '@/styles/table.less';
 import '@/styles/task.less';
 import { ITaskListItem, ITaskListQuery } from '@/interface/ITask';
-import { EmptyObject, global } from '@/config/global';
+import { EmptyObject } from '@/config/global';
 import queryString from 'query-string';
-import { connect } from '@/compatibility/connect';
-import { ConnectProps } from '@/models/connect';
+import CopyLink from '@/components/copyLink';
 
 declare interface IALLTaskPageState {
     selectedRowKeys: string[];
@@ -55,14 +54,12 @@ declare interface ISearchFormConfig {
     initialValues?: { [key: string]: any };
 }
 
-@connect(() => {
-    return {};
-})
 @BindAll()
-class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, IALLTaskPageState> {
-    private defaultFormRef: RefObject<JsonForm> = React.createRef();
-    private expendFormRef: RefObject<JsonForm> = React.createRef();
-    constructor(props: IALLTaskPageProps & ConnectProps) {
+class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
+    private defaultFormRef: RefObject<SearchForm> = React.createRef();
+    private expendFormRef: RefObject<SearchForm> = React.createRef();
+    private queryData: any = {};
+    constructor(props: IALLTaskPageProps) {
         super(props);
         const { page, page_number, ...defaultInitialValues } = this.computeInitialValues();
         this.state = {
@@ -92,6 +89,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
     }
 
     private computeInitialValues() {
+        // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
         if (query) {
             window.history.replaceState({}, '', url);
@@ -157,24 +155,21 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
         };
         const initialTaskStatus = this.props.task_status;
         // 设置方法后才显示copylink
-        this.props.dispatch!({
-            type: 'global/cacheQueryData',
-            queryData: {
-                ...query,
-                tabKey:
-                    initialTaskStatus === void 0
-                        ? '1'
-                        : initialTaskStatus === TaskStatusEnum.UnExecuted
-                        ? '2'
-                        : initialTaskStatus === TaskStatusEnum.Executing
-                        ? '3'
-                        : initialTaskStatus === TaskStatusEnum.Executed
-                        ? '4'
-                        : initialTaskStatus === TaskStatusEnum.Failed
-                        ? 5
-                        : '6',
-            },
-        });
+        this.queryData = {
+            ...query,
+            tabKey:
+                initialTaskStatus === void 0
+                    ? '1'
+                    : initialTaskStatus === TaskStatusEnum.UnExecuted
+                    ? '2'
+                    : initialTaskStatus === TaskStatusEnum.Executing
+                    ? '3'
+                    : initialTaskStatus === TaskStatusEnum.Executed
+                    ? '4'
+                    : initialTaskStatus === TaskStatusEnum.Failed
+                    ? 5
+                    : '6',
+        };
 
         return getTaskList(query)
             .then(
@@ -353,7 +348,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
     }
 
     private viewTaskResult(task_id: number) {
-        router.push({
+        history.push({
             pathname: '/goods/local',
             state: {
                 task_id,
@@ -362,7 +357,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
     }
 
     private viewTaskDetail(task_id: number) {
-        router.push(`/task/list/${task_id}`);
+        history.push(`/task/list/${task_id}`);
     }
 
     private deleteTasks() {
@@ -426,10 +421,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
                         任务<span className="task-justify-1">SN</span>
                     </span>
                 ),
-                type: 'input',
+                type: 'number',
                 name: 'task_sn',
-                className: 'input-default',
+                className: 'input-default input-handler',
                 formItemClassName: 'form-item',
+                formatter: 'number',
             },
             {
                 label: '任务状态',
@@ -524,10 +520,11 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
                         任务<span className="task-justify-1">SN</span>
                     </span>
                 ),
-                type: 'input',
+                type: 'number',
                 name: 'task_sn',
-                className: 'input-default',
+                className: 'input-default input-handler',
                 formItemClassName: 'form-item',
+                formatter: 'number',
             },
         ],
         expend: [
@@ -587,6 +584,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
     private onRefresh() {
         return this.queryList();
     }
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
     render() {
         const {
             selectedRowKeys,
@@ -609,7 +609,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
         const formConfig = task_status === void 0 ? this.allFieldsList : this.unExecutedFieldsList;
         return (
             <div>
-                <JsonForm
+                <SearchForm
                     ref={this.defaultFormRef}
                     fieldList={formConfig.default}
                     initialValues={formConfig.initialValues}
@@ -637,9 +637,9 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
                     >
                         刷新
                     </LoadingButton>
-                </JsonForm>
+                </SearchForm>
                 <CollapsePopOver collapse={showMore}>
-                    <JsonForm
+                    <SearchForm
                         ref={this.expendFormRef}
                         className="form-item-bottom"
                         fieldList={formConfig.expend}
@@ -723,12 +723,13 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps & ConnectProps, 
                         pagination={false}
                         loading={dataLoading}
                         scroll={{
-                            x: true,
+                            x: 'max-content',
                             scrollToFirstRowOnChange: true,
                         }}
                         bottom={130}
                     />
                 </div>
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

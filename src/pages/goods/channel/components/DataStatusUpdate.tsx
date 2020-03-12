@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, Spin } from 'antd';
-import router from 'umi/router';
+import { history } from 'umi';
 import '@/styles/form.less';
 import { queryChannelChangedProperties } from '@/services/channel';
 import { IChannelChangedProperty } from '@/interface/IChannel';
@@ -22,7 +22,7 @@ const DataStatusUpdate: React.FC = () => {
     }, []);
 
     const goTo = useCallback(() => {
-        router.push(`${window.location.pathname}/version`);
+        history.push(`${window.location.pathname}/version`);
     }, []);
 
     return useMemo(() => {

@@ -1,4 +1,4 @@
-import history from '@@/history';
+import { history } from 'umi';
 import { Modal } from 'antd';
 import NProgress from 'nprogress';
 const logger = require('dva-logger');

@@ -1,4 +1,3 @@
-import { IApiParams } from '@/pages/goods/channel/components/VersionSearch';
 import request from '@/utils/request';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import {

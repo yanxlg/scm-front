@@ -2,10 +2,16 @@ import React, { RefObject } from 'react';
 import { Button, Tabs, message } from 'antd';
 
 import OrderFilter from './components/OrderFilter';
-import OrderTable from './components/OrderTable';
+import OrderTable from './components/OrderTable_del';
 import PaneAll from './components/PaneAll';
+import PanePendingOrder from './components/PanePendingOrder';
+import PanePay from './components/PanePay';
+import PaneWaitShip from './components/PaneWaitShip';
+import PaneError from './components/PaneError';
+import PaneNotStock from './components/PaneNotStock';
+import PaneStockNotShip from './components/PaneStockNotShip';
 
-import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
+// import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
 
 import '@/styles/order.less';
 
@@ -39,81 +45,18 @@ export declare interface IOrderItem {
     purchase_waybill_number: string;
 }
 
-declare interface IOrderState {
-    loading: boolean;
-    page: number;
-    pageNumber: number;
-    total: number;
-    orderList: IOrderItem[];
-    selectedRows: IOrderItem[];
-}
+declare interface IOrderState {}
 
 class Order extends React.PureComponent<{}, IOrderState> {
     private orderFilterRef: RefObject<OrderFilter> = React.createRef();
 
     constructor(props: {}) {
         super(props);
-        this.state = {
-            loading: false,
-            page: 1,
-            pageNumber: 30,
-            total: 0,
-            orderList: [],
-            selectedRows: [],
-        };
     }
 
     componentDidMount() {
-        this.onSearch();
+        // this.onSearch();
     }
-
-    onSearch = (baseParams?: IFilterBaseParams) => {
-        const { page, pageNumber } = this.state;
-        let params: IFilterParams = {
-            page,
-            page_number: pageNumber,
-        };
-        if (this.orderFilterRef.current) {
-            // console.log('onSearch', this.orderFilterRef.current.getValues());
-            params = Object.assign(params, this.orderFilterRef.current.getValues());
-        }
-        if (baseParams) {
-            params = Object.assign(params, baseParams);
-        }
-        // console.log('getValues', this.orderFilterRef.current!.getValues());
-        this.setState({
-            loading: true,
-        });
-        getProductOrderList(params)
-            .then(res => {
-                // console.log('getProductOrderList', res);
-                const { total, list } = res.data;
-                this.setState({
-                    total,
-                    page: params.page,
-                    pageNumber: params.page_number,
-                    orderList: list,
-                });
-            })
-            .finally(() => {
-                this.setState({
-                    loading: false,
-                });
-            });
-    };
-
-    // 改变选择的行
-    changeSelectedRows = (selectedRows: IOrderItem[]) => {
-        this.setState({
-            selectedRows,
-        });
-    };
-
-    // 拍单
-    placeOrder = () => {
-        const { selectedRows } = this.state;
-        // console.log('selectedRows', selectedRows);
-    };
 
     // 改变tab
     selectedTab = (key: string) => {
@@ -121,59 +64,31 @@ class Order extends React.PureComponent<{}, IOrderState> {
     };
 
     render() {
-        const { loading, orderList } = this.state;
-
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
                     <TabPane tab={`全部（1000）`} key="1">
                         <PaneAll />
                     </TabPane>
-                    <TabPane tab={`待拍单（1000）`} key="2">
-                        待拍单
-                    </TabPane>
+                    {/* <TabPane tab={`待拍单（1000）`} key="2">
+                        <PanePendingOrder />
+                    </TabPane> */}
                     <TabPane tab={`待支付（1000）`} key="3">
-                        待支付
+                        <PanePay />
                     </TabPane>
-                    <TabPane tab={`待发货（1000）`} key="4">
-                        待发货
+                    {/* <TabPane tab={`待发货（1000）`} key="4">
+                        <PaneWaitShip />
                     </TabPane>
                     <TabPane tab={`采购未发货（1000）`} key="5">
-                        采购未发货
+                        <PaneNotStock />
                     </TabPane>
                     <TabPane tab={`仓库未发货（1000）`} key="6">
-                        仓库未发货
-                    </TabPane>
+                        <PaneStockNotShip />
+                    </TabPane> */}
                     <TabPane tab={`异常订单（1000）`} key="7">
-                        异常订单
+                        <PaneError />
                     </TabPane>
                 </Tabs>
-                {/* <OrderFilter
-                    ref={this.orderFilterRef}
-                />
-                <div className="order-operation">
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                        loading={loading}
-                        onClick={() => this.onSearch()}
-                    >查询</Button>
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                        onClick={this.placeOrder}
-                    >一键拍单</Button>
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                    >支付</Button>
-                    <Button className="order-btn">导出Excel</Button>
-                </div>
-                <OrderTable
-                    loading={loading}
-                    orderList={orderList}
-                    changeSelectedRows={this.changeSelectedRows}
-                /> */}
             </div>
         );
     }

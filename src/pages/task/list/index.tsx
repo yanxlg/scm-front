@@ -3,7 +3,7 @@ import { Tabs } from 'antd';
 import ALLTaskPage from '@/pages/task/components/ALLTaskPage';
 import '@/styles/index.less';
 import { TaskStatusEnum } from '@/enums/StatusEnum';
-import { RouteComponentProps } from 'dva/router';
+import { RouteComponentProps } from 'react-router';
 import { ITaskListQuery } from '@/interface/ITask';
 import queryString from 'query-string';
 
@@ -40,7 +40,7 @@ const Index: React.FC<LocalPageProps> = props => {
                                 setCountArr={setCountArr}
                             />
                         </TabPane>,
-                        <TabPane tab={`已执行${count1 === void 0 ? '' : `(${count4})`}`} key="4">
+                        <TabPane tab={`已发送${count1 === void 0 ? '' : `(${count4})`}`} key="4">
                             <ALLTaskPage
                                 task_status={TaskStatusEnum.Executed}
                                 setCountArr={setCountArr}

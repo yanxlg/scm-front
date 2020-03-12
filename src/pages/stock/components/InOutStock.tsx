@@ -1,13 +1,13 @@
 import React, { RefObject } from 'react';
 import { FitTable } from '@/components/FitTable';
-import { Button, Form, Pagination } from 'antd';
+import { Button, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
 import { transEndDate, transStartDate, utcToLocal } from '@/utils/date';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
 import { exportIOList, queryIOList } from '@/services/stock';
@@ -321,7 +321,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         return (
             <div>
                 <div className="float-clear">
-                    <JsonForm
+                    <SearchForm
                         labelClassName="stock-form-label"
                         formRef={this.formRef}
                         fieldList={type === 1 ? this.outFieldsList : this.inFieldsList}

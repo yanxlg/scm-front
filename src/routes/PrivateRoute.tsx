@@ -4,27 +4,29 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import {router} from "dva";
-import {  RouteProps } from 'dva/router';
+import { router } from 'dva';
 import { getCookie } from '@/utils/common';
+import { RouteProps } from 'react-router';
 
-const {Route} = router;
+const { Route } = router;
 
 const host = window.location.host;
 
-const cookie = /localhost/.test(host)?true:getCookie("JSESSIONID");
+const cookie = /localhost/.test(host) ? true : getCookie('JSESSIONID');
 
-const Login:React.FC = ()=>{
-    useEffect(()=>{
-        window.location.replace(`/cas/login?service=${window.location.protocol}//${window.location.host}/auth/cas_login`);
-    },[]);
-    return useMemo(()=>{
-        return <div/>
-    },[]);
+const Login: React.FC = () => {
+    useEffect(() => {
+        window.location.replace(
+            `/cas/login?service=${window.location.protocol}//${window.location.host}/auth/cas_login`,
+        );
+    }, []);
+    return useMemo(() => {
+        return <div />;
+    }, []);
 };
 
-const AuthRouter:React.FC<RouteProps> = (props) => {
-    return cookie?<Route {...props} /> : <Login/>
+const AuthRouter: React.FC<RouteProps> = props => {
+    return cookie ? <Route {...props} /> : <Login />;
 };
 
 export default AuthRouter;

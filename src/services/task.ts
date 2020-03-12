@@ -1,5 +1,5 @@
 import request, { errorHandlerFactory } from '@/utils/request';
-import { TaskExecuteType, TaskStatusCode, TaskTypeEnum, TaskRangeEnum } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskStatusCode, TaskRangeEnum } from '@/enums/StatusEnum';
 import {
     IHotTaskBody,
     ITaskCreatedResponse,

@@ -1,7 +1,6 @@
 import React, { RefObject } from 'react';
 import { Table, Button } from 'antd';
-import Link from 'umi/link';
-import ZoomImage from '@/components/ZoomImage';
+import { Link } from 'umi';
 import SkuDialog from './SkuDialog';
 
 import { ColumnProps } from 'antd/es/table';
