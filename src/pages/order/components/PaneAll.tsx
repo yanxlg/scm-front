@@ -8,9 +8,10 @@ import TableParentAll from './TableParentAll';
 
 import {
     getAllOrderList,
-    IFilterParams,
     delChannelOrders,
     postOrdersPlace,
+    postExportAll,
+    IFilterParams,
 } from '@/services/order-manage';
 import {
     childDefaultFieldList,
@@ -23,16 +24,25 @@ import {
     parentOptionalColList,
     pageSizeOptions,
 } from '@/enums/OrderEnum';
+import { getCurrentPage } from '@/utils/common';
 
 export declare interface IPurchaseStatus {
     status: number;
     comment: string;
 }
 
-// export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
-//     _checked?: boolean;
-//     _rowspan?: number;
-// }
+export declare interface ISkuStyle {
+    [key: string]: string;
+}
+
+export declare interface IGoodsDetail {
+    product_id: string;
+    goods_img: string;
+    title: string;
+    sku_style?: ISkuStyle;
+    sku_sn?: string;
+    sku_img?: string;
+}
 
 export declare interface IChildOrderItem {
     [key: string]: any;
@@ -42,11 +52,16 @@ export declare interface IParentOrderItem {
     [key: string]: any;
 }
 
-declare interface IPaneAllState {
+declare interface IProps {
+    getAllTabCount(type: number): void;
+}
+
+declare interface IState {
     page: number;
     pageCount: number;
     total: number;
     loading: boolean;
+    exportLoading: boolean;
     showFilterStatus: boolean;
     showColStatus: boolean;
     showParentStatus: boolean;
@@ -59,7 +74,7 @@ declare interface IPaneAllState {
     childOptionalColList: IOptionalColItem[];
 }
 
-class PaneAll extends React.PureComponent<{}, IPaneAllState> {
+class PaneAll extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchForm> = React.createRef();
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
 
@@ -80,13 +95,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         },
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
             pageCount: 50,
             total: 0,
             loading: false,
+            exportLoading: false,
             showFilterStatus: false,
             showColStatus: false,
             showParentStatus: false,
@@ -107,14 +123,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     private onSearch = (filterParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
+        const fields = this.getFieldsValue();
         let params: IFilterParams = {
             page,
             page_count: pageCount,
+            ...fields,
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
+        // console.log(this.getFieldsValue())
+        // return
         if (filterParams) {
             params = Object.assign(params, filterParams);
         }
@@ -148,6 +164,18 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 });
             });
     };
+
+    // 获取查询数据
+    private getFieldsValue = () => {
+        // console.log('111', this.formRef.current!.getFieldsValue());
+        const { only_p_order, ...fields } = this.formRef.current!.getFieldsValue();
+        return {
+            only_p_order: only_p_order ? 1 : 0,
+            ...fields,
+        };
+    };
+
+    private validateParams = () => {};
 
     // 获取子订单=>采购计划数据
     private getChildOrderData(list: any[]): IChildOrderItem[] {
@@ -232,10 +260,13 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         this.setState(
             {
                 showParentStatus: status,
+                page: 1,
+                pageCount: 50,
+                total: 0,
                 selectedColKeyList: [],
                 childOptionalColList: status ? parentOptionalColList : childOptionalColList,
-                // childOrderList: [],
-                // parentOrderList: []
+                childOrderList: [],
+                parentOrderList: [],
             },
             () => {
                 // 切换过滤条件
@@ -243,11 +274,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 if (showColStatus) {
                     this.optionalRef.current!.cancelCheckAll();
                 }
-                this.onSearch({
-                    page: 1,
-                    page_count: 50,
-                    only_p_order: status ? 1 : 0,
-                });
+                this.onSearch();
+                this.props.getAllTabCount(status ? 1 : 2);
             },
         );
     };
@@ -338,11 +366,6 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
     };
 
-    // 获取查询数据
-    private getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
-    };
-
     // 一键拍单
     postOrdersPlace = () => {
         const { childOrderList } = this.state;
@@ -419,12 +442,44 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         }
     };
 
+    onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    };
+
+    pageCountChange = (current: number, size: number) => {
+        const { page, pageCount } = this.state;
+        this.onSearch({
+            page: getCurrentPage(size, (page - 1) * pageCount + 1),
+            page_count: size,
+        });
+    };
+
+    // 导出excel
+    postExportAll = () => {
+        const { page, pageCount } = this.state;
+        this.setState({
+            exportLoading: true,
+        });
+        postExportAll({
+            page,
+            page_count: pageCount,
+            ...this.getFieldsValue(),
+        }).finally(() => {
+            this.setState({
+                exportLoading: false,
+            });
+        });
+    };
+
     render() {
         const {
             page,
             pageCount,
             total,
             loading,
+            exportLoading,
             showFilterStatus,
             showParentStatus,
             showColStatus,
@@ -450,7 +505,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         <Button
                             type="primary"
                             className="order-btn"
-                            onClick={() => this.getFieldsValue()}
+                            loading={loading}
+                            onClick={() => this.onSearch()}
                         >
                             查询
                         </Button>
@@ -477,7 +533,12 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                                 取消渠道订单
                             </Button>
                         ) : null}
-                        <Button type="primary" className="order-btn">
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            loading={exportLoading}
+                            onClick={this.postExportAll}
+                        >
                             导出数据
                         </Button>
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
@@ -520,8 +581,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         showSizeChanger={true}
                         showQuickJumper={true}
                         pageSizeOptions={pageSizeOptions}
-                        // onChange={this.onChangePage}
-                        // onShowSizeChange={this.pageCountChange}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
                         showTotal={total => `共${total}条`}
                     />
                 </div>

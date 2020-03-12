@@ -149,7 +149,14 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
-            render: this.mergeCell,
+            render: (value: string, row: IParentOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
             key: 'channelSource',
@@ -213,14 +220,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         const columns = this.createColumns();
         return (
             <Table
-                bordered={true}
+                bordered
+                key={columns.length}
                 rowKey="orderGoodsId"
                 className="order-table"
                 loading={loading}
                 columns={columns}
                 // rowSelection={rowSelection}
                 dataSource={orderList}
-                scroll={{ x: true, y: 600 }}
+                scroll={{ x: 'max-content', y: 600 }}
                 pagination={false}
             />
         );

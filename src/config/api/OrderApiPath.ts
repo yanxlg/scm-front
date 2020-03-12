@@ -4,10 +4,14 @@
 export enum OrderApiPath {
     // 全部订单
     getAllOrderList = '/api/v1/orders/list/1',
+    // 导出全部订单
+    postExportAll = '/api/v1/orders/exports/1',
     // 待拍单
     getPendingOrderList = '/api/v1/orders/list/2',
     // 待支付
     getPayOrderList = '/api/v1/orders/list/3',
+    // 导出待支付
+    postExportPay = '/api/v1/orders/exports/3',
     // 待发货
     getWaitShipList = '/v1/orders/list/4',
     // 采购未发货

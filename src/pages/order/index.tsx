@@ -11,7 +11,7 @@ import PaneError from './components/PaneError';
 import PaneNotStock from './components/PaneNotStock';
 import PaneStockNotShip from './components/PaneStockNotShip';
 
-// import { getProductOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
+import { getAllTabCount } from '@/services/order-manage';
 
 import '@/styles/order.less';
 
@@ -45,18 +45,36 @@ export declare interface IOrderItem {
     purchase_waybill_number: string;
 }
 
-declare interface IOrderState {}
+declare interface IOrderState {
+    allListCount: number;
+    penddingPayCount: number;
+    errorOrderCount: number;
+}
 
 class Order extends React.PureComponent<{}, IOrderState> {
     private orderFilterRef: RefObject<OrderFilter> = React.createRef();
 
     constructor(props: {}) {
         super(props);
+        this.state = {
+            allListCount: 0,
+            penddingPayCount: 0,
+            errorOrderCount: 0,
+        };
     }
 
     componentDidMount() {
         // this.onSearch();
+        this.getAllTabCount(2);
     }
+
+    getAllTabCount = (type: number) => {
+        getAllTabCount(type).then(res => {
+            this.setState({
+                ...res.data,
+            });
+        });
+    };
 
     // 改变tab
     selectedTab = (key: string) => {
@@ -64,16 +82,17 @@ class Order extends React.PureComponent<{}, IOrderState> {
     };
 
     render() {
+        const { allListCount, penddingPayCount, errorOrderCount } = this.state;
         return (
             <div className="order-wrap">
                 <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
-                    <TabPane tab={`全部（1000）`} key="1">
-                        <PaneAll />
+                    <TabPane tab={`全部（${allListCount}）`} key="1">
+                        <PaneAll getAllTabCount={this.getAllTabCount} />
                     </TabPane>
                     {/* <TabPane tab={`待拍单（1000）`} key="2">
                         <PanePendingOrder />
                     </TabPane> */}
-                    <TabPane tab={`待支付（1000）`} key="3">
+                    <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
                         <PanePay />
                     </TabPane>
                     {/* <TabPane tab={`待发货（1000）`} key="4">
@@ -85,7 +104,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                     <TabPane tab={`仓库未发货（1000）`} key="6">
                         <PaneStockNotShip />
                     </TabPane> */}
-                    <TabPane tab={`异常订单（1000）`} key="7">
+                    <TabPane tab={`异常订单（${errorOrderCount}）`} key="7">
                         <PaneError />
                     </TabPane>
                 </Tabs>

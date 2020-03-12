@@ -1,5 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
+import { downloadExcel } from '@/utils/common';
 
 export declare interface IFilterParams {
     page?: number;
@@ -32,7 +33,6 @@ export declare interface IFilterParams {
     non_purchase_plan?: number; // 没有采购计划的 true 没有采购计划
     cancel_time_start?: number; // og订单取消时间
     cancel_time_end?: number;
-    //
     only_p_order?: number;
 }
 
@@ -51,11 +51,27 @@ interface IConfirmPayData {
     purchase_plan_id: string[];
 }
 
+// 获取所有列表的条数
+export async function getAllTabCount(type: number) {
+    return request.get(`/api/v1/orders/count/${type}`);
+}
+
+// 获取全部订单
 export async function getAllOrderList(data: IFilterParams) {
     return request.post(OrderApiPath.getAllOrderList, {
         requestType: 'json',
         data,
     });
+}
+
+export async function postExportAll(data: IFilterParams) {
+    return request
+        .post(OrderApiPath.postExportAll, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
 }
 
 // 获取待拍单
@@ -67,11 +83,21 @@ export async function getPendingOrderList(data = {}) {
 }
 
 // 获取待支付
-export async function getPayOrderList(data = {}) {
+export async function getPayOrderList(data: IPayFilterParams) {
     return request.post(OrderApiPath.getPayOrderList, {
         requestType: 'json',
         data,
     });
+}
+
+export async function postExportPay(data: IPayFilterParams) {
+    return request
+        .post(OrderApiPath.postExportPay, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
 }
 
 // 获取待发货
@@ -106,11 +132,9 @@ export async function getErrorOrderList(data = {}) {
     });
 }
 
-export async function getOrderGoodsDetail(params: { middleground_order_id: string }) {
-    return request.get(OrderApiPath.getOrderGoodsDetail, {
-        requestType: 'form',
-        params,
-    });
+// 获取商品详情
+export async function getOrderGoodsDetail(id: string) {
+    return request.get(`/api/v1/goods/get/${id}`);
 }
 
 // 一键拍单

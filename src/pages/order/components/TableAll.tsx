@@ -3,7 +3,7 @@ import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IChildOrderItem, IPurchaseStatus } from './PaneAll';
+import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -16,16 +16,6 @@ import {
 
 declare interface ISpecs {
     [key: string]: string;
-}
-
-export declare interface IGoodsDetail {
-    channel_goods_id: string;
-    psku: string;
-    main_img: string;
-    sku: string;
-    sku_img: string;
-    goods_name: string;
-    specs: ISpecs;
 }
 
 declare interface IProps {
@@ -75,7 +65,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: any, row: IChildOrderItem) => {
                 return {
                     children: (
-                        <a onClick={() => this.getOrderGoodsDetail(row.channel_order_id)}>
+                        <a onClick={() => this.getOrderGoodsDetail(row.productId, row.skuId)}>
                             查看商品详情
                         </a>
                     ),
@@ -499,16 +489,28 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     };
 
     // 获取商品详情
-    private getOrderGoodsDetail = (middleground_order_id: string) => {
+    private getOrderGoodsDetail = (productId: string, skuId: string) => {
         this.setState({
             detailDialogStatus: true,
         });
-        getOrderGoodsDetail({
-            middleground_order_id,
-        }).then(res => {
-            // console.log('getOrderGoodsDetail', res);
+        getOrderGoodsDetail(productId).then(res => {
+            const { sku_info, product_id, goods_img, title } = res.data;
+            const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
+            const goodsDetail: IGoodsDetail = {
+                product_id,
+                goods_img,
+                title,
+            };
+            if (i > -1) {
+                const { sku_style, sku_sn, sku_img } = sku_info[i];
+                Object.assign(goodsDetail, {
+                    sku_sn,
+                    sku_img,
+                    sku_style,
+                });
+            }
             this.setState({
-                goodsDetail: res.data,
+                goodsDetail,
             });
         });
     };

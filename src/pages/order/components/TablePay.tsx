@@ -5,12 +5,14 @@ import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';
 import { putConfirmPay } from '@/services/order-manage';
+import { utcToLocal } from '@/utils/date';
 
 declare interface IProps {
     loading: boolean;
     orderList: IPayItem[];
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IPayItem): void;
+    onSearch(): void;
 }
 
 declare interface IState {}
@@ -59,7 +61,14 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchase_order_time',
             align: 'center',
             width: 150,
-            render: this.mergeCell,
+            render: (value: string, row: IPayItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
             key: 'purchase_parent_order_sn',
@@ -192,7 +201,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
 
     // 确认支付
     confirmPay = (id: string) => {
-        const { orderList } = this.props;
+        const { orderList, onSearch } = this.props;
         const planIdList = orderList
             .filter(item => item.purchase_parent_order_sn === id)
             .map(item => item.purchase_plan_id);
@@ -200,7 +209,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             purchase_platform_parent_order_id: id,
             purchase_plan_id: planIdList,
         }).then(res => {
-            console.log('putConfirmPay', res);
+            // console.log('putConfirmPay', res);
+            onSearch();
         });
     };
 
