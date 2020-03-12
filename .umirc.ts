@@ -1,6 +1,8 @@
 import { defineConfig } from 'umi';
 const shajs = require('sha.js');
 
+const dev = process.env.NODE_ENV !== 'production';
+
 const config = defineConfig({
     /*    forkTSCheker: {
         formatter: 'codeframe',
@@ -9,13 +11,13 @@ const config = defineConfig({
         reportFiles: ['!src/.umi/!**', '!node_modules', 'src/!**!/!*.{ts,tsx}'],
     },*/
     hash: true,
-    devtool: process.env.NODE_ENV !== 'production' ? 'source-map' : false,
+    devtool: dev ? 'source-map' : false,
     antd: {},
     dva: {
         hmr: true,
     },
     title: '供应链管理中台',
-    dll: process.env.NODE_ENV === 'production',
+    // dll: !dev,
     locale: {
         antd: true,
         title: false,
@@ -25,6 +27,7 @@ const config = defineConfig({
     dynamicImport: {
         loading: '@/components/PageLoading/index',
     },
+    headScripts: dev ? ['http://localhost:8097'] : undefined,
     cssLoader: {
         localsConvention: 'camelCaseOnly',
         modules: {
@@ -60,14 +63,14 @@ const config = defineConfig({
     },
     chainWebpack(config, { webpack }) {
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
-        config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
-            {
-                formatter: 'codeframe',
-                async: true,
-                checkSyntacticErrors: true,
-                reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
-            },
-        ]);
+        // config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
+        //     {
+        //         formatter: 'codeframe',
+        //         async: true,
+        //         checkSyntacticErrors: true,
+        //         reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
+        //     },
+        // ]);
     },
 });
 

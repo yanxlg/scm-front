@@ -57,7 +57,8 @@
         "fork-ts-checker-webpack-plugin": "^4.0.5",
         "stylelint": "^13.2.1",
         "husky": "^4.2.3",
-        "eslint-plugin-react-hooks": "^2.5.0"
+        "eslint-plugin-react-hooks": "^2.5.0",
+        "stylelint-config-standard": "^20.0.0"
     },
 
     "husky": {
