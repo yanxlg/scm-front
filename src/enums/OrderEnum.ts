@@ -95,6 +95,7 @@ export const childDefaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台订单ID',
+        formatter: 'number',
     },
     {
         type: 'input',
@@ -132,6 +133,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单ID',
+        formatter: 'number',
     },
     // {
     //     type: 'input',
@@ -148,6 +150,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入尾程运单号',
+        formatter: 'number',
     },
     {
         type: 'input',
@@ -156,6 +159,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台商品ID',
+        formatter: 'number',
     },
     {
         type: 'input',
@@ -164,6 +168,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台SKU ID',
+        formatter: 'number',
     },
     // {
     //     type: 'select',
@@ -374,6 +379,7 @@ export const parentDefaultFieldList: IFieldItem[] = [
         label: '订单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'input',
@@ -382,6 +388,7 @@ export const parentDefaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单id',
+        formatter: 'number',
     },
     {
         type: 'select',
@@ -406,9 +413,10 @@ export const parentAllFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
         name: ['confirm_time_start', 'confirm_time_end'],
-        label: '订单时间',
+        label: '订单确认时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
 ];
 

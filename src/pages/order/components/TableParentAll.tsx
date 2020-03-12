@@ -5,10 +5,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IParentOrderItem } from './PaneAll';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import { 
-    orderStatusOptionList,
-    orderShippingOptionList
-} from '@/enums/OrderEnum';
+import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;
@@ -105,8 +102,8 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(orderStatusOptionList, value)
-            }
+                return getStatusDesc(orderStatusOptionList, value);
+            },
         },
         {
             key: 'orderGoodsShippingStatus',
@@ -115,8 +112,8 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(orderShippingOptionList, value)
-            }
+                return getStatusDesc(orderShippingOptionList, value);
+            },
         },
         // {
         //     key: 'orderGoodsId',
@@ -152,7 +149,14 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
-            render: this.mergeCell,
+            render: (value: string, row: IParentOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
             key: 'channelSource',
@@ -216,14 +220,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         const columns = this.createColumns();
         return (
             <Table
-                bordered={true}
+                bordered
+                key={columns.length}
                 rowKey="orderGoodsId"
                 className="order-table"
                 loading={loading}
                 columns={columns}
                 // rowSelection={rowSelection}
                 dataSource={orderList}
-                scroll={{ x: true, y: 600 }}
+                scroll={{ x: 'max-content', y: 600 }}
                 pagination={false}
             />
         );

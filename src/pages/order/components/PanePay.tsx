@@ -1,10 +1,15 @@
 import React, { RefObject } from 'react';
-import { Button, Pagination } from 'antd';
+import { Button, Pagination, message } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TablePay from './TablePay';
 
-import { getPayOrderList, IPayFilterParams } from '@/services/order-manage';
+import {
+    getPayOrderList,
+    delChannelOrders,
+    postExportPay,
+    IPayFilterParams,
+} from '@/services/order-manage';
 import { defaultOptionItem, purchasePlatformOptionList, pageSizeOptions } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
 
@@ -29,17 +34,9 @@ export declare interface IPayItem {
     purchase_order_status_desc: string;
     purchase_pay_status: string;
     purchase_pay_status_desc: string;
+    order_goods_id: string;
     _rowspan?: number;
     _checked?: boolean;
-}
-
-declare interface IState {
-    page: number;
-    pageCount: number;
-    total: number;
-    loading: boolean;
-    showStatus: boolean;
-    orderList: IPayItem[];
 }
 
 const defaultFieldList: IFieldItem[] = [
@@ -79,6 +76,16 @@ const defaultFieldList: IFieldItem[] = [
 
 // const allFieldList: IFieldItem[] = [];
 
+declare interface IState {
+    page: number;
+    pageCount: number;
+    total: number;
+    loading: boolean;
+    exportLoading: boolean;
+    showStatus: boolean;
+    orderList: IPayItem[];
+}
+
 class PanePay extends React.PureComponent<{}, IState> {
     private formRef: RefObject<SearchForm> = React.createRef();
     private initialValues = {
@@ -92,6 +99,7 @@ class PanePay extends React.PureComponent<{}, IState> {
             pageCount: 50,
             total: 0,
             loading: false,
+            exportLoading: false,
             showStatus: false,
             orderList: [],
         };
@@ -107,10 +115,8 @@ class PanePay extends React.PureComponent<{}, IState> {
         let params: IPayFilterParams = {
             page,
             page_count: pageCount,
+            ...this.getFieldsValue(),
         };
-        if (this.formRef.current) {
-            params = Object.assign(params, this.formRef.current.getFieldsValue());
-        }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
@@ -163,8 +169,7 @@ class PanePay extends React.PureComponent<{}, IState> {
 
     // 获取查询数据
     getFieldsValue = () => {
-        console.log('111', this.formRef.current!.getFieldsValue());
-        // const fields = this.formRef.current!.getFieldsValue();
+        return this.formRef.current!.getFieldsValue();
     };
 
     changeShowStatus = () => {
@@ -209,13 +214,13 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
     };
 
-    onChangePage = (page: number) => {
+    private onChangePage = (page: number) => {
         this.onSearch({
             page,
         });
     };
 
-    pageCountChange = (current: number, size: number) => {
+    private pageCountChange = (current: number, size: number) => {
         const { page, pageCount } = this.state;
         this.onSearch({
             page: getCurrentPage(size, (page - 1) * pageCount + 1),
@@ -223,8 +228,56 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
     };
 
+    private delChannelOrders = () => {
+        const { orderList } = this.state;
+        const parentOrdersSnList = orderList
+            .filter(item => item._checked)
+            .map(item => item.purchase_parent_order_sn);
+        if (parentOrdersSnList.length) {
+            const list = orderList
+                .filter(
+                    item =>
+                        parentOrdersSnList.indexOf(item.purchase_parent_order_sn) > -1 &&
+                        item.order_goods_id,
+                )
+                .map(item => item.order_goods_id);
+            // console.log(list);
+            delChannelOrders({
+                order_goods_ids: [...new Set(list)],
+            }).then(res => {
+                // console.log('delChannelOrders', res);
+            });
+        } else {
+            message.error('请选择需要取消的订单');
+        }
+    };
+
+    postExportPay = () => {
+        const { page, pageCount } = this.state;
+        this.setState({
+            exportLoading: true,
+        });
+        postExportPay({
+            page,
+            page_count: pageCount,
+            ...this.getFieldsValue(),
+        }).finally(() => {
+            this.setState({
+                exportLoading: false,
+            });
+        });
+    };
+
     render() {
-        const { showStatus, loading, orderList, total, page, pageCount } = this.state;
+        const {
+            showStatus,
+            loading,
+            exportLoading,
+            orderList,
+            total,
+            page,
+            pageCount,
+        } = this.state;
 
         // const fieldList = showStatus ? allFieldList : defaultFieldList;
 
@@ -246,13 +299,22 @@ class PanePay extends React.PureComponent<{}, IState> {
                         >
                             查询
                         </Button>
-                        <Button type="primary" className="order-btn">
+                        <Button type="primary" className="order-btn" disabled>
                             取消采购单
                         </Button>
-                        <Button type="primary" className="order-btn" disabled>
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.delChannelOrders}
+                        >
                             取消渠道订单
                         </Button>
-                        <Button type="primary" className="order-btn">
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            loading={exportLoading}
+                            onClick={this.postExportPay}
+                        >
                             导出数据
                         </Button>
                         {/* <Button 
@@ -266,6 +328,7 @@ class PanePay extends React.PureComponent<{}, IState> {
                         orderList={orderList}
                         onCheckAllChange={this.onCheckAllChange}
                         onSelectedRow={this.onSelectedRow}
+                        onSearch={this.onSearch}
                     />
                     <Pagination
                         className="order-pagination"
