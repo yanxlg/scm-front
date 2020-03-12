@@ -3,16 +3,10 @@ import { Modal, Table, Pagination, Skeleton, Input, InputNumber } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 // import { getGoodsSkuList } from '@/services/goods';
-import { queryGoodsDetail, queryGoodsSkuList } from '@/services/channel';
-import { IGoodsDetailResponse, ISpecsItem, IGoodsSkuItem } from '@/interface/IChannel';
+import { queryGoodsDetail, queryGoodsSkuList, editSkuPrice } from '@/services/channel';
+import { IGoodsDetailResponse, ISpecsItem, IGoodsSkuItem, IEditSkuBody } from '@/interface/IChannel';
 
 const { TextArea } = Input;
-
-declare interface IEditPriceItem {
-    sku_id: string;
-    sku_sale_price: number | undefined;
-    comment: string;
-}
 
 declare interface IState {
     visible: boolean;
@@ -22,7 +16,7 @@ declare interface IState {
     productId: string;
     skuList: IGoodsSkuItem[];
     goodsDetail: IGoodsDetailResponse | null;
-    editList: IEditPriceItem[];
+    editList: IEditSkuBody[];
 }
 
 class SkuDialog extends React.PureComponent<{}, IState> {
@@ -70,20 +64,20 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             title: '运费',
             dataIndex: 'shipping_fee',
             align: 'center',
-            width: 60,
+            width: 80,
         },
         {
-            key: 'sku_sale_price',
+            key: 'adjust_price',
             title: '销售价格调整',
-            dataIndex: 'sku_sale_price',
+            dataIndex: 'adjust_price',
             align: 'center',
             width: 120,
-            render: (value: number, row: IGoodsSkuItem) => {
+            render: (value: string, row: IGoodsSkuItem) => {
                 return (
                     <InputNumber 
                         min={0}
                         precision={2}
-                        defaultValue={value}
+                        defaultValue={value ? Number(value) : undefined }
                         style={{width: '100%'}}
                         onChange={(val) => this.changePrice(val, row)}
                     />
@@ -91,9 +85,9 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             }
         },
         {
-            key: 'comment',
+            key: 'adjust_reason',
             title: '销售价格调整',
-            dataIndex: 'comment',
+            dataIndex: 'adjust_reason',
             align: 'center',
             width: 180,
             render: (value: string, row: IGoodsSkuItem) => {
@@ -140,11 +134,11 @@ class SkuDialog extends React.PureComponent<{}, IState> {
     }
 
     queryGoodsSkuList = (page: number) => {
-        const { productId } = this.state;
+        const { productId, editList } = this.state;
         this.setState({
             loading: true
         });
-        const page_count = 10;
+        const page_count = 50;
         queryGoodsSkuList({
             page,
             page_count,
@@ -154,12 +148,24 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             // console.log('queryGoodsSkuList', res);
             const { total, sku_list } = res.data;
             this.setState({
+                page,
                 total: Number(total),
                 skuList: sku_list.map((item, index: number) => {
-                    return {
-                        serial: (page - 1) * page_count + index + 1,
-                        ...item
+                    const i = editList.findIndex(editItem => editItem.sku === item.sku_name);
+                    if (i > -1) {
+                        return {
+                            serial: (page - 1) * page_count + index + 1,
+                            ...item,
+                            adjust_price: editList[i].adjustment_price,
+                            adjust_reason: editList[i].adjustment_reason
+                        }
+                    } else {
+                        return {
+                            serial: (page - 1) * page_count + index + 1,
+                            ...item
+                        }
                     }
+                    
                 })
             });
         }).finally(() => {
@@ -172,12 +178,23 @@ class SkuDialog extends React.PureComponent<{}, IState> {
     private handleCancel = () => {
         this.setState({
             visible: false,
+            loading: false,
+            productId: '',
+            page: 1,
+            total: 0,
+            skuList: [],
+            goodsDetail: null,
             editList: []
         })
     };
 
     private handleOk = () => {
         // console.log('handleOk', this.state.editList);
+        const { editList } = this.state;
+        editSkuPrice(editList).then(res => {
+            // console.log('editSkuPrice', res);
+            this.handleCancel();
+        })
     }
 
     private onChangePage = (page: number) => {
@@ -186,62 +203,63 @@ class SkuDialog extends React.PureComponent<{}, IState> {
 
     private changePrice = (val: number | undefined, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
-        // const { editList } = this.state;
-        // const i =  editList.findIndex(item => item.sku_id === rowData.sku_id)
-        // if (i > -1) {
-        //     this.setState({
-        //         editList: editList.map((item, index: number) => {
-        //             if (i === index) {
-        //                 return {
-        //                     ...item,
-        //                     sku_sale_price: val
-        //                 }
-        //             }
-        //             return item;
-        //         })
-        //     })
-        // } else {
-        //     this.setState({
-        //         editList: [
-        //             ...editList,
-        //             {
-        //                 sku_id: rowData.sku_id,
-        //                 sku_sale_price: val,
-        //                 comment: rowData.comment
-        //             }
-        //         ]
-        //     })
-        // }
+        const { editList } = this.state;
+        const i =  editList.findIndex(item => item.sku === rowData.sku_name);
+        const valStr = val ? (val + '') : '';
+        if (i > -1) {
+            this.setState({
+                editList: editList.map((item, index: number) => {
+                    if (i === index) {
+                        return {
+                            ...item,
+                            adjustment_price: valStr
+                        }
+                    }
+                    return item;
+                })
+            })
+        } else {
+            this.setState({
+                editList: [
+                    ...editList,
+                    {
+                        sku: rowData.sku_name,
+                        adjustment_price: valStr,
+                        adjustment_reason: rowData.adjust_reason
+                    }
+                ]
+            })
+        }
     }
 
     private changeComment = (val: string, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
-        // const { editList } = this.state;
-        // const i =  editList.findIndex(item => item.sku_id === rowData.sku_id)
-        // if (i > -1) {
-        //     this.setState({
-        //         editList: editList.map((item, index: number) => {
-        //             if (i === index) {
-        //                 return {
-        //                     ...item,
-        //                     comment: val
-        //                 }
-        //             }
-        //             return item;
-        //         })
-        //     })
-        // } else {
-        //     this.setState({
-        //         editList: [
-        //             ...editList,
-        //             {
-        //                 sku_id: rowData.sku_id,
-        //                 sku_sale_price: rowData.sku_sale_price,
-        //                 comment: val
-        //             }
-        //         ]
-        //     })
-        // }
+        const { editList } = this.state;
+        const i =  editList.findIndex(item => item.sku === rowData.sku_name)
+        if (i > -1) {
+            this.setState({
+                editList: editList.map((item, index: number) => {
+                    if (i === index) {
+                        return {
+                            ...item,
+                            adjustment_reason: val
+                        }
+                    }
+                    return item;
+                })
+            })
+        } else {
+            this.setState({
+                editList: [
+                    ...editList,
+                    {
+                        sku: rowData.sku_name,
+                        adjustment_price: rowData.adjust_price,
+                        adjustment_reason: val
+                    }
+                ]
+            })
+        }
     }
 
     render() {
@@ -319,7 +337,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                         size="small"
                         total={total}
                         current={page}
-                        pageSize={10}
+                        pageSize={50}
                         onChange={this.onChangePage}
                         showTotal={total => `共${total}条`}
                         style={{marginTop: 12}}

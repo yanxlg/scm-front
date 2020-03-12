@@ -18,6 +18,7 @@ import {
     IGoodsDetailResponse,
     IGoodsSkuBody,
     IGoodsSkuResponse,
+    IEditSkuBody,
 } from '@/interface/IChannel';
 import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
@@ -120,6 +121,13 @@ export async function queryGoodsDetail(params: IGoodsDetailBody) {
 // 查询商品sku
 export async function queryGoodsSkuList(data: IGoodsSkuBody) {
     return request.post<IResponse<IGoodsSkuResponse>>(ChannelApiPath.QueryGoodsSkuList, {
+        data,
+    });
+}
+
+// 编辑sku价格
+export async function editSkuPrice(data: IEditSkuBody[]) {
+    return request.put<IResponse<null>>(ChannelApiPath.EditSkuPrice, {
         data,
     });
 }

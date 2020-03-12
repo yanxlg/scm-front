@@ -221,10 +221,18 @@ export interface IGoodsSkuItem {
     shipping_fee: string;
     storage: string;
     specs: ISpecsItem[];
+    adjust_price: string;
+    adjust_reason: string;
     serial?: number;
 }
 
 export interface IGoodsSkuResponse {
     total: string;
     sku_list: IGoodsSkuItem[];
+}
+
+export interface IEditSkuBody {
+    sku: string;
+    adjustment_price: string;
+    adjustment_reason: string;
 }

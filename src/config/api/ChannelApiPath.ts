@@ -13,4 +13,5 @@ export enum ChannelApiPath {
     QueryRegionShippingFee = '/api/v1/vova_goods/region_shipping_fee',
     QueryGoodsDetail = '/api/v1/vova_goods/detail',
     QueryGoodsSkuList = '/api/v1/vova_goods/sku_list',
+    EditSkuPrice='/api/v1/vova_goods/edits',
 }
