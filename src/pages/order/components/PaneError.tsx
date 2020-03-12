@@ -6,7 +6,7 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TableError from './TableError';
 
-import { getErrorOrderList, IFilterBaseParams, IFilterParams } from '@/services/order-manage';
+import { getErrorOrderList, IFilterParams } from '@/services/order-manage';
 import {
     pageSizeOptions,
     defaultOptionItem,
@@ -94,7 +94,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterBaseParams) => {
+    onSearch = (baseParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
         let params: IFilterParams = {
             page,

@@ -66,7 +66,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
     render() {
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="3">
                     <TabPane tab={`全部（1000）`} key="1">
                         <PaneAll />
                     </TabPane>

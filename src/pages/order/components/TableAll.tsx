@@ -246,7 +246,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IChildOrderItem) => {
                 return utcToLocal(value);
-            }
+            },
         },
         {
             key: 'confirmTime',
@@ -275,8 +275,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
-                }
-            }
+                };
+            },
         },
         {
             key: 'deliveryTime',
@@ -305,8 +305,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
-                }
-            }
+                };
+            },
         },
         {
             key: 'receiveTime',
@@ -320,8 +320,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
-                }
-            }
+                };
+            },
         },
         // 待确定
         {
@@ -372,7 +372,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                         rowSpan: row._rowspan || 0,
                     },
                 };
-            }
+            },
         },
         {
             key: 'channelSource',
@@ -517,10 +517,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         const { loading, orderList } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
         const columns = this.createColumns();
-
         return (
             <>
                 <Table
+                    key={columns.length}
                     bordered={true}
                     // "purchasePlanId"
                     rowKey={record => {
@@ -531,7 +531,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     columns={columns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
-                    scroll={{ x: true, y: 600 }}
+                    scroll={{ x: 'max-content', y: 500 }}
                     pagination={false}
                 />
                 <GoodsDetailDialog

@@ -77,6 +77,8 @@ export const errorDetailOptionList = [
     { name: '30天未妥投', value: 9 },
 ];
 
+export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
+
 export const childDefaultFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
@@ -84,7 +86,7 @@ export const childDefaultFieldList: IFieldItem[] = [
         label: '订单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
-        formatter: ['start_date', 'end_date']
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'input',
@@ -247,6 +249,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '采购时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
@@ -254,14 +257,16 @@ export const childAllFieldList: IFieldItem[] = [
         label: '出库时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     //上线时间 揽收时间
     {
         type: 'dateRanger',
-        name: ['collect_time_start', 'collect_time_start'],
+        name: ['collect_time_start', 'collect_time_end'],
         label: '揽收时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
@@ -269,6 +274,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '收货时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
@@ -276,6 +282,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '支付时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
@@ -283,6 +290,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '入库时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
@@ -290,6 +298,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '订单确认时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
@@ -297,6 +306,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: 'og订单取消时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     // endFieldItem
 ];
@@ -408,13 +418,13 @@ export const defaultParentColList = [
     // 'a1',                          // 运费
     // 'channel_order_status',        // 渠道订单状态
     // 'channel_delivery_status',     // 渠道发货状态
-    'productId',                   // 中台商品ID
-    'goodsNumber',                 // 商品数量
-    'goodsAmount',                 // 商品价格
-    'orderGoodsId',                // 中台子订单ID
-    'orderGoodsStatus',            // 中台订单状态
-    'orderGoodsShippingStatus'     // 中台订单配送状态
-]
+    'productId', // 中台商品ID
+    'goodsNumber', // 商品数量
+    'goodsAmount', // 商品价格
+    'orderGoodsId', // 中台子订单ID
+    'orderGoodsStatus', // 中台订单状态
+    'orderGoodsShippingStatus', // 中台订单配送状态
+];
 
 export const parentOptionalColList = [
     { key: 'orderGoodsId', name: '中台子订单ID' }, // 2
