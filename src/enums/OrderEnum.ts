@@ -345,6 +345,7 @@ export const childOptionalColList = [
     { key: 'deliveryTime', name: '出库时间' }, // 1
     { key: 'collectTime', name: '揽收时间' }, // 1
     { key: 'receiveTime', name: '收货时间' }, // 1
+    { key: 'cancelTime', name: '订单取消时间' }, // 1
     { key: 'channelOrderSn', name: '渠道订单ID' }, // 1
     { key: 'goodsAmount', name: '价格' }, // 1
     // { key: 'a4', name: '运费' },
