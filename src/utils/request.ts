@@ -148,11 +148,16 @@ request.interceptors.response.use(async (response: Response, options: RequestOpt
     return response;
 });
 
+const requestId = function() {
+    return Date.now() + '' + Math.ceil(Math.random() * 100000);
+};
+
 // 登录身份设置
 request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
     if (User.token) {
         options.headers = Object.assign({}, options.headers, {
             'X-Token': User.token,
+            request_id: requestId(),
         });
     }
     return {

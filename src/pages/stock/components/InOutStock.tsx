@@ -6,11 +6,21 @@ import '@/styles/form.less';
 import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
-import { transEndDate, transStartDate, utcToLocal } from '@/utils/date';
+import {
+    convertEndDate,
+    convertStartDate,
+    transEndDate,
+    transStartDate,
+    utcToLocal,
+} from '@/utils/date';
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
 import { exportIOList, queryIOList } from '@/services/stock';
+import CopyLink from '@/components/copyLink';
+import queryString from 'query-string';
+import { ProductStatusList } from '@/config/dictionaries/Product';
+import { StockType } from '@/config/dictionaries/Stock';
 
 declare interface ITableData {
     warehousing_time: number; // 入库时间
@@ -35,6 +45,7 @@ declare interface IInOutStockState {
     pageNumber: number;
     pageSize: number;
     total: number;
+    defaultInitialValues?: { [key: string]: any };
 }
 
 export declare interface IStockIOFormData {
@@ -47,16 +58,17 @@ export declare interface IStockIOFormData {
     purchase_order_sn?: string;
     product_id?: string;
     last_waybill_no?: string;
-    type: 1 | 2;
+    type: typeof StockType[keyof typeof StockType];
 }
 
 declare interface IInOutStockProps {
-    type: 1 | 2; //1:出库管理，2入库管理
+    type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
 }
 
 @BindAll()
 class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+    private queryData: any = {};
     private inColumns: ColumnProps<ITableData>[] = [
         {
             title: '入库时间',
@@ -204,19 +216,49 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
 
     constructor(props: IInOutStockProps) {
         super(props);
+        const { page, page_count, ...extra } = this.computeInitialValues();
         this.state = {
             dataSet: [],
             dataLoading: true,
             searchLoading: true,
             exportingLoading: false,
             total: 0,
-            pageNumber: 1,
-            pageSize: 50,
+            pageNumber: page,
+            pageSize: page_count,
+            defaultInitialValues: extra,
+        };
+    }
+
+    private computeInitialValues() {
+        // copy link 解析
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const {
+            page = 1,
+            page_count = 50,
+            warehousing_start_time = 0,
+            warehousing_end_time = 0,
+            outgoing_start_time = 0,
+            outgoing_end_time = 0,
+            ...extra
+        } = query;
+        return {
+            page: Number(page),
+            page_count: Number(page_count),
+            warehousing_start_time: convertStartDate(Number(warehousing_start_time)),
+            warehousing_end_time: convertEndDate(Number(warehousing_end_time)),
+            outgoing_start_time: convertStartDate(Number(outgoing_start_time)),
+            outgoing_end_time: convertEndDate(Number(outgoing_end_time)),
+            ...extra,
         };
     }
 
     componentDidMount(): void {
-        this.onSearch();
+        this.queryList({
+            searchLoading: true,
+        });
     }
 
     private convertFormData() {
@@ -268,12 +310,18 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
             dataLoading: true,
             searchLoading,
         });
-        queryIOList({
+        const type = this.props.type;
+        const query = {
             ...values,
             page: pageNumber,
             page_count: pageSize,
             type: this.props.type,
-        })
+        };
+        this.queryData = {
+            ...query,
+            tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
+        };
+        queryIOList(query)
             .then(({ data: { all_count = 0, list = [] } }) => {
                 this.setState({
                     dataLoading: false,
@@ -307,6 +355,10 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         });
     }
 
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
     render() {
         const {
             dataSet,
@@ -316,6 +368,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
             pageNumber,
             pageSize,
             total,
+            defaultInitialValues,
         } = this.state;
         const { type } = this.props;
         return (
@@ -325,6 +378,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
                         labelClassName="stock-form-label"
                         formRef={this.formRef}
                         fieldList={type === 1 ? this.outFieldsList : this.inFieldsList}
+                        initialValues={defaultInitialValues}
                     />
                     <Button
                         type="primary"
@@ -371,6 +425,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
                     }}
                     bottom={130}
                 />
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

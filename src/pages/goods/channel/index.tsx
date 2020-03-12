@@ -3,6 +3,7 @@ import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import './index.less';
 import '@/styles/product.less';
+import '@/styles/modal.less';
 import { Modal, message, Button, Pagination } from 'antd';
 import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
