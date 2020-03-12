@@ -1,13 +1,17 @@
 import React, { RefObject } from 'react';
-import { Pagination, Button } from 'antd';
-import { FormInstance } from 'antd/lib/form';
+import { Pagination, Button, message, notification } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
 
-import { getAllOrderList, IFilterParams } from '@/services/order-manage';
+import {
+    getAllOrderList,
+    IFilterParams,
+    delChannelOrders,
+    postOrdersPlace,
+} from '@/services/order-manage';
 import {
     childDefaultFieldList,
     childAllFieldList,
@@ -19,7 +23,6 @@ import {
     parentOptionalColList,
     pageSizeOptions,
 } from '@/enums/OrderEnum';
-import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
 
 export declare interface IPurchaseStatus {
     status: number;
@@ -61,12 +64,10 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
 
     private initialValues = {
-        channel: 100,
-        sale_order_status: 100,
-        purchase_order_status: 100,
-        purchase_pay_status: 100,
-        purchase_shipping_status: 100,
-        purchase_cancel_res: 100,
+        channel_source: 100,
+        order_goods_status: 100,
+        order_goods_shipping_status: 100,
+        non_purchase_plan: 100,
     };
 
     private endFieldItem: IFieldItem = {
@@ -281,14 +282,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         );
     };
 
-    changeShowColStatus = () => {
+    private changeShowColStatus = () => {
         const { showColStatus } = this.state;
         this.setState({
             showColStatus: !showColStatus,
         });
     };
 
-    changeSelectedColList = (list: string[]) => {
+    private changeSelectedColList = (list: string[]) => {
         const { showParentStatus } = this.state;
         this.setState({
             selectedColKeyList: list,
@@ -303,32 +304,6 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 colChildList: [...defaultColChildList, ...list],
             });
         }
-    };
-
-    // 获取查询数据
-    getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
-        const fields = this.formRef.current!.getFieldsValue();
-        const {
-            order_start_time,
-            order_end_time,
-            purchase_start_time,
-            purchase_end_time,
-            only_p_order,
-        } = fields;
-        return Object.assign(fields, {
-            order_start_time: order_start_time
-                ? transStartDate(order_start_time)
-                : order_start_time,
-            order_end_time: order_end_time ? transEndDate(order_end_time) : order_end_time,
-            purchase_start_time: purchase_start_time
-                ? transStartDate(purchase_start_time)
-                : purchase_start_time,
-            purchase_end_time: purchase_end_time
-                ? transStartDate(purchase_end_time)
-                : purchase_end_time,
-            only_p_order: only_p_order ? 1 : 0,
-        });
     };
 
     // 全选
@@ -352,7 +327,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         const { childOrderList } = this.state;
         this.setState({
             childOrderList: childOrderList.map(item => {
-                if (row._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
                     return {
                         ...item,
                         _checked: !row._checked,
@@ -361,6 +336,87 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 return item;
             }),
         });
+    };
+
+    // 获取查询数据
+    private getFieldsValue = () => {
+        // console.log('111', this.formRef.current!.getFieldsValue());
+    };
+
+    // 一键拍单
+    postOrdersPlace = () => {
+        const { childOrderList } = this.state;
+        const orderGoodsIdList = childOrderList
+            .filter(item => item._checked)
+            .map(item => item.orderGoodsId);
+        if (orderGoodsIdList.length) {
+            // console.log('orderGoodsIdList', orderGoodsIdList);
+            postOrdersPlace({
+                order_goods_ids: orderGoodsIdList,
+            }).then(res => {
+                // console.log('delChannelOrders', res);
+                const { success, failed } = res.data;
+                if (success!.length) {
+                    notification.success({
+                        message: '拍单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '拍单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
+            });
+        } else {
+            message.error('请选择需要拍单的订单！');
+        }
+    };
+
+    // 取消渠道订单
+    cancelChannelOrder = () => {
+        const { childOrderList } = this.state;
+        const orderGoodsIdList = childOrderList
+            .filter(item => item._checked)
+            .map(item => item.orderGoodsId);
+        if (orderGoodsIdList.length) {
+            // console.log('orderGoodsIdList', orderGoodsIdList);
+            delChannelOrders({
+                order_goods_ids: orderGoodsIdList,
+            }).then(res => {
+                // console.log('delChannelOrders', res);
+                const { success, failed } = res.data;
+                if (success!.length) {
+                    notification.success({
+                        message: '取消渠道订单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '取消渠道订单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
+            });
+        } else {
+            message.error('请选择需要删除的订单！');
+        }
     };
 
     render() {
@@ -399,7 +455,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                             查询
                         </Button>
                         {!showParentStatus ? (
-                            <Button type="primary" className="order-btn">
+                            <Button
+                                type="primary"
+                                className="order-btn"
+                                onClick={this.postOrdersPlace}
+                            >
                                 一键拍单
                             </Button>
                         ) : null}
@@ -409,7 +469,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                             </Button>
                         ) : null}
                         {!showParentStatus ? (
-                            <Button type="primary" className="order-btn">
+                            <Button
+                                type="primary"
+                                className="order-btn"
+                                onClick={this.cancelChannelOrder}
+                            >
                                 取消渠道订单
                             </Button>
                         ) : null}
