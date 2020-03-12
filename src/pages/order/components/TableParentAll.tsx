@@ -5,10 +5,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IParentOrderItem } from './PaneAll';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import { 
-    orderStatusOptionList,
-    orderShippingOptionList
-} from '@/enums/OrderEnum';
+import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;
@@ -105,8 +102,8 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(orderStatusOptionList, value)
-            }
+                return getStatusDesc(orderStatusOptionList, value);
+            },
         },
         {
             key: 'orderGoodsShippingStatus',
@@ -115,8 +112,8 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(orderShippingOptionList, value)
-            }
+                return getStatusDesc(orderShippingOptionList, value);
+            },
         },
         // {
         //     key: 'orderGoodsId',
