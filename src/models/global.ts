@@ -29,7 +29,7 @@ const GlobalModel: GlobalModelType = {
         collapsed: false,
         queryData: {},
     },
-    subscriptions: {
+    /*   subscriptions: {
         history({ dispatch, history }) {
             return history.listen(() => {
                 dispatch({
@@ -38,7 +38,7 @@ const GlobalModel: GlobalModelType = {
                 });
             });
         },
-    },
+    },*/
     reducers: {
         changeLayoutCollapsed(state = { collapsed: true }, { payload }): GlobalModelState {
             return {

@@ -231,8 +231,16 @@ export interface IGoodsSkuResponse {
     sku_list: IGoodsSkuItem[];
 }
 
-export interface IEditSkuBody {
+export interface IEditSkuItem {
     sku: string;
     adjustment_price: string;
     adjustment_reason: string;
+}
+
+export interface IEditSkuBody {
+    sku_list: IEditSkuItem[];
+}
+
+export interface IEditSkuResponse {
+    execute_status: string;
 }

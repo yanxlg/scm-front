@@ -3,7 +3,7 @@ import { Tabs } from 'antd';
 import ALLTaskPage from '@/pages/task/components/ALLTaskPage';
 import '@/styles/index.less';
 import { TaskStatusEnum } from '@/enums/StatusEnum';
-import { RouteComponentProps } from 'dva/router';
+import { RouteComponentProps } from 'react-router';
 import { ITaskListQuery } from '@/interface/ITask';
 import queryString from 'query-string';
 

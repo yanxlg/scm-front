@@ -723,7 +723,7 @@ class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageSta
                         pagination={false}
                         loading={dataLoading}
                         scroll={{
-                            x: true,
+                            x: 'max-content',
                             scrollToFirstRowOnChange: true,
                         }}
                         bottom={130}

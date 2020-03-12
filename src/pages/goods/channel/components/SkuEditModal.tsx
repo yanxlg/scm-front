@@ -1,10 +1,10 @@
 import React from 'react';
-import { Modal, Table, Pagination, Skeleton, Input, InputNumber } from 'antd';
+import { Modal, Table, Pagination, Skeleton, Input, InputNumber, message } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 // import { getGoodsSkuList } from '@/services/goods';
 import { queryGoodsDetail, queryGoodsSkuList, editSkuPrice } from '@/services/channel';
-import { IGoodsDetailResponse, ISpecsItem, IGoodsSkuItem, IEditSkuBody } from '@/interface/IChannel';
+import { IGoodsDetailResponse, ISpecsItem, IGoodsSkuItem, IEditSkuItem } from '@/interface/IChannel';
 
 const { TextArea } = Input;
 
@@ -16,7 +16,7 @@ declare interface IState {
     productId: string;
     skuList: IGoodsSkuItem[];
     goodsDetail: IGoodsDetailResponse | null;
-    editList: IEditSkuBody[];
+    editList: IEditSkuItem[];
 }
 
 class SkuDialog extends React.PureComponent<{}, IState> {
@@ -191,8 +191,17 @@ class SkuDialog extends React.PureComponent<{}, IState> {
     private handleOk = () => {
         // console.log('handleOk', this.state.editList);
         const { editList } = this.state;
-        editSkuPrice(editList).then(res => {
+        for (let i = 0; i < editList.length; i++) {
+            const { sku, adjustment_price, adjustment_reason } = editList[i];
+            if (!adjustment_price || !adjustment_reason) {
+                return message.info(`请完善${sku}修改信息`);
+            }
+        }
+        editSkuPrice({
+            sku_list: editList
+        }).then(res => {
             // console.log('editSkuPrice', res);
+            message.success(res.data.execute_status)
             this.handleCancel();
         })
     }

@@ -19,6 +19,7 @@ import {
     IGoodsSkuBody,
     IGoodsSkuResponse,
     IEditSkuBody,
+    IEditSkuResponse
 } from '@/interface/IChannel';
 import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
@@ -126,8 +127,8 @@ export async function queryGoodsSkuList(data: IGoodsSkuBody) {
 }
 
 // 编辑sku价格
-export async function editSkuPrice(data: IEditSkuBody[]) {
-    return request.put<IResponse<null>>(ChannelApiPath.EditSkuPrice, {
+export async function editSkuPrice(data: IEditSkuBody) {
+    return request.put<IResponse<IEditSkuResponse>>(ChannelApiPath.EditSkuPrice, {
         data,
     });
 }
