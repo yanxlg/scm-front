@@ -4,9 +4,10 @@
 enum StockApiPathEnum {
     QueryOutList = '/api/v1/inventory/out',
     QueryInList = '/api/v1/inventory/in',
-    ExportIOList = '/api/v1/inventory/io/export',
+    ExportInList = '/api/v1/inventory/in_export',
+    ExportOutList = '/api/v1/inventory/out_export',
     QueryStockList = '/api/v1/inventory/list',
-    ExportStockList = '/api/v1/inventory/export',
+    ExportStockList = '/api/v1/inventory/stork_export',
     SyncStock = '/api/v1/inventory/sync',
 }
 

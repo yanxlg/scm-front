@@ -3,6 +3,7 @@ import { Checkbox, DatePicker, Form, Input, Select } from 'antd';
 import { FormProps } from 'antd/lib/form/Form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance } from 'antd/es/form';
+import { RuleObject, StoreValue } from 'rc-field-form/lib/interface';
 
 import NumberInput from '@/components/NumberInput';
 import IntegerInput from '@/components/IntegerInput';
@@ -61,6 +62,7 @@ export type IFieldItem = FormItemLabelProps & {
     dateBeginWith?: Array<FormItemName | 'now'>;
     dateEndWith?: Array<FormItemName | 'now'>;
     onChange?: (name: FormItemName, form: FormInstance, setState: setStateFunc) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+    validator?: (rule: RuleObject, value: StoreValue, form: FormInstance) => Promise<any>;
 } & (SingleField | DoubleFields);
 
 declare interface ISearchFormProps extends FormProps {
@@ -131,7 +133,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                 const date =
                     dependence === 'now'
                         ? moment()
-                        : this.formRef.current!.getFieldValue(dependence);
+                        : this.getFormRef().current!.getFieldValue(dependence);
                 if (date) {
                     const time = date.startOf('day').valueOf();
                     if ((timeMax && time < timeMax) || timeMax === void 0) {
@@ -156,7 +158,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                 const date =
                     dependence === 'now'
                         ? moment()
-                        : this.formRef.current!.getFieldValue(dependence);
+                        : this.getFormRef().current!.getFieldValue(dependence);
                 if (date) {
                     const time = date.endOf('day').valueOf();
                     if ((timeMax && time < timeMax) || timeMax === void 0) {
@@ -199,7 +201,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                   onChange: () => {
                       onChange(
                           name as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
@@ -222,25 +224,42 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
         );
     };
     private addInteger = (field: IFieldItem) => {
-        const { name, placeholder, label, className, formItemClassName, onChange } = field;
+        const {
+            name,
+            placeholder,
+            label,
+            className,
+            formItemClassName,
+            onChange,
+            validator,
+        } = field;
         const { labelClassName } = this.props;
         const eventProps = onChange
             ? {
                   onChange: () => {
                       onChange(
                           name as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
               }
             : {};
+        const rules = validator
+            ? [
+                  {
+                      validator: (rule: RuleObject, value: StoreValue) =>
+                          validator(rule, value, this.getFormRef().current!),
+                  },
+              ]
+            : undefined;
         return (
             <Form.Item
                 key={String(name)}
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
+                rules={rules}
             >
                 <IntegerInput
                     min={0}
@@ -266,7 +285,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                   onChange: () => {
                       onChange(
                           name1 as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
@@ -277,7 +296,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                   onChange: () => {
                       onChange(
                           name2 as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
@@ -345,25 +364,42 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
     };
 
     private addInput = (field: IFieldItem) => {
-        const { name, placeholder, label, className, formItemClassName, onChange } = field;
+        const {
+            name,
+            placeholder,
+            label,
+            className,
+            formItemClassName,
+            onChange,
+            validator,
+        } = field;
         const { labelClassName } = this.props;
         const eventProps = onChange
             ? {
                   onChange: () => {
                       onChange(
                           name as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
               }
             : {};
+        const rules = validator
+            ? [
+                  {
+                      validator: (rule: RuleObject, value: StoreValue) =>
+                          validator(rule, value, this.getFormRef().current!),
+                  },
+              ]
+            : undefined;
         return (
             <Form.Item
                 key={String(name)}
                 className={formItemClassName}
                 name={name}
                 label={<span className={labelClassName}>{label}</span>}
+                rules={rules}
             >
                 <Input placeholder={placeholder} className={className} {...eventProps} />
             </Form.Item>
@@ -386,7 +422,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             if (optionListDependence) {
                 const { name: dependenceName, key: dependenceKey, convert } = optionListDependence;
                 const { optionMap } = this.state;
-                const form = this.formRef.current;
+                const form = this.getFormRef().current;
                 const dependenceValue = form?.getFieldValue(dependenceName);
                 const parentList = optionMap[dependenceName];
                 const parentItem = parentList?.find(({ value }) => value === dependenceValue);
@@ -430,7 +466,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                   onChange: () => {
                       onChange(
                           name as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
@@ -520,7 +556,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                   onChange: () => {
                       onChange(
                           name as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
@@ -550,7 +586,7 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                   onChange: () => {
                       onChange(
                           name as FormItemName,
-                          this.formRef.current!,
+                          this.getFormRef().current!,
                           this.setState as setStateFunc,
                       );
                   },
@@ -570,10 +606,19 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
         );
     };
 
+    private getFormRef = () => {
+        const { formRef = this.formRef } = this.props;
+        return formRef;
+    };
+
     public getFieldsValue = () => {
         const { formRef = this.formRef } = this.props;
         const originValues = formRef.current!.getFieldsValue();
         return this.formatter(originValues);
+    };
+
+    public validateFields = () => {
+        return this.getFormRef().current!.validateFields();
     };
 
     private getFormatCallback = (format?: formatter) => {
