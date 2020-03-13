@@ -11,10 +11,10 @@ import { showFailureModal } from '@/pages/task/components/modal/GatherFailureMod
 import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
+import { EmptyObject } from '@/config/global';
 
 declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Spin } from 'antd';
 
-import { IGoodsDetail } from './OrderTable';
+import { IGoodsDetail } from './OrderTable_del';
 
 declare interface IGoodsDetailDialogProps {
     visible: boolean;

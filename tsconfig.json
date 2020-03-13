@@ -16,7 +16,7 @@
                 "src/*"
             ],
             "@@/*": [
-                "src/pages/.umi/*"
+                "src/.umi/*"
             ]
         },
         "allowSyntheticDefaultImports": true

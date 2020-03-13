@@ -10,7 +10,7 @@ import {
     exportChannelProductVersion,
     queryChannelProductVersion,
 } from '@/services/channel';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface ITableItem {
     vova_virtual_id: number;
@@ -382,7 +382,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
     render() {
         const { dataLoading, attributes, dataSet, clearLoading } = this.state;
         return (
-            <div className="container">
+            <div>
                 <VersionSearch
                     onActive={this.activeGoodsVersion}
                     onExport={this.exportGoodsVersion}

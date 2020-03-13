@@ -17,7 +17,7 @@ import {
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IURLTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
 
 declare interface IURLGatherProps {
     taskId?: number;
@@ -33,14 +33,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
     const [failTimes, setFailTimes] = useState<number | undefined>();
 
     const convertDetail = useCallback((info: ITaskDetailInfo) => {
-        const {
-            range,
-            task_end_time,
-            task_start_time,
-            task_interval_seconds,
-            urls,
-            ...extra
-        } = info;
+        const { task_end_time, task_start_time, task_interval_seconds, urls, ...extra } = info;
         return {
             task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
             urls: parseText(urls),

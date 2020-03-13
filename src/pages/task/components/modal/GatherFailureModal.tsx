@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, Modal } from 'antd';
-import router from 'umi/router';
 import '@/styles/modal.less';
 
 const GatherFailureModal: React.FC = () => {

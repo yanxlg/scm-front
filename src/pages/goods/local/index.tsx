@@ -20,7 +20,11 @@ import {
     getCatagoryList,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
-import { RouteComponentProps } from 'dva/router';
+import { RouteComponentProps } from 'react-router';
+import CopyLink from '@/components/copyLink';
+import queryString from 'query-string';
+import { ProductStatusList } from '@/config/dictionaries/Product';
+import { convertEndDate, convertStartDate } from '@/utils/date';
 
 declare interface IPageData {
     page?: number;
@@ -127,6 +131,7 @@ const pageSizeOptions = ['50', '100', '500', '1000'];
 type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
+    private queryData: any = {};
     localSearchRef: LocalSearch | null = null;
     // goodsTableRef: GoodsTable | null = null;
     // 保存搜索条件
@@ -154,6 +159,18 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             originEditGoods: null,
         };
     }
+    private computeInitialValues = () => {
+        // copy link 解析
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const { page = 1, page_count = 50 } = query;
+        return {
+            page: Number(page),
+            page_count: Number(page_count),
+        };
+    };
 
     componentDidMount(): void {
         this.getCatagoryList();
@@ -252,6 +269,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.setState({
             searchLoading: true,
         });
+        this.queryData = {
+            ...params,
+        };
         return getGoodsList(params)
             .then(res => {
                 // console.log(res)
@@ -564,6 +584,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             });
     };
 
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
     render() {
         const {
             page,
@@ -657,6 +681,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     getExcelData={this.getExcelData}
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }
