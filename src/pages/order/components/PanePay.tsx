@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { Button, Pagination, message } from 'antd';
+import { Button, Pagination, message, notification } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TablePay from './TablePay';
@@ -7,6 +7,7 @@ import TablePay from './TablePay';
 import {
     getPayOrderList,
     delChannelOrders,
+    delPurchaseOrders,
     postExportPay,
     IPayFilterParams,
 } from '@/services/order-manage';
@@ -88,6 +89,7 @@ declare interface IState {
 
 class PanePay extends React.PureComponent<{}, IState> {
     private formRef: RefObject<SearchForm> = React.createRef();
+    private currentSearchParams: IPayFilterParams | null = null;
     private initialValues = {
         purchase_platform: 100,
     };
@@ -125,6 +127,7 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
         getPayOrderList(params)
             .then(res => {
+                this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
                 const { all_count, list } = res.data;
                 // console.log('getPayOrderList', list);
@@ -228,24 +231,82 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
     };
 
-    private delChannelOrders = () => {
+    private getOrderGoodsIdList = () => {
         const { orderList } = this.state;
         const parentOrdersSnList = orderList
             .filter(item => item._checked)
             .map(item => item.purchase_parent_order_sn);
-        if (parentOrdersSnList.length) {
-            const list = orderList
-                .filter(
-                    item =>
-                        parentOrdersSnList.indexOf(item.purchase_parent_order_sn) > -1 &&
-                        item.order_goods_id,
-                )
-                .map(item => item.order_goods_id);
-            // console.log(list);
-            delChannelOrders({
-                order_goods_ids: [...new Set(list)],
+        const list = orderList
+            .filter(
+                item =>
+                    parentOrdersSnList.indexOf(item.purchase_parent_order_sn) > -1 &&
+                    item.order_goods_id,
+            )
+            .map(item => item.order_goods_id);
+        return [...new Set(list)];
+    };
+
+    // 取消采购订单
+    private cancelPurchaseOrder = () => {
+        const list = this.getOrderGoodsIdList();
+        if (list.length) {
+            delPurchaseOrders({
+                order_goods_ids: list,
             }).then(res => {
-                // console.log('delChannelOrders', res);
+                const { success, failed } = res.data;
+                this.onSearch();
+                if (success!.length) {
+                    notification.success({
+                        message: '取消采购单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '取消采购单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单！');
+        }
+    };
+
+    private delChannelOrders = () => {
+        const list = this.getOrderGoodsIdList();
+        if (list.length) {
+            delChannelOrders({
+                order_goods_ids: list,
+            }).then(res => {
+                const { success, failed } = res.data;
+                this.onSearch();
+                if (success!.length) {
+                    notification.success({
+                        message: '取消渠道订单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '取消渠道订单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div key={item.order_goods_id}>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
             });
         } else {
             message.error('请选择需要取消的订单');
@@ -253,15 +314,16 @@ class PanePay extends React.PureComponent<{}, IState> {
     };
 
     postExportPay = () => {
-        const { page, pageCount } = this.state;
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
         this.setState({
             exportLoading: true,
         });
-        postExportPay({
-            page,
-            page_count: pageCount,
-            ...this.getFieldsValue(),
-        }).finally(() => {
+        postExportPay(params).finally(() => {
             this.setState({
                 exportLoading: false,
             });
@@ -299,7 +361,11 @@ class PanePay extends React.PureComponent<{}, IState> {
                         >
                             查询
                         </Button>
-                        <Button type="primary" className="order-btn" disabled>
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.cancelPurchaseOrder}
+                        >
                             取消采购单
                         </Button>
                         <Button

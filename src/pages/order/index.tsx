@@ -85,7 +85,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
         const { allListCount, penddingPayCount, errorOrderCount } = this.state;
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="7">
                     <TabPane tab={`全部（${allListCount}）`} key="1">
                         <PaneAll getAllTabCount={this.getAllTabCount} />
                     </TabPane>

@@ -7,15 +7,15 @@ export declare interface IFilterParams {
     page_count?: number;
     order_time_start?: number; // 订单时间
     order_time_end?: number;
-    order_goods_id?: number; // 中台订单id
-    order_id?: number; // 中台父订单id
-    channel_order_goods_sn?: string; // 销售订单id
+    order_goods_id?: string[]; // 中台订单id
+    order_id?: string[]; // 中台父订单id
+    channel_order_goods_sn?: string[]; // 销售订单id
     channel_source?: number; // 渠道来源， VOVA, FD
     purchase_time_start?: number; // 采购时间
     purchase_time_end?: number; // 采购时间
-    last_waybill_no?: string; // 尾程运单号
-    product_id?: number; // 中台product id
-    sku_id?: number; // 中台sku id
+    last_waybill_no?: string[]; // 尾程运单号
+    product_id?: string[]; // 中台product id
+    sku_id?: string[]; // 中台sku id
     order_goods_status?: number; // 订单状态 1：已确认 2：已取消
     order_goods_shipping_status?: number; // 订单配送状态 1：未配送 2：头程已配送 3：已妥投未入库 4： 已入库 5：出库中 6：出库失败  7：取消出库 8：已出库 9：尾程已揽收 10：已妥投
     delivery_time_start?: number; // 出库时间
@@ -140,6 +140,14 @@ export async function getOrderGoodsDetail(id: string) {
 // 一键拍单
 export async function postOrdersPlace(data: { order_goods_ids: string[] }) {
     return request.post(OrderApiPath.postOrdersPlace, {
+        requestType: 'json',
+        data,
+    });
+}
+
+// 取消采购订单
+export async function delPurchaseOrders(data: { order_goods_ids: string[] }) {
+    return request.delete(OrderApiPath.delPurchaseOrders, {
         requestType: 'json',
         data,
     });

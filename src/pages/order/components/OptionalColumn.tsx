@@ -64,7 +64,7 @@ class OptionalColumn extends React.PureComponent<IOptionalColumnProps, IOptional
         // const currentColumnList = allColumnList.filter(item => );
         changeSelectedColList(keyList as string[]);
         this.setState({
-            indeterminate: keyList.length > 0,
+            indeterminate: keyList.length > 0 && keyList.length !== optionalColList.length,
             checkAll: keyList.length === optionalColList.length,
         });
     };

@@ -23,6 +23,8 @@ export enum OrderApiPath {
     getOrderGoodsDetail = '/v1/order/goods_detail',
     // 一键拍单
     postOrdersPlace = '/api/v1/orders/place',
+    // 取消采购单
+    delPurchaseOrders = '/api/v1/orders/purchase',
     // 取消渠道订单
     delChannelOrders = '/api/v1/orders/channel',
     // 确认支付
