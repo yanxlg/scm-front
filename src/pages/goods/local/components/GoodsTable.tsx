@@ -300,7 +300,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                     rowSelection={rowSelection}
                     columns={this.columns}
                     dataSource={goodsList}
-                    scroll={{ x: true, y: 600 }}
+                    scroll={{ x: 'max-content', y: 600 }}
                     pagination={false}
                     loading={searchLoading}
                 />

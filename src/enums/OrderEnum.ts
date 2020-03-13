@@ -66,15 +66,12 @@ export const errorTypeOptionList = [
 ];
 
 export const errorDetailOptionList = [
-    { name: '12小时未支付', value: 1 },
     { name: '24小时未拍单', value: 2 },
-    { name: '48小时未发货', value: 3 },
-    { name: '48小时未出库', value: 4 },
     { name: '72小时未入库', value: 5 },
-    { name: '6天未标记发货', value: 6 },
-    { name: '7天未上线', value: 7 },
-    { name: '14天未上线', value: 8 },
-    { name: '30天未妥投', value: 9 },
+    { name: '48小时未出库', value: 6 },
+    { name: '12小时未支付', value: 3 },
+    { name: '48小时未发货', value: 4 },
+    { name: '6天未标记发货', value: 7 },
 ];
 
 export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
@@ -91,10 +88,10 @@ export const childDefaultFieldList: IFieldItem[] = [
     {
         type: 'input',
         name: 'order_goods_id',
-        label: '中台订单ID',
+        label: '中台订单子ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单ID',
+        placeholder: '请输入中台订单子ID',
         // formatter: 'number',
     },
     {
@@ -334,7 +331,7 @@ export const defaultColChildList = [
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
     'purchaseOrderShippingStatus', // 采购配送状态
-    'purchaseCreateTime', // 采购生成时间
+    // 'purchaseCreateTime', // 采购生成时间
     'purchasePlatformOrderId', // 采购订单号
     'purchaseWaybillNo', // 采购运单号
 ];
@@ -343,10 +340,11 @@ export const childOptionalColList = [
     { key: 'purchaseNumber', name: '采购数量' }, // 2
     { key: 'purchaseAmount', name: '采购单价' }, // 2
     { key: 'purchaseCancelReason', name: '采购取消原因' }, // 2
-    { key: 'purchaseCreateTime', name: '采购时间' }, // 2
+    // { key: 'purchaseCreateTime', name: '采购时间' }, // 2
     { key: 'payTime', name: '支付时间' }, // 2
     // orderInfo
     { key: 'confirmTime', name: '订单确认时间' }, // 1
+    { key: 'purchaseTime', name: '采购完成时间' }, // 1
     { key: 'storageTime', name: '入库时间' }, // 1
     { key: 'deliveryTime', name: '出库时间' }, // 1
     { key: 'collectTime', name: '揽收时间' }, // 1

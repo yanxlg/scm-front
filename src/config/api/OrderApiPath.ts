@@ -19,8 +19,9 @@ export enum OrderApiPath {
     // 仓库未发货
     getStockNotShipList = '/v1/orders/list/6',
     // 错误订单
-    getErrorOrderList = '/v1/orders/list/7',
-    getOrderGoodsDetail = '/v1/order/goods_detail',
+    getErrorOrderList = '/api/v1/orders/list/7',
+    // 导出待支付
+    postExportErrOrder = '/api/v1/orders/exports/7',
     // 一键拍单
     postOrdersPlace = '/api/v1/orders/place',
     // 取消采购单

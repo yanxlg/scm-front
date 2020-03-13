@@ -341,12 +341,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             // colChildList: [...defaultColChildList, ...list]
         });
         if (showParentStatus) {
+            const colList = parentOptionalColList
+                .filter(item => list.indexOf(item.key) > -1)
+                .map(item => item.key);
             this.setState({
-                colParentList: [...defaultParentColList, ...list],
+                colParentList: [...defaultParentColList, ...colList],
             });
         } else {
+            const colList = childOptionalColList
+                .filter(item => list.indexOf(item.key) > -1)
+                .map(item => item.key);
             this.setState({
-                colChildList: [...defaultColChildList, ...list],
+                colChildList: [...defaultColChildList, ...colList],
             });
         }
     };

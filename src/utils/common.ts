@@ -110,7 +110,7 @@ export function downloadExcel(response: Response) {
     });
 }
 
-export function splitStrToArr(str: string | undefined, split: string = '?'): string[] | undefined {
+export function splitStrToArr(str: string | undefined, split: string = ','): string[] | undefined {
     if (str) {
         return str.replace(/(^\s*)|(\s*$)/g, '').split(split);
     }

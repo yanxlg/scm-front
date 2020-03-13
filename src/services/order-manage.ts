@@ -46,6 +46,19 @@ export declare interface IPayFilterParams {
     purchase_parent_order_sn?: string;
 }
 
+export declare interface IErrFilterParams {
+    page?: number;
+    page_count?: number;
+    order_start_time?: number;
+    order_end_time?: number;
+    confirm_time_start?: number;
+    confirm_time_end?: number;
+    channel_source?: number;
+    order_goods_id?: string;
+    abnormal_type?: number;
+    abnormal_detail_type?: number;
+}
+
 interface IConfirmPayData {
     purchase_platform_parent_order_id: string;
     purchase_plan_id: string[];
@@ -125,11 +138,21 @@ export async function getStockNotShipList(data = {}) {
 }
 
 // 获取异常订单
-export async function getErrorOrderList(data = {}) {
+export async function getErrorOrderList(data: IErrFilterParams) {
     return request.post(OrderApiPath.getErrorOrderList, {
         requestType: 'json',
         data,
     });
+}
+
+export async function postExportErrOrder(data: IErrFilterParams) {
+    return request
+        .post(OrderApiPath.postExportErrOrder, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
 }
 
 // 获取商品详情

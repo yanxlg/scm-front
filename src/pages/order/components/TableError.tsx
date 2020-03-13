@@ -1,11 +1,11 @@
 import React from 'react';
-import { Table, Input } from 'antd';
+import { Table } from 'antd';
 
 import { ColumnProps } from 'antd/es/table';
 import { IErrorOrderItem } from './PaneError';
-// import { TableRowSelection } from 'antd/lib/table/interface';
-
-// import { formatDate } from '@/utils/date';
+import { utcToLocal } from '@/utils/date';
+import { getStatusDesc } from '@/utils/transform';
+import { errorTypeOptionList, errorDetailOptionList } from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;
@@ -18,116 +18,191 @@ declare interface IState {}
 class TableError extends React.PureComponent<IProps, IState> {
     columns: ColumnProps<IErrorOrderItem>[] = [
         {
-            key: 'order_create_time',
+            key: 'createTime',
             title: '订单时间',
-            dataIndex: 'order_create_time',
+            dataIndex: 'createTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IErrorOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'order_confirm_time',
+            key: 'confirmTime',
             title: '订单确认时间',
-            dataIndex: 'order_confirm_time',
+            dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IErrorOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'middleground_order_id',
+            key: 'orderGoodsId',
             title: '订单号',
-            dataIndex: 'middleground_order_id',
+            dataIndex: 'orderGoodsId',
             align: 'center',
             width: 120,
+            render: this.mergeCell,
         },
         {
-            key: 'channel_order_id',
+            key: 'channelOrderGoodsSn',
             title: '渠道订单号',
-            dataIndex: 'channel_order_id',
+            dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
+            render: this.mergeCell,
         },
         {
-            key: 'error_type',
+            key: 'abnormalType',
             title: '异常类型',
-            dataIndex: 'error_type',
+            dataIndex: 'abnormalType',
             align: 'center',
             width: 120,
+            render: (value: number, row: IErrorOrderItem) => {
+                return {
+                    children: getStatusDesc(errorTypeOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'error_detail',
+            key: 'abnormalDetailType',
             title: '异常详情',
-            dataIndex: 'error_detail',
+            dataIndex: 'abnormalDetailType',
             align: 'center',
             width: 120,
+            render: (value: number, row: IErrorOrderItem) => {
+                return {
+                    children: getStatusDesc(errorDetailOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: '',
-            title: '采购订单发货时间',
-            dataIndex: '',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: '',
+            key: 'storageTime',
             title: '入库时间',
-            dataIndex: '',
+            dataIndex: 'storageTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IErrorOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: '',
-            title: '发送指令时间',
-            dataIndex: '',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: '',
+            key: 'deliveryTime',
             title: '出库时间',
-            dataIndex: '',
+            dataIndex: 'deliveryTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IErrorOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: '',
-            title: '采购订单生成时间',
-            dataIndex: '',
+            key: 'deliveryCommandTime',
+            title: '发送指令时间',
+            dataIndex: 'deliveryCommandTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IErrorOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: '',
+            key: 'platformShippingTime',
+            title: '采购订单发货时间',
+            dataIndex: 'platformShippingTime',
+            align: 'center',
+            width: 120,
+            render: (value: string) => {
+                return utcToLocal(value);
+            },
+        },
+        // {
+        //     key: 'x1',
+        //     title: '采购订单生成时间',
+        //     dataIndex: 'x1',
+        //     align: 'center',
+        //     width: 120,
+        //     render: (value: string) => {
+        //         return utcToLocal(value)
+        //     }
+        // },
+        {
+            key: 'platformOrderTime',
             title: '拍单时间',
-            dataIndex: '',
+            dataIndex: 'platformOrderTime',
             align: 'center',
             width: 120,
+            render: (value: string) => {
+                return utcToLocal(value);
+            },
         },
         {
-            key: '',
+            key: 'payTime',
             title: '支付时间',
-            dataIndex: '',
+            dataIndex: 'payTime',
             align: 'center',
             width: 120,
+            render: (value: string) => {
+                return utcToLocal(value);
+            },
         },
         {
-            key: '',
+            key: 'x2',
             title: '标记发货时间',
-            dataIndex: '',
+            dataIndex: 'x2',
             align: 'center',
             width: 120,
+            render: (value: string) => {
+                return utcToLocal(value);
+            },
         },
         {
-            key: 'last_waybill_no',
+            key: 'lastWaybillNo',
             title: '尾程运单号',
-            dataIndex: 'last_waybill_no',
+            dataIndex: 'lastWaybillNo',
             align: 'center',
             width: 120,
+            render: this.mergeCell,
         },
         {
-            key: 'first_waybill_no',
+            key: 'x3',
             title: '首程运单号',
-            dataIndex: 'first_waybill_no',
+            dataIndex: 'x3',
             align: 'center',
             width: 120,
+            render: this.mergeCell,
         },
     ];
 
@@ -135,14 +210,24 @@ class TableError extends React.PureComponent<IProps, IState> {
         super(props);
     }
 
+    // 合并单元格
+    private mergeCell(value: string | number, row: IErrorOrderItem) {
+        return {
+            children: value,
+            props: {
+                rowSpan: row._rowspan || 0,
+            },
+        };
+    }
+
     render() {
         const { loading, orderList } = this.props;
-        // const columns = this.createColumns()
-
         return (
             <Table
                 bordered={true}
-                rowKey="middleground_order_id"
+                rowKey={record => {
+                    return record.purchasePlanId || record.orderGoodsId;
+                }}
                 className="order-table"
                 loading={loading}
                 columns={this.columns}

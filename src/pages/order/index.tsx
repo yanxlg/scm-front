@@ -2,7 +2,6 @@ import React, { RefObject } from 'react';
 import { Button, Tabs, message } from 'antd';
 
 import OrderFilter from './components/OrderFilter';
-import OrderTable from './components/OrderTable_del';
 import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
 import PanePay from './components/PanePay';
@@ -82,7 +81,8 @@ class Order extends React.PureComponent<{}, IOrderState> {
     };
 
     render() {
-        const { allListCount, penddingPayCount, errorOrderCount } = this.state;
+        // errorOrderCount
+        const { allListCount, penddingPayCount } = this.state;
         return (
             <div className="order-wrap">
                 <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">

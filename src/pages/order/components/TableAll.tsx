@@ -39,7 +39,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
+            render: (value: string, row: IChildOrderItem) => {
                 return {
                     children: utcToLocal(value),
                     props: {
@@ -195,17 +195,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'purchaseCreateTime',
-            title: '采购生成时间',
-            dataIndex: 'purchaseCreateTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return utcToLocal(value);
-            },
-        },
-        // 待确定
-        {
             key: 'purchasePlatformOrderId',
             title: '采购订单号',
             dataIndex: 'purchasePlatformOrderId',
@@ -250,6 +239,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             key: 'confirmTime',
             title: '订单确认时间',
             dataIndex: 'confirmTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'purchaseTime',
+            title: '采购完成时间',
+            dataIndex: 'purchaseTime',
             align: 'center',
             width: 120,
             render: (value: string, row: IChildOrderItem) => {

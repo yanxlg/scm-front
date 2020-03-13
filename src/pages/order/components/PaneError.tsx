@@ -1,12 +1,12 @@
 import React, { RefObject } from 'react';
-import { Button, Checkbox, Pagination } from 'antd';
-import { FormInstance } from 'antd/es/form';
-import { CheckboxValueType } from 'antd/lib/checkbox/Group';
+import { Button, Radio, Pagination } from 'antd';
+// import { FormInstance } from 'antd/es/form';
+import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TableError from './TableError';
 
-import { getErrorOrderList, IFilterParams } from '@/services/order-manage';
+import { getErrorOrderList, postExportErrOrder, IErrFilterParams } from '@/services/order-manage';
 import {
     pageSizeOptions,
     defaultOptionItem,
@@ -14,24 +14,25 @@ import {
     errorTypeOptionList,
     errorDetailOptionList,
 } from '@/enums/OrderEnum';
+import { getCurrentPage } from '@/utils/common';
 
 export declare interface IErrorOrderItem {
-    order_create_time: number;
-    order_confirm_time: number;
-    middleground_order_id: string;
-    channel_order_id: string;
-    error_type: number;
-    error_detail: number;
-    first_waybill_no: string;
-    last_waybill_no: string;
-}
+    createTime: string; // 订单时间
+    confirmTime: string; // 订单确认时间
+    orderGoodsId: string; // 订单号
+    channelOrderGoodsSn: string; // 渠道订单号
+    storageTime: string; // 入库时间
+    deliveryTime: string; // 出库时间
+    deliveryCommandTime: string; // 发送指令时间
+    lastWaybillNo: string; // 尾程运单号
+    abnormalDetailType: number;
+    abnormalType: number;
 
-declare interface IState {
-    page: number;
-    pageCount: number;
-    total: number;
-    loading: boolean;
-    orderList: IErrorOrderItem[];
+    purchasePlanId?: string;
+    platformShippingTime?: string; // 采购订单发货时间
+    platformOrderTime?: string; // 拍单时间
+    payTime?: string; // 支付时间
+    _rowspan?: number;
 }
 
 const fieldList: IFieldItem[] = [
@@ -73,12 +74,23 @@ const fieldList: IFieldItem[] = [
         label: '异常类型',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...errorTypeOptionList],
+        optionList: errorTypeOptionList,
     },
 ];
 
-class PanePaid extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+declare interface IState {
+    loading: boolean;
+    exportLoading: boolean;
+    page: number;
+    pageCount: number;
+    total: number;
+    abnormalDetailType: number;
+    orderList: IErrorOrderItem[];
+}
+
+class PaneErr extends React.PureComponent<{}, IState> {
+    private formRef: RefObject<SearchForm> = React.createRef();
+    private currentSearchParams: IErrFilterParams | null = null;
     private initialValues = {
         channel_source: 100,
         abnormal_type: 1,
@@ -87,9 +99,11 @@ class PanePaid extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             page: 1,
-            pageCount: 30,
+            pageCount: 50,
             total: 0,
             loading: false,
+            exportLoading: false,
+            abnormalDetailType: 2,
             orderList: [],
         };
     }
@@ -99,32 +113,28 @@ class PanePaid extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterParams) => {
+    onSearch = (baseParams?: IErrFilterParams) => {
         const { page, pageCount } = this.state;
-        let params: IFilterParams = {
+        let params: IErrFilterParams = {
             page,
             page_count: pageCount,
+            ...this.getFieldsValue(),
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
-        // console.log('getValues', this.orderFilterRef.current!.getValues());
         this.setState({
             loading: true,
         });
         getErrorOrderList(params)
             .then(res => {
                 // console.log('getProductOrderList', res);
-                const { total, list } = res.data;
+                const { all_count, list } = res.data;
                 this.setState({
-                    total,
-                    // page: params.page,
-                    // pageCount: params.page_count,
-                    orderList: list,
+                    total: all_count,
+                    page: params.page as number,
+                    pageCount: params.page_count as number,
+                    orderList: this.getOrderList(list),
                 });
             })
             .finally(() => {
@@ -134,16 +144,145 @@ class PanePaid extends React.PureComponent<{}, IState> {
             });
     };
 
+    // 获取子订单=>采购计划数据
+    private getOrderList(list: any[]): IErrorOrderItem[] {
+        const { abnormalDetailType } = this.state;
+        const { abnormal_type: abnormalType } = this.formRef.current!.getFieldsValue();
+        const orderList: IErrorOrderItem[] = [];
+        // abnormal_type
+        list.forEach((goodsItem: any) => {
+            const { orderGoods, orderInfo } = goodsItem;
+            const {
+                createTime,
+                orderGoodsId,
+                channelOrderGoodsSn,
+                storageTime,
+                deliveryTime,
+                deliveryCommandTime,
+                lastWaybillNo,
+                orderGoodsPurchasePlan,
+            } = orderGoods;
+            const { confirmTime } = orderInfo;
+            // console.log(111, orderGoodsPurchasePlan, orderGoods);
+            if (orderGoodsPurchasePlan) {
+                // 生成采购计划
+                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                    const {
+                        purchasePlanId,
+                        platformShippingTime,
+                        // platformOrderTime,
+                        platformOrderTime,
+                        payTime,
+                    } = purchaseItem;
+                    const childOrderItem: IErrorOrderItem = {
+                        createTime, // 订单时间
+                        confirmTime, // 订单确认时间
+                        orderGoodsId, // 订单号
+                        channelOrderGoodsSn, // 渠道订单号
+                        storageTime, // 入库时间
+                        deliveryTime, // 出库时间
+                        deliveryCommandTime, // 发送指令时间
+                        lastWaybillNo, // 尾程运单号
+                        abnormalDetailType,
+                        abnormalType,
+
+                        purchasePlanId,
+                        platformShippingTime, // 采购订单发货时间
+                        platformOrderTime, // 拍单时间
+                        payTime, // 支付时间
+                    };
+                    if (index === 0) {
+                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        // childOrderItem._checked = false;
+                    }
+                    orderList.push(childOrderItem);
+                });
+            } else {
+                // 没有生成采购计划
+                orderList.push({
+                    createTime, // 订单时间
+                    confirmTime, // 订单确认时间
+                    orderGoodsId, // 订单号
+                    channelOrderGoodsSn, // 渠道订单号
+                    storageTime, // 入库时间
+                    deliveryTime, // 出库时间
+                    deliveryCommandTime, // 发送指令时间
+                    lastWaybillNo, // 尾程运单号
+                    abnormalDetailType,
+                    abnormalType,
+                    _rowspan: 1,
+                });
+            }
+        });
+        // console.log(1111, childOrderList);
+        return orderList;
+    }
+
     // 获取查询数据
     getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
+        const { abnormalDetailType } = this.state;
+        return {
+            abnormal_detail_type: abnormalDetailType,
+            ...this.formRef.current!.getFieldsValue(),
+        };
     };
 
     // 选择异常详情
-    onCheckErrDetail = (list: CheckboxValueType[]) => {};
+    onCheckErrDetail = (e: RadioChangeEvent) => {
+        // console.log(e.target.value);
+        const val = e.target.value;
+        this.setState({
+            abnormalDetailType: val,
+        });
+        this.onSearch({
+            abnormal_detail_type: val,
+        });
+    };
+
+    private onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    };
+
+    private pageCountChange = (current: number, size: number) => {
+        const { page, pageCount } = this.state;
+        this.onSearch({
+            page: getCurrentPage(size, (page - 1) * pageCount + 1),
+            page_count: size,
+        });
+    };
+
+    // 导出excel
+    private postExportErrOrder = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+                  abnormal_type: 1,
+                  abnormal_detail_type: 2,
+              };
+        this.setState({
+            exportLoading: true,
+        });
+        postExportErrOrder(params).finally(() => {
+            this.setState({
+                exportLoading: false,
+            });
+        });
+    };
 
     render() {
-        const { loading, orderList, total, page, pageCount } = this.state;
+        const {
+            loading,
+            exportLoading,
+            orderList,
+            total,
+            page,
+            pageCount,
+            abnormalDetailType,
+        } = this.state;
 
         return (
             <>
@@ -151,33 +290,43 @@ class PanePaid extends React.PureComponent<{}, IState> {
                     <SearchForm
                         labelClassName="order-label"
                         fieldList={fieldList}
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
                         <Button
                             type="primary"
                             className="order-btn"
-                            onClick={() => this.getFieldsValue()}
+                            loading={loading}
+                            onClick={() => this.onSearch()}
                         >
                             查询
                         </Button>
-                        <Button className="order-btn">导出数据</Button>
+                        <Button
+                            className="order-btn"
+                            loading={exportLoading}
+                            onClick={this.postExportErrOrder}
+                        >
+                            导出数据
+                        </Button>
                     </div>
                     <div className="order-err-detail">
-                        <strong>异常详情</strong>
+                        <strong>异常详情:</strong>
                         <div className="wrap">
-                            <Checkbox.Group onChange={this.onCheckErrDetail}>
+                            <Radio.Group
+                                value={abnormalDetailType}
+                                onChange={this.onCheckErrDetail}
+                            >
                                 {errorDetailOptionList.map(item => (
-                                    <Checkbox
+                                    <Radio
                                         className="checkbox-item"
                                         key={item.value}
                                         value={item.value}
                                     >
                                         {item.name}
-                                    </Checkbox>
+                                    </Radio>
                                 ))}
-                            </Checkbox.Group>
+                            </Radio.Group>
                         </div>
                     </div>
                     <TableError loading={loading} orderList={orderList} />
@@ -190,8 +339,8 @@ class PanePaid extends React.PureComponent<{}, IState> {
                         showSizeChanger={true}
                         showQuickJumper={true}
                         pageSizeOptions={pageSizeOptions}
-                        // onChange={this.onChangePage}
-                        // onShowSizeChange={this.pageCountChange}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
                         showTotal={total => `共${total}条`}
                     />
                 </div>
@@ -200,4 +349,4 @@ class PanePaid extends React.PureComponent<{}, IState> {
     }
 }
 
-export default PanePaid;
+export default PaneErr;
