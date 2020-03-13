@@ -1,7 +1,7 @@
 @divisionSpacing: 6px;
 @btnSpacing: 12px;
 @inputWidth: 140px;
-@inputLabel: 90px;
+@inputLabel: 100px;
 
 .order {
     &-wrap {
@@ -11,12 +11,9 @@
         margin: 0 @divisionSpacing;
         font-size: 17px;
     }
-    
     &-time {
         margin-right: 0 !important;
     }
-    
-    
     &-table {
         margin-top: 20px;
     }
@@ -27,12 +24,14 @@
         .img-line {
             display: flex;
             align-items: center;
+            justify-content: space-between;
         }
         .img-wrap {
             margin-left: 30px;
             span {
                 display: inline-block;
                 width: 90px;
+                text-align: right;
                 vertical-align: -3px;
             }
         }
@@ -41,6 +40,9 @@
         }
         .style + .style {
             margin-left: 6px;
+        }
+        .float-left {
+            margin-right: 10px;
         }
     }
     &-goods-none {
@@ -57,7 +59,7 @@
         width: @inputWidth !important;
     }
     &-date-picker {
-        width: 187px;
+        width: 192px;
     }
     &-label {
         display: inline-block;
@@ -101,5 +103,8 @@
     }
     &-pagination {
         margin: 20px 0;
+    }
+    &-img-auto {
+        width: 100%;
     }
 }

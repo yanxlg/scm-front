@@ -1,16 +1,18 @@
 import React from 'react';
 import { Table, Input, Modal, Button, Checkbox } from 'antd';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';
-
-const { TextArea } = Input;
+import { putConfirmPay } from '@/services/order-manage';
+import { utcToLocal } from '@/utils/date';
 
 declare interface IProps {
     loading: boolean;
     orderList: IPayItem[];
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IPayItem): void;
+    onSearch(): void;
 }
 
 declare interface IState {}
@@ -41,7 +43,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             },
             dataIndex: '_checked',
             align: 'center',
-            width: 60,
+            width: 50,
             render: (value: boolean, row: IPayItem) => {
                 return {
                     children: (
@@ -54,46 +56,14 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'purchaseOrderTime',
+            key: 'purchase_order_time',
             title: '采购订单生成时间',
-            dataIndex: 'purchaseOrderTime',
+            dataIndex: 'purchase_order_time',
             align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'purchaseParentOrderSn',
-            title: '采购父订单号',
-            dataIndex: 'purchaseParentOrderSn',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'purchasePayUrl',
-            title: '支付二维码',
-            dataIndex: 'purchasePayUrl',
-            align: 'center',
-            width: 140,
+            width: 150,
             render: (value: string, row: IPayItem) => {
                 return {
-                    children: (
-                        <div>
-                            <img
-                                src={value}
-                                style={{ width: '100%' }}
-                                onMouseEnter={() => this.mouseEnter(value)}
-                            />
-                            <Button
-                                ghost={true}
-                                size="small"
-                                type="primary"
-                                style={{ marginTop: 10 }}
-                            >
-                                确认支付
-                            </Button>
-                        </div>
-                    ),
+                    children: utcToLocal(value),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -101,48 +71,88 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'parentPurchasePayStatusDesc',
+            key: 'purchase_parent_order_sn',
+            title: '采购父订单号',
+            dataIndex: 'purchase_parent_order_sn',
+            align: 'center',
+            width: 150,
+            render: this.mergeCell,
+        },
+        {
+            key: 'purchase_pay_url',
+            title: '支付二维码',
+            dataIndex: 'purchase_pay_url',
+            align: 'center',
+            width: 140,
+            render: (value: string, row: IPayItem) => {
+                const { purchase_parent_order_sn, parent_purchase_pay_status_desc } = row;
+                return {
+                    children:
+                        parent_purchase_pay_status_desc !== '已支付' ? (
+                            <div>
+                                <AutoEnLargeImg src={value} className="order-img-auto" />
+                                <Button
+                                    ghost={true}
+                                    size="small"
+                                    type="primary"
+                                    style={{ marginTop: 10 }}
+                                    onClick={() => this.confirmPay(purchase_parent_order_sn)}
+                                >
+                                    确认支付
+                                </Button>
+                            </div>
+                        ) : (
+                            parent_purchase_pay_status_desc
+                        ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'purchase_pay_status_desc',
             title: '采购支付状态',
-            dataIndex: 'parentPurchasePayStatusDesc',
+            dataIndex: 'purchase_pay_status_desc',
             align: 'center',
             width: 120,
             render: this.mergeCell,
         },
         {
-            key: 'purchaseTotalAmount',
+            key: 'purchase_total_amount',
             title: '采购价',
-            dataIndex: 'purchaseTotalAmount',
+            dataIndex: 'purchase_total_amount',
             align: 'center',
             width: 120,
             render: this.mergeCell,
         },
         {
-            key: 'purchaseOrderSn',
+            key: 'purchase_order_sn',
             title: '采购子订单号',
-            dataIndex: 'purchaseOrderSn',
+            dataIndex: 'purchase_order_sn',
             align: 'center',
-            width: 120,
+            width: 140,
         },
         {
-            key: 'purchasePlanId',
+            key: 'purchase_plan_id',
             title: '计划子项ID',
-            dataIndex: 'purchasePlanId',
+            dataIndex: 'purchase_plan_id',
             align: 'center',
             width: 120,
         },
         {
-            key: 'purchaseOrderStatusDesc',
+            key: 'purchase_order_status_desc',
             title: '采购订单状态',
-            dataIndex: 'purchaseOrderStatusDesc',
+            dataIndex: 'purchase_order_status_desc',
             align: 'center',
             width: 120,
         },
         {
-            key: 'purchasePayStatusDesc',
+            key: 'purchase_pay_status_desc',
             title: '采购子订单支付状态',
-            dataIndex: 'purchasePayStatusDesc',
+            dataIndex: 'purchase_pay_status_desc',
             align: 'center',
-            width: 120,
+            width: 160,
         },
         // {
         //     key: 'a9',
@@ -189,13 +199,18 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
         };
     }
 
-    mouseEnter = (qrCodeurl: string) => {
-        // console.log('mouseEnter');
-        Modal.success({
-            icon: null,
-            okText: '关闭',
-            maskClosable: true,
-            content: <img style={{ width: '100%' }} src={qrCodeurl} />,
+    // 确认支付
+    confirmPay = (id: string) => {
+        const { orderList, onSearch } = this.props;
+        const planIdList = orderList
+            .filter(item => item.purchase_parent_order_sn === id)
+            .map(item => item.purchase_plan_id);
+        putConfirmPay({
+            purchase_platform_parent_order_id: id,
+            purchase_plan_id: planIdList,
+        }).then(res => {
+            // console.log('putConfirmPay', res);
+            onSearch();
         });
     };
 
@@ -206,13 +221,13 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
         return (
             <Table
                 bordered={true}
-                rowKey="middleground_order_id"
+                rowKey="purchase_plan_id"
                 className="order-table"
                 loading={loading}
                 columns={this.columns}
                 // rowSelection={rowSelection}
                 dataSource={orderList}
-                scroll={{ x: true, y: 600 }}
+                scroll={{ x: 'max-content', y: 600 }}
                 pagination={false}
             />
         );
