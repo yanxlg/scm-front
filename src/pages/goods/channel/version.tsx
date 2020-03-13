@@ -382,7 +382,7 @@ class Version extends React.PureComponent<{}, IVersionState> {
     render() {
         const { dataLoading, attributes, dataSet, clearLoading } = this.state;
         return (
-            <div className="container">
+            <div>
                 <VersionSearch
                     onActive={this.activeGoodsVersion}
                     onExport={this.exportGoodsVersion}

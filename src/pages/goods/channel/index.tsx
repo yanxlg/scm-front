@@ -566,7 +566,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             defaultInitialValues,
         } = this.state;
         return (
-            <div className="container">
+            <div>
                 <SearchForm
                     ref={this.formRef}
                     fieldList={formFields}

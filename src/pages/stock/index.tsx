@@ -7,29 +7,27 @@ import { StockType } from '@/config/dictionaries/Stock';
 
 const { TabPane } = Tabs;
 
-const Stock: React.FC = () => {
+const Stock: React.FC = (props: any) => {
     return useMemo(() => {
         const { query } = queryString.parseUrl(window.location.href);
         const defaultActiveKey = ((query.tabKey ?? '1') as unknown) as string;
         return (
-            <div className="container">
-                <Tabs
-                    defaultActiveKey={defaultActiveKey}
-                    className="tabs-margin-none"
-                    type="card"
-                    children={[
-                        <TabPane tab="入库管理" key="1">
-                            <InOutStock type={StockType.In} />
-                        </TabPane>,
-                        <TabPane tab="出库管理" key="2">
-                            <InOutStock type={StockType.Out} />
-                        </TabPane>,
-                        <TabPane tab="库存管理" key="3">
-                            <StockControl />
-                        </TabPane>,
-                    ]}
-                />
-            </div>
+            <Tabs
+                defaultActiveKey={defaultActiveKey}
+                className="tabs-margin-none"
+                type="card"
+                children={[
+                    <TabPane tab="入库管理" key="1">
+                        <InOutStock type={StockType.In} />
+                    </TabPane>,
+                    <TabPane tab="出库管理" key="2">
+                        <InOutStock type={StockType.Out} />
+                    </TabPane>,
+                    <TabPane tab="库存管理" key="3">
+                        <StockControl />
+                    </TabPane>,
+                ]}
+            />
         );
     }, []);
 };

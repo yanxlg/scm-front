@@ -4,9 +4,20 @@ import { StockApiPathEnum } from '@/config/api/StockApiPathEnum';
 import { IRequestPagination } from '@/interface/IGlobal';
 import { IStockFormData } from '@/pages/stock/components/StockControl';
 import Stock from '@/pages/stock';
+import { StockType } from '@/config/dictionaries/Stock';
 
 export function queryIOList(data: IStockIOFormData & IRequestPagination) {
-    return request.post(StockApiPathEnum.QueryIOList, {
+    const { type } = data;
+    return type === StockType.In ? queryInList(data) : queryOutList(data);
+}
+export function queryInList(data: IStockIOFormData & IRequestPagination) {
+    return request.post(StockApiPathEnum.QueryInList, {
+        data: data,
+    });
+}
+
+export function queryOutList(data: IStockIOFormData & IRequestPagination) {
+    return request.post(StockApiPathEnum.QueryOutList, {
         data: data,
     });
 }

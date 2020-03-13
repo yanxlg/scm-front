@@ -5,10 +5,13 @@ import '@/styles/index.less';
 import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
-import { utcToLocal } from '@/utils/date';
+import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { FormInstance } from 'antd/es/form';
 import { exportStockList, queryStockList, syncStock } from '@/services/stock';
+import CopyLink from '@/components/copyLink';
+import { StockType } from '@/config/dictionaries/Stock';
+import queryString from 'query-string';
 
 declare interface ITableData {
     product_id: number; // 中台商品ID
@@ -32,6 +35,7 @@ declare interface IStockControlState {
     pageNumber: number;
     pageSize: number;
     total: number;
+    defaultInitialValues?: { [key: string]: any };
 }
 
 export declare interface IStockFormData {
@@ -41,17 +45,18 @@ export declare interface IStockFormData {
 @BindAll()
 class StockControl extends React.PureComponent<{}, IStockControlState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+    private queryData: any = {};
     private columns: ColumnProps<ITableData>[] = [
         {
             title: '中台商品ID',
-            width: '130px',
+            width: '180px',
             dataIndex: 'product_id',
             align: 'center',
             render: (time: number) => utcToLocal(time),
         },
         {
             title: '商品子SKU',
-            width: '130px',
+            width: '180px',
             dataIndex: 'sku_info',
             align: 'center',
         },
@@ -87,25 +92,25 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         },
         {
             title: '在途库存',
-            width: '128px',
+            width: '100px',
             dataIndex: 'shipping_inventory_qy',
             align: 'center',
         },
         {
             title: '锁定库存',
-            width: '128px',
+            width: '100px',
             dataIndex: 'lock_inventory_qy',
             align: 'center',
         },
         {
             title: '可销售库存',
-            width: '128px',
+            width: '100px',
             dataIndex: 'sales_inventory_qy',
             align: 'center',
         },
         {
             title: '仓库库存',
-            width: '128px',
+            width: '100px',
             dataIndex: 'inventory_qy',
             align: 'center',
         },
@@ -121,6 +126,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
     ];
     constructor(props: {}) {
         super(props);
+        const { page, page_count, ...extra } = this.computeInitialValues();
         this.state = {
             dataSet: [],
             dataLoading: true,
@@ -128,17 +134,33 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             exportingLoading: false,
             syncLoading: false,
             total: 0,
-            pageNumber: 1,
-            pageSize: 50,
+            pageNumber: page,
+            pageSize: page_count,
+            defaultInitialValues: extra,
         };
     }
 
+    private computeInitialValues() {
+        // copy link 解析
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const { page = 1, page_count = 50, ...extra } = query;
+        return {
+            page: Number(page),
+            page_count: Number(page_count),
+            ...extra,
+        };
+    }
     private convertFormData() {
         return this.formRef.current!.getFieldsValue();
     }
 
     componentDidMount(): void {
-        this.onSearch();
+        this.queryList({
+            searchLoading: true,
+        });
     }
 
     private onSearch() {
@@ -161,11 +183,16 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             dataLoading: true,
             searchLoading,
         });
-        queryStockList({
+        const query = {
             ...values,
             page: pageNumber,
             page_count: pageSize,
-        })
+        };
+        this.queryData = {
+            ...query,
+            tabKey: '3',
+        };
+        queryStockList(query)
             .then(({ data: { all_count = 0, list = [] } }) => {
                 this.setState({
                     dataLoading: false,
@@ -204,11 +231,15 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         this.setState({
             exportingLoading: true,
         });
-        exportStockList(values).finally(() => {
-            this.setState({
-                exportingLoading: false,
+        exportStockList(values)
+            .catch(() => {
+                message.error('导出失败!');
+            })
+            .finally(() => {
+                this.setState({
+                    exportingLoading: false,
+                });
             });
-        });
     }
 
     private syncStock() {
@@ -226,6 +257,10 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             });
     }
 
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
     render() {
         const {
             dataSet,
@@ -236,11 +271,13 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             pageNumber,
             pageSize,
             total,
+            defaultInitialValues,
         } = this.state;
         return (
             <div>
                 <div className="float-clear">
                     <SearchForm
+                        initialValues={defaultInitialValues}
                         labelClassName="stock-form-label"
                         fieldList={this.fieldsList}
                         formRef={this.formRef}
@@ -301,6 +338,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                     }}
                     bottom={130}
                 />
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

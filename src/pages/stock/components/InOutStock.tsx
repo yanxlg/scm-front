@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import { FitTable } from '@/components/FitTable';
-import { Button, Pagination } from 'antd';
+import { Button, message, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/stock.less';
@@ -72,44 +72,44 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
     private inColumns: ColumnProps<ITableData>[] = [
         {
             title: '入库时间',
-            width: '200px',
+            width: '150px',
             dataIndex: 'warehousing_time',
             align: 'center',
             render: (time: number) => utcToLocal(time),
         },
         {
             title: '入库订单号',
-            width: '130px',
+            width: '180px',
             dataIndex: 'warehousing_order_sn',
             align: 'center',
         },
         {
             title: '采购订单号',
-            width: '130px',
+            width: '180px',
             dataIndex: 'purchase_order_sn',
             align: 'center',
         },
         {
             title: '首程运单号',
-            width: '130px',
+            width: '180px',
             dataIndex: 'first_waybill_no',
             align: 'center',
         },
         {
             title: '计划入库数量',
-            width: '150px',
+            width: '100px',
             dataIndex: 'plan_warehousing_qy',
             align: 'center',
         },
         {
             title: '实际入库数量',
-            width: '150px',
+            width: '100px',
             dataIndex: 'actual_warehousing_qy',
             align: 'center',
         },
         {
             title: '中台商品ID',
-            width: '128px',
+            width: '150px',
             dataIndex: 'product_id',
             align: 'center',
         },
@@ -117,38 +117,38 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
     private outColumns: ColumnProps<ITableData>[] = [
         {
             title: '中台商品ID',
-            width: '128px',
+            width: '150px',
             dataIndex: 'product_id',
             align: 'center',
         },
         {
             title: '出库时间',
-            width: '200px',
+            width: '150px',
             dataIndex: 'outgoing_time',
             align: 'center',
             render: (time: number) => utcToLocal(time),
         },
         {
             title: '出库单号',
-            width: '130px',
+            width: '180px',
             dataIndex: 'outgoing_no',
             align: 'center',
         },
         {
             title: '计划出库数量',
-            width: '150px',
+            width: '100px',
             dataIndex: 'plan_outgoing_qy',
             align: 'center',
         },
         {
             title: '实际出库数量',
-            width: '150px',
+            width: '100px',
             dataIndex: 'actual_outgoing_qy',
             align: 'center',
         },
         {
             title: '尾程运单号',
-            width: '130px',
+            width: '180px',
             dataIndex: 'last_waybill_no',
             align: 'center',
         },
@@ -290,11 +290,15 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         this.setState({
             exportingLoading: true,
         });
-        exportIOList(Object.assign({ ...values, type: this.props.type })).finally(() => {
-            this.setState({
-                exportingLoading: false,
+        exportIOList(Object.assign({ ...values, type: this.props.type }))
+            .catch(() => {
+                message.error('导出失败!');
+            })
+            .finally(() => {
+                this.setState({
+                    exportingLoading: false,
+                });
             });
-        });
     }
 
     private queryList(
