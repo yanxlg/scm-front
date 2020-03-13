@@ -41,17 +41,19 @@ const fieldList: IFieldItem[] = [
         label: '订单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
-        name: ['order_confirm_start_time', 'order_confirm_end_time'],
+        name: ['confirm_time_start', 'confirm_time_end'],
         label: '订单确认时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'select',
-        name: 'channel',
+        name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
         formItemClassName: 'order-form-item',
@@ -59,15 +61,15 @@ const fieldList: IFieldItem[] = [
     },
     {
         type: 'input',
-        name: 'order_id',
+        name: 'order_goods_id',
         label: '订单号',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入采购父订单ID',
+        placeholder: '请输入订单号',
     },
     {
         type: 'select',
-        name: 'error_type',
+        name: 'abnormal_type',
         label: '异常类型',
         className: 'order-input',
         formItemClassName: 'order-form-item',
@@ -77,7 +79,10 @@ const fieldList: IFieldItem[] = [
 
 class PanePaid extends React.PureComponent<{}, IState> {
     private formRef: RefObject<FormInstance> = React.createRef();
-
+    private initialValues = {
+        channel_source: 100,
+        abnormal_type: 1,
+    };
     constructor(props: {}) {
         super(props);
         this.state = {
@@ -140,10 +145,6 @@ class PanePaid extends React.PureComponent<{}, IState> {
     render() {
         const { loading, orderList, total, page, pageCount } = this.state;
 
-        const initialValues = {
-            channel: 100,
-            error_type: 100,
-        };
         return (
             <>
                 <div>
@@ -151,7 +152,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
                         labelClassName="order-label"
                         fieldList={fieldList}
                         formRef={this.formRef}
-                        initialValues={initialValues}
+                        initialValues={this.initialValues}
                     />
                     <div className="order-operation">
                         <Button

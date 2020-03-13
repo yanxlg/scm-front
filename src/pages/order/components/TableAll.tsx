@@ -75,10 +75,18 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 };
             },
         },
+        // {
+        //     key: 'channelOrderGoodsSn',
+        //     title: 'Product SN',
+        //     dataIndex: 'channelOrderGoodsSn',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        // },
         {
-            key: 'channelOrderGoodsSn',
-            title: 'Product SN',
-            dataIndex: 'channelOrderGoodsSn',
+            key: 'skuId',
+            title: 'SKU ID',
+            dataIndex: 'skuId',
             align: 'center',
             width: 120,
             render: this.mergeCell,
@@ -313,11 +321,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 };
             },
         },
-        // 待确定
         {
-            key: 'channelOrderSn',
+            key: 'channelOrderGoodsSn',
             title: '渠道订单ID',
-            dataIndex: 'channelOrderSn',
+            dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
             render: this.mergeCell,
@@ -409,6 +416,14 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             key: 'orderGoodsId',
             title: '中台子订单ID',
             dataIndex: 'orderGoodsId',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        {
+            key: 'lastWaybillNo',
+            title: '尾程运单号',
+            dataIndex: 'lastWaybillNo',
             align: 'center',
             width: 120,
             render: this.mergeCell,
