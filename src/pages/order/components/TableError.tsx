@@ -148,7 +148,7 @@ class TableError extends React.PureComponent<IProps, IState> {
                 columns={this.columns}
                 // rowSelection={rowSelection}
                 dataSource={orderList}
-                scroll={{ x: 'max-content', y: 600 }}
+                scroll={{ x: 'max-content', y: 500 }}
                 pagination={false}
             />
         );
