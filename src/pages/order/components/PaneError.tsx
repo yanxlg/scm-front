@@ -32,6 +32,7 @@ export declare interface IErrorOrderItem {
     platformShippingTime?: string; // 采购订单发货时间
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
+    purchaseWaybillNo?: string; // 首程运单号
     _rowspan?: number;
 }
 
@@ -173,6 +174,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
                         // platformOrderTime,
                         platformOrderTime,
                         payTime,
+                        purchaseWaybillNo,
                     } = purchaseItem;
                     const childOrderItem: IErrorOrderItem = {
                         createTime, // 订单时间
@@ -190,6 +192,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
                         platformShippingTime, // 采购订单发货时间
                         platformOrderTime, // 拍单时间
                         payTime, // 支付时间
+                        purchaseWaybillNo, // 首程运单号
                     };
                     if (index === 0) {
                         childOrderItem._rowspan = orderGoodsPurchasePlan.length;

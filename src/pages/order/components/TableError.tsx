@@ -148,16 +148,16 @@ class TableError extends React.PureComponent<IProps, IState> {
                 return utcToLocal(value);
             },
         },
-        // {
-        //     key: 'x1',
-        //     title: '采购订单生成时间',
-        //     dataIndex: 'x1',
-        //     align: 'center',
-        //     width: 120,
-        //     render: (value: string) => {
-        //         return utcToLocal(value)
-        //     }
-        // },
+        {
+            key: 'x1',
+            title: '采购订单生成时间',
+            dataIndex: 'x1',
+            align: 'center',
+            width: 120,
+            render: (value: string) => {
+                return utcToLocal(value);
+            },
+        },
         {
             key: 'platformOrderTime',
             title: '拍单时间',
@@ -189,20 +189,18 @@ class TableError extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: 'purchaseWaybillNo',
+            title: '首程运单号',
+            dataIndex: 'purchaseWaybillNo',
+            align: 'center',
+            width: 120,
+        },
+        {
             key: 'lastWaybillNo',
             title: '尾程运单号',
             dataIndex: 'lastWaybillNo',
             align: 'center',
             width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'x3',
-            title: '首程运单号',
-            dataIndex: 'x3',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
         },
     ];
 

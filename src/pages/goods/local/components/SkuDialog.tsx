@@ -191,14 +191,34 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                                     </a>
                                 </div>
                                 <div className="center">
-                                    <span>product id: {product_id}</span>
-                                    <span>commodity id：{commodity_id}</span>
-                                    <span>爬虫商品 id：{worm_goods_id}</span>
+                                    <div className="goods-item one">
+                                        <span className="float-left">product id:</span>
+                                        <div className="overflow-hidden">{product_id}</div>
+                                    </div>
+                                    <div className="goods-item two">
+                                        <span className="float-left">commodity id:</span>
+                                        <div className="overflow-hidden">{commodity_id}</div>
+                                    </div>
+                                    <div className="goods-item three">
+                                        <span className="float-left">爬虫商品 id:</span>
+                                        <div className="overflow-hidden">{worm_goods_id}</div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <span>一级分类: {first_catagory.name}</span>
-                                    <span>二级分类：{second_catagory.name}</span>
-                                    <span>三级分类：{third_catagory.name}</span>
+                                    <div className="goods-item one">
+                                        <span className="float-left">一级分类:</span>
+                                        <div className="overflow-hidden">{first_catagory.name}</div>
+                                    </div>
+                                    <div className="goods-item two">
+                                        <span className="float-left">二级分类:</span>
+                                        <div className="overflow-hidden">
+                                            {second_catagory.name}
+                                        </div>
+                                    </div>
+                                    <div className="goods-item three">
+                                        <span className="float-left">三级分类:</span>
+                                        <div className="overflow-hidden">{third_catagory.name}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
