@@ -317,9 +317,19 @@ class PaneErr extends React.PureComponent<{}, IState> {
                         <strong>异常详情:</strong>
                         <div className="wrap">
                             <Radio.Group
+                                className="radio-group"
                                 value={abnormalDetailType}
                                 onChange={this.onCheckErrDetail}
                             >
+                                {errorDetailOptionList.map(item => (
+                                    <Radio
+                                        className="checkbox-item"
+                                        key={item.value}
+                                        value={item.value}
+                                    >
+                                        {item.name}
+                                    </Radio>
+                                ))}
                                 {errorDetailOptionList.map(item => (
                                     <Radio
                                         className="checkbox-item"
