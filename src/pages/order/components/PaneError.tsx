@@ -330,15 +330,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
                                         {item.name}
                                     </Radio>
                                 ))}
-                                {errorDetailOptionList.map(item => (
-                                    <Radio
-                                        className="checkbox-item"
-                                        key={item.value}
-                                        value={item.value}
-                                    >
-                                        {item.name}
-                                    </Radio>
-                                ))}
                             </Radio.Group>
                         </div>
                     </div>
