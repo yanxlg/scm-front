@@ -146,19 +146,21 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 // console.log('getProductOrderList', res);
                 const { all_count, list } = res.data;
                 const { page, page_count, only_p_order } = params;
-                this.setState({
-                    total: all_count,
-                    page: page as number,
-                    pageCount: page_count as number,
-                });
-                if (only_p_order) {
+                if (list) {
                     this.setState({
-                        parentOrderList: this.getParentOrderData(list),
+                        total: all_count,
+                        page: page as number,
+                        pageCount: page_count as number,
                     });
-                } else {
-                    this.setState({
-                        childOrderList: this.getChildOrderData(list),
-                    });
+                    if (only_p_order) {
+                        this.setState({
+                            parentOrderList: this.getParentOrderData(list),
+                        });
+                    } else {
+                        this.setState({
+                            childOrderList: this.getChildOrderData(list),
+                        });
+                    }
                 }
             })
             .finally(() => {

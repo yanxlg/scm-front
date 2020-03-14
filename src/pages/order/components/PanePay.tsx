@@ -130,13 +130,14 @@ class PanePay extends React.PureComponent<{}, IState> {
                 this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
                 const { all_count, list } = res.data;
-                // console.log('getPayOrderList', list);
-                this.setState({
-                    total: all_count,
-                    page: params.page as number,
-                    pageCount: params.page_count as number,
-                    orderList: this.getOrderData(list),
-                });
+                if (list) {
+                    this.setState({
+                        total: all_count,
+                        page: params.page as number,
+                        pageCount: params.page_count as number,
+                        orderList: this.getOrderData(list),
+                    });
+                }
             })
             .finally(() => {
                 this.setState({

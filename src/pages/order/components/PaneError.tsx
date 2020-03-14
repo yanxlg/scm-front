@@ -131,12 +131,14 @@ class PaneErr extends React.PureComponent<{}, IState> {
             .then(res => {
                 // console.log('getProductOrderList', res);
                 const { all_count, list } = res.data;
-                this.setState({
-                    total: all_count,
-                    page: params.page as number,
-                    pageCount: params.page_count as number,
-                    orderList: this.getOrderList(list),
-                });
+                if (list) {
+                    this.setState({
+                        total: all_count,
+                        page: params.page as number,
+                        pageCount: params.page_count as number,
+                        orderList: this.getOrderList(list),
+                    });
+                }
             })
             .finally(() => {
                 this.setState({
