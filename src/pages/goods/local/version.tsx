@@ -330,7 +330,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                 {currentDom}
                 <div className="goods-version-filter">
                     <div className="left-item">
-                        <span className="">商品调价跟踪</span>
+                        <span className="">版本生成时间</span>
                         <RangePicker className="date" onChange={this.selectedDate} />
                         <Button onClick={this.downloadExcel}>导出至Excel</Button>
                     </div>

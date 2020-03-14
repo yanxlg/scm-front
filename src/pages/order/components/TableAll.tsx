@@ -3,7 +3,7 @@ import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IChildOrderItem, IPurchaseStatus } from './PaneAll';
+import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -16,16 +16,6 @@ import {
 
 declare interface ISpecs {
     [key: string]: string;
-}
-
-export declare interface IGoodsDetail {
-    channel_goods_id: string;
-    psku: string;
-    main_img: string;
-    sku: string;
-    sku_img: string;
-    goods_name: string;
-    specs: ISpecs;
 }
 
 declare interface IProps {
@@ -49,7 +39,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
+            render: (value: string, row: IChildOrderItem) => {
                 return {
                     children: utcToLocal(value),
                     props: {
@@ -75,7 +65,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: any, row: IChildOrderItem) => {
                 return {
                     children: (
-                        <a onClick={() => this.getOrderGoodsDetail(row.channel_order_id)}>
+                        <a onClick={() => this.getOrderGoodsDetail(row.productId, row.skuId)}>
                             查看商品详情
                         </a>
                     ),
@@ -85,10 +75,18 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 };
             },
         },
+        // {
+        //     key: 'channelOrderGoodsSn',
+        //     title: 'Product SN',
+        //     dataIndex: 'channelOrderGoodsSn',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        // },
         {
-            key: 'channelOrderGoodsSn',
-            title: 'Product SN',
-            dataIndex: 'channelOrderGoodsSn',
+            key: 'skuId',
+            title: 'SKU ID',
+            dataIndex: 'skuId',
             align: 'center',
             width: 120,
             render: this.mergeCell,
@@ -197,17 +195,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'purchaseCreateTime',
-            title: '采购生成时间',
-            dataIndex: 'purchaseCreateTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return utcToLocal(value);
-            },
-        },
-        // 待确定
-        {
             key: 'purchasePlatformOrderId',
             title: '采购订单号',
             dataIndex: 'purchasePlatformOrderId',
@@ -252,6 +239,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             key: 'confirmTime',
             title: '订单确认时间',
             dataIndex: 'confirmTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'purchaseTime',
+            title: '采购完成时间',
+            dataIndex: 'purchaseTime',
             align: 'center',
             width: 120,
             render: (value: string, row: IChildOrderItem) => {
@@ -323,11 +325,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 };
             },
         },
-        // 待确定
         {
-            key: 'channelOrderSn',
+            key: 'channelOrderGoodsSn',
             title: '渠道订单ID',
-            dataIndex: 'channelOrderSn',
+            dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
             render: this.mergeCell,
@@ -423,6 +424,14 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: this.mergeCell,
         },
+        {
+            key: 'lastWaybillNo',
+            title: '尾程运单号',
+            dataIndex: 'lastWaybillNo',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
     ];
 
     constructor(props: IProps) {
@@ -499,16 +508,28 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     };
 
     // 获取商品详情
-    private getOrderGoodsDetail = (middleground_order_id: string) => {
+    private getOrderGoodsDetail = (productId: string, skuId: string) => {
         this.setState({
             detailDialogStatus: true,
         });
-        getOrderGoodsDetail({
-            middleground_order_id,
-        }).then(res => {
-            // console.log('getOrderGoodsDetail', res);
+        getOrderGoodsDetail(productId).then(res => {
+            const { sku_info, product_id, goods_img, title } = res.data;
+            const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
+            const goodsDetail: IGoodsDetail = {
+                product_id,
+                goods_img,
+                title,
+            };
+            if (i > -1) {
+                const { sku_style, sku_sn, sku_img } = sku_info[i];
+                Object.assign(goodsDetail, {
+                    sku_sn,
+                    sku_img,
+                    sku_style,
+                });
+            }
             this.setState({
-                goodsDetail: res.data,
+                goodsDetail,
             });
         });
     };

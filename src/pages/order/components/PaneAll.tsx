@@ -8,9 +8,11 @@ import TableParentAll from './TableParentAll';
 
 import {
     getAllOrderList,
-    IFilterParams,
     delChannelOrders,
     postOrdersPlace,
+    delPurchaseOrders,
+    postExportAll,
+    IFilterParams,
 } from '@/services/order-manage';
 import {
     childDefaultFieldList,
@@ -23,16 +25,25 @@ import {
     parentOptionalColList,
     pageSizeOptions,
 } from '@/enums/OrderEnum';
+import { getCurrentPage, splitStrToArr } from '@/utils/common';
 
 export declare interface IPurchaseStatus {
     status: number;
     comment: string;
 }
 
-// export declare interface IOrderItem extends IBaseOrderItem, IGoodsItem {
-//     _checked?: boolean;
-//     _rowspan?: number;
-// }
+export declare interface ISkuStyle {
+    [key: string]: string;
+}
+
+export declare interface IGoodsDetail {
+    product_id: string;
+    goods_img: string;
+    title: string;
+    sku_style?: ISkuStyle;
+    sku_sn?: string;
+    sku_img?: string;
+}
 
 export declare interface IChildOrderItem {
     [key: string]: any;
@@ -42,11 +53,16 @@ export declare interface IParentOrderItem {
     [key: string]: any;
 }
 
-declare interface IPaneAllState {
+declare interface IProps {
+    getAllTabCount(type: number): void;
+}
+
+declare interface IState {
     page: number;
     pageCount: number;
     total: number;
     loading: boolean;
+    exportLoading: boolean;
     showFilterStatus: boolean;
     showColStatus: boolean;
     showParentStatus: boolean;
@@ -59,10 +75,10 @@ declare interface IPaneAllState {
     childOptionalColList: IOptionalColItem[];
 }
 
-class PaneAll extends React.PureComponent<{}, IPaneAllState> {
+class PaneAll extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchForm> = React.createRef();
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
-
+    private currentSearchParams: IFilterParams | null = null;
     private initialValues = {
         channel_source: 100,
         order_goods_status: 100,
@@ -80,13 +96,14 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         },
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
             pageCount: 50,
             total: 0,
             loading: false,
+            exportLoading: false,
             showFilterStatus: false,
             showColStatus: false,
             showParentStatus: false,
@@ -107,14 +124,15 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
 
     private onSearch = (filterParams?: IFilterParams) => {
         const { page, pageCount } = this.state;
+        const fields = this.getFieldsValue();
+        // if (!fields) {}
         let params: IFilterParams = {
             page,
             page_count: pageCount,
+            ...fields,
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
+        // console.log(this.getFieldsValue())
+        // return
         if (filterParams) {
             params = Object.assign(params, filterParams);
         }
@@ -124,22 +142,25 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
         getAllOrderList(params)
             .then(res => {
+                this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
                 const { all_count, list } = res.data;
                 const { page, page_count, only_p_order } = params;
-                this.setState({
-                    total: all_count,
-                    page: page as number,
-                    pageCount: page_count as number,
-                });
-                if (only_p_order) {
+                if (list) {
                     this.setState({
-                        parentOrderList: this.getParentOrderData(list),
+                        total: all_count,
+                        page: page as number,
+                        pageCount: page_count as number,
                     });
-                } else {
-                    this.setState({
-                        childOrderList: this.getChildOrderData(list),
-                    });
+                    if (only_p_order) {
+                        this.setState({
+                            parentOrderList: this.getParentOrderData(list),
+                        });
+                    } else {
+                        this.setState({
+                            childOrderList: this.getChildOrderData(list),
+                        });
+                    }
                 }
             })
             .finally(() => {
@@ -147,6 +168,31 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                     loading: false,
                 });
             });
+    };
+
+    // 获取查询数据
+    private getFieldsValue = () => {
+        // console.log('111', this.formRef.current!.getFieldsValue());
+        const {
+            only_p_order,
+            channel_order_goods_sn,
+            order_goods_id,
+            order_id,
+            last_waybill_no,
+            product_id,
+            sku_id,
+            ...fields
+        } = this.formRef.current!.getFieldsValue();
+        return {
+            only_p_order: only_p_order ? 1 : 0,
+            channel_order_goods_sn: splitStrToArr(channel_order_goods_sn),
+            order_goods_id: splitStrToArr(order_goods_id),
+            order_id: splitStrToArr(order_id),
+            last_waybill_no: splitStrToArr(last_waybill_no),
+            product_id: splitStrToArr(product_id),
+            sku_id: splitStrToArr(sku_id),
+            ...fields,
+        };
     };
 
     // 获取子订单=>采购计划数据
@@ -229,13 +275,17 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     private changeParentOrder = (status: boolean) => {
         // console.log('changeParentOrder', status);
         const { showColStatus } = this.state;
+        this.currentSearchParams = null;
         this.setState(
             {
                 showParentStatus: status,
+                page: 1,
+                pageCount: 50,
+                total: 0,
                 selectedColKeyList: [],
                 childOptionalColList: status ? parentOptionalColList : childOptionalColList,
-                // childOrderList: [],
-                // parentOrderList: []
+                childOrderList: [],
+                parentOrderList: [],
             },
             () => {
                 // 切换过滤条件
@@ -243,11 +293,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 if (showColStatus) {
                     this.optionalRef.current!.cancelCheckAll();
                 }
-                this.onSearch({
-                    page: 1,
-                    page_count: 50,
-                    only_p_order: status ? 1 : 0,
-                });
+                this.onSearch();
+                this.props.getAllTabCount(status ? 1 : 2);
             },
         );
     };
@@ -296,18 +343,24 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             // colChildList: [...defaultColChildList, ...list]
         });
         if (showParentStatus) {
+            const colList = parentOptionalColList
+                .filter(item => list.indexOf(item.key) > -1)
+                .map(item => item.key);
             this.setState({
-                colParentList: [...defaultParentColList, ...list],
+                colParentList: [...defaultParentColList, ...colList],
             });
         } else {
+            const colList = childOptionalColList
+                .filter(item => list.indexOf(item.key) > -1)
+                .map(item => item.key);
             this.setState({
-                colChildList: [...defaultColChildList, ...list],
+                colChildList: [...defaultColChildList, ...colList],
             });
         }
     };
 
     // 全选
-    onCheckAllChange = (status: boolean) => {
+    private onCheckAllChange = (status: boolean) => {
         const { childOrderList } = this.state;
         this.setState({
             childOrderList: childOrderList.map(item => {
@@ -323,7 +376,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
     };
 
     // 单选
-    onSelectedRow = (row: IChildOrderItem) => {
+    private onSelectedRow = (row: IChildOrderItem) => {
         const { childOrderList } = this.state;
         this.setState({
             childOrderList: childOrderList.map(item => {
@@ -338,23 +391,22 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         });
     };
 
-    // 获取查询数据
-    private getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
+    // 获取勾选的orderGoodsId
+    private getOrderGoodsIdList = (): string[] => {
+        const { childOrderList } = this.state;
+        return childOrderList.filter(item => item._checked).map(item => item.orderGoodsId);
     };
 
     // 一键拍单
-    postOrdersPlace = () => {
-        const { childOrderList } = this.state;
-        const orderGoodsIdList = childOrderList
-            .filter(item => item._checked)
-            .map(item => item.orderGoodsId);
+    private postOrdersPlace = () => {
+        const orderGoodsIdList = this.getOrderGoodsIdList();
         if (orderGoodsIdList.length) {
             // console.log('orderGoodsIdList', orderGoodsIdList);
             postOrdersPlace({
                 order_goods_ids: orderGoodsIdList,
             }).then(res => {
                 // console.log('delChannelOrders', res);
+                this.onSearch();
                 const { success, failed } = res.data;
                 if (success!.length) {
                     notification.success({
@@ -381,12 +433,43 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
         }
     };
 
+    // 取消采购订单
+    private cancelPurchaseOrder = () => {
+        const orderGoodsIdList = this.getOrderGoodsIdList();
+        if (orderGoodsIdList.length) {
+            delPurchaseOrders({
+                order_goods_ids: orderGoodsIdList,
+            }).then(res => {
+                const { success, failed } = res.data;
+                this.onSearch();
+                if (success!.length) {
+                    notification.success({
+                        message: '取消采购单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '取消采购单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单！');
+        }
+    };
+
     // 取消渠道订单
-    cancelChannelOrder = () => {
-        const { childOrderList } = this.state;
-        const orderGoodsIdList = childOrderList
-            .filter(item => item._checked)
-            .map(item => item.orderGoodsId);
+    private cancelChannelOrder = () => {
+        const orderGoodsIdList = this.getOrderGoodsIdList();
         if (orderGoodsIdList.length) {
             // console.log('orderGoodsIdList', orderGoodsIdList);
             delChannelOrders({
@@ -394,6 +477,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             }).then(res => {
                 // console.log('delChannelOrders', res);
                 const { success, failed } = res.data;
+                this.onSearch();
                 if (success!.length) {
                     notification.success({
                         message: '取消渠道订单成功',
@@ -415,8 +499,40 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                 }
             });
         } else {
-            message.error('请选择需要删除的订单！');
+            message.error('请选择需要取消的订单！');
         }
+    };
+
+    private onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    };
+
+    private pageCountChange = (current: number, size: number) => {
+        const { page, pageCount } = this.state;
+        this.onSearch({
+            page: getCurrentPage(size, (page - 1) * pageCount + 1),
+            page_count: size,
+        });
+    };
+
+    // 导出excel
+    private postExportAll = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        this.setState({
+            exportLoading: true,
+        });
+        postExportAll(params).finally(() => {
+            this.setState({
+                exportLoading: false,
+            });
+        });
     };
 
     render() {
@@ -425,6 +541,7 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
             pageCount,
             total,
             loading,
+            exportLoading,
             showFilterStatus,
             showParentStatus,
             showColStatus,
@@ -450,7 +567,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         <Button
                             type="primary"
                             className="order-btn"
-                            onClick={() => this.getFieldsValue()}
+                            loading={loading}
+                            onClick={() => this.onSearch()}
                         >
                             查询
                         </Button>
@@ -464,7 +582,11 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                             </Button>
                         ) : null}
                         {!showParentStatus ? (
-                            <Button type="primary" className="order-btn">
+                            <Button
+                                type="primary"
+                                className="order-btn"
+                                onClick={this.cancelPurchaseOrder}
+                            >
                                 取消采购单
                             </Button>
                         ) : null}
@@ -477,7 +599,12 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                                 取消渠道订单
                             </Button>
                         ) : null}
-                        <Button type="primary" className="order-btn">
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            loading={exportLoading}
+                            onClick={this.postExportAll}
+                        >
                             导出数据
                         </Button>
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
@@ -520,8 +647,8 @@ class PaneAll extends React.PureComponent<{}, IPaneAllState> {
                         showSizeChanger={true}
                         showQuickJumper={true}
                         pageSizeOptions={pageSizeOptions}
-                        // onChange={this.onChangePage}
-                        // onShowSizeChange={this.pageCountChange}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
                         showTotal={total => `共${total}条`}
                     />
                 </div>

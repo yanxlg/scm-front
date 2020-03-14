@@ -7,5 +7,8 @@ module.exports = {
         'selector-pseudo-element-colon-notation': ['single', 'double'],
         indentation: null,
         'rule-empty-line-before': null,
+        'function-calc-no-invalid': null,
+        'declaration-empty-line-before': null,
+        'no-duplicate-selectors': null,
     },
 };

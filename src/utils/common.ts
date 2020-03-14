@@ -109,3 +109,10 @@ export function downloadExcel(response: Response) {
         link.remove();
     });
 }
+
+export function splitStrToArr(str: string | undefined, split: string = ','): string[] | undefined {
+    if (str) {
+        return str.replace(/(^\s*)|(\s*$)/g, '').split(split);
+    }
+    return str as undefined;
+}

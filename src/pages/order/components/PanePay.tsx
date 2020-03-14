@@ -1,10 +1,16 @@
 import React, { RefObject } from 'react';
-import { Button, Pagination } from 'antd';
+import { Button, Pagination, message, notification } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TablePay from './TablePay';
 
-import { getPayOrderList, IPayFilterParams } from '@/services/order-manage';
+import {
+    getPayOrderList,
+    delChannelOrders,
+    delPurchaseOrders,
+    postExportPay,
+    IPayFilterParams,
+} from '@/services/order-manage';
 import { defaultOptionItem, purchasePlatformOptionList, pageSizeOptions } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
 
@@ -29,17 +35,9 @@ export declare interface IPayItem {
     purchase_order_status_desc: string;
     purchase_pay_status: string;
     purchase_pay_status_desc: string;
+    order_goods_id: string;
     _rowspan?: number;
     _checked?: boolean;
-}
-
-declare interface IState {
-    page: number;
-    pageCount: number;
-    total: number;
-    loading: boolean;
-    showStatus: boolean;
-    orderList: IPayItem[];
 }
 
 const defaultFieldList: IFieldItem[] = [
@@ -79,8 +77,19 @@ const defaultFieldList: IFieldItem[] = [
 
 // const allFieldList: IFieldItem[] = [];
 
+declare interface IState {
+    page: number;
+    pageCount: number;
+    total: number;
+    loading: boolean;
+    exportLoading: boolean;
+    showStatus: boolean;
+    orderList: IPayItem[];
+}
+
 class PanePay extends React.PureComponent<{}, IState> {
     private formRef: RefObject<SearchForm> = React.createRef();
+    private currentSearchParams: IPayFilterParams | null = null;
     private initialValues = {
         purchase_platform: 100,
     };
@@ -92,6 +101,7 @@ class PanePay extends React.PureComponent<{}, IState> {
             pageCount: 50,
             total: 0,
             loading: false,
+            exportLoading: false,
             showStatus: false,
             orderList: [],
         };
@@ -107,10 +117,8 @@ class PanePay extends React.PureComponent<{}, IState> {
         let params: IPayFilterParams = {
             page,
             page_count: pageCount,
+            ...this.getFieldsValue(),
         };
-        if (this.formRef.current) {
-            params = Object.assign(params, this.formRef.current.getFieldsValue());
-        }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
@@ -119,8 +127,9 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
         getPayOrderList(params)
             .then(res => {
+                this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
-                const { all_count, list } = res.data;
+                const { all_count = 0, list = [] } = res.data || {}; // default value
                 // console.log('getPayOrderList', list);
                 this.setState({
                     total: all_count,
@@ -163,8 +172,7 @@ class PanePay extends React.PureComponent<{}, IState> {
 
     // 获取查询数据
     getFieldsValue = () => {
-        console.log('111', this.formRef.current!.getFieldsValue());
-        // const fields = this.formRef.current!.getFieldsValue();
+        return this.formRef.current!.getFieldsValue();
     };
 
     changeShowStatus = () => {
@@ -209,13 +217,13 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
     };
 
-    onChangePage = (page: number) => {
+    private onChangePage = (page: number) => {
         this.onSearch({
             page,
         });
     };
 
-    pageCountChange = (current: number, size: number) => {
+    private pageCountChange = (current: number, size: number) => {
         const { page, pageCount } = this.state;
         this.onSearch({
             page: getCurrentPage(size, (page - 1) * pageCount + 1),
@@ -223,8 +231,115 @@ class PanePay extends React.PureComponent<{}, IState> {
         });
     };
 
+    private getOrderGoodsIdList = () => {
+        const { orderList } = this.state;
+        const parentOrdersSnList = orderList
+            .filter(item => item._checked)
+            .map(item => item.purchase_parent_order_sn);
+        const list = orderList
+            .filter(
+                item =>
+                    parentOrdersSnList.indexOf(item.purchase_parent_order_sn) > -1 &&
+                    item.order_goods_id,
+            )
+            .map(item => item.order_goods_id);
+        return [...new Set(list)];
+    };
+
+    // 取消采购订单
+    private cancelPurchaseOrder = () => {
+        const list = this.getOrderGoodsIdList();
+        if (list.length) {
+            delPurchaseOrders({
+                order_goods_ids: list,
+            }).then(res => {
+                const { success, failed } = res.data;
+                this.onSearch();
+                if (success!.length) {
+                    notification.success({
+                        message: '取消采购单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '取消采购单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单！');
+        }
+    };
+
+    private delChannelOrders = () => {
+        const list = this.getOrderGoodsIdList();
+        if (list.length) {
+            delChannelOrders({
+                order_goods_ids: list,
+            }).then(res => {
+                const { success, failed } = res.data;
+                this.onSearch();
+                if (success!.length) {
+                    notification.success({
+                        message: '取消渠道订单成功',
+                        description: success.join('、'),
+                    });
+                } else if (failed!.length) {
+                    notification.error({
+                        message: '取消渠道订单失败',
+                        description: (
+                            <div>
+                                {failed.map((item: any) => (
+                                    <div key={item.order_goods_id}>
+                                        {item.order_goods_id}: {item.result}
+                                    </div>
+                                ))}
+                            </div>
+                        ),
+                    });
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单');
+        }
+    };
+
+    postExportPay = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        this.setState({
+            exportLoading: true,
+        });
+        postExportPay(params).finally(() => {
+            this.setState({
+                exportLoading: false,
+            });
+        });
+    };
+
     render() {
-        const { showStatus, loading, orderList, total, page, pageCount } = this.state;
+        const {
+            showStatus,
+            loading,
+            exportLoading,
+            orderList,
+            total,
+            page,
+            pageCount,
+        } = this.state;
 
         // const fieldList = showStatus ? allFieldList : defaultFieldList;
 
@@ -246,17 +361,30 @@ class PanePay extends React.PureComponent<{}, IState> {
                         >
                             查询
                         </Button>
-                        <Button type="primary" className="order-btn">
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.cancelPurchaseOrder}
+                        >
                             取消采购单
                         </Button>
-                        <Button type="primary" className="order-btn" disabled>
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.delChannelOrders}
+                        >
                             取消渠道订单
                         </Button>
-                        <Button type="primary" className="order-btn">
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            loading={exportLoading}
+                            onClick={this.postExportPay}
+                        >
                             导出数据
                         </Button>
-                        {/* <Button 
-                            type="default" 
+                        {/* <Button
+                            type="default"
                             className="order-btn"
                             onClick={this.changeShowStatus}
                         >{ showStatus ? '收起' : '展示'}搜索条件</Button> */}
@@ -266,6 +394,7 @@ class PanePay extends React.PureComponent<{}, IState> {
                         orderList={orderList}
                         onCheckAllChange={this.onCheckAllChange}
                         onSelectedRow={this.onSelectedRow}
+                        onSearch={this.onSearch}
                     />
                     <Pagination
                         className="order-pagination"

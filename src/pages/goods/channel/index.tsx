@@ -5,7 +5,6 @@ import './index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import { Modal, message, Button, Pagination } from 'antd';
-import ProductEditModal from './components/ProductEditModal';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
@@ -29,6 +28,8 @@ import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { convertEndDate, convertStartDate } from '@/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
+import ShipFeeModal from './components/ShipFeeModal';
+import SkuEditModal from './components/SkuEditModal';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -197,6 +198,7 @@ const formFields: IFieldItem[] = [
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
     private formRef: RefObject<SearchForm> = React.createRef();
+    private skuRef: RefObject<SkuEditModal> = React.createRef();
     private queryData: any = {};
     constructor(props: {}) {
         super(props);
@@ -207,6 +209,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             searchLoading: true,
             total: 0,
             pageNumber: page_count,
+            // pageNumber: 1,
             page: page,
             excelDialogStatus: false,
             defaultInitialValues: extra,
@@ -385,23 +388,6 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             width: 100,
         },
         {
-            title: '商品详情',
-            dataIndex: 'product_detail',
-            align: 'center',
-            width: 150,
-            render: (value: string, row: IChannelProductListItem, index: number) => {
-                return (
-                    <Button
-                        onClick={() => {
-                            this.toggleDetailDialog(row);
-                        }}
-                    >
-                        查看详情
-                    </Button>
-                );
-            },
-        },
-        {
             title: '评价数量',
             dataIndex: 'evaluate_volume',
             align: 'center',
@@ -435,20 +421,59 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             },
         },
         {
-            title: '链接',
-            dataIndex: 'vova_product_link',
+            title: 'sku数量',
+            dataIndex: 'sku_count',
             align: 'center',
-            width: 240,
-            render: (url: string) => {
+            width: 140,
+            render: (value: number, row: IChannelProductListItem) => {
                 return (
-                    url && (
-                        <Button target="_blank" type="link" href={url} className="product-link">
-                            {url}
+                    <>
+                        <div>{value}</div>
+                        <Button
+                            ghost={true}
+                            size="small"
+                            type="primary"
+                            onClick={() => this.showSkuDialog(row.product_id)}
+                        >
+                            查看sku详情
                         </Button>
-                    )
+                    </>
                 );
             },
         },
+        {
+            title: '国家运费',
+            dataIndex: 'country_ship_fee',
+            align: 'center',
+            width: 140,
+            render: (value: number, row: IChannelProductListItem) => {
+                return (
+                    <Button
+                        ghost={true}
+                        size="small"
+                        type="primary"
+                        onClick={() => this.showCountryShipFee(row.product_id)}
+                    >
+                        查看国家运费
+                    </Button>
+                );
+            },
+        },
+        // {
+        //     title: '链接',
+        //     dataIndex: 'vova_product_link',
+        //     align: 'center',
+        //     width: 240,
+        //     render: (url: string) => {
+        //         return (
+        //             url && (
+        //                 <Button target="_blank" type="link" href={url} className="product-link">
+        //                     {url}
+        //                 </Button>
+        //             )
+        //         );
+        //     },
+        // },
         {
             title: '操作',
             dataIndex: 'product_status',
@@ -538,16 +563,26 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             });
     }
 
-    // 查看详情弹窗
-    private toggleDetailDialog(row: IChannelProductListItem) {
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
+    private showSkuDialog = (productId: string) => {
+        // console.log(this.skuRef);
+        this.skuRef.current!.showModal(productId);
+    };
+
+    // 查看国家运费
+    private showCountryShipFee(product_id: string) {
         Modal.info({
-            className: 'product-modal modal-empty',
+            // className: 'product-modal modal-empty',
             icon: null,
-            title: '查看/编辑商品详情',
-            cancelText: null,
-            okText: null,
-            content: <ProductEditModal product_id={row.product_id} channel="vova" />,
+            title: '查看国家运费',
+            // cancelText: null,
+            okText: '关闭',
             maskClosable: true,
+            width: 800,
+            content: <ShipFeeModal product_id={product_id} />,
         });
     }
     private getCopiedLinkQuery() {
@@ -566,7 +601,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             defaultInitialValues,
         } = this.state;
         return (
-            <div className="container">
+            <div>
                 <SearchForm
                     ref={this.formRef}
                     fieldList={formFields}
@@ -631,6 +666,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
                 <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
+                <SkuEditModal ref={this.skuRef} />
             </div>
         );
     }

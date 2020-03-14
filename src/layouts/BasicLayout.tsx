@@ -12,6 +12,7 @@ import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
 import '@/styles/menu.less';
+import '@/styles/index.less';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -83,7 +84,7 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
                 // links={[<div key="1" className="menu-link">草稿箱（9999999）</div>]}
                 {...props}
             >
-                {children}
+                <div className="container">{children}</div>
             </ProLayout>
         );
     }

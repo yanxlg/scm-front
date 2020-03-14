@@ -82,16 +82,18 @@ const OrderPayListModal: React.FC<IOrderPayListModalProps> = ({ visible }) => {
         columnWidth: '50px',
         onChange: (selectedRowKeys: ReactText[], selectedRows: IDataItem[]) => {
             setSelectedRowKeys(selectedRowKeys as string[]);
-            // if(selectedRowKeys.length>0){
-            //     setTotalAmount(dataSet.reduce<number>((prev,curr)=>{
-            //         if(selectedRowKeys.indexOf(curr.order_id)>-1){
-            //             return prev + curr.price;
-            //         }
-            //         return prev;
-            //     },0))
-            // }else{
-            //     setTotalAmount(undefined);
-            // }
+            if (selectedRowKeys.length > 0) {
+                setTotalAmount(
+                    dataSet.reduce<number>((prev, curr) => {
+                        if (selectedRowKeys.indexOf(curr.order_id) > -1) {
+                            return prev + curr.price;
+                        }
+                        return prev;
+                    }, 0),
+                );
+            } else {
+                setTotalAmount(undefined);
+            }
         },
     };
 
@@ -115,7 +117,13 @@ const OrderPayListModal: React.FC<IOrderPayListModalProps> = ({ visible }) => {
                 cancelText={undefined}
                 onOk={Pay}
             >
-                {/* <Table pagination={false} rowKey="order_id" columns={column} rowSelection={rowSelection} dataSource={dataSet}/> */}
+                <Table
+                    pagination={false}
+                    rowKey="order_id"
+                    columns={column}
+                    rowSelection={rowSelection}
+                    dataSource={dataSet}
+                />
                 <Modal
                     title="扫码支付"
                     className="order-pay-qr-modal modal-cancel-none"

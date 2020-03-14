@@ -1,10 +1,8 @@
-
 import React from 'react';
 import DraftSearch from '@/pages/task/components/DraftSearchForm';
-import "@/styles/index.less";
+import '@/styles/index.less';
 import { Button, Pagination, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-
 
 declare interface IDataItem {
     taskId: string;
@@ -12,45 +10,41 @@ declare interface IDataItem {
     scope: string;
     taskType: string;
     startTime: string;
-    createTime:string;
+    createTime: string;
 }
 
 declare interface IDraftsState {
-    searchLoading:boolean;
-    dataLoading:boolean;
-    pageSize:number;
-    pageNumber:number;
-    total:number;
-    selectedRowKeys:string[];
-    dataSet:IDataItem[];
+    searchLoading: boolean;
+    dataLoading: boolean;
+    pageSize: number;
+    pageNumber: number;
+    total: number;
+    selectedRowKeys: string[];
+    dataSet: IDataItem[];
 }
 
-class Drafts extends React.PureComponent<{},IDraftsState>{
-    constructor(props:{}){
+class Drafts extends React.PureComponent<{}, IDraftsState> {
+    constructor(props: {}) {
         super(props);
-        this.state={
-            searchLoading:false,
-            dataLoading:false,
-            pageSize:20,
-            pageNumber:1,
-            total:0,
-            selectedRowKeys:[],
-            dataSet:[]
-        }
+        this.state = {
+            searchLoading: false,
+            dataLoading: false,
+            pageSize: 20,
+            pageNumber: 1,
+            total: 0,
+            selectedRowKeys: [],
+            dataSet: [],
+        };
     }
-    private onSearch(){
-
-    }
+    private onSearch() {}
     private onSelectChange(selectedRowKeys: React.Key[]) {
-        this.setState({ selectedRowKeys:selectedRowKeys as string[]});
-    };
+        this.setState({ selectedRowKeys: selectedRowKeys as string[] });
+    }
     private showTotal(total: number) {
         return <span className="data-grid-total">共有{total}条</span>;
     }
-    private onPageChange(page: number, pageSize?: number) {
-    }
-    private onShowSizeChange(page: number, size: number) {
-    }
+    private onPageChange(page: number, pageSize?: number) {}
+    private onShowSizeChange(page: number, size: number) {}
     private getColumns(): ColumnProps<IDataItem>[] {
         const { pageSize, pageNumber } = this.state;
         return [
@@ -60,7 +54,8 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
                 dataIndex: 'index',
                 fixed: 'left',
                 align: 'center',
-                render: (text: string, record: any, index: number) => index + 1 + pageSize * (pageNumber - 1),
+                render: (text: string, record: any, index: number) =>
+                    index + 1 + pageSize * (pageNumber - 1),
             },
             {
                 title: '任务名称',
@@ -99,15 +94,27 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
                 align: 'center',
                 render: (text: any, record: IDataItem) => {
                     return [
-                        <Button type="link" key="0">查看任务详情</Button>,
-                        <Button type="link" key="1">重新创建任务</Button>
-                    ]
+                        <Button type="link" key="0">
+                            查看任务详情
+                        </Button>,
+                        <Button type="link" key="1">
+                            重新创建任务
+                        </Button>,
+                    ];
                 },
             },
         ];
     }
-    render(){
-        const {searchLoading, pageSize, pageNumber, total, dataLoading, selectedRowKeys, dataSet} = this.state;
+    render() {
+        const {
+            searchLoading,
+            pageSize,
+            pageNumber,
+            total,
+            dataLoading,
+            selectedRowKeys,
+            dataSet,
+        } = this.state;
         const rowSelection = {
             fixed: true,
             columnWidth: '100px',
@@ -115,10 +122,12 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
             onChange: this.onSelectChange,
         };
         return (
-            <div className="container">
-                <DraftSearch/>
+            <div>
+                <DraftSearch />
                 <div className="block form-item">
-                    <Button loading={searchLoading} onClick={this.onSearch} type="primary">查询</Button>
+                    <Button loading={searchLoading} onClick={this.onSearch} type="primary">
+                        查询
+                    </Button>
                     <Button type="link">重新创建任务</Button>
                     <Button type="link">删除任务</Button>
                     <Pagination
@@ -149,7 +158,7 @@ class Drafts extends React.PureComponent<{},IDraftsState>{
                     loading={dataLoading}
                 />
             </div>
-        )
+        );
     }
 }
 

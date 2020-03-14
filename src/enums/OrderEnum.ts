@@ -60,21 +60,18 @@ export const purchaseShippingOptionList = [
 
 export const errorTypeOptionList = [
     { name: '仓库异常', value: 1 },
-    { name: '尾程异常', value: 2 },
+    // { name: '尾程异常', value: 2 },
     { name: '采购异常', value: 3 },
     { name: '其他', value: 4 },
 ];
 
 export const errorDetailOptionList = [
-    { name: '12小时未支付', value: 1 },
     { name: '24小时未拍单', value: 2 },
-    { name: '48小时未发货', value: 3 },
-    { name: '48小时未出库', value: 4 },
     { name: '72小时未入库', value: 5 },
-    { name: '6天未标记发货', value: 6 },
-    { name: '7天未上线', value: 7 },
-    { name: '14天未上线', value: 8 },
-    { name: '30天未妥投', value: 9 },
+    { name: '48小时未出库', value: 6 },
+    { name: '12小时未支付', value: 3 },
+    { name: '48小时未发货', value: 4 },
+    { name: '6天未标记发货', value: 7 },
 ];
 
 export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
@@ -91,10 +88,11 @@ export const childDefaultFieldList: IFieldItem[] = [
     {
         type: 'input',
         name: 'order_goods_id',
-        label: '中台订单ID',
+        label: '中台订单子ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单ID',
+        placeholder: '请输入中台订单子ID',
+        // formatter: 'number',
     },
     {
         type: 'input',
@@ -132,6 +130,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单ID',
+        // formatter: 'number',
     },
     // {
     //     type: 'input',
@@ -148,6 +147,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入尾程运单号',
+        // formatter: 'number',
     },
     {
         type: 'input',
@@ -156,6 +156,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台商品ID',
+        // formatter: 'number',
     },
     {
         type: 'input',
@@ -164,6 +165,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台SKU ID',
+        // formatter: 'number',
     },
     // {
     //     type: 'select',
@@ -318,16 +320,18 @@ export const defaultColChildList = [
     'createTime', // 订单时间
     'orderGoodsId', // 中台订单子ID
     'goodsDetail', // 商品详情
-    'channelOrderGoodsSn', // Product_sn
+    'skuId', // sku id
+    // 'channelOrderGoodsSn', // Product_sn
     // 'channel_order_status',         // 渠道订单状态
     // 'channel_delivery_status',      // 渠道发货状态
     'orderGoodsStatus', // 中台订单状态
     'productId', // 中台商品ID
     'purchasePlanId', // 计划子项ID
+    'purchasePlatform', // 采购平台
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
     'purchaseOrderShippingStatus', // 采购配送状态
-    'purchaseCreateTime', // 采购生成时间
+    // 'purchaseCreateTime', // 采购生成时间
     'purchasePlatformOrderId', // 采购订单号
     'purchaseWaybillNo', // 采购运单号
 ];
@@ -335,18 +339,18 @@ export const defaultColChildList = [
 export const childOptionalColList = [
     { key: 'purchaseNumber', name: '采购数量' }, // 2
     { key: 'purchaseAmount', name: '采购单价' }, // 2
-    { key: 'purchasePlatform', name: '采购平台' }, // 2
     { key: 'purchaseCancelReason', name: '采购取消原因' }, // 2
-    { key: 'purchaseCreateTime', name: '采购时间' }, // 2
+    // { key: 'purchaseCreateTime', name: '采购时间' }, // 2
     { key: 'payTime', name: '支付时间' }, // 2
     // orderInfo
     { key: 'confirmTime', name: '订单确认时间' }, // 1
+    { key: 'purchaseTime', name: '采购完成时间' }, // 1
     { key: 'storageTime', name: '入库时间' }, // 1
     { key: 'deliveryTime', name: '出库时间' }, // 1
     { key: 'collectTime', name: '揽收时间' }, // 1
     { key: 'receiveTime', name: '收货时间' }, // 1
     { key: 'cancelTime', name: '订单取消时间' }, // 1
-    { key: 'channelOrderSn', name: '渠道订单ID' }, // 1
+    { key: 'channelOrderGoodsSn', name: '渠道订单ID' }, // 1
     { key: 'goodsAmount', name: '价格' }, // 1
     // { key: 'a4', name: '运费' },
     { key: 'goodsNumber', name: '商品数量' }, // 1
@@ -358,6 +362,7 @@ export const childOptionalColList = [
     { key: 'currency', name: '货币类型' }, // 1
     // { key: 'a10', name: '发货剩余时间' },
     { key: 'productShop', name: '渠道店铺名' }, // 1
+    { key: 'lastWaybillNo', name: '尾程运单号' }, // 1
     // { key: 'a14', name: '渠道订单状态' },
     // { key: 'a15', name: '父订单ID' },
     // { key: 'a16', name: '子订单ID' },
@@ -374,6 +379,7 @@ export const parentDefaultFieldList: IFieldItem[] = [
         label: '订单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
     {
         type: 'input',
@@ -382,6 +388,7 @@ export const parentDefaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单id',
+        // formatter: 'number',
     },
     {
         type: 'select',
@@ -406,9 +413,10 @@ export const parentAllFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
         name: ['confirm_time_start', 'confirm_time_end'],
-        label: '订单时间',
+        label: '订单确认时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
+        formatter: ['start_date', 'end_date'],
     },
 ];
 
@@ -423,13 +431,12 @@ export const defaultParentColList = [
     'goodsNumber', // 商品数量
     'goodsAmount', // 商品价格
     'orderGoodsId', // 中台子订单ID
+    'channelOrderGoodsSn', // 渠道订单ID
     'orderGoodsStatus', // 中台订单状态
     'orderGoodsShippingStatus', // 中台订单配送状态
 ];
 
 export const parentOptionalColList = [
-    { key: 'orderGoodsId', name: '中台子订单ID' }, // 2
-    { key: 'goodsAmount', name: '价格' }, // 2
     { key: 'goodsDetail', name: '商品详情' }, // 2
     { key: 'productShop', name: '渠道店铺名' }, // 2
     { key: 'confirmTime', name: '订单确认时间' }, // 1
