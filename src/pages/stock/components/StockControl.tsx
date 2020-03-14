@@ -76,7 +76,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
         {
             title: '商品主图',
             width: '130px',
-            dataIndex: 'main_image',
+            dataIndex: ['sku_item', 'mainImageUrl'],
             align: 'center',
             render: (value: string) => <AutoEnLargeImg src={value} className="stock-img" />,
         },

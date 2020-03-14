@@ -21,7 +21,7 @@ export function queryOutList(data: IStockOUTFormData) {
 export function exportInList(data: IStockINFormData) {
     return request
         .post(StockApiPathEnum.ExportInList, {
-            params: data,
+            data: data,
             responseType: 'blob',
             parseResponse: false,
         })
@@ -45,7 +45,7 @@ export function exportInList(data: IStockINFormData) {
 export function exportOutList(data: IStockOUTFormData) {
     return request
         .post(StockApiPathEnum.ExportOutList, {
-            params: data,
+            data: data,
             responseType: 'blob',
             parseResponse: false,
         })
@@ -75,7 +75,7 @@ export function queryStockList(data: IStockFormData) {
 export function exportStockList(data: IStockFormData) {
     return request
         .post(StockApiPathEnum.ExportStockList, {
-            params: data,
+            data: data,
             responseType: 'blob',
             parseResponse: false,
         })
