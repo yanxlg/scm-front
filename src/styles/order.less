@@ -5,7 +5,7 @@
 
 .order {
     &-wrap {
-        padding: 12px;
+        // padding: 12px;
     }
     &-division {
         margin: 0 @divisionSpacing;
@@ -15,7 +15,7 @@
         margin-right: 0 !important;
     }
     &-table {
-        margin-top: 20px;
+        margin-top: 10px;
     }
     &-goods-content {
         > div {
@@ -68,8 +68,9 @@
     &-btn {
         width: 120px;
     }
-    &-btn + &-btn {
-        margin-left: 12px;
+    &-btn {
+        margin-right: 12px;
+        margin-bottom: 10px;
     }
     &-optional-column {
         .all {
@@ -87,13 +88,16 @@
         }
     }
     &-err-detail {
-        margin: 30px 0 10px;
+        margin: 10px 0 10px;
         strong {
             float: left;
             width: 80px;
         }
         .wrap {
             overflow: hidden;
+        }
+        .radio-group {
+            white-space: normal;
         }
         .checkbox-item {
             margin-left: 0 !important;

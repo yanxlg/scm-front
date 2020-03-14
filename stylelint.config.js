@@ -9,5 +9,6 @@ module.exports = {
         'rule-empty-line-before': null,
         'function-calc-no-invalid': null,
         'declaration-empty-line-before': null,
+        'no-duplicate-selectors': null,
     },
 };
