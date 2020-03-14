@@ -129,7 +129,7 @@ class PanePay extends React.PureComponent<{}, IState> {
             .then(res => {
                 this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
-                const { all_count, list } = res.data;
+                const { all_count = 0, list = [] } = res.data || {}; // default value
                 // console.log('getPayOrderList', list);
                 this.setState({
                     total: all_count,
@@ -383,8 +383,8 @@ class PanePay extends React.PureComponent<{}, IState> {
                         >
                             导出数据
                         </Button>
-                        {/* <Button 
-                            type="default" 
+                        {/* <Button
+                            type="default"
                             className="order-btn"
                             onClick={this.changeShowStatus}
                         >{ showStatus ? '收起' : '展示'}搜索条件</Button> */}

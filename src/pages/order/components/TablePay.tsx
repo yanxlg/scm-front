@@ -6,6 +6,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';
 import { putConfirmPay } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
+import QRCode from 'qrcode.react';
 
 declare interface IProps {
     loading: boolean;
@@ -90,7 +91,17 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                     children:
                         parent_purchase_pay_status_desc !== '已支付' ? (
                             <div>
-                                <AutoEnLargeImg src={value} className="order-img-auto" />
+                                <AutoEnLargeImg
+                                    enlargeContent={
+                                        <QRCode
+                                            value={value}
+                                            size={300}
+                                            className="order-qr-enlarge"
+                                        />
+                                    }
+                                >
+                                    <QRCode value={value} size={40} className="order-qr-small" />
+                                </AutoEnLargeImg>
                                 <Button
                                     ghost={true}
                                     size="small"

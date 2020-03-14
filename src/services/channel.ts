@@ -19,7 +19,7 @@ import {
     IGoodsSkuBody,
     IGoodsSkuResponse,
     IEditSkuBody,
-    IEditSkuResponse
+    IEditSkuResponse,
 } from '@/interface/IChannel';
 import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
@@ -107,9 +107,12 @@ export async function exportChannelProductList(
 
 // 查询国家运费
 export async function queryRegionShippingFee(data: IRegionShippingFeeBody) {
-    return request.post<IResponse<IRegionShippingFeeResponse>>(ChannelApiPath.QueryRegionShippingFee, {
-        data,
-    });
+    return request.post<IResponse<IRegionShippingFeeResponse>>(
+        ChannelApiPath.QueryRegionShippingFee,
+        {
+            data,
+        },
+    );
 }
 
 // 查询商品详情
@@ -132,5 +135,3 @@ export async function editSkuPrice(data: IEditSkuBody) {
         data,
     });
 }
-
-

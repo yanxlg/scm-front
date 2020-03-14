@@ -31,7 +31,6 @@ import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
 
-
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
     dataLoading: boolean;
@@ -435,9 +434,11 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                             size="small"
                             type="primary"
                             onClick={() => this.showSkuDialog(row.product_id)}
-                        >查看sku详情</Button>
+                        >
+                            查看sku详情
+                        </Button>
                     </>
-                )
+                );
             },
         },
         {
@@ -452,8 +453,10 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                         size="small"
                         type="primary"
                         onClick={() => this.showCountryShipFee(row.product_id)}
-                    >查看国家运费</Button>
-                )
+                    >
+                        查看国家运费
+                    </Button>
+                );
             },
         },
         // {
@@ -567,7 +570,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
     private showSkuDialog = (productId: string) => {
         // console.log(this.skuRef);
         this.skuRef.current!.showModal(productId);
-    }
+    };
 
     // 查看国家运费
     private showCountryShipFee(product_id: string) {
@@ -663,7 +666,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                     toggleExcelDialog={this.toggleExcelDialog}
                 />
                 <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
-                <SkuEditModal ref={this.skuRef}/>
+                <SkuEditModal ref={this.skuRef} />
             </div>
         );
     }

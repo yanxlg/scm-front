@@ -331,14 +331,14 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                             >
                                 导出Excel表
                             </Button>
-                            <Button
+                            {/* <Button
                                 loading={syncLoading}
                                 className="btn-group vertical-middle form-item btn-clear"
                                 type="link"
                                 onClick={this.syncStock}
                             >
                                 点击同步库存
-                            </Button>
+                            </Button>*/}
                         </React.Fragment>
                     </SearchForm>
                     <Pagination

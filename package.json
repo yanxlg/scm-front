@@ -19,9 +19,11 @@
         "classnames": "^2.2.6",
         "nprogress": "^0.2.0",
         "dva-logger": "^1.0.0",
-        "query-string": "^6.11.1"
+        "query-string": "^6.11.1",
+        "qrcode.react": "^1.0.0"
     },
     "devDependencies": {
+        "@types/qrcode.react": "^1.0.0",
         "prettier": "^1.19.1",
         "@types/query-string": "^6.3.0",
         "@types/express": "^4.17.0",

@@ -164,7 +164,6 @@ export type IActiveChannelProductVersionBody = Array<{
     product_id: number;
 }>;
 
-
 export interface IRegionShippingFeeBody {
     product_id: string;
     page?: number;

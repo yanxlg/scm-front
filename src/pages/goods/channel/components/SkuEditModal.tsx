@@ -4,7 +4,12 @@ import { ColumnProps } from 'antd/es/table';
 
 // import { getGoodsSkuList } from '@/services/goods';
 import { queryGoodsDetail, queryGoodsSkuList, editSkuPrice } from '@/services/channel';
-import { IGoodsDetailResponse, ISpecsItem, IGoodsSkuItem, IEditSkuItem } from '@/interface/IChannel';
+import {
+    IGoodsDetailResponse,
+    ISpecsItem,
+    IGoodsSkuItem,
+    IEditSkuItem,
+} from '@/interface/IChannel';
 
 const { TextArea } = Input;
 
@@ -74,15 +79,15 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             width: 120,
             render: (value: string, row: IGoodsSkuItem) => {
                 return (
-                    <InputNumber 
+                    <InputNumber
                         min={0}
                         precision={2}
-                        defaultValue={value ? Number(value) : undefined }
-                        style={{width: '100%'}}
-                        onChange={(val) => this.changePrice(val, row)}
+                        defaultValue={value ? Number(value) : undefined}
+                        style={{ width: '100%' }}
+                        onChange={val => this.changePrice(val, row)}
                     />
-                )
-            }
+                );
+            },
         },
         {
             key: 'adjust_reason',
@@ -91,9 +96,15 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             align: 'center',
             width: 180,
             render: (value: string, row: IGoodsSkuItem) => {
-                return <TextArea autoSize={true} defaultValue={value} onChange={e => this.changeComment(e.target.value, row)} />
-            }
-        }
+                return (
+                    <TextArea
+                        autoSize={true}
+                        defaultValue={value}
+                        onChange={e => this.changeComment(e.target.value, row)}
+                    />
+                );
+            },
+        },
     ];
 
     constructor(props: {}) {
@@ -106,74 +117,78 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             total: 0,
             skuList: [],
             goodsDetail: null,
-            editList: []
+            editList: [],
         };
     }
 
     showModal = (productId: string) => {
-        this.setState({
-            productId,
-            visible: true
-        }, () => {
-            this.queryGoodsDetail();
-            this.queryGoodsSkuList(1);
-        });
-    }
+        this.setState(
+            {
+                productId,
+                visible: true,
+            },
+            () => {
+                this.queryGoodsDetail();
+                this.queryGoodsSkuList(1);
+            },
+        );
+    };
 
     queryGoodsDetail = () => {
         const { productId } = this.state;
         queryGoodsDetail({
             product_id: productId,
-            channel: 'vova'
+            channel: 'vova',
         }).then(res => {
             // console.log('queryGoodsDetail', res);
             this.setState({
-                goodsDetail: res.data
+                goodsDetail: res.data,
             });
-        })
-    }
+        });
+    };
 
     queryGoodsSkuList = (page: number) => {
         const { productId, editList } = this.state;
         this.setState({
-            loading: true
+            loading: true,
         });
         const page_count = 50;
         queryGoodsSkuList({
             page,
             page_count,
             product_id: productId,
-            channel: 'vova'
-        }).then(res => {
-            // console.log('queryGoodsSkuList', res);
-            const { total, sku_list } = res.data;
-            this.setState({
-                page,
-                total: Number(total),
-                skuList: sku_list.map((item, index: number) => {
-                    const i = editList.findIndex(editItem => editItem.sku === item.sku_name);
-                    if (i > -1) {
-                        return {
-                            serial: (page - 1) * page_count + index + 1,
-                            ...item,
-                            adjust_price: editList[i].adjustment_price,
-                            adjust_reason: editList[i].adjustment_reason
-                        }
-                    } else {
-                        return {
-                            serial: (page - 1) * page_count + index + 1,
-                            ...item
-                        }
-                    }
-                    
-                })
-            });
-        }).finally(() => {
-            this.setState({
-                loading: false
-            })
+            channel: 'vova',
         })
-    }
+            .then(res => {
+                // console.log('queryGoodsSkuList', res);
+                const { total, sku_list } = res.data;
+                this.setState({
+                    page,
+                    total: Number(total),
+                    skuList: sku_list.map((item, index: number) => {
+                        const i = editList.findIndex(editItem => editItem.sku === item.sku_name);
+                        if (i > -1) {
+                            return {
+                                serial: (page - 1) * page_count + index + 1,
+                                ...item,
+                                adjust_price: editList[i].adjustment_price,
+                                adjust_reason: editList[i].adjustment_reason,
+                            };
+                        } else {
+                            return {
+                                serial: (page - 1) * page_count + index + 1,
+                                ...item,
+                            };
+                        }
+                    }),
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     private handleCancel = () => {
         this.setState({
@@ -184,8 +199,8 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             total: 0,
             skuList: [],
             goodsDetail: null,
-            editList: []
-        })
+            editList: [],
+        });
     };
 
     private handleOk = () => {
@@ -198,13 +213,13 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             }
         }
         editSkuPrice({
-            sku_list: editList
+            sku_list: editList,
         }).then(res => {
             // console.log('editSkuPrice', res);
-            message.success(res.data.execute_status)
+            message.success(res.data.execute_status);
             this.handleCancel();
-        })
-    }
+        });
+    };
 
     private onChangePage = (page: number) => {
         this.queryGoodsSkuList(page);
@@ -213,20 +228,20 @@ class SkuDialog extends React.PureComponent<{}, IState> {
     private changePrice = (val: number | undefined, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
         const { editList } = this.state;
-        const i =  editList.findIndex(item => item.sku === rowData.sku_name);
-        const valStr = val ? (val + '') : '';
+        const i = editList.findIndex(item => item.sku === rowData.sku_name);
+        const valStr = val ? val + '' : '';
         if (i > -1) {
             this.setState({
                 editList: editList.map((item, index: number) => {
                     if (i === index) {
                         return {
                             ...item,
-                            adjustment_price: valStr
-                        }
+                            adjustment_price: valStr,
+                        };
                     }
                     return item;
-                })
-            })
+                }),
+            });
         } else {
             this.setState({
                 editList: [
@@ -234,29 +249,29 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                     {
                         sku: rowData.sku_name,
                         adjustment_price: valStr,
-                        adjustment_reason: rowData.adjust_reason
-                    }
-                ]
-            })
+                        adjustment_reason: rowData.adjust_reason,
+                    },
+                ],
+            });
         }
-    }
+    };
 
     private changeComment = (val: string, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
         const { editList } = this.state;
-        const i =  editList.findIndex(item => item.sku === rowData.sku_name)
+        const i = editList.findIndex(item => item.sku === rowData.sku_name);
         if (i > -1) {
             this.setState({
                 editList: editList.map((item, index: number) => {
                     if (i === index) {
                         return {
                             ...item,
-                            adjustment_reason: val
-                        }
+                            adjustment_reason: val,
+                        };
                     }
                     return item;
-                })
-            })
+                }),
+            });
         } else {
             this.setState({
                 editList: [
@@ -264,12 +279,12 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                     {
                         sku: rowData.sku_name,
                         adjustment_price: rowData.adjust_price,
-                        adjustment_reason: val
-                    }
-                ]
-            })
+                        adjustment_reason: val,
+                    },
+                ],
+            });
         }
-    }
+    };
 
     render() {
         const { visible, loading, page, total, skuList, goodsDetail } = this.state;
@@ -287,51 +302,60 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                 // }}
             >
                 <div className="product-sku-dialog">
-                    {
-                        goodsDetail ? (
+                    {goodsDetail ? (
+                        <div className="overflow-hidden">
+                            <img className="goods-img" src={goodsDetail.main_image} />
                             <div className="overflow-hidden">
-                                <img className="goods-img" src={goodsDetail.main_image} />
-                                <div className="overflow-hidden">
-                                    <div className="text item">
-                                        标题：{goodsDetail.product_name}
-                                    </div>
-                                    <div className="text item">
-                                        描述：{goodsDetail.product_description}
-                                    </div>
-                                    <div className="item">
-                                        <div className="desc">
-                                            <span className="float-left">Product ID:</span>
-                                            <div className="overflow-hidden">{goodsDetail.product_id}</div>
-                                             
-                                        </div>
-                                        <div className="desc center">
-                                            <span className="float-left">中台商品ID:</span>
-                                            <div className="overflow-hidden">{goodsDetail.commodity_id}</div>
-                                        </div>
-                                        <div className="desc">
-                                            <span className="float-left">爬虫商品 id:</span>
-                                            <div className="overflow-hidden">{goodsDetail.spider_product_id}</div>
+                                <div className="text item">标题：{goodsDetail.product_name}</div>
+                                <div className="text item">
+                                    描述：{goodsDetail.product_description}
+                                </div>
+                                <div className="item">
+                                    <div className="desc">
+                                        <span className="float-left">Product ID:</span>
+                                        <div className="overflow-hidden">
+                                            {goodsDetail.product_id}
                                         </div>
                                     </div>
-                                    <div className="item">
-                                        <div className="desc">
-                                            <span className="float-left">一级分类:</span>
-                                            <div className="overflow-hidden">{goodsDetail.category_level_1}</div>
+                                    <div className="desc center">
+                                        <span className="float-left">中台商品ID:</span>
+                                        <div className="overflow-hidden">
+                                            {goodsDetail.commodity_id}
                                         </div>
-                                        <div className="desc center">
-                                            <span className="float-left">二级分类:</span>
-                                            <div className="overflow-hidden">{goodsDetail.category_level_2}</div>
+                                    </div>
+                                    <div className="desc">
+                                        <span className="float-left">爬虫商品 id:</span>
+                                        <div className="overflow-hidden">
+                                            {goodsDetail.spider_product_id}
                                         </div>
-                                        <div className="desc">
-                                            <span className="float-left">三级分类:</span>
-                                            <div className="overflow-hidden">{goodsDetail.category_level_3}</div>
+                                    </div>
+                                </div>
+                                <div className="item">
+                                    <div className="desc">
+                                        <span className="float-left">一级分类:</span>
+                                        <div className="overflow-hidden">
+                                            {goodsDetail.category_level_1}
+                                        </div>
+                                    </div>
+                                    <div className="desc center">
+                                        <span className="float-left">二级分类:</span>
+                                        <div className="overflow-hidden">
+                                            {goodsDetail.category_level_2}
+                                        </div>
+                                    </div>
+                                    <div className="desc">
+                                        <span className="float-left">三级分类:</span>
+                                        <div className="overflow-hidden">
+                                            {goodsDetail.category_level_3}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ) : <Skeleton avatar={true} active={true} paragraph={{ rows: 1 }} />
-                    }
-                    
+                        </div>
+                    ) : (
+                        <Skeleton avatar={true} active={true} paragraph={{ rows: 1 }} />
+                    )}
+
                     <Table
                         bordered={true}
                         rowKey="sku_name"
@@ -349,7 +373,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                         pageSize={50}
                         onChange={this.onChangePage}
                         showTotal={total => `共${total}条`}
-                        style={{marginTop: 12}}
+                        style={{ marginTop: 12 }}
                     />
                 </div>
             </Modal>
