@@ -26,28 +26,23 @@ const list = Mock.mock({
             pdd_order_time: '0000-00-00 00:00:00',
             purchase_tracking_number: 'abcdefg',
             style_values: '@cparagraph',
-            purchase_order_desc:'@cparagraph',
-            purchase_shipping_status:1
+            purchase_order_desc: '@cparagraph',
+            purchase_shipping_status: 1,
         },
     ],
 });
-
 
 export default {
     'POST /order/filter': (req: Request, res: Response) => {
         const { page, size } = req.body;
         res.status(200).send({
-                'code': 'success',
-                'data': {
-                    'list': list.data.slice(
-                        Number(size) * Number(page-1),
-                        Number(size) * (Number(page)),
-                    ),
-                    'total': list.data.length,
-                    'page': 1,
-                    'size': 100,
-                },
+            code: 'success',
+            data: {
+                list: list.data.slice(Number(size) * Number(page - 1), Number(size) * Number(page)),
+                total: list.data.length,
+                page: 1,
+                size: 100,
             },
-        );
+        });
     },
 };

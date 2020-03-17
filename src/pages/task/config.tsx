@@ -25,9 +25,9 @@ const Config: React.FC = () => {
                     <TabPane tab="定时商品更新" key="3">
                         <TimerUpdate />
                     </TabPane>,
-                    /* <TabPane tab="自动采购任务" key="4">
+                    <TabPane tab="自动采购任务" key="4">
                         <AutoPurchaseTask />
-                    </TabPane>,*/
+                    </TabPane>,
                 ]}
             />
         );
