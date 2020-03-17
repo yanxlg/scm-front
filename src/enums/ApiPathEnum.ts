@@ -12,20 +12,8 @@ enum ApiPathEnum {
     getGoodsVersionList = '/goodsVersion/list',
 
     // vova商品库相关接口''
-
-    getGoodsList = '/api/v1/goods/list',
-    postGoodsExports = '/api/v1/goods/exports',
-    putGoodsPicEdit = '/api/v1/goods/pic/edit',
-    postGoodsPicUpload = '/api/v1/goods/pic/upload',
-    getGoodsOnsale = '/api/v1/goods/onsale',
-    getGoodsDelete = '/api/v1/goods/delete',
-    putGoodsEdit = '/api/v1/goods/edits',
-    getGoodsSales = '/api/v1/goods/sales',
-    getCatagoryList = '/api/v1/catagory/list',
-    getGoodsVersion = '/api/v1/goods/version_list',
-    postGoodsVersionExport = '/api/v1/goods/version_export',
     postGoodsApplyVersion = '/api/v1/goods/apply_version',
-    postGoodsIgnoreVersion = '/api/v1/goods/ignore_version',
+    
 
     // 订单管理
     getProductOrderList = '/v1/order/list',

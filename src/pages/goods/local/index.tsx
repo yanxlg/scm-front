@@ -18,6 +18,7 @@ import {
     getGoodsDelete,
     IFilterParams,
     getCatagoryList,
+    getAllGoodsOnsale
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'dva/router';
@@ -110,6 +111,7 @@ declare interface IIndexState {
     // 按钮加载中状态
     searchLoading: boolean;
     onsaleLoading: boolean;
+    allOnsaleLoading: boolean;
     deleteLoading: boolean;
     page: number;
     page_count: number;
@@ -141,6 +143,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             goodsEditDialogStatus: true,
             excelDialogStataus: false,
             onsaleLoading: false,
+            allOnsaleLoading: false,
             deleteLoading: false,
             searchLoading: false,
             page: 1,
@@ -215,36 +218,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             page,
             page_count,
         };
-        if (this.localSearchRef) {
-            const {
-                secondCatagoryList,
-                thirdCatagoryList,
-                task_number,
-                store_id,
-                commodity_id,
-                inventory_status,
-                version_status,
-                first_catagory,
-                second_catagory,
-                third_catagory,
-                ...searhParams
-            } = this.localSearchRef.state;
-            // commodity_id
-            if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
-                return;
-            }
-            // 转换数据格式
-            params = Object.assign(params, searhParams, {
-                inventory_status: strToNumber(inventory_status),
-                version_status: strToNumber(version_status),
-                first_catagory: strToNumber(first_catagory),
-                second_catagory: strToNumber(second_catagory),
-                third_catagory: strToNumber(third_catagory),
-                task_number: task_number.split(',').filter(item => item.trim()),
-                store_id: store_id.split(',').filter(item => item.trim()),
-                // .map(item => Number(item.trim()))
-                commodity_id: commodity_id.split(',').filter(item => item.trim()),
-            });
+        const searchParams = this.getSearchParams();
+        if (!searchParams) {
+            return
+        } else {
+            params = Object.assign(params, searchParams);
         }
         if (searchData) {
             params = Object.assign(params, searchData);
@@ -263,8 +241,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 }
                 this.setState({
                     allCount: all_count,
-                    page: params.page,
-                    page_count: params.page_count,
+                    page: params.page as number,
+                    page_count: params.page_count as number,
                     goodsList: this.addRowSpanData(list),
                 });
             })
@@ -274,6 +252,41 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 });
             });
     };
+
+    private getSearchParams() {
+        if (this.localSearchRef) {
+            const {
+                secondCatagoryList,
+                thirdCatagoryList,
+                task_number,
+                store_id,
+                commodity_id,
+                inventory_status,
+                version_status,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                ...searhParams
+            } = this.localSearchRef.state;
+            // commodity_id
+            if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
+                return null;
+            }
+            // 转换数据格式
+            return Object.assign({}, searhParams, {
+                inventory_status: strToNumber(inventory_status),
+                version_status: strToNumber(version_status),
+                first_catagory: strToNumber(first_catagory),
+                second_catagory: strToNumber(second_catagory),
+                third_catagory: strToNumber(third_catagory),
+                task_number: task_number.split(',').filter(item => item.trim()),
+                store_id: store_id.split(',').filter(item => item.trim()),
+                // .map(item => Number(item.trim()))
+                commodity_id: commodity_id.split(',').filter(item => item.trim()),
+            });
+        }
+        return null
+    }
 
     private getCatagoryList = () => {
         getCatagoryList()
@@ -483,6 +496,28 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             });
     };
 
+    // 查询商品一键上架
+    getAllGoodsOnsale = () => {
+        const searchParams = this.getSearchParams();
+        if (searchParams) {
+            this.setState({
+                allOnsaleLoading: true
+            })
+            getAllGoodsOnsale(searchParams)
+                .then(res => {
+                    // console.log('getAllGoodsOnsale', res);
+                    this.onSearch();
+                    message.success('查询商品一键上架成功');
+                })
+                .finally(() => {
+                    this.setState({
+                        allOnsaleLoading: false
+                    })
+                })
+        }
+        
+    }
+
     // 删除
     getGoodsDelete = () => {
         const { selectedRowKeys, goodsList } = this.state;
@@ -576,6 +611,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             excelDialogStataus,
             selectedRowKeys,
             onsaleLoading,
+            allOnsaleLoading,
             deleteLoading,
             searchLoading,
             saleStatusList,
@@ -594,6 +630,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     ref={node => (this.localSearchRef = node)}
                     searchLoading={searchLoading}
                     onsaleLoading={onsaleLoading}
+                    allOnsaleLoading={allOnsaleLoading}
                     deleteLoading={deleteLoading}
                     allCatagoryList={allCatagoryList}
                     onSearch={this.onSearch}
@@ -601,6 +638,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     getGoodsDelete={this.getGoodsDelete}
                     toggleExcelDialog={this.toggleExcelDialog}
                     getCurrentCatagory={this.getCurrentCatagory}
+                    getAllGoodsOnsale={this.getAllGoodsOnsale}
                 />
                 <Pagination
                     className="goods-local-pagination"
