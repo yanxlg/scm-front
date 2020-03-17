@@ -14,6 +14,7 @@ declare interface IPageData {
 declare interface ILocalSearchProps {
     searchLoading: boolean;
     onsaleLoading: boolean;
+    allOnsaleLoading: boolean;
     deleteLoading: boolean;
     allCatagoryList: ICategoryItem[];
     onSearch(params?: IPageData, isRefresh?: boolean): void;
@@ -22,6 +23,7 @@ declare interface ILocalSearchProps {
     toggleExcelDialog(status: boolean): void;
     getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
     task_id?: number; // 默认task_id
+    getAllGoodsOnsale(): void;
 }
 
 declare interface ILocalSearchState {
@@ -131,7 +133,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
     };
 
     render() {
-        const { onsaleLoading, deleteLoading, searchLoading, allCatagoryList } = this.props;
+        const { onsaleLoading, allOnsaleLoading, deleteLoading, searchLoading, allCatagoryList } = this.props;
 
         const {
             task_number,
@@ -333,6 +335,14 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onClick={this.postGoodsOnsale}
                     >
                         一键上架
+                    </Button>
+                    <Button
+                        type="primary"
+                        className="local-search-all-btn"
+                        loading={allOnsaleLoading}
+                        onClick={this.props.getAllGoodsOnsale}
+                    >
+                        查询商品一键上架
                     </Button>
                     <Button
                         className="local-search-item-btn"
