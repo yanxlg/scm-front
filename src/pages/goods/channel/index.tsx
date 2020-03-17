@@ -563,10 +563,6 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             });
     }
 
-    private getCopiedLinkQuery() {
-        return this.queryData;
-    }
-
     private showSkuDialog = (productId: string) => {
         // console.log(this.skuRef);
         this.skuRef.current!.showModal(productId);
