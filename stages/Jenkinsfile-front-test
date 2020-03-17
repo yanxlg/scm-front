@@ -51,7 +51,7 @@ pipeline {
                                branches: [[name: "$refspec"]],
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
                     if (NpmInstall == "true" || !fileExists("./node_modules")) {
-                        sh "docker run -u 0 --rm -v \$(pwd):/opt/app-root/scm-front --name scm-front-build node:10 bash -c 'cd /opt/app-root/scm-front;npm install'"
+                        sh "docker run -u 0 --rm -v \$(pwd):/opt/app-root/scm-front --name scm-front-build node:10 bash -c 'cd /opt/app-root/scm-front;rm -rf node_modules;npm install'"
                     }
                     sh "docker run --rm -v \$(pwd):/opt/app-root/scm-front --name scm-front-build node:10 bash -c 'cd /opt/app-root/scm-front;npm run build'; \
                         sudo chown -R ec2-user.ec2-user \$(pwd); \
