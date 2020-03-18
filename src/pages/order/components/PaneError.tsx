@@ -29,6 +29,7 @@ export declare interface IErrorOrderItem {
     abnormalType: number;
 
     purchasePlanId?: string;
+    platformSendOrderTime?: string; // 采购订单生成时间
     platformShippingTime?: string; // 采购订单发货时间
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
@@ -39,7 +40,7 @@ export declare interface IErrorOrderItem {
 const fieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
-        name: ['order_start_time', 'order_end_time'],
+        name: ['order_time_start', 'order_time_end'],
         label: '订单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
@@ -130,6 +131,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
         getErrorOrderList(params)
             .then(res => {
                 // console.log('getProductOrderList', res);
+                this.currentSearchParams = params;
                 const { all_count, list } = res.data;
                 if (list) {
                     this.setState({
@@ -173,10 +175,10 @@ class PaneErr extends React.PureComponent<{}, IState> {
                     const {
                         purchasePlanId,
                         platformShippingTime,
-                        // platformOrderTime,
                         platformOrderTime,
                         payTime,
                         purchaseWaybillNo,
+                        platformSendOrderTime,
                     } = purchaseItem;
                     const childOrderItem: IErrorOrderItem = {
                         createTime, // 订单时间
@@ -191,6 +193,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
                         abnormalType,
 
                         purchasePlanId,
+                        platformSendOrderTime,
                         platformShippingTime, // 采购订单发货时间
                         platformOrderTime, // 拍单时间
                         payTime, // 支付时间
