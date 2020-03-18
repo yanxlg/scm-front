@@ -133,7 +133,13 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
     };
 
     render() {
-        const { onsaleLoading, allOnsaleLoading, deleteLoading, searchLoading, allCatagoryList } = this.props;
+        const {
+            onsaleLoading,
+            allOnsaleLoading,
+            deleteLoading,
+            searchLoading,
+            allCatagoryList,
+        } = this.props;
 
         const {
             task_number,

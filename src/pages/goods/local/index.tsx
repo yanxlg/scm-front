@@ -18,7 +18,7 @@ import {
     getGoodsDelete,
     IFilterParams,
     getCatagoryList,
-    getAllGoodsOnsale
+    getAllGoodsOnsale,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'react-router';
@@ -237,7 +237,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         };
         const searchParams = this.getSearchParams();
         if (!searchParams) {
-            return
+            return;
         } else {
             params = Object.assign(params, searchParams);
         }
@@ -302,7 +302,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 commodity_id: commodity_id.split(',').filter(item => item.trim()),
             });
         }
-        return null
+        return null;
     }
 
     private getCatagoryList = () => {
@@ -518,8 +518,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const searchParams = this.getSearchParams();
         if (searchParams) {
             this.setState({
-                allOnsaleLoading: true
-            })
+                allOnsaleLoading: true,
+            });
             getAllGoodsOnsale(searchParams)
                 .then(res => {
                     // console.log('getAllGoodsOnsale', res);
@@ -528,12 +528,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 })
                 .finally(() => {
                     this.setState({
-                        allOnsaleLoading: false
-                    })
-                })
+                        allOnsaleLoading: false,
+                    });
+                });
         }
-        
-    }
+    };
 
     // 删除
     getGoodsDelete = () => {
