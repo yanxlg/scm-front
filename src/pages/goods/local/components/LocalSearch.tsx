@@ -14,6 +14,7 @@ declare interface IPageData {
 declare interface ILocalSearchProps {
     searchLoading: boolean;
     onsaleLoading: boolean;
+    allOnsaleLoading: boolean;
     deleteLoading: boolean;
     allCatagoryList: ICategoryItem[];
     onSearch(params?: IPageData, isRefresh?: boolean): void;
@@ -22,6 +23,7 @@ declare interface ILocalSearchProps {
     toggleExcelDialog(status: boolean): void;
     getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
     task_id?: number; // 默认task_id
+    getAllGoodsOnsale(): void;
 }
 
 declare interface ILocalSearchState {
@@ -42,6 +44,7 @@ declare interface ILocalSearchState {
     min_comment: number | undefined; // 评论数量最小值
     secondCatagoryList: ICategoryItem[];
     thirdCatagoryList: ICategoryItem[];
+    product_status: string[];
 }
 
 // <{}, ILocalSearchState>
@@ -67,6 +70,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
             min_comment: undefined,
             secondCatagoryList: [],
             thirdCatagoryList: [],
+            product_status: []
         };
     }
 
@@ -130,8 +134,14 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.props.getGoodsDelete();
     };
 
+    setProductStatus = (val: string[]) => {
+        this.setState({
+            product_status: val
+        });
+    }
+
     render() {
-        const { onsaleLoading, deleteLoading, searchLoading, allCatagoryList } = this.props;
+        const { onsaleLoading, allOnsaleLoading, deleteLoading, searchLoading, allCatagoryList } = this.props;
 
         const {
             task_number,
@@ -151,6 +161,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
             min_comment,
             secondCatagoryList,
             thirdCatagoryList,
+            product_status
         } = this.state;
 
         return (
@@ -195,6 +206,29 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         <Option value="">全部</Option>
                         <Option value="1">不可销售</Option>
                         <Option value="2">可销售</Option>
+                    </Select>
+                </div>
+                <div className="local-search-item">
+                    <span className="local-search-label">版本状态</span>
+                    <Select
+                        className="local-search-item-select"
+                        mode="multiple"
+                        placeholder="请选择版本状态"
+                        maxTagCount={2}
+                        value={product_status}
+                        onChange={(val: string[]) => this.setProductStatus(val)}
+                    >
+                        {/* INITIALIZING=0,INITIALIZED=1,UPDATING=2,UPDATED=3,RELEASING=4,RELEASED=5,PUBLISHED=6,FROZEN=7,RETIRED=8,REMOVED=9 */}
+                        <Option value="0">INITIALIZING</Option>
+                        <Option value="1">INITIALIZED</Option>
+                        <Option value="2">UPDATING</Option>
+                        <Option value="3">UPDATED</Option>
+                        <Option value="4">RELEASING</Option>
+                        <Option value="5">RELEASED</Option>
+                        <Option value="6">PUBLISHED</Option>
+                        <Option value="7">FROZEN</Option>
+                        <Option value="8">RETIRED</Option>
+                        <Option value="9">REMOVED</Option>
                     </Select>
                 </div>
                 <div className="local-search-item">
@@ -333,6 +367,14 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         onClick={this.postGoodsOnsale}
                     >
                         一键上架
+                    </Button>
+                    <Button
+                        type="primary"
+                        className="local-search-all-btn"
+                        loading={allOnsaleLoading}
+                        onClick={this.props.getAllGoodsOnsale}
+                    >
+                        查询商品一键上架
                     </Button>
                     <Button
                         className="local-search-item-btn"
