@@ -44,6 +44,7 @@ declare interface ILocalSearchState {
     min_comment: number | undefined; // 评论数量最小值
     secondCatagoryList: ICategoryItem[];
     thirdCatagoryList: ICategoryItem[];
+    product_status: string[];
 }
 
 // <{}, ILocalSearchState>
@@ -69,6 +70,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
             min_comment: undefined,
             secondCatagoryList: [],
             thirdCatagoryList: [],
+            product_status: []
         };
     }
 
@@ -132,6 +134,12 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
         this.props.getGoodsDelete();
     };
 
+    setProductStatus = (val: string[]) => {
+        this.setState({
+            product_status: val
+        });
+    }
+
     render() {
         const { onsaleLoading, allOnsaleLoading, deleteLoading, searchLoading, allCatagoryList } = this.props;
 
@@ -153,6 +161,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
             min_comment,
             secondCatagoryList,
             thirdCatagoryList,
+            product_status
         } = this.state;
 
         return (
@@ -197,6 +206,29 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         <Option value="">全部</Option>
                         <Option value="1">不可销售</Option>
                         <Option value="2">可销售</Option>
+                    </Select>
+                </div>
+                <div className="local-search-item">
+                    <span className="local-search-label">版本状态</span>
+                    <Select
+                        className="local-search-item-select"
+                        mode="multiple"
+                        placeholder="请选择版本状态"
+                        maxTagCount={2}
+                        value={product_status}
+                        onChange={(val: string[]) => this.setProductStatus(val)}
+                    >
+                        {/* INITIALIZING=0,INITIALIZED=1,UPDATING=2,UPDATED=3,RELEASING=4,RELEASED=5,PUBLISHED=6,FROZEN=7,RETIRED=8,REMOVED=9 */}
+                        <Option value="0">INITIALIZING</Option>
+                        <Option value="1">INITIALIZED</Option>
+                        <Option value="2">UPDATING</Option>
+                        <Option value="3">UPDATED</Option>
+                        <Option value="4">RELEASING</Option>
+                        <Option value="5">RELEASED</Option>
+                        <Option value="6">PUBLISHED</Option>
+                        <Option value="7">FROZEN</Option>
+                        <Option value="8">RETIRED</Option>
+                        <Option value="9">REMOVED</Option>
                     </Select>
                 </div>
                 <div className="local-search-item">

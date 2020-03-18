@@ -266,6 +266,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 first_catagory,
                 second_catagory,
                 third_catagory,
+                product_status,
                 ...searhParams
             } = this.localSearchRef.state;
             // commodity_id
@@ -283,6 +284,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 store_id: store_id.split(',').filter(item => item.trim()),
                 // .map(item => Number(item.trim()))
                 commodity_id: commodity_id.split(',').filter(item => item.trim()),
+                product_status: product_status.length ? product_status.join(',') : undefined
             });
         }
         return null
