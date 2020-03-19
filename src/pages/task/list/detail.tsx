@@ -214,12 +214,10 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                     {detail.grab_count_max || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="销量区间">
-                                    {sales_volume_min === void 0
-                                        ? '--'
-                                        : `${sales_volume_min}-${sales_volume_max}`}
+                                    {`${sales_volume_min || 0}-${sales_volume_max || '+∞'}`}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="价格区间(￥)">
-                                    {price_min === void 0 ? '--' : `${price_min}-${price_max}`}
+                                    {`${price_min || 0}-${price_max || '+∞'}`}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务周期">
                                     {task_cycle === TaskExecuteType.once
