@@ -19,6 +19,7 @@ export declare interface IFilterParams {
     min_price?: number | undefined; // 价格范围最小值
     max_price?: number | undefined; // 价格范围最大值
     min_comment?: number | undefined; // 评论数量最小值
+    product_status?: string | undefined; // 版本状态
 }
 
 declare interface IImgEditData {
