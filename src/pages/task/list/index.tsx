@@ -15,6 +15,7 @@ const Index: React.FC<LocalPageProps> = props => {
     const [countArr, setCountArr] = useState<number[]>([]);
     const { query } = queryString.parseUrl(window.location.href);
     const defaultActiveKey = ((query.tabKey ?? '1') as unknown) as string;
+
     return useMemo(() => {
         const initialValues = props.location.state;
         const [count1, count2, count3, count4, count5, count6] = countArr;

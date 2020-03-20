@@ -15,4 +15,9 @@ export interface IResponse<T> {
     data: T;
 }
 
+export interface IPaginationResponse<T> {
+    total: number;
+    list: T[];
+}
+
 export type IBoolean = 0 | 1;
