@@ -44,6 +44,8 @@ export const purchaseOrderOptionList = [
     { name: '拍单失败', value: 3 },
     { name: '拍单中', value: 4 },
     { name: '已拍单', value: 5 },
+    { name: '已重新生成', value: 6 },
+    { name: '最终取消', value: 7 },
 ];
 
 export const purchasePayOptionList = [
