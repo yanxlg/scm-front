@@ -301,7 +301,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 store_id: store_id.split(',').filter(item => item.trim()),
                 // .map(item => Number(item.trim()))
                 commodity_id: commodity_id.split(',').filter(item => item.trim()),
-                product_status: product_status.length ? product_status.join(',') : undefined
+                product_status: product_status.length ? product_status.join(',') : undefined,
             });
         }
         return null;

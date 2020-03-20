@@ -70,7 +70,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
             min_comment: undefined,
             secondCatagoryList: [],
             thirdCatagoryList: [],
-            product_status: []
+            product_status: [],
         };
     }
 
@@ -136,9 +136,9 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
 
     setProductStatus = (val: string[]) => {
         this.setState({
-            product_status: val
+            product_status: val,
         });
-    }
+    };
 
     render() {
         const {
@@ -167,7 +167,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
             min_comment,
             secondCatagoryList,
             thirdCatagoryList,
-            product_status
+            product_status,
         } = this.state;
 
         return (
