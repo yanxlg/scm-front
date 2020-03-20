@@ -23,7 +23,7 @@ declare interface ILocalSearchProps {
     toggleExcelDialog(status: boolean): void;
     getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
     task_id?: number; // 默认task_id
-    getAllGoodsOnsale(): void;
+    postAllGoodsOnsale(): void;
 }
 
 declare interface ILocalSearchState {
@@ -372,7 +372,7 @@ class LocalSearch extends React.PureComponent<ILocalSearchProps, ILocalSearchSta
                         type="primary"
                         className="local-search-all-btn"
                         loading={allOnsaleLoading}
-                        onClick={this.props.getAllGoodsOnsale}
+                        onClick={this.props.postAllGoodsOnsale}
                     >
                         查询商品一键上架
                     </Button>

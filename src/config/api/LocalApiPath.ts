@@ -11,5 +11,5 @@ export enum LocalApiPath {
     getGoodsVersion = '/api/v1/goods/version_list',
     postGoodsVersionExport = '/api/v1/goods/version_export',
     postGoodsIgnoreVersion = '/api/v1/goods/ignore_version',
-    getAllGoodsOnsale = '/api/v1/goods/batch_onsale_goods',
+    postAllGoodsOnsale = '/api/v1/goods/batch_onsale_goods',
 }
