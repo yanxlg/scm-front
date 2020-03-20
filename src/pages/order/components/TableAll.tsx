@@ -530,23 +530,25 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
         getOrderGoodsDetail(productId).then(res => {
             const { sku_info, product_id, goods_img, title } = res.data;
-            const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
-            const goodsDetail: IGoodsDetail = {
-                product_id,
-                goods_img,
-                title,
-            };
-            if (i > -1) {
-                const { sku_style, sku_sn, sku_img } = sku_info[i];
-                Object.assign(goodsDetail, {
-                    sku_sn,
-                    sku_img,
-                    sku_style,
+            if (sku_info) {
+                const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
+                const goodsDetail: IGoodsDetail = {
+                    product_id,
+                    goods_img,
+                    title,
+                };
+                if (i > -1) {
+                    const { sku_style, sku_sn, sku_img } = sku_info[i];
+                    Object.assign(goodsDetail, {
+                        sku_sn,
+                        sku_img,
+                        sku_style,
+                    });
+                }
+                this.setState({
+                    goodsDetail,
                 });
             }
-            this.setState({
-                goodsDetail,
-            });
         });
     };
 

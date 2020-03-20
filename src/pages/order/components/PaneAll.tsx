@@ -85,6 +85,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         order_goods_status: 100,
         order_goods_shipping_status: 100,
         non_purchase_plan: 100,
+        purchase_order_pay_status: 100,
+        purchase_order_status: 100,
     };
 
     private endFieldItem: IFieldItem = {
@@ -173,7 +175,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
 
     // 获取查询数据
     private getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
+        console.log('111', this.formRef.current!.getFieldsValue());
         const {
             only_p_order,
             channel_order_goods_sn,
@@ -182,6 +184,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             last_waybill_no,
             product_id,
             sku_id,
+            purchase_waybill_no,
+            purchase_plan_id,
             ...fields
         } = this.formRef.current!.getFieldsValue();
         return {
@@ -192,6 +196,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             last_waybill_no: splitStrToArr(last_waybill_no),
             product_id: splitStrToArr(product_id),
             sku_id: splitStrToArr(sku_id),
+            purchase_waybill_no: splitStrToArr(purchase_waybill_no),
+            purchase_plan_id: splitStrToArr(purchase_plan_id),
             ...fields,
         };
     };
@@ -412,16 +418,23 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 if (success!.length) {
                     notification.success({
                         message: '拍单成功',
-                        description: success.join('、'),
+                        description: (
+                            <div>
+                                {success.map((item: string) => (
+                                    <div key={item}>{item}</div>
+                                ))}
+                            </div>
+                        ),
                     });
-                } else if (failed!.length) {
+                }
+                if (failed!.length) {
                     notification.error({
                         message: '拍单失败',
                         description: (
                             <div>
                                 {failed.map((item: any) => (
                                     <div>
-                                        {item.order_goods_id}: {item.result}
+                                        {item.order_goods_id}: {item.result.slice(0, 50)}
                                     </div>
                                 ))}
                             </div>
@@ -442,20 +455,28 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 order_goods_ids: orderGoodsIdList,
             }).then(res => {
                 const { success, failed } = res.data;
+                console.log(1111, failed);
                 this.onSearch();
                 if (success!.length) {
                     notification.success({
                         message: '取消采购单成功',
-                        description: success.join('、'),
+                        description: (
+                            <div>
+                                {success.map((item: string) => (
+                                    <div key={item}>{item}</div>
+                                ))}
+                            </div>
+                        ),
                     });
-                } else if (failed!.length) {
+                }
+                if (failed!.length) {
                     notification.error({
                         message: '取消采购单失败',
                         description: (
                             <div>
                                 {failed.map((item: any) => (
-                                    <div>
-                                        {item.order_goods_id}: {item.result}
+                                    <div key={item.order_goods_id}>
+                                        {item.order_goods_id}: {item.result.slice(0, 50)}
                                     </div>
                                 ))}
                             </div>
@@ -482,16 +503,23 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 if (success!.length) {
                     notification.success({
                         message: '取消渠道订单成功',
-                        description: success.join('、'),
+                        description: (
+                            <div>
+                                {success.map((item: string) => (
+                                    <div key={item}>{item}</div>
+                                ))}
+                            </div>
+                        ),
                     });
-                } else if (failed!.length) {
+                }
+                if (failed!.length) {
                     notification.error({
                         message: '取消渠道订单失败',
                         description: (
                             <div>
                                 {failed.map((item: any) => (
                                     <div>
-                                        {item.order_goods_id}: {item.result}
+                                        {item.order_goods_id}: {item.result.slice(0, 50)}
                                     </div>
                                 ))}
                             </div>
