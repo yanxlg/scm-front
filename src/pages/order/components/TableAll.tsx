@@ -9,6 +9,7 @@ import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
+    orderShippingOptionList,
     purchaseOrderOptionList,
     purchasePayOptionList,
     purchaseShippingOptionList,
@@ -118,6 +119,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: number, row: IChildOrderItem) => {
                 return {
                     children: getStatusDesc(orderStatusOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'orderGoodsShippingStatus',
+            title: '中台订单配送状态',
+            dataIndex: 'orderGoodsShippingStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return {
+                    children: getStatusDesc(orderShippingOptionList, value),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
