@@ -18,6 +18,7 @@ import {
     getGoodsDelete,
     IFilterParams,
     getCatagoryList,
+    getAllGoodsOnsale,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'react-router';
@@ -114,6 +115,7 @@ declare interface IIndexState {
     // 按钮加载中状态
     searchLoading: boolean;
     onsaleLoading: boolean;
+    allOnsaleLoading: boolean;
     deleteLoading: boolean;
     page: number;
     page_count: number;
@@ -146,6 +148,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             goodsEditDialogStatus: true,
             excelDialogStataus: false,
             onsaleLoading: false,
+            allOnsaleLoading: false,
             deleteLoading: false,
             searchLoading: false,
             page: 1,
@@ -232,6 +235,42 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             page,
             page_count,
         };
+        const searchParams = this.getSearchParams();
+        if (!searchParams) {
+            return;
+        } else {
+            params = Object.assign(params, searchParams);
+        }
+        if (searchData) {
+            params = Object.assign(params, searchData);
+        }
+        this.setState({
+            searchLoading: true,
+        });
+        return getGoodsList(params)
+            .then(res => {
+                // console.log(res)
+                this.searchFilter = params;
+                const { list, all_count } = res.data;
+                // console.log(111111, this.addRowSpanData(list));
+                if (!isRefresh) {
+                    this.cancelSelectedRow();
+                }
+                this.setState({
+                    allCount: all_count,
+                    page: params.page as number,
+                    page_count: params.page_count as number,
+                    goodsList: this.addRowSpanData(list),
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    searchLoading: false,
+                });
+            });
+    };
+
+    private getSearchParams() {
         if (this.localSearchRef) {
             const {
                 secondCatagoryList,
@@ -244,14 +283,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 first_catagory,
                 second_catagory,
                 third_catagory,
+                product_status,
                 ...searhParams
             } = this.localSearchRef.state;
             // commodity_id
             if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
-                return;
+                return null;
             }
             // 转换数据格式
-            params = Object.assign(params, searhParams, {
+            return Object.assign({}, searhParams, {
                 inventory_status: strToNumber(inventory_status),
                 version_status: strToNumber(version_status),
                 first_catagory: strToNumber(first_catagory),
@@ -261,39 +301,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 store_id: store_id.split(',').filter(item => item.trim()),
                 // .map(item => Number(item.trim()))
                 commodity_id: commodity_id.split(',').filter(item => item.trim()),
+                product_status: product_status.length ? product_status.join(',') : undefined
             });
         }
-        if (searchData) {
-            params = Object.assign(params, searchData);
-        }
-        this.setState({
-            searchLoading: true,
-        });
-        this.queryData = {
-            ...params,
-        };
-        return getGoodsList(params)
-            .then(res => {
-                // console.log(res)
-                this.searchFilter = params;
-                const { list, all_count } = res.data;
-                // console.log(111111, this.addRowSpanData(list));
-                if (!isRefresh) {
-                    this.cancelSelectedRow();
-                }
-                this.setState({
-                    allCount: all_count,
-                    page: params.page,
-                    page_count: params.page_count,
-                    goodsList: this.addRowSpanData(list),
-                });
-            })
-            .finally(() => {
-                this.setState({
-                    searchLoading: false,
-                });
-            });
-    };
+        return null;
+    }
 
     private getCatagoryList = () => {
         getCatagoryList()
@@ -503,6 +515,27 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             });
     };
 
+    // 查询商品一键上架
+    getAllGoodsOnsale = () => {
+        const searchParams = this.getSearchParams();
+        if (searchParams) {
+            this.setState({
+                allOnsaleLoading: true,
+            });
+            getAllGoodsOnsale(searchParams)
+                .then(res => {
+                    // console.log('getAllGoodsOnsale', res);
+                    this.onSearch();
+                    message.success('查询商品一键上架成功');
+                })
+                .finally(() => {
+                    this.setState({
+                        allOnsaleLoading: false,
+                    });
+                });
+        }
+    };
+
     // 删除
     getGoodsDelete = () => {
         const { selectedRowKeys, goodsList } = this.state;
@@ -600,6 +633,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             excelDialogStataus,
             selectedRowKeys,
             onsaleLoading,
+            allOnsaleLoading,
             deleteLoading,
             searchLoading,
             saleStatusList,
@@ -618,6 +652,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     ref={node => (this.localSearchRef = node)}
                     searchLoading={searchLoading}
                     onsaleLoading={onsaleLoading}
+                    allOnsaleLoading={allOnsaleLoading}
                     deleteLoading={deleteLoading}
                     allCatagoryList={allCatagoryList}
                     onSearch={this.onSearch}
@@ -625,6 +660,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     getGoodsDelete={this.getGoodsDelete}
                     toggleExcelDialog={this.toggleExcelDialog}
                     getCurrentCatagory={this.getCurrentCatagory}
+                    getAllGoodsOnsale={this.getAllGoodsOnsale}
                 />
                 <Pagination
                     className="goods-local-pagination"

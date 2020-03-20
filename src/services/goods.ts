@@ -1,9 +1,9 @@
 import request from '@/utils/request';
-import { ApiPathEnum } from '@/enums/ApiPathEnum';
+import { LocalApiPath } from '@/config/api/LocalApiPath';
 
 export declare interface IFilterParams {
-    page: number;
-    page_count: number;
+    page?: number;
+    page_count?: number;
     task_number?: string[]; // 任务 id
     store_id?: string[]; // 店铺 ID
     commodity_id?: number[]; // Commodity_ID
@@ -19,6 +19,7 @@ export declare interface IFilterParams {
     min_price?: number | undefined; // 价格范围最小值
     max_price?: number | undefined; // 价格范围最大值
     min_comment?: number | undefined; // 评论数量最小值
+    product_status?: string | undefined; // 版本状态
 }
 
 declare interface IImgEditData {
@@ -72,7 +73,7 @@ declare interface ISkuParams {
 }
 
 export async function getGoodsList(params: IFilterParams) {
-    return request.post(ApiPathEnum.getGoodsList, {
+    return request.post(LocalApiPath.getGoodsList, {
         // requestType: 'form',
         data: params,
     });
@@ -80,7 +81,7 @@ export async function getGoodsList(params: IFilterParams) {
 
 export async function postGoodsExports(data: IFilterParams) {
     return request
-        .post(ApiPathEnum.postGoodsExports, {
+        .post(LocalApiPath.postGoodsExports, {
             // requestType: 'form',
             data,
             responseType: 'blob',
@@ -104,7 +105,7 @@ export async function postGoodsExports(data: IFilterParams) {
 }
 
 export async function putGoodsPicEdit(data: IImgEditData) {
-    return request.put(ApiPathEnum.putGoodsPicEdit, {
+    return request.put(LocalApiPath.putGoodsPicEdit, {
         requestType: 'json',
         data,
     });
@@ -112,22 +113,29 @@ export async function putGoodsPicEdit(data: IImgEditData) {
 
 // formData
 export async function postGoodsPicUpload(data: any) {
-    return request.post(ApiPathEnum.postGoodsPicUpload, {
+    return request.post(LocalApiPath.postGoodsPicUpload, {
         data,
     });
 }
 
 // 一键上架
 export async function postGoodsOnsale(data: IOnsaleData) {
-    return request.post(ApiPathEnum.getGoodsOnsale, {
+    return request.post(LocalApiPath.getGoodsOnsale, {
         data,
+    });
+}
+
+// 查询商品一键上架
+export async function getAllGoodsOnsale(params: IFilterParams) {
+    return request.get(LocalApiPath.getAllGoodsOnsale, {
+        params,
     });
 }
 
 // 删除
 export async function getGoodsDelete(data: IGoodsDeleteData) {
     // console.log('data', data);
-    return request.post(ApiPathEnum.getGoodsDelete, {
+    return request.post(LocalApiPath.getGoodsDelete, {
         requestType: 'json',
         data,
     });
@@ -135,26 +143,26 @@ export async function getGoodsDelete(data: IGoodsDeleteData) {
 
 // 商品编辑
 export async function putGoodsEdit(data: IGoodsEditData) {
-    return request.put(ApiPathEnum.putGoodsEdit, {
+    return request.put(LocalApiPath.putGoodsEdit, {
         data,
     });
 }
 
 // 查询商品上架信息
 export async function getGoodsSales(params: IProductId) {
-    return request.get(ApiPathEnum.getGoodsSales, {
+    return request.get(LocalApiPath.getGoodsSales, {
         params,
     });
 }
 
 // 获取所有
 export async function getCatagoryList() {
-    return request.get(ApiPathEnum.getCatagoryList);
+    return request.get(LocalApiPath.getCatagoryList);
 }
 
 // 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {
-    return request.get(ApiPathEnum.getGoodsVersion, {
+    return request.get(LocalApiPath.getGoodsVersion, {
         params: params,
     });
 }
@@ -162,7 +170,7 @@ export async function getGoodsVersion(params: IGoodsVersionParams) {
 // 下载商品版本excel
 export async function postGoodsVersionExport(data: IGoodsVersionParams) {
     return request
-        .get(ApiPathEnum.postGoodsVersionExport, {
+        .get(LocalApiPath.postGoodsVersionExport, {
             // requestType: 'form',
             params: data,
             // data,
@@ -188,7 +196,7 @@ export async function postGoodsVersionExport(data: IGoodsVersionParams) {
 
 // 忽略版本
 export async function postGoodsIgnoreVersion(data: IProductId) {
-    return request.post(ApiPathEnum.postGoodsIgnoreVersion, {
+    return request.post(LocalApiPath.postGoodsIgnoreVersion, {
         data,
     });
 }

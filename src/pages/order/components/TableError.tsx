@@ -149,9 +149,9 @@ class TableError extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'x1',
+            key: 'platformSendOrderTime',
             title: '采购订单生成时间',
-            dataIndex: 'x1',
+            dataIndex: 'platformSendOrderTime',
             align: 'center',
             width: 120,
             render: (value: string) => {

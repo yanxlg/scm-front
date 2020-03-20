@@ -11,7 +11,7 @@ declare interface ICollapsePopOverProps {
 }
 
 const Index: React.FC<ICollapsePopOverProps> = ({ collapse, children }) => {
-    const [x, setX] = useState();
+    const [x, setX] = useState<number>();
     const ref = useRef<CollapsePanel>(null);
 
     useEffect(() => {

@@ -34,7 +34,11 @@ const AutoEnLargeImg: React.FC<IAutoEnLargeImgProps> = ({
                 title={null}
                 autoAdjustOverflow={true}
             >
-                {src ? <img src={src} className={className} alt="" /> : children}
+                {src ? (
+                    <img src={src} className={className} alt="" />
+                ) : (
+                    (children as React.ReactElement)
+                )}
             </Popover>
         ) : null;
     }, [className, enLargeClassName, src]);

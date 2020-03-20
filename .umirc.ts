@@ -55,22 +55,23 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t.vova.com.hk/',
-            // target: 'http://192.168.120.17:3026/',
+            target: 'https://scm-api-t2.vova.com.hk/',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
         },
     },
     chainWebpack(config, { webpack }) {
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
-        config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
-            {
-                formatter: 'codeframe',
-                async: true,
-                checkSyntacticErrors: true,
-                reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
-            },
-        ]);
+        if (dev) {
+            config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
+                {
+                    formatter: 'codeframe',
+                    async: true,
+                    checkSyntacticErrors: true,
+                    reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
+                },
+            ]);
+        }
     },
 });
 
