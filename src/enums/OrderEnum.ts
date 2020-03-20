@@ -327,6 +327,7 @@ export const defaultColChildList = [
     // 'channel_order_status',         // 渠道订单状态
     // 'channel_delivery_status',      // 渠道发货状态
     'orderGoodsStatus', // 中台订单状态
+    'orderGoodsShippingStatus', // 中台订单配送状态
     'productId', // 中台商品ID
     'purchasePlanId', // 计划子项ID
     'purchasePlatform', // 采购平台
