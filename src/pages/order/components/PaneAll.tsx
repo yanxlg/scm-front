@@ -175,7 +175,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
 
     // 获取查询数据
     private getFieldsValue = () => {
-        console.log('111', this.formRef.current!.getFieldsValue());
+        // console.log('111', this.formRef.current!.getFieldsValue());
         const {
             only_p_order,
             channel_order_goods_sn,
@@ -455,7 +455,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 order_goods_ids: orderGoodsIdList,
             }).then(res => {
                 const { success, failed } = res.data;
-                console.log(1111, failed);
+                // console.log(1111, failed);
                 this.onSearch();
                 if (success!.length) {
                     notification.success({
