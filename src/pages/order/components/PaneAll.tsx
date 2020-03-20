@@ -43,6 +43,7 @@ export declare interface IGoodsDetail {
     sku_style?: ISkuStyle;
     sku_sn?: string;
     sku_img?: string;
+    commodity_sku_id?: string;
 }
 
 export declare interface IChildOrderItem {
