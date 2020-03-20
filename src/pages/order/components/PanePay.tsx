@@ -258,16 +258,23 @@ class PanePay extends React.PureComponent<{}, IState> {
                 if (success!.length) {
                     notification.success({
                         message: '取消采购单成功',
-                        description: success.join('、'),
+                        description: (
+                            <div>
+                                {success.map((item: string) => (
+                                    <div key={item}>{item}</div>
+                                ))}
+                            </div>
+                        ),
                     });
-                } else if (failed!.length) {
+                }
+                if (failed!.length) {
                     notification.error({
                         message: '取消采购单失败',
                         description: (
                             <div>
                                 {failed.map((item: any) => (
-                                    <div>
-                                        {item.order_goods_id}: {item.result}
+                                    <div key={item.order_goods_id}>
+                                        {item.order_goods_id}: {item.result.slice(0, 50)}
                                     </div>
                                 ))}
                             </div>
@@ -291,7 +298,13 @@ class PanePay extends React.PureComponent<{}, IState> {
                 if (success!.length) {
                     notification.success({
                         message: '取消渠道订单成功',
-                        description: success.join('、'),
+                        description: (
+                            <div>
+                                {success.map((item: string) => (
+                                    <div key={item}>{item}</div>
+                                ))}
+                            </div>
+                        ),
                     });
                 } else if (failed!.length) {
                     notification.error({
@@ -300,7 +313,7 @@ class PanePay extends React.PureComponent<{}, IState> {
                             <div>
                                 {failed.map((item: any) => (
                                     <div key={item.order_goods_id}>
-                                        {item.order_goods_id}: {item.result}
+                                        {item.order_goods_id}: {item.result.slice(0, 50)}
                                     </div>
                                 ))}
                             </div>
