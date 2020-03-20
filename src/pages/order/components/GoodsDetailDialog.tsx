@@ -39,7 +39,7 @@ class GoodsDetailDialog extends React.PureComponent<IGoodsDetailDialogProps> {
                         </div>
                         {goodsDetail.sku_sn ? (
                             <div className="img-line">
-                                <div className="desc">子SKU: {goodsDetail.sku_sn}</div>
+                                <div className="desc">子SKU: {goodsDetail.commodity_sku_id}</div>
                                 <div className="img-wrap">
                                     <span>SKU对应图片:</span> <img src={goodsDetail.sku_img} />
                                 </div>
