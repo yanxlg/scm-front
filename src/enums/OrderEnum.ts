@@ -52,6 +52,9 @@ export const purchasePayOptionList = [
     { name: '未支付', value: 1 },
     { name: '已支付', value: 2 },
     { name: '已退款', value: 3 },
+    { name: '待退款', value: 4 },
+    { name: '审核不通过', value: 5 },
+    { name: '待审核', value: 6 },
 ];
 
 export const purchaseShippingOptionList = [
@@ -134,14 +137,22 @@ export const childAllFieldList: IFieldItem[] = [
         placeholder: '请输入中台父订单ID',
         // formatter: 'number',
     },
-    // {
-    //     type: 'input',
-    //     name: 'purchase_shipping_no',
-    //     label: '采购运单号',
-    //     className: 'order-input',
-    //     formItemClassName: 'order-form-item',
-    //     placeholder: '请输入采购运单号',
-    // },
+    {
+        type: 'input',
+        name: 'purchase_plan_id',
+        label: '采购计划 ID',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        placeholder: '请输入采购计划ID',
+    },
+    {
+        type: 'input',
+        name: 'purchase_waybill_no',
+        label: '采购运单号',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        placeholder: '请输入采购运单号',
+    },
     {
         type: 'input',
         name: 'last_waybill_no',
@@ -180,28 +191,22 @@ export const childAllFieldList: IFieldItem[] = [
     //         ...orderStatusOptionList
     //     ],
     // },
-    // {
-    //     type: 'select',
-    //     name: 'purchase_order_status',
-    //     label: '采购订单状态',
-    //     className: 'order-input',
-    //     formItemClassName: 'order-form-item',
-    //     optionList: [
-    //         defaultOptionItem,
-    //         ...purchaseOrderOptionList
-    //     ],
-    // },
-    // {
-    //     type: 'select',
-    //     name: 'purchase_pay_status',
-    //     label: '采购支付状态',
-    //     className: 'order-input',
-    //     formItemClassName: 'order-form-item',
-    //     optionList: [
-    //         defaultOptionItem,
-    //         ...purchasePayOptionList
-    //     ],
-    // },
+    {
+        type: 'select',
+        name: 'purchase_order_status',
+        label: '采购订单状态',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_order_pay_status',
+        label: '采购支付状态',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchasePayOptionList],
+    },
     // {
     //     type: 'select',
     //     name: 'purchase_shipping_status',
@@ -245,7 +250,7 @@ export const childAllFieldList: IFieldItem[] = [
         label: '采购计划',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...hasOptionList],
+        optionList: [defaultOptionItem, { name: '没有', value: 2 }],
     },
     {
         type: 'dateRanger',
