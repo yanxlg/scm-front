@@ -41,3 +41,16 @@ export function getStatusDesc(
     }
     return '';
 }
+
+export function transOptionList(statusMap: { [key: number]: string; [key: string]: string }) {
+    let statusList = [];
+    for (let key in statusMap) {
+        if (statusMap.hasOwnProperty(key)) {
+            statusList.push({
+                value: key,
+                name: statusMap[key],
+            });
+        }
+    }
+    return statusList;
+}

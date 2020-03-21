@@ -4,8 +4,8 @@ import { Link } from 'umi';
 import SkuDialog from './SkuDialog';
 
 import { ColumnProps } from 'antd/es/table';
-import { IRowDataItem, ISaleItem, ICatagoryData } from '../index';
-
+import { IRowDataItem } from '../index';
+import { IOnsaleItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from '@/utils/date';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
@@ -15,7 +15,7 @@ declare interface IProps {
     goodsList: IRowDataItem[];
     toggleEditGoodsDialog(status: boolean, row: IRowDataItem): void;
     changeSelectedRowKeys(rowKeys: string[]): void;
-    searchGoodsSale(product_id: string, saleList: ISaleItem[]): void;
+    searchGoodsSale(product_id: string, saleList: IOnsaleItem[]): void;
 }
 
 declare interface IState {
@@ -126,7 +126,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'first_catagory',
             align: 'center',
             width: 120,
-            render: (value: ICatagoryData, row: IRowDataItem) => {
+            render: (value: ICatagoryItem, row: IRowDataItem) => {
                 const { second_catagory, third_catagory } = row;
                 return <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>;
             },
@@ -212,7 +212,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'onsale_info',
             align: 'center',
             width: 100,
-            render: (value: ISaleItem[], row: IRowDataItem, index: number) => {
+            render: (value: IOnsaleItem[], row: IRowDataItem, index: number) => {
                 const channelList = [...new Set(value.map(item => item.onsale_channel))];
                 return value ? (
                     <Button

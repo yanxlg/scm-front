@@ -63,6 +63,8 @@ export type IFieldItem = FormItemLabelProps & {
     dateEndWith?: Array<FormItemName | 'now'>;
     onChange?: (name: FormItemName, form: FormInstance, setState: setStateFunc) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
     validator?: (rule: RuleObject, value: StoreValue, form: FormInstance) => Promise<any>;
+    mode?: 'multiple' | 'tags';
+    maxTagCount?: number;
 } & (SingleField | DoubleFields);
 
 declare interface ISearchFormProps extends FormProps {
@@ -459,6 +461,9 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
             syncDefaultOption,
             optionListDependence,
             onChange,
+            mode,
+            maxTagCount,
+            placeholder,
         } = field;
         const { labelClassName } = this.props;
         const eventProps = onChange
@@ -482,7 +487,14 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                     className={formItemClassName}
                     label={<span className={labelClassName}>{label}</span>}
                 >
-                    <Select className={className} loading={loading} {...eventProps}>
+                    <Select
+                        className={className}
+                        loading={loading}
+                        mode={mode}
+                        maxTagCount={maxTagCount}
+                        placeholder={placeholder}
+                        {...eventProps}
+                    >
                         {syncDefaultOption ? (
                             <Option value={syncDefaultOption.value}>
                                 {syncDefaultOption.name}

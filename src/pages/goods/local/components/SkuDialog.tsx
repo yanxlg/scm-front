@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Table, Pagination } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
-import { ISkuStyle } from '../index';
+import { ISkuStyle } from '@/interface/ILocalGoods';
 import { getGoodsSkuList } from '@/services/goods';
 
 import './SkuDialog.less';

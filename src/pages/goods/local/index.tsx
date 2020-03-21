@@ -1,15 +1,11 @@
-import React from 'react';
-import { Pagination, message } from 'antd';
-
+import React, { RefObject } from 'react';
+import { Pagination, message, Button } from 'antd';
 import LocalSearch from './components/LocalSearch';
 import GoodsTable from './components/GoodsTable';
-
-import ImportGoodsDialog from './components/ImportGoodsDialog';
 import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
 import ImgEditDialog from './components/ImgEditDialog';
 import ExcelDialog from './components/ExcelDialog';
-// good-local.less
-import '../../../styles/goods-local.less';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 
 import {
     getGoodsList,
@@ -24,80 +20,20 @@ import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'react-router';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import { ProductStatusList } from '@/config/dictionaries/Product';
 import { convertEndDate, convertStartDate } from '@/utils/date';
+import { IGoodsList, ISkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
+import {
+    defaultOption,
+    inventoryStatusList,
+    productStatusList,
+    versionStatusList,
+} from '@/enums/LocalGoodsEnum';
+
+import '../../../styles/goods-local.less';
 
 declare interface IPageData {
     page?: number;
     page_count?: number;
-}
-
-export declare interface ICatagoryData {
-    id?: string;
-    name?: string;
-}
-
-export declare interface ISaleItem {
-    onsale_channel: string;
-    onsale_time: number;
-    status_label: string;
-}
-
-export declare interface ISkuStyle {
-    [key: string]: string;
-    // size?: string;
-    // color?: string;
-}
-
-declare interface ISkuItem {
-    sku_sn: string;
-    sku_style: ISkuStyle;
-    sku_price: number;
-    sku_weight: number;
-    sku_inventory: number;
-    sku_shopping_fee: number;
-    sku_img: string;
-}
-
-declare interface IBaseData {
-    commodity_id: string;
-    product_id: string;
-    goods_img: string;
-    goods_status: string;
-    title: string;
-    description: string;
-    first_catagory: ICatagoryData;
-    second_catagory: ICatagoryData;
-    third_catagory: ICatagoryData;
-    sku_number: number;
-    sku_image: string[];
-    sales_volume: number;
-    comments: number;
-    brand: string;
-    store_id: string;
-    store_name: string;
-    worm_task_id: number;
-    worm_goods_id: number;
-    onsale_info: ISaleItem[];
-    update_time: number;
-    create_time: number;
-    worm_goodsinfo_link: string;
-    hasnew_version: number;
-    inventory_status: number;
-}
-
-declare interface IDataItem extends IBaseData {
-    sku_info: ISkuItem[];
-}
-
-export declare interface IRowDataItem extends IBaseData {
-    sku_sn: string;
-    sku_style: ISkuStyle;
-    sku_price: number;
-    sku_weight: number;
-    sku_inventory: number;
-    sku_shopping_fee: number;
-    // _sku_img_list?: string[];
 }
 
 export declare interface ICategoryItem {
@@ -106,9 +42,57 @@ export declare interface ICategoryItem {
     children?: ICategoryItem[];
 }
 
+const formFields: IFieldItem[] = [
+    {
+        type: 'input',
+        label: '爬虫任务 ID',
+        name: 'task_number',
+        placeholder: '多个逗号隔开',
+        className: 'local-search-item-input',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: '店铺 ID',
+        name: 'store_id',
+        placeholder: '多个逗号隔开',
+        className: 'local-search-item-input',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'input',
+        label: 'Commodity ID',
+        name: 'commodity_id',
+        placeholder: '多个逗号隔开',
+        className: 'local-search-item-input',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'select',
+        label: '销售状态',
+        name: 'inventory_status',
+        className: 'local-search-item-select',
+        formItemClassName: 'form-item',
+        formatter: 'number',
+        optionList: [defaultOption, ...inventoryStatusList],
+    },
+    {
+        type: 'select',
+        label: '请选择版本状态',
+        name: 'product_status',
+        className: 'local-search-item-select',
+        formItemClassName: 'form-item',
+        formatter: 'number',
+        placeholder: '请选择版本状态',
+        mode: 'multiple',
+        maxTagCount: 2,
+        optionList: productStatusList,
+    },
+];
+
+export type IRowDataItem = IGoodsList & ISkuItem;
+
 declare interface IIndexState {
-    // updateDialogStatus: boolean;
-    importGoodsDialogStatus: boolean;
     shelvesDialogStatus: boolean;
     goodsEditDialogStatus: boolean;
     excelDialogStataus: boolean;
@@ -133,6 +117,7 @@ const pageSizeOptions = ['50', '100', '500', '1000'];
 type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
+    private formRef: RefObject<SearchForm> = React.createRef();
     private queryData: any = {};
     localSearchRef: LocalSearch | null = null;
     // goodsTableRef: GoodsTable | null = null;
@@ -143,7 +128,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         super(props);
 
         this.state = {
-            importGoodsDialogStatus: false,
             shelvesDialogStatus: false,
             goodsEditDialogStatus: true,
             excelDialogStataus: false,
@@ -252,7 +236,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 // console.log(res)
                 this.searchFilter = params;
                 const { list, all_count } = res.data;
-                // console.log(111111, this.addRowSpanData(list));
                 if (!isRefresh) {
                     this.cancelSelectedRow();
                 }
@@ -260,7 +243,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     allCount: all_count,
                     page: params.page as number,
                     page_count: params.page_count as number,
-                    goodsList: this.addRowSpanData(list),
+                    goodsList: this.handleRowData(list),
                 });
             })
             .finally(() => {
@@ -341,48 +324,19 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     };
 
-    // 处理表格数据，用于合并单元格
-    private addRowSpanData(list: IDataItem[]): IRowDataItem[] {
-        let ret: IRowDataItem[] = [];
-        // let goodsId: string | number = 0;
-        for (let i = 0, len = list.length; i < len; i++) {
-            let {
-                sku_info,
-                first_catagory,
-                second_catagory,
-                third_catagory,
-                sku_image,
-                ...rest
-            } = list[i];
-            first_catagory = Array.isArray(first_catagory) ? {} : first_catagory;
-            second_catagory = Array.isArray(second_catagory) ? {} : second_catagory;
-            third_catagory = Array.isArray(third_catagory) ? {} : third_catagory;
-            // 把默认主图放第一位
-            const imgIndex = sku_image.findIndex(imgItem => imgItem === rest.goods_img);
-            sku_image.splice(imgIndex, 1);
-            sku_image = [rest.goods_img, ...sku_image];
-            // 只展示默认的一条sku
-            sku_info.forEach((item, index) => {
-                let rowDataItem: IRowDataItem = {
-                    ...rest,
+    // 处理表格数据
+    private handleRowData(list: IGoodsList[]): IRowDataItem[] {
+        return list.map(item => {
+            const { sku_info } = item;
+            if (sku_info.length > 0) {
+                return {
                     ...item,
-                    sku_image,
-                    first_catagory,
-                    second_catagory,
-                    third_catagory,
+                    ...sku_info[0],
                 };
-                ret.push(rowDataItem);
-            });
-        }
-        return ret;
-    }
-
-    // 导入商品弹框
-    toggleImportGoodsDialog = (status: boolean) => {
-        this.setState({
-            importGoodsDialogStatus: status,
+            }
+            return item;
         });
-    };
+    }
 
     // 上架状态记录弹框
     toggleShelvesDialog = (status: boolean) => {
@@ -392,11 +346,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 查询商品上下架记录
-    searchGoodsSale = (product_id: string, saleList: ISaleItem[]) => {
+    searchGoodsSale = (product_id: string, saleList: IOnsaleItem[]) => {
         this.toggleShelvesDialog(true);
         this.setState({
             saleStatusList: saleList.map(
-                (item: ISaleItem, index: number): ISaleStatausItem => {
+                (item: IOnsaleItem, index: number): ISaleStatausItem => {
                     return {
                         ...item,
                         product_id: product_id,
@@ -627,7 +581,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             page_count,
             allCount,
             goodsList,
-            importGoodsDialogStatus,
             shelvesDialogStatus,
             goodsEditDialogStatus,
             excelDialogStataus,
@@ -646,6 +599,22 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
         return (
             <div className="goods-local">
+                <SearchForm
+                    labelClassName="local-search-label"
+                    initialValues={{
+                        inventory_status: '',
+                    }}
+                    ref={this.formRef}
+                    fieldList={formFields}
+                >
+                    <Button
+                        onClick={() => {
+                            console.log(this.formRef.current!.getFieldsValue());
+                        }}
+                    >
+                        111
+                    </Button>
+                </SearchForm>
                 <LocalSearch
                     task_id={task_id}
                     // toggleUpdateDialog={this.toggleUpdateDialog}
@@ -688,10 +657,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     toggleEditGoodsDialog={this.toggleEditGoodsDialog}
                     changeSelectedRowKeys={this.changeSelectedRowKeys}
                     searchGoodsSale={this.searchGoodsSale}
-                />
-                <ImportGoodsDialog
-                    visible={importGoodsDialogStatus}
-                    toggleImportGoodsDialog={this.toggleImportGoodsDialog}
                 />
                 <ShelvesDialog
                     visible={shelvesDialogStatus}

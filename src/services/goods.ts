@@ -1,5 +1,7 @@
 import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
+import { IResponse, IRequestPagination, IPaginationResponse } from '@/interface/IGlobal';
+import { IGoodsListQuery, IGoodsList } from '@/interface/ILocalGoods';
 
 export declare interface IFilterParams {
     page?: number;
@@ -73,7 +75,7 @@ declare interface ISkuParams {
 }
 
 export async function getGoodsList(params: IFilterParams) {
-    return request.post(LocalApiPath.getGoodsList, {
+    return request.post<IResponse<IPaginationResponse<IGoodsList[]>>>(LocalApiPath.getGoodsList, {
         // requestType: 'form',
         data: params,
     });
