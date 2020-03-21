@@ -85,13 +85,13 @@ class Order extends React.PureComponent<{}, IOrderState> {
         const { allListCount, penddingPayCount } = this.state;
         return (
             <div className="order-wrap">
-                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
+                <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="2">
                     <TabPane tab={`全部（${allListCount}）`} key="1">
                         <PaneAll getAllTabCount={this.getAllTabCount} />
                     </TabPane>
-                    {/* <TabPane tab={`待拍单（1000）`} key="2">
+                    <TabPane tab={`待拍单（1000）`} key="2">
                         <PanePendingOrder />
-                    </TabPane> */}
+                    </TabPane>
                     <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
                         <PanePay />
                     </TabPane>

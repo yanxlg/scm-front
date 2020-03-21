@@ -1,9 +1,10 @@
 import React from 'react';
-import { Table, Input, Checkbox } from 'antd';
-import { ColumnProps } from 'antd/es/table';
-import { TableRowSelection } from 'antd/lib/table/interface';
+// Table,
+import { Input, Checkbox } from 'antd';
+import { FitTable } from '@/components/FitTable';
 
 import { IOrderItem, IStyleData, ICatagoryData } from './PanePendingOrder';
+import { ColumnProps } from 'antd/lib/table/Column';
 
 // import { formatDate } from '@/utils/date';
 
@@ -245,14 +246,14 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
         const { loading, orderList } = this.props;
 
         return (
-            <Table
+            <FitTable
                 bordered={true}
                 rowKey="middleground_order_id"
                 className="order-table"
                 loading={loading}
                 columns={this.columns}
                 dataSource={orderList}
-                scroll={{ x: true }}
+                scroll={{ x: 'max-content' }}
                 pagination={false}
             />
         );

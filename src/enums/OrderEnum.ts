@@ -226,7 +226,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'order_goods_status',
-        label: '订单状态',
+        label: '中台订单状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...orderStatusOptionList],

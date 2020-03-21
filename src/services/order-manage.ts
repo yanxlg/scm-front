@@ -36,6 +36,18 @@ export declare interface IFilterParams {
     only_p_order?: number;
 }
 
+export declare interface IPendingFilterParams {
+    page?: number;
+    page_count?: number;
+    order_start_time?: number;
+    order_end_time?: number;
+    order_goods_id?: string[];
+    product_id?: string[];
+    sku_id?: string[];
+    channel_source?: number[];
+    order_goods_status?: number[];
+}
+
 export declare interface IPayFilterParams {
     page?: number;
     page_count?: number;
@@ -88,7 +100,7 @@ export async function postExportAll(data: IFilterParams) {
 }
 
 // 获取待拍单
-export async function getPendingOrderList(data = {}) {
+export async function getPendingOrderList(data: IPendingFilterParams) {
     return request.post(OrderApiPath.getPendingOrderList, {
         requestType: 'json',
         data,
