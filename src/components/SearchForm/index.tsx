@@ -1,693 +1,183 @@
-import React, { RefObject } from 'react';
-import { Checkbox, DatePicker, Form, Input, Select } from 'antd';
+import React, {
+    forwardRef,
+    ForwardRefRenderFunction,
+    useCallback,
+    useImperativeHandle,
+    useMemo,
+} from 'react';
+import { Form } from 'antd';
 import { FormProps } from 'antd/lib/form/Form';
-import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
+import FormInput, {
+    InputType,
+    InputProps,
+    InputFormatter,
+} from '@/components/SearchForm/items/Input';
+import FormSelect, {
+    SelectType,
+    SelectProps,
+    SelectFormatter,
+} from '@/components/SearchForm/items/Select';
+import FormCheckbox, { CheckboxType, CheckboxProps } from '@/components/SearchForm/items/Checkbox';
+import FormDatePicker, {
+    DatePickerProps,
+    DatePickerType,
+    DatePickerFormatter,
+} from '@/components/SearchForm/items/DatePicker';
+import FormDateRanger, {
+    DateRangerType,
+    DateRangerProps,
+    DateRangerFormatter,
+} from '@/components/SearchForm/items/DateRanger';
+import { Store, ValidateFields } from 'rc-field-form/lib/interface';
 import { FormInstance } from 'antd/es/form';
-import { RuleObject, StoreValue } from 'rc-field-form/lib/interface';
 
-import NumberInput from '@/components/NumberInput';
-import IntegerInput from '@/components/IntegerInput';
-import moment, { Moment } from 'moment';
-import { transNumber, transNullValue } from '@/utils/transform';
-import { transEndDate, transStartDate } from '@/utils/date';
-import '@/styles/form.less';
-import '@/styles/index.less';
-import '@/styles/config.less';
-
-const { Option } = Select;
-
-declare interface IOptionItem {
-    name: string;
-    value: string | number;
-    [key: string]: any;
-}
-
-type formatter = 'number' | 'start_date' | 'end_date';
-
-type FormItemName = string;
-
-type setStateFunc = <K extends keyof ISearchFormState>(
-    state:
-        | ((
-              prevState: Readonly<ISearchFormState>,
-              props: Readonly<ISearchFormProps>,
-          ) => Pick<ISearchFormState, K> | ISearchFormState | null)
-        | (Pick<ISearchFormState, K> | ISearchFormState | null),
-    callback?: () => void,
-) => void;
-
-type SingleField = {
-    type: 'input' | 'select' | 'checkbox' | 'datePicker' | 'number' | 'integer';
-    name: FormItemName;
-    formatter?: formatter;
-};
-
-type DoubleFields = {
-    type: 'dateRanger';
-    name: [FormItemName, FormItemName];
-    formatter?: [formatter, formatter];
-};
-
-export type IFieldItem = FormItemLabelProps & {
-    placeholder?: string;
-    optionList?: IOptionItem[] | (() => Promise<IOptionItem[]>); // 支持异步获取
-    syncDefaultOption?: IOptionItem; // 异步获取options是默认选项，通常用于胚子'全部'
-    optionListDependence?: {
-        name: FormItemName; // 异步存储在state中的数据
-        key: string; // 关联key
-        convert?: (item: any) => IOptionItem;
-    };
-    className?: string;
-    formItemClassName?: string;
-    dateBeginWith?: Array<FormItemName | 'now'>;
-    dateEndWith?: Array<FormItemName | 'now'>;
-    onChange?: (name: FormItemName, form: FormInstance, setState: setStateFunc) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-    validator?: (rule: RuleObject, value: StoreValue, form: FormInstance) => Promise<any>;
-} & (SingleField | DoubleFields);
-
-declare interface ISearchFormProps extends FormProps {
-    fieldList: IFieldItem[];
+export declare interface CustomFormProps {
     labelClassName?: string;
-    formRef?: RefObject<FormInstance>;
 }
 
-declare interface ISearchFormState {
-    optionMap: {
-        [key: string]: IOptionItem[];
-    };
+export type FormField = (
+    | Omit<InputProps, 'form'>
+    | Omit<SelectProps, 'form'>
+    | Omit<CheckboxProps, 'form'>
+    | Omit<DatePickerProps, 'form'>
+    | Omit<DateRangerProps, 'form'>
+) & {
+    form?: FormInstance;
+};
+
+declare interface SearchFormProps extends FormProps, CustomFormProps {
+    fieldList: Array<FormField>;
 }
 
-export default class SearchForm extends React.PureComponent<ISearchFormProps, ISearchFormState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
-    private formatterMap = new Map<string, formatter>();
+export type FormItemName = string;
 
-    constructor(props: ISearchFormProps) {
-        super(props);
-        this.state = {
-            optionMap: {},
-        };
-    }
+export declare interface CustomFormProps {
+    labelClassName?: string;
+}
 
-    private loadOptions = () => {
-        const { fieldList } = this.props;
-        fieldList.forEach(field => {
-            if (field.type === 'select') {
-                const optionList = field.optionList;
-                if (typeof optionList === 'function') {
-                    const name = field.name as string;
-                    optionList()
-                        .then(optionList => {
-                            this.setState(({ optionMap, ...state }) => {
-                                return {
-                                    ...state,
-                                    optionMap: {
-                                        ...optionMap,
-                                        [name]: optionList,
-                                    },
-                                };
-                            });
-                        })
-                        .catch(() => {
-                            this.setState(({ optionMap, ...state }) => {
-                                return {
-                                    ...state,
-                                    optionMap: {
-                                        ...optionMap,
-                                        [name]: [],
-                                    },
-                                };
-                            });
-                        });
-                }
-            }
-        });
-    };
-    private disabledStartDate = (dateBeginWith?: string[]) => {
-        if (!dateBeginWith || dateBeginWith.length === 0) {
-            return undefined;
-        }
-        return (startTime: Moment | null) => {
-            let timeMax: number | undefined = undefined;
-            // 取最小值=> endOf('d');
-            dateBeginWith.map(dependence => {
-                const date =
-                    dependence === 'now'
-                        ? moment()
-                        : this.getFormRef().current!.getFieldValue(dependence);
-                if (date) {
-                    const time = date.startOf('day').valueOf();
-                    if ((timeMax && time < timeMax) || timeMax === void 0) {
-                        timeMax = time;
-                    }
-                }
-            });
-            if (!startTime || timeMax === void 0) {
-                return false;
-            }
-            return startTime.startOf('day').valueOf() < timeMax;
-        };
-    };
-    private disabledEndDate = (dateEndWith?: string[]) => {
-        if (!dateEndWith || dateEndWith.length === 0) {
-            return undefined;
-        }
-        return (endTime: Moment | null) => {
-            let timeMax: number | undefined = undefined;
-            // 取最大值=> startOf('d');
-            dateEndWith.map(dependence => {
-                const date =
-                    dependence === 'now'
-                        ? moment()
-                        : this.getFormRef().current!.getFieldValue(dependence);
-                if (date) {
-                    const time = date.endOf('day').valueOf();
-                    if ((timeMax && time < timeMax) || timeMax === void 0) {
-                        timeMax = time;
-                    }
-                }
-            });
-            if (!endTime || timeMax === void 0) {
-                return false;
-            }
-            return timeMax < endTime.endOf('day').valueOf();
-        };
-    };
+export interface SearchFormRef {
+    getFieldsValue: () => Store;
+    validateFields: ValidateFields;
+}
 
-    private addFormItem = (field: IFieldItem) => {
-        switch (field.type) {
-            case 'input':
-                return this.addInput(field);
-            case 'select':
-                return this.addSelect(field);
-            case 'checkbox':
-                return this.addCheckbox(field);
-            case 'datePicker':
-                return this.addDatePicker(field);
-            case 'dateRanger':
-                return this.addDateRanger(field);
-            case 'integer':
-                return this.addInteger(field);
-            case 'number':
-                return this.addNumber(field);
-            default:
-                return null;
-        }
-    };
-    private addNumber = (field: IFieldItem) => {
-        const { name, placeholder, label, className, formItemClassName, onChange } = field;
-        const { labelClassName } = this.props;
-        const eventProps = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        return (
-            <Form.Item
-                key={String(name)}
-                className={formItemClassName}
-                name={name}
-                label={<span className={labelClassName}>{label}</span>}
-            >
-                <NumberInput
-                    min={0}
-                    placeholder={placeholder}
-                    className={className}
-                    {...eventProps}
-                />
-            </Form.Item>
-        );
-    };
-    private addInteger = (field: IFieldItem) => {
-        const {
-            name,
-            placeholder,
-            label,
-            className,
-            formItemClassName,
-            onChange,
-            validator,
-        } = field;
-        const { labelClassName } = this.props;
-        const eventProps = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        const rules = validator
-            ? [
-                  {
-                      validator: (rule: RuleObject, value: StoreValue) =>
-                          validator(rule, value, this.getFormRef().current!),
-                  },
-              ]
-            : undefined;
-        return (
-            <Form.Item
-                key={String(name)}
-                className={formItemClassName}
-                name={name}
-                label={<span className={labelClassName}>{label}</span>}
-                rules={rules}
-            >
-                <IntegerInput
-                    min={0}
-                    placeholder={placeholder}
-                    className={className}
-                    {...eventProps}
-                />
-            </Form.Item>
-        );
-    };
+const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (
+    { fieldList, ...props },
+    ref,
+) => {
+    const [form] = Form.useForm();
 
-    private addDateRanger = (field: IFieldItem) => {
-        const { labelClassName = '' } = this.props;
-        const {
-            label,
-            className,
-            name: [name1, name2],
-            formItemClassName,
-            onChange,
-        } = field;
-        const event1Props = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name1 as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        const event2Props = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name2 as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        return (
-            <Form.Item
-                key={String([name1, name2])}
-                label={<span className={labelClassName}>{label}</span>}
-                className={`${formItemClassName}`}
-            >
-                <Form.Item
-                    shouldUpdate={(prevValues, currentValues) =>
-                        prevValues[name2] !== currentValues[name2]
-                    }
-                    className="form-item-inline inline-block margin-none vertical-middle"
-                >
-                    {({ getFieldValue }) => {
-                        const endTime = getFieldValue(name2);
-                        return (
-                            <Form.Item name={name1} className="margin-none">
-                                <DatePicker
-                                    disabledDate={currentDate =>
-                                        currentDate
-                                            ? endTime
-                                                ? currentDate.isAfter(endTime)
-                                                : false
-                                            : false
-                                    }
-                                    className={className}
-                                    {...event1Props}
-                                />
-                            </Form.Item>
-                        );
-                    }}
-                </Form.Item>
-                <span className="config-colon vertical-middle">-</span>
-                <Form.Item
-                    className="form-item-inline inline-block vertical-middle margin-none"
-                    shouldUpdate={(prevValues, currentValues) =>
-                        prevValues[name1] !== currentValues[name1]
-                    }
-                >
-                    {({ getFieldValue }) => {
-                        const startTime = getFieldValue(name1);
-                        return (
-                            <Form.Item name={name2} className="margin-none">
-                                <DatePicker
-                                    disabledDate={currentDate =>
-                                        currentDate
-                                            ? startTime
-                                                ? currentDate.isBefore(startTime)
-                                                : false
-                                            : false
-                                    }
-                                    className={className}
-                                    {...event2Props}
-                                />
-                            </Form.Item>
-                        );
-                    }}
-                </Form.Item>
-            </Form.Item>
-        );
-    };
-
-    private addInput = (field: IFieldItem) => {
-        const {
-            name,
-            placeholder,
-            label,
-            className,
-            formItemClassName,
-            onChange,
-            validator,
-        } = field;
-        const { labelClassName } = this.props;
-        const eventProps = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        const rules = validator
-            ? [
-                  {
-                      validator: (rule: RuleObject, value: StoreValue) =>
-                          validator(rule, value, this.getFormRef().current!),
-                  },
-              ]
-            : undefined;
-        return (
-            <Form.Item
-                key={String(name)}
-                className={formItemClassName}
-                name={name}
-                label={<span className={labelClassName}>{label}</span>}
-                rules={rules}
-            >
-                <Input placeholder={placeholder} className={className} {...eventProps} />
-            </Form.Item>
-        );
-    };
-
-    private getOptionList(field: IFieldItem): { loading: boolean; optionList: IOptionItem[] } {
-        const { name, optionList, optionListDependence } = field;
-        const isFunction = typeof optionList === 'function';
-        if (isFunction) {
-            const { optionMap } = this.state;
-            const syncOptionList = optionMap[name as string];
-            const loading = isFunction && !syncOptionList;
-            const mergeList = syncOptionList || ([] as IOptionItem[]);
-            return {
-                loading: loading,
-                optionList: mergeList,
-            };
-        } else if (optionList === void 0) {
-            if (optionListDependence) {
-                const { name: dependenceName, key: dependenceKey, convert } = optionListDependence;
-                const { optionMap } = this.state;
-                const form = this.getFormRef().current;
-                const dependenceValue = form?.getFieldValue(dependenceName);
-                const parentList = optionMap[dependenceName];
-                const parentItem = parentList?.find(({ value }) => value === dependenceValue);
-                const dependenceList = parentItem?.[dependenceKey] ?? undefined;
-                const convertList = dependenceList?.map((item: any) =>
-                    convert ? convert(item) : item,
+    const getValues = useCallback(() => {
+        let values: Store = {};
+        fieldList.map(({ type, name, formatter }) => {
+            if (FormInput.typeList.includes(type)) {
+                values[name as string] = FormInput.formatter(formatter as InputFormatter)(
+                    form.getFieldValue(name),
                 );
-                const loading = !parentList;
-                const mergeList = convertList || ([] as IOptionItem[]);
-                return {
-                    loading: loading,
-                    optionList: mergeList,
-                };
+            } else if (FormSelect.typeList.includes(type)) {
+                values[name as string] = FormSelect.formatter(formatter as SelectFormatter)(
+                    form.getFieldValue(name),
+                );
+            } else if (FormDateRanger.typeList.includes(type)) {
+                const [name1, name2] = name;
+                values[name1] = FormDateRanger.formatter(formatter?.[0] as DateRangerFormatter)(
+                    form.getFieldValue(name1),
+                );
+                values[name2] = FormDateRanger.formatter(formatter?.[1] as DateRangerFormatter)(
+                    form.getFieldValue(name2),
+                );
+            } else if (FormDatePicker.typeList.includes(type)) {
+                values[name as string] = FormDatePicker.formatter(formatter as DatePickerFormatter)(
+                    form.getFieldValue(name),
+                );
             } else {
-                return {
-                    loading: false,
-                    optionList: [] as IOptionItem[],
-                };
-            }
-        } else {
-            return {
-                loading: false,
-                optionList: (optionList || []) as IOptionItem[],
-            };
-        }
-    }
-
-    private addSelect = (field: IFieldItem) => {
-        const {
-            name,
-            label,
-            className,
-            formItemClassName,
-            syncDefaultOption,
-            optionListDependence,
-            onChange,
-        } = field;
-        const { labelClassName } = this.props;
-        const eventProps = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-
-        if (optionListDependence === void 0) {
-            const { loading, optionList } = this.getOptionList(field);
-            return (
-                <Form.Item
-                    key={String(name)}
-                    name={name}
-                    className={formItemClassName}
-                    label={<span className={labelClassName}>{label}</span>}
-                >
-                    <Select className={className} loading={loading} {...eventProps}>
-                        {syncDefaultOption ? (
-                            <Option value={syncDefaultOption.value}>
-                                {syncDefaultOption.name}
-                            </Option>
-                        ) : null}
-                        {optionList!.map(item => (
-                            <Option key={item.value} value={item.value}>
-                                {item.name}
-                            </Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-            );
-        } else {
-            return (
-                <Form.Item
-                    key={String(name)}
-                    noStyle={true}
-                    shouldUpdate={(prevValues, currentValues) =>
-                        prevValues[optionListDependence?.name] !==
-                        currentValues[optionListDependence?.name]
-                    }
-                >
-                    {({ getFieldValue }) => {
-                        const { loading, optionList } = this.getOptionList(field);
-                        return (
-                            <Form.Item
-                                name={name}
-                                className={formItemClassName}
-                                label={<span className={labelClassName}>{label}</span>}
-                            >
-                                <Select className={className} loading={loading} {...eventProps}>
-                                    {syncDefaultOption ? (
-                                        <Option value={syncDefaultOption.value}>
-                                            {syncDefaultOption.name}
-                                        </Option>
-                                    ) : null}
-                                    {optionList!.map(item => (
-                                        <Option key={item.value} value={item.value}>
-                                            {item.name}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        );
-                    }}
-                </Form.Item>
-            );
-        }
-    };
-
-    private addDatePicker = (field: IFieldItem) => {
-        const {
-            name,
-            placeholder,
-            label,
-            className,
-            formItemClassName,
-            dateBeginWith,
-            dateEndWith,
-            onChange,
-        } = field;
-        const { labelClassName } = this.props;
-        const disabledDate = dateBeginWith
-            ? this.disabledStartDate(dateBeginWith)
-            : dateEndWith
-            ? this.disabledEndDate(dateEndWith)
-            : undefined;
-        const eventProps = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        return (
-            <Form.Item
-                key={String(name)}
-                name={name}
-                className={formItemClassName}
-                label={<span className={labelClassName}>{label}</span>}
-            >
-                <DatePicker
-                    className={className}
-                    placeholder={placeholder}
-                    disabledDate={disabledDate}
-                    {...eventProps}
-                />
-            </Form.Item>
-        );
-    };
-
-    private addCheckbox = (field: IFieldItem) => {
-        const { name, label, formItemClassName, className, onChange } = field;
-        const eventProps = onChange
-            ? {
-                  onChange: () => {
-                      onChange(
-                          name as FormItemName,
-                          this.getFormRef().current!,
-                          this.setState as setStateFunc,
-                      );
-                  },
-              }
-            : {};
-        return (
-            <Form.Item
-                key={String(name)}
-                name={name}
-                className={formItemClassName}
-                valuePropName="checked"
-            >
-                <Checkbox className={className} {...eventProps}>
-                    {label}
-                </Checkbox>
-            </Form.Item>
-        );
-    };
-
-    private getFormRef = () => {
-        const { formRef = this.formRef } = this.props;
-        return formRef;
-    };
-
-    public getFieldsValue = () => {
-        const { formRef = this.formRef } = this.props;
-        const originValues = formRef.current!.getFieldsValue();
-        return this.formatter(originValues);
-    };
-
-    public validateFields = () => {
-        return this.getFormRef().current!.validateFields();
-    };
-
-    private getFormatCallback = (format?: formatter) => {
-        return format
-            ? format === 'number'
-                ? transNumber
-                : format === 'start_date'
-                ? transStartDate
-                : format === 'end_date'
-                ? transEndDate
-                : transNullValue
-            : transNullValue;
-    };
-    private formatter = (originValues: { [name: string]: any }) => {
-        let formattedValues: { [name: string]: any } = {};
-        for (let key in originValues) {
-            if (originValues.hasOwnProperty(key)) {
-                const format = this.formatterMap.get(key);
-                const formatCallback = this.getFormatCallback(format);
-                formattedValues[key] = formatCallback(originValues[key]);
-            }
-        }
-        return formattedValues;
-    };
-
-    private resetFormatterMap = () => {
-        const { fieldList } = this.props;
-        this.formatterMap.clear();
-        fieldList.forEach(({ name, formatter }) => {
-            if (formatter) {
-                if (typeof name === 'string') {
-                    this.formatterMap.set(name, formatter as formatter);
-                } else {
-                    name.forEach((item, index) => {
-                        this.formatterMap.set(item, (formatter as [formatter, formatter])[index]);
-                    });
-                }
+                return form.getFieldValue(name);
             }
         });
-    };
-    componentDidMount(): void {
-        this.resetFormatterMap();
-        this.loadOptions();
-    }
+        return values;
+    }, [fieldList]);
 
-    componentDidUpdate(
-        prevProps: Readonly<ISearchFormProps>,
-        prevState: Readonly<{}>,
-        snapshot?: any,
-    ): void {
-        if (prevProps.fieldList !== this.props.fieldList) {
-            this.resetFormatterMap();
-            this.loadOptions();
-        }
-    }
-
-    render() {
-        const {
-            fieldList,
-            labelClassName,
-            children,
-            formRef = this.formRef,
-            ...props
-        } = this.props;
+    useImperativeHandle(
+        ref,
+        () => {
+            return {
+                getFieldsValue: getValues,
+                validateFields: () => {
+                    return form.validateFields().then(() => {
+                        return getValues();
+                    });
+                },
+            };
+        },
+        [],
+    );
+    return useMemo(() => {
+        const { labelClassName, children, ..._props } = props;
         return (
-            <Form layout="inline" {...props} ref={formRef}>
-                {fieldList.map(field => this.addFormItem(field))}
+            <Form layout="inline" {..._props} form={form}>
+                {fieldList.map(({ type, ...field }) => {
+                    if (FormInput.typeList.includes(type)) {
+                        return (
+                            <FormInput
+                                key={String(field.name)}
+                                {...(field as InputProps)}
+                                type={type as InputType}
+                                labelClassName={labelClassName}
+                                form={form}
+                            />
+                        );
+                    }
+                    if (FormSelect.typeList.includes(type)) {
+                        return (
+                            <FormSelect
+                                key={String(field.name)}
+                                {...(field as SelectProps)}
+                                type={type as SelectType}
+                                labelClassName={labelClassName}
+                                form={form}
+                            />
+                        );
+                    }
+                    if (FormCheckbox.typeList.includes(type)) {
+                        return (
+                            <FormCheckbox
+                                key={String(field.name)}
+                                {...(field as CheckboxProps)}
+                                type={type as CheckboxType}
+                                labelClassName={labelClassName}
+                                form={form}
+                            />
+                        );
+                    }
+                    if (FormDatePicker.typeList.includes(type)) {
+                        return (
+                            <FormDatePicker
+                                key={String(field.name)}
+                                {...(field as DatePickerProps)}
+                                type={type as DatePickerType}
+                                labelClassName={labelClassName}
+                                form={form}
+                            />
+                        );
+                    }
+                    if (FormDateRanger.typeList.includes(type)) {
+                        return (
+                            <FormDateRanger
+                                key={String(field.name)}
+                                {...(field as DateRangerProps)}
+                                type={type as DateRangerType}
+                                labelClassName={labelClassName}
+                                form={form}
+                            />
+                        );
+                    }
+                    return null;
+                })}
                 {children}
             </Form>
         );
-    }
-}
+    }, [fieldList]);
+};
+
+const exportComponent = forwardRef(SearchForm);
+
+export default exportComponent;

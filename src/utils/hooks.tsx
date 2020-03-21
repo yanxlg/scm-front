@@ -1,12 +1,12 @@
 import { RefObject, useState, useCallback, useEffect } from 'react';
-import SearchForm from '@/components/SearchForm';
 import { IRequestPagination, IResponse, IPaginationResponse } from '@/interface/IGlobal';
 import { PaginationConfig } from 'antd/es/pagination';
 import { EmptyObject } from '@/config/global';
+import { SearchFormRef } from '@/components/SearchForm';
 
 function useList<T, Q extends IRequestPagination>(
     queryList: (query: Q) => Promise<IResponse<IPaginationResponse<T>>>,
-    searchRef?: RefObject<SearchForm>,
+    searchRef?: RefObject<SearchFormRef>,
     pageSizeKey = 'page_count',
     totalKey = 'total',
     listKey = 'list',

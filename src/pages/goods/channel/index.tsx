@@ -24,7 +24,7 @@ import {
 } from '@/config/dictionaries/Product';
 import { EmptyObject } from '@/config/global';
 import { IChannelProductListItem, IChannelCategoryItem } from '@/interface/IChannel';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { convertEndDate, convertStartDate } from '@/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
@@ -85,7 +85,7 @@ const salesVolumeList = [
     },
 ];
 
-const formFields: IFieldItem[] = [
+const formFields: FormField[] = [
     {
         type: 'dateRanger',
         name: ['onshelf_time_start', 'onshelf_time_end'],
@@ -158,7 +158,7 @@ const formFields: IFieldItem[] = [
                 .catch(() => {
                     return [];
                 }),
-        onChange: (name, form, setState) => {
+        onChange: (name, form) => {
             form.resetFields(['level_two_category']);
         },
     },
@@ -197,7 +197,7 @@ const formFields: IFieldItem[] = [
 
 @BindAll()
 class Index extends React.PureComponent<{}, IVoVaListState> {
-    private formRef: RefObject<SearchForm> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private skuRef: RefObject<SkuEditModal> = React.createRef();
     private queryData: any = {};
     constructor(props: {}) {

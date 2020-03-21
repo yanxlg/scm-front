@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, Pagination, Table } from 'antd';
 import { queryTaskProgressList } from '@/services/task';
-import { BindAll } from 'lodash-decorators';
 import { showTaskProgressModal } from '@/pages/task/components/modal/TaskProgressModal';
 import { ColumnProps } from 'antd/es/table';
 import { ITaskProgressItem } from '@/interface/ITask';
@@ -17,20 +16,11 @@ import '@/styles/config.less';
 import '@/styles/modal.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
-import { EmptyObject } from '@/config/global';
 import { useList } from '@/utils/hooks';
 
 declare interface ISubTaskViewProps {
     task_Id: number;
     task_type?: TaskTypeCode;
-}
-
-declare interface ISubTaskViewState {
-    total: number;
-    pageNumber: number;
-    page: number;
-    list: ITaskProgressItem[];
-    loading: boolean;
 }
 
 const SubTaskView: React.FC<ISubTaskViewProps> = props => {

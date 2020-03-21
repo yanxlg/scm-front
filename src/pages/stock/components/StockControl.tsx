@@ -5,14 +5,11 @@ import '@/styles/index.less';
 import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
-import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
-import { FormInstance } from 'antd/es/form';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { FormInstance } from 'rc-field-form/lib/interface';
 import { exportStockList, queryStockList, syncStock } from '@/services/stock';
 import CopyLink from '@/components/copyLink';
-import { StockType } from '@/config/dictionaries/Stock';
 import queryString from 'query-string';
-import { IChannelProductListItem } from '@/interface/IChannel';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 declare interface ITableData {
@@ -51,7 +48,7 @@ export declare interface IStockFormData {
 
 @BindAll()
 class StockControl extends React.PureComponent<{}, IStockControlState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private queryData: any = {};
     private columns: ColumnProps<ITableData>[] = [
         {
@@ -117,21 +114,27 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             align: 'center',
         },
     ];
-    private fieldsList: IFieldItem[] = [
+    private fieldsList: FormField[] = [
         {
             type: 'input',
             label: '中台商品ID',
             name: 'commodity_id',
             formItemClassName: 'form-item',
             className: 'input-default',
-            validator: (rule, value, form) => {
-                const sku_id = form.getFieldValue('commodity_sku_id');
-                if (sku_id || value) {
-                    return Promise.resolve();
-                } else {
-                    return Promise.reject('必须输入一个筛选条件');
-                }
-            },
+            rules: [
+                (form: FormInstance) => {
+                    return {
+                        validator: (rule, value) => {
+                            const sku_id = form.getFieldValue('commodity_sku_id');
+                            if (sku_id || value) {
+                                return Promise.resolve();
+                            } else {
+                                return Promise.reject('必须输入一个筛选条件');
+                            }
+                        },
+                    };
+                },
+            ],
         },
         {
             type: 'input',
@@ -139,14 +142,20 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
             name: 'commodity_sku_id',
             formItemClassName: 'form-item',
             className: 'input-default',
-            validator: (rule, value, form) => {
-                const commodity_id = form.getFieldValue('commodity_id');
-                if (commodity_id || value) {
-                    return Promise.resolve();
-                } else {
-                    return Promise.reject('必须输入一个筛选条件');
-                }
-            },
+            rules: [
+                (form: FormInstance) => {
+                    return {
+                        validator: (rule, value) => {
+                            const commodity_id = form.getFieldValue('commodity_id');
+                            if (commodity_id || value) {
+                                return Promise.resolve();
+                            } else {
+                                return Promise.reject('必须输入一个筛选条件');
+                            }
+                        },
+                    };
+                },
+            ],
         },
     ];
     constructor(props: {}) {
@@ -313,7 +322,7 @@ class StockControl extends React.PureComponent<{}, IStockControlState> {
                         className="form-help-absolute"
                         initialValues={defaultInitialValues}
                         fieldList={this.fieldsList}
-                        formRef={this.formRef}
+                        ref={this.formRef}
                     >
                         <React.Fragment>
                             <Button

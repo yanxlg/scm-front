@@ -3,7 +3,7 @@ import { Button, Radio, Pagination } from 'antd';
 // import { FormInstance } from 'antd/es/form';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import TableError from './TableError';
 
 import { getErrorOrderList, postExportErrOrder, IErrFilterParams } from '@/services/order-manage';
@@ -37,7 +37,7 @@ export declare interface IErrorOrderItem {
     _rowspan?: number;
 }
 
-const fieldList: IFieldItem[] = [
+const fieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
@@ -91,7 +91,7 @@ declare interface IState {
 }
 
 class PaneErr extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<SearchForm> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private currentSearchParams: IErrFilterParams | null = null;
     private initialValues = {
         channel_source: 100,
