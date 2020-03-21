@@ -52,12 +52,22 @@ export const purchasePayOptionList = [
     { name: '未支付', value: 1 },
     { name: '已支付', value: 2 },
     { name: '已退款', value: 3 },
+    { name: '待退款', value: 4 },
+    { name: '审核不通过', value: 5 },
+    { name: '待审核', value: 6 },
 ];
 
 export const purchaseShippingOptionList = [
     { name: '未配送', value: 1 },
     { name: '已发货', value: 2 },
     { name: '已妥投', value: 3 },
+];
+
+export const purchaseReserveOptionList = [
+    { name: '未预定', value: 1 },
+    { name: '预定失败', value: 2 },
+    { name: '预定成功', value: 3 },
+    { name: '预定已释放', value: 4 },
 ];
 
 export const errorTypeOptionList = [
@@ -94,7 +104,7 @@ export const childDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台订单子ID',
-        // formatter: 'number',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -103,6 +113,7 @@ export const childDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单ID',
+        formatter: 'strArr',
     },
     // {
     //     type: 'input',
@@ -132,16 +143,26 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单ID',
-        // formatter: 'number',
+        formatter: 'numberStrArr',
     },
-    // {
-    //     type: 'input',
-    //     name: 'purchase_shipping_no',
-    //     label: '采购运单号',
-    //     className: 'order-input',
-    //     formItemClassName: 'order-form-item',
-    //     placeholder: '请输入采购运单号',
-    // },
+    {
+        type: 'input',
+        name: 'purchase_plan_id',
+        label: '采购计划 ID',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        placeholder: '请输入采购计划ID',
+        formatter: 'numberStrArr',
+    },
+    {
+        type: 'input',
+        name: 'purchase_waybill_no',
+        label: '采购运单号',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        placeholder: '请输入采购运单号',
+        formatter: 'strArr',
+    },
     {
         type: 'input',
         name: 'last_waybill_no',
@@ -149,7 +170,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入尾程运单号',
-        // formatter: 'number',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -158,7 +179,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台商品ID',
-        // formatter: 'number',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -167,7 +188,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台SKU ID',
-        // formatter: 'number',
+        formatter: 'strArr',
     },
     // {
     //     type: 'select',
@@ -180,28 +201,30 @@ export const childAllFieldList: FormField[] = [
     //         ...orderStatusOptionList
     //     ],
     // },
-    // {
-    //     type: 'select',
-    //     name: 'purchase_order_status',
-    //     label: '采购订单状态',
-    //     className: 'order-input',
-    //     formItemClassName: 'order-form-item',
-    //     optionList: [
-    //         defaultOptionItem,
-    //         ...purchaseOrderOptionList
-    //     ],
-    // },
-    // {
-    //     type: 'select',
-    //     name: 'purchase_pay_status',
-    //     label: '采购支付状态',
-    //     className: 'order-input',
-    //     formItemClassName: 'order-form-item',
-    //     optionList: [
-    //         defaultOptionItem,
-    //         ...purchasePayOptionList
-    //     ],
-    // },
+    {
+        type: 'select',
+        name: 'reserve_status',
+        label: '采购预定状态',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchaseReserveOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_order_status',
+        label: '采购订单状态',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_order_pay_status',
+        label: '采购支付状态',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchasePayOptionList],
+    },
     // {
     //     type: 'select',
     //     name: 'purchase_shipping_status',
@@ -245,12 +268,12 @@ export const childAllFieldList: FormField[] = [
         label: '采购计划',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...hasOptionList],
+        optionList: [defaultOptionItem, { name: '没有', value: 2 }],
     },
     {
         type: 'dateRanger',
         name: ['purchase_time_start', 'purchase_time_end'],
-        label: '采购时间',
+        label: '采购完成时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
@@ -327,9 +350,11 @@ export const defaultColChildList = [
     // 'channel_order_status',         // 渠道订单状态
     // 'channel_delivery_status',      // 渠道发货状态
     'orderGoodsStatus', // 中台订单状态
+    'orderGoodsShippingStatus', // 中台订单配送状态
     'productId', // 中台商品ID
     'purchasePlanId', // 计划子项ID
     'purchasePlatform', // 采购平台
+    'reserveStatus', // 采购预定状态
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
     'purchaseOrderShippingStatus', // 采购配送状态
@@ -390,7 +415,7 @@ export const parentDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单id',
-        // formatter: 'number',
+        formatter: 'numberStrArr',
     },
     {
         type: 'select',
@@ -411,6 +436,7 @@ export const parentAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单id',
+        formatter: 'strArr',
     },
     {
         type: 'dateRanger',

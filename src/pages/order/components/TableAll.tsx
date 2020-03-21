@@ -9,9 +9,11 @@ import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
+    orderShippingOptionList,
     purchaseOrderOptionList,
     purchasePayOptionList,
     purchaseShippingOptionList,
+    purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 
 declare interface ISpecs {
@@ -125,6 +127,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: 'orderGoodsShippingStatus',
+            title: '中台订单配送状态',
+            dataIndex: 'orderGoodsShippingStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return {
+                    children: getStatusDesc(orderShippingOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
             key: 'productId',
             title: '中台商品ID',
             dataIndex: 'productId',
@@ -163,6 +180,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             // render: this.mergeCell
+        },
+        {
+            key: 'reserveStatus',
+            title: '采购预定状态',
+            dataIndex: 'reserveStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return getStatusDesc(purchaseReserveOptionList, value);
+            },
         },
         {
             key: 'purchaseOrderStatus',
@@ -514,23 +541,25 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
         getOrderGoodsDetail(productId).then(res => {
             const { sku_info, product_id, goods_img, title } = res.data;
-            const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
-            const goodsDetail: IGoodsDetail = {
-                product_id,
-                goods_img,
-                title,
-            };
-            if (i > -1) {
-                const { sku_style, sku_sn, sku_img } = sku_info[i];
-                Object.assign(goodsDetail, {
-                    sku_sn,
-                    sku_img,
-                    sku_style,
+            if (sku_info) {
+                const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
+                const goodsDetail: IGoodsDetail = {
+                    product_id,
+                    goods_img,
+                    title,
+                };
+                if (i > -1) {
+                    const { sku_style, sku_sn, sku_img } = sku_info[i];
+                    Object.assign(goodsDetail, {
+                        sku_sn,
+                        sku_img,
+                        sku_style,
+                    });
+                }
+                this.setState({
+                    goodsDetail,
                 });
             }
-            this.setState({
-                goodsDetail,
-            });
         });
     };
 
