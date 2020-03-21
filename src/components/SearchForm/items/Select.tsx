@@ -75,7 +75,7 @@ const FormSelect = (props: SelectProps) => {
         if (isFunction) {
             if (optionListDependence) {
                 const { name, key: dependenceKey, convert } = optionListDependence;
-                const dependenceNameList = [...name];
+                const dependenceNameList = typeof name === 'string' ? [name] : name || [];
                 let parentItem = options;
                 for (let i = 0; i < dependenceNameList.length; i++) {
                     const dependenceName = dependenceNameList[i];
@@ -106,7 +106,7 @@ const FormSelect = (props: SelectProps) => {
                 optionList: (optionList || []) as IOptionItem[],
             };
         }
-    }, [optionListDependence, optionList]);
+    }, [optionListDependence, optionList, options]);
 
     const eventProps = useMemo(() => {
         return onChange
@@ -148,7 +148,7 @@ const FormSelect = (props: SelectProps) => {
                     noStyle={true}
                     shouldUpdate={(prevValues, currentValues) => {
                         const { name } = optionListDependence;
-                        const dependenceNameList = [...name];
+                        const dependenceNameList = typeof name === 'string' ? [name] : name || [];
                         let updated = false;
                         let i = 0;
                         let length = dependenceNameList.length;

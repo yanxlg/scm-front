@@ -23,6 +23,7 @@ import {
 } from '@/interface/IChannel';
 import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
+import { singlePromiseWrap } from '@/utils/utils';
 
 export async function queryChannelProductVersion(query?: IChannelProductVersionQuery) {
     return request.get<IResponse<IChannelProductVersionResponse>>(
@@ -75,9 +76,9 @@ export async function queryChannelGoodsList(data: IChannelProductListBody & IReq
     });
 }
 
-export async function queryChannelCategory() {
+export const queryChannelCategory = singlePromiseWrap(() => {
     return request.get<IResponse<IChannelCategoryResponse>>(ChannelApiPath.QueryCategory);
-}
+});
 
 // 获取数据/状态更新数据
 export async function queryChannelChangedProperties() {
