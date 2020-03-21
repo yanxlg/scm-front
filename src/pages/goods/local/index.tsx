@@ -18,7 +18,7 @@ import {
     getGoodsDelete,
     IFilterParams,
     getCatagoryList,
-    getAllGoodsOnsale,
+    postAllGoodsOnsale,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'react-router';
@@ -301,7 +301,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 store_id: store_id.split(',').filter(item => item.trim()),
                 // .map(item => Number(item.trim()))
                 commodity_id: commodity_id.split(',').filter(item => item.trim()),
-                product_status: product_status.length ? product_status.join(',') : undefined
+                product_status: product_status.length ? product_status.join(',') : undefined,
             });
         }
         return null;
@@ -516,15 +516,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 查询商品一键上架
-    getAllGoodsOnsale = () => {
+    postAllGoodsOnsale = () => {
         const searchParams = this.getSearchParams();
         if (searchParams) {
             this.setState({
                 allOnsaleLoading: true,
             });
-            getAllGoodsOnsale(searchParams)
+            postAllGoodsOnsale(searchParams)
                 .then(res => {
-                    // console.log('getAllGoodsOnsale', res);
+                    // console.log('postAllGoodsOnsale', res);
                     this.onSearch();
                     message.success('查询商品一键上架成功');
                 })
@@ -660,7 +660,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     getGoodsDelete={this.getGoodsDelete}
                     toggleExcelDialog={this.toggleExcelDialog}
                     getCurrentCatagory={this.getCurrentCatagory}
-                    getAllGoodsOnsale={this.getAllGoodsOnsale}
+                    postAllGoodsOnsale={this.postAllGoodsOnsale}
                 />
                 <Pagination
                     className="goods-local-pagination"

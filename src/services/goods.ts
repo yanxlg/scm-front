@@ -126,9 +126,9 @@ export async function postGoodsOnsale(data: IOnsaleData) {
 }
 
 // 查询商品一键上架
-export async function getAllGoodsOnsale(params: IFilterParams) {
-    return request.get(LocalApiPath.getAllGoodsOnsale, {
-        params,
+export async function postAllGoodsOnsale(data: IFilterParams) {
+    return request.post(LocalApiPath.postAllGoodsOnsale, {
+        data,
     });
 }
 
