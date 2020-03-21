@@ -87,6 +87,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         non_purchase_plan: 100,
         purchase_order_pay_status: 100,
         purchase_order_status: 100,
+        reserve_status: 100,
     };
 
     private endFieldItem: IFieldItem = {

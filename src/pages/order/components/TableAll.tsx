@@ -13,6 +13,7 @@ import {
     purchaseOrderOptionList,
     purchasePayOptionList,
     purchaseShippingOptionList,
+    purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 
 declare interface ISpecs {
@@ -179,6 +180,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             // render: this.mergeCell
+        },
+        {
+            key: 'reserveStatus',
+            title: '采购预定状态',
+            dataIndex: 'reserveStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return getStatusDesc(purchaseReserveOptionList, value);
+            },
         },
         {
             key: 'purchaseOrderStatus',
