@@ -63,6 +63,13 @@ export const purchaseShippingOptionList = [
     { name: '已妥投', value: 3 },
 ];
 
+export const purchaseReserveOptionList = [
+    { name: '未预定', value: 1 },
+    { name: '预定失败', value: 2 },
+    { name: '预定成功', value: 3 },
+    { name: '预定已释放', value: 4 },
+];
+
 export const errorTypeOptionList = [
     { name: '仓库异常', value: 1 },
     // { name: '尾程异常', value: 2 },
@@ -194,6 +201,14 @@ export const childAllFieldList: IFieldItem[] = [
     //         ...orderStatusOptionList
     //     ],
     // },
+    {
+        type: 'select',
+        name: 'reserve_status',
+        label: '采购预定状态',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchaseReserveOptionList],
+    },
     {
         type: 'select',
         name: 'purchase_order_status',
@@ -339,6 +354,7 @@ export const defaultColChildList = [
     'productId', // 中台商品ID
     'purchasePlanId', // 计划子项ID
     'purchasePlatform', // 采购平台
+    'reserveStatus', // 采购预定状态
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
     'purchaseOrderShippingStatus', // 采购配送状态
