@@ -75,7 +75,7 @@ declare interface ISkuParams {
 }
 
 export async function getGoodsList(params: IFilterParams) {
-    return request.post<IResponse<IPaginationResponse<IGoodsList[]>>>(LocalApiPath.getGoodsList, {
+    return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
         // requestType: 'form',
         data: params,
     });

@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import OptionalColumn from './OptionalColumn';
 import TableStockNotShip from './TableStockNotShip';
 
@@ -20,7 +20,7 @@ export declare interface IOrderItem {
     deliver_start_time: number;
 }
 
-const allFieldList: IFieldItem[] = [
+const allFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['warehousing_start_time', 'warehousing_start_time'],
@@ -75,13 +75,13 @@ declare interface IState {
     loading: boolean;
     showColStatus: boolean;
     orderList: IOrderItem[];
-    fieldList: IFieldItem[];
+    fieldList: FormField[];
     selectedColKeyList: string[];
     colList: string[];
 }
 
 class PaneStockNotShip extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
 
     private initialValues = {
         channel: 100,
@@ -173,7 +173,7 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
                     <SearchForm
                         fieldList={fieldList}
                         labelClassName="order-label"
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">

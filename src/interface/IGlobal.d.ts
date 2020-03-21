@@ -15,11 +15,10 @@ export interface IResponse<T> {
     data: T;
 }
 
-export interface IPaginationResponse1<T> {
-    all_count: number;
-    list: T;
-}
-
-export type IPaginationResponse<T> = IPaginationResponse1<T>;
+export type IPaginationResponse<T> = {
+    total?: number;
+    all_count?: number;
+    list: T[];
+};
 
 export type IBoolean = 0 | 1;

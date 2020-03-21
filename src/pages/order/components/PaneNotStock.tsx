@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import { FormInstance } from 'antd/lib/form';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import OptionalColumn from './OptionalColumn';
 import TableNotStock from './TableNotStock';
 
@@ -20,7 +20,7 @@ export declare interface IOrderItem {
     purchase_num: number;
 }
 
-const allFieldList: IFieldItem[] = [
+const allFieldList: FormField[] = [
     {
         type: 'input',
         name: 'middleground_order_id',
@@ -68,13 +68,13 @@ declare interface IState {
     loading: boolean;
     showColStatus: boolean;
     orderList: IOrderItem[];
-    fieldList: IFieldItem[];
+    fieldList: FormField[];
     selectedColKeyList: string[];
     colList: string[];
 }
 
 class PaneNotStock extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
 
     private initialValues = {
         channel: 100,
@@ -166,7 +166,7 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
                     <SearchForm
                         fieldList={fieldList}
                         labelClassName="order-label"
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">

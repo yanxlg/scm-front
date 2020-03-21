@@ -18,7 +18,7 @@ import {
     TaskTypeList,
     TaskTypeMap,
 } from '@/enums/StatusEnum';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import CollapsePopOver from '@/components/CollapsePopOver';
 import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
@@ -49,15 +49,15 @@ declare interface IALLTaskPageProps {
 }
 
 declare interface ISearchFormConfig {
-    default: IFieldItem[];
-    expend: IFieldItem[];
+    default: FormField[];
+    expend: FormField[];
     initialValues?: { [key: string]: any };
 }
 
 @BindAll()
 class ALLTaskPage extends React.PureComponent<IALLTaskPageProps, IALLTaskPageState> {
-    private defaultFormRef: RefObject<SearchForm> = React.createRef();
-    private expendFormRef: RefObject<SearchForm> = React.createRef();
+    private defaultFormRef: RefObject<SearchFormRef> = React.createRef();
+    private expendFormRef: RefObject<SearchFormRef> = React.createRef();
     private queryData: any = {};
     constructor(props: IALLTaskPageProps) {
         super(props);

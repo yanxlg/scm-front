@@ -5,7 +5,7 @@ import GoodsTable from './components/GoodsTable';
 import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
 import ImgEditDialog from './components/ImgEditDialog';
 import ExcelDialog from './components/ExcelDialog';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 
 import {
     getGoodsList,
@@ -42,7 +42,7 @@ export declare interface ICategoryItem {
     children?: ICategoryItem[];
 }
 
-const formFields: IFieldItem[] = [
+const formFields: FormField[] = [
     {
         type: 'input',
         label: '爬虫任务 ID',
@@ -117,7 +117,7 @@ const pageSizeOptions = ['50', '100', '500', '1000'];
 type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
-    private formRef: RefObject<SearchForm> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private queryData: any = {};
     localSearchRef: LocalSearch | null = null;
     // goodsTableRef: GoodsTable | null = null;
@@ -240,7 +240,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     this.cancelSelectedRow();
                 }
                 this.setState({
-                    allCount: all_count,
+                    allCount: all_count as number,
                     page: params.page as number,
                     page_count: params.page_count as number,
                     goodsList: this.handleRowData(list),

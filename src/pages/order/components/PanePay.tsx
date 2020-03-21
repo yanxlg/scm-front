@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button, Pagination, message, notification } from 'antd';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import TablePay from './TablePay';
 
 import {
@@ -40,7 +40,7 @@ export declare interface IPayItem {
     _checked?: boolean;
 }
 
-const defaultFieldList: IFieldItem[] = [
+const defaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['purchase_order_stime', 'purchase_order_etime'],
@@ -88,7 +88,7 @@ declare interface IState {
 }
 
 class PanePay extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<SearchForm> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private currentSearchParams: IPayFilterParams | null = null;
     private initialValues = {
         purchase_platform: 100,

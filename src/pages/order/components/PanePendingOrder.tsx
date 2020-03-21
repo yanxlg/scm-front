@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button, Pagination } from 'antd';
 import { FormInstance } from 'antd/es/form';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 
 import TablePendingOrder from './TablePendingOrder';
 
@@ -14,9 +14,8 @@ import {
     orderStatusOptionList,
     pageSizeOptions,
 } from '@/enums/OrderEnum';
-import { AntAnchor } from 'antd/lib/anchor/Anchor';
 
-const defaultFieldList: IFieldItem[] = [
+const defaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['order_start_time', 'order_end_time'],
@@ -43,7 +42,7 @@ const defaultFieldList: IFieldItem[] = [
     },
 ];
 
-const allFieldList: IFieldItem[] = [
+const allFieldList: FormField[] = [
     ...defaultFieldList,
     {
         type: 'select',
@@ -95,7 +94,7 @@ declare interface IState {
 }
 
 class PanePendingOrder extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
 
     private initialValues = {
         channel: 100,
@@ -302,7 +301,7 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
                     <SearchForm
                         labelClassName="order-label"
                         fieldList={fieldList}
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">

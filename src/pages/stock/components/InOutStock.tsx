@@ -7,9 +7,8 @@ import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
 import { convertEndDate, convertStartDate, transEndDate, transStartDate } from '@/utils/date';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { Moment } from 'moment';
-import { FormInstance } from 'antd/es/form';
 import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
@@ -65,7 +64,7 @@ declare interface IInOutStockProps {
 
 @BindAll()
 class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private queryData: any = {};
     private inColumns: ColumnProps<ITableData>[] = [
         {
@@ -149,7 +148,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
             align: 'center',
         },
     ];
-    private inFieldsList: IFieldItem[] = [
+    private inFieldsList: FormField[] = [
         {
             type: 'dateRanger',
             label: <span>入库&emsp;时间</span>,
@@ -179,7 +178,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
             className: 'input-default',
         },
     ];
-    private outFieldsList: IFieldItem[] = [
+    private outFieldsList: FormField[] = [
         {
             type: 'dateRanger',
             label: <span>出库&emsp;时间</span>,
@@ -359,7 +358,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
                 <div className="float-clear">
                     <SearchForm
                         labelClassName="stock-form-label"
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         fieldList={type === 1 ? this.outFieldsList : this.inFieldsList}
                         initialValues={defaultInitialValues}
                     />
@@ -396,7 +395,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
                 </div>
                 <FitTable
                     className="form-item"
-                    rowKey="in_order"
+                    rowKey={type === 1 ? 'inboundOrderSn' : 'outboundOrderSn'}
                     bordered={true}
                     columns={type === 1 ? this.outColumns : this.inColumns}
                     dataSource={dataSet}

@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import { FormInstance } from 'antd/es/form';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 
 import TableWaitShip from './TableWaitShip';
 
@@ -30,7 +30,7 @@ declare interface IState {
     orderList: IWaitShipItem[];
 }
 
-const defaultFieldList: IFieldItem[] = [
+const defaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['purchase_start_time', 'purchase_end_time'],
@@ -61,7 +61,7 @@ const defaultFieldList: IFieldItem[] = [
     },
 ];
 
-const allFieldList: IFieldItem[] = [
+const allFieldList: FormField[] = [
     ...defaultFieldList,
     {
         type: 'dateRanger',
@@ -115,7 +115,7 @@ const allFieldList: IFieldItem[] = [
 ];
 
 class PanePaid extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
 
     constructor(props: {}) {
         super(props);
@@ -198,7 +198,7 @@ class PanePaid extends React.PureComponent<{}, IState> {
                     <SearchForm
                         labelClassName="order-label"
                         fieldList={fieldList}
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         initialValues={initialValues}
                     />
                     <div className="order-operation">

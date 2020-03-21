@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react';
 import { Pagination, Button, message, notification } from 'antd';
 
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
@@ -68,7 +68,7 @@ declare interface IState {
     showParentStatus: boolean;
     childOrderList: IChildOrderItem[];
     parentOrderList: IParentOrderItem[];
-    fieldList: IFieldItem[];
+    fieldList: FormField[];
     selectedColKeyList: string[];
     colChildList: string[];
     colParentList: string[];
@@ -76,7 +76,7 @@ declare interface IState {
 }
 
 class PaneAll extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<SearchForm> = React.createRef();
+    private formRef: RefObject<SearchFormRef> = React.createRef();
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
     private currentSearchParams: IFilterParams | null = null;
     private initialValues = {
@@ -86,12 +86,12 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         non_purchase_plan: 100,
     };
 
-    private endFieldItem: IFieldItem = {
+    private endFieldItem: FormField = {
         type: 'checkbox',
         name: 'only_p_order',
         label: '仅展示父订单ID',
         // name, form, setState
-        onChange: (name, form, setState) => {
+        onChange: (name, form) => {
             this.changeParentOrder(form.getFieldValue(name));
         },
     };
@@ -302,7 +302,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     // 展示过滤条件
     private changeFilter = () => {
         const { showParentStatus, showFilterStatus } = this.state;
-        let fieldList: IFieldItem[] = [];
+        let fieldList: FormField[] = [];
         if (showParentStatus && showFilterStatus) {
             fieldList = parentAllFieldList;
         } else if (showParentStatus && !showFilterStatus) {

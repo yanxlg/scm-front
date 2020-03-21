@@ -1,13 +1,11 @@
-import React from 'react';
-import { Button, Card, Descriptions, Modal, Steps, Tabs, Spin } from 'antd';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Card, Descriptions, Modal, Tabs, Spin } from 'antd';
 import SubTaskView from '@/pages/task/components/SubTaskView';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import '@/styles/card.less';
-import { RouteComponentProps } from 'react-router';
 import { queryTaskDetail } from '@/services/task';
-import { Bind } from 'lodash-decorators';
 import { ITaskDetailInfo } from '@/interface/ITask';
 import {
     TaskExecuteType,
@@ -23,47 +21,48 @@ import { utcToLocal } from '@/utils/date';
 import TimerUpdate from '../components/editor/TimerUpdate';
 import { EmptyObject } from '@/config/global';
 import CopyLink from '@/components/copyLink';
+import { RouteComponentProps } from 'react-router';
 
 const { TabPane } = Tabs;
-const { Step } = Steps;
 
-type TaskDetailPageProps = RouteComponentProps<{ id: string }>;
+const Detail: React.FC<RouteComponentProps<{ id: string }>> = ({ match }) => {
+    const [loading, setLoading] = useState(false);
+    const [detail, setDetail] = useState<ITaskDetailInfo>(EmptyObject);
+    const taskId = Number(match.params.id);
 
-declare interface ITaskDetailPagePropsState {
-    detail?: ITaskDetailInfo;
-    loading: boolean;
-}
-
-class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetailPagePropsState> {
-    private readonly taskId: number;
-    constructor(props: TaskDetailPageProps) {
-        super(props);
-        this.taskId = Number(props.match.params.id);
-        this.state = {
-            loading: true,
-        };
-    }
-    @Bind
-    private queryDetail(taskId: number) {
+    useEffect(() => {
+        setLoading(true);
         queryTaskDetail(taskId)
             .then(({ data: { task_detail_info = EmptyObject } = {} } = EmptyObject) => {
-                this.setState({
-                    detail: task_detail_info,
-                });
+                setDetail(task_detail_info);
             })
             .finally(() => {
-                this.setState({
-                    loading: false,
-                });
+                setLoading(false);
             });
-    }
-    @Bind
-    private copyTask() {
+    }, []);
+
+    const getTimeIntervalString = useCallback((time_interval?: number) => {
+        if (time_interval === void 0) {
+            return '--';
+        }
+        const timeInterval = Number(time_interval);
+        const isDay = timeInterval % 86400 === 0;
+        return time_interval === void 0
+            ? undefined
+            : isDay
+            ? `${timeInterval / 86400}天`
+            : `${timeInterval}秒`;
+    }, []);
+
+    const getCopiedLinkQuery = useCallback(() => {
+        return {};
+    }, []);
+
+    const copyTask = useCallback(() => {
         // task_range 分别弹不同的弹窗
-        const task_id = this.taskId;
-        const { detail = EmptyObject } = this.state;
-        const { sub_cat_id } = detail!;
-        switch (sub_cat_id) {
+        const { sub_cat_id } = detail;
+        const task_id = Number(taskId);
+        switch (Number(sub_cat_id)) {
             case TaskRangeEnum.URL:
                 // url
                 Modal.info({
@@ -111,28 +110,9 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
             default:
                 break;
         }
-    }
-    componentDidMount(): void {
-        this.queryDetail(this.taskId);
-    }
+    }, [detail]);
 
-    private getTimeIntervalString(time_interval?: number) {
-        if (time_interval === void 0) {
-            return '--';
-        }
-        const timeInterval = Number(time_interval);
-        const isDay = timeInterval % 86400 === 0;
-        return time_interval === void 0
-            ? undefined
-            : isDay
-            ? `${timeInterval / 86400}天`
-            : `${timeInterval}秒`;
-    }
-    private getCopiedLinkQuery() {
-        return {};
-    }
-    render() {
-        const { detail = {} as ITaskDetailInfo, loading } = this.state;
+    return useMemo(() => {
         const category = detail.category_level_one;
         const {
             task_name = '',
@@ -150,6 +130,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
             task_end_time,
             task_start_time,
         } = detail;
+
         return (
             <div className="body-transparent">
                 <Card
@@ -159,7 +140,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                             {task_name
                                 ? `【${TaskTypeMap[task_type!] ?? ''}】${task_name} - ${
                                       task_cycle === TaskExecuteType.once ? '单次' : '定时'
-                                  } - ${this.taskId} - ${TaskStatusMap[status] ?? ''}`
+                                  } - ${taskId} - ${TaskStatusMap[status] ?? ''}`
                                 : null}
                         </Spin>
                     }
@@ -234,7 +215,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                 )}
                                 {task_cycle === TaskExecuteType.once ? null : (
                                     <Descriptions.Item label="任务间隔">
-                                        {this.getTimeIntervalString(time_interval)}
+                                        {getTimeIntervalString(time_interval)}
                                     </Descriptions.Item>
                                 )}
                             </Descriptions>
@@ -275,7 +256,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                     {utcToLocal(task_start_time)} - {utcToLocal(task_end_time)}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务间隔">
-                                    {this.getTimeIntervalString(time_interval)}
+                                    {getTimeIntervalString(time_interval)}
                                 </Descriptions.Item>
                             </Descriptions>
                         ) : null}
@@ -286,7 +267,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                 type="primary"
                                 size="large"
                                 ghost={true}
-                                onClick={this.copyTask}
+                                onClick={copyTask}
                             >
                                 复制创建新任务
                             </Button>
@@ -298,7 +279,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                         defaultActiveKey="1"
                         children={[
                             <TabPane tab="子任务进度" key="1">
-                                <SubTaskView task_Id={this.taskId} task_type={task_type} />
+                                <SubTaskView task_Id={taskId as number} task_type={task_type} />
                             </TabPane>,
                             /*<TabPane tab="任务日志" key="2">
                                 <TaskLogView task_Id={this.taskId} />
@@ -306,10 +287,10 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                         ]}
                     />
                 </Card>
-                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
+                <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }
-}
+    }, [loading]);
+};
 
-export default TaskDetailPage;
+export default Detail;
