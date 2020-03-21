@@ -1,7 +1,7 @@
 // wrap ()=>Promise to control it as single instance
-function singlePromiseWrap<T, P>(promise: (params: P) => Promise<T>) {
+function singlePromiseWrap<T, P = any>(promise: (params?: P) => Promise<T>) {
     let syncPromise: Promise<T>;
-    return (params: P) => {
+    return (params?: P) => {
         if (syncPromise) {
             return syncPromise;
         } else {
