@@ -291,6 +291,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             selectedRowKeys: selectedRowKeys,
             onChange: this.onSelectChange,
         };
+        const width = this.columns.reduce((total, current) => total + (current.width as number), 0);
         return (
             <>
                 <Table
@@ -300,7 +301,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                     rowSelection={rowSelection}
                     columns={this.columns}
                     dataSource={goodsList}
-                    scroll={{ x: 'max-content', y: 600 }}
+                    scroll={{ x: width || 'max-content', y: 600 }}
                     pagination={false}
                     loading={searchLoading}
                 />
