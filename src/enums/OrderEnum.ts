@@ -97,7 +97,7 @@ export const childDefaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台订单子ID',
-        // formatter: 'number',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -106,6 +106,7 @@ export const childDefaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单ID',
+        formatter: 'strArr',
     },
     // {
     //     type: 'input',
@@ -135,7 +136,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单ID',
-        // formatter: 'number',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -144,6 +145,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购计划ID',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -152,6 +154,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购运单号',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -160,7 +163,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入尾程运单号',
-        // formatter: 'number',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -169,7 +172,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台商品ID',
-        // formatter: 'number',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -178,7 +181,7 @@ export const childAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台SKU ID',
-        // formatter: 'number',
+        formatter: 'strArr',
     },
     // {
     //     type: 'select',
@@ -255,7 +258,7 @@ export const childAllFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
         name: ['purchase_time_start', 'purchase_time_end'],
-        label: '采购时间',
+        label: '采购完成时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
@@ -396,7 +399,7 @@ export const parentDefaultFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单id',
-        // formatter: 'number',
+        formatter: 'numberStrArr',
     },
     {
         type: 'select',
@@ -417,6 +420,7 @@ export const parentAllFieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单id',
+        formatter: 'strArr',
     },
     {
         type: 'dateRanger',

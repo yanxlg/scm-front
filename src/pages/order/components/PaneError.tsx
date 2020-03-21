@@ -69,6 +69,7 @@ const fieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入订单号',
+        formatter: 'number',
     },
     {
         type: 'select',
@@ -178,7 +179,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
                         platformOrderTime,
                         payTime,
                         purchaseWaybillNo,
-                        platformSendOrderTime
+                        platformSendOrderTime,
                     } = purchaseItem;
                     const childOrderItem: IErrorOrderItem = {
                         createTime, // 订单时间

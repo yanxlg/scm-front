@@ -102,15 +102,17 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                                 >
                                     <QRCode value={value} size={40} className="order-qr-small" />
                                 </AutoEnLargeImg>
-                                <Button
-                                    ghost={true}
-                                    size="small"
-                                    type="primary"
-                                    style={{ marginTop: 10 }}
-                                    onClick={() => this.confirmPay(purchase_parent_order_sn)}
-                                >
-                                    确认支付
-                                </Button>
+                                <div>
+                                    <Button
+                                        ghost={true}
+                                        size="small"
+                                        type="primary"
+                                        style={{ marginTop: 6 }}
+                                        onClick={() => this.confirmPay(purchase_parent_order_sn)}
+                                    >
+                                        确认支付
+                                    </Button>
+                                </div>
                             </div>
                         ) : (
                             parent_purchase_pay_status_desc
