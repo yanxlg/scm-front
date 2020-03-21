@@ -2,6 +2,7 @@ import React, { RefObject } from 'react';
 import { Pagination, Button, message, notification } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import LoadingButton from '@/components/LoadingButton';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
@@ -63,7 +64,6 @@ declare interface IState {
     pageCount: number;
     total: number;
     loading: boolean;
-    exportLoading: boolean;
     showFilterStatus: boolean;
     showColStatus: boolean;
     showParentStatus: boolean;
@@ -106,7 +106,6 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             pageCount: 50,
             total: 0,
             loading: false,
-            exportLoading: false,
             showFilterStatus: false,
             showColStatus: false,
             showParentStatus: false,
@@ -175,29 +174,9 @@ class PaneAll extends React.PureComponent<IProps, IState> {
 
     // 获取查询数据
     private getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
-        const {
-            only_p_order,
-            channel_order_goods_sn,
-            order_goods_id,
-            order_id,
-            last_waybill_no,
-            product_id,
-            sku_id,
-            purchase_waybill_no,
-            purchase_plan_id,
-            ...fields
-        } = this.formRef.current!.getFieldsValue();
+        const { only_p_order, ...fields } = this.formRef.current!.getFieldsValue();
         return {
             only_p_order: only_p_order ? 1 : 0,
-            channel_order_goods_sn: splitStrToArr(channel_order_goods_sn),
-            order_goods_id: splitStrToArr(order_goods_id),
-            order_id: splitStrToArr(order_id),
-            last_waybill_no: splitStrToArr(last_waybill_no),
-            product_id: splitStrToArr(product_id),
-            sku_id: splitStrToArr(sku_id),
-            purchase_waybill_no: splitStrToArr(purchase_waybill_no),
-            purchase_plan_id: splitStrToArr(purchase_plan_id),
             ...fields,
         };
     };
@@ -409,7 +388,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const orderGoodsIdList = this.getOrderGoodsIdList();
         if (orderGoodsIdList.length) {
             // console.log('orderGoodsIdList', orderGoodsIdList);
-            postOrdersPlace({
+            return postOrdersPlace({
                 order_goods_ids: orderGoodsIdList,
             }).then(res => {
                 // console.log('delChannelOrders', res);
@@ -444,6 +423,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             });
         } else {
             message.error('请选择需要拍单的订单！');
+            return Promise.resolve();
         }
     };
 
@@ -451,7 +431,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     private cancelPurchaseOrder = () => {
         const orderGoodsIdList = this.getOrderGoodsIdList();
         if (orderGoodsIdList.length) {
-            delPurchaseOrders({
+            return delPurchaseOrders({
                 order_goods_ids: orderGoodsIdList,
             }).then(res => {
                 const { success, failed } = res.data;
@@ -486,6 +466,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             });
         } else {
             message.error('请选择需要取消的订单！');
+            return Promise.resolve();
         }
     };
 
@@ -494,7 +475,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const orderGoodsIdList = this.getOrderGoodsIdList();
         if (orderGoodsIdList.length) {
             // console.log('orderGoodsIdList', orderGoodsIdList);
-            delChannelOrders({
+            return delChannelOrders({
                 order_goods_ids: orderGoodsIdList,
             }).then(res => {
                 // console.log('delChannelOrders', res);
@@ -529,6 +510,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             });
         } else {
             message.error('请选择需要取消的订单！');
+            return Promise.resolve();
         }
     };
 
@@ -554,14 +536,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                   page: 1,
                   page_count: 50,
               };
-        this.setState({
-            exportLoading: true,
-        });
-        postExportAll(params).finally(() => {
-            this.setState({
-                exportLoading: false,
-            });
-        });
+        return postExportAll(params);
     };
 
     render() {
@@ -570,7 +545,6 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             pageCount,
             total,
             loading,
-            exportLoading,
             showFilterStatus,
             showParentStatus,
             showColStatus,
@@ -602,40 +576,39 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             查询
                         </Button>
                         {!showParentStatus ? (
-                            <Button
+                            <LoadingButton
                                 type="primary"
                                 className="order-btn"
                                 onClick={this.postOrdersPlace}
                             >
                                 一键拍单
-                            </Button>
+                            </LoadingButton>
                         ) : null}
                         {!showParentStatus ? (
-                            <Button
+                            <LoadingButton
                                 type="primary"
                                 className="order-btn"
                                 onClick={this.cancelPurchaseOrder}
                             >
                                 取消采购单
-                            </Button>
+                            </LoadingButton>
                         ) : null}
                         {!showParentStatus ? (
-                            <Button
+                            <LoadingButton
                                 type="primary"
                                 className="order-btn"
                                 onClick={this.cancelChannelOrder}
                             >
                                 取消渠道订单
-                            </Button>
+                            </LoadingButton>
                         ) : null}
-                        <Button
+                        <LoadingButton
                             type="primary"
                             className="order-btn"
-                            loading={exportLoading}
                             onClick={this.postExportAll}
                         >
                             导出数据
-                        </Button>
+                        </LoadingButton>
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件
                         </Button>

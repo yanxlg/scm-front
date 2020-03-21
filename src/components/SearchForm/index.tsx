@@ -8,7 +8,7 @@ import { RuleObject, StoreValue } from 'rc-field-form/lib/interface';
 import NumberInput from '@/components/NumberInput';
 import IntegerInput from '@/components/IntegerInput';
 import moment, { Moment } from 'moment';
-import { transNumber, transNullValue } from '@/utils/transform';
+import { transNumber, transNullValue, transNumberStrArr, transStrArr } from '@/utils/transform';
 import { transEndDate, transStartDate } from '@/utils/date';
 import '@/styles/form.less';
 import '@/styles/index.less';
@@ -22,7 +22,7 @@ declare interface IOptionItem {
     [key: string]: any;
 }
 
-type formatter = 'number' | 'start_date' | 'end_date';
+type formatter = 'number' | 'start_date' | 'end_date' | 'numberStrArr' | 'strArr';
 
 type FormItemName = string;
 
@@ -629,6 +629,10 @@ export default class SearchForm extends React.PureComponent<ISearchFormProps, IS
                 ? transStartDate
                 : format === 'end_date'
                 ? transEndDate
+                : format === 'numberStrArr'
+                ? transNumberStrArr
+                : format === 'strArr'
+                ? transStrArr
                 : transNullValue
             : transNullValue;
     };
