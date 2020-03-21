@@ -49,7 +49,7 @@ const formFields: FormField[] = [
         name: 'task_number',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
+        formItemClassName: 'goods-local-form-item',
     },
     {
         type: 'input',
@@ -57,7 +57,7 @@ const formFields: FormField[] = [
         name: 'store_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
+        formItemClassName: 'goods-local-form-item',
     },
     {
         type: 'input',
@@ -65,14 +65,14 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
+        formItemClassName: 'goods-local-form-item',
     },
     {
         type: 'select',
         label: '销售状态',
         name: 'inventory_status',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
+        formItemClassName: 'goods-local-form-item',
         formatter: 'number',
         optionList: [defaultOption, ...inventoryStatusList],
     },
@@ -81,12 +81,21 @@ const formFields: FormField[] = [
         label: '请选择版本状态',
         name: 'product_status',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
+        formItemClassName: 'goods-local-form-item',
         formatter: 'number',
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,
         optionList: productStatusList,
+    },
+    {
+        type: 'select',
+        label: '版本更新',
+        name: 'version_status',
+        className: 'local-search-item-select',
+        formItemClassName: 'goods-local-form-item',
+        formatter: 'number',
+        optionList: [defaultOption, ...versionStatusList],
     },
 ];
 
@@ -603,16 +612,18 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     labelClassName="local-search-label"
                     initialValues={{
                         inventory_status: '',
+                        version_status: ''
                     }}
                     ref={this.formRef}
                     fieldList={formFields}
                 >
                     <Button
+                        type="primary"
                         onClick={() => {
                             console.log(this.formRef.current!.getFieldsValue());
                         }}
                     >
-                        111
+                        查询
                     </Button>
                 </SearchForm>
                 <LocalSearch
