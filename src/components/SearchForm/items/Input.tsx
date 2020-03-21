@@ -5,12 +5,12 @@ import { FormInstance, Rule } from 'antd/es/form';
 import IntegerInput from '@/components/IntegerInput';
 import NumberInput from '@/components/NumberInput';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
-import { transNullValue, transNumber } from '@/utils/transform';
+import { transNullValue, transNumber, transNumberStrArr, transStrArr } from '@/utils/transform';
 
 export type InputType = 'input' | 'integer' | 'number';
 const typeList = ['input', 'integer', 'number'];
 
-export type InputFormatter = 'number';
+export type InputFormatter = 'number' | 'strArr' | 'numberStrArr';
 
 export type InputProps = FormItemLabelProps &
     CustomFormProps & {
@@ -81,7 +81,18 @@ const FormInput = (props: InputProps) => {
 FormInput.typeList = typeList;
 
 FormInput.formatter = (formatter?: InputFormatter) => {
-    return formatter ? (formatter === 'number' ? transNumber : transNullValue) : transNullValue;
+    // return formatter ? (formatter === 'number' ? transNumber : transNullValue) : transNullValue;
+    // return
+    switch (formatter) {
+        case 'number':
+            return transNumber;
+        case 'strArr':
+            return transStrArr;
+        case 'numberStrArr':
+            return transNumberStrArr;
+        default:
+            return transNullValue;
+    }
 };
 
 export default FormInput;
