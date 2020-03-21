@@ -69,6 +69,7 @@ const fieldList: IFieldItem[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入订单号',
+        formatter: 'number',
     },
     {
         type: 'select',

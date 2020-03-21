@@ -3,6 +3,7 @@ import { Button, Pagination, message, notification } from 'antd';
 
 import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import TablePay from './TablePay';
+import LoadingButton from '@/components/LoadingButton';
 
 import {
     getPayOrderList,
@@ -82,8 +83,6 @@ declare interface IState {
     pageCount: number;
     total: number;
     loading: boolean;
-    exportLoading: boolean;
-    showStatus: boolean;
     orderList: IPayItem[];
 }
 
@@ -101,8 +100,6 @@ class PanePay extends React.PureComponent<{}, IState> {
             pageCount: 50,
             total: 0,
             loading: false,
-            exportLoading: false,
-            showStatus: false,
             orderList: [],
         };
     }
@@ -175,13 +172,6 @@ class PanePay extends React.PureComponent<{}, IState> {
         return this.formRef.current!.getFieldsValue();
     };
 
-    changeShowStatus = () => {
-        const { showStatus } = this.state;
-        this.setState({
-            showStatus: !showStatus,
-        });
-    };
-
     // 全选
     onCheckAllChange = (status: boolean) => {
         const { orderList } = this.state;
@@ -250,7 +240,7 @@ class PanePay extends React.PureComponent<{}, IState> {
     private cancelPurchaseOrder = () => {
         const list = this.getOrderGoodsIdList();
         if (list.length) {
-            delPurchaseOrders({
+            return delPurchaseOrders({
                 order_goods_ids: list,
             }).then(res => {
                 const { success, failed } = res.data;
@@ -284,13 +274,14 @@ class PanePay extends React.PureComponent<{}, IState> {
             });
         } else {
             message.error('请选择需要取消的订单！');
+            return Promise.resolve();
         }
     };
 
     private delChannelOrders = () => {
         const list = this.getOrderGoodsIdList();
         if (list.length) {
-            delChannelOrders({
+            return delChannelOrders({
                 order_goods_ids: list,
             }).then(res => {
                 const { success, failed } = res.data;
@@ -323,6 +314,7 @@ class PanePay extends React.PureComponent<{}, IState> {
             });
         } else {
             message.error('请选择需要取消的订单');
+            return Promise.resolve();
         }
     };
 
@@ -333,29 +325,11 @@ class PanePay extends React.PureComponent<{}, IState> {
                   page: 1,
                   page_count: 50,
               };
-        this.setState({
-            exportLoading: true,
-        });
-        postExportPay(params).finally(() => {
-            this.setState({
-                exportLoading: false,
-            });
-        });
+        return postExportPay(params);
     };
 
     render() {
-        const {
-            showStatus,
-            loading,
-            exportLoading,
-            orderList,
-            total,
-            page,
-            pageCount,
-        } = this.state;
-
-        // const fieldList = showStatus ? allFieldList : defaultFieldList;
-
+        const { loading, orderList, total, page, pageCount } = this.state;
         return (
             <>
                 <div>
@@ -374,33 +348,27 @@ class PanePay extends React.PureComponent<{}, IState> {
                         >
                             查询
                         </Button>
-                        <Button
+                        <LoadingButton
                             type="primary"
                             className="order-btn"
                             onClick={this.cancelPurchaseOrder}
                         >
                             取消采购单
-                        </Button>
-                        <Button
+                        </LoadingButton>
+                        <LoadingButton
                             type="primary"
                             className="order-btn"
                             onClick={this.delChannelOrders}
                         >
                             取消渠道订单
-                        </Button>
-                        <Button
+                        </LoadingButton>
+                        <LoadingButton
                             type="primary"
                             className="order-btn"
-                            loading={exportLoading}
                             onClick={this.postExportPay}
                         >
                             导出数据
-                        </Button>
-                        {/* <Button
-                            type="default"
-                            className="order-btn"
-                            onClick={this.changeShowStatus}
-                        >{ showStatus ? '收起' : '展示'}搜索条件</Button> */}
+                        </LoadingButton>
                     </div>
                     <TablePay
                         loading={loading}
