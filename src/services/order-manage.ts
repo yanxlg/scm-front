@@ -107,6 +107,13 @@ export async function getPendingOrderList(data: IPendingFilterParams) {
     });
 }
 
+export async function postExportPendingOrder(data: IPendingFilterParams) {
+    return request.post(OrderApiPath.postExportPendingOrder, {
+        requestType: 'json',
+        data,
+    });
+}
+
 // 获取待支付
 export async function getPayOrderList(data: IPayFilterParams) {
     return request.post(OrderApiPath.getPayOrderList, {

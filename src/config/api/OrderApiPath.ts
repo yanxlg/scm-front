@@ -8,6 +8,8 @@ export enum OrderApiPath {
     postExportAll = '/api/v1/orders/exports/1',
     // 待拍单
     getPendingOrderList = '/api/v1/orders/list/2',
+    // 导出待拍单
+    postExportPendingOrder = '/api/v1/orders/exports/2',
     // 待支付
     getPayOrderList = '/api/v1/orders/list/3',
     // 导出待支付

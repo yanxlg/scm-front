@@ -1,7 +1,6 @@
-import React, { RefObject } from 'react';
-import { Button, Tabs, message } from 'antd';
+import React from 'react';
+import { Tabs } from 'antd';
 
-import OrderFilter from './components/OrderFilter';
 import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
 import PanePay from './components/PanePay';
@@ -16,47 +15,20 @@ import '@/styles/order.less';
 
 const { TabPane } = Tabs;
 
-export declare interface IOrderItem {
-    order_confirm_time: string;
-    middleground_order_id: string;
-    channel_order_id: string;
-    commodity_id: string;
-    goods_detatil: string; // ?
-    channel_goods_price: string;
-    channel_shipping_fee: string;
-    goods_number: string;
-    order_price: string;
-    currency_type: string;
-    address: string;
-    remain_delivery_time: string;
-    cancel_order_time: string;
-    channel_store_name: string;
-    channel_order_status: string;
-    channel_shipments_status: string;
-    middleground_order_status: string;
-    purchase_order_status: string;
-    purchase_payment_status: string;
-    purchase_delivery_status: string;
-    cancel_order: string;
-    purchase_place_order_time: string;
-    purchase_order_number: string;
-    purchase_porder_number: string;
-    purchase_waybill_number: string;
-}
-
 declare interface IOrderState {
     allListCount: number;
+    penddingOrderCount: number;
     penddingPayCount: number;
     errorOrderCount: number;
 }
 
 class Order extends React.PureComponent<{}, IOrderState> {
-    private orderFilterRef: RefObject<OrderFilter> = React.createRef();
-
+    private type: number = 2;
     constructor(props: {}) {
         super(props);
         this.state = {
             allListCount: 0,
+            penddingOrderCount: 0,
             penddingPayCount: 0,
             errorOrderCount: 0,
         };
@@ -64,11 +36,12 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
     componentDidMount() {
         // this.onSearch();
-        this.getAllTabCount(2);
+        this.getAllTabCount();
     }
 
-    getAllTabCount = (type: number) => {
-        getAllTabCount(type).then(res => {
+    getAllTabCount = (type?: number) => {
+        const _type: number = typeof type === 'number' ? type : this.type;
+        getAllTabCount(_type).then(res => {
             this.setState({
                 ...res.data,
             });
@@ -82,15 +55,15 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
     render() {
         // errorOrderCount
-        const { allListCount, penddingPayCount } = this.state;
+        const { allListCount, penddingOrderCount, penddingPayCount } = this.state;
         return (
             <div className="order-wrap">
                 <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="2">
                     <TabPane tab={`全部（${allListCount}）`} key="1">
                         <PaneAll getAllTabCount={this.getAllTabCount} />
                     </TabPane>
-                    <TabPane tab={`待拍单（1000）`} key="2">
-                        <PanePendingOrder />
+                    <TabPane tab={`待拍单（${penddingOrderCount}）`} key="2">
+                        <PanePendingOrder getAllTabCount={this.getAllTabCount} />
                     </TabPane>
                     <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
                         <PanePay />

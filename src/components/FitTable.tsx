@@ -50,13 +50,14 @@ function FitTable<T extends object>(props: IFitTableProps<T>) {
     }, []);
 
     return useMemo(() => {
+        // console.log(222222);
         const { scroll, ..._props } = props;
         return (
             <div ref={ref}>
                 <Table<T> {..._props} scroll={{ ...scroll, x: calcX, y: y }} />
             </div>
         );
-    }, [props]);
+    }, [props, calcX, y]);
 }
 
 export { FitTable };
