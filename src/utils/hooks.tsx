@@ -1,22 +1,25 @@
 import { RefObject, useState, useCallback, useEffect } from 'react';
-import { IRequestPagination, IResponse, IPaginationResponse } from '@/interface/IGlobal';
+import { IResponse, IPaginationResponse, RequestPagination } from '@/interface/IGlobal';
 import { PaginationConfig } from 'antd/es/pagination';
 import { EmptyObject } from '@/config/global';
 import { SearchFormRef } from '@/components/SearchForm';
 
-function useList<T, Q extends IRequestPagination>(
+const EmptyArray: string[] = [];
+
+function useList<T, Q extends RequestPagination, S = any>(
     queryList: (query: Q) => Promise<IResponse<IPaginationResponse<T>>>,
     searchRef?: RefObject<SearchFormRef>,
-    pageSizeKey = 'page_count',
-    totalKey = 'total',
-    listKey = 'list',
     extraQuery?: { [key: string]: any },
+    defaultState?: { pageNumber?: number; pageSize?: number },
 ) {
     const [loading, setLoading] = useState(true);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [pageSize, setPageSize] = useState(50);
+    const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? 1);
+    const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? 50);
     const [dataSource, setDataSource] = useState<T[]>([]);
     const [total, setTotal] = useState(0);
+    const [query, setQuery] = useState({});
+    const [extraData, setExtraData] = useState<S | undefined>(undefined);
+    const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>(EmptyArray);
 
     const getListData = useCallback(
         ({
@@ -27,19 +30,20 @@ function useList<T, Q extends IRequestPagination>(
             const formValues = searchRef ? searchRef.current!.getFieldsValue() : undefined;
             setLoading(true);
             const query = {
-                ...formValues,
-                page: page,
-                [pageSizeKey]: page_count,
+                pageNumber: page,
+                pageSize: page_count,
                 ...extra,
+                ...formValues,
             };
+            setQuery(query);
+            setSelectedRowKeys(EmptyArray);
             return queryList(query as Q)
-                .then(({ data = EmptyObject }) => {
-                    const total = data[totalKey] || 0;
-                    const list = data[listKey] || [];
+                .then(({ data: { total = 0, list = [], ...extraData } = EmptyObject }) => {
                     setDataSource(list);
                     setTotal(total);
                     setPageNumber(page);
                     setPageSize(page_count);
+                    setExtraData(extraData);
                 })
                 .finally(() => {
                     setLoading(false);
@@ -83,20 +87,24 @@ function useList<T, Q extends IRequestPagination>(
     }, []);
 
     return {
+        query,
         loading,
         pageNumber,
         pageSize,
         dataSource,
+        extraData,
         total,
         setLoading,
         setPageNumber,
         setPageSize,
         setDataSource,
+        selectedRowKeys,
         setTotal,
         onReload,
         onSearch,
         onChange,
         getListData,
+        setSelectedRowKeys,
     };
 }
 

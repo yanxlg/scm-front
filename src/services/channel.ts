@@ -24,6 +24,8 @@ import {
 import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
 import { singlePromiseWrap } from '@/utils/utils';
+import { EmptyObject } from '@/config/global';
+import { IOptionItem } from '@/components/SearchForm/items/Select';
 
 export async function queryChannelProductVersion(query?: IChannelProductVersionQuery) {
     return request.get<IResponse<IChannelProductVersionResponse>>(
@@ -76,8 +78,25 @@ export async function queryChannelGoodsList(data: IChannelProductListBody & IReq
     });
 }
 
+function convertChannelCategory(data: IChannelCategoryResponse): IOptionItem[] {
+    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
+        return {
+            value: String(platform_cate_id),
+            name: platform_cate_name,
+            ...(children ? { children: convertChannelCategory(children) } : undefined),
+        };
+    });
+}
+
 export const queryChannelCategory = singlePromiseWrap(() => {
-    return request.get<IResponse<IChannelCategoryResponse>>(ChannelApiPath.QueryCategory);
+    return request
+        .get<IResponse<IChannelCategoryResponse>>(ChannelApiPath.QueryCategory)
+        .then(({ data = [] } = EmptyObject) => {
+            return convertChannelCategory(data);
+        })
+        .catch(() => {
+            return [];
+        });
 });
 
 // 获取数据/状态更新数据

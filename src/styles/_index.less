@@ -1,3 +1,5 @@
+@import '~antd/es/style/themes/default';
+
 .inline-block {
     display: inline-block !important;
 }
@@ -8,4 +10,20 @@
 
 .margin-none {
     margin: 0 !important;
+}
+
+.container {
+    padding: 20px 30px;
+
+    @spacing: 64px + 48px;
+
+    min-height: calc(~'100vh - @{spacing}');
+}
+
+.transparent {
+    background: @layout-body-background;
+}
+
+.text-center {
+    text-align: center;
 }

@@ -27,9 +27,6 @@ const SubTaskView: React.FC<ISubTaskViewProps> = props => {
     const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList(
         queryTaskProgressList,
         undefined,
-        'page_number',
-        undefined,
-        undefined,
         {
             task_id: props.task_Id,
         },

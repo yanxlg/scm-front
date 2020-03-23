@@ -15,7 +15,7 @@ body {
     background: #fff;
 }
 
-/* .ant-table table{
-    width: max-content!important;
-    min-width: 100%!important;
-} */
+/****************fix pro table style**************/
+.ant-pro-table .ant-table-row .ant-table-cell:first-child {
+    padding: 16px 16px!important;
+}

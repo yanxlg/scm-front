@@ -21,6 +21,7 @@ import {
 import { IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
 import { EmptyObject } from '@/config/global';
+import { transPaginationRequest, transPaginationResponse } from '@/utils/utils';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -48,9 +49,12 @@ export declare interface IPddHotTaskParams {
 }
 
 export async function getTaskList(query: ITaskListQuery) {
-    return request.get<IResponse<ITaskListResponse>>(TaskApiPath.QueryTaskList, {
-        params: query,
-    });
+    const params = transPaginationRequest(query);
+    return request
+        .get<IResponse<ITaskListResponse>>(TaskApiPath.QueryTaskList, {
+            params: params,
+        })
+        .then(transPaginationResponse);
 }
 
 export async function addPddHotTask(params: IHotTaskBody) {
@@ -183,9 +187,11 @@ export async function queryTaskLog(params: { task_id: number; page: number; page
 }
 
 export async function queryTaskProgressList(params: ITaskProgressQuery) {
-    return request.get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
-        params: params,
-    });
+    return request
+        .get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
+            params: transPaginationRequest(params),
+        })
+        .then(transPaginationResponse);
 }
 
 export async function addAutoPurchaseTask(data: IAPTaskBody) {

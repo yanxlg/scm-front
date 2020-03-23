@@ -5,10 +5,10 @@ import { FormInstance, Rule } from 'antd/es/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { transNullValue, transNumber } from '@/utils/transform';
 
-declare interface IOptionItem {
+export declare interface IOptionItem {
     name: string;
     value: string | number;
-    [key: string]: any;
+    [key: string]: any; // 子节点key
 }
 
 export type SelectFormatter = 'number';
@@ -28,7 +28,6 @@ export type SelectProps = FormItemLabelProps &
         optionListDependence?: {
             name: FormItemName | FormItemName[]; // 依赖名成
             key: string; // 关联key，暂时不支持多个对应
-            convert?: (item: any) => IOptionItem;
         };
         className?: string;
         formItemClassName?: string;
@@ -74,20 +73,20 @@ const FormSelect = (props: SelectProps) => {
     } => {
         if (isFunction) {
             if (optionListDependence) {
-                const { name, key: dependenceKey, convert } = optionListDependence;
+                const { name, key: dependenceKey } = optionListDependence;
                 const dependenceNameList = typeof name === 'string' ? [name] : name || [];
                 let parentItem = options;
                 for (let i = 0; i < dependenceNameList.length; i++) {
                     const dependenceName = dependenceNameList[i];
                     const dependenceValue = form?.getFieldValue(dependenceName);
-                    const siblings = parentItem?.find(({ value }) => value === dependenceValue);
+
+                    const siblings = parentItem?.find(({ value }) => {
+                        return value === dependenceValue;
+                    });
                     parentItem = siblings?.[dependenceKey] ?? undefined;
                 }
-                const convertList = parentItem?.map((item: any) =>
-                    convert ? convert(item) : item,
-                );
                 const loading = !options;
-                const mergeList = convertList || ([] as IOptionItem[]);
+                const mergeList = parentItem || ([] as IOptionItem[]);
                 return {
                     loading: loading,
                     optionList: mergeList,

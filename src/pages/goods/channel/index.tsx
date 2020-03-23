@@ -145,20 +145,7 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
-        optionList: () =>
-            queryChannelCategory()
-                .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
-                        return {
-                            value: String(platform_cate_id),
-                            name: platform_cate_name,
-                            children,
-                        };
-                    });
-                })
-                .catch(() => {
-                    return [];
-                }),
+        optionList: () => queryChannelCategory(),
         onChange: (name, form) => {
             form.resetFields(['level_two_category']);
         },
@@ -172,31 +159,12 @@ const formFields: FormField[] = [
         optionListDependence: {
             name: 'level_one_category',
             key: 'children',
-            convert: ({ platform_cate_id, platform_cate_name }: IChannelCategoryItem) => {
-                return {
-                    value: String(platform_cate_id),
-                    name: platform_cate_name,
-                };
-            },
         },
         syncDefaultOption: {
             value: '',
             name: '全部',
         },
-        optionList: () =>
-            queryChannelCategory()
-                .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
-                        return {
-                            value: String(platform_cate_id),
-                            name: platform_cate_name,
-                            children,
-                        };
-                    });
-                })
-                .catch(() => {
-                    return [];
-                }),
+        optionList: () => queryChannelCategory(),
     },
     {
         type: 'select',
