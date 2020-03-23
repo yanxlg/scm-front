@@ -87,12 +87,12 @@ const FormSelect = (props: SelectProps) => {
                     const dependenceValue = form?.getFieldValue(dependenceName);
                     const siblings = parentItem?.find(({ value }) => value === dependenceValue);
                     parentItem = siblings?.[dependenceKey] ?? undefined;
+                    parentItem = parentItem?.map((item: any) =>
+                        convert ? convert(item) : item,
+                    );
                 }
-                const convertList = parentItem?.map((item: any) =>
-                    convert ? convert(item) : item,
-                );
                 const loading = !options;
-                const mergeList = convertList || ([] as IOptionItem[]);
+                const mergeList = parentItem || ([] as IOptionItem[]);
                 return {
                     loading: loading,
                     optionList: mergeList,

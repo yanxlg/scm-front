@@ -28,6 +28,7 @@ import {
     productStatusList,
     versionStatusList,
 } from '@/enums/LocalGoodsEnum';
+import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
 
@@ -42,6 +43,8 @@ export declare interface ICategoryItem {
     children?: ICategoryItem[];
 }
 
+const getCatagoryListPromise = getCatagoryList()
+
 const formFields: FormField[] = [
     {
         type: 'input',
@@ -49,7 +52,7 @@ const formFields: FormField[] = [
         name: 'task_number',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'goods-local-form-item',
+        formItemClassName: 'form-item',
     },
     {
         type: 'input',
@@ -57,7 +60,7 @@ const formFields: FormField[] = [
         name: 'store_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'goods-local-form-item',
+        formItemClassName: 'form-item',
     },
     {
         type: 'input',
@@ -65,14 +68,14 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'goods-local-form-item',
+        formItemClassName: 'form-item',
     },
     {
         type: 'select',
         label: '销售状态',
         name: 'inventory_status',
         className: 'local-search-item-select',
-        formItemClassName: 'goods-local-form-item',
+        formItemClassName: 'form-item',
         formatter: 'number',
         optionList: [defaultOption, ...inventoryStatusList],
     },
@@ -81,7 +84,7 @@ const formFields: FormField[] = [
         label: '请选择版本状态',
         name: 'product_status',
         className: 'local-search-item-select',
-        formItemClassName: 'goods-local-form-item',
+        formItemClassName: 'form-item',
         formatter: 'number',
         placeholder: '请选择版本状态',
         mode: 'multiple',
@@ -93,9 +96,120 @@ const formFields: FormField[] = [
         label: '版本更新',
         name: 'version_status',
         className: 'local-search-item-select',
-        formItemClassName: 'goods-local-form-item',
+        formItemClassName: 'form-item',
         formatter: 'number',
         optionList: [defaultOption, ...versionStatusList],
+    },
+    {
+        type: 'select',
+        label: '一级类目',
+        name: 'first_catagory',
+        className: 'local-search-item-select',
+        formItemClassName: 'form-item',
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () =>
+            getCatagoryListPromise
+                .then(({ data = [] } = EmptyObject) => {
+                    return data.map(({ id, name, children }: ICategoryItem) => {
+                        return {
+                            value: id,
+                            name: name,
+                            children,
+                        };
+                    });
+                })
+                .catch(() => {
+                    return [];
+                }),
+        onChange: (name, form) => {
+            form.resetFields(['second_catagory']);
+            form.resetFields(['third_catagory']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        name: 'second_catagory',
+        className: 'local-search-item-select',
+        formItemClassName: 'form-item',
+        optionListDependence: {
+            name: 'first_catagory',
+            key: 'children',
+            convert: ({ id, name, children }: ICategoryItem) => {
+                return {
+                    value: id,
+                    name: name,
+                    children
+                };
+            },
+        },
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () =>
+            getCatagoryListPromise
+                .then(({ data = [] } = EmptyObject) => {
+                    return data.map(({ id, name, children }: ICategoryItem) => {
+                        return {
+                            value: id,
+                            name: name,
+                            children,
+                        };
+                    });
+                })
+                .catch(() => {
+                    return [];
+                }),
+        onChange: (name, form) => {
+            form.resetFields(['third_catagory']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        name: 'third_catagory',
+        className: 'local-search-item-select',
+        formItemClassName: 'form-item',
+        optionListDependence: {
+            name: ['first_catagory', 'second_catagory'],
+            key: 'children',
+            convert: ({ id, name, children }: ICategoryItem) => {
+                return {
+                    value: id,
+                    name: name,
+                    children
+                };
+            },
+        },
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () =>
+            getCatagoryListPromise
+                .then(({ data = [] } = EmptyObject) => {
+                    return data.map(({ id, name, children }: ICategoryItem) => {
+                        return {
+                            value: id,
+                            name: name,
+                            children,
+                        };
+                    });
+                })
+                .catch(() => {
+                    return [];
+                }),
+    },
+    {
+        type: 'inputRange',
+        label: 'sku数量',
+        name: ['min_sku', 'max_sku'],
+        // className: 'local-search-item-input',
+        formItemClassName: 'form-item',
     },
 ];
 
@@ -612,19 +726,25 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     labelClassName="local-search-label"
                     initialValues={{
                         inventory_status: '',
-                        version_status: ''
+                        version_status: '',
+                        first_catagory: '',
+                        second_catagory: '',
+                        third_catagory: ''
                     }}
                     ref={this.formRef}
                     fieldList={formFields}
                 >
-                    <Button
-                        type="primary"
-                        onClick={() => {
-                            console.log(this.formRef.current!.getFieldsValue());
-                        }}
-                    >
-                        查询
-                    </Button>
+                    <div>
+                        <Button
+                            type="primary"
+                            className="btn-group form-item"
+                            onClick={() => {
+                                console.log(this.formRef.current!.getFieldsValue());
+                            }}
+                        >
+                            查询
+                        </Button>
+                    </div>
                 </SearchForm>
                 <LocalSearch
                     task_id={task_id}

@@ -30,11 +30,16 @@ import FormDateRanger, {
     DateRangerProps,
     DateRangerFormatter,
 } from '@/components/SearchForm/items/DateRanger';
+import FormInputRange, {
+    InputRangeType,
+    InputRangeProps,
+} from '@/components/SearchForm/items/InputRange';
 import { Store, ValidateFields } from 'rc-field-form/lib/interface';
 import { FormInstance } from 'antd/es/form';
 import RcResizeObserver from 'rc-resize-observer';
 
 import '@/styles/index.less';
+import '@/styles/form.less';
 import { UpOutlined, DownOutlined } from '@ant-design/icons';
 
 export declare interface CustomFormProps {
@@ -47,6 +52,7 @@ export type FormField = (
     | Omit<CheckboxProps, 'form'>
     | Omit<DatePickerProps, 'form'>
     | Omit<DateRangerProps, 'form'>
+    | Omit<InputRangeProps, 'form'>
 ) & {
     form?: FormInstance;
 };
@@ -257,6 +263,17 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                         key={String(field.name)}
                         {...(field as DateRangerProps)}
                         type={type as DateRangerType}
+                        labelClassName={labelClassName}
+                        form={form}
+                    />
+                );
+            }
+            if (FormInputRange.typeList.includes(type)) {
+                return (
+                    <FormInputRange
+                        key={String(field.name)}
+                        {...(field as InputRangeProps)}
+                        type={type as InputRangeType}
                         labelClassName={labelClassName}
                         form={form}
                     />
