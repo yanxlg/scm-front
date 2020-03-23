@@ -32,7 +32,29 @@ const FormInputRange = (props: InputRangeProps) => {
         onChange,
         labelClassName = '',
         form,
-        rules,
+        rules = [
+            [
+                ({ getFieldValue, validateFields }) => ({
+                    validator(rule, value) {
+                        // 校验最大值
+                        validateFields([name2]);
+                        return Promise.resolve();
+                    },
+                })
+            ],
+            [
+                ({ getFieldValue, validateFields }) => ({
+                    validator(rule, value) {
+                        const value1 = getFieldValue(name1)
+                        if ( typeof value !== 'number' || typeof value1 !== 'number' || value >=  value1) {
+                            // validateFields([name1]);
+                            return Promise.resolve();
+                        }
+                        return Promise.reject('请检查范围区间!');
+                    },
+                })
+            ]
+        ],
     } = props;
 
     const event1Props = useMemo(() => {
@@ -76,6 +98,7 @@ const FormInputRange = (props: InputRangeProps) => {
                     <Form.Item
                         name={name1}
                         className={styles.marginNone}
+                        validateTrigger='onBlur'
                         rules={rules?.[0]}
                     >
                         <InputNumber
@@ -96,6 +119,7 @@ const FormInputRange = (props: InputRangeProps) => {
                     <Form.Item
                         name={name2}
                         className={styles.marginNone}
+                        validateTrigger='onBlur'
                         rules={rules?.[1]}
                     >
                         <InputNumber

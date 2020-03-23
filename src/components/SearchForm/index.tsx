@@ -137,6 +137,14 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 values[name as string] = FormDatePicker.formatter(formatter as DatePickerFormatter)(
                     form.getFieldValue(name),
                 );
+            } else if (FormInputRange.typeList.includes(type)) {
+                const [name1, name2] = name;
+                values[name1 as string] = FormInputRange.formatter()(
+                    form.getFieldValue(name1),
+                );
+                values[name2 as string] = FormInputRange.formatter()(
+                    form.getFieldValue(name2),
+                );
             } else {
                 return form.getFieldValue(name);
             }

@@ -53,6 +53,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
+        formatter: 'numberStrArr'
     },
     {
         type: 'input',
@@ -61,6 +62,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
+        formatter: 'numberStrArr'
     },
     {
         type: 'input',
@@ -69,6 +71,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
+        formatter: 'strArr'
     },
     {
         type: 'select',
@@ -208,7 +211,29 @@ const formFields: FormField[] = [
         type: 'inputRange',
         label: 'sku数量',
         name: ['min_sku', 'max_sku'],
-        // className: 'local-search-item-input',
+        className: 'local-search-item-input-min',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'inputRange',
+        label: '价格范围（￥）',
+        name: ['min_price', 'max_price'],
+        className: 'local-search-item-input-min',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'inputRange',
+        label: '销量',
+        name: ['min_sale', 'max_sale'],
+        className: 'local-search-item-input-min',
+        formItemClassName: 'form-item',
+    },
+    {
+        type: 'number',
+        label: '评论数量>=',
+        name: 'min_comment',
+        // placeholder: '多个逗号隔开',
+        className: 'local-search-item-input-min',
         formItemClassName: 'form-item',
     },
 ];
@@ -375,6 +400,17 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 });
             });
     };
+
+    private handleClickSearch = () => {
+        // console.log(this.formRef.current?.getFieldsValue());
+        this.formRef.current?.validateFields()
+            .then(values => {
+                // console.log('handleClickSearch', values);
+            })
+            .catch(errorInfo => {
+                // console.log('handleClickSearch', errorInfo);
+            });
+    }
 
     private getSearchParams() {
         if (this.localSearchRef) {
@@ -738,9 +774,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         <Button
                             type="primary"
                             className="btn-group form-item"
-                            onClick={() => {
-                                console.log(this.formRef.current!.getFieldsValue());
-                            }}
+                            onClick={this.handleClickSearch}
                         >
                             查询
                         </Button>
