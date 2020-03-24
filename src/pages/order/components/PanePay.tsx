@@ -45,7 +45,7 @@ const defaultFieldList: IFieldItem[] = [
     {
         type: 'dateRanger',
         name: ['purchase_order_stime', 'purchase_order_etime'],
-        label: '采购时间',
+        label: '拍单时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
