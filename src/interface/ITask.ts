@@ -12,7 +12,12 @@ import {
     AutoPurchaseTaskType,
     TaskCreateStatusCode,
 } from '@/enums/StatusEnum';
-import { IRequestPagination, IRequestPagination2, IBoolean } from '@/interface/IGlobal';
+import {
+    IRequestPagination,
+    IRequestPagination2,
+    IBoolean,
+    RequestPagination,
+} from '@/interface/IGlobal';
 
 export type ITaskListQuery = {
     task_id?: string;
@@ -24,7 +29,7 @@ export type ITaskListQuery = {
     task_create_time2?: number;
     task_sn?: string;
     task_type?: TaskTypeEnum;
-} & IRequestPagination;
+} & RequestPagination;
 
 export interface ITaskListItem {
     task_id: number;
@@ -39,15 +44,18 @@ export interface ITaskListItem {
     execute_count: number;
 }
 
-export interface ITaskListResponse {
-    total: number;
+export interface ITaskListExtraData {
     task_total_num: number;
     task_not_execute_num: number;
     task_execting_num: number;
     task_exected_num: number;
     task_exected_fail_num: number;
     task_ternimation_num: number;
-    task_info: ITaskListItem[];
+}
+
+export interface ITaskListResponse extends ITaskListExtraData {
+    total: number;
+    list: ITaskListItem[];
 }
 
 export interface IURLTaskBody {
@@ -183,7 +191,7 @@ export interface ITaskLogResponse {
     total: number;
 }
 
-export interface ITaskProgressQuery extends IRequestPagination2 {
+export interface ITaskProgressQuery extends RequestPagination {
     task_id: number;
 }
 

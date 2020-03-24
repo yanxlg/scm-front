@@ -9,6 +9,11 @@ export interface IRequestPagination2 {
 }
 export type IRequestPagination = IRequestPagination1 | IRequestPagination2;
 
+export type RequestPagination = {
+    pageNumber: number;
+    pageSize: number;
+};
+
 export interface IResponse<T> {
     code: number;
     message: string;
@@ -19,6 +24,7 @@ export type IPaginationResponse<T> = {
     total?: number;
     all_count?: number;
     list: T[];
-};
+    [key: string]: any;
+}
 
 export type IBoolean = 0 | 1;

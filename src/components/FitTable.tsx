@@ -6,6 +6,7 @@ import { debounce } from 'lodash';
 declare interface IFitTableProps<T> extends TableProps<T> {
     bottom?: number;
     minHeight?: number;
+    autoFitY?: boolean;
 }
 
 function FitTable<T extends object>(props: IFitTableProps<T>) {
@@ -30,9 +31,9 @@ function FitTable<T extends object>(props: IFitTableProps<T>) {
     }, [props.columns, props.rowSelection]);
 
     useEffect(() => {
+        const { bottom = 0, minHeight = 500, autoFitY = true } = props;
         const resizeHeight = debounce(() => {
             const el = ref.current!;
-            const { bottom = 0, minHeight } = props;
             const height = document.body.offsetHeight - el.getBoundingClientRect().top - bottom;
             if ((!minHeight || height >= minHeight) && height > 0) {
                 setY(height);
@@ -40,7 +41,8 @@ function FitTable<T extends object>(props: IFitTableProps<T>) {
                 setY(minHeight);
             }
         }, 300);
-        if (props.bottom) {
+
+        if (autoFitY) {
             resizeHeight();
             window.addEventListener('resize', resizeHeight);
         }
@@ -57,7 +59,7 @@ function FitTable<T extends object>(props: IFitTableProps<T>) {
                 <Table<T> {..._props} scroll={{ ...scroll, x: calcX, y: y }} />
             </div>
         );
-    }, [props, calcX, y]);
+    }, [props, y]);
 }
 
 export { FitTable };

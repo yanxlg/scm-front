@@ -20,6 +20,10 @@ export const TaskRangeMap = {
     6: '采购',
     7: '商品上架',
     8: '商品下架',
+    21: '全站',
+    23: '全站',
+    22: '指定店铺',
+    24: '指定店铺',
     // 11 :'',
 };
 
@@ -38,12 +42,12 @@ export enum TaskRangeEnum {
 //======================= 任务状态 ======================//
 
 export const TaskStatusMap = {
-    0: '未执行',
+    0: '待执行',
     1: '执行中',
     2: '已发送',
     3: '执行失败',
     // 4: '已取消',
-    5: '已完成',
+    5: '执行成功',
     6: '已终止',
     7: '部分失败',
 };
@@ -59,7 +63,6 @@ export enum TaskStatusEnum {
     Failed, // 执行失败
     Finished = 5,
     Terminated = 6,
-    PartFailed,
 }
 
 //======================= 任务类型 ======================//
@@ -68,6 +71,7 @@ export const TaskTypeMap = {
     1: '上架任务',
     2: '更新任务',
     3: '采购任务',
+    4: '采集上架任务',
 };
 
 export type TaskTypeCode = keyof typeof TaskTypeMap;
