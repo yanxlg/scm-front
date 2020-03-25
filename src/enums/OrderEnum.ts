@@ -204,7 +204,7 @@ export const childAllFieldList: IFieldItem[] = [
     {
         type: 'select',
         name: 'reserve_status',
-        label: '采购预定状态',
+        label: '库存预定状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchaseReserveOptionList],
@@ -354,7 +354,7 @@ export const defaultColChildList = [
     'productId', // 中台商品ID
     'purchasePlanId', // 计划子项ID
     'purchasePlatform', // 采购平台
-    'reserveStatus', // 采购预定状态
+    'reserveStatus', // 库存预定状态
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
     'purchaseOrderShippingStatus', // 采购配送状态

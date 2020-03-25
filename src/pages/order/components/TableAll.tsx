@@ -183,7 +183,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         },
         {
             key: 'reserveStatus',
-            title: '采购预定状态',
+            title: '库存预定状态',
             dataIndex: 'reserveStatus',
             align: 'center',
             width: 120,
