@@ -1,8 +1,8 @@
 import React from 'react';
-import { Table, Checkbox } from 'antd';
+import { Table, Checkbox, Modal } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-
 import GoodsDetailDialog from './GoodsDetailDialog';
+import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
@@ -30,6 +30,7 @@ declare interface IProps {
 
 declare interface IState {
     detailDialogStatus: boolean;
+    trackDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
 }
 
@@ -242,6 +243,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: '_logisticsTrack',
             align: 'center',
             width: 120,
+            render: (value, row: IChildOrderItem) => {
+                const { purchaseWaybillNo } = row;
+                // return purchaseWaybillNo ? (
+                //     <a onClick={() => this.showLogisticsTrack(purchaseWaybillNo)}>物流轨迹</a>
+                // ) : null;
+                return <a onClick={() => this.showLogisticsTrack(purchaseWaybillNo)}>物流轨迹</a>;
+            },
         },
         {
             key: 'purchaseCancelReason',
@@ -473,6 +481,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         super(props);
         this.state = {
             detailDialogStatus: false,
+            trackDialogStatus: false,
             goodsDetail: null,
         };
     }
@@ -525,6 +534,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return allColumns;
     };
 
+    private showLogisticsTrack = (purchaseWaybillNo: string) => {
+        console.log('showLogisticsTrack', purchaseWaybillNo);
+        this.setState({
+            trackDialogStatus: true,
+        });
+    };
+
     // 合并单元格
     private mergeCell(value: string | number, row: IChildOrderItem) {
         return {
@@ -539,6 +555,12 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         this.setState({
             detailDialogStatus: false,
             goodsDetail: null,
+        });
+    };
+
+    hideTrackDetail = () => {
+        this.setState({
+            trackDialogStatus: false,
         });
     };
 
@@ -573,7 +595,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
 
     render() {
         const { loading, orderList } = this.props;
-        const { detailDialogStatus, goodsDetail } = this.state;
+        const { detailDialogStatus, trackDialogStatus, goodsDetail } = this.state;
         const columns = this.createColumns();
         return (
             <>
@@ -597,6 +619,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
                 />
+                <TrackDialog visible={trackDialogStatus} hideTrackDetail={this.hideTrackDetail} />
             </>
         );
     }
