@@ -23,6 +23,7 @@ export type InputProps = FormItemLabelProps &
         name: FormItemName;
         formatter?: InputFormatter;
         rules?: Rule[];
+        precision?: number;
     };
 
 const FormInput = (props: InputProps) => {
@@ -37,6 +38,7 @@ const FormInput = (props: InputProps) => {
         form,
         type,
         rules,
+        precision,
     } = props;
     const eventProps = useMemo(() => {
         return onChange
@@ -66,6 +68,7 @@ const FormInput = (props: InputProps) => {
                 ) : type === 'number' ? (
                     <NumberInput
                         min={0}
+                        precision={precision}
                         placeholder={placeholder}
                         className={className}
                         {...eventProps}

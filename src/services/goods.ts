@@ -2,6 +2,7 @@ import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
 import { IResponse, IRequestPagination, IPaginationResponse } from '@/interface/IGlobal';
 import { IGoodsListQuery, IGoodsList } from '@/interface/ILocalGoods';
+import { IOptionItem } from '@/components/SearchForm/items/Select';
 
 export declare interface IFilterParams {
     page?: number;
@@ -72,6 +73,13 @@ declare interface ISkuParams {
     page: number;
     page_count: number;
     product_id: string;
+}
+
+// 兼容SearchForm数据结构 { name: '', value: '' }
+export declare interface ICategoryItem {
+    name: string;
+    id: string;
+    children?: ICategoryItem[];
 }
 
 export async function getGoodsList(params: IFilterParams) {
@@ -157,9 +165,25 @@ export async function getGoodsSales(params: IProductId) {
     });
 }
 
+function convertCategory(data: ICategoryItem[]): IOptionItem[] {
+    return data.map(({ name, id, children }) => {
+        return {
+            name,
+            value: id,
+            ...(children ? { children: convertCategory(children) } : undefined),
+        };
+    });
+}
+
 // 获取所有
 export async function getCatagoryList() {
-    return request.get(LocalApiPath.getCatagoryList);
+    return request.get(LocalApiPath.getCatagoryList).then(res => {
+        const { data } = res;
+        return {
+            list: data,
+            convertList: convertCategory(data),
+        };
+    });
 }
 
 // 获取商品版本

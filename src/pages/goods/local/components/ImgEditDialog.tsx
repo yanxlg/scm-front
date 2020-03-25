@@ -5,8 +5,8 @@ import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 
 // import { UploadChangeParam } from 'antd/lib/upload';
 
-import { postGoodsPicUpload } from '@/services/goods';
-import { ICategoryItem, IRowDataItem } from '../index';
+import { postGoodsPicUpload, ICategoryItem } from '@/services/goods';
+import { IRowDataItem } from '../index';
 import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
 
 const { Option } = Select;

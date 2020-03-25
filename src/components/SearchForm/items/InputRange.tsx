@@ -20,6 +20,7 @@ export type InputRangeProps = FormItemLabelProps &
         onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
         name: [FormItemName, FormItemName];
         formatter?: any;
+        precision?: number;
         rules?: [Rule[], Rule[]];
     };
 
@@ -32,6 +33,7 @@ const FormInputRange = (props: InputRangeProps) => {
         onChange,
         labelClassName = '',
         form,
+        precision = 0,
         rules = [
             [
                 ({ getFieldValue, validateFields }) => ({
@@ -40,20 +42,24 @@ const FormInputRange = (props: InputRangeProps) => {
                         validateFields([name2]);
                         return Promise.resolve();
                     },
-                })
+                }),
             ],
             [
                 ({ getFieldValue, validateFields }) => ({
                     validator(rule, value) {
-                        const value1 = getFieldValue(name1)
-                        if ( typeof value !== 'number' || typeof value1 !== 'number' || value >=  value1) {
+                        const value1 = getFieldValue(name1);
+                        if (
+                            typeof value !== 'number' ||
+                            typeof value1 !== 'number' ||
+                            value >= value1
+                        ) {
                             // validateFields([name1]);
                             return Promise.resolve();
                         }
                         return Promise.reject('请检查范围区间!');
                     },
-                })
-            ]
+                }),
+            ],
         ],
     } = props;
 
@@ -98,12 +104,12 @@ const FormInputRange = (props: InputRangeProps) => {
                     <Form.Item
                         name={name1}
                         className={styles.marginNone}
-                        validateTrigger='onBlur'
+                        validateTrigger="onBlur"
                         rules={rules?.[0]}
                     >
                         <InputNumber
                             min={0}
-                            precision={0}
+                            precision={precision}
                             className={className}
                             {...event1Props}
                         />
@@ -119,12 +125,12 @@ const FormInputRange = (props: InputRangeProps) => {
                     <Form.Item
                         name={name2}
                         className={styles.marginNone}
-                        validateTrigger='onBlur'
+                        validateTrigger="onBlur"
                         rules={rules?.[1]}
                     >
                         <InputNumber
                             min={0}
-                            precision={0}
+                            precision={precision}
                             className={className}
                             {...event2Props}
                         />
@@ -142,4 +148,3 @@ FormInputRange.formatter = () => {
 };
 
 export default FormInputRange;
-

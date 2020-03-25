@@ -16,6 +16,7 @@ import {
     IFilterParams,
     getCatagoryList,
     getAllGoodsOnsale,
+    ICategoryItem,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'react-router';
@@ -38,13 +39,7 @@ declare interface IPageData {
     page_count?: number;
 }
 
-export declare interface ICategoryItem {
-    id: string;
-    name: string;
-    children?: ICategoryItem[];
-}
-
-const getCatagoryListPromise = getCatagoryList()
+const getCatagoryListPromise = getCatagoryList();
 
 const formFields: FormField[] = [
     {
@@ -54,7 +49,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
-        formatter: 'numberStrArr'
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -63,7 +58,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
-        formatter: 'numberStrArr'
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -72,7 +67,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
-        formatter: 'strArr'
+        formatter: 'strArr',
     },
     {
         type: 'select',
@@ -116,14 +111,8 @@ const formFields: FormField[] = [
         },
         optionList: () =>
             getCatagoryListPromise
-                .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ id, name, children }: ICategoryItem) => {
-                        return {
-                            value: id,
-                            name: name,
-                            children,
-                        };
-                    });
+                .then(({ convertList = [] } = EmptyObject) => {
+                    return convertList;
                 })
                 .catch(() => {
                     return [];
@@ -149,14 +138,8 @@ const formFields: FormField[] = [
         },
         optionList: () =>
             getCatagoryListPromise
-                .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ id, name, children }: ICategoryItem) => {
-                        return {
-                            value: id,
-                            name: name,
-                            children,
-                        };
-                    });
+                .then(({ convertList = [] } = EmptyObject) => {
+                    return convertList;
                 })
                 .catch(() => {
                     return [];
@@ -173,7 +156,7 @@ const formFields: FormField[] = [
         formItemClassName: 'form-item',
         optionListDependence: {
             name: ['first_catagory', 'second_catagory'],
-            key: 'children'
+            key: 'children',
         },
         syncDefaultOption: {
             value: '',
@@ -181,14 +164,8 @@ const formFields: FormField[] = [
         },
         optionList: () =>
             getCatagoryListPromise
-                .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ id, name, children }: ICategoryItem) => {
-                        return {
-                            value: id,
-                            name: name,
-                            children,
-                        };
-                    });
+                .then(({ convertList = [] } = EmptyObject) => {
+                    return convertList;
                 })
                 .catch(() => {
                     return [];
@@ -207,6 +184,7 @@ const formFields: FormField[] = [
         name: ['min_price', 'max_price'],
         className: 'local-search-item-input-min',
         formItemClassName: 'form-item',
+        precision: 2,
     },
     {
         type: 'inputRange',
@@ -222,6 +200,7 @@ const formFields: FormField[] = [
         // placeholder: '多个逗号隔开',
         className: 'local-search-item-input-min',
         formItemClassName: 'form-item',
+        precision: 0,
     },
 ];
 
@@ -390,14 +369,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
     private handleClickSearch = () => {
         // console.log(this.formRef.current?.getFieldsValue());
-        this.formRef.current?.validateFields()
+        this.formRef.current
+            ?.validateFields()
             .then(values => {
                 // console.log('handleClickSearch', values);
             })
             .catch(errorInfo => {
                 // console.log('handleClickSearch', errorInfo);
             });
-    }
+    };
 
     private getSearchParams() {
         if (this.localSearchRef) {
@@ -437,16 +417,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     }
 
     private getCatagoryList = () => {
-        getCatagoryList()
-            .then(res => {
-                // console.log('getCatagoryList', res);
-                this.setState({
-                    allCatagoryList: res.data,
-                });
-            })
-            .catch(err => {
-                message.error('获取所有类目失败');
+        getCatagoryListPromise.then(res => {
+            // console.log('getCatagoryList', res);
+            this.setState({
+                allCatagoryList: res.list,
             });
+        });
     };
 
     // 找到当前类目
@@ -753,7 +729,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             version_status: '',
                             first_catagory: '',
                             second_catagory: '',
-                            third_catagory: ''
+                            third_catagory: '',
                         }}
                         ref={this.formRef}
                         fieldList={formFields}
@@ -838,7 +814,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
                 </div>
             </Container>
-            
         );
     }
 }

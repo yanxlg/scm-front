@@ -1,8 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import { Input, InputNumber, Select, Button } from 'antd';
 // import { ClickParam } from 'antd/lib/menu';
-
-import { ICategoryItem } from '../index';
+import { ICategoryItem } from '@/services/goods';
 
 const { Option } = Select;
 

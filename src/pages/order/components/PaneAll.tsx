@@ -566,6 +566,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         fieldList={fieldList}
                         labelClassName="order-label"
                         initialValues={this.initialValues}
+                        enableCollapse={false}
                     />
                     <div className="order-operation">
                         <Button
