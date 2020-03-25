@@ -298,7 +298,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 </div>
             </RcResizeObserver>
         );
-    }, [fieldList, collapseBtnVisible, collapse]);
+    }, [fieldList, collapseBtnVisible, collapse, children]);
 
     return useMemo(() => {
         const style = enableCollapse
@@ -318,7 +318,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 {formComponent}
             </div>
         );
-    }, [formHeight, fieldList, collapseBtnVisible, collapse]);
+    }, [formHeight, fieldList, collapseBtnVisible, collapse, children]);
 };
 
 const exportComponent = forwardRef(SearchForm);

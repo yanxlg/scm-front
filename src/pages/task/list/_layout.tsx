@@ -17,7 +17,7 @@ export default function(props: any) {
                         live: true,
                     },
                     {
-                        path: '/task/list/:id',
+                        path: '/task/list/:task_id',
                         extract: true,
                         component: TaskDetailPage,
                     },

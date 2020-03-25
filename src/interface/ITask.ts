@@ -147,8 +147,11 @@ export interface ITaskDetailInfo {
     execute_count: number; //TaskExecuteType
     sub_cat_id: TaskRangeCode;
     sort_type_name?: string;
-    cat_name?: string;
+    cate_name_one?: string;
+    cate_name_two?: string;
+    cate_name_three?: string;
     task_cycle?: TaskExecuteType;
+    task_channel?: string;
 }
 
 export interface ITaskDetailResponse {
@@ -219,4 +222,13 @@ export interface ISubTaskProgressResponse {
     transform_incoming_num: number;
     incoming_num: number;
     incoming_fail_num: number;
+}
+
+export interface ISubTaskIdItem {
+    plan_id: string;
+    status: number;
+}
+
+export interface ISubTaskIdQuery extends RequestPagination {
+    task_id: number;
 }

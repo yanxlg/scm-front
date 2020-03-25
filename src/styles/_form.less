@@ -1,9 +1,14 @@
+@itemSpacing: 24px;
 .form-item {
-    margin-top: 24px;
+    margin-top: @itemSpacing;
 }
 
 .form-item-bottom {
-    margin-bottom: 24px;
+    margin-bottom: @itemSpacing;
+}
+
+.form-item-small {
+    margin-top: @itemSpacing / 2;
 }
 
 .form-inline {
@@ -12,4 +17,30 @@
 
 .form-colon {
     margin: 0 10px;
+}
+
+.form-help-absolute {
+    :global {
+        .ant-form-item-explain {
+            position: absolute !important;
+            white-space: nowrap;
+            top: 100%;
+        }
+        .ant-form-item-with-help {
+            margin-bottom: 0 !important;
+        }
+    }
+}
+
+.form-horizon {
+    display: inline-flex;
+    margin-right: 16px; // form
+}
+
+.form-required-hide {
+    :global .ant-form-item-required {
+        &:before {
+            visibility: hidden;
+        }
+    }
 }

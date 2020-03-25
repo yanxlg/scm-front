@@ -24,7 +24,7 @@ export default [
                 extract: true,
             },
             {
-                path: '/task/list/:id',
+                path: '/task/list/:task_id',
                 name: '任务详情',
                 hideInMenu: true,
                 extract: true,

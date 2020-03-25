@@ -17,4 +17,5 @@ export enum TaskApiPath {
     QueryTaskProgressList = '/api/v1/task/progress',
     AddAPTask = '/api/v1/task/spider/auto_purchase',
     QuerySubTaskProgress = '/api/v1/task/progress_detail',
+    QuerySubTaskIdList = '/api/v1/task/plan_info',
 }

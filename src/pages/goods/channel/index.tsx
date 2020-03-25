@@ -31,6 +31,7 @@ import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
+import Container from '@/components/Container';
 
 declare interface IVoVaListState {
     dataSet: Array<IChannelProductListItem>;
@@ -580,7 +581,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             defaultInitialValues,
         } = this.state;
         return (
-            <div>
+            <Container>
                 <SearchForm
                     ref={this.formRef}
                     fieldList={formFields}
@@ -646,7 +647,7 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
                 />
                 <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
                 <SkuEditModal ref={this.skuRef} />
-            </div>
+            </Container>
         );
     }
 }

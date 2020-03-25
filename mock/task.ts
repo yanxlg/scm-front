@@ -2,6 +2,14 @@ import { Request, Response } from 'express';
 
 import Mock, { Random } from 'mockjs';
 
+const sleep = async (second: number) => {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, second * 1000);
+    });
+};
+
 const list = Mock.mock({
     'data|100-500': [
         {
@@ -30,6 +38,22 @@ export default {
                 ),
                 total: list.data.length,
             },
+        });
+    },
+    'GET /api/v1/task/plan_info': async (req: Request, res: Response) => {
+        const { page, page_count } = req.query;
+        await sleep(4);
+        res.status(200).send({
+            code: 200,
+            message: 'By mock.js',
+            data: Mock.mock({
+                [`data|${page_count}`]: [
+                    {
+                        plan_id: '@increment(18)',
+                        status: '@increment',
+                    },
+                ],
+            }).data,
         });
     },
 };

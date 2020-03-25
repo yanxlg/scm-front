@@ -51,3 +51,7 @@ export const transPaginationResponse = <T>({
 };
 
 export { singlePromiseWrap };
+
+export const mapClassNames = (classNames: string[]) => {
+    return classNames.join(' ');
+};
