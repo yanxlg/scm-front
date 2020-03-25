@@ -13,18 +13,11 @@ import {
 declare interface IProps {
     loading: boolean;
     orderList: IOrderItem[];
+    selectedRowKeys: string[];
+    changeSelectedRowKeys(keys: string[]): void;
 }
 
 declare interface IState {}
-
-
-
-// 采购单号
-// 采购订单号
-// 采购运单号
-// 采购生成时间
-// 采购支付时间
-
 
 class TableNotStock extends React.PureComponent<IProps, IState> {
     private columns: ColumnProps<IOrderItem>[] = [
@@ -84,31 +77,24 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
-            key: 'purchase_shipping_no',
-            title: '采购单号',
-            dataIndex: 'purchase_shipping_no',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'a5',
+            key: 'purchasePlatformOrderId',
             title: '采购订单号',
-            dataIndex: 'a5',
+            dataIndex: 'purchasePlatformOrderId',
             align: 'center',
             width: 120,
         },
         {
-            key: 'purchase_shipping_no',
+            key: 'purchaseWaybillNo',
             title: '采购运单号',
-            dataIndex: 'purchase_shipping_no',
+            dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
         },
         
         {
-            key: 'a4',
+            key: 'platformOrderTime',
             title: '采购生成时间',
-            dataIndex: 'a4',
+            dataIndex: 'platformOrderTime',
             align: 'center',
             width: 120,
         },
@@ -120,9 +106,9 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
-            key: 'a3',
+            key: 'payTime',
             title: '采购支付状态',
-            dataIndex: 'a3',
+            dataIndex: 'payTime',
             align: 'center',
             width: 120,
         },
@@ -162,16 +148,27 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
         super(props);
     }
 
+    private onSelectChange = (selectedRowKeys: React.Key[]) => {
+        // console.log('onSelectChange', selectedRowKeys);
+        this.props.changeSelectedRowKeys(selectedRowKeys as string[]);
+    };
+
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, selectedRowKeys } = this.props;
+        const rowSelection = {
+            fixed: true,
+            columnWidth: 60,
+            selectedRowKeys: selectedRowKeys,
+            onChange: this.onSelectChange,
+        };
         return (
             <FitTable
                 bordered
-                rowKey="middleground_order_id"
+                rowKey="orderGoodsId"
                 className="order-table"
                 loading={loading}
                 columns={this.columns}
-                // rowSelection={rowSelection}
+                rowSelection={rowSelection}
                 dataSource={orderList}
                 scroll={{ x: 'max-content' }}
                 pagination={false}

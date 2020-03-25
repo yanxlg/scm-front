@@ -204,9 +204,6 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
     }
 
     private handleClickSearch = () => {
-        // const  values = this.formRef.current?.getFieldsValue();
-        // if (values.order_goods_id) {}
-        // console.log(this.formRef.current?.getFieldsValue());
         const { order_goods_id } = this.formRef.current?.getFieldsValue() as any;
         if (order_goods_id && /[^0-9]/.test(order_goods_id)) {
             return message.error('中台订单ID只能输入数字字符');
@@ -335,17 +332,17 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                     changeSelectedRowKeys={this.changeSelectedRowKeys}
                 />
                 <Pagination
-                        className="order-pagination"
-                        total={total}
-                        current={page}
-                        pageSize={pageCount}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
-                    />
+                    className="order-pagination"
+                    total={total}
+                    current={page}
+                    pageSize={pageCount}
+                    showSizeChanger={true}
+                    showQuickJumper={true}
+                    pageSizeOptions={pageSizeOptions}
+                    onChange={this.onChangePage}
+                    onShowSizeChange={this.pageCountChange}
+                    showTotal={total => `共${total}条`}
+                />
             </div>
         );
     }

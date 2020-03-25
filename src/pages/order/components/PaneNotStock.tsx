@@ -1,16 +1,17 @@
 import React, { RefObject } from 'react';
-import { Button } from 'antd';
+import { Button, message, Pagination, notification } from 'antd';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-import OptionalColumn from './OptionalColumn';
 import TableNotStock from './TableNotStock';
+import LoadingButton from '@/components/LoadingButton';
 
-import { getPurchasedNotStockList, IFilterParams } from '@/services/order-manage';
+import { getPurchasedNotStockList, IFilterParams, delChannelOrders } from '@/services/order-manage';
 import {
     defaultOptionItem,
     orderStatusOptionList,
     purchaseOrderOptionList,
     pageSizeOptions,
 } from '@/enums/OrderEnum';
+import { getCurrentPage } from '@/utils/common';
 
 export declare interface IOrderItem {
     orderGoodsId: string;                // 中台订单ID
@@ -19,11 +20,10 @@ export declare interface IOrderItem {
     productId: string;                   // 中台商品ID
     purchasePlatform: string;            // 采购平台
     purchaseNumber: number;              // 采购数量
-    // 采购单号
-    // 采购订单号
-    // 采购运单号
-    // 采购生成时间
-    // 采购支付时间
+    purchasePlatformOrderId: string;     // 采购订单号
+    purchaseWaybillNo: string;           // 采购运单号
+    platformOrderTime: string;           // 采购生成时间
+    payTime: string;                     // 采购支付时间
     purchaseOrderStatus: number;         // 采购订单状态
     purchaseOrderShippingStatus: number; // 采购配送状态
     purchaseOrderPayStatus: number;      // 采购支付状态
@@ -88,6 +88,7 @@ declare interface IState {
     total: number;
     loading: boolean;
     orderList: IOrderItem[];
+    selectedRowKeys: string[];
 }
 
 class PaneNotStock extends React.PureComponent<IProps, IState> {
@@ -105,11 +106,11 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
             total: 0,
             loading: false,
             orderList: [],
+            selectedRowKeys: []
         };
     }
 
     componentDidMount() {
-        // console.log('PaneAll');
         this.onSearch();
     }
 
@@ -119,10 +120,9 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
             page,
             page_count: pageCount,
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
+        if (this.formRef.current) {
+            params = Object.assign(params, this.formRef.current.getFieldsValue());
+        }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
@@ -150,11 +150,6 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
 
     // 处理接口返回数据
     handleOrderList = (list: any[]): IOrderItem[] => {
-        // 采购单号
-        // 采购订单号
-        // 采购运单号
-        // 采购生成时间
-        // 采购支付时间
         return list.map(current => {
             const {
                 orderGoodsId,
@@ -165,6 +160,10 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 purchaseOrderStatus,
                 purchaseOrderShippingStatus,
                 purchaseOrderPayStatus,
+                purchasePlatformOrderId,
+                purchaseWaybillNo,
+                platformOrderTime,
+                payTime,
 
                 orderGoods,
                 orderInfo
@@ -187,6 +186,10 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 purchaseOrderStatus,
                 purchaseOrderShippingStatus,
                 purchaseOrderPayStatus,
+                purchasePlatformOrderId,
+                purchaseWaybillNo,
+                platformOrderTime,
+                payTime,
 
                 confirmTime,
                 channelOrderSn,
@@ -197,10 +200,99 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
         });;
     }
 
+    private handleClickSearch = () => {
+        const { order_goods_id } = this.formRef.current?.getFieldsValue() as any;
+        if (order_goods_id && /[^0-9]/.test(order_goods_id)) {
+            return message.error('中台订单ID只能输入数字字符');
+        }
+        this.onSearch();
+    }
+
+    private onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    };
+
+    private pageCountChange = (current: number, size: number) => {
+        const { page, pageCount } = this.state;
+        this.onSearch({
+            page: getCurrentPage(size, (page - 1) * pageCount + 1),
+            page_count: size,
+        });
+    };
+
+    private changeSelectedRowKeys = (keys: string[]) => {
+        // console.log('keys', keys);
+        this.setState({
+            selectedRowKeys: keys
+        })
+    }
+
+    // 批量操作成功
+    private batchOperateSuccess = (name: string = '', list: string[]) => {
+        this.props.getAllTabCount();
+        notification.success({
+            message: `${name}成功`,
+            description: (
+                <div>
+                    {list.map((item: string) => (
+                        <div key={item}>{item}</div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 批量操作失败
+    private batchOperateFail = (
+        name: string = '',
+        list: { order_goods_id: string; result: string }[],
+    ) => {
+        notification.error({
+            message: `${name}失败`,
+            description: (
+                <div>
+                    {list.map((item: any) => (
+                        <div>
+                            {item.order_goods_id}: {item.result.slice(0, 50)}
+                        </div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    private delChannelOrders = () => {
+        const { selectedRowKeys } = this.state;
+        if (selectedRowKeys.length) {
+            return delChannelOrders({
+                order_goods_ids: selectedRowKeys,
+            }).then(res => {
+                this.onSearch();
+                const { success, failed } = res.data;
+                
+                if (success!.length) {
+                    this.batchOperateSuccess('取消渠道订单', success);
+                }
+                if (failed!.length) {
+                    this.batchOperateFail('取消渠道订单', failed);
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单');
+            return Promise.resolve();
+        }
+    };
+
     render() {
         const {
             loading,
-            orderList
+            page,
+            pageCount,
+            total,
+            orderList,
+            selectedRowKeys
         } = this.state;
 
         return (
@@ -213,17 +305,43 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
-                        <Button type="primary" className="order-btn">
+                        <Button 
+                            type="primary" 
+                            className="order-btn"
+                            loading={loading}
+                            onClick={this.handleClickSearch}
+                        >
                             查询
                         </Button>
-                        <Button type="primary" className="order-btn">
+                        <LoadingButton
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.delChannelOrders}
+                        >
                             取消渠道订单
-                        </Button>
+                        </LoadingButton>
                         <Button type="primary" className="order-btn">
                             导出数据
                         </Button>
                     </div>
-                    <TableNotStock loading={loading} orderList={orderList} />
+                    <TableNotStock 
+                        loading={loading}
+                        orderList={orderList}
+                        selectedRowKeys={selectedRowKeys}
+                        changeSelectedRowKeys={this.changeSelectedRowKeys}
+                    />
+                    <Pagination
+                        className="order-pagination"
+                        total={total}
+                        current={page}
+                        pageSize={pageCount}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
+                        showTotal={total => `共${total}条`}
+                    />
                 </div>
             </>
         );
