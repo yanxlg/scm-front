@@ -78,11 +78,19 @@ export const errorTypeOptionList = [
 ];
 
 export const errorDetailOptionList = [
-    { name: '24小时未拍单', value: 2 },
+    // 仓库异常
+    { name: '24小时未拍单', value: 11 },
     { name: '72小时未入库', value: 5 },
     { name: '48小时未出库', value: 6 },
+    // 采购异常
+    { name: '拍单失败超24小时', value: 2 },
     { name: '12小时未支付', value: 3 },
     { name: '48小时未发货', value: 4 },
+    // 尾程异常
+    { name: '7天未揽收', value: 8 },
+    { name: '14天未揽收', value: 9 },
+    { name: '30天未妥投', value: 10 },
+    // 其他异常
     { name: '6天未标记发货', value: 7 },
 ];
 
