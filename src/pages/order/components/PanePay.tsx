@@ -1,6 +1,5 @@
 import React, { RefObject } from 'react';
 import { Button, Pagination, message, notification } from 'antd';
-
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import TablePay from './TablePay';
 import LoadingButton from '@/components/LoadingButton';
@@ -43,27 +42,11 @@ export declare interface IPayItem {
 
 const defaultFieldList: FormField[] = [
     {
-        type: 'dateRanger',
-        name: ['purchase_order_stime', 'purchase_order_etime'],
-        label: '采购时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'select',
-        name: 'purchase_platform',
-        label: '采购渠道',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...purchasePlatformOptionList],
-    },
-    {
         type: 'input',
         name: 'purchase_order_sn',
         label: '采购子订单ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
     },
     {
@@ -71,12 +54,30 @@ const defaultFieldList: FormField[] = [
         name: 'purchase_parent_order_sn',
         label: '采购父订单ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入采购父订单ID',
+    },
+    {
+        type: 'select',
+        name: 'purchase_platform',
+        label: '采购渠道',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...purchasePlatformOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['purchase_order_stime', 'purchase_order_etime'],
+        label: '采购时间',
+        className: 'order-date-picker',
+        formItemClassName: 'form-item',
+        formatter: ['start_date', 'end_date'],
     },
 ];
 
-// const allFieldList: IFieldItem[] = [];
+declare interface IProps {
+    getAllTabCount(): void;
+}
 
 declare interface IState {
     page: number;
@@ -86,14 +87,14 @@ declare interface IState {
     orderList: IPayItem[];
 }
 
-class PanePay extends React.PureComponent<{}, IState> {
+class PanePay extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
     private currentSearchParams: IPayFilterParams | null = null;
     private initialValues = {
         purchase_platform: 100,
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
@@ -236,6 +237,40 @@ class PanePay extends React.PureComponent<{}, IState> {
         return [...new Set(list)];
     };
 
+     // 批量操作成功
+     private batchOperateSuccess = (name: string = '', list: string[]) => {
+        this.props.getAllTabCount();
+        notification.success({
+            message: `${name}成功`,
+            description: (
+                <div>
+                    {list.map((item: string) => (
+                        <div key={item}>{item}</div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 批量操作失败
+    private batchOperateFail = (
+        name: string = '',
+        list: { order_goods_id: string; result: string }[],
+    ) => {
+        notification.error({
+            message: `${name}失败`,
+            description: (
+                <div>
+                    {list.map((item: any) => (
+                        <div>
+                            {item.order_goods_id}: {item.result.slice(0, 50)}
+                        </div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
     // 取消采购订单
     private cancelPurchaseOrder = () => {
         const list = this.getOrderGoodsIdList();
@@ -243,33 +278,13 @@ class PanePay extends React.PureComponent<{}, IState> {
             return delPurchaseOrders({
                 order_goods_ids: list,
             }).then(res => {
-                const { success, failed } = res.data;
                 this.onSearch();
+                const { success, failed } = res.data;
                 if (success!.length) {
-                    notification.success({
-                        message: '取消采购单成功',
-                        description: (
-                            <div>
-                                {success.map((item: string) => (
-                                    <div key={item}>{item}</div>
-                                ))}
-                            </div>
-                        ),
-                    });
+                    this.batchOperateSuccess('取消采购单', success);
                 }
                 if (failed!.length) {
-                    notification.error({
-                        message: '取消采购单失败',
-                        description: (
-                            <div>
-                                {failed.map((item: any) => (
-                                    <div key={item.order_goods_id}>
-                                        {item.order_goods_id}: {item.result.slice(0, 50)}
-                                    </div>
-                                ))}
-                            </div>
-                        ),
-                    });
+                    this.batchOperateFail('取消采购单', failed);
                 }
             });
         } else {
@@ -284,32 +299,14 @@ class PanePay extends React.PureComponent<{}, IState> {
             return delChannelOrders({
                 order_goods_ids: list,
             }).then(res => {
-                const { success, failed } = res.data;
                 this.onSearch();
+                const { success, failed } = res.data;
+                
                 if (success!.length) {
-                    notification.success({
-                        message: '取消渠道订单成功',
-                        description: (
-                            <div>
-                                {success.map((item: string) => (
-                                    <div key={item}>{item}</div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                } else if (failed!.length) {
-                    notification.error({
-                        message: '取消渠道订单失败',
-                        description: (
-                            <div>
-                                {failed.map((item: any) => (
-                                    <div key={item.order_goods_id}>
-                                        {item.order_goods_id}: {item.result.slice(0, 50)}
-                                    </div>
-                                ))}
-                            </div>
-                        ),
-                    });
+                    this.batchOperateSuccess('取消渠道订单', success);
+                }
+                if (failed!.length) {
+                    this.batchOperateFail('取消渠道订单', failed);
                 }
             });
         } else {

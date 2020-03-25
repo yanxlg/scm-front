@@ -1,98 +1,110 @@
 import React, { RefObject } from 'react';
 import { Button } from 'antd';
-import { FormInstance } from 'antd/lib/form';
-
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import OptionalColumn from './OptionalColumn';
 import TableNotStock from './TableNotStock';
 
 import { getPurchasedNotStockList, IFilterParams } from '@/services/order-manage';
-import { defaultStockColList, notStockOptionalColList } from '@/enums/OrderEnum';
+import {
+    defaultOptionItem,
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    pageSizeOptions,
+} from '@/enums/OrderEnum';
 
 export declare interface IOrderItem {
-    order_create_time: number;
-    middleground_order_id: string;
-    commodity_id: string;
-    purchase_shipping_no: string;
-    purchase_order_status: number;
-    purchase_shipping_status: number;
-    purchase_pay_time: number;
-    purchase_num: number;
+    orderGoodsId: string;                // 中台订单ID
+    orderCreateTime: string;             // 订单时间
+    purchasePlanId: string;              // 计划子项ID
+    productId: string;                   // 中台商品ID
+    purchasePlatform: string;            // 采购平台
+    purchaseNumber: number;              // 采购数量
+    // 采购单号
+    // 采购订单号
+    // 采购运单号
+    // 采购生成时间
+    // 采购支付时间
+    purchaseOrderStatus: number;         // 采购订单状态
+    purchaseOrderShippingStatus: number; // 采购配送状态
+    purchaseOrderPayStatus: number;      // 采购支付状态
+    confirmTime: string;                 // 订单确认时间
+    channelOrderSn: string;              // 渠道订单ID
 }
 
-const allFieldList: FormField[] = [
+const fieldList: FormField[] = [
     {
         type: 'input',
-        name: 'middleground_order_id',
-        label: '中台订单ID',
+        name: 'order_goods_id',
+        label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
+        // numberStrArr
+        // formatter: 'strArr',
     },
     {
         type: 'input',
-        name: 'commodity_id',
-        label: '中台商品ID',
+        name: 'purchase_platform_order_id_list',
+        label: '采购平台订单ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台商品ID',
+        formatter: 'strArr',
     },
-    {
-        type: 'input',
-        name: 'purchase_shipping_no',
-        label: '采购运单号',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购运单号',
-    },
-
     {
         type: 'select',
-        name: 'channel',
-        label: '销售渠道',
+        name: 'order_goods_status',
+        label: '中台订单状态',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...orderStatusOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_order_status',
+        label: '采购订单状态',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['platform_order_time_start', 'platform_order_time_end'],
+        label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
+        className: 'order-pending-date-picker',
+        formItemClassName: 'form-item',
+        placeholder: '请选择订单时间',
+        formatter: ['start_date', 'end_date'],
     },
 ];
+
+declare interface IProps {
+    getAllTabCount(): void;
+}
 
 declare interface IState {
     page: number;
     pageCount: number;
     total: number;
     loading: boolean;
-    showColStatus: boolean;
     orderList: IOrderItem[];
-    fieldList: FormField[];
-    selectedColKeyList: string[];
-    colList: string[];
 }
 
-class PaneNotStock extends React.PureComponent<{}, IState> {
+class PaneNotStock extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
-
     private initialValues = {
-        channel: 100,
+        order_goods_status: 100,
+        purchase_order_status: 100
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
             pageCount: 50,
             total: 0,
             loading: false,
-            showColStatus: false,
             orderList: [],
-            fieldList: allFieldList,
-            selectedColKeyList: [],
-            // 表格展示的列
-            colList: defaultStockColList,
         };
     }
 
@@ -121,12 +133,12 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
         getPurchasedNotStockList(params)
             .then(res => {
                 // console.log('getProductOrderList', res);
-                const { total, list } = res.data;
+                const { all_count: total, list } = res.data;
                 this.setState({
                     total,
                     page: params.page as number,
                     pageCount: params.page_count as number,
-                    orderList: list,
+                    orderList: this.handleOrderList(list),
                 });
             })
             .finally(() => {
@@ -136,28 +148,59 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
             });
     };
 
-    changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
-        });
-    };
+    // 处理接口返回数据
+    handleOrderList = (list: any[]): IOrderItem[] => {
+        // 采购单号
+        // 采购订单号
+        // 采购运单号
+        // 采购生成时间
+        // 采购支付时间
+        return list.map(current => {
+            const {
+                orderGoodsId,
+                purchasePlanId,
+                productId,
+                purchasePlatform,
+                purchaseNumber,
+                purchaseOrderStatus,
+                purchaseOrderShippingStatus,
+                purchaseOrderPayStatus,
 
-    changeSelectedColList = (list: string[]) => {
-        this.setState({
-            selectedColKeyList: list,
-            colList: [...defaultStockColList, ...list],
-        });
-    };
+                orderGoods,
+                orderInfo
+            } = current;
+            const {
+                confirmTime,
+                channelOrderSn
+            } = orderInfo;
+            const {
+                orderGoodsStatus,
+                createTime: orderCreateTime
+            } = orderGoods;
+            
+            return {
+                orderGoodsId,
+                purchasePlanId,
+                productId,
+                purchasePlatform,
+                purchaseNumber,
+                purchaseOrderStatus,
+                purchaseOrderShippingStatus,
+                purchaseOrderPayStatus,
+
+                confirmTime,
+                channelOrderSn,
+
+                orderGoodsStatus,
+                orderCreateTime,
+            } as IOrderItem;
+        });;
+    }
 
     render() {
         const {
             loading,
-            showColStatus,
-            orderList,
-            fieldList,
-            selectedColKeyList,
-            colList,
+            orderList
         } = this.state;
 
         return (
@@ -179,18 +222,8 @@ class PaneNotStock extends React.PureComponent<{}, IState> {
                         <Button type="primary" className="order-btn">
                             导出数据
                         </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
-                            {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
                     </div>
-                    {showColStatus ? (
-                        <OptionalColumn
-                            optionalColList={notStockOptionalColList}
-                            selectedColKeyList={selectedColKeyList}
-                            changeSelectedColList={this.changeSelectedColList}
-                        />
-                    ) : null}
-                    <TableNotStock loading={loading} colList={colList} orderList={orderList} />
+                    <TableNotStock loading={loading} orderList={orderList} />
                 </div>
             </>
         );

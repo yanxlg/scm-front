@@ -1,19 +1,24 @@
 import React from 'react';
 import { Modal, Table, Pagination } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
-import { ISkuStyle } from '@/interface/ILocalGoods';
+import { ISkuStyleItem } from '@/interface/ILocalGoods';
 import { getGoodsSkuList } from '@/services/goods';
 
 import './SkuDialog.less';
 
 declare interface ISkuItem {
+    origin_sku_id: string;
+    shipping_fee: number;
     sku_id: string;
-    sku_style: ISkuStyle;
+    sku_style: ISkuStyleItem[];
     sku_price: string;
     sku_inventory: string;
     sku_weight: number;
     serial: number;
+    sku_amount: number; // 爬虫价格 = 价格 + 运费
+    image_url: string;
 }
 
 declare interface IPageData {
@@ -46,10 +51,20 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         },
         {
             key: 'sku_id',
-            title: 'sku id',
+            title: 'SKU ID',
             dataIndex: 'sku_id',
             align: 'center',
             width: 120,
+        },
+        {
+            key: 'image_url',
+            title: '对应图片',
+            dataIndex: 'image_url',
+            align: 'center',
+            width: 120,
+            render: (value: string) => {
+                return <AutoEnLargeImg src={value} className="sku-img" />;
+            }
         },
         {
             key: 'sku_style',
@@ -57,23 +72,34 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             dataIndex: 'sku_style',
             align: 'center',
             width: 200,
-            render: (value: ISkuStyle) => {
-                return Object.keys(value).map(key => (
-                    <div key={key}>
-                        {key}: {value[key]}
+            render: (value: ISkuStyleItem[]) => {
+                return value.map(item => (
+                    <div key={item.option}>
+                        {item.option}: {item.value}
                     </div>
-                ));
+                ))
             },
         },
         {
+            key: 'sku_amount',
+            title: '爬虫价格(￥)',
+            dataIndex: 'sku_amount',
+            align: 'center',
+            width: 100
+        },
+        {
             key: 'sku_price',
-            title: '爬虫价格',
+            title: '单价(￥)',
             dataIndex: 'sku_price',
             align: 'center',
-            width: 100,
-            render: (value: string) => {
-                return '￥' + value;
-            },
+            width: 100
+        },
+        {
+            key: 'shipping_fee',
+            title: '运费(￥)',
+            dataIndex: 'shipping_fee',
+            align: 'center',
+            width: 100
         },
         {
             key: 'sku_weight',
@@ -126,14 +152,18 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                     page: params.page,
                     allCount: all_count,
                     skuList: list.map((item: any, index: number) => {
-                        const { sku_id, sku_style, sku_price, sku_weight, sku_inventory } = item;
+                        let { sku_style, sku_price, shipping_fee, variant_image, ...rest } = item;
                         return {
-                            serial: (params.page - 1) * 50 + index + 1,
-                            sku_id,
-                            sku_style,
+                            ...rest,
                             sku_price,
-                            sku_weight,
-                            sku_inventory,
+                            shipping_fee,
+                            sku_amount: Number(sku_price) + Number(shipping_fee),
+                            sku_style: sku_style.map(({ option, value }: any) => ({
+                                option,
+                                value
+                            })),
+                            image_url: variant_image?.url,
+                            serial: (params.page - 1) * 50 + index + 1,
                         };
                     }),
                 });
@@ -182,7 +212,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                 >
                     <div className="goods-sku-dialog">
                         <div className="goods-info">
-                            <img src={goods_img} />
+                            <img className="main-img" src={goods_img} />
                             <div className="content">
                                 <div className="desc">
                                     商品标题：{title}

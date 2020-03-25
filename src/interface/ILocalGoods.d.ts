@@ -12,8 +12,9 @@ export interface IOnsaleItem {
     status_label: string;
 }
 
-export interface ISkuStyle {
-    [key: string]: string | number;
+export interface ISkuStyleItem {
+    option: string;
+    value: string;
 }
 
 export interface ISkuItem {
@@ -22,7 +23,7 @@ export interface ISkuItem {
     sku_inventory?: string;
     sku_price?: string;
     sku_sn?: string;
-    sku_style?: ISkuStyle | [];
+    sku_style?: ISkuStyleItem[];
     sku_weight?: string;
 }
 
@@ -72,4 +73,9 @@ export interface IGoodsList {
     worm_goodsinfo_link: string;
     worm_task_id: string;
     sku_info: ISkuItem[];
+    price_min: number;
+    price_max: number;
+    shipping_fee_min: number;
+    shipping_fee_max: number;
+
 }

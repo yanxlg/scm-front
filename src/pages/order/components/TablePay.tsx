@@ -238,7 +238,6 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 className="order-table"
                 loading={loading}
                 columns={this.columns}
-                // rowSelection={rowSelection}
                 dataSource={orderList}
                 scroll={{ x: 'max-content', y: 600 }}
                 pagination={false}

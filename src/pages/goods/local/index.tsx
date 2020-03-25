@@ -6,6 +6,7 @@ import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
 import ImgEditDialog from './components/ImgEditDialog';
 import ExcelDialog from './components/ExcelDialog';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import Container from '@/components/Container';
 
 import {
     getGoodsList,
@@ -141,13 +142,6 @@ const formFields: FormField[] = [
         optionListDependence: {
             name: 'first_catagory',
             key: 'children',
-            convert: ({ id, name, children }: ICategoryItem) => {
-                return {
-                    value: id,
-                    name: name,
-                    children
-                };
-            },
         },
         syncDefaultOption: {
             value: '',
@@ -179,14 +173,7 @@ const formFields: FormField[] = [
         formItemClassName: 'form-item',
         optionListDependence: {
             name: ['first_catagory', 'second_catagory'],
-            key: 'children',
-            convert: ({ id, name, children }: ICategoryItem) => {
-                return {
-                    value: id,
-                    name: name,
-                    children
-                };
-            },
+            key: 'children'
         },
         syncDefaultOption: {
             value: '',
@@ -757,98 +744,101 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const task_id = this.props.location.state?.task_id;
 
         return (
-            <div className="goods-local">
-                <SearchForm
-                    labelClassName="local-search-label"
-                    initialValues={{
-                        inventory_status: '',
-                        version_status: '',
-                        first_catagory: '',
-                        second_catagory: '',
-                        third_catagory: ''
-                    }}
-                    ref={this.formRef}
-                    fieldList={formFields}
-                >
-                    <div>
-                        <Button
-                            type="primary"
-                            className="btn-group form-item"
-                            onClick={this.handleClickSearch}
-                        >
-                            查询
-                        </Button>
-                    </div>
-                </SearchForm>
-                <LocalSearch
-                    task_id={task_id}
-                    // toggleUpdateDialog={this.toggleUpdateDialog}
-                    ref={node => (this.localSearchRef = node)}
-                    searchLoading={searchLoading}
-                    onsaleLoading={onsaleLoading}
-                    allOnsaleLoading={allOnsaleLoading}
-                    deleteLoading={deleteLoading}
-                    allCatagoryList={allCatagoryList}
-                    onSearch={this.onSearch}
-                    postGoodsOnsale={this.postGoodsOnsale}
-                    getGoodsDelete={this.getGoodsDelete}
-                    toggleExcelDialog={this.toggleExcelDialog}
-                    getCurrentCatagory={this.getCurrentCatagory}
-                    getAllGoodsOnsale={this.getAllGoodsOnsale}
-                />
-                <Pagination
-                    className="goods-local-pagination"
-                    size="small"
-                    total={allCount}
-                    current={page}
-                    pageSize={page_count}
-                    showSizeChanger={true}
-                    showQuickJumper={true}
-                    pageSizeOptions={pageSizeOptions}
-                    onChange={this.onChangePage}
-                    onShowSizeChange={this.pageCountChange}
-                    showTotal={total => {
-                        if (total > 10000) {
-                            return '';
-                        }
-                        return `共${total}条`;
-                    }}
-                />
-                <GoodsTable
-                    // ref={node => (this.goodsTableRef = node)}
-                    searchLoading={searchLoading}
-                    goodsList={goodsList}
-                    selectedRowKeys={selectedRowKeys}
-                    toggleEditGoodsDialog={this.toggleEditGoodsDialog}
-                    changeSelectedRowKeys={this.changeSelectedRowKeys}
-                    searchGoodsSale={this.searchGoodsSale}
-                />
-                <ShelvesDialog
-                    visible={shelvesDialogStatus}
-                    saleStatusList={saleStatusList}
-                    toggleShelvesDialog={this.toggleShelvesDialog}
-                />
-                <ImgEditDialog
-                    visible={goodsEditDialogStatus}
-                    originEditGoods={originEditGoods}
-                    currentEditGoods={currentEditGoods}
-                    allCatagoryList={allCatagoryList}
-                    toggleEditGoodsDialog={this.toggleEditGoodsDialog}
-                    getCurrentCatagory={this.getCurrentCatagory}
-                    changeGoodsText={this.changeGoodsText}
-                    changeGoodsCatagory={this.changeGoodsCatagory}
-                    changeGoodsImg={this.changeGoodsImg}
-                    resetGoodsData={this.resetGoodsData}
-                    onSearch={this.onSearch}
-                />
-                <ExcelDialog
-                    visible={excelDialogStataus}
-                    allCount={allCount}
-                    getExcelData={this.getExcelData}
-                    toggleExcelDialog={this.toggleExcelDialog}
-                />
-                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
-            </div>
+            <Container>
+                <div className="goods-local">
+                    <SearchForm
+                        labelClassName="local-search-label"
+                        initialValues={{
+                            inventory_status: '',
+                            version_status: '',
+                            first_catagory: '',
+                            second_catagory: '',
+                            third_catagory: ''
+                        }}
+                        ref={this.formRef}
+                        fieldList={formFields}
+                    >
+                        <div>
+                            <Button
+                                type="primary"
+                                className="btn-group form-item"
+                                onClick={this.handleClickSearch}
+                            >
+                                查询
+                            </Button>
+                        </div>
+                    </SearchForm>
+                    <LocalSearch
+                        task_id={task_id}
+                        // toggleUpdateDialog={this.toggleUpdateDialog}
+                        ref={node => (this.localSearchRef = node)}
+                        searchLoading={searchLoading}
+                        onsaleLoading={onsaleLoading}
+                        allOnsaleLoading={allOnsaleLoading}
+                        deleteLoading={deleteLoading}
+                        allCatagoryList={allCatagoryList}
+                        onSearch={this.onSearch}
+                        postGoodsOnsale={this.postGoodsOnsale}
+                        getGoodsDelete={this.getGoodsDelete}
+                        toggleExcelDialog={this.toggleExcelDialog}
+                        getCurrentCatagory={this.getCurrentCatagory}
+                        getAllGoodsOnsale={this.getAllGoodsOnsale}
+                    />
+                    <Pagination
+                        className="goods-local-pagination"
+                        size="small"
+                        total={allCount}
+                        current={page}
+                        pageSize={page_count}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
+                        showTotal={total => {
+                            if (total > 10000) {
+                                return '';
+                            }
+                            return `共${total}条`;
+                        }}
+                    />
+                    <GoodsTable
+                        // ref={node => (this.goodsTableRef = node)}
+                        searchLoading={searchLoading}
+                        goodsList={goodsList}
+                        selectedRowKeys={selectedRowKeys}
+                        toggleEditGoodsDialog={this.toggleEditGoodsDialog}
+                        changeSelectedRowKeys={this.changeSelectedRowKeys}
+                        searchGoodsSale={this.searchGoodsSale}
+                    />
+                    <ShelvesDialog
+                        visible={shelvesDialogStatus}
+                        saleStatusList={saleStatusList}
+                        toggleShelvesDialog={this.toggleShelvesDialog}
+                    />
+                    <ImgEditDialog
+                        visible={goodsEditDialogStatus}
+                        originEditGoods={originEditGoods}
+                        currentEditGoods={currentEditGoods}
+                        allCatagoryList={allCatagoryList}
+                        toggleEditGoodsDialog={this.toggleEditGoodsDialog}
+                        getCurrentCatagory={this.getCurrentCatagory}
+                        changeGoodsText={this.changeGoodsText}
+                        changeGoodsCatagory={this.changeGoodsCatagory}
+                        changeGoodsImg={this.changeGoodsImg}
+                        resetGoodsData={this.resetGoodsData}
+                        onSearch={this.onSearch}
+                    />
+                    <ExcelDialog
+                        visible={excelDialogStataus}
+                        allCount={allCount}
+                        getExcelData={this.getExcelData}
+                        toggleExcelDialog={this.toggleExcelDialog}
+                    />
+                    <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
+                </div>
+            </Container>
+            
         );
     }
 }

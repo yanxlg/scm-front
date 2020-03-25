@@ -7,7 +7,11 @@ import OptionalColumn from './OptionalColumn';
 import TableStockNotShip from './TableStockNotShip';
 
 import { getPurchasedNotStockList, IFilterParams } from '@/services/order-manage';
-import { defaultStockNotShipColList, stockNotShipOptionalColList } from '@/enums/OrderEnum';
+import {
+    defaultOptionItem,
+    channelOptionList,
+    pageSizeOptions,
+} from '@/enums/OrderEnum';
 
 export declare interface IOrderItem {
     order_create_time: number;
@@ -20,53 +24,55 @@ export declare interface IOrderItem {
     deliver_start_time: number;
 }
 
-const allFieldList: FormField[] = [
-    {
-        type: 'dateRanger',
-        name: ['warehousing_start_time', 'warehousing_start_time'],
-        label: '入库时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
+const fieldList: FormField[] = [
     {
         type: 'input',
-        name: 'middleground_order_id',
-        label: '中台订单ID',
+        name: 'order_goods_id',
+        label: '中台订单子ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单ID',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台订单子ID',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
-        name: 'commodity_id',
+        name: 'product_id',
         label: '中台商品ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台商品ID',
+        formatter: 'strArr',
     },
     {
         type: 'input',
-        name: 'purchase_shipping_no',
+        name: 'purchase_waybill_no',
         label: '采购运单号',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入采购运单号',
+        formatter: 'strArr',
     },
-
     {
         type: 'select',
-        name: 'channel',
+        name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...channelOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['storage_time_start', 'storage_time_end'],
+        label: '入库时间',
+        className: 'order-date-picker',
+        formItemClassName: 'form-item',
+        formatter: ['start_date', 'end_date'],
     },
 ];
+
+declare interface IProps {
+    getAllTabCount(): void;
+}
 
 declare interface IState {
     page: number;
@@ -75,19 +81,17 @@ declare interface IState {
     loading: boolean;
     showColStatus: boolean;
     orderList: IOrderItem[];
-    fieldList: FormField[];
     selectedColKeyList: string[];
-    colList: string[];
 }
 
-class PaneStockNotShip extends React.PureComponent<{}, IState> {
+class PaneStockNotShip extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
 
     private initialValues = {
         channel: 100,
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
@@ -96,10 +100,7 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
             loading: false,
             showColStatus: false,
             orderList: [],
-            fieldList: allFieldList,
             selectedColKeyList: [],
-            // 表格展示的列
-            colList: defaultStockNotShipColList,
         };
     }
 
@@ -153,7 +154,6 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
     changeSelectedColList = (list: string[]) => {
         this.setState({
             selectedColKeyList: list,
-            colList: [...defaultStockNotShipColList, ...list],
         });
     };
 
@@ -162,9 +162,7 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
             loading,
             showColStatus,
             orderList,
-            fieldList,
             selectedColKeyList,
-            colList,
         } = this.state;
 
         return (
@@ -190,14 +188,7 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
                             {showColStatus ? '收起' : '展示'}字段设置
                         </Button>
                     </div>
-                    {showColStatus ? (
-                        <OptionalColumn
-                            optionalColList={stockNotShipOptionalColList}
-                            selectedColKeyList={selectedColKeyList}
-                            changeSelectedColList={this.changeSelectedColList}
-                        />
-                    ) : null}
-                    <TableStockNotShip loading={loading} colList={colList} orderList={orderList} />
+                    {/* <TableStockNotShip loading={loading} orderList={orderList} /> */}
                 </div>
             </>
         );

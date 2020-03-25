@@ -2,12 +2,13 @@ import React, { RefObject } from 'react';
 import { Table, Button } from 'antd';
 import { Link } from 'umi';
 import SkuDialog from './SkuDialog';
+import { FitTable } from '@/components/FitTable';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 import { ColumnProps } from 'antd/es/table';
 import { IRowDataItem } from '../index';
 import { IOnsaleItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from '@/utils/date';
-import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 declare interface IProps {
     searchLoading: boolean;
@@ -36,52 +37,48 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
     private columns: ColumnProps<IRowDataItem>[] = [
         {
             fixed: true,
+            key: '_operation',
+            title: '操作',
+            align: 'center',
+            width: 140,
+            render: (value, row: IRowDataItem) => {
+                return (
+                    <>
+                        <div>
+                            <a onClick={() => this.props.toggleEditGoodsDialog(true, row)}>编辑商品</a>
+                        </div>
+                        <div className="spacing-top">
+                            <Link to={`/goods/local/version?id=${row.commodity_id}`}>
+                                <a >查看更多版本</a>
+                            </Link>
+                        </div>
+                    </>
+                )
+            }
+        },
+        {
             key: 'commodity_id',
             title: 'Commodity ID',
             dataIndex: 'commodity_id',
             align: 'center',
             width: 140,
-            render: (value: string, row: IRowDataItem) => {
-                return (
-                    <>
-                        <div>{value}</div>
-                        <Button
-                            ghost={true}
-                            size="small"
-                            type="primary"
-                            className="goods-local-img-edit"
-                            onClick={() => this.props.toggleEditGoodsDialog(true, row)}
-                        >
-                            编辑
-                        </Button>
-                    </>
-                );
-            },
         },
         {
-            fixed: true,
             key: 'product_id',
             title: 'Product ID',
             dataIndex: 'product_id',
             align: 'center',
-            width: 140,
+            width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return (
-                    <>
-                        <div className={row.hasnew_version ? 'red' : ''}>{value}</div>
-                        <Link to={`/goods/local/version?id=${row.commodity_id}`}>
-                            <Button
-                                ghost={true}
-                                size="small"
-                                type="primary"
-                                className="goods-local-img-edit"
-                            >
-                                查看更多版本
-                            </Button>
-                        </Link>
-                    </>
-                );
+                return <div className={row.hasnew_version ? 'red' : ''}>{value}</div>
             },
+        },
+        {
+            key: 'product_sn',
+            title: 'Product SN',
+            dataIndex: 'product_sn',
+            align: 'center',
+            width: 120,
         },
         {
             key: 'goods_status',
@@ -121,6 +118,13 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: 'xxx',
+            title: '商品属性',
+            dataIndex: 'xxx',
+            align: 'center',
+            width: 200,
+        },
+        {
             key: 'first_catagory',
             title: '商品分类',
             dataIndex: 'first_catagory',
@@ -142,9 +146,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                     <>
                         <div>{value}</div>
                         <Button
-                            ghost={true}
-                            size="small"
-                            type="primary"
+                            type="link"
                             className="goods-local-img-edit"
                             onClick={() => this.showSkuDialog(row)}
                         >
@@ -155,13 +157,19 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'sku_price',
+            key: 'price_min',
             width: 140,
-            title: '爬虫价格',
-            dataIndex: 'sku_price',
+            title: '爬虫价格(￥)',
+            dataIndex: 'price_min',
             align: 'center',
-            render: (value: number) => {
-                return `￥${value}`;
+            render: (value: number, row: IRowDataItem) => {
+                const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                return (
+                    <div>
+                        {price_min}~{price_max}
+                        <div>(含运费{shipping_fee_min}~{shipping_fee_max})</div>
+                    </div>
+                )
             },
         },
         {
@@ -207,6 +215,13 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
+            key: 'a1',
+            title: '采购渠道',
+            dataIndex: 'a1',
+            align: 'center',
+            width: 123,
+        },
+        {
             key: 'onsale_info',
             title: '上架渠道',
             dataIndex: 'onsale_info',
@@ -246,7 +261,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
         },
         {
             key: 'worm_goodsinfo_link',
-            title: '链接',
+            title: '商详链接',
             dataIndex: 'worm_goodsinfo_link',
             align: 'center',
             width: 200,
@@ -293,14 +308,14 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
         };
         return (
             <>
-                <Table
+                <FitTable
                     bordered={true}
                     rowKey="product_id"
                     className="goods-local-table"
                     rowSelection={rowSelection}
                     columns={this.columns}
                     dataSource={goodsList}
-                    scroll={{ x: 'max-content', y: 600 }}
+                    scroll={{ x: 'max-content' }}
                     pagination={false}
                     loading={searchLoading}
                 />
