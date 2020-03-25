@@ -49,7 +49,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
-        formatter: 'numberStrArr',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -58,7 +58,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
-        formatter: 'numberStrArr',
+        formatter: 'strArr',
     },
     {
         type: 'input',
@@ -84,7 +84,7 @@ const formFields: FormField[] = [
         name: 'product_status',
         className: 'local-search-item-select',
         formItemClassName: 'form-item',
-        formatter: 'number',
+        formatter: 'joinStr',
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,
@@ -105,6 +105,7 @@ const formFields: FormField[] = [
         name: 'first_catagory',
         className: 'local-search-item-select',
         formItemClassName: 'form-item',
+        formatter: 'number',
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -128,6 +129,7 @@ const formFields: FormField[] = [
         name: 'second_catagory',
         className: 'local-search-item-select',
         formItemClassName: 'form-item',
+        formatter: 'number',
         optionListDependence: {
             name: 'first_catagory',
             key: 'children',
@@ -154,6 +156,7 @@ const formFields: FormField[] = [
         name: 'third_catagory',
         className: 'local-search-item-select',
         formItemClassName: 'form-item',
+        formatter: 'number',
         optionListDependence: {
             name: ['first_catagory', 'second_catagory'],
             key: 'children',
@@ -333,11 +336,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             page,
             page_count,
         };
-        const searchParams = this.getSearchParams();
-        if (!searchParams) {
-            return;
-        } else {
-            params = Object.assign(params, searchParams);
+        // const searchParams = this.getSearchParams();
+        // if (!searchParams) {
+        //     return;
+        // } else {
+        //     params = Object.assign(params, searchParams);
+        // }
+        // params
+        if (this.formRef.current) {
+            params = Object.assign(params, this.formRef.current?.getFieldsValue());
         }
         if (searchData) {
             params = Object.assign(params, searchData);
@@ -373,6 +380,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             ?.validateFields()
             .then(values => {
                 // console.log('handleClickSearch', values);
+                this.onSearch({
+                    page: 1,
+                });
             })
             .catch(errorInfo => {
                 // console.log('handleClickSearch', errorInfo);
@@ -738,6 +748,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             <Button
                                 type="primary"
                                 className="btn-group form-item"
+                                loading={searchLoading}
                                 onClick={this.handleClickSearch}
                             >
                                 查询

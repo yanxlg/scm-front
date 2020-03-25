@@ -139,12 +139,8 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 );
             } else if (FormInputRange.typeList.includes(type)) {
                 const [name1, name2] = name;
-                values[name1 as string] = FormInputRange.formatter()(
-                    form.getFieldValue(name1),
-                );
-                values[name2 as string] = FormInputRange.formatter()(
-                    form.getFieldValue(name2),
-                );
+                values[name1 as string] = FormInputRange.formatter()(form.getFieldValue(name1));
+                values[name2 as string] = FormInputRange.formatter()(form.getFieldValue(name2));
             } else {
                 return form.getFieldValue(name);
             }
@@ -323,7 +319,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 </div>
             </RcResizeObserver>
         );
-    }, [fieldList, collapseBtnVisible, collapse]);
+    }, [fieldList, collapseBtnVisible, collapse, formContent]);
 
     return useMemo(() => {
         const style = enableCollapse
@@ -343,7 +339,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 {formComponent}
             </div>
         );
-    }, [formHeight, fieldList, collapseBtnVisible, collapse]);
+    }, [formHeight, fieldList, collapseBtnVisible, collapse, formComponent]);
 };
 
 const exportComponent = forwardRef(SearchForm);

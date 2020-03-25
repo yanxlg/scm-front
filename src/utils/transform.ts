@@ -17,6 +17,10 @@ export function transNullValue(value?: any) {
     return value === '' || isNull(value) ? undefined : value;
 }
 
+export function transJoinStr(value?: any) {
+    return value && value.length ? value.join(',') : undefined;
+}
+
 export function transNumber(value?: any) {
     const _value =
         typeof value === 'string'
