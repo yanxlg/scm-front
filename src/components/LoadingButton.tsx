@@ -8,16 +8,19 @@ declare interface ILoadingButtonProps extends ButtonProps {
 
 const LoadingButton: React.FC<ILoadingButtonProps> = props => {
     const [loading, setLoading] = useState(false);
-    const onClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-        setLoading(true);
-        props?.onClick(event).finally(() => {
-            setLoading(false);
-        });
-    }, []);
+    const onClick = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement>) => {
+            setLoading(true);
+            props?.onClick(event).finally(() => {
+                setLoading(false);
+            });
+        },
+        [props.onClick],
+    );
     const currentLoading = props.loading || loading;
     return useMemo(() => {
         return <Button {...props} loading={currentLoading} onClick={onClick} />;
-    }, [props, currentLoading]);
+    }, [props, currentLoading, onClick]);
 };
 
 export default LoadingButton;

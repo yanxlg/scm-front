@@ -1,100 +1,89 @@
-import React from 'react';
-import { Modal, Radio } from 'antd';
-
+import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import { message, Modal, Radio } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
+import { SearchFormRef } from '@/components/SearchForm';
+import { exportChannelProductList } from '@/services/channel';
+import channelStyles from '@/styles/_channel.less';
 
 declare interface IExcelDialogProps {
     visible: boolean;
     total: number;
-    // saleStatusList: ISaleStatausItem[];
-    getExcelData(pageNumber: number, pageSize: number): Promise<unknown>;
-    toggleExcelDialog(status: boolean): void;
+    onCancel: () => void;
+    form: RefObject<SearchFormRef>;
 }
 
-declare interface IExcelDialogState {
-    val: number;
-    confirmLoading: boolean;
-}
+const exportNum = 10000;
 
-class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogState> {
-    private excelPageSize: number = 10000;
-    constructor(props: IExcelDialogProps) {
-        super(props);
-        this.state = {
-            val: 0,
-            confirmLoading: false,
-        };
-    }
+const ExcelDialog: React.FC<IExcelDialogProps> = ({ visible, onCancel, total, form }) => {
+    const [index, setIndex] = useState(0);
+    const [loading, setLoading] = useState(false);
 
-    private handleCancel = () => {
-        this.props.toggleExcelDialog(false);
-    };
-
-    private handleOk = () => {
-        const { val } = this.state;
-        this.setState({
-            confirmLoading: true,
-        });
-        return this.props.getExcelData(val + 1, this.excelPageSize).finally(() => {
-            this.setState({
-                confirmLoading: false,
+    const handleOk = useCallback(() => {
+        setLoading(true);
+        // export
+        const values = form.current!.getFieldsValue();
+        return exportChannelProductList({
+            pageNumber: index + 1,
+            pageSize: exportNum,
+            ...values,
+        })
+            .catch(err => {
+                message.error('导出表格失败！');
+            })
+            .finally(() => {
+                onCancel();
+            })
+            .finally(() => {
+                setLoading(false);
             });
-        });
-    };
+    }, [index]);
 
-    private onChange = (e: RadioChangeEvent) => {
-        this.setState({
-            val: e.target.value,
-        });
-    };
+    const onChange = useCallback((e: RadioChangeEvent) => {
+        setIndex(e.target.value);
+    }, []);
 
-    render() {
-        const { visible, total } = this.props;
-        const { val, confirmLoading } = this.state;
-
-        if (total < 1) {
-            return null;
+    const list = useMemo<number[]>(() => {
+        let _list: number[] = [];
+        for (let i = 0; i < Math.ceil(total / exportNum); i++) {
+            _list.push(i);
         }
-        const list: number[] = [];
-        for (let i = 0; i < Math.ceil(total / this.excelPageSize); i++) {
-            list.push(i);
-        }
+        return _list;
+    }, [total]);
 
+    return useMemo(() => {
         return (
             <Modal
                 title="导出EXCEL"
+                className={channelStyles.channelExportModal}
                 visible={visible}
-                width={660}
-                onCancel={this.handleCancel}
-                onOk={this.handleOk}
-                confirmLoading={confirmLoading}
+                onCancel={onCancel}
+                onOk={handleOk}
+                confirmLoading={loading}
             >
-                <div>
-                    <Radio.Group onChange={this.onChange} value={val}>
-                        {list.map(index => {
-                            let desc = '';
-                            if (index === 0) {
-                                desc = '导出前1万条';
-                            } else if (index === list.length - 1) {
-                                desc = `导出${index * this.excelPageSize}条-${total}条`;
-                            } else {
-                                desc = `导出${index}万条-${index + 1}条`;
-                            }
-                            return (
-                                <Radio
-                                    className="goods-local-excel-radio"
-                                    key={index}
-                                    value={index}
-                                >
-                                    {desc}
-                                </Radio>
-                            );
-                        })}
-                    </Radio.Group>
-                </div>
+                <Radio.Group onChange={onChange} value={index}>
+                    {list.map(index => {
+                        let desc = '';
+                        if (index === 0) {
+                            desc = '导出前1万条';
+                        } else if (index === list.length - 1) {
+                            desc = `导出${index}万条-${total}条`;
+                        } else {
+                            desc = `导出${index}万条-${index + 1}条`;
+                        }
+                        return (
+                            <Radio
+                                key={index}
+                                className={channelStyles.channelExportItem}
+                                value={index}
+                            >
+                                {desc}
+                            </Radio>
+                        );
+                    })}
+                </Radio.Group>
             </Modal>
         );
-    }
-}
+    }, [loading, index, total, visible]);
+};
 
 export default ExcelDialog;

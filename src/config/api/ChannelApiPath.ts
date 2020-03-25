@@ -14,4 +14,5 @@ export enum ChannelApiPath {
     QueryGoodsDetail = '/api/v1/vova_goods/detail',
     QueryGoodsSkuList = '/api/v1/vova_goods/sku_list',
     EditSkuPrice = '/api/v1/vova_goods/edits',
+    QueryShopList = '/api/v1/vova_goods/store_list',
 }

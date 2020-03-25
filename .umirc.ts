@@ -55,7 +55,7 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t.vova.com.hk/',
+            target: 'https://scm-api-t3.vova.com.hk/',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
         },

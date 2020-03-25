@@ -27,12 +27,12 @@ const Index: React.FC<LocalPageProps> = props => {
                     className="tabs-margin-none"
                     type="card"
                     children={[
-                        <TabPane tab={`全部任务${count1 === void 0 ? '' : `(${count1})`}`} key="1">
+                        <TabPane tab={`全部列表${count1 === void 0 ? '' : `(${count1})`}`} key="1">
                             <TaskListTab initialValues={initialValues} setCountArr={setCountArr} />
                         </TabPane>,
-                        <TabPane tab={`未执行${count1 === void 0 ? '' : `(${count2})`}`} key="2">
+                        <TabPane tab={`待执行${count1 === void 0 ? '' : `(${count2})`}`} key="2">
                             <TaskListTab
-                                task_status={TaskStatusEnum.UnExecuted}
+                                task_status={TaskStatusEnum.ToBeExecuted}
                                 setCountArr={setCountArr}
                             />
                         </TabPane>,
@@ -42,9 +42,9 @@ const Index: React.FC<LocalPageProps> = props => {
                                 setCountArr={setCountArr}
                             />
                         </TabPane>,
-                        <TabPane tab={`已发送${count1 === void 0 ? '' : `(${count4})`}`} key="4">
+                        <TabPane tab={`执行成功${count1 === void 0 ? '' : `(${count4})`}`} key="4">
                             <TaskListTab
-                                task_status={TaskStatusEnum.Executed}
+                                task_status={TaskStatusEnum.Success}
                                 setCountArr={setCountArr}
                             />
                         </TabPane>,

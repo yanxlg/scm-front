@@ -17,16 +17,18 @@ import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import ProTable from '@/components/ProTable';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { useList } from '@/utils/hooks';
-import { getTaskList, deleteTasks, activeTasks, reActiveTasks, abortTasks } from '@/services/task';
+import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
 import { history } from '@@/core/history';
 import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
-import { EmptyObject } from '@/config/global';
+import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import btnStyle from '@/styles/_btn.less';
 import TaskStatus from './TaskStatus';
+import { TaskChannelCode, TaskChannelList, TaskChannelMap } from '@/config/dictionaries/Task';
+import { isEmptyObject } from '@/utils/utils';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -43,35 +45,34 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     } = useMemo(() => {
         // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
-        if (query) {
+        if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
-            const routeInitialValues = initialValues ?? {};
-            const {
-                pageNumber = 1,
-                pageSize = 50,
-                task_id = '',
-                task_sn = '',
-                task_status = '',
-                task_name = '',
-                task_type = '',
-                task_begin_time = 0,
-                task_end_time = 0,
-            } = query;
-            return {
-                ...routeInitialValues,
-                pageNumber: Number(pageNumber),
-                pageSize: Number(pageSize),
-                task_id,
-                task_sn,
-                task_status,
-                task_name,
-                task_type,
-                task_begin_time: convertStartDate(Number(task_begin_time)),
-                task_end_time: convertEndDate(Number(task_end_time)),
-            };
-        } else {
-            return Object.assign(EmptyObject, initialValues);
         }
+
+        const routeInitialValues = initialValues ?? {};
+        const {
+            pageNumber = defaultPageNumber,
+            pageSize = defaultPageSize,
+            task_id = '',
+            task_sn = '',
+            task_status = '',
+            task_name = '',
+            task_type = '',
+            task_begin_time = 0,
+            task_end_time = 0,
+        } = query;
+        return {
+            ...routeInitialValues,
+            pageNumber: Number(pageNumber),
+            pageSize: Number(pageSize),
+            task_id,
+            task_sn,
+            task_status,
+            task_name,
+            task_type,
+            task_begin_time: convertStartDate(Number(task_begin_time)),
+            task_end_time: convertEndDate(Number(task_end_time)),
+        };
     }, []);
 
     const {
@@ -104,11 +105,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             tabKey:
                 task_status === void 0
                     ? '1'
-                    : task_status === TaskStatusEnum.UnExecuted
+                    : task_status === TaskStatusEnum.ToBeExecuted
                     ? '2'
                     : task_status === TaskStatusEnum.Executing
                     ? '3'
-                    : task_status === TaskStatusEnum.Executed
+                    : task_status === TaskStatusEnum.Success
                     ? '4'
                     : task_status === TaskStatusEnum.Failed
                     ? 5
@@ -136,9 +137,9 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         });
     }, []);
 
-    const reActiveTask = useCallback((task_id: number) => {
-        return reActiveTasks(String(task_id)).then(() => {
-            message.success('任务已重新执行');
+    const reTryTask = useCallback((task_id: number) => {
+        return reTryTasks(String(task_id)).then(() => {
+            message.success('任务已尝试重新执行');
             onReload();
         });
     }, []);
@@ -166,19 +167,18 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                             <Button type="link" onClick={() => viewTaskDetail(task_id)}>
                                 查看详情
                             </Button>
-                            {statusCode === TaskStatusEnum.UnExecuted ? (
+                            {statusCode === TaskStatusEnum.ToBeExecuted ? (
                                 <LoadingButton type="link" onClick={() => activeTask(task_id)}>
                                     立即执行
                                 </LoadingButton>
                             ) : null}
-                            {statusCode === TaskStatusEnum.Failed ? (
-                                <LoadingButton type="link" onClick={() => reActiveTask(task_id)}>
-                                    重新执行
+                            {/* {statusCode === TaskStatusEnum.Failed ? (
+                                <LoadingButton type="link" onClick={() => reTryTask(task_id)}>
+                                    重试任务
                                 </LoadingButton>
-                            ) : null}
-                            {statusCode === TaskStatusEnum.Executed ||
-                            statusCode === TaskStatusEnum.Failed ||
-                            statusCode === TaskStatusEnum.Terminated ? (
+                            ) : null}*/}
+                            {statusCode === TaskStatusEnum.ToBeExecuted ||
+                            statusCode === TaskStatusEnum.Executing ? (
                                 <LoadingButton
                                     onClick={() => abortTask(task_id)}
                                     type="link"
@@ -235,6 +235,20 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                         </>
                     );
                 },
+            },
+            {
+                title: '任务类型',
+                dataIndex: 'task_type',
+                width: '223px',
+                align: 'center',
+                render: (text: TaskTypeCode) => TaskTypeMap[text],
+            },
+            {
+                title: '任务渠道',
+                dataIndex: 'channel',
+                width: '223px',
+                align: 'center',
+                render: (text: TaskChannelCode) => TaskChannelMap[text] || '——',
             },
             {
                 title: '任务类型',
@@ -336,6 +350,27 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     formItemClassName: 'form-item',
                 },
                 {
+                    label: '任务渠道',
+                    type: 'select',
+                    name: 'channel',
+                    className: 'select-default',
+                    formItemClassName: 'form-item',
+                    formatter: 'number',
+                    optionList: [
+                        {
+                            name: '全部',
+                            value: '',
+                        },
+                    ].concat(
+                        TaskChannelList.map(({ id, name }) => {
+                            return {
+                                name,
+                                value: id,
+                            };
+                        }),
+                    ),
+                },
+                {
                     label: '任务类型',
                     type: 'select',
                     name: 'task_type',
@@ -408,6 +443,27 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     formItemClassName: 'form-item',
                 },
                 {
+                    label: '任务渠道',
+                    type: 'select',
+                    name: 'channel',
+                    className: 'select-default',
+                    formItemClassName: 'form-item',
+                    formatter: 'number',
+                    optionList: [
+                        {
+                            name: '全部',
+                            value: '',
+                        },
+                    ].concat(
+                        TaskChannelList.map(({ id, name }) => {
+                            return {
+                                name,
+                                value: id,
+                            };
+                        }),
+                    ),
+                },
+                {
                     label: '任务类型',
                     type: 'select',
                     name: 'task_type',
@@ -452,31 +508,27 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
 
     const formInitialValues = useMemo(() => {
         return task_status === void 0
-            ? { task_status: '', task_type: '', ...defaultInitialValues }
-            : { task_type: '', ...defaultInitialValues };
-    }, []);
-
-    const showTotal = useCallback((total: number) => {
-        return <span className="data-grid-total">共有{total}条</span>;
+            ? { task_status: '', channel: '', task_type: '', ...defaultInitialValues }
+            : { task_type: '', channel: '', ...defaultInitialValues };
     }, []);
 
     useEffect(() => {
         if (extraData !== void 0) {
             const {
                 task_total_num,
-                task_not_execute_num,
-                task_execting_num,
-                task_exected_num,
-                task_exected_fail_num,
-                task_ternimation_num,
+                task_wait_execute_num,
+                task_executing_num,
+                task_executed_num,
+                task_executed_fail_num,
+                task_termination_num,
             } = extraData;
             setCountArr([
                 task_total_num,
-                task_not_execute_num,
-                task_execting_num,
-                task_exected_num,
-                task_exected_fail_num,
-                task_ternimation_num,
+                task_wait_execute_num,
+                task_executing_num,
+                task_executed_num,
+                task_executed_fail_num,
+                task_termination_num,
             ]);
         }
     }, [extraData]);
@@ -492,13 +544,16 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         setSelectedRowKeys(selectedRowKeys as string[]);
     }, []);
 
-    return useMemo(() => {
-        const rowSelection = {
+    const rowSelection = useMemo(() => {
+        return {
             fixed: true,
             columnWidth: '50px',
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange,
         };
+    }, [selectedRowKeys]);
+
+    return useMemo(() => {
         const selectTaskSize = selectedRowKeys.length;
         return (
             <div>
@@ -517,12 +572,14 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     headerTitle="查询表格"
                     rowKey="task_id"
                     rowSelection={rowSelection}
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    bottom={60}
+                    minHeight={500}
                     pagination={{
                         total: total,
                         current: pageNumber,
                         pageSize: pageSize,
                         showSizeChanger: true,
-                        showTotal: showTotal,
                     }}
                     toolBarRender={(action, { selectedRows }) => [
                         <PopConfirmLoadingButton
@@ -543,11 +600,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                             }}
                         />,
                     ]}
-                    tableAlertRender={() => (
-                        <div>
-                            已选择 <a style={{ fontWeight: 600 }}>{selectTaskSize}</a> 项
-                        </div>
-                    )}
+                    tableAlertRender={false}
                     columns={columns}
                     dataSource={dataSource}
                     loading={loading}

@@ -18,7 +18,9 @@ export type IChannelProductListBody = {
 };
 
 export interface IChannelProductListItem {
+    id: string;
     shop_name: string;
+    merchant_id: string;
     virtual_id: string;
     main_image: string;
     commodity_id: string;
@@ -61,11 +63,11 @@ export type IChannelShelveStateBody =
           type: 'onsale';
           info: {
               onsale: {
-                  task_body: {
+                  task_body_list: Array<{
                       product_id: string;
                       commodity_id: string;
                       sale_domain: string;
-                  };
+                  }>;
               };
           };
       }
@@ -73,11 +75,11 @@ export type IChannelShelveStateBody =
           type: 'offsale';
           info: {
               offsale: {
-                  task_body: {
+                  task_body_list: Array<{
                       product_id: string;
                       commodity_id: string;
                       sale_domain: string;
-                  };
+                  }>;
               };
           };
       };
@@ -166,8 +168,7 @@ export type IActiveChannelProductVersionBody = Array<{
 
 export interface IRegionShippingFeeBody {
     product_id: string;
-    page?: number;
-    page_count?: number;
+    merchant_id: string;
 }
 
 export interface IRegionShippingFeeItem {
@@ -185,7 +186,7 @@ export interface IRegionShippingFeeResponse {
 }
 
 export interface IGoodsDetailBody {
-    product_id: string;
+    id: string;
     channel: string;
 }
 
@@ -202,7 +203,7 @@ export interface IGoodsDetailResponse {
 }
 
 export interface IGoodsSkuBody {
-    product_id: string;
+    id: string;
     channel: string;
     page: number;
     page_count: number;
@@ -238,8 +239,17 @@ export interface IEditSkuItem {
 
 export interface IEditSkuBody {
     sku_list: IEditSkuItem[];
+    merchant_id: string;
 }
 
 export interface IEditSkuResponse {
     execute_status: string;
 }
+
+export interface IShopItem {
+    merchant_id: string;
+    merchant_name: string;
+    merchant_platform: string;
+}
+
+export type ISHopList = IShopItem[];

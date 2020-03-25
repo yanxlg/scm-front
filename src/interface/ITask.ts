@@ -46,11 +46,11 @@ export interface ITaskListItem {
 
 export interface ITaskListExtraData {
     task_total_num: number;
-    task_not_execute_num: number;
-    task_execting_num: number;
-    task_exected_num: number;
-    task_exected_fail_num: number;
-    task_ternimation_num: number;
+    task_wait_execute_num: number;
+    task_executing_num: number;
+    task_executed_num: number;
+    task_executed_fail_num: number;
+    task_termination_num: number;
 }
 
 export interface ITaskListResponse extends ITaskListExtraData {

@@ -28,6 +28,7 @@ import SalesRange from '@/pages/task/components/config/hot/SalesRange';
 import { TaskChannelList } from '@/config/dictionaries/Task';
 import moment from 'moment';
 import { mapClassNames } from '@/utils/utils';
+import SortType from '@/pages/task/components/config/hot/SortType';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -302,8 +303,13 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     </Select>
                 </Form.Item>
                 <TaskRange form={form} onTaskRangeChange={taskRangeChange} />
-
-                <Form.Item
+                <SortType
+                    form={form}
+                    listSort={listSort}
+                    merchantSort={merchantSort}
+                    sortLoading={sortLoading}
+                />
+                {/* <Form.Item
                     noStyle={true}
                     shouldUpdate={(prevValues, currentValues) =>
                         prevValues.range !== currentValues.range
@@ -340,7 +346,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             </Form.Item>
                         );
                     }}
-                </Form.Item>
+                </Form.Item>*/}
                 <ReptileCondition form={form} ref={reptileRef} />
                 <div>
                     <Form.Item

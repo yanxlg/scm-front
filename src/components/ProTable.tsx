@@ -1,13 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ProTableProps } from '@ant-design/pro-table/lib/Table';
 import { default as DefaultProTable } from '@ant-design/pro-table';
-import { Card, Pagination } from 'antd';
+import { Button, Card, Pagination } from 'antd';
 import { Key, SorterResult, TableCurrentDataSource } from 'antd/es/table/interface';
 import { PaginationConfig } from 'antd/es/pagination';
 import cardStyle from '@/styles/_card.less';
 import formStyle from '@/styles/_form.less';
+import btnStyle from '@/styles/_btn.less';
 import ReactDOM from 'react-dom';
 import { debounce } from 'lodash';
+
+export const showTotal = (total: number) => {
+    return <span>共有{total}条</span>;
+};
+
+export const goButton = () => <Button className={btnStyle.btnGo}>Go</Button>;
 
 const ProTable = <
     T,
@@ -33,10 +40,10 @@ const ProTable = <
         if (scroll?.x === true || scroll?.x === 'max-content') {
             let x: number = 0;
             if (rowSelection && rowSelection.columnWidth) {
-                x += Number(rowSelection.columnWidth) || 0;
+                x += parseInt(rowSelection.columnWidth as string) || 0;
             }
             columns?.forEach(column => {
-                x += Number(column.width) || 0;
+                x += parseInt(column.width as string) || 0;
             });
             return x;
         } else {
@@ -107,7 +114,7 @@ const ProTable = <
     );
 
     return useMemo(() => {
-        const { pagination, scroll, children, ..._props } = props;
+        const { pagination, scroll, children, autoFitY, ..._props } = props;
         return (
             <Card className={[cardStyle.cardPlain, formStyle.formItem].join(' ')} ref={cardRef}>
                 {children}
@@ -115,12 +122,16 @@ const ProTable = <
                     {..._props}
                     pagination={false}
                     onChange={onDefaultChange}
-                    scroll={{ ...scroll, x: calcX, y: y }}
+                    scroll={{ ...scroll, x: calcX, ...(autoFitY === false ? {} : { y: y }) }}
                 />
                 {pagination ? (
                     <Pagination
                         className="ant-table-pagination"
                         pageSizeOptions={['50', '100', '200']}
+                        showQuickJumper={{
+                            goButton: goButton,
+                        }}
+                        showTotal={showTotal}
                         {...pagination}
                         onChange={onChange}
                         onShowSizeChange={onShowSizeChange}
