@@ -235,6 +235,14 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
+
+        {
+            key: '_logisticsTrack',
+            title: '物流轨迹',
+            dataIndex: '_logisticsTrack',
+            align: 'center',
+            width: 120,
+        },
         {
             key: 'purchaseCancelReason',
             title: '采购取消原因',

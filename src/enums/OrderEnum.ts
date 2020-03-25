@@ -362,6 +362,7 @@ export const defaultColChildList = [
     // 'purchaseCreateTime', // 采购生成时间
     'purchasePlatformOrderId', // 采购订单号
     'purchaseWaybillNo', // 采购运单号
+    '_logisticsTrack', // 物流轨迹
 ];
 
 export const childOptionalColList = [

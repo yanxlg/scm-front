@@ -61,18 +61,18 @@ class Order extends React.PureComponent<{}, IOrderState> {
 
     render() {
         // errorOrderCount
-        const { 
-            allListCount, 
-            penddingOrderCount, 
-            penddingPayCount, 
+        const {
+            allListCount,
+            penddingOrderCount,
+            penddingPayCount,
             penddingShipingOrderCount,
             penddingPurchaseListCount,
-            penddingWarehousingListCount
+            penddingWarehousingListCount,
         } = this.state;
         return (
             <Container>
                 <div className="order-wrap">
-                    <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="5">
+                    <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <PaneAll getAllTabCount={this.getAllTabCount} />
                         </TabPane>
@@ -80,7 +80,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
                             <PanePendingOrder getAllTabCount={this.getAllTabCount} />
                         </TabPane>
                         <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
-                            <PanePay  getAllTabCount={this.getAllTabCount} />
+                            <PanePay getAllTabCount={this.getAllTabCount} />
                         </TabPane>
                         <TabPane tab={`待发货（${penddingShipingOrderCount}）`} key="4">
                             <div className="order-tab-content">
