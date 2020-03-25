@@ -40,6 +40,7 @@ export declare interface IPayItem {
     _checked?: boolean;
 }
 
+// const defaultFieldList: FormField[] = [
 const defaultFieldList: FormField[] = [
     {
         type: 'input',

@@ -79,11 +79,19 @@ export const errorTypeOptionList = [
 ];
 
 export const errorDetailOptionList = [
-    { name: '24小时未拍单', value: 2 },
+    // 仓库异常
+    { name: '24小时未拍单', value: 11 },
     { name: '72小时未入库', value: 5 },
     { name: '48小时未出库', value: 6 },
+    // 采购异常
+    { name: '拍单失败超24小时', value: 2 },
     { name: '12小时未支付', value: 3 },
     { name: '48小时未发货', value: 4 },
+    // 尾程异常
+    { name: '7天未揽收', value: 8 },
+    { name: '14天未揽收', value: 9 },
+    { name: '30天未妥投', value: 10 },
+    // 其他异常
     { name: '6天未标记发货', value: 7 },
 ];
 
@@ -205,7 +213,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'reserve_status',
-        label: '采购预定状态',
+        label: '库存预定状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchaseReserveOptionList],
@@ -355,7 +363,7 @@ export const defaultColChildList = [
     'productId', // 中台商品ID
     'purchasePlanId', // 计划子项ID
     'purchasePlatform', // 采购平台
-    'reserveStatus', // 采购预定状态
+    'reserveStatus', // 库存预定状态
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
     'purchaseOrderShippingStatus', // 采购配送状态
