@@ -95,31 +95,40 @@ class PaneErr extends React.PureComponent<{}, IState> {
                 const value = form.getFieldValue(name);
                 switch (value) {
                     case 1:
-                        this.setState({
-                            abnormalDetailType: 11,
-                            abnormalDetailList: [11, 5, 6],
-                        }, () => {
-                            this.onSearch();
-                        });
+                        this.setState(
+                            {
+                                abnormalDetailType: 11,
+                                abnormalDetailList: [11, 5, 6],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
                         break;
                     case 3:
-                        this.setState({
-                            abnormalDetailType: 2,
-                            abnormalDetailList: [2, 3, 4],
-                        }, () => {
-                            this.onSearch();
-                        });
+                        this.setState(
+                            {
+                                abnormalDetailType: 3,
+                                abnormalDetailList: [3, 4],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
                         break;
                     case 4:
-                        this.setState({
-                            abnormalDetailType: 7,
-                            abnormalDetailList: [7],
-                        }, () => {
-                            this.onSearch();
-                        });
+                        this.setState(
+                            {
+                                abnormalDetailType: 7,
+                                abnormalDetailList: [7],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
                         break;
-               }
-            }
+                }
+            },
         },
     ];
     private initialValues = {
@@ -319,7 +328,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
             page,
             pageCount,
             abnormalDetailType,
-            abnormalDetailList
+            abnormalDetailList,
         } = this.state;
 
         return (
@@ -356,15 +365,17 @@ class PaneErr extends React.PureComponent<{}, IState> {
                                 value={abnormalDetailType}
                                 onChange={this.onCheckErrDetail}
                             >
-                                {errorDetailOptionList.filter(item => abnormalDetailList.indexOf(item.value) > -1).map(item => (
-                                    <Radio
-                                        className="checkbox-item"
-                                        key={item.value}
-                                        value={item.value}
-                                    >
-                                        {item.name}
-                                    </Radio>
-                                ))}
+                                {errorDetailOptionList
+                                    .filter(item => abnormalDetailList.indexOf(item.value) > -1)
+                                    .map(item => (
+                                        <Radio
+                                            className="checkbox-item"
+                                            key={item.value}
+                                            value={item.value}
+                                        >
+                                            {item.name}
+                                        </Radio>
+                                    ))}
                             </Radio.Group>
                         </div>
                     </div>
