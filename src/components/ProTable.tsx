@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ProTableProps } from '@ant-design/pro-table/lib/Table';
+import { ColumnsState, ProTableProps } from '@ant-design/pro-table/lib/Table';
 import { default as DefaultProTable } from '@ant-design/pro-table';
 import { Button, Card, Pagination } from 'antd';
 import { Key, SorterResult, TableCurrentDataSource } from 'antd/es/table/interface';
@@ -9,6 +9,8 @@ import formStyle from '@/styles/_form.less';
 import btnStyle from '@/styles/_btn.less';
 import ReactDOM from 'react-dom';
 import { debounce } from 'lodash';
+import { genColumnKey } from '@ant-design/pro-table/es/component/util';
+import { ProColumns } from '@ant-design/pro-table/es';
 
 export const showTotal = (total: number) => {
     return <span>共有{total}条</span>;
@@ -35,21 +37,27 @@ const ProTable = <
     const [y, setY] = useState<number | undefined>(undefined);
     const cardRef = useRef<Card>(null);
 
-    const calcX = useMemo(() => {
+    const calcTotalX = useCallback((_columns?: ProColumns<T>[]) => {
         const { columns, rowSelection, scroll } = props;
         if (scroll?.x === true || scroll?.x === 'max-content') {
             let x: number = 0;
             if (rowSelection && rowSelection.columnWidth) {
                 x += parseInt(rowSelection.columnWidth as string) || 0;
             }
-            columns?.forEach(column => {
+            (_columns || columns)?.forEach(column => {
                 x += parseInt(column.width as string) || 0;
             });
             return x;
         } else {
             return scroll?.x;
         }
-    }, [props.columns, props.rowSelection]);
+    }, []);
+
+    const calcX = useMemo(() => {
+        return calcTotalX();
+    }, []);
+
+    const [x, setX] = useState(calcX);
 
     useEffect(() => {
         const element = ReactDOM.findDOMNode(cardRef.current) as HTMLDivElement;
@@ -113,6 +121,26 @@ const ProTable = <
         [props.onChange, filters, sorters, extra],
     );
 
+    const onColumnsStateChange = useCallback(
+        (map: { [key: string]: ColumnsState }) => {
+            const { columns = [] } = props;
+            const _columns = columns.filter(item => {
+                const { key, dataIndex } = item;
+                const columnKey = genColumnKey(key, dataIndex);
+                if (!columnKey) {
+                    return true;
+                }
+                const config = map[columnKey];
+                if (config && config.show === false) {
+                    return false;
+                }
+                return true;
+            });
+            setX(calcTotalX(_columns));
+        },
+        [props.onColumnsStateChange],
+    );
+
     return useMemo(() => {
         const { pagination, scroll, children, autoFitY, ..._props } = props;
         return (
@@ -122,7 +150,8 @@ const ProTable = <
                     {..._props}
                     pagination={false}
                     onChange={onDefaultChange}
-                    scroll={{ ...scroll, x: calcX, ...(autoFitY === false ? {} : { y: y }) }}
+                    onColumnsStateChange={onColumnsStateChange}
+                    scroll={{ ...scroll, x: x, ...(autoFitY === false ? {} : { y: y }) }}
                 />
                 {pagination ? (
                     <Pagination
@@ -139,7 +168,7 @@ const ProTable = <
                 ) : null}
             </Card>
         );
-    }, [props, y]);
+    }, [props, y, x]);
 };
 
 export default ProTable;

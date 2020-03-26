@@ -243,13 +243,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 },
             },
             {
-                title: '任务类型',
-                dataIndex: 'task_type',
-                width: '223px',
-                align: 'center',
-                render: (text: TaskTypeCode) => TaskTypeMap[text],
-            },
-            {
                 title: '任务渠道',
                 dataIndex: 'channel',
                 width: '223px',

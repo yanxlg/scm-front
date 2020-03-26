@@ -45,6 +45,7 @@ import { ProColumns } from '@ant-design/pro-table';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
+import { Icons } from '@/components/Icon';
 
 const salesVolumeList = [
     {
@@ -567,20 +568,20 @@ const ChannelList: React.FC = props => {
                 <LoadingButton
                     type="primary"
                     className="btn-group vertical-middle form-item"
-                    icon={<SearchOutlined />}
+                    icon={<Icons type="scm-on-sale" />}
                     onClick={onShelveList}
                     disabled={rowSize === 0}
                 >
-                    一件上架
+                    一键上架
                 </LoadingButton>
                 <LoadingButton
                     type="primary"
                     className="btn-group vertical-middle form-item"
-                    icon={<SearchOutlined />}
+                    icon={<Icons type="scm-of-sale" />}
                     onClick={offShelveList}
                     disabled={rowSize === 0}
                 >
-                    一件下架
+                    一键下架
                 </LoadingButton>
                 <LoadingButton
                     type="primary"
@@ -595,6 +596,7 @@ const ChannelList: React.FC = props => {
                     type="primary"
                     className="btn-group vertical-middle form-item"
                     onClick={showExcelDialog}
+                    icon={<Icons type="scm-export" />}
                 >
                     导出
                 </Button>
