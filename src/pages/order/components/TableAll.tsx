@@ -278,6 +278,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: 'cancelTime',
+            title: '订单取消时间',
+            dataIndex: 'cancelTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
             key: 'purchaseTime',
             title: '采购完成时间',
             dataIndex: 'purchaseTime',
