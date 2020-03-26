@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
-import IntegerInput from '@/components/IntegerInput';
+import IntegerInput from '@/components/Input/IntegerInput';
 import { isNull } from '@/utils/validate';
 import { FormInstance } from 'antd/es/form';
 

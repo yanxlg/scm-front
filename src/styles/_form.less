@@ -1,6 +1,7 @@
+@import 'variable';
 @itemSpacing: 24px;
 .form-item {
-    margin-top: @itemSpacing;
+    margin-top: @itemSpacing !important;
 }
 
 .form-item-bottom {
@@ -34,7 +35,7 @@
 
 .form-horizon {
     display: inline-flex;
-    margin-right: 16px; // form
+    margin-right: 16px !important; // form
 }
 
 .form-required-hide {
@@ -43,4 +44,40 @@
             visibility: hidden;
         }
     }
+}
+
+.form-required-absolute {
+    :global {
+        .ant-form-item-label {
+            overflow: visible;
+        }
+
+        .ant-form-item-required {
+            &:before {
+                position: absolute;
+                transform: translateX(-100%);
+                left: -4px;
+            }
+        }
+    }
+}
+
+.form-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.form-item-default {
+    width: @inputWidth !important;
+}
+
+.form-item-large {
+    width: @inputLargeWidth !important;
+}
+.form-item-small {
+    width: @inputSmallWidth !important;
+}
+
+.form-checkbox {
+    margin: 0 8px 8px 0 !important;
 }

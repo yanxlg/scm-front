@@ -12,12 +12,7 @@ import {
     AutoPurchaseTaskType,
     TaskCreateStatusCode,
 } from '@/enums/StatusEnum';
-import {
-    IRequestPagination,
-    IRequestPagination2,
-    IBoolean,
-    RequestPagination,
-} from '@/interface/IGlobal';
+import { IBoolean, RequestPagination } from '@/interface/IGlobal';
 
 export type ITaskListQuery = {
     task_id?: string;

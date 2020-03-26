@@ -4,6 +4,7 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 import { SearchFormRef } from '@/components/SearchForm';
 import { exportChannelProductList } from '@/services/channel';
 import channelStyles from '@/styles/_channel.less';
+import formStyles from '@/styles/_form.less';
 
 declare interface IExcelDialogProps {
     visible: boolean;
@@ -71,11 +72,7 @@ const ExcelDialog: React.FC<IExcelDialogProps> = ({ visible, onCancel, total, fo
                             desc = `导出${index}万条-${index + 1}条`;
                         }
                         return (
-                            <Radio
-                                key={index}
-                                className={channelStyles.channelExportItem}
-                                value={index}
-                            >
+                            <Radio key={index} className={formStyles.formCheckbox} value={index}>
                                 {desc}
                             </Radio>
                         );

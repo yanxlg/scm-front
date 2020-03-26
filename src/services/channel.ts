@@ -155,6 +155,6 @@ export async function editSkuPrice(data: IEditSkuBody) {
     });
 }
 
-export async function queryShopList() {
+export const queryShopList = singlePromiseWrap(() => {
     return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
-}
+});

@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormInstance } from 'antd/es/form';
 import { Form, Radio } from 'antd';
 import { HotTaskRange } from '@/enums/StatusEnum';
-import IntegerInput from '@/components/IntegerInput';
+import IntegerInput from '@/components/Input/IntegerInput';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
 declare interface TaskRangeProps {

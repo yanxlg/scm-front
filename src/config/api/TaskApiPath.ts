@@ -8,6 +8,7 @@ export enum TaskApiPath {
     AddPUTask = '/api/v1/task/spider/goods_update',
     DeleteTask = '/api/v1/task/delete',
     ActiveTask = '/api/v1/task/plan',
+    RetryTask = '/api/v1/task/retry',
     AbortTask = '/api/v1/task/termination',
     QueryTaskDetail = '/api/v1/task/detail',
     QueryPurchaseIds = '/api/v1/orders/purchase',

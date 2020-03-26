@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select, Spin, Tooltip, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
@@ -15,7 +15,7 @@ import {
     HotTaskFilterType,
     TaskRangeEnum,
 } from '@/enums/StatusEnum';
-import IntegerInput from '@/components/IntegerInput';
+import IntegerInput from '@/components/Input/IntegerInput';
 import { IHotTaskBody, IPDDSortItem, ITaskDetailInfo } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
@@ -29,6 +29,8 @@ import { TaskChannelList } from '@/config/dictionaries/Task';
 import moment from 'moment';
 import { mapClassNames } from '@/utils/utils';
 import SortType from '@/pages/task/components/config/hot/SortType';
+import MerchantListModal from '@/pages/goods/components/MerchantListModal';
+import LoadingButton from '@/components/LoadingButton';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -42,15 +44,14 @@ declare interface IHotGatherProps {
     taskId?: number;
 }
 
-const Option = Select.Option;
-
 const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
     const [queryLoading, setQueryLoading] = useState(false);
     const [listSort, setListSort] = useState<IPDDSortItem[]>([]);
     const [merchantSort, setMerchantSort] = useState<IPDDSortItem[]>([]);
     const [sortLoading, setSortLoading] = useState(true);
-    const [gatherLoading, setGatherLoading] = useState(false);
     const reptileRef = useRef<ReptileConditionRef>(null);
+
+    const [merchantModal, setMerchantModal] = useState(false);
 
     const [form] = Form.useForm();
 
@@ -217,12 +218,12 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                 task_type === TaskExecuteType.interval ? dateToUnix(task_end_time) : undefined,
         };
     }, []);
-    const onGather = () => {
-        form.validateFields()
+    const onGather = useCallback(() => {
+        return form
+            .validateFields()
             .then((values: any) => {
                 const params = convertFormData(values);
-                setGatherLoading(true);
-                addPddHotTask(
+                return addPddHotTask(
                     Object.assign({}, params, {
                         is_upper_shelf: false,
                     }),
@@ -237,182 +238,205 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     })
                     .catch(() => {
                         showFailureModal();
-                    })
-                    .finally(() => {
-                        setGatherLoading(false);
                     });
             })
             .catch(({ errorFields }) => {
                 scrollToFirstError(form, errorFields);
             });
-    };
+    }, []);
+
+    const onGatherOn = useCallback(() => {
+        form.validateFields()
+            .then((values: any) => {
+                setMerchantModal(true);
+            })
+            .catch(({ errorFields }) => {
+                scrollToFirstError(form, errorFields);
+            });
+    }, []);
+
+    const closeMerChantModal = useCallback(() => {
+        setMerchantModal(false);
+    }, []);
+
+    const onGatherOnOKey = useCallback((merchant_ids: string[]) => {
+        const values = form.getFieldsValue() as IFormData;
+        const params = convertFormData(values);
+        return addPddHotTask(
+            Object.assign(
+                {
+                    merchants_id: merchant_ids.join(','),
+                },
+                params,
+                {
+                    is_upper_shelf: true,
+                },
+            ),
+        )
+            .then(({ data = EmptyObject } = EmptyObject) => {
+                form.resetFields();
+                reptileRef.current!.reset();
+                form.setFieldsValue({
+                    sort_type: listSort[0]?.value ?? '',
+                });
+                showSuccessModal(data);
+            })
+            .catch(() => {
+                showFailureModal();
+            });
+    }, []);
+
+    const modals = useMemo(() => {
+        return (
+            <MerchantListModal
+                visible={merchantModal}
+                onOKey={onGatherOnOKey}
+                onCancel={closeMerChantModal}
+            />
+        );
+    }, [merchantModal]);
+
+    const body = useMemo(() => {
+        return (
+            <Spin spinning={queryLoading} tip="Loading...">
+                <Form
+                    className={formStyles.formHelpAbsolute}
+                    layout="horizontal"
+                    autoComplete={'off'}
+                    form={form}
+                    initialValues={{
+                        range: HotTaskRange.fullStack,
+                        task_type: TaskExecuteType.once,
+                        taskIntervalType: TaskIntervalConfigType.day,
+                        filterType: HotTaskFilterType.ByCategory,
+                        day: 1,
+                        grab_page_count: 20,
+                        grab_count_max: 10000,
+                        channel: TaskChannelList[0].id,
+                    }}
+                >
+                    <Form.Item
+                        className={mapClassNames([
+                            edit ? '' : formStyles.formItem,
+                            formStyles.formInline,
+                        ])}
+                        validateTrigger={'onBlur'}
+                        name="task_name"
+                        label="任务名称"
+                        rules={[
+                            {
+                                required: true,
+                                message: '请输入任务名称',
+                            },
+                        ]}
+                    >
+                        <Input className="picker-default" />
+                    </Form.Item>
+                    <Form.Item
+                        className={mapClassNames([formStyles.formItem, formStyles.formInline])}
+                        validateTrigger={'onBlur'}
+                        name="channel"
+                        label="任务渠道"
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择任务渠道',
+                            },
+                        ]}
+                    >
+                        <Select className="picker-default">
+                            {TaskChannelList.map(({ name, id }) => (
+                                <Select.Option value={id} key={id}>
+                                    {name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <TaskRange form={form} onTaskRangeChange={taskRangeChange} />
+                    <SortType
+                        form={form}
+                        listSort={listSort}
+                        merchantSort={merchantSort}
+                        sortLoading={sortLoading}
+                    />
+                    <ReptileCondition form={form} ref={reptileRef} />
+                    <div>
+                        <Form.Item
+                            validateTrigger={'onBlur'}
+                            name="grab_page_count"
+                            label="爬取页数"
+                            className={mapClassNames([
+                                formStyles.formItem,
+                                formStyles.formHorizon,
+                                formStyles.formInline,
+                            ])}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请输入爬取页数',
+                                },
+                            ]}
+                        >
+                            <IntegerInput
+                                positive={true}
+                                className="picker-default input-handler"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            validateTrigger={'onBlur'}
+                            name="grab_count_max"
+                            className={mapClassNames([
+                                formStyles.formItem,
+                                formStyles.formHorizon,
+                                formStyles.formInline,
+                            ])}
+                            label={
+                                <span>
+                                    爬取数量
+                                    <Tooltip
+                                        placement="bottom"
+                                        title="各指定类目筛选前可爬取的最大数量"
+                                    >
+                                        <QuestionCircleOutlined className="config-ques" />
+                                    </Tooltip>
+                                </span>
+                            }
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请输入爬取数量',
+                                },
+                            ]}
+                        >
+                            <IntegerInput
+                                positive={true}
+                                className="picker-default input-handler"
+                            />
+                        </Form.Item>
+                    </div>
+                    <div>
+                        <SalesRange form={form} />
+                        <PriceRange form={form} />
+                    </div>
+                    <TaskCycle form={form} />
+                    <div className={formStyles.formItem}>
+                        <LoadingButton onClick={onGather} type="primary" className="btn-default">
+                            {edit ? '创建新采集任务' : '开始采集'}
+                        </LoadingButton>
+                        <Button type="primary" className="btn-default" onClick={onGatherOn}>
+                            {edit ? '创建新采集上架任务' : '一键采集上架'}
+                        </Button>
+                    </div>
+                </Form>
+            </Spin>
+        );
+    }, [queryLoading, sortLoading]);
 
     return (
-        <Spin spinning={queryLoading} tip="Loading...">
-            <Form
-                className={formStyles.formHelpAbsolute}
-                layout="horizontal"
-                autoComplete={'off'}
-                form={form}
-                initialValues={{
-                    range: HotTaskRange.fullStack,
-                    task_type: TaskExecuteType.once,
-                    taskIntervalType: TaskIntervalConfigType.day,
-                    filterType: HotTaskFilterType.ByCategory,
-                    day: 1,
-                    grab_page_count: 20,
-                    grab_count_max: 10000,
-                    channel: TaskChannelList[0].id,
-                }}
-            >
-                <Form.Item
-                    className={mapClassNames([
-                        edit ? '' : formStyles.formItem,
-                        formStyles.formInline,
-                    ])}
-                    validateTrigger={'onBlur'}
-                    name="task_name"
-                    label="任务名称"
-                    rules={[
-                        {
-                            required: true,
-                            message: '请输入任务名称',
-                        },
-                    ]}
-                >
-                    <Input className="picker-default" />
-                </Form.Item>
-                <Form.Item
-                    className={mapClassNames([formStyles.formItem, formStyles.formInline])}
-                    validateTrigger={'onBlur'}
-                    name="channel"
-                    label="任务渠道"
-                    rules={[
-                        {
-                            required: true,
-                            message: '请选择任务渠道',
-                        },
-                    ]}
-                >
-                    <Select className="picker-default">
-                        {TaskChannelList.map(({ name, id }) => (
-                            <Select.Option value={id} key={id}>
-                                {name}
-                            </Select.Option>
-                        ))}
-                    </Select>
-                </Form.Item>
-                <TaskRange form={form} onTaskRangeChange={taskRangeChange} />
-                <SortType
-                    form={form}
-                    listSort={listSort}
-                    merchantSort={merchantSort}
-                    sortLoading={sortLoading}
-                />
-                {/* <Form.Item
-                    noStyle={true}
-                    shouldUpdate={(prevValues, currentValues) =>
-                        prevValues.range !== currentValues.range
-                    }
-                >
-                    {({ getFieldValue }) => {
-                        const range = getFieldValue('range');
-                        const list = range === HotTaskRange.fullStack ? listSort : merchantSort;
-                        return (
-                            <Form.Item
-                                validateTrigger={'onBlur'}
-                                name="sort_type"
-                                label="排序类型"
-                                className={mapClassNames([
-                                    formStyles.formItem,
-                                    formStyles.formInline,
-                                ])}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '请选择排序类型',
-                                    },
-                                ]}
-                            >
-                                <Select loading={sortLoading} className="picker-default">
-                                    {list.map(sort => {
-                                        return (
-                                            <Option key={sort.value} value={sort.value}>
-                                                {sort.display}
-                                            </Option>
-                                        );
-                                    })}
-                                </Select>
-                            </Form.Item>
-                        );
-                    }}
-                </Form.Item>*/}
-                <ReptileCondition form={form} ref={reptileRef} />
-                <div>
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        name="grab_page_count"
-                        label="爬取页数"
-                        className={mapClassNames([
-                            formStyles.formItem,
-                            formStyles.formHorizon,
-                            formStyles.formInline,
-                        ])}
-                        rules={[
-                            {
-                                required: true,
-                                message: '请输入爬取页数',
-                            },
-                        ]}
-                    >
-                        <IntegerInput positive={true} className="picker-default input-handler" />
-                    </Form.Item>
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        name="grab_count_max"
-                        className={mapClassNames([
-                            formStyles.formItem,
-                            formStyles.formHorizon,
-                            formStyles.formInline,
-                        ])}
-                        label={
-                            <span>
-                                爬取数量
-                                <Tooltip
-                                    placement="bottom"
-                                    title="各指定类目筛选前可爬取的最大数量"
-                                >
-                                    <QuestionCircleOutlined className="config-ques" />
-                                </Tooltip>
-                            </span>
-                        }
-                        rules={[
-                            {
-                                required: true,
-                                message: '请输入爬取数量',
-                            },
-                        ]}
-                    >
-                        <IntegerInput positive={true} className="picker-default input-handler" />
-                    </Form.Item>
-                </div>
-                <div>
-                    <SalesRange form={form} />
-                    <PriceRange form={form} />
-                </div>
-                <TaskCycle form={form} />
-                <div className={formStyles.formItem}>
-                    <Button
-                        loading={gatherLoading}
-                        type="primary"
-                        className="btn-default"
-                        onClick={onGather}
-                    >
-                        {edit ? '创建新采集任务' : '开始采集'}
-                    </Button>
-                </div>
-            </Form>
-        </Spin>
+        <>
+            {body}
+            {modals}
+        </>
     );
 };
 

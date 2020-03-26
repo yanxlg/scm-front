@@ -27,7 +27,12 @@ import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import btnStyle from '@/styles/_btn.less';
 import TaskStatus from './TaskStatus';
-import { TaskChannelCode, TaskChannelList, TaskChannelMap } from '@/config/dictionaries/Task';
+import {
+    isOnceTask,
+    TaskChannelCode,
+    TaskChannelList,
+    TaskChannelMap,
+} from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 
 declare interface TaskListTabProps {
@@ -162,6 +167,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 render: (_, record: ITaskListItem) => {
                     const statusCode = Number(record.status);
                     const task_id = record.task_id;
+                    const onceTask = isOnceTask(record.execute_count);
                     return (
                         <>
                             <Button type="link" onClick={() => viewTaskDetail(task_id)}>
@@ -172,11 +178,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                                     立即执行
                                 </LoadingButton>
                             ) : null}
-                            {/* {statusCode === TaskStatusEnum.Failed ? (
+                            {statusCode === TaskStatusEnum.Failed && onceTask ? (
                                 <LoadingButton type="link" onClick={() => reTryTask(task_id)}>
                                     重试任务
                                 </LoadingButton>
-                            ) : null}*/}
+                            ) : null}
                             {statusCode === TaskStatusEnum.ToBeExecuted ||
                             statusCode === TaskStatusEnum.Executing ? (
                                 <LoadingButton
@@ -269,7 +275,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataIndex: 'execute_count',
                 width: '223px',
                 align: 'center',
-                render: count => (count === '1' ? '单次' : '定时'),
+                render: (count: string) => (isOnceTask(count) ? '单次' : '定时'),
             },
             {
                 title: '创建时间',

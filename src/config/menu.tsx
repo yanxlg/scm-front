@@ -88,6 +88,10 @@ export default [
                 path: '/setting/address',
                 name: '中转仓地址设置',
             },
+            {
+                path: '/setting/info',
+                name: '重要报关信息映射',
+            },
         ],
     },
 ];

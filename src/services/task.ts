@@ -101,11 +101,10 @@ export async function activeTasks(task_ids: string) {
     });
 }
 
-export async function reTryTasks(task_ids: string) {
-    return request.post(TaskApiPath.ActiveTask, {
-        data: {
-            task_ids,
-            type: 1,
+export async function reTryTasks(task_id: string) {
+    return request.get(TaskApiPath.RetryTask, {
+        params: {
+            task_id,
         },
     });
 }

@@ -1,14 +1,14 @@
-import { Form, Input } from 'antd';
+import { Form } from 'antd';
 import React, { useMemo } from 'react';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormInstance, Rule } from 'antd/es/form';
-import IntegerInput from '@/components/IntegerInput';
-import NumberInput from '@/components/NumberInput';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { transNullValue, transNumber } from '@/utils/transform';
+import RichInput, { RichType } from '@/components/Input/RichInput';
+import { InputProps as AntInputProps } from 'antd/es/input';
 
-export type InputType = 'input' | 'integer' | 'number';
-const typeList = ['input', 'integer', 'number'];
+export type InputType = RichType;
+const typeList = ['input', 'integer', 'number', 'positiveInteger'];
 
 export type InputFormatter = 'number';
 
@@ -23,7 +23,7 @@ export type InputProps = FormItemLabelProps &
         name: FormItemName;
         formatter?: InputFormatter;
         rules?: Rule[];
-    };
+    } & Omit<AntInputProps, 'type' | 'size' | 'onPressEnter' | 'form'>;
 
 const FormInput = (props: InputProps) => {
     const {
@@ -37,6 +37,7 @@ const FormInput = (props: InputProps) => {
         form,
         type,
         rules,
+        ..._props
     } = props;
     const eventProps = useMemo(() => {
         return onChange
@@ -56,23 +57,13 @@ const FormInput = (props: InputProps) => {
                 label={<span className={labelClassName}>{label}</span>}
                 rules={rules}
             >
-                {type === 'integer' ? (
-                    <IntegerInput
-                        min={0}
-                        placeholder={placeholder}
-                        className={className}
-                        {...eventProps}
-                    />
-                ) : type === 'number' ? (
-                    <NumberInput
-                        min={0}
-                        placeholder={placeholder}
-                        className={className}
-                        {...eventProps}
-                    />
-                ) : (
-                    <Input placeholder={placeholder} className={className} {...eventProps} />
-                )}
+                <RichInput
+                    placeholder={placeholder}
+                    className={className}
+                    {..._props}
+                    {...eventProps}
+                    richType={type}
+                />
             </Form.Item>
         );
     }, []);
