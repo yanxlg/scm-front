@@ -19,10 +19,10 @@ function FitTable<T extends object>(props: IFitTableProps<T>) {
         if (scroll?.x === true || scroll?.x === 'max-content') {
             let x: number = 0;
             if (rowSelection && rowSelection.columnWidth) {
-                x += Number(rowSelection.columnWidth) || 0;
+                x += parseInt(rowSelection.columnWidth as string) || 0;
             }
             columns?.forEach(column => {
-                x += Number(column.width) || 0;
+                x += parseInt(column.width as string) || 0;
             });
             return x;
         } else {

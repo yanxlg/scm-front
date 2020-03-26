@@ -1,13 +1,14 @@
 import React, {
     forwardRef,
     ForwardRefRenderFunction,
+    ReactElement,
     useCallback,
     useImperativeHandle,
     useMemo,
     useRef,
     useState,
 } from 'react';
-import { Button, Form } from 'antd';
+import { Button, Col, Form, Row } from 'antd';
 import { FormProps } from 'antd/lib/form/Form';
 import FormInput, {
     InputType,
@@ -41,6 +42,9 @@ import RcResizeObserver from 'rc-resize-observer';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import { UpOutlined, DownOutlined } from '@ant-design/icons';
+import { ColProps } from 'antd/lib/grid/col';
+import { RowProps } from 'antd/lib/grid/row';
+import formStyles from '@/styles/_form.less';
 
 export declare interface CustomFormProps {
     labelClassName?: string;
@@ -62,6 +66,8 @@ declare interface SearchFormProps extends FormProps, CustomFormProps {
     rowHeight?: number; // 行高，默认为60
     defaultCollapse?: boolean; // 初始状态，默认为true
     enableCollapse?: boolean; // 默认为true
+    itemCol?: ColProps;
+    itemRow?: RowProps;
 }
 
 export type FormItemName = string;
@@ -83,6 +89,8 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
         rowHeight = 56,
         defaultCollapse = true,
         enableCollapse = true,
+        itemCol,
+        itemRow,
         ..._props
     } = props;
 
@@ -215,61 +223,70 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
         }
     }, [collapseBtnVisible, collapse]);
 
+    const getColChildren = useCallback((children: ReactElement, times: number = 1) => {
+        //TODO 暂时不支持时间关联使用col方式布局
+        if (itemCol) {
+            return <Col {...itemCol}>{children}</Col>;
+        } else {
+            return children;
+        }
+    }, []);
+
     const fromItemList = useMemo(() => {
-        return fieldList.map(({ type, ...field }) => {
+        const fields = fieldList.map(({ type, ...field }) => {
             if (FormInput.typeList.includes(type)) {
-                return (
+                return getColChildren(
                     <FormInput
                         key={String(field.name)}
                         {...(field as InputProps)}
                         type={type as InputType}
                         labelClassName={labelClassName}
                         form={form}
-                    />
+                    />,
                 );
             }
             if (FormSelect.typeList.includes(type)) {
-                return (
+                return getColChildren(
                     <FormSelect
                         key={String(field.name)}
                         {...(field as SelectProps)}
                         type={type as SelectType}
                         labelClassName={labelClassName}
                         form={form}
-                    />
+                    />,
                 );
             }
             if (FormCheckbox.typeList.includes(type)) {
-                return (
+                return getColChildren(
                     <FormCheckbox
                         key={String(field.name)}
                         {...(field as CheckboxProps)}
                         type={type as CheckboxType}
                         labelClassName={labelClassName}
                         form={form}
-                    />
+                    />,
                 );
             }
             if (FormDatePicker.typeList.includes(type)) {
-                return (
+                return getColChildren(
                     <FormDatePicker
                         key={String(field.name)}
                         {...(field as DatePickerProps)}
                         type={type as DatePickerType}
                         labelClassName={labelClassName}
                         form={form}
-                    />
+                    />,
                 );
             }
             if (FormDateRanger.typeList.includes(type)) {
-                return (
+                return getColChildren(
                     <FormDateRanger
                         key={String(field.name)}
                         {...(field as DateRangerProps)}
                         type={type as DateRangerType}
                         labelClassName={labelClassName}
                         form={form}
-                    />
+                    />,
                 );
             }
             if (FormInputRange.typeList.includes(type)) {
@@ -285,6 +302,16 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
             }
             return null;
         });
+
+        if (itemCol) {
+            return (
+                <Row {...(itemRow ? itemRow : {})} className={formStyles.formRow}>
+                    {fields}
+                </Row>
+            );
+        } else {
+            return fields;
+        }
     }, [fieldList]);
 
     const formContent = useMemo(() => {
@@ -319,7 +346,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 </div>
             </RcResizeObserver>
         );
-    }, [fieldList, collapseBtnVisible, collapse, formContent]);
+    }, [fieldList, collapseBtnVisible, collapse, children]);
 
     return useMemo(() => {
         const style = enableCollapse
@@ -339,9 +366,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 {formComponent}
             </div>
         );
-    }, [formHeight, fieldList, collapseBtnVisible, collapse, formComponent]);
+    }, [formHeight, fieldList, collapseBtnVisible, collapse, children]);
 };
 
-const exportComponent = forwardRef(SearchForm);
-
-export default exportComponent;
+export default forwardRef(SearchForm);

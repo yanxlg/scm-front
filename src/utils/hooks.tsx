@@ -1,20 +1,20 @@
 import { RefObject, useState, useCallback, useEffect } from 'react';
 import { IResponse, IPaginationResponse, RequestPagination } from '@/interface/IGlobal';
 import { PaginationConfig } from 'antd/es/pagination';
-import { EmptyObject } from '@/config/global';
+import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
 import { SearchFormRef } from '@/components/SearchForm';
 
 const EmptyArray: string[] = [];
 
-function useList<T, Q extends RequestPagination, S = any>(
+function useList<T, Q extends RequestPagination = any, S = any>(
     queryList: (query: Q) => Promise<IResponse<IPaginationResponse<T>>>,
     searchRef?: RefObject<SearchFormRef>,
     extraQuery?: { [key: string]: any },
     defaultState?: { pageNumber?: number; pageSize?: number },
 ) {
     const [loading, setLoading] = useState(true);
-    const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? 1);
-    const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? 50);
+    const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? defaultPageNumber);
+    const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? defaultPageSize);
     const [dataSource, setDataSource] = useState<T[]>([]);
     const [total, setTotal] = useState(0);
     const [query, setQuery] = useState({});

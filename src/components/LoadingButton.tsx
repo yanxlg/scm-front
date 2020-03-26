@@ -15,12 +15,12 @@ const LoadingButton: React.FC<ILoadingButtonProps> = props => {
                 setLoading(false);
             });
         },
-        [props],
+        [props.onClick],
     );
     const currentLoading = props.loading || loading;
     return useMemo(() => {
         return <Button {...props} loading={currentLoading} onClick={onClick} />;
-    }, [props, currentLoading]);
+    }, [props, currentLoading, onClick]);
 };
 
 export default LoadingButton;

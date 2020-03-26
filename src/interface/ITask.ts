@@ -12,12 +12,7 @@ import {
     AutoPurchaseTaskType,
     TaskCreateStatusCode,
 } from '@/enums/StatusEnum';
-import {
-    IRequestPagination,
-    IRequestPagination2,
-    IBoolean,
-    RequestPagination,
-} from '@/interface/IGlobal';
+import { IBoolean, RequestPagination } from '@/interface/IGlobal';
 
 export type ITaskListQuery = {
     task_id?: string;
@@ -46,11 +41,11 @@ export interface ITaskListItem {
 
 export interface ITaskListExtraData {
     task_total_num: number;
-    task_not_execute_num: number;
-    task_execting_num: number;
-    task_exected_num: number;
-    task_exected_fail_num: number;
-    task_ternimation_num: number;
+    task_wait_execute_num: number;
+    task_executing_num: number;
+    task_executed_num: number;
+    task_executed_fail_num: number;
+    task_termination_num: number;
 }
 
 export interface ITaskListResponse extends ITaskListExtraData {
@@ -147,8 +142,11 @@ export interface ITaskDetailInfo {
     execute_count: number; //TaskExecuteType
     sub_cat_id: TaskRangeCode;
     sort_type_name?: string;
-    cat_name?: string;
+    cate_name_one?: string;
+    cate_name_two?: string;
+    cate_name_three?: string;
     task_cycle?: TaskExecuteType;
+    task_channel?: string;
 }
 
 export interface ITaskDetailResponse {
@@ -219,4 +217,13 @@ export interface ISubTaskProgressResponse {
     transform_incoming_num: number;
     incoming_num: number;
     incoming_fail_num: number;
+}
+
+export interface ISubTaskIdItem {
+    plan_id: string;
+    status: number;
+}
+
+export interface ISubTaskIdQuery extends RequestPagination {
+    task_id: number;
 }

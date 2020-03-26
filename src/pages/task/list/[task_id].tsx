@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Card, Descriptions, Modal, Tabs, Spin } from 'antd';
-import SubTaskView from '@/pages/task/components/SubTaskView';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Card, Descriptions, Modal, Tabs, Spin, Select, Popover } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import '@/styles/card.less';
+import btnStyles from '@/styles/_btn.less';
 import { queryTaskDetail } from '@/services/task';
 import { ITaskDetailInfo } from '@/interface/ITask';
 import {
@@ -26,13 +26,15 @@ import formStyles from '@/styles/_form.less';
 import taskStyle from '@/styles/_task.less';
 import styles from '@/styles/_index.less';
 import TaskProgress from '@/pages/task/components/detail/TskProgress';
+import TaskIdList from '@/pages/task/components/detail/TaskIdList';
 
 const { TabPane } = Tabs;
 
-const Task_id: React.FC<RouteComponentProps<{ id: string }>> = ({ match }) => {
+const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) => {
     const [loading, setLoading] = useState(false);
     const [detail, setDetail] = useState<ITaskDetailInfo>(EmptyObject);
-    const taskId = Number(match.params.id);
+    const taskId = Number(match.params.task_id);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -110,7 +112,9 @@ const Task_id: React.FC<RouteComponentProps<{ id: string }>> = ({ match }) => {
             sub_cat_id,
             sort_type_name,
             category_level_one,
-            cat_name,
+            cate_name_one,
+            cate_name_two,
+            cate_name_three,
             sales_volume_min,
             sales_volume_max,
             price_min,
@@ -119,51 +123,71 @@ const Task_id: React.FC<RouteComponentProps<{ id: string }>> = ({ match }) => {
             task_start_time,
             task_end_time,
             time_interval,
+            task_channel,
         } = detail;
         if (task_type === TaskTypeEnum.Gather) {
             return (
-                <Descriptions column={1} className="task-desc" size="small">
-                    <Descriptions.Item label="任务SN">{task_sn || '--'}</Descriptions.Item>
-                    <Descriptions.Item label="任务名称">{task_name || '--'}</Descriptions.Item>
-                    <Descriptions.Item label="任务范围">
+                <Descriptions column={3} className="task-desc" size="small">
+                    <Descriptions.Item label="任务SN" span={1}>
+                        {task_sn || '--'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="任务名称" span={1}>
+                        {task_name || '--'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="任务渠道" span={1}>
+                        {task_channel || '--'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="任务范围" span={1}>
                         {TaskRangeMap[sub_cat_id] || '--'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="排序类型">{sort_type_name || '--'}</Descriptions.Item>
-                    <Descriptions.Item label="爬虫条件">
+                    <Descriptions.Item label="排序类型" span={1}>
+                        {sort_type_name || '--'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="爬虫条件" span={1}>
                         {category_level_one ? '指定类目' : '指定关键词'}
                     </Descriptions.Item>
                     {category_level_one ? (
-                        <Descriptions.Item label="类目">{cat_name || '--'}</Descriptions.Item>
+                        <>
+                            <Descriptions.Item label="一级类目">
+                                {cate_name_one || '--'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="二级类目">
+                                {cate_name_two || '--'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="三级类目">
+                                {cate_name_three || '--'}
+                            </Descriptions.Item>
+                        </>
                     ) : (
-                        <Descriptions.Item label="关键词">
+                        <Descriptions.Item label="关键词" span={3}>
                             {detail.keywords || '--'}
                         </Descriptions.Item>
                     )}
-                    <Descriptions.Item label="爬取页数">
+                    <Descriptions.Item label="爬取页数" span={1}>
                         {detail.grab_page_count || '--'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="爬取数量">
+                    <Descriptions.Item label="爬取数量" span={1}>
                         {detail.grab_count_max || '--'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="销量区间">
+                    <Descriptions.Item label="销量区间" span={1}>
                         {`${sales_volume_min || 0}-${sales_volume_max || '+∞'}`}
                     </Descriptions.Item>
-                    <Descriptions.Item label="价格区间(￥)">
+                    <Descriptions.Item label="价格区间(￥)" span={1}>
                         {`${price_min || 0}-${price_max || '+∞'}`}
                     </Descriptions.Item>
-                    <Descriptions.Item label="任务周期">
+                    <Descriptions.Item label="任务周期" span={1}>
                         {task_cycle === TaskExecuteType.once ? '一次性任务' : '定时任务'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="任务开始时间">
+                    <Descriptions.Item label="任务开始时间" span={1}>
                         {utcToLocal(task_start_time) || '--'}
                     </Descriptions.Item>
                     {task_cycle === TaskExecuteType.once ? null : (
-                        <Descriptions.Item label="任务结束时间">
+                        <Descriptions.Item label="任务结束时间" span={1}>
                             {utcToLocal(task_end_time) || '--'}
                         </Descriptions.Item>
                     )}
                     {task_cycle === TaskExecuteType.once ? null : (
-                        <Descriptions.Item label="任务间隔">
+                        <Descriptions.Item label="任务间隔" span={1}>
                             {getTimeIntervalString(time_interval)}
                         </Descriptions.Item>
                     )}
@@ -212,7 +236,7 @@ const Task_id: React.FC<RouteComponentProps<{ id: string }>> = ({ match }) => {
             return <div>努力集成中，敬请期待...</div>;
         }
         return <div>数据异常，请排查...</div>;
-    }, [detail]);
+    }, [loading]);
 
     const detailComponent = useMemo(() => {
         const { task_type, task_name, status } = detail;
@@ -221,35 +245,45 @@ const Task_id: React.FC<RouteComponentProps<{ id: string }>> = ({ match }) => {
         return (
             <Card
                 loading={loading}
-                title={loading ? '加载中...' : task_type ? title : '异常'}
+                title={loading ? '加载中...' : task_type !== void 0 ? title : '异常'}
                 className={taskStyle.taskDetailCard}
+                extra={
+                    <Button className={btnStyles.btnLink} type="link" onClick={copyTask}>
+                        复制创建新任务
+                    </Button>
+                }
             >
                 {cardContent}
             </Card>
         );
     }, [loading]);
 
-    return useMemo(() => {
-        const { task_type } = detail;
+    const dropdownRender = useCallback(() => {
+        return <div />;
+    }, []);
 
+    const getPopupContainer = useCallback(() => {
+        return containerRef.current as HTMLDivElement;
+    }, []);
+
+    return useMemo(() => {
         return (
             <div className={styles.transparent}>
                 {detailComponent}
                 <Card className={formStyles.formItem} title="任务进度">
-                    <TaskProgress/>
-                    <Tabs
-                        className="tabs-margin-none form-item"
-                        type="card"
-                        defaultActiveKey="1"
-                        children={[
-                            <TabPane tab="子任务进度" key="1">
-                                <SubTaskView task_Id={taskId as number} task_type={task_type} />
-                            </TabPane>,
-                            /*<TabPane tab="任务日志" key="2">
-                                <TaskLogView task_Id={this.taskId} />
-                            </TabPane>,*/
-                        ]}
-                    />
+                    <div className={styles.relative} ref={containerRef}>
+                        <Popover
+                            placement="bottomLeft"
+                            getPopupContainer={getPopupContainer}
+                            title={undefined}
+                            content={<TaskIdList task_id={taskId} />}
+                            overlayStyle={{ width: '100%' }}
+                            trigger="click"
+                        >
+                            <Select placeholder="全部子任务" dropdownRender={dropdownRender} />
+                        </Popover>
+                    </div>
+                    <TaskProgress />
                 </Card>
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>

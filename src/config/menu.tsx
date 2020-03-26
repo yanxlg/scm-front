@@ -24,7 +24,7 @@ export default [
                 extract: true,
             },
             {
-                path: '/task/list/:id',
+                path: '/task/list/:task_id',
                 name: '任务详情',
                 hideInMenu: true,
                 extract: true,
@@ -91,6 +91,10 @@ export default [
             {
                 path: '/setting/address',
                 name: '中转仓地址设置',
+            },
+            {
+                path: '/setting/info',
+                name: '重要报关信息映射',
             },
         ],
     },

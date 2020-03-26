@@ -9,11 +9,6 @@
         "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx "
     },
     "dependencies": {
-        "@ant-design/pro-layout": "^5.0.5",
-        "@ant-design/icons":"^4.0.2",
-        "@ant-design/pro-table": "^2.1.8",
-        "antd": "^4.0.3",
-        "lodash-decorators": "^6.0.1",
         "moment": "^2.24.0",
         "react": "^16.13.0",
         "react-dom": "^16.13.0",
@@ -21,9 +16,16 @@
         "nprogress": "^0.2.0",
         "dva-logger": "^1.0.0",
         "query-string": "^6.11.1",
-        "qrcode.react": "^1.0.0"
+        "qrcode.react": "^1.0.0",
+        "react-virtualized": "^9.21.2",
+        "antd": "^4.0.3",
+        "@ant-design/pro-layout": "^5.0.5",
+        "@ant-design/icons":"^4.0.2",
+        "@ant-design/pro-table": "^2.1.8",
+        "lodash-decorators": "^6.0.1"
     },
     "devDependencies": {
+        "@types/react-virtualized": "^9.21.8",
         "@types/qrcode.react": "^1.0.0",
         "prettier": "^1.19.1",
         "@types/query-string": "^6.3.0",

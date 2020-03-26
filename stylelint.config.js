@@ -12,5 +12,6 @@ module.exports = {
         'no-duplicate-selectors': null,
         'selector-pseudo-class-no-unknown': null,
         'declaration-bang-space-before': null,
+        'color-hex-length': null,
     },
 };

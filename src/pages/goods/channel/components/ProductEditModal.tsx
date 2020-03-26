@@ -5,8 +5,8 @@ import { Button, Modal, Form, Spin } from 'antd';
 import { Bind } from 'lodash-decorators';
 import { editChannelProductDetail, queryChannelProductDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
-import NumberInput from '@/components/NumberInput';
-import IntegerInput from '@/components/IntegerInput';
+import NumberInput from '@/components/Input/NumberInput';
+import IntegerInput from '@/components/Input/IntegerInput';
 import { IChannelProductDetailResponse, ISku } from '@/interface/IChannel';
 import { EmptyObject } from '@/config/global';
 

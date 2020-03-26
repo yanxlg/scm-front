@@ -17,8 +17,10 @@ import {
     ITaskProgressResponse,
     ISubTaskProgressQuery,
     ISubTaskProgressResponse,
+    ISubTaskIdItem,
+    ISubTaskIdQuery,
 } from '@/interface/ITask';
-import { IResponse } from '@/interface/IGlobal';
+import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
 import { EmptyObject } from '@/config/global';
 import { transPaginationRequest, transPaginationResponse } from '@/utils/utils';
@@ -99,11 +101,10 @@ export async function activeTasks(task_ids: string) {
     });
 }
 
-export async function reActiveTasks(task_ids: string) {
-    return request.post(TaskApiPath.ActiveTask, {
-        data: {
-            task_ids,
-            type: 1,
+export async function reTryTasks(task_id: string) {
+    return request.get(TaskApiPath.RetryTask, {
+        params: {
+            task_id,
         },
     });
 }
@@ -172,12 +173,19 @@ export async function queryCategory() {
     return request.get<IResponse<IPDDCategoryResponse>>(TaskApiPath.QueryPDDCategory);
 }
 
-export async function querySortCondition(type: IPDDSortQueryType) {
-    return request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
-        params: {
-            type: type,
-        },
-    });
+export async function querySortCondition() {
+    return Promise.all([
+        request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
+            params: {
+                type: 'list',
+            },
+        }),
+        request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
+            params: {
+                type: 'merchant',
+            },
+        }),
+    ]);
 }
 
 export async function queryTaskLog(params: { task_id: number; page: number; page_number: number }) {
@@ -207,5 +215,11 @@ export async function addAutoPurchaseTask(data: IAPTaskBody) {
 export async function querySubTaskProgress(query: ISubTaskProgressQuery) {
     return request.get<IResponse<ISubTaskProgressResponse>>(TaskApiPath.QuerySubTaskProgress, {
         params: query,
+    });
+}
+
+export async function querySubTaskIdList(params: ISubTaskIdQuery) {
+    return request.get<IResponse<ISubTaskIdItem[]>>(TaskApiPath.QuerySubTaskIdList, {
+        params: transPaginationRequest(params),
     });
 }

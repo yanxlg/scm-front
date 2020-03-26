@@ -5,7 +5,7 @@ import formStyle from '@/styles/_form.less';
 import taskStyle from '@/styles/_task.less';
 import tableStyle from '@/styles/_table.less';
 import { ColumnsType } from 'antd/lib/table/interface';
-import { CheckCircleFilled, CloseCircleFilled, WarningFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleOutlined } from '@ant-design/icons';
 import { FitTable } from '@/components/FitTable';
 
 declare interface TaskProgressProps {}
@@ -49,7 +49,9 @@ const TaskProgress: React.FC = () => {
                     <Statistic
                         value={_}
                         className={tableStyle.staticNumber}
-                        suffix={<WarningFilled className={taskStyle.failureSuffixIcon} />}
+                        suffix={
+                            <ExclamationCircleOutlined className={taskStyle.failureSuffixIcon} />
+                        }
                     />
                 ),
             },
@@ -107,7 +109,7 @@ const TaskProgress: React.FC = () => {
                     column={{
                         xl: 6,
                     }}
-                    className={styles.textCenter}
+                    className={[styles.textCenter, formStyle.formItemSmall].join(' ')}
                 >
                     <Descriptions.Item label="列表商品数量">
                         <Statistic value={1128} className={tableStyle.staticNumber} />

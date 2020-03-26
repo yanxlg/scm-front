@@ -32,7 +32,7 @@ export const transPaginationRequest = ({
 };
 
 export const transPaginationResponse = <T>({
-    data: { total = 0, list, task_info, ...extra },
+    data,
     ...others
 }: IResponse<{
     total?: number;
@@ -40,10 +40,11 @@ export const transPaginationResponse = <T>({
     task_info?: T[];
     [key: string]: any;
 }> = EmptyObject) => {
+    const { total = 0, list, task_info, fee, ...extra } = data || {};
     return {
         data: {
             total,
-            list: list || task_info || [],
+            list: list || task_info || fee || [],
             ...extra,
         },
         ...others,
@@ -51,3 +52,11 @@ export const transPaginationResponse = <T>({
 };
 
 export { singlePromiseWrap };
+
+export const mapClassNames = (classNames: string[]) => {
+    return classNames.join(' ');
+};
+
+export const isEmptyObject = (target: object) => {
+    return JSON.stringify(target) === '{}';
+};

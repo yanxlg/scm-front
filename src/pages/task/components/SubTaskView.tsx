@@ -24,13 +24,11 @@ declare interface ISubTaskViewProps {
 }
 
 const SubTaskView: React.FC<ISubTaskViewProps> = props => {
-    const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList(
-        queryTaskProgressList,
-        undefined,
-        {
-            task_id: props.task_Id,
-        },
-    );
+    const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList<
+        ITaskProgressItem
+    >(queryTaskProgressList, undefined, {
+        task_id: props.task_Id,
+    });
 
     const showTotal = useCallback((total: number) => {
         return <span className="data-grid-total">共有{total}条</span>;

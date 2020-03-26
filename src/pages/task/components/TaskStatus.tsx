@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { TaskStatusCode, TaskStatusEnum, TaskStatusMap } from '@/enums/StatusEnum';
 import {
-    CheckCircleOutlined,
-    ClockCircleOutlined,
-    CloseCircleOutlined,
-    InfoCircleOutlined,
+    CheckCircleFilled,
+    CloseCircleFilled,
+    ClockCircleFilled,
+    InfoCircleFilled,
 } from '@ant-design/icons';
 import { Progress } from 'antd';
+import taskStyle from '@/styles/_task.less';
 
 declare interface TaskStatusProps {
     status: TaskStatusCode;
@@ -17,18 +18,18 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
     }, []);
 
     return useMemo(() => {
-        if (status === TaskStatusEnum.UnExecuted) {
+        if (status === TaskStatusEnum.ToBeExecuted) {
             return (
                 <div>
-                    <ClockCircleOutlined />
+                    <ClockCircleFilled className={taskStyle.waitIcon} />
                     {TaskStatusMap[(status as unknown) as TaskStatusCode]}
                 </div>
             );
         }
-        if (status === TaskStatusEnum.Finished) {
+        if (status === TaskStatusEnum.Success) {
             return (
                 <div>
-                    <CheckCircleOutlined />
+                    <CheckCircleFilled className={taskStyle.successIcon} />
                     {TaskStatusMap[(status as unknown) as TaskStatusCode]}
                 </div>
             );
@@ -36,7 +37,7 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
         if (status === TaskStatusEnum.Failed) {
             return (
                 <div>
-                    <CloseCircleOutlined />
+                    <CloseCircleFilled className={taskStyle.errorIcon} />
                     {TaskStatusMap[(status as unknown) as TaskStatusCode]}
                 </div>
             );
@@ -44,7 +45,7 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
         if (status === TaskStatusEnum.Terminated) {
             return (
                 <div>
-                    <InfoCircleOutlined />
+                    <InfoCircleFilled className={taskStyle.warnIcon} />
                     {TaskStatusMap[(status as unknown) as TaskStatusCode]}
                 </div>
             );
@@ -53,10 +54,10 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
             return (
                 <div>
                     <Progress
-                        className="task-progress-circle"
-                        width={20}
-                        strokeWidth={15}
+                        className={taskStyle.progressIcon}
                         strokeLinecap="round"
+                        width={14}
+                        strokeWidth={14}
                         type="circle"
                         percent={percent}
                         status={'normal'}

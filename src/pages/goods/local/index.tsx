@@ -206,13 +206,13 @@ const formFields: FormField[] = [
         formItemClassName: 'form-item',
     },
     {
-        type: 'number',
+        type: 'positiveInteger',
         label: '评论数量>=',
         name: 'min_comment',
         // placeholder: '多个逗号隔开',
         className: 'local-search-item-input-min',
         formItemClassName: 'form-item',
-        precision: 0,
+        // precision: 0,
     },
 ];
 
@@ -832,8 +832,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         toggleExcelDialog={this.toggleExcelDialog}
                     />
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
-
-
                 </div>
             </Container>
         );
