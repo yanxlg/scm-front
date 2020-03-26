@@ -389,6 +389,7 @@ export const childOptionalColList = [
     { key: 'goodsAmount', name: '价格' }, // 1
     // { key: 'a4', name: '运费' },
     { key: 'goodsNumber', name: '商品数量' }, // 1
+    { key: 'freight', name: '商品运费' }, // 1
     { key: '_goodsTotalAmount', name: '商品总金额' }, // 1
     // { key: 'a6', name: '取消订单时间' },
     { key: 'channelSource', name: '销售渠道' }, // 1
