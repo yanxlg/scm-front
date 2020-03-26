@@ -3,14 +3,6 @@ import { Input, Select, Form } from 'antd';
 import '@/styles/config.less';
 import { FormInstance } from 'antd/es/form';
 
-declare interface IFormData {
-    taskName?: string;
-    scope?: string;
-    taskStatus?: string;
-    createStartTime?: string;
-    createEndTime?: string;
-}
-
 declare interface ITaskSearchProps {}
 
 const Option = Select.Option;

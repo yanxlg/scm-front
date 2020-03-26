@@ -9,22 +9,20 @@ const Store: React.FC = (props: {}) => {
     const onChange = useCallback((activeKey: string) => setActiveKey(activeKey), []);
     return useMemo(() => {
         return (
-            <div className="container">
-                <Tabs
-                    className="tabs-margin-none"
-                    onChange={onChange}
-                    activeKey={activeKey}
-                    type="card"
-                    children={[
-                        <TabPane tab="VOVA" key="1">
-                            <StoreForm />
-                        </TabPane>,
-                        <TabPane tab="FD" key="2">
-                            <StoreForm />
-                        </TabPane>,
-                    ]}
-                />
-            </div>
+            <Tabs
+                className="tabs-margin-none"
+                onChange={onChange}
+                activeKey={activeKey}
+                type="card"
+                children={[
+                    <TabPane tab="VOVA" key="1">
+                        <StoreForm />
+                    </TabPane>,
+                    <TabPane tab="FD" key="2">
+                        <StoreForm />
+                    </TabPane>,
+                ]}
+            />
         );
     }, [activeKey, props]);
 };

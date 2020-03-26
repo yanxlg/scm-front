@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { Result, Button } from 'antd';
-import router from 'umi/router';
+import { history } from 'umi';
 
 const Page: React.FC = () => {
-    const goToHome = useCallback(() => router.replace('/'), []);
+    const goToHome = useCallback(() => history.replace('/'), []);
     return useMemo(() => {
         return (
             <Result

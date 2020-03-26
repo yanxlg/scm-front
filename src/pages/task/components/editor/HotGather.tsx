@@ -23,7 +23,6 @@ import {
 import IntegerInput from '@/components/IntegerInput';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { TreeNodeNormal } from 'antd/es/tree/Tree';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import {
     IHotTaskBody,
     IPDDCategoryResponse,
@@ -32,6 +31,7 @@ import {
 } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
+import { EmptyObject } from '@/config/global';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -972,103 +972,104 @@ class HotGather extends React.PureComponent<IHotGatherProps, IHotGatherState> {
                     >
                         {({ getFieldValue }) => {
                             const filterType = getFieldValue('filterType');
-                            if (filterType === HotTaskFilterType.ByKeywords) {
-                                return (
-                                    <Form.Item
-                                        className="form-item form-item-inline form-required-hide"
-                                        validateTrigger={'onBlur'}
-                                        name="keywords"
-                                        label="关&ensp;键&ensp;词"
-                                        required={true}
-                                    >
-                                        <Input
-                                            className="input-large"
-                                            spellCheck={'false'}
-                                            placeholder="iPhone XR，国行，白"
-                                        />
-                                    </Form.Item>
-                                );
-                            }
                             return (
                                 <Form.Item noStyle={true}>
-                                    <Form.Item
-                                        validateTrigger={'onBlur'}
-                                        name="category_level_one"
-                                        label="一级类目"
-                                        className="form-item form-item-horizon form-item-inline config-hot-category"
-                                        validateFirst={true}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: '必须选择一级分类',
-                                            },
-                                        ]}
-                                    >
-                                        <TreeSelect
-                                            treeNodeFilterProp="title"
-                                            onChange={this.onFirstCategoryChange}
-                                            loading={categoryLoading}
-                                            showArrow={true}
-                                            className="picker-default"
-                                            showCheckedStrategy={'SHOW_PARENT'}
-                                            showSearch={true}
-                                            treeDefaultExpandAll={true}
-                                            treeCheckable={true}
-                                            treeData={firstTreeData}
-                                            maxTagCount={10}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        validateTrigger={'onBlur'}
-                                        name="category_level_two"
-                                        label="二级类目"
-                                        className="form-item form-item-horizon form-item-inline form-required-hide config-hot-category"
-                                        required={true}
-                                        rules={[
-                                            {
-                                                validator: this.checkSecondCategory,
-                                            },
-                                        ]}
-                                    >
-                                        <TreeSelect
-                                            treeNodeFilterProp="title"
-                                            loading={categoryLoading}
-                                            className="picker-default"
-                                            onChange={this.onMiddleCategoryChange}
-                                            showArrow={true}
-                                            showCheckedStrategy={'SHOW_PARENT'}
-                                            showSearch={true}
-                                            treeDefaultExpandAll={true}
-                                            treeCheckable={true}
-                                            treeData={middleTreeData}
-                                            maxTagCount={10}
-                                        />
-                                    </Form.Item>
-                                    <Form.Item
-                                        validateTrigger={'onBlur'}
-                                        name="category_level_three"
-                                        label="三级类目"
-                                        required={true}
-                                        className="form-item form-item-horizon form-item-inline form-required-hide"
-                                        rules={[
-                                            {
-                                                validator: this.checkLastCategory,
-                                            },
-                                        ]}
-                                    >
-                                        <TreeSelect
-                                            treeNodeFilterProp="title"
-                                            loading={categoryLoading}
-                                            className="picker-default"
-                                            showArrow={true}
-                                            showCheckedStrategy={'SHOW_PARENT'}
-                                            showSearch={true}
-                                            treeDefaultExpandAll={true}
-                                            treeCheckable={true}
-                                            treeData={lastTreeData}
-                                            maxTagCount={10}
-                                        />
-                                    </Form.Item>
+                                    {filterType === HotTaskFilterType.ByKeywords ? (
+                                        <Form.Item
+                                            className="form-item form-item-inline form-required-hide"
+                                            validateTrigger={'onBlur'}
+                                            name="keywords"
+                                            label="关&ensp;键&ensp;词"
+                                            required={true}
+                                        >
+                                            <Input
+                                                className="input-large"
+                                                spellCheck={'false'}
+                                                placeholder="iPhone XR，国行，白"
+                                            />
+                                        </Form.Item>
+                                    ) : (
+                                        <React.Fragment>
+                                            <Form.Item
+                                                validateTrigger={'onBlur'}
+                                                name="category_level_one"
+                                                label="一级类目"
+                                                className="form-item form-item-horizon form-item-inline config-hot-category"
+                                                validateFirst={true}
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: '必须选择一级分类',
+                                                    },
+                                                ]}
+                                            >
+                                                <TreeSelect
+                                                    treeNodeFilterProp="title"
+                                                    onChange={this.onFirstCategoryChange}
+                                                    loading={categoryLoading}
+                                                    showArrow={true}
+                                                    className="picker-default"
+                                                    showCheckedStrategy={'SHOW_PARENT'}
+                                                    showSearch={true}
+                                                    treeDefaultExpandAll={true}
+                                                    treeCheckable={true}
+                                                    treeData={firstTreeData}
+                                                    maxTagCount={10}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                validateTrigger={'onBlur'}
+                                                name="category_level_two"
+                                                label="二级类目"
+                                                className="form-item form-item-horizon form-item-inline form-required-hide config-hot-category"
+                                                required={true}
+                                                rules={[
+                                                    {
+                                                        validator: this.checkSecondCategory,
+                                                    },
+                                                ]}
+                                            >
+                                                <TreeSelect
+                                                    treeNodeFilterProp="title"
+                                                    loading={categoryLoading}
+                                                    className="picker-default"
+                                                    onChange={this.onMiddleCategoryChange}
+                                                    showArrow={true}
+                                                    showCheckedStrategy={'SHOW_PARENT'}
+                                                    showSearch={true}
+                                                    treeDefaultExpandAll={true}
+                                                    treeCheckable={true}
+                                                    treeData={middleTreeData}
+                                                    maxTagCount={10}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                validateTrigger={'onBlur'}
+                                                name="category_level_three"
+                                                label="三级类目"
+                                                required={true}
+                                                className="form-item form-item-horizon form-item-inline form-required-hide"
+                                                rules={[
+                                                    {
+                                                        validator: this.checkLastCategory,
+                                                    },
+                                                ]}
+                                            >
+                                                <TreeSelect
+                                                    treeNodeFilterProp="title"
+                                                    loading={categoryLoading}
+                                                    className="picker-default"
+                                                    showArrow={true}
+                                                    showCheckedStrategy={'SHOW_PARENT'}
+                                                    showSearch={true}
+                                                    treeDefaultExpandAll={true}
+                                                    treeCheckable={true}
+                                                    treeData={lastTreeData}
+                                                    maxTagCount={10}
+                                                />
+                                            </Form.Item>
+                                        </React.Fragment>
+                                    )}
                                 </Form.Item>
                             );
                         }}

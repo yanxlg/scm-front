@@ -4,7 +4,7 @@
  */
 import { message, notification } from 'antd';
 import { extend, RequestOptionsInit, ResponseError } from 'umi-request';
-import { router } from 'umi';
+import { history } from 'umi';
 import { parse, stringify } from 'querystring';
 import User from '@/storage/User';
 
@@ -64,7 +64,7 @@ export function errorHandlerFactory(skipError: boolean = false) {
                     newMessage(msg);
                     const { redirect } = getPageQuery();
                     if (window.location.pathname !== '/login' && !redirect) {
-                        router.replace({
+                        history.replace({
                             pathname: '/login',
                             search: stringify({
                                 redirect: window.location.href,
@@ -148,11 +148,16 @@ request.interceptors.response.use(async (response: Response, options: RequestOpt
     return response;
 });
 
+const requestId = function() {
+    return Date.now() + '' + Math.ceil(Math.random() * 100000);
+};
+
 // 登录身份设置
 request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
     if (User.token) {
         options.headers = Object.assign({}, options.headers, {
             'X-Token': User.token,
+            request_id: requestId(),
         });
     }
     return {

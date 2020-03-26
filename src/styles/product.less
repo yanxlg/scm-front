@@ -1,17 +1,17 @@
 @cardSpacing: 20px;
 
 .product {
-    &-link{
+    &-link {
         white-space: normal;
     }
     &-card {
-        margin-top: @cardSpacing!important;
+        margin-top: @cardSpacing !important;
     }
 
     &-modal {
         width: 80% !important;
         max-width: 1000px;
-        &-content{
+        &-content {
             height: 500px;
             overflow: auto;
         }
@@ -20,13 +20,12 @@
             right: 0;
             top: 0;
             cursor: pointer;
-
         }
-        &-item{
-            & ~ &{
+        &-item {
+            & ~ & {
                 margin-left: 16px;
             }
-            &-value{
+            &-value {
                 vertical-align: top;
                 width: 800px;
                 white-space: normal;
@@ -34,16 +33,16 @@
                 text-align: left;
             }
         }
-        &-specs{
-            line-height: 24px!important;
-            &-value{
+        &-specs {
+            line-height: 24px !important;
+            &-value {
                 width: 100px;
                 white-space: normal;
-                text-align: left!important;
+                text-align: left !important;
                 line-height: 18px;
             }
-            &-item{
-                & ~ &{
+            &-item {
+                & ~ & {
                     margin-top: 5px;
                 }
             }
@@ -51,7 +50,7 @@
 
         &-value {
             font-size: 12px;
-            color: #999999;
+            color: #999;
         }
 
         &-avatar {
@@ -65,34 +64,58 @@
                 display: inline-block;
             }
         }
-        &-name{
+        &-name {
             width: 160px;
             overflow: hidden;
             text-overflow: ellipsis;
-            text-align: left!important;
+            text-align: left !important;
         }
     }
 
-    &-tag{
+    &-tag {
         display: inline-block;
         width: 150px;
         font-size: 12px;
-        color: #666666;
-        &s{
+        color: #666;
+        &s {
             min-height: 30px;
         }
-        &-value{
+        &-value {
             font-weight: bold;
             color: #1890ff;
         }
     }
-    &-picker{
+    &-picker {
         width: 196px;
     }
-    &-form{
-        &-label{
+    &-form {
+        &-label {
             display: inline-block;
             width: 88px;
+        }
+    }
+    &-sku-dialog {
+        .goods-img {
+            float: left;
+            width: 100px;
+            margin-right: 12px;
+        }
+        .text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .item {
+            margin-bottom: 6px;
+            .desc {
+                display: inline-block;
+                vertical-align: top;
+                width: 260px;
+                word-break: break-all;
+            }
+            .center {
+                margin: 0 8px;
+            }
         }
     }
 }

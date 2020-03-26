@@ -5,7 +5,7 @@ import { Button, Checkbox, Input } from 'antd';
 import { BindAll } from 'lodash-decorators';
 import { userLogin } from '@/services/user';
 import { getPageQuery } from '@/utils/request';
-import router from 'umi/router';
+import { history } from 'umi';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
@@ -109,7 +109,7 @@ class Login extends React.PureComponent<{}, ILoginState> {
                         return;
                     }
                 }
-                router.replace(redirect || '/');
+                history.replace(redirect || '/');
             })
             .catch(({ message }) => {
                 this.setState({

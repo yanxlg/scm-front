@@ -4,7 +4,6 @@ import { queryTaskProgressList } from '@/services/task';
 import { BindAll } from 'lodash-decorators';
 import { showTaskProgressModal } from '@/pages/task/components/modal/TaskProgressModal';
 import { ColumnProps } from 'antd/es/table';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { ITaskProgressItem } from '@/interface/ITask';
 import {
     TaskTypeCode,
@@ -18,6 +17,7 @@ import '@/styles/config.less';
 import '@/styles/modal.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
+import { EmptyObject } from '@/config/global';
 
 declare interface ISubTaskViewProps {
     task_Id: number;

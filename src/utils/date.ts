@@ -37,6 +37,10 @@ export function transStartDate(moment?: Moment) {
         : moment;
 }
 
+export function convertStartDate(unix: number) {
+    return !unix ? undefined : moment.unix(unix);
+}
+
 export function transEndDate(moment?: Moment) {
     return moment
         ? moment
@@ -47,6 +51,10 @@ export function transEndDate(moment?: Moment) {
               .second(0)
               .unix()
         : moment;
+}
+
+export function convertEndDate(unix: number) {
+    return !unix ? undefined : moment.unix(unix).add(-1, 'd');
 }
 
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';

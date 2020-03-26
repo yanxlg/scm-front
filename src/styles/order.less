@@ -1,44 +1,21 @@
-@import "~antd/lib/style/themes/default";
-
 @divisionSpacing: 6px;
 @btnSpacing: 12px;
 @inputWidth: 140px;
+@inputLabel: 100px;
 
 .order {
     &-wrap {
-        padding: 12px;
+        // padding: 12px;
     }
     &-division {
         margin: 0 @divisionSpacing;
         font-size: 17px;
     }
-    &-form-item {
-        margin-bottom: 16px !important;
-    }
     &-time {
         margin-right: 0 !important;
     }
-    &-date-picker {
-        width: 197px;
-    }
-    &-input {
-        width: 140px !important;
-    }
-    &-label {
-        display: inline-block;
-        width: 104px;
-    }
-    // &-operation {
-    //     margin: 8px 0;
-    // }
-    &-btn {
-        width: 100px;
-    }
-    &-btn + &-btn {
-        margin-left: 12px;
-    }
     &-table {
-        margin-top: 20px;
+        margin-top: 10px;
     }
     &-goods-content {
         > div {
@@ -47,13 +24,15 @@
         .img-line {
             display: flex;
             align-items: center;
+            justify-content: space-between;
         }
         .img-wrap {
             margin-left: 30px;
             span {
                 display: inline-block;
                 width: 90px;
-                vertical-align: -3px;
+                text-align: right;
+                // vertical-align: -3px;
             }
         }
         img {
@@ -62,31 +41,87 @@
         .style + .style {
             margin-left: 6px;
         }
+        .float-left {
+            margin-right: 10px;
+        }
     }
     &-goods-none {
         text-align: center;
     }
 
-    &-pay{
-        &-modal{
-            width: 600px!important;
+    &-form-item {
+        margin-bottom: 16px !important;
+    }
+    &-operation {
+        margin: 8px 0;
+    }
+    &-input {
+        width: @inputWidth !important;
+    }
+    &-date-picker {
+        width: 192px;
+    }
+    &-label {
+        display: inline-block;
+        width: @inputLabel;
+    }
+    &-btn {
+        width: 120px;
+    }
+    &-btn {
+        margin-right: 12px;
+        margin-bottom: 10px;
+    }
+    &-optional-column {
+        .all {
+            display: flex;
+            align-items: center;
+            margin: 20px 0 6px;
         }
-        &-total{
-            float: right;
-            color: #999999;
-            font-size: 14px;
-            margin-right: 20px;
-            line-height: 25px;
-            &-amount{
-                color: @success-color;
-            }
+        strong {
+            margin-right: 6px;
         }
-        &-qr{
-            width: 120px;
-            height: 120px;
-            &-modal{
-                width: 300px!important;
-            }
+        .checkbox-item {
+            width: 160px;
+            margin-left: 0 !important;
+            margin-right: 8px;
+        }
+    }
+    &-err-detail {
+        margin: 10px 0 10px;
+        strong {
+            float: left;
+            width: 80px;
+        }
+        .wrap {
+            overflow: hidden;
+        }
+        .radio-group {
+            white-space: normal;
+        }
+        .checkbox-item {
+            margin-left: 0 !important;
+            margin-right: 8px;
+            width: 140px;
+        }
+    }
+    &-pagination {
+        margin: 20px 0;
+    }
+    &-img-auto {
+        width: 100%;
+    }
+    &-qr {
+        &-small {
+            width: 40px;
+            height: 40px;
+            // margin-right: 10px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        &-enlarge {
+            width: 300px;
+            height: 300px;
         }
     }
 }

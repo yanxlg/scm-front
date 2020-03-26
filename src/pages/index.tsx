@@ -1,8 +1,9 @@
 import React from 'react';
+import '@/styles/index.less';
 
 class Index extends React.PureComponent {
     render() {
-        return <div>Home</div>;
+        return 'Home';
     }
 }
 

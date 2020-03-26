@@ -5,8 +5,8 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { router } from 'dva';
-import { RouteProps } from 'dva/router';
 import { getCookie } from '@/utils/common';
+import { RouteProps } from 'react-router';
 
 const { Route } = router;
 

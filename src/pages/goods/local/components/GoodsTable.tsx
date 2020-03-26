@@ -1,7 +1,6 @@
 import React, { RefObject } from 'react';
 import { Table, Button } from 'antd';
-import Link from 'umi/link';
-import ZoomImage from '@/components/ZoomImage';
+import { Link } from 'umi';
 import SkuDialog from './SkuDialog';
 
 import { ColumnProps } from 'antd/es/table';
@@ -302,7 +301,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
                     rowSelection={rowSelection}
                     columns={this.columns}
                     dataSource={goodsList}
-                    scroll={{ x: width || true, y: 600 }}
+                    scroll={{ x: width || 'max-content', y: 600 }}
                     pagination={false}
                     loading={searchLoading}
                 />

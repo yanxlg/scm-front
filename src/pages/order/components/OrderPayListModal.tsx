@@ -6,11 +6,11 @@ import '@/styles/index.less';
 import { ColumnProps } from 'antd/es/table';
 
 declare interface IDataItem {
-    price: string;
-    create_time: number;
-    order_ids: string;
-    controller: string;
-    order_id: string;
+    price?: number;
+    create_time?: number;
+    order_ids?: string;
+    controller?: string;
+    order_id?: number;
 }
 
 const column: ColumnProps<IDataItem>[] = [

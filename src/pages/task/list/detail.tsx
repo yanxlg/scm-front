@@ -5,7 +5,7 @@ import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
 import '@/styles/card.less';
-import { RouteComponentProps } from 'dva/router';
+import { RouteComponentProps } from 'react-router';
 import { queryTaskDetail } from '@/services/task';
 import { Bind } from 'lodash-decorators';
 import { ITaskDetailInfo } from '@/interface/ITask';
@@ -17,11 +17,12 @@ import {
     TaskTypeEnum,
     TaskTypeMap,
 } from '@/enums/StatusEnum';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import URLGather from '@/pages/task/components/editor/URLGather';
 import HotGather from '../components/editor/HotGather';
 import { utcToLocal } from '@/utils/date';
 import TimerUpdate from '../components/editor/TimerUpdate';
+import { EmptyObject } from '@/config/global';
+import CopyLink from '@/components/copyLink';
 
 const { TabPane } = Tabs;
 const { Step } = Steps;
@@ -127,6 +128,9 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
             ? `${timeInterval / 86400}天`
             : `${timeInterval}秒`;
     }
+    private getCopiedLinkQuery() {
+        return {};
+    }
     render() {
         const { detail = {} as ITaskDetailInfo, loading } = this.state;
         const category = detail.category_level_one;
@@ -180,40 +184,40 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                         {task_type === TaskTypeEnum.Gather ? (
                             <Descriptions column={1} className="task-desc" size="small">
                                 <Descriptions.Item label="任务SN">
-                                    {detail.task_sn}
+                                    {detail.task_sn || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务名称">
-                                    {detail.task_name}
+                                    {detail.task_name || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务范围">
-                                    {TaskRangeMap[sub_cat_id]}
+                                    {TaskRangeMap[sub_cat_id] || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="排序类型">
-                                    {sort_type_name}
+                                    {sort_type_name || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="爬虫条件">
                                     {category ? '指定类目' : '指定关键词'}
                                 </Descriptions.Item>
                                 {category ? (
-                                    <Descriptions.Item label="类目">{cat_name}</Descriptions.Item>
+                                    <Descriptions.Item label="类目">
+                                        {cat_name || '--'}
+                                    </Descriptions.Item>
                                 ) : (
                                     <Descriptions.Item label="关键词">
-                                        {detail.keywords}
+                                        {detail.keywords || '--'}
                                     </Descriptions.Item>
                                 )}
                                 <Descriptions.Item label="爬取页数">
-                                    {detail.grab_page_count}
+                                    {detail.grab_page_count || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="爬取数量">
-                                    {detail.grab_count_max}
+                                    {detail.grab_count_max || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="销量区间">
-                                    {sales_volume_min === void 0
-                                        ? '--'
-                                        : `${sales_volume_min}-${sales_volume_max}`}
+                                    {`${sales_volume_min || 0}-${sales_volume_max || '+∞'}`}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="价格区间(￥)">
-                                    {price_min === void 0 ? '--' : `${price_min}-${price_max}`}
+                                    {`${price_min || 0}-${price_max || '+∞'}`}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务周期">
                                     {task_cycle === TaskExecuteType.once
@@ -221,11 +225,11 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                         : '定时任务'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务开始时间">
-                                    {utcToLocal(task_start_time)}
+                                    {utcToLocal(task_start_time) || '--'}
                                 </Descriptions.Item>
                                 {task_cycle === TaskExecuteType.once ? null : (
                                     <Descriptions.Item label="任务结束时间">
-                                        {utcToLocal(task_end_time)}
+                                        {utcToLocal(task_end_time) || '--'}
                                     </Descriptions.Item>
                                 )}
                                 {task_cycle === TaskExecuteType.once ? null : (
@@ -237,13 +241,13 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                         ) : task_type === TaskTypeEnum.Grounding ? (
                             <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
-                                    {detail.task_sn}
+                                    {detail.task_sn || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务名称">
-                                    {detail.task_name}
+                                    {detail.task_name || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务范围">
-                                    {TaskRangeMap[sub_cat_id]}
+                                    {TaskRangeMap[sub_cat_id] || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务周期">
                                     {task_cycle === TaskExecuteType.once
@@ -251,16 +255,16 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                                         : '定时任务'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务开始时间">
-                                    {utcToLocal(task_start_time)}
+                                    {utcToLocal(task_start_time) || '--'}
                                 </Descriptions.Item>
                             </Descriptions>
                         ) : task_type === TaskTypeEnum.Update ? (
                             <Descriptions column={1} className="task-desc">
                                 <Descriptions.Item label="任务SN">
-                                    {detail.task_sn}
+                                    {detail.task_sn || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="任务名称">
-                                    {detail.task_name}
+                                    {detail.task_name || '--'}
                                 </Descriptions.Item>
                                 <Descriptions.Item label="商品范围">
                                     {TaskRangeMap[sub_cat_id]
@@ -302,6 +306,7 @@ class TaskDetailPage extends React.PureComponent<TaskDetailPageProps, ITaskDetai
                         ]}
                     />
                 </Card>
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

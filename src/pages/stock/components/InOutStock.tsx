@@ -1,30 +1,31 @@
 import React, { RefObject } from 'react';
 import { FitTable } from '@/components/FitTable';
-import { Button, Form, Pagination } from 'antd';
+import { Button, message, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { BindAll } from 'lodash-decorators';
-import { transEndDate, transStartDate, utcToLocal } from '@/utils/date';
-import JsonForm, { IFieldItem } from '@/components/JsonForm';
+import { convertEndDate, convertStartDate, transEndDate, transStartDate } from '@/utils/date';
+import SearchForm, { IFieldItem } from '@/components/SearchForm';
 import { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
-import { exportIOList, queryIOList } from '@/services/stock';
+import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
+import CopyLink from '@/components/copyLink';
+import queryString from 'query-string';
+import { StockType } from '@/config/dictionaries/Stock';
 
 declare interface ITableData {
-    warehousing_time: number; // 入库时间
-    warehousing_order_sn: string; // 入库订单号
-    purchase_order_sn: string; // 采购订单号
-    first_waybill_no: string; // 首程运单号
-    plan_warehousing_qy: number; // 计划入库数量
-    actual_warehousing_qy: number; // 实际入库数量
-    product_id: string; //中台商品ID
-    outgoing_time: number; //出库时间
-    outgoing_no: string; //出库单号
-    plan_outgoing_qy: number; //计划出库数量
-    actual_outgoing_qy: number; //实际出库数量
-    last_waybill_no: string; //尾程运单号
+    outboundOrderSn: string;
+    planedQuantity: number;
+    quantity: number;
+    outboundTime: string;
+    lastWaybillNo: string;
+    commodity_id: string;
+    inboundOrderSn: string;
+    inboundTime: string;
+    firstWaybillNo: string;
+    purchaseOrderSn: string;
 }
 
 declare interface IInOutStockState {
@@ -35,109 +36,116 @@ declare interface IInOutStockState {
     pageNumber: number;
     pageSize: number;
     total: number;
+    defaultInitialValues?: { [key: string]: any };
 }
 
-export declare interface IStockIOFormData {
-    warehousing_start_time?: Moment | number;
-    warehousing_end_time?: Moment | number;
-    outgoing_start_time?: Moment | number;
-    outgoing_end_time?: Moment | number;
-    outgoing_order_sn?: string;
-    warehousing_order_sn?: string;
+export declare interface IStockINFormData {
+    time_start?: Moment | number;
+    time_end?: Moment | number;
     purchase_order_sn?: string;
-    product_id?: string;
+    inbound_order_sn?: string;
+    commodity_id?: string;
+    page?: number;
+    per_page?: number;
+}
+
+export declare interface IStockOUTFormData {
+    time_start?: Moment | number;
+    time_end?: Moment | number;
     last_waybill_no?: string;
-    type: 1 | 2;
+    outbound_order_sn?: string;
+    commodity_id?: string;
+    page?: number;
+    per_page?: number;
 }
 
 declare interface IInOutStockProps {
-    type: 1 | 2; //1:出库管理，2入库管理
+    type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
 }
 
 @BindAll()
 class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState> {
     private formRef: RefObject<FormInstance> = React.createRef();
+    private queryData: any = {};
     private inColumns: ColumnProps<ITableData>[] = [
         {
             title: '入库时间',
-            width: '200px',
-            dataIndex: 'warehousing_time',
+            width: '150px',
+            dataIndex: 'inboundTime',
             align: 'center',
-            render: (time: number) => utcToLocal(time),
         },
         {
             title: '入库订单号',
-            width: '130px',
-            dataIndex: 'warehousing_order_sn',
+            width: '180px',
+            dataIndex: 'inboundOrderSn',
             align: 'center',
         },
         {
             title: '采购订单号',
-            width: '130px',
-            dataIndex: 'purchase_order_sn',
+            width: '180px',
+            dataIndex: 'purchaseOrderSn',
             align: 'center',
         },
         {
             title: '首程运单号',
-            width: '130px',
-            dataIndex: 'first_waybill_no',
+            width: '180px',
+            dataIndex: 'firstWaybillNo',
             align: 'center',
         },
         {
             title: '计划入库数量',
-            width: '150px',
-            dataIndex: 'plan_warehousing_qy',
+            width: '100px',
+            dataIndex: 'planedQuantity',
             align: 'center',
         },
         {
             title: '实际入库数量',
-            width: '150px',
-            dataIndex: 'actual_warehousing_qy',
+            width: '100px',
+            dataIndex: 'quantity',
             align: 'center',
         },
         {
             title: '中台商品ID',
-            width: '128px',
-            dataIndex: 'product_id',
+            width: '150px',
+            dataIndex: 'commodity_id',
             align: 'center',
         },
     ];
     private outColumns: ColumnProps<ITableData>[] = [
         {
             title: '中台商品ID',
-            width: '128px',
-            dataIndex: 'product_id',
+            width: '150px',
+            dataIndex: 'commodity_id',
             align: 'center',
         },
         {
             title: '出库时间',
-            width: '200px',
-            dataIndex: 'outgoing_time',
+            width: '150px',
+            dataIndex: 'outboundTime',
             align: 'center',
-            render: (time: number) => utcToLocal(time),
         },
         {
             title: '出库单号',
-            width: '130px',
-            dataIndex: 'outgoing_no',
+            width: '180px',
+            dataIndex: 'outboundOrderSn',
             align: 'center',
         },
         {
             title: '计划出库数量',
-            width: '150px',
-            dataIndex: 'plan_outgoing_qy',
+            width: '100px',
+            dataIndex: 'planedQuantity',
             align: 'center',
         },
         {
             title: '实际出库数量',
-            width: '150px',
-            dataIndex: 'actual_outgoing_qy',
+            width: '100px',
+            dataIndex: 'quantity',
             align: 'center',
         },
         {
             title: '尾程运单号',
-            width: '130px',
-            dataIndex: 'last_waybill_no',
+            width: '180px',
+            dataIndex: 'lastWaybillNo',
             align: 'center',
         },
     ];
@@ -145,14 +153,14 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         {
             type: 'dateRanger',
             label: <span>入库&emsp;时间</span>,
-            name: ['warehousing_start_time', 'warehousing_end_time'],
+            name: ['time_start', 'time_end'],
             formItemClassName: 'form-item',
             className: 'stock-form-picker',
         },
         {
             type: 'input',
             label: '入库订单号',
-            name: 'warehousing_order_sn',
+            name: 'inbound_order_sn',
             formItemClassName: 'form-item',
             className: 'input-default',
         },
@@ -166,7 +174,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         {
             type: 'input',
             label: '中台商品ID',
-            name: 'product_id',
+            name: 'commodity_id',
             formItemClassName: 'form-item',
             className: 'input-default',
         },
@@ -175,14 +183,14 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         {
             type: 'dateRanger',
             label: <span>出库&emsp;时间</span>,
-            name: ['outgoing_start_time', 'outgoing_end_time'],
+            name: ['time_start', 'time_end'],
             formItemClassName: 'form-item',
             className: 'stock-form-picker',
         },
         {
             type: 'input',
             label: '出库订单号',
-            name: 'outgoing_order_sn',
+            name: 'outbound_order_sn',
             formItemClassName: 'form-item',
             className: 'input-default',
         },
@@ -196,7 +204,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         {
             type: 'input',
             label: '中台商品ID',
-            name: 'product_id',
+            name: 'commodity_id',
             formItemClassName: 'form-item',
             className: 'input-default',
         },
@@ -204,35 +212,47 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
 
     constructor(props: IInOutStockProps) {
         super(props);
+        const { page, per_page, ...extra } = this.computeInitialValues();
         this.state = {
             dataSet: [],
             dataLoading: true,
             searchLoading: true,
             exportingLoading: false,
             total: 0,
-            pageNumber: 1,
-            pageSize: 50,
+            pageNumber: page,
+            pageSize: per_page,
+            defaultInitialValues: extra,
+        };
+    }
+
+    private computeInitialValues() {
+        // copy link 解析
+        const { query, url } = queryString.parseUrl(window.location.href);
+        if (query) {
+            window.history.replaceState({}, '', url);
+        }
+        const { page = 1, per_page = 50, time_start = 0, time_end = 0, ...extra } = query;
+        return {
+            page: Number(page),
+            per_page: Number(per_page),
+            time_start: convertStartDate(Number(time_start)),
+            time_end: convertEndDate(Number(time_end)),
+            ...extra,
         };
     }
 
     componentDidMount(): void {
-        this.onSearch();
+        this.queryList({
+            searchLoading: true,
+        });
     }
 
     private convertFormData() {
-        const {
-            warehousing_start_time,
-            warehousing_end_time,
-            outgoing_start_time,
-            outgoing_end_time,
-            ...values
-        } = this.formRef.current!.getFieldsValue();
+        const { time_start, time_end, ...values } = this.formRef.current!.getFieldsValue();
         return {
             ...values,
-            warehousing_start_time: transStartDate(warehousing_start_time),
-            warehousing_end_time: transEndDate(warehousing_end_time),
-            outgoing_start_time: transStartDate(outgoing_start_time),
-            outgoing_end_time: transEndDate(outgoing_end_time),
+            time_start: transStartDate(time_start),
+            time_end: transEndDate(time_end),
         };
     }
 
@@ -248,11 +268,16 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         this.setState({
             exportingLoading: true,
         });
-        exportIOList(Object.assign({ ...values, type: this.props.type })).finally(() => {
-            this.setState({
-                exportingLoading: false,
+        const exportService = this.props.type === StockType.In ? exportInList : exportOutList;
+        exportService(Object.assign({ ...values }))
+            .catch(() => {
+                message.error('导出失败!');
+            })
+            .finally(() => {
+                this.setState({
+                    exportingLoading: false,
+                });
             });
-        });
     }
 
     private queryList(
@@ -268,17 +293,23 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
             dataLoading: true,
             searchLoading,
         });
-        queryIOList({
+        const type = this.props.type;
+        const query = {
             ...values,
             page: pageNumber,
-            page_count: pageSize,
-            type: this.props.type,
-        })
-            .then(({ data: { all_count = 0, list = [] } }) => {
+            per_page: pageSize,
+        };
+        this.queryData = {
+            ...query,
+            tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
+        };
+        const queryService = type === StockType.In ? queryInList : queryOutList;
+        queryService(query)
+            .then(({ data: { total = 0, list = [] } }) => {
                 this.setState({
                     dataLoading: false,
                     searchLoading: false,
-                    total: all_count,
+                    total: total,
                     dataSet: list,
                 });
             })
@@ -307,6 +338,10 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
         });
     }
 
+    private getCopiedLinkQuery() {
+        return this.queryData;
+    }
+
     render() {
         const {
             dataSet,
@@ -316,15 +351,17 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
             pageNumber,
             pageSize,
             total,
+            defaultInitialValues,
         } = this.state;
         const { type } = this.props;
         return (
             <div>
                 <div className="float-clear">
-                    <JsonForm
+                    <SearchForm
                         labelClassName="stock-form-label"
                         formRef={this.formRef}
                         fieldList={type === 1 ? this.outFieldsList : this.inFieldsList}
+                        initialValues={defaultInitialValues}
                     />
                     <Button
                         type="primary"
@@ -371,6 +408,7 @@ class InOutStock extends React.PureComponent<IInOutStockProps, IInOutStockState>
                     }}
                     bottom={130}
                 />
+                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
             </div>
         );
     }

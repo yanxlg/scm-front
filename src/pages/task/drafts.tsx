@@ -122,7 +122,7 @@ class Drafts extends React.PureComponent<{}, IDraftsState> {
             onChange: this.onSelectChange,
         };
         return (
-            <div className="container">
+            <div>
                 <DraftSearch />
                 <div className="block form-item">
                     <Button loading={searchLoading} onClick={this.onSearch} type="primary">
