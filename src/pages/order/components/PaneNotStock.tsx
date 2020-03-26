@@ -4,7 +4,12 @@ import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import TableNotStock from './TableNotStock';
 import LoadingButton from '@/components/LoadingButton';
 
-import { getPurchasedNotStockList, IFilterParams, delChannelOrders } from '@/services/order-manage';
+import {
+    getPurchasedNotStockList,
+    IWaitShipFilterParams,
+    delChannelOrders,
+    postExportPurchasedNotStock,
+} from '@/services/order-manage';
 import {
     defaultOptionItem,
     orderStatusOptionList,
@@ -14,21 +19,21 @@ import {
 import { getCurrentPage } from '@/utils/common';
 
 export declare interface IOrderItem {
-    orderGoodsId: string;                // 中台订单ID
-    orderCreateTime: string;             // 订单时间
-    purchasePlanId: string;              // 计划子项ID
-    productId: string;                   // 中台商品ID
-    purchasePlatform: string;            // 采购平台
-    purchaseNumber: number;              // 采购数量
-    purchasePlatformOrderId: string;     // 采购订单号
-    purchaseWaybillNo: string;           // 采购运单号
-    platformOrderTime: string;           // 采购生成时间
-    payTime: string;                     // 采购支付时间
-    purchaseOrderStatus: number;         // 采购订单状态
+    orderGoodsId: string; // 中台订单ID
+    orderCreateTime: string; // 订单时间
+    purchasePlanId: string; // 计划子项ID
+    productId: string; // 中台商品ID
+    purchasePlatform: string; // 采购平台
+    purchaseNumber: number; // 采购数量
+    purchasePlatformOrderId: string; // 采购订单号
+    purchaseWaybillNo: string; // 采购运单号
+    platformOrderTime: string; // 采购生成时间
+    payTime: string; // 采购支付时间
+    purchaseOrderStatus: number; // 采购订单状态
     purchaseOrderShippingStatus: number; // 采购配送状态
-    purchaseOrderPayStatus: number;      // 采购支付状态
-    confirmTime: string;                 // 订单确认时间
-    channelOrderSn: string;              // 渠道订单ID
+    purchaseOrderPayStatus: number; // 采购支付状态
+    confirmTime: string; // 订单确认时间
+    channelOrderSn: string; // 渠道订单ID
 }
 
 const fieldList: FormField[] = [
@@ -93,9 +98,10 @@ declare interface IState {
 
 class PaneNotStock extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
+    private currentSearchParams: IWaitShipFilterParams | null = null;
     private initialValues = {
         order_goods_status: 100,
-        purchase_order_status: 100
+        purchase_order_status: 100,
     };
 
     constructor(props: IProps) {
@@ -106,7 +112,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
             total: 0,
             loading: false,
             orderList: [],
-            selectedRowKeys: []
+            selectedRowKeys: [],
         };
     }
 
@@ -114,9 +120,9 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterParams) => {
+    onSearch = (baseParams?: IWaitShipFilterParams) => {
         const { page, pageCount } = this.state;
-        let params: IFilterParams = {
+        let params: IWaitShipFilterParams = {
             page,
             page_count: pageCount,
         };
@@ -133,6 +139,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
         getPurchasedNotStockList(params)
             .then(res => {
                 // console.log('getProductOrderList', res);
+                this.currentSearchParams = params;
                 const { all_count: total, list } = res.data;
                 this.setState({
                     total,
@@ -166,17 +173,11 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 payTime,
 
                 orderGoods,
-                orderInfo
+                orderInfo,
             } = current;
-            const {
-                confirmTime,
-                channelOrderSn
-            } = orderInfo;
-            const {
-                orderGoodsStatus,
-                createTime: orderCreateTime
-            } = orderGoods;
-            
+            const { confirmTime, channelOrderSn } = orderInfo;
+            const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
+
             return {
                 orderGoodsId,
                 purchasePlanId,
@@ -197,16 +198,18 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 orderGoodsStatus,
                 orderCreateTime,
             } as IOrderItem;
-        });;
-    }
+        });
+    };
 
     private handleClickSearch = () => {
         const { order_goods_id } = this.formRef.current?.getFieldsValue() as any;
         if (order_goods_id && /[^0-9]/.test(order_goods_id)) {
             return message.error('中台订单ID只能输入数字字符');
         }
-        this.onSearch();
-    }
+        this.onSearch({
+            page: 1,
+        });
+    };
 
     private onChangePage = (page: number) => {
         this.onSearch({
@@ -225,9 +228,9 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
     private changeSelectedRowKeys = (keys: string[]) => {
         // console.log('keys', keys);
         this.setState({
-            selectedRowKeys: keys
-        })
-    }
+            selectedRowKeys: keys,
+        });
+    };
 
     // 批量操作成功
     private batchOperateSuccess = (name: string = '', list: string[]) => {
@@ -271,7 +274,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
             }).then(res => {
                 this.onSearch();
                 const { success, failed } = res.data;
-                
+
                 if (success!.length) {
                     this.batchOperateSuccess('取消渠道订单', success);
                 }
@@ -285,15 +288,18 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
         }
     };
 
+    private postExportPurchasedNotStock = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        return postExportPurchasedNotStock(params);
+    };
+
     render() {
-        const {
-            loading,
-            page,
-            pageCount,
-            total,
-            orderList,
-            selectedRowKeys
-        } = this.state;
+        const { loading, page, pageCount, total, orderList, selectedRowKeys } = this.state;
 
         return (
             <>
@@ -305,8 +311,8 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
-                        <Button 
-                            type="primary" 
+                        <Button
+                            type="primary"
                             className="order-btn"
                             loading={loading}
                             onClick={this.handleClickSearch}
@@ -320,11 +326,15 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                         >
                             取消渠道订单
                         </LoadingButton>
-                        <Button type="primary" className="order-btn">
+                        <LoadingButton
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.postExportPurchasedNotStock}
+                        >
                             导出数据
-                        </Button>
+                        </LoadingButton>
                     </div>
-                    <TableNotStock 
+                    <TableNotStock
                         loading={loading}
                         orderList={orderList}
                         selectedRowKeys={selectedRowKeys}

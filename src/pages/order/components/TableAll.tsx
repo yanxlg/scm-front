@@ -535,7 +535,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     };
 
     private showLogisticsTrack = (purchaseWaybillNo: string) => {
-        console.log('showLogisticsTrack', purchaseWaybillNo);
+        // console.log('showLogisticsTrack', purchaseWaybillNo);
         this.setState({
             trackDialogStatus: true,
         });

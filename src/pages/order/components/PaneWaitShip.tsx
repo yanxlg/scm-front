@@ -5,11 +5,12 @@ import TableWaitShip from './TableWaitShip';
 import LoadingButton from '@/components/LoadingButton';
 
 import { getCurrentPage } from '@/utils/common';
-import { 
-    getWaitShipList, 
-    IFilterParams,
+import {
+    getWaitShipList,
+    IWaitShipFilterParams,
     delPurchaseOrders,
-    delChannelOrders
+    delChannelOrders,
+    postExportWaitShip,
 } from '@/services/order-manage';
 import {
     defaultOptionItem,
@@ -65,7 +66,7 @@ const fieldList: FormField[] = [
     },
 ];
 export declare interface IWaitShipItem {
-    platformOrderTime: string; 
+    platformOrderTime: string;
     purchasePlatformOrderId: string;
     purchaseAmount: string;
     orderGoodsStatus: string;
@@ -93,8 +94,9 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
     private initialValues = {
         order_goods_status: 100,
-        purchase_order_status: 100
-    }
+        purchase_order_status: 100,
+    };
+    private currentSearchParams: IWaitShipFilterParams | null = null;
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -103,7 +105,7 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
             total: 0,
             loading: false,
             orderList: [],
-            selectedRowKeys: []
+            selectedRowKeys: [],
         };
     }
 
@@ -112,9 +114,9 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterParams) => {
+    onSearch = (baseParams?: IWaitShipFilterParams) => {
         const { page, pageCount } = this.state;
-        let params: IFilterParams = {
+        let params: IWaitShipFilterParams = {
             page,
             page_count: pageCount,
         };
@@ -130,6 +132,7 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
         });
         getWaitShipList(params)
             .then(res => {
+                this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
                 const { all_count: total, list } = res.data;
                 this.setState({
@@ -157,12 +160,9 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                 purchaseOrderShippingStatus,
                 purchasePlanId,
                 orderGoodsId,
-                orderGoods
+                orderGoods,
             } = current;
-            const {
-                orderGoodsStatus,
-                createTime: orderCreateTime
-            } = orderGoods;
+            const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
             return {
                 platformOrderTime,
                 purchasePlatformOrderId,
@@ -172,10 +172,10 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                 purchaseOrderShippingStatus,
                 purchasePlanId,
                 orderGoodsId,
-                orderCreateTime
+                orderCreateTime,
             } as IWaitShipItem;
-        });;
-    }
+        });
+    };
 
     // 获取查询数据
     getFieldsValue = () => {
@@ -199,17 +199,19 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
     private changeSelectedRowKeys = (keys: string[]) => {
         // console.log('keys', keys);
         this.setState({
-            selectedRowKeys: keys
-        })
-    }
+            selectedRowKeys: keys,
+        });
+    };
 
     private handleClickSearch = () => {
         const { order_goods_id } = this.formRef.current?.getFieldsValue() as any;
         if (order_goods_id && /[^0-9]/.test(order_goods_id)) {
             return message.error('中台订单ID只能输入数字字符');
         }
-        this.onSearch();
-    }
+        this.onSearch({
+            page: 1,
+        });
+    };
 
     // 批量操作成功
     private batchOperateSuccess = (name: string = '', list: string[]) => {
@@ -275,7 +277,7 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
             }).then(res => {
                 this.onSearch();
                 const { success, failed } = res.data;
-                
+
                 if (success!.length) {
                     this.batchOperateSuccess('取消渠道订单', success);
                 }
@@ -289,6 +291,16 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
         }
     };
 
+    private postExportWaitShip = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        return postExportWaitShip(params);
+    };
+
     render() {
         const { loading, orderList, total, page, pageCount, selectedRowKeys } = this.state;
         return (
@@ -300,11 +312,7 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                     initialValues={this.initialValues}
                 />
                 <div className="order-operation">
-                    <Button
-                        type="primary"
-                        className="order-btn"
-                        onClick={this.handleClickSearch}
-                    >
+                    <Button type="primary" className="order-btn" onClick={this.handleClickSearch}>
                         查询
                     </Button>
                     <LoadingButton
@@ -321,12 +329,16 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                     >
                         取消渠道订单
                     </LoadingButton>
-                    <Button type="primary" className="order-btn">
+                    <LoadingButton
+                        type="primary"
+                        className="order-btn"
+                        onClick={this.postExportWaitShip}
+                    >
                         导出数据
-                    </Button>
+                    </LoadingButton>
                 </div>
-                <TableWaitShip 
-                    loading={loading} 
+                <TableWaitShip
+                    loading={loading}
                     orderList={orderList}
                     selectedRowKeys={selectedRowKeys}
                     changeSelectedRowKeys={this.changeSelectedRowKeys}

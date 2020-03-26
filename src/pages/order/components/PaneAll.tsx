@@ -26,7 +26,7 @@ import {
     parentOptionalColList,
     pageSizeOptions,
 } from '@/enums/OrderEnum';
-import { getCurrentPage, splitStrToArr } from '@/utils/common';
+import { getCurrentPage } from '@/utils/common';
 
 export declare interface IPurchaseStatus {
     status: number;

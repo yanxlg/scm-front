@@ -58,6 +58,17 @@ export declare interface IPayFilterParams {
     purchase_parent_order_sn?: string;
 }
 
+export declare interface IWaitShipFilterParams {
+    page?: number;
+    page_count?: number;
+    order_goods_id?: string;
+    purchase_platform_order_id_list?: string[];
+    order_goods_status?: number;
+    purchase_order_status?: number;
+    platform_order_time_start?: number;
+    platform_order_time_end?: number;
+}
+
 export declare interface IErrFilterParams {
     page?: number;
     page_count?: number;
@@ -108,10 +119,13 @@ export async function getPendingOrderList(data: IPendingFilterParams) {
 }
 
 export async function postExportPendingOrder(data: IPendingFilterParams) {
-    return request.post(OrderApiPath.postExportPendingOrder, {
-        requestType: 'json',
-        data,
-    });
+    return request
+        .post(OrderApiPath.postExportPendingOrder, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
 }
 
 // 获取待支付
@@ -133,27 +147,57 @@ export async function postExportPay(data: IPayFilterParams) {
 }
 
 // 获取待发货
-export async function getWaitShipList(data = {}) {
+export async function getWaitShipList(data: IWaitShipFilterParams) {
     return request.post(OrderApiPath.getWaitShipList, {
         requestType: 'json',
         data,
     });
 }
 
-// 采购未发货
-export async function getPurchasedNotStockList(data = {}) {
+export async function postExportWaitShip(data: IWaitShipFilterParams) {
+    return request
+        .post(OrderApiPath.postExportWaitShip, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
+}
+
+// 已采购未入库
+export async function getPurchasedNotStockList(data: IWaitShipFilterParams) {
     return request.post(OrderApiPath.getPurchasedNotStockList, {
         requestType: 'json',
         data,
     });
 }
 
+export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
+    return request
+        .post(OrderApiPath.postExportPurchasedNotStock, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
+}
+
 // 仓库未发货
-export async function getStockNotShipList(data = {}) {
+export async function getStockNotShipList(data: IFilterParams) {
     return request.post(OrderApiPath.getStockNotShipList, {
         requestType: 'json',
         data,
     });
+}
+
+export async function postExportStockNotShip(data: IFilterParams) {
+    return request
+        .post(OrderApiPath.postExportStockNotShip, {
+            data,
+            responseType: 'blob',
+            parseResponse: false,
+        })
+        .then(downloadExcel);
 }
 
 // 获取异常订单
