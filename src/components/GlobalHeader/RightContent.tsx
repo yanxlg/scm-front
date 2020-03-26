@@ -4,6 +4,7 @@ import styles from './_index.less';
 import { Breadcrumb, Button } from 'antd';
 import { genBreadcrumbProps } from '@ant-design/pro-layout/es/utils/getBreadcrumbProps';
 import { BasicLayoutProps, getMenuData, MenuDataItem } from '@ant-design/pro-layout';
+import { getCookie } from '@/utils/common';
 
 export type SiderTheme = 'light' | 'dark';
 export interface GlobalHeaderRightProps extends BasicLayoutProps {
@@ -23,6 +24,8 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
             breadcrumbMap: breadcrumbMap,
         }),
     );
+
+    const userName = getCookie('USERNAME') || '--';
     return (
         <div>
             {breadcrumbData ? (
@@ -33,7 +36,7 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
                 />
             ) : null}
             <div className={styles.right}>
-                用户名，
+                {userName}，
                 <Button
                     type="link"
                     className="padding-none"
