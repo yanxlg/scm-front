@@ -69,10 +69,11 @@ export declare interface IGoodsEditData {
     imgs: IGoodsEditImgItem[];
 }
 
-declare interface ISkuParams {
+export declare interface ISkuParams {
     page: number;
-    page_count: number;
-    product_id: string;
+    page_count?: number;
+    product_id?: string;
+    variantids?: string;
 }
 
 // 兼容SearchForm数据结构 { name: '', value: '' }

@@ -1,10 +1,10 @@
-import React from 'react';
-import { Modal, Table, Pagination } from 'antd';
+import React, { ChangeEvent } from 'react';
+import { Modal, Table, Pagination, Row, Col, Button, Input } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 
 import { ISkuStyleItem } from '@/interface/ILocalGoods';
-import { getGoodsSkuList } from '@/services/goods';
+import { getGoodsSkuList, ISkuParams } from '@/services/goods';
 
 import './SkuDialog.less';
 
@@ -21,11 +21,6 @@ declare interface ISkuItem {
     image_url: string;
 }
 
-declare interface IPageData {
-    page?: number;
-    page_count?: number;
-}
-
 declare interface IPorps {
     visible: boolean;
     // currentRowData: IRowDataItem | null;
@@ -38,6 +33,7 @@ declare interface IState {
     page: number;
     allCount: number;
     skuList: ISkuItem[];
+    value: string;
 }
 
 class SkuDialog extends React.PureComponent<IPorps, IState> {
@@ -116,7 +112,6 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             width: 100,
         },
     ];
-
     constructor(props: IPorps) {
         super(props);
         this.state = {
@@ -124,6 +119,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             page: 1,
             allCount: 0,
             skuList: [],
+            value: ''
         };
     }
 
@@ -131,9 +127,9 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         this.props.toggleSkuDialog(false);
     };
 
-    getSkuList = (productId: string, pageData?: IPageData) => {
+    getSkuList = (productId: string, pageData?: ISkuParams) => {
         const { page } = this.state;
-        let params = {
+        let params: ISkuParams = {
             page,
             product_id: productId,
             page_count: 50,
@@ -181,9 +177,23 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         });
     };
 
+    changeValue = (e: ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            value: e.target.value
+        })
+    }
+
+    handleClickSearch = () => {
+        const { value } = this.state;
+        this.getSkuList(this.props.currentRowData!.product_id, {
+            page: 1,
+            variantids: value
+        });
+    }
+
     render() {
         const { visible, currentRowData } = this.props;
-        const { loading, page, allCount, skuList } = this.state;
+        const { loading, page, allCount, skuList, value } = this.state;
         if (!currentRowData) {
             return null;
         } else {
@@ -202,6 +212,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                 <Modal
                     width={1000}
                     visible={visible}
+                    style={{ top: 50 }}
                     onCancel={this.handleCancel}
                     maskClosable={false}
                     footer={null}
@@ -214,13 +225,23 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                         <div className="goods-info">
                             <img className="main-img" src={goods_img} />
                             <div className="content">
+                                <Row>
+                                    <Col span={6}>Product ID: {product_id}</Col>
+                                    <Col span={10}>Commodity ID: {commodity_id}</Col>
+                                    <Col span={5}>爬虫商品 ID: {worm_goods_id}</Col>
+                                </Row>
                                 <div className="desc">
                                     商品标题：{title}
                                     <a href={worm_goodsinfo_link} target="_blank">
                                         【查看源商品】
                                     </a>
                                 </div>
-                                <div className="center">
+                                <Row>
+                                    <Col span={8}>一级分类: {first_catagory.name}</Col>
+                                    <Col span={8}>二级分类: {second_catagory.name}</Col>
+                                    <Col span={8}>三级分类: {third_catagory.name}</Col>
+                                </Row>
+                                {/* <div className="center">
                                     <div className="goods-item one">
                                         <span className="float-left">product id:</span>
                                         <div className="overflow-hidden">{product_id}</div>
@@ -249,11 +270,29 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                                         <span className="float-left">三级分类:</span>
                                         <div className="overflow-hidden">{third_catagory.name}</div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
+                        <Row className="filter-section" gutter={16}>
+                            <Col span={21} className="input-wrap">
+                                <span className="label">SKU ID:</span>
+                                <Input 
+                                    value={value}
+                                    onChange={this.changeValue}
+                                    placeholder="支持多个搜索，以英文逗号隔开"
+                                />
+                            </Col>
+                            <Col span={3}>
+                                <Button
+                                    type="primary"
+                                    className="btn"
+                                    loading={loading}
+                                    onClick={this.handleClickSearch}
+                                >搜索</Button>
+                            </Col>
+                        </Row>
                         <Table
-                            bordered={true}
+                            bordered
                             rowKey="sku_id"
                             className="table"
                             loading={loading}

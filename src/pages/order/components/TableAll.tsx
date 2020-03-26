@@ -399,15 +399,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: this.mergeCell,
         },
-        // 待确定
-        // {
-        //     key: 'a4',
-        //     title: '运费',
-        //     dataIndex: 'a4',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
         {
             key: 'goodsNumber',
             title: '商品数量',

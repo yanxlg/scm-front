@@ -70,6 +70,15 @@ const formFields: FormField[] = [
         formatter: 'strArr',
     },
     {
+        type: 'input',
+        label: '商品名称',
+        name: 'title',
+        placeholder: '请输入商品名称',
+        className: 'local-search-item-input',
+        formItemClassName: 'form-item',
+        // formatter: 'strArr',
+    },
+    {
         type: 'select',
         label: '销售状态',
         name: 'inventory_status',
@@ -823,6 +832,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         toggleExcelDialog={this.toggleExcelDialog}
                     />
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
+
+
                 </div>
             </Container>
         );

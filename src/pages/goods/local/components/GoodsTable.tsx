@@ -140,7 +140,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             title: 'sku数量',
             dataIndex: 'sku_number',
             align: 'center',
-            width: 120,
+            width: 140,
             render: (value: number, row: IRowDataItem) => {
                 return (
                     <>
