@@ -401,6 +401,14 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell,
         },
         {
+            key: 'freight',
+            title: '商品运费',
+            dataIndex: 'freight',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        {
             key: '_goodsTotalAmount',
             title: '商品总金额',
             dataIndex: '_goodsTotalAmount',
@@ -408,9 +416,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value, row: IChildOrderItem) => {
                 // console.log(row);
-                const { goodsAmount, goodsNumber } = row;
+                const { goodsAmount, goodsNumber, freight } = row;
                 return {
-                    children: Number(goodsAmount) * goodsNumber,
+                    children: Number(goodsAmount) * goodsNumber + (Number(freight) || 0),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
