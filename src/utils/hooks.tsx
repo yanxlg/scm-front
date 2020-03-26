@@ -52,7 +52,13 @@ function useList<T, Q extends RequestPagination = any, S = any>(
         [pageNumber, pageSize],
     );
 
-    const onReload = useCallback(() => getListData(), [pageNumber, pageSize]);
+    const onReload = useCallback(
+        () =>
+            getListData({
+                ...extraQuery,
+            }),
+        [pageNumber, pageSize, extraQuery],
+    );
 
     const onSearch = useCallback(
         () =>
