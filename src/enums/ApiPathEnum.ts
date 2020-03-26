@@ -13,7 +13,6 @@ enum ApiPathEnum {
 
     // vova商品库相关接口''
     postGoodsApplyVersion = '/api/v1/goods/apply_version',
-    
 
     // 订单管理
     getProductOrderList = '/v1/order/list',

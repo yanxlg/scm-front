@@ -292,7 +292,7 @@ class GoodsTable extends React.PureComponent<IProps, IState> {
             selectedRowKeys: selectedRowKeys,
             onChange: this.onSelectChange,
         };
-        const width = this.columns.reduce((total, current) => total + (current.width as number), 0)
+        const width = this.columns.reduce((total, current) => total + (current.width as number), 0);
         return (
             <>
                 <Table

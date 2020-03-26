@@ -24,14 +24,13 @@ export declare interface IFilterParams extends IFilterBaseParams {
 export async function getProductOrderList(params: IFilterParams) {
     return request.get(ApiPathEnum.getProductOrderList, {
         requestType: 'form',
-        params
+        params,
     });
 }
 
 export async function getOrderGoodsDetail(params: { middleground_order_id: string }) {
     return request.get(ApiPathEnum.getOrderGoodsDetail, {
         requestType: 'form',
-        params
+        params,
     });
 }
-

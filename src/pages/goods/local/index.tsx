@@ -18,7 +18,7 @@ import {
     getGoodsDelete,
     IFilterParams,
     getCatagoryList,
-    postAllGoodsOnsale
+    postAllGoodsOnsale,
 } from '@/services/goods';
 import { strToNumber, getCurrentPage } from '@/utils/common';
 import { RouteComponentProps } from 'dva/router';
@@ -220,7 +220,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         };
         const searchParams = this.getSearchParams();
         if (!searchParams) {
-            return
+            return;
         } else {
             params = Object.assign(params, searchParams);
         }
@@ -284,10 +284,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 store_id: store_id.split(',').filter(item => item.trim()),
                 // .map(item => Number(item.trim()))
                 commodity_id: commodity_id.split(',').filter(item => item.trim()),
-                product_status: product_status.length ? product_status.join(',') : undefined
+                product_status: product_status.length ? product_status.join(',') : undefined,
             });
         }
-        return null
+        return null;
     }
 
     private getCatagoryList = () => {
@@ -503,8 +503,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         const searchParams = this.getSearchParams();
         if (searchParams) {
             this.setState({
-                allOnsaleLoading: true
-            })
+                allOnsaleLoading: true,
+            });
             postAllGoodsOnsale(searchParams)
                 .then(res => {
                     // console.log('postAllGoodsOnsale', res);
@@ -513,12 +513,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 })
                 .finally(() => {
                     this.setState({
-                        allOnsaleLoading: false
-                    })
-                })
+                        allOnsaleLoading: false,
+                    });
+                });
         }
-        
-    }
+    };
 
     // 删除
     getGoodsDelete = () => {
