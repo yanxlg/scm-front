@@ -4,6 +4,7 @@
 export interface ICatagoryItem {
     id?: string;
     name?: string;
+    children?: ICatagoryItem[];
 }
 
 export interface IOnsaleItem {
@@ -77,5 +78,4 @@ export interface IGoodsList {
     price_max: number;
     shipping_fee_min: number;
     shipping_fee_max: number;
-
 }

@@ -25,7 +25,7 @@ declare interface IPorps {
     visible: boolean;
     // currentRowData: IRowDataItem | null;
     currentRowData: any;
-    toggleSkuDialog(status: boolean): void;
+    hideSkuDialog(): void;
 }
 
 declare interface IState {
@@ -60,7 +60,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             width: 120,
             render: (value: string) => {
                 return <AutoEnLargeImg src={value} className="sku-img" />;
-            }
+            },
         },
         {
             key: 'sku_style',
@@ -73,7 +73,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                     <div key={item.option}>
                         {item.option}: {item.value}
                     </div>
-                ))
+                ));
             },
         },
         {
@@ -81,21 +81,21 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             title: '爬虫价格(￥)',
             dataIndex: 'sku_amount',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'sku_price',
             title: '单价(￥)',
             dataIndex: 'sku_price',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'shipping_fee',
             title: '运费(￥)',
             dataIndex: 'shipping_fee',
             align: 'center',
-            width: 100
+            width: 100,
         },
         {
             key: 'sku_weight',
@@ -119,20 +119,21 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             page: 1,
             allCount: 0,
             skuList: [],
-            value: ''
+            value: '',
         };
     }
 
     private handleCancel = () => {
-        this.props.toggleSkuDialog(false);
+        this.props.hideSkuDialog();
     };
 
     getSkuList = (productId: string, pageData?: ISkuParams) => {
-        const { page } = this.state;
+        const { page, value } = this.state;
         let params: ISkuParams = {
             page,
             product_id: productId,
             page_count: 50,
+            variantids: value,
         };
         if (pageData) {
             params = Object.assign(params, pageData);
@@ -156,7 +157,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                             sku_amount: Number(sku_price) + Number(shipping_fee),
                             sku_style: sku_style.map(({ option, value }: any) => ({
                                 option,
-                                value
+                                value,
                             })),
                             image_url: variant_image?.url,
                             serial: (params.page - 1) * 50 + index + 1,
@@ -179,17 +180,16 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
 
     changeValue = (e: ChangeEvent<HTMLInputElement>) => {
         this.setState({
-            value: e.target.value
-        })
-    }
+            value: e.target.value,
+        });
+    };
 
     handleClickSearch = () => {
         const { value } = this.state;
         this.getSkuList(this.props.currentRowData!.product_id, {
             page: 1,
-            variantids: value
         });
-    }
+    };
 
     render() {
         const { visible, currentRowData } = this.props;
@@ -276,7 +276,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                         <Row className="filter-section" gutter={16}>
                             <Col span={21} className="input-wrap">
                                 <span className="label">SKU ID:</span>
-                                <Input 
+                                <Input
                                     value={value}
                                     onChange={this.changeValue}
                                     placeholder="支持多个搜索，以英文逗号隔开"
@@ -288,7 +288,9 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                                     className="btn"
                                     loading={loading}
                                     onClick={this.handleClickSearch}
-                                >搜索</Button>
+                                >
+                                    搜索
+                                </Button>
                             </Col>
                         </Row>
                         <Table

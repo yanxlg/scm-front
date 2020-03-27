@@ -1,0 +1,553 @@
+import React, { RefObject } from 'react';
+import { Button } from 'antd';
+import ProTable from '@/components/ProTable';
+import { PaginationConfig } from 'antd/es/pagination';
+import { ProColumns } from '@ant-design/pro-table';
+import { Link } from 'umi';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import ShelvesDialog, { ISaleStatausItem } from './ShelvesDialog';
+import ImgEditDialog from './ImgEditDialog';
+import SkuDialog from './SkuDialog';
+import GoodsMergeDialog from './GoodsMergeDialog';
+
+import { IRowDataItem, IPageData } from '../index';
+import { IOnsaleItem, ICatagoryItem } from '@/interface/ILocalGoods';
+import { getCurrentPage } from '@/utils/common';
+import { utcToLocal } from '@/utils/date';
+
+const pageSizeOptions = ['50', '100', '500', '1000'];
+
+declare interface IProps {
+    loading: boolean;
+    currentPage: number;
+    pageSize: number;
+    total: number;
+    selectedRowKeys: string[];
+    goodsList: IRowDataItem[];
+    allCatagoryList: ICatagoryItem[];
+    onSearch(pageData?: IPageData, isRefresh?: boolean): void;
+    changeSelectedRowKeys(keys: string[]): void;
+}
+
+declare interface IState {
+    goodsEditDialogStatus: boolean;
+    shelvesDialogStatus: boolean;
+    skuDialogStatus: boolean;
+    currentEditGoods: IRowDataItem | null;
+    originEditGoods: IRowDataItem | null;
+    saleStatusList: ISaleStatausItem[];
+}
+
+class GoodsProTable extends React.PureComponent<IProps, IState> {
+    private skuDialogRef: RefObject<SkuDialog> = React.createRef();
+    private goodsMergeRef: RefObject<GoodsMergeDialog> = React.createRef();
+    private columns = [
+        {
+            fixed: true,
+            key: '_operation',
+            title: '操作',
+            align: 'center',
+            width: 150,
+            render: (value, row: IRowDataItem) => {
+                return (
+                    <>
+                        <div>
+                            <a onClick={() => this.toggleEditGoodsDialog(true, row)}>编辑商品</a>
+                        </div>
+                        <div className="spacing-top">
+                            <Link to={`/goods/local/version?id=${row.commodity_id}`}>
+                                <a>查看更多版本</a>
+                            </Link>
+                        </div>
+                    </>
+                );
+            },
+        },
+        {
+            key: 'commodity_id',
+            title: 'Commodity ID',
+            dataIndex: 'commodity_id',
+            align: 'center',
+            width: 140,
+        },
+        {
+            key: 'product_id',
+            title: 'Product ID',
+            dataIndex: 'product_id',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IRowDataItem) => {
+                return <div className={row.hasnew_version ? 'red' : ''}>{value}</div>;
+            },
+        },
+        {
+            key: 'product_sn',
+            title: 'Product SN',
+            dataIndex: 'product_sn',
+            align: 'center',
+            width: 140,
+            render: (value: string) => {
+                return (
+                    <>
+                        <div>{value}</div>
+                        <Button
+                            ghost={true}
+                            size="small"
+                            type="primary"
+                            className="goods-local-img-edit"
+                            onClick={() => this.showMergeDialog(value)}
+                        >
+                            查看商品组
+                        </Button>
+                    </>
+                );
+            },
+        },
+        {
+            key: 'goods_status',
+            title: '版本状态',
+            dataIndex: 'goods_status',
+            align: 'center',
+            width: 110,
+        },
+        {
+            key: 'inventory_status',
+            title: '销售状态',
+            dataIndex: 'inventory_status',
+            align: 'center',
+            width: 100,
+            render: (value: number) => {
+                return value === 1 ? '可销售' : '不可销售';
+            },
+        },
+        {
+            key: 'goods_img',
+            title: '商品图片',
+            dataIndex: 'goods_img',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IRowDataItem) => {
+                return <AutoEnLargeImg src={value} className="goods-local-img" />;
+            },
+        },
+        {
+            key: 'title',
+            title: '商品名称',
+            dataIndex: 'title',
+            align: 'center',
+            width: 200,
+            render: (value: string, row: IRowDataItem) => {
+                return <div className="text">{value}</div>;
+            },
+        },
+        {
+            key: 'xxx',
+            title: '商品属性',
+            dataIndex: 'xxx',
+            align: 'center',
+            width: 200,
+        },
+        {
+            key: 'first_catagory',
+            title: '商品分类',
+            dataIndex: 'first_catagory',
+            align: 'center',
+            width: 120,
+            render: (value: ICatagoryItem, row: IRowDataItem) => {
+                const { second_catagory, third_catagory } = row;
+                return <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>;
+            },
+        },
+        {
+            key: 'sku_number',
+            title: 'sku数量',
+            dataIndex: 'sku_number',
+            align: 'center',
+            width: 140,
+            render: (value: number, row: IRowDataItem) => {
+                return (
+                    <>
+                        <div>{value}</div>
+                        <Button
+                            type="link"
+                            className="goods-local-img-edit"
+                            onClick={() => this.showSkuDialog(row)}
+                        >
+                            查看sku信息
+                        </Button>
+                    </>
+                );
+            },
+        },
+        {
+            key: 'price_min',
+            width: 140,
+            title: '爬虫价格(￥)',
+            dataIndex: 'price_min',
+            align: 'center',
+            render: (value: number, row: IRowDataItem) => {
+                const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                return (
+                    <div>
+                        {price_min}~{price_max}
+                        <div>
+                            (含运费{shipping_fee_min}~{shipping_fee_max})
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'sales_volume',
+            title: '销量',
+            dataIndex: 'sales_volume',
+            align: 'center',
+            width: 100,
+        },
+        {
+            key: 'comments',
+            title: '评价数量',
+            dataIndex: 'comments',
+            align: 'center',
+            width: 100,
+        },
+        {
+            key: 'store_id',
+            title: '店铺 id',
+            dataIndex: 'store_id',
+            align: 'center',
+            width: 110,
+        },
+        {
+            key: 'store_name',
+            title: '店铺名称',
+            dataIndex: 'store_name',
+            align: 'center',
+            width: 140,
+        },
+        {
+            key: 'worm_task_id',
+            title: '爬虫任务ID',
+            dataIndex: 'worm_task_id',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'worm_goods_id',
+            title: '爬虫商品ID',
+            dataIndex: 'worm_goods_id',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'a1',
+            title: '采购渠道',
+            dataIndex: 'a1',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'onsale_info',
+            title: '上架渠道',
+            dataIndex: 'onsale_info',
+            align: 'center',
+            width: 100,
+            render: (value: IOnsaleItem[], row: IRowDataItem, index: number) => {
+                const channelList = [...new Set(value.map(item => item.onsale_channel))];
+                return value ? (
+                    <Button type="link" onClick={() => this.searchGoodsSale(row.product_id, value)}>
+                        {channelList.join('、')}
+                    </Button>
+                ) : null;
+            },
+        },
+        {
+            key: 'update_time',
+            title: '更新时间',
+            dataIndex: 'update_time',
+            align: 'center',
+            width: 120,
+            render: (value: number) => {
+                return <div>{utcToLocal(value)}</div>;
+            },
+        },
+        {
+            key: 'create_time',
+            title: '上传时间',
+            dataIndex: 'create_time',
+            align: 'center',
+            width: 120,
+            render: (value: number) => {
+                return <div>{utcToLocal(value)}</div>;
+            },
+        },
+        {
+            key: 'worm_goodsinfo_link',
+            title: '商详链接',
+            dataIndex: 'worm_goodsinfo_link',
+            align: 'center',
+            width: 200,
+            render: (value: string, row: IRowDataItem) => {
+                return (
+                    <a href={value} target="_blank">
+                        {value}
+                    </a>
+                );
+            },
+        },
+    ] as ProColumns<IRowDataItem>[];
+    constructor(props: IProps) {
+        super(props);
+        this.state = {
+            currentEditGoods: null,
+            goodsEditDialogStatus: false,
+            shelvesDialogStatus: false,
+            skuDialogStatus: false,
+            originEditGoods: null,
+            saleStatusList: [],
+        };
+    }
+
+    private onSelectChange = (selectedRowKeys: React.Key[]) => {
+        this.props.changeSelectedRowKeys(selectedRowKeys as string[]);
+    };
+
+    private onChangeProTable = ({ current, pageSize }: PaginationConfig) => {
+        const { currentPage, pageSize: _pageSize } = this.props;
+        this.props.onSearch({
+            page:
+                currentPage !== current
+                    ? current
+                    : getCurrentPage(pageSize as number, (currentPage - 1) * _pageSize + 1),
+            page_count: pageSize,
+        });
+    };
+
+    private onReload = () => {
+        this.props.onSearch({}, true);
+    };
+
+    // 找到当前类目
+    private getCurrentCatagory = (firstId: string, secondId?: string): ICatagoryItem[] => {
+        const { allCatagoryList } = this.props;
+        let ret: ICatagoryItem[] = [];
+        const firstIndex = allCatagoryList.findIndex(item => item.id === firstId);
+        ret = (allCatagoryList[firstIndex].children as ICatagoryItem[]) || [];
+        if (secondId) {
+            const secondIndex = ret.findIndex(item => item.id === secondId);
+            ret = (ret[secondIndex].children as ICatagoryItem[]) || [];
+            // ret = ret[secondIndex] ? (ret[secondIndex].children as ICategoryItem[]) : [];
+        }
+        // console.log('allCatagoryList', allCatagoryList);
+        return ret;
+    };
+
+    // 编辑商品-弹框
+    toggleEditGoodsDialog = (status: boolean, rowData?: IRowDataItem) => {
+        // console.log('toggleEditGoodsDialog', rowData);
+        this.setState({
+            goodsEditDialogStatus: status,
+            currentEditGoods: rowData ? { ...rowData } : null,
+            originEditGoods: rowData ? { ...rowData } : null,
+        });
+    };
+
+    // 编辑title和description
+    changeGoodsText = (type: string, text: string) => {
+        const { currentEditGoods } = this.state;
+        // 'title' | 'description'
+        this.setState({
+            currentEditGoods: {
+                ...(currentEditGoods as IRowDataItem),
+                [type]: text,
+            },
+        });
+    };
+
+    // 编辑类目
+    changeGoodsCatagory = (type: string, id: string) => {
+        const { currentEditGoods } = this.state;
+        if (type === 'first_catagory') {
+            this.setState({
+                currentEditGoods: {
+                    ...(currentEditGoods as IRowDataItem),
+                    first_catagory: {
+                        id,
+                    },
+                    second_catagory: {},
+                    third_catagory: {},
+                },
+            });
+        } else if (type === 'second_catagory') {
+            this.setState({
+                currentEditGoods: {
+                    ...(currentEditGoods as IRowDataItem),
+                    second_catagory: { id },
+                    third_catagory: {},
+                },
+            });
+        } else {
+            this.setState({
+                currentEditGoods: {
+                    ...(currentEditGoods as IRowDataItem),
+                    third_catagory: { id },
+                },
+            });
+        }
+    };
+
+    // 编辑图片
+    changeGoodsImg = (imgList: string[]) => {
+        const { currentEditGoods } = this.state;
+        this.setState({
+            currentEditGoods: {
+                ...(currentEditGoods as IRowDataItem),
+                sku_image: imgList,
+            },
+        });
+    };
+
+    // 重置编辑弹框
+    resetGoodsData = () => {
+        const { originEditGoods } = this.state;
+        this.setState({
+            currentEditGoods: { ...(originEditGoods as IRowDataItem) },
+        });
+    };
+
+    private showSkuDialog = (rowData: IRowDataItem) => {
+        this.setState(
+            {
+                skuDialogStatus: true,
+                currentEditGoods: rowData,
+            },
+            () => {
+                this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
+            },
+        );
+    };
+
+    private hideSkuDialog = () => {
+        this.setState({
+            skuDialogStatus: false,
+            currentEditGoods: null,
+        });
+    };
+
+    private showMergeDialog = (productSn: string) => {
+        this.goodsMergeRef.current?.getGoodsList(productSn);
+    };
+
+    // 上架状态记录弹框
+    toggleShelvesDialog = (status: boolean) => {
+        this.setState({
+            shelvesDialogStatus: status,
+        });
+    };
+
+    // 查询商品上下架记录
+    searchGoodsSale = (product_id: string, saleList: IOnsaleItem[]) => {
+        this.toggleShelvesDialog(true);
+        this.setState({
+            saleStatusList: saleList.map(
+                (item: IOnsaleItem, index: number): ISaleStatausItem => {
+                    return {
+                        ...item,
+                        product_id: product_id,
+                        order: index + 1,
+                    };
+                },
+            ),
+        });
+    };
+
+    // 编辑图片弹框
+    toggleImgEditDialog = (status: boolean, imgList?: string[], product_id?: string) => {
+        this.setState({
+            goodsEditDialogStatus: status,
+        });
+    };
+
+    render() {
+        const {
+            selectedRowKeys,
+            currentPage,
+            pageSize,
+            total,
+            goodsList,
+            loading,
+            allCatagoryList,
+        } = this.props;
+        const {
+            goodsEditDialogStatus,
+            shelvesDialogStatus,
+            skuDialogStatus,
+            originEditGoods,
+            currentEditGoods,
+            saleStatusList,
+        } = this.state;
+        return (
+            <>
+                <ProTable<IRowDataItem>
+                    search={false}
+                    headerTitle="本地产品库列表"
+                    rowKey="product_id"
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    bottom={60}
+                    minHeight={500}
+                    rowSelection={{
+                        fixed: true,
+                        selectedRowKeys: selectedRowKeys,
+                        onChange: this.onSelectChange,
+                    }}
+                    pagination={{
+                        total: total,
+                        current: currentPage,
+                        pageSize: pageSize,
+                        showSizeChanger: true,
+                        pageSizeOptions: pageSizeOptions,
+                    }}
+                    toolBarRender={(action, { selectedRows }) => []}
+                    tableAlertRender={false}
+                    columns={this.columns}
+                    dataSource={goodsList}
+                    loading={loading}
+                    onChange={this.onChangeProTable}
+                    options={{
+                        density: true,
+                        fullScreen: true,
+                        reload: this.onReload,
+                        setting: true,
+                    }}
+                />
+                <ShelvesDialog
+                    visible={shelvesDialogStatus}
+                    saleStatusList={saleStatusList}
+                    toggleShelvesDialog={this.toggleShelvesDialog}
+                />
+                <ImgEditDialog
+                    visible={goodsEditDialogStatus}
+                    originEditGoods={originEditGoods}
+                    currentEditGoods={currentEditGoods}
+                    allCatagoryList={allCatagoryList}
+                    toggleEditGoodsDialog={this.toggleEditGoodsDialog}
+                    getCurrentCatagory={this.getCurrentCatagory}
+                    changeGoodsText={this.changeGoodsText}
+                    changeGoodsCatagory={this.changeGoodsCatagory}
+                    changeGoodsImg={this.changeGoodsImg}
+                    resetGoodsData={this.resetGoodsData}
+                    onSearch={this.props.onSearch}
+                />
+                <SkuDialog
+                    visible={skuDialogStatus}
+                    ref={this.skuDialogRef}
+                    currentRowData={currentEditGoods}
+                    hideSkuDialog={this.hideSkuDialog}
+                />
+                <GoodsMergeDialog ref={this.goodsMergeRef} />
+            </>
+        );
+    }
+}
+
+export default GoodsProTable;

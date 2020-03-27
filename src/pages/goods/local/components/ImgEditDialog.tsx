@@ -5,9 +5,10 @@ import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 
 // import { UploadChangeParam } from 'antd/lib/upload';
 
-import { postGoodsPicUpload, ICategoryItem } from '@/services/goods';
+import { postGoodsPicUpload } from '@/services/goods';
 import { IRowDataItem } from '../index';
 import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
+import { ICatagoryItem } from '@/interface/ILocalGoods';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -20,12 +21,12 @@ declare interface IPageData {
 
 declare interface ImgEditDialogProps {
     visible: boolean;
-    allCatagoryList: ICategoryItem[];
+    allCatagoryList: ICatagoryItem[];
     currentEditGoods: IRowDataItem | null;
     originEditGoods: IRowDataItem | null;
     onSearch(params?: IPageData, isRefresh?: boolean): void;
     toggleEditGoodsDialog(status: boolean): void;
-    getCurrentCatagory(firstId: string, secondId?: string): ICategoryItem[];
+    getCurrentCatagory(firstId: string, secondId?: string): ICatagoryItem[];
     changeGoodsText(type: string, text: string): void;
     changeGoodsCatagory(type: string, id: string): void;
     changeGoodsImg(imgList: string[]): void;
@@ -338,12 +339,12 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             // _sku_img_list
         } = currentEditGoods;
 
-        let secondCatagoryList: ICategoryItem[] = [];
-        let thirdCatagoryList: ICategoryItem[] = [];
+        let secondCatagoryList: ICatagoryItem[] = [];
+        let thirdCatagoryList: ICatagoryItem[] = [];
         if (first_catagory.id) {
             secondCatagoryList = getCurrentCatagory(first_catagory.id);
         }
-        if (first_catagory.id && third_catagory.id) {
+        if (first_catagory.id && second_catagory.id) {
             thirdCatagoryList = getCurrentCatagory(first_catagory.id, second_catagory.id);
         }
 
@@ -399,7 +400,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         onChange={(val: string) => changeGoodsCatagory('first_catagory', val)}
                     >
                         {allCatagoryList.map(item => (
-                            <Option key={item.id} value={item.id}>
+                            <Option key={item.id} value={item.id as string}>
                                 {item.name}
                             </Option>
                         ))}
@@ -412,7 +413,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     >
                         <Option value="">请选择</Option>
                         {secondCatagoryList.map(item => (
-                            <Option key={item.id} value={item.id}>
+                            <Option key={item.id} value={item.id as string}>
                                 {item.name}
                             </Option>
                         ))}
@@ -425,7 +426,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     >
                         <Option value="">请选择</Option>
                         {thirdCatagoryList.map(item => (
-                            <Option key={item.id} value={item.id}>
+                            <Option key={item.id} value={item.id as string}>
                                 {item.name}
                             </Option>
                         ))}

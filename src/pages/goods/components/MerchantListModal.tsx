@@ -105,7 +105,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({ visible, onCancel
                 </Spin>
             </Modal>
         );
-    }, [loading, confirmLoading]);
+    }, [loading, confirmLoading, visible]);
 };
 
 export default MerchantListModal;

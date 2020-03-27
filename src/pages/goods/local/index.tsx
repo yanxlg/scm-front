@@ -1,12 +1,10 @@
 import React, { RefObject } from 'react';
-import { Pagination, message, Button } from 'antd';
-import LocalSearch from './components/LocalSearch';
-import GoodsTable from './components/GoodsTable';
-import ShelvesDialog, { ISaleStatausItem } from './components/ShelvesDialog';
-import ImgEditDialog from './components/ImgEditDialog';
+import { message, Button } from 'antd';
 import ExcelDialog from './components/ExcelDialog';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import Container from '@/components/Container';
+import GoodsProTable from './components/GoodsProTable';
+import MerchantListModal from '../components/MerchantListModal';
 
 import {
     getGoodsList,
@@ -16,14 +14,12 @@ import {
     IFilterParams,
     getCatagoryList,
     getAllGoodsOnsale,
-    ICategoryItem,
 } from '@/services/goods';
-import { strToNumber, getCurrentPage } from '@/utils/common';
+
 import { RouteComponentProps } from 'react-router';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import { convertEndDate, convertStartDate } from '@/utils/date';
-import { IGoodsList, ISkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
+import { IGoodsList, ISkuItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import {
     defaultOption,
     inventoryStatusList,
@@ -34,7 +30,7 @@ import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
 
-declare interface IPageData {
+export declare interface IPageData {
     page?: number;
     page_count?: number;
 }
@@ -219,46 +215,34 @@ const formFields: FormField[] = [
 export type IRowDataItem = IGoodsList & ISkuItem;
 
 declare interface IIndexState {
-    shelvesDialogStatus: boolean;
-    goodsEditDialogStatus: boolean;
     excelDialogStataus: boolean;
+    merchantDialogStatus: boolean;
     // 按钮加载中状态
     searchLoading: boolean;
-    onsaleLoading: boolean;
-    allOnsaleLoading: boolean;
     deleteLoading: boolean;
     page: number;
     page_count: number;
     allCount: number;
     goodsList: IRowDataItem[];
     selectedRowKeys: string[];
-    saleStatusList: ISaleStatausItem[];
-    allCatagoryList: ICategoryItem[];
-    currentEditGoods: IRowDataItem | null;
-    originEditGoods: IRowDataItem | null;
+    allCatagoryList: ICatagoryItem[];
+    onsaleType: 'default' | 'all';
 }
-
-const pageSizeOptions = ['50', '100', '500', '1000'];
 
 type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
     private queryData: any = {};
-    localSearchRef: LocalSearch | null = null;
-    // goodsTableRef: GoodsTable | null = null;
     // 保存搜索条件
-    searchFilter: IFilterParams | null = null;
+    private searchFilter: IFilterParams | null = null;
 
     constructor(props: LocalPageProps) {
         super(props);
 
         this.state = {
-            shelvesDialogStatus: false,
-            goodsEditDialogStatus: true,
             excelDialogStataus: false,
-            onsaleLoading: false,
-            allOnsaleLoading: false,
+            merchantDialogStatus: false,
             deleteLoading: false,
             searchLoading: false,
             page: 1,
@@ -266,10 +250,8 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             allCount: 0,
             goodsList: [],
             selectedRowKeys: [],
-            saleStatusList: [],
             allCatagoryList: [],
-            currentEditGoods: null,
-            originEditGoods: null,
+            onsaleType: 'default',
         };
     }
     private computeInitialValues = () => {
@@ -291,52 +273,17 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         // console.log(this.props);
     }
 
+    changeSelectedRowKeys = (keys: string[]) => {
+        this.setState({
+            selectedRowKeys: keys,
+        });
+    };
+
     // 取消选中的商品
     private cancelSelectedRow = () => {
         this.setState({
             selectedRowKeys: [],
         });
-    };
-
-    // 校验  sku数量、价格范围、销量 区间是否正常
-    private validateSearhParam = (searhParam: any): boolean => {
-        const {
-            task_number,
-            store_id,
-            // commodity_id,
-            min_sku,
-            max_sku,
-            min_price,
-            max_price,
-            min_sale,
-            max_sale,
-        } = searhParam;
-        const reg = /[^0-9\,]/;
-        if (task_number && reg.test(task_number.trim())) {
-            message.error('爬虫任务ID输入了非法字符，只支持检索数字！');
-            return false;
-        }
-        if (store_id && reg.test(store_id.trim())) {
-            message.error('店铺ID输入了非法字符，只支持检索数字！');
-            return false;
-        }
-        // if (commodity_id && reg.test(commodity_id.trim())) {
-        //     message.error('Commodity ID输入了非法字符，只支持检索数字！');
-        //     return false;
-        // }
-        if (min_sku >= 0 && max_sku >= 0 && min_sku - max_sku > 0) {
-            message.error('sku数量最小值大于最大值！');
-            return false;
-        }
-        if (min_price >= 0 && max_price >= 0 && min_price - max_price > 0) {
-            message.error('价格范围最小值大于最大值！');
-            return false;
-        }
-        if (min_sale >= 0 && max_sale >= 0 && min_sale - max_sale > 0) {
-            message.error('销量最小值大于最大值！');
-            return false;
-        }
-        return true;
     };
 
     private onSearch = (searchData?: IPageData, isRefresh?: boolean) => {
@@ -345,13 +292,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             page,
             page_count,
         };
-        // const searchParams = this.getSearchParams();
-        // if (!searchParams) {
-        //     return;
-        // } else {
-        //     params = Object.assign(params, searchParams);
-        // }
-        // params
         if (this.formRef.current) {
             params = Object.assign(params, this.formRef.current?.getFieldsValue());
         }
@@ -385,55 +325,13 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
 
     private handleClickSearch = () => {
         // console.log(this.formRef.current?.getFieldsValue());
-        this.formRef.current
-            ?.validateFields()
-            .then(values => {
-                // console.log('handleClickSearch', values);
-                this.onSearch({
-                    page: 1,
-                });
-            })
-            .catch(errorInfo => {
-                // console.log('handleClickSearch', errorInfo);
+        this.formRef.current?.validateFields().then(values => {
+            // console.log('handleClickSearch', values);
+            this.onSearch({
+                page: 1,
             });
+        });
     };
-
-    private getSearchParams() {
-        if (this.localSearchRef) {
-            const {
-                secondCatagoryList,
-                thirdCatagoryList,
-                task_number,
-                store_id,
-                commodity_id,
-                inventory_status,
-                version_status,
-                first_catagory,
-                second_catagory,
-                third_catagory,
-                product_status,
-                ...searhParams
-            } = this.localSearchRef.state;
-            // commodity_id
-            if (!this.validateSearhParam({ ...searhParams, task_number, store_id })) {
-                return null;
-            }
-            // 转换数据格式
-            return Object.assign({}, searhParams, {
-                inventory_status: strToNumber(inventory_status),
-                version_status: strToNumber(version_status),
-                first_catagory: strToNumber(first_catagory),
-                second_catagory: strToNumber(second_catagory),
-                third_catagory: strToNumber(third_catagory),
-                task_number: task_number.split(',').filter(item => item.trim()),
-                store_id: store_id.split(',').filter(item => item.trim()),
-                // .map(item => Number(item.trim()))
-                commodity_id: commodity_id.split(',').filter(item => item.trim()),
-                product_status: product_status.length ? product_status.join(',') : undefined,
-            });
-        }
-        return null;
-    }
 
     private getCatagoryList = () => {
         getCatagoryListPromise.then(res => {
@@ -441,27 +339,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             this.setState({
                 allCatagoryList: res.list,
             });
-        });
-    };
-
-    // 找到当前类目
-    private getCurrentCatagory = (firstId: string, secondId?: string): ICategoryItem[] => {
-        const { allCatagoryList } = this.state;
-        let ret: ICategoryItem[] = [];
-        const firstIndex = allCatagoryList.findIndex(item => item.id === firstId);
-        ret = (allCatagoryList[firstIndex].children as ICategoryItem[]) || [];
-        if (secondId) {
-            const secondIndex = ret.findIndex(item => item.id === secondId);
-            ret = (ret[secondIndex].children as ICategoryItem[]) || [];
-            // ret = ret[secondIndex] ? (ret[secondIndex].children as ICategoryItem[]) : [];
-        }
-        return ret;
-    };
-
-    // 设置选择行
-    private changeSelectedRowKeys = (keys: string[]) => {
-        this.setState({
-            selectedRowKeys: keys,
         });
     };
 
@@ -479,164 +356,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     }
 
-    // 上架状态记录弹框
-    toggleShelvesDialog = (status: boolean) => {
-        this.setState({
-            shelvesDialogStatus: status,
-        });
-    };
-
-    // 查询商品上下架记录
-    searchGoodsSale = (product_id: string, saleList: IOnsaleItem[]) => {
-        this.toggleShelvesDialog(true);
-        this.setState({
-            saleStatusList: saleList.map(
-                (item: IOnsaleItem, index: number): ISaleStatausItem => {
-                    return {
-                        ...item,
-                        product_id: product_id,
-                        order: index + 1,
-                    };
-                },
-            ),
-        });
-    };
-
-    // 编辑图片弹框
-    toggleImgEditDialog = (status: boolean, imgList?: string[], product_id?: string) => {
-        this.setState({
-            goodsEditDialogStatus: status,
-        });
-    };
-
-    // 编辑商品弹框
-    toggleEditGoodsDialog = (status: boolean, rowData?: IRowDataItem) => {
-        // console.log('toggleEditGoodsDialog', rowData);
-        this.setState({
-            goodsEditDialogStatus: status,
-            currentEditGoods: rowData ? { ...rowData } : null,
-            originEditGoods: rowData ? { ...rowData } : null,
-        });
-    };
-
-    // 编辑title和description
-    changeGoodsText = (type: string, text: string) => {
-        const { currentEditGoods } = this.state;
-        // 'title' | 'description'
-        this.setState({
-            currentEditGoods: {
-                ...(currentEditGoods as IRowDataItem),
-                [type]: text,
-            },
-        });
-    };
-
-    // 编辑类目
-    changeGoodsCatagory = (type: string, id: string) => {
-        const { currentEditGoods } = this.state;
-        if (type === 'first_catagory') {
-            this.setState({
-                currentEditGoods: {
-                    ...(currentEditGoods as IRowDataItem),
-                    first_catagory: {
-                        id,
-                    },
-                    second_catagory: {},
-                    third_catagory: {},
-                },
-            });
-        } else if (type === 'second_catagory') {
-            this.setState({
-                currentEditGoods: {
-                    ...(currentEditGoods as IRowDataItem),
-                    second_catagory: { id },
-                    third_catagory: {},
-                },
-            });
-        } else {
-            this.setState({
-                currentEditGoods: {
-                    ...(currentEditGoods as IRowDataItem),
-                    third_catagory: { id },
-                },
-            });
-        }
-    };
-
-    // 编辑图片
-    changeGoodsImg = (imgList: string[]) => {
-        const { currentEditGoods } = this.state;
-        this.setState({
-            currentEditGoods: {
-                ...(currentEditGoods as IRowDataItem),
-                sku_image: imgList,
-            },
-        });
-    };
-
-    // 重置编辑弹框
-    resetGoodsData = () => {
-        const { originEditGoods } = this.state;
-        this.setState({
-            currentEditGoods: { ...(originEditGoods as IRowDataItem) },
-        });
-    };
-
-    // 一键上架
-    postGoodsOnsale = () => {
-        const { selectedRowKeys } = this.state;
-        if (!selectedRowKeys.length) {
-            return message.error('一键上架需要选择商品');
-        }
-        this.setState({
-            onsaleLoading: true,
-        });
-        postGoodsOnsale({ scm_goods_id: selectedRowKeys })
-            .then(res => {
-                // console.log('postGoodsOnsale');
-                this.setState({
-                    onsaleLoading: false,
-                });
-                this.onSearch();
-                message.success('上架任务已发送');
-            })
-            .catch(err => {
-                message.error('上架任务发送失败');
-                // console.log('postGoodsOnsale ERR');
-                this.setState({
-                    onsaleLoading: false,
-                });
-                // message.error('一键上架失败');
-            });
-    };
-
-    // 查询商品一键上架
-    getAllGoodsOnsale = () => {
-        const searchParams = this.getSearchParams();
-        if (searchParams) {
-            this.setState({
-                allOnsaleLoading: true,
-            });
-            getAllGoodsOnsale(searchParams)
-                .then(res => {
-                    // console.log('getAllGoodsOnsale', res);
-                    this.onSearch();
-                    message.success('查询商品一键上架成功');
-                })
-                .finally(() => {
-                    this.setState({
-                        allOnsaleLoading: false,
-                    });
-                });
-        }
-    };
-
     // 删除
     getGoodsDelete = () => {
         const { selectedRowKeys, goodsList } = this.state;
-        if (!selectedRowKeys.length) {
-            return message.error('删除需要选择商品');
-        }
         this.setState({
             deleteLoading: true,
         });
@@ -664,57 +386,86 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 }
                 message.info(str);
             })
-            .catch(err => {
-                // console.log('getGoodsDelete ERR');
+            .finally(() => {
                 this.setState({
                     deleteLoading: false,
                 });
-                // message.success('商品删除失败！');
             });
     };
 
-    onChangePage = (page: number) => {
-        this.onSearch({
-            page,
-        });
-    };
-
-    pageCountChange = (current: number, size: number) => {
-        // console.log('current', current);
-        const { page, page_count } = this.state;
-        this.onSearch({
-            page: getCurrentPage(size, (page - 1) * page_count + 1),
-            page_count: size,
+    // 获取下载表格数据
+    private getExcelData = (count: number) => {
+        return postGoodsExports(
+            Object.assign({}, this.searchFilter, {
+                page: count + 1,
+                page_count: 10000,
+            }),
+        ).finally(() => {
+            this.toggleExcelDialog(false);
         });
     };
 
     // 显示下载弹框
-    toggleExcelDialog = (status: boolean) => {
+    private toggleExcelDialog = (status: boolean) => {
         this.setState({
             excelDialogStataus: status,
         });
     };
 
-    // 获取下载表格数据
-    getExcelData = (count: number) => {
-        postGoodsExports(
-            Object.assign({}, this.searchFilter, {
-                page: count + 1,
-                page_count: 10000,
-            }),
-        )
-            .catch(err => {
-                // console.log('postGoodsExports err', err);
-                message.error('导出表格失败！');
-            })
-            .finally(() => {
-                this.toggleExcelDialog(false);
-            });
-    };
-
     private getCopiedLinkQuery() {
         return this.queryData;
     }
+
+    private handleClickOnsale = () => {
+        this.setState({
+            merchantDialogStatus: true,
+            onsaleType: 'default',
+        });
+    };
+
+    private handleClickAllOnsale = () => {
+        this.setState({
+            merchantDialogStatus: true,
+            onsaleType: 'all',
+        });
+    };
+
+    // 一键上架
+    postGoodsOnsale = (merchants_id: string[]) => {
+        const { selectedRowKeys } = this.state;
+
+        return postGoodsOnsale({ scm_goods_id: selectedRowKeys, merchants_id }).then(res => {
+            this.onSearch();
+            message.success('上架任务已发送');
+        });
+    };
+
+    // 查询商品一键上架
+    getAllGoodsOnsale = (merchants_id: string[]) => {
+        const searchParams = {
+            merchants_id,
+            ...this.formRef.current?.getFieldsValue(),
+        };
+        return getAllGoodsOnsale(searchParams).then(res => {
+            // console.log('getAllGoodsOnsale', res);
+            this.onSearch();
+            message.success('查询商品一键上架成功');
+        });
+    };
+
+    private merchantOkey = (merchants_id: string[]) => {
+        // return Promise.resolve();
+        const { onsaleType } = this.state;
+        return onsaleType === 'default'
+            ? this.postGoodsOnsale(merchants_id)
+            : this.getAllGoodsOnsale(merchants_id);
+    };
+
+    private merchantCancel = () => {
+        this.setState({
+            merchantDialogStatus: false,
+        });
+    };
 
     render() {
         const {
@@ -722,21 +473,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             page_count,
             allCount,
             goodsList,
-            shelvesDialogStatus,
-            goodsEditDialogStatus,
             excelDialogStataus,
+            merchantDialogStatus,
             selectedRowKeys,
-            onsaleLoading,
-            allOnsaleLoading,
             deleteLoading,
             searchLoading,
-            saleStatusList,
             allCatagoryList,
-            currentEditGoods,
-            originEditGoods,
         } = this.state;
 
-        const task_id = this.props.location.state?.task_id;
+        const disabled = selectedRowKeys.length === 0;
 
         return (
             <Container>
@@ -764,66 +509,47 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             </Button>
                         </div>
                     </SearchForm>
-                    <LocalSearch
-                        task_id={task_id}
-                        // toggleUpdateDialog={this.toggleUpdateDialog}
-                        ref={node => (this.localSearchRef = node)}
-                        searchLoading={searchLoading}
-                        onsaleLoading={onsaleLoading}
-                        allOnsaleLoading={allOnsaleLoading}
-                        deleteLoading={deleteLoading}
-                        allCatagoryList={allCatagoryList}
-                        onSearch={this.onSearch}
-                        postGoodsOnsale={this.postGoodsOnsale}
-                        getGoodsDelete={this.getGoodsDelete}
-                        toggleExcelDialog={this.toggleExcelDialog}
-                        getCurrentCatagory={this.getCurrentCatagory}
-                        getAllGoodsOnsale={this.getAllGoodsOnsale}
-                    />
-                    <Pagination
-                        className="goods-local-pagination"
-                        size="small"
-                        total={allCount}
-                        current={page}
+                    <div style={{ marginTop: 20 }}>
+                        <Button
+                            type="primary"
+                            className="local-search-item-btn"
+                            onClick={this.handleClickOnsale}
+                            disabled={disabled}
+                        >
+                            一键上架
+                        </Button>
+                        <Button
+                            type="primary"
+                            className="local-search-all-btn"
+                            onClick={this.handleClickAllOnsale}
+                        >
+                            查询商品一键上架
+                        </Button>
+                        <Button
+                            className="local-search-item-btn"
+                            loading={deleteLoading}
+                            onClick={this.getGoodsDelete}
+                            disabled={disabled}
+                        >
+                            删除
+                        </Button>
+                        <Button
+                            className="local-search-item-btn"
+                            onClick={() => this.toggleExcelDialog(true)}
+                        >
+                            导出至Excel
+                        </Button>
+                    </div>
+                    <GoodsProTable
+                        loading={searchLoading}
+                        currentPage={page}
                         pageSize={page_count}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => {
-                            if (total > 10000) {
-                                return '';
-                            }
-                            return `共${total}条`;
-                        }}
-                    />
-                    <GoodsTable
-                        // ref={node => (this.goodsTableRef = node)}
-                        searchLoading={searchLoading}
-                        goodsList={goodsList}
+                        total={allCount}
                         selectedRowKeys={selectedRowKeys}
-                        toggleEditGoodsDialog={this.toggleEditGoodsDialog}
-                        changeSelectedRowKeys={this.changeSelectedRowKeys}
-                        searchGoodsSale={this.searchGoodsSale}
-                    />
-                    <ShelvesDialog
-                        visible={shelvesDialogStatus}
-                        saleStatusList={saleStatusList}
-                        toggleShelvesDialog={this.toggleShelvesDialog}
-                    />
-                    <ImgEditDialog
-                        visible={goodsEditDialogStatus}
-                        originEditGoods={originEditGoods}
-                        currentEditGoods={currentEditGoods}
+                        goodsList={goodsList}
                         allCatagoryList={allCatagoryList}
-                        toggleEditGoodsDialog={this.toggleEditGoodsDialog}
-                        getCurrentCatagory={this.getCurrentCatagory}
-                        changeGoodsText={this.changeGoodsText}
-                        changeGoodsCatagory={this.changeGoodsCatagory}
-                        changeGoodsImg={this.changeGoodsImg}
-                        resetGoodsData={this.resetGoodsData}
                         onSearch={this.onSearch}
+                        changeSelectedRowKeys={this.changeSelectedRowKeys}
                     />
                     <ExcelDialog
                         visible={excelDialogStataus}
@@ -832,6 +558,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         toggleExcelDialog={this.toggleExcelDialog}
                     />
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
+                    <MerchantListModal
+                        visible={merchantDialogStatus}
+                        onOKey={this.merchantOkey}
+                        onCancel={this.merchantCancel}
+                    />
                 </div>
             </Container>
         );
