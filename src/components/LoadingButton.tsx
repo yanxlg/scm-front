@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from 'antd';
 import { ButtonProps } from 'antd/lib/button/button';
+import btnStyles from '@/styles/_btn.less';
+import { mapClassNames } from '@/utils/utils';
 
 declare interface ILoadingButtonProps extends ButtonProps {
     onClick: (event: React.MouseEvent<HTMLButtonElement>) => Promise<any>;
@@ -8,6 +10,7 @@ declare interface ILoadingButtonProps extends ButtonProps {
 
 const LoadingButton: React.FC<ILoadingButtonProps> = props => {
     const [loading, setLoading] = useState(false);
+    const { loading: outerLoading, icon, className, ..._props } = props;
     const onClick = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             setLoading(true);
@@ -17,9 +20,17 @@ const LoadingButton: React.FC<ILoadingButtonProps> = props => {
         },
         [props.onClick],
     );
-    const currentLoading = props.loading || loading;
+    const currentLoading = outerLoading || loading;
     return useMemo(() => {
-        return <Button {...props} loading={currentLoading} onClick={onClick} />;
+        return (
+            <Button
+                {..._props}
+                icon={icon}
+                className={mapClassNames([className, btnStyles.btnWithoutAnim])}
+                loading={currentLoading}
+                onClick={onClick}
+            />
+        );
     }, [props, currentLoading, onClick]);
 };
 

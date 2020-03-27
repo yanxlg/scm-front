@@ -243,13 +243,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 },
             },
             {
-                title: '任务类型',
-                dataIndex: 'task_type',
-                width: '223px',
-                align: 'center',
-                render: (text: TaskTypeCode) => TaskTypeMap[text],
-            },
-            {
                 title: '任务渠道',
                 dataIndex: 'channel',
                 width: '223px',
@@ -560,7 +553,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     }, [selectedRowKeys]);
 
     return useMemo(() => {
-        const selectTaskSize = selectedRowKeys.length;
         return (
             <div>
                 <SearchForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
@@ -587,25 +579,28 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                         pageSize: pageSize,
                         showSizeChanger: true,
                     }}
-                    toolBarRender={(action, { selectedRows }) => [
-                        <PopConfirmLoadingButton
-                            key="delete"
-                            buttonProps={{
-                                danger: true,
-                                type: 'link',
-                                className: 'btn-clear btn-group',
-                                disabled: selectTaskSize === 0,
-                                children: '删除任务',
-                            }}
-                            popConfirmProps={{
-                                title: '确定要删除选中的任务吗?',
-                                okText: '确定',
-                                cancelText: '取消',
-                                disabled: selectTaskSize === 0,
-                                onConfirm: deleteTaskList,
-                            }}
-                        />,
-                    ]}
+                    toolBarRender={(action, { selectedRows, selectedRowKeys = [] }) => {
+                        const size = selectedRowKeys.length;
+                        return [
+                            <PopConfirmLoadingButton
+                                key="delete"
+                                buttonProps={{
+                                    danger: true,
+                                    type: 'link',
+                                    className: 'btn-clear btn-group',
+                                    disabled: size === 0,
+                                    children: '删除任务',
+                                }}
+                                popConfirmProps={{
+                                    title: '确定要删除选中的任务吗?',
+                                    okText: '确定',
+                                    cancelText: '取消',
+                                    disabled: size === 0,
+                                    onConfirm: deleteTaskList,
+                                }}
+                            />,
+                        ];
+                    }}
                     tableAlertRender={false}
                     columns={columns}
                     dataSource={dataSource}
@@ -621,7 +616,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading]);
 };
 
 export default TaskListTab;
