@@ -48,7 +48,7 @@ declare interface IOrderPayListModalProps {
 const OrderPayListModal: React.FC<IOrderPayListModalProps> = ({ visible }) => {
     const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
     const [qrVisible, setQrVisible] = useState(false);
-    const [totalAmount, setTotalAmount] = useState();
+    const [totalAmount, setTotalAmount] = useState<number>();
     const [dataSet, setDataSet] = useState([
         {
             order_id: 1,

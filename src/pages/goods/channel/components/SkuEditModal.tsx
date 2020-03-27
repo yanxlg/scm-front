@@ -18,7 +18,8 @@ declare interface IState {
     loading: boolean;
     page: number;
     total: number;
-    productId: string;
+    id: string;
+    merchant_id: string;
     skuList: IGoodsSkuItem[];
     goodsDetail: IGoodsDetailResponse | null;
     editList: IEditSkuItem[];
@@ -112,7 +113,8 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         this.state = {
             visible: false,
             loading: false,
-            productId: '',
+            id: '',
+            merchant_id: '',
             page: 1,
             total: 0,
             skuList: [],
@@ -121,10 +123,11 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         };
     }
 
-    showModal = (productId: string) => {
+    showModal = (id: string, merchant_id: string) => {
         this.setState(
             {
-                productId,
+                id,
+                merchant_id,
                 visible: true,
             },
             () => {
@@ -135,9 +138,9 @@ class SkuDialog extends React.PureComponent<{}, IState> {
     };
 
     queryGoodsDetail = () => {
-        const { productId } = this.state;
+        const { id } = this.state;
         queryGoodsDetail({
-            product_id: productId,
+            id: id,
             channel: 'vova',
         }).then(res => {
             // console.log('queryGoodsDetail', res);
@@ -148,7 +151,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
     };
 
     queryGoodsSkuList = (page: number) => {
-        const { productId, editList } = this.state;
+        const { id, editList } = this.state;
         this.setState({
             loading: true,
         });
@@ -156,7 +159,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         queryGoodsSkuList({
             page,
             page_count,
-            product_id: productId,
+            id: id,
             channel: 'vova',
         })
             .then(res => {
@@ -194,7 +197,8 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         this.setState({
             visible: false,
             loading: false,
-            productId: '',
+            id: '',
+            merchant_id: '',
             page: 1,
             total: 0,
             skuList: [],
@@ -205,7 +209,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
 
     private handleOk = () => {
         // console.log('handleOk', this.state.editList);
-        const { editList } = this.state;
+        const { editList, merchant_id } = this.state;
         for (let i = 0; i < editList.length; i++) {
             const { sku, adjustment_price, adjustment_reason } = editList[i];
             if (!adjustment_price || !adjustment_reason) {
@@ -214,6 +218,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         }
         editSkuPrice({
             sku_list: editList,
+            merchant_id: merchant_id,
         }).then(res => {
             // console.log('editSkuPrice', res);
             message.success(res.data.execute_status);

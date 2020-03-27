@@ -1,14 +1,15 @@
-import React, { RefObject } from 'react';
+import React, { RefObject, useCallback, useMemo, useRef, useState } from 'react';
 import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
-import './index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
+import '@/styles/form.less';
+import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button, Pagination } from 'antd';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
 import { ColumnProps } from 'antd/es/table';
-import { checkLowerShelf, checkUpperShelf } from '@/enums/StatusEnum';
+import { TaskStatusEnum } from '@/enums/StatusEnum';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 import {
@@ -16,31 +17,35 @@ import {
     exportChannelProductList,
     updateChannelShelveState,
     queryChannelCategory,
+    queryShopList,
 } from '@/services/channel';
 import {
     ProductStatusMap,
     ProductStatusCode,
     ProductStatusList,
+    checkLowerShelf,
+    checkUpperShelf,
 } from '@/config/dictionaries/Product';
-import { EmptyObject } from '@/config/global';
+import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
 import { IChannelProductListItem, IChannelCategoryItem } from '@/interface/IChannel';
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { convertEndDate, convertStartDate } from '@/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
-
-declare interface IVoVaListState {
-    dataSet: Array<IChannelProductListItem>;
-    dataLoading: boolean;
-    searchLoading: boolean;
-    excelDialogStatus: boolean;
-    pageNumber: number;
-    page: number;
-    total: number;
-    defaultInitialValues?: { [key: string]: any };
-}
+import Container from '@/components/Container';
+import { useList } from '@/utils/hooks';
+import { ITaskListExtraData, ITaskListItem, ITaskListQuery } from '@/interface/ITask';
+import { getTaskList } from '@/services/task';
+import LoadingButton from '@/components/LoadingButton';
+import { SearchOutlined } from '@ant-design/icons';
+import ProTable from '@/components/ProTable';
+import { ProColumns } from '@ant-design/pro-table';
+import SkuDialog from './components/SkuEditModal';
+import { isEmptyObject } from '@/utils/utils';
+import MerchantListModal from '@/pages/goods/components/MerchantListModal';
+import { Icons } from '@/components/Icon';
 
 const salesVolumeList = [
     {
@@ -85,7 +90,7 @@ const salesVolumeList = [
     },
 ];
 
-const formFields: IFieldItem[] = [
+const formFields: FormField[] = [
     {
         type: 'dateRanger',
         name: ['onshelf_time_start', 'onshelf_time_end'],
@@ -127,12 +132,22 @@ const formFields: IFieldItem[] = [
         optionList: salesVolumeList,
     },
     {
-        type: 'input',
-        label: <span>店&ensp;铺&ensp;名</span>,
-        name: 'shop_name',
+        type: 'select',
+        label: '店铺名称',
+        name: 'mechant_ids',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
+        className: 'select-default',
         formItemClassName: 'form-item',
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () =>
+            queryShopList().then(({ data = [] }) => {
+                return data.map(({ merchant_name, merchant_id }) => {
+                    return { name: merchant_name, value: merchant_id };
+                });
+            }),
     },
     {
         type: 'select',
@@ -144,21 +159,8 @@ const formFields: IFieldItem[] = [
             value: '',
             name: '全部',
         },
-        optionList: () =>
-            queryChannelCategory()
-                .then(({ data = [] } = EmptyObject) => {
-                    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
-                        return {
-                            value: String(platform_cate_id),
-                            name: platform_cate_name,
-                            children,
-                        };
-                    });
-                })
-                .catch(() => {
-                    return [];
-                }),
-        onChange: (name, form, setState) => {
+        optionList: () => queryChannelCategory(),
+        onChange: (name, form) => {
             form.resetFields(['level_two_category']);
         },
     },
@@ -171,17 +173,12 @@ const formFields: IFieldItem[] = [
         optionListDependence: {
             name: 'level_one_category',
             key: 'children',
-            convert: ({ platform_cate_id, platform_cate_name }: IChannelCategoryItem) => {
-                return {
-                    value: String(platform_cate_id),
-                    name: platform_cate_name,
-                };
-            },
         },
         syncDefaultOption: {
             value: '',
             name: '全部',
         },
+        optionList: () => queryChannelCategory(),
     },
     {
         type: 'select',
@@ -195,41 +192,25 @@ const formFields: IFieldItem[] = [
     },
 ];
 
-@BindAll()
-class Index extends React.PureComponent<{}, IVoVaListState> {
-    private formRef: RefObject<SearchForm> = React.createRef();
-    private skuRef: RefObject<SkuEditModal> = React.createRef();
-    private queryData: any = {};
-    constructor(props: {}) {
-        super(props);
-        const { page, page_count, ...extra } = this.computeInitialValues();
-        this.state = {
-            dataSet: [],
-            dataLoading: false,
-            searchLoading: true,
-            total: 0,
-            pageNumber: page_count,
-            // pageNumber: 1,
-            page: page,
-            excelDialogStatus: false,
-            defaultInitialValues: extra,
-        };
-    }
+const ChannelList: React.FC = props => {
+    const searchRef = useRef<SearchFormRef>(null);
+    const [exportDialog, setExportDialog] = useState(false);
 
-    componentDidMount() {
-        this.queryList({
-            searchLoading: true,
-        });
-    }
-    private computeInitialValues() {
+    const skuRef = useRef<SkuDialog>(null);
+
+    const {
+        pageSize: page_size,
+        pageNumber: page_number,
+        ...defaultInitialValues
+    } = useMemo(() => {
         // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
-        if (query) {
+        if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
         }
         const {
-            page = 1,
-            page_count = 50,
+            pageNumber = defaultPageNumber,
+            pageSize = defaultPageSize,
             onshelf_time_start = 0,
             onshelf_time_end = 0,
             commodity_id = '',
@@ -240,10 +221,11 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             shop_name = '',
             level_one_category = '',
             level_two_category = '',
+            mechant_ids = '',
         } = query;
         return {
-            page: Number(page),
-            page_count: Number(page_count),
+            pageNumber: Number(pageNumber),
+            pageSize: Number(pageSize),
             onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
             onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
             commodity_id,
@@ -254,418 +236,425 @@ class Index extends React.PureComponent<{}, IVoVaListState> {
             level_one_category,
             level_two_category,
             product_status,
+            mechant_ids,
         };
-    }
-    private queryList(
-        params: { page?: number; page_number?: number; searchLoading?: boolean } = {},
-    ) {
-        const {
-            page = this.state.page,
-            page_number = this.state.pageNumber,
-            searchLoading = false,
-        } = params;
-        const values = this.formRef.current!.getFieldsValue();
-        this.setState({
-            dataLoading: true,
-            searchLoading,
-        });
-        const query = {
-            page: page,
-            page_count: page_number,
-            ...values,
-        };
-        this.queryData = {
-            ...query,
-        };
-        queryChannelGoodsList(query)
-            .then(({ data: { list = [], total = 0 } = EmptyObject } = EmptyObject) => {
-                this.setState({
-                    page: page,
-                    pageNumber: page_number,
-                    dataSet: list,
-                    total,
-                });
-            })
-            .finally(() => {
-                this.setState({
-                    dataLoading: false,
-                    searchLoading: false,
-                });
-            });
-    }
+    }, []);
 
-    private onSearch() {
-        this.queryList({
-            searchLoading: true,
-            page: 1,
-        });
-    }
+    const {
+        query,
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        selectedRowKeys,
+        onSearch,
+        onReload,
+        onChange,
+        setSelectedRowKeys,
+    } = useList(queryChannelGoodsList, searchRef, undefined, {
+        pageSize: page_size,
+        pageNumber: page_number,
+    });
 
-    // 上架操作
-    private onShelves(row: IChannelProductListItem) {
+    const showExcelDialog = useCallback(() => {
+        setExportDialog(true);
+    }, []);
+    const closeExcelDialog = useCallback(() => {
+        setExportDialog(false);
+    }, []);
+
+    const getCopiedLinkQuery = useCallback(() => {
+        return Object.assign({}, query);
+    }, [query]);
+
+    const showSkuDialog = useCallback((id: string, merchant_id: string) => {
+        skuRef.current!.showModal(id, merchant_id);
+    }, []);
+
+    const showCountryShipFee = useCallback((product_id: string, merchant_id: string) => {
+        Modal.info({
+            className: channelStyles.channelShipModal,
+            icon: null,
+            title: '查看国家运费',
+            okText: '关闭',
+            maskClosable: true,
+            content: <ShipFeeModal product_id={product_id} merchant_id={merchant_id} />,
+        });
+    }, []);
+
+    const onShelves = useCallback((row: IChannelProductListItem) => {
         return updateChannelShelveState({
             type: 'onsale',
             info: {
                 onsale: {
-                    task_body: {
-                        product_id: row.product_id,
-                        commodity_id: row.commodity_id,
-                        sale_domain: 'vova',
-                    },
+                    task_body_list: [
+                        {
+                            product_id: row.product_id,
+                            commodity_id: row.commodity_id,
+                            sale_domain: 'vova',
+                        },
+                    ],
                 },
             },
         })
             .then(res => {
                 message.success('上架任务已发送');
-                this.queryList();
+                onReload();
             })
             .catch(() => {
-                message.success('上架任务发送失败');
+                message.error('上架任务发送失败');
             });
-    }
+    }, []);
 
     // 下架操作
-    private offShelves(row: IChannelProductListItem) {
+    const offShelves = useCallback((row: IChannelProductListItem) => {
         return updateChannelShelveState({
             type: 'offsale',
             info: {
                 offsale: {
-                    task_body: {
-                        product_id: row.product_id,
-                        commodity_id: row.commodity_id,
-                        sale_domain: 'vova',
-                    },
+                    task_body_list: [
+                        {
+                            product_id: row.product_id,
+                            commodity_id: row.commodity_id,
+                            sale_domain: 'vova',
+                        },
+                    ],
                 },
             },
         })
             .then(res => {
                 message.success('下架任务已发送');
-                this.queryList();
+                onReload();
             })
             .catch(() => {
                 message.error('下架任务发送失败');
             });
-    }
+    }, []);
 
-    private columns: ColumnProps<IChannelProductListItem>[] = [
-        {
-            title: '店铺名称',
-            dataIndex: 'shop_name',
-            align: 'center',
-            width: 130,
-        },
-        {
-            title: '虚拟ID',
-            dataIndex: 'virtual_id',
-            align: 'center',
-            width: 100,
-        },
-        {
-            title: '商品图片',
-            dataIndex: 'main_image',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChannelProductListItem, index: number) => (
-                <AutoEnLargeImg src={value} className="goods-vova-img" />
-            ),
-        },
-        {
-            title: 'Commodity_ID',
-            dataIndex: 'commodity_id',
-            align: 'center',
-            width: 160,
-        },
-        {
-            title: 'Product_ID',
-            dataIndex: 'product_id',
-            align: 'center',
-            width: 160,
-        },
-        {
-            title: '销量',
-            dataIndex: 'sales_volume',
-            align: 'center',
-            width: 100,
-        },
-        {
-            title: '评价数量',
-            dataIndex: 'evaluate_volume',
-            align: 'center',
-            width: 100,
-        },
-        {
-            title: '平均评分',
-            dataIndex: 'average_score',
-            align: 'center',
-            width: 100,
-        },
-        {
-            title: '一级类目',
-            dataIndex: 'level_one_category',
-            align: 'center',
-            width: 120,
-        },
-        {
-            title: '二级类目',
-            dataIndex: 'level_two_category',
-            align: 'center',
-            width: 120,
-        },
-        {
-            title: '商品状态',
-            dataIndex: 'product_status',
-            align: 'center',
-            width: 100,
-            render: (status: ProductStatusCode) => {
-                return ProductStatusMap[status];
-            },
-        },
-        {
-            title: 'sku数量',
-            dataIndex: 'sku_count',
-            align: 'center',
-            width: 140,
-            render: (value: number, row: IChannelProductListItem) => {
-                return (
-                    <>
-                        <div>{value}</div>
-                        <Button
-                            ghost={true}
-                            size="small"
-                            type="primary"
-                            onClick={() => this.showSkuDialog(row.product_id)}
-                        >
-                            查看sku详情
-                        </Button>
-                    </>
-                );
-            },
-        },
-        {
-            title: '国家运费',
-            dataIndex: 'country_ship_fee',
-            align: 'center',
-            width: 140,
-            render: (value: number, row: IChannelProductListItem) => {
-                return (
-                    <Button
-                        ghost={true}
-                        size="small"
-                        type="primary"
-                        onClick={() => this.showCountryShipFee(row.product_id)}
-                    >
-                        查看国家运费
-                    </Button>
-                );
-            },
-        },
-        // {
-        //     title: '链接',
-        //     dataIndex: 'vova_product_link',
-        //     align: 'center',
-        //     width: 240,
-        //     render: (url: string) => {
-        //         return (
-        //             url && (
-        //                 <Button target="_blank" type="link" href={url} className="product-link">
-        //                     {url}
-        //                 </Button>
-        //             )
-        //         );
-        //     },
-        // },
-        {
-            title: '操作',
-            dataIndex: 'product_status',
-            align: 'center',
-            width: 140,
-            render: (status, item) => {
-                const canUpper = !checkUpperShelf(status);
-                const canDown = !checkLowerShelf(status);
-                return {
-                    children: (
-                        <>
-                            <PopConfirmLoadingButton
-                                buttonProps={{
-                                    className: 'shelves-btn',
-                                    disabled: canUpper,
-                                    children: '上架',
-                                }}
-                                popConfirmProps={{
-                                    title: '确定需要上架该商品吗?',
-                                    okText: '确定',
-                                    cancelText: '取消',
-                                    disabled: canUpper,
-                                    onConfirm: () => this.onShelves(item),
-                                }}
-                            />
-                            <PopConfirmLoadingButton
-                                buttonProps={{
-                                    className: 'unshelves-btn',
-                                    disabled: canDown,
-                                    children: '下架',
-                                }}
-                                popConfirmProps={{
-                                    title: '确定需要下架该商品吗?',
-                                    okText: '确定',
-                                    cancelText: '取消',
-                                    disabled: canDown,
-                                    onConfirm: () => this.offShelves(item),
-                                }}
-                            />
-                        </>
-                    ),
-                };
-            },
-        },
-    ];
-
-    private showTotal(total: number) {
-        return <span className="data-grid-total">共有{total}条</span>;
-    }
-    private onPageChange(page: number, pageSize?: number) {
-        this.queryList({
-            page: page,
-        });
-    }
-    private onShowSizeChange(page: number, size: number) {
-        this.queryList({
-            page: page,
-            page_number: size,
-        });
-    }
-
-    private showExcelDialog() {
-        this.setState({
-            excelDialogStatus: true,
-        });
-    }
-
-    // 显示下载弹框
-    private toggleExcelDialog(status: boolean) {
-        this.setState({
-            excelDialogStatus: status,
-        });
-    }
-
-    private getExcelData(pageNumber: number, pageSize: number) {
-        const values = this.formRef.current!.getFieldsValue();
-        return exportChannelProductList({
-            page: pageNumber,
-            page_count: pageSize,
-            ...values,
-        })
-            .catch(err => {
-                message.error('导出表格失败！');
+    const onShelveList = useCallback(() => {
+        const taskBodyList = dataSource
+            .filter(item => {
+                return selectedRowKeys.indexOf(item.product_id) > -1;
             })
-            .finally(() => {
-                this.toggleExcelDialog(false);
+            .map(({ product_id, commodity_id }) => {
+                return {
+                    product_id: product_id,
+                    commodity_id: commodity_id,
+                    sale_domain: 'vova',
+                };
             });
-    }
+        return updateChannelShelveState({
+            type: 'onsale',
+            info: {
+                onsale: {
+                    task_body_list: taskBodyList,
+                },
+            },
+        })
+            .then(res => {
+                message.success('上架任务已发送');
+                onReload();
+            })
+            .catch(() => {
+                message.error('上架任务发送失败');
+            });
+    }, [selectedRowKeys, dataSource]);
 
-    private showSkuDialog = (productId: string) => {
-        // console.log(this.skuRef);
-        this.skuRef.current!.showModal(productId);
-    };
+    const offShelveList = useCallback(() => {
+        const taskBodyList = dataSource
+            .filter(item => {
+                return selectedRowKeys.indexOf(item.product_id) > -1;
+            })
+            .map(({ product_id, commodity_id }) => {
+                return {
+                    product_id: product_id,
+                    commodity_id: commodity_id,
+                    sale_domain: 'vova',
+                };
+            });
+        return updateChannelShelveState({
+            type: 'offsale',
+            info: {
+                offsale: {
+                    task_body_list: taskBodyList,
+                },
+            },
+        })
+            .then(res => {
+                message.success('下架任务已发送');
+                onReload();
+            })
+            .catch(() => {
+                message.error('下架任务发送失败');
+            });
+    }, [selectedRowKeys, dataSource]);
 
-    // 查看国家运费
-    private showCountryShipFee(product_id: string) {
-        Modal.info({
-            // className: 'product-modal modal-empty',
-            icon: null,
-            title: '查看国家运费',
-            // cancelText: null,
-            okText: '关闭',
-            maskClosable: true,
-            width: 800,
-            content: <ShipFeeModal product_id={product_id} />,
-        });
-    }
-    private getCopiedLinkQuery() {
-        return this.queryData;
-    }
+    const columns = useMemo(() => {
+        return [
+            {
+                title: '店铺名称',
+                dataIndex: 'shop_name',
+                align: 'center',
+                width: 130,
+            },
+            {
+                title: '虚拟ID',
+                dataIndex: 'virtual_id',
+                align: 'center',
+                width: 100,
+            },
+            {
+                title: '商品图片',
+                dataIndex: 'main_image',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IChannelProductListItem, index: number) => (
+                    <AutoEnLargeImg src={value} className={channelStyles.channelImg} />
+                ),
+            },
+            {
+                title: 'Commodity_ID',
+                dataIndex: 'commodity_id',
+                align: 'center',
+                width: 160,
+            },
+            {
+                title: 'Product_ID',
+                dataIndex: 'product_id',
+                align: 'center',
+                width: 160,
+            },
+            {
+                title: '销量',
+                dataIndex: 'sales_volume',
+                align: 'center',
+                width: 100,
+            },
+            {
+                title: '评价数量',
+                dataIndex: 'evaluate_volume',
+                align: 'center',
+                width: 100,
+            },
+            {
+                title: '平均评分',
+                dataIndex: 'average_score',
+                align: 'center',
+                width: 100,
+            },
+            {
+                title: '一级类目',
+                dataIndex: 'level_one_category',
+                align: 'center',
+                width: 120,
+            },
+            {
+                title: '二级类目',
+                dataIndex: 'level_two_category',
+                align: 'center',
+                width: 120,
+            },
+            {
+                title: '商品状态',
+                dataIndex: 'product_status',
+                align: 'center',
+                width: 100,
+                render: (status: ProductStatusCode) => {
+                    return ProductStatusMap[status];
+                },
+            },
+            {
+                title: 'sku数量',
+                dataIndex: 'sku_count',
+                align: 'center',
+                width: 140,
+                render: (value: number, row: IChannelProductListItem) => {
+                    return (
+                        <>
+                            <div>{value}</div>
+                            <Button
+                                type="link"
+                                onClick={() => showSkuDialog(row.id, row.merchant_id)}
+                            >
+                                查看sku详情
+                            </Button>
+                        </>
+                    );
+                },
+            },
+            {
+                title: '国家运费',
+                dataIndex: 'country_ship_fee',
+                align: 'center',
+                width: 140,
+                render: (value: number, row: IChannelProductListItem) => {
+                    return (
+                        <Button
+                            type="link"
+                            onClick={() => showCountryShipFee(row.product_id, row.merchant_id)}
+                        >
+                            查看国家运费
+                        </Button>
+                    );
+                },
+            },
+            {
+                title: '操作',
+                dataIndex: 'product_status',
+                align: 'center',
+                width: 140,
+                render: (status: ProductStatusCode, item) => {
+                    const canUpper = !checkUpperShelf(status);
+                    const canDown = !checkLowerShelf(status);
+                    return {
+                        children: (
+                            <>
+                                <PopConfirmLoadingButton
+                                    buttonProps={{
+                                        disabled: canUpper,
+                                        children: '上架',
+                                        type: 'link',
+                                    }}
+                                    popConfirmProps={{
+                                        title: '确定需要上架该商品吗?',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        disabled: canUpper,
+                                        placement: 'topRight',
+                                        onConfirm: () => onShelves(item),
+                                    }}
+                                />
+                                <PopConfirmLoadingButton
+                                    buttonProps={{
+                                        disabled: canDown,
+                                        children: '下架',
+                                        type: 'link',
+                                    }}
+                                    popConfirmProps={{
+                                        title: '确定需要下架该商品吗?',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        disabled: canDown,
+                                        placement: 'topRight',
+                                        onConfirm: () => offShelves(item),
+                                    }}
+                                />
+                            </>
+                        ),
+                    };
+                },
+            },
+        ] as ProColumns<IChannelProductListItem>[];
+    }, []);
 
-    render() {
-        const {
-            dataSet,
-            total,
-            excelDialogStatus,
-            dataLoading,
-            page,
-            pageNumber,
-            searchLoading,
-            defaultInitialValues,
-        } = this.state;
+    const onSelectChange = useCallback((selectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(selectedRowKeys as string[]);
+    }, []);
+
+    const rowSelection = useMemo(() => {
+        return {
+            fixed: true,
+            columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectChange,
+        };
+    }, [selectedRowKeys]);
+
+    const children = useMemo(() => {
+        const rowSize = selectedRowKeys.length;
         return (
             <div>
+                <LoadingButton
+                    type="primary"
+                    className="btn-group vertical-middle form-item"
+                    icon={<Icons type="scm-on-sale" />}
+                    onClick={onShelveList}
+                    disabled={rowSize === 0}
+                >
+                    一键上架
+                </LoadingButton>
+                <LoadingButton
+                    type="primary"
+                    className="btn-group vertical-middle form-item"
+                    icon={<Icons type="scm-of-sale" />}
+                    onClick={offShelveList}
+                    disabled={rowSize === 0}
+                >
+                    一键下架
+                </LoadingButton>
+                <LoadingButton
+                    type="primary"
+                    className="btn-group vertical-middle form-item"
+                    icon={<SearchOutlined />}
+                    onClick={onSearch}
+                >
+                    查询
+                </LoadingButton>
+                <Button
+                    disabled={total <= 0}
+                    type="primary"
+                    className="btn-group vertical-middle form-item"
+                    onClick={showExcelDialog}
+                    icon={<Icons type="scm-export" />}
+                >
+                    导出
+                </Button>
+            </div>
+        );
+    }, [selectedRowKeys, loading]);
+
+    const body = useMemo(() => {
+        return (
+            <Container>
                 <SearchForm
-                    ref={this.formRef}
+                    ref={searchRef}
                     fieldList={formFields}
                     labelClassName="product-form-label"
                     initialValues={defaultInitialValues}
                 >
-                    <div>
-                        <Button
-                            type="primary"
-                            className="btn-group vertical-middle form-item"
-                            loading={searchLoading}
-                            onClick={this.onSearch}
-                        >
-                            查询
-                        </Button>
-                        <Button
-                            type="primary"
-                            className="btn-group vertical-middle form-item"
-                            onClick={this.showExcelDialog}
-                        >
-                            导出
-                        </Button>
-                    </div>
+                    {children}
                 </SearchForm>
-                {/*<DataStatusUpdate />*/}
-                <div className="float-clear">
-                    <Pagination
-                        className="float-right form-item"
-                        pageSize={pageNumber}
-                        current={page}
-                        total={total}
-                        pageSizeOptions={['50', '100', '500', '1000']}
-                        onChange={this.onPageChange}
-                        onShowSizeChange={this.onShowSizeChange}
-                        showSizeChanger={true}
-                        showQuickJumper={{
-                            goButton: <Button className="btn-go">Go</Button>,
-                        }}
-                        showLessItems={true}
-                        showTotal={this.showTotal}
-                    />
-                </div>
-                <FitTable
-                    className="form-item goods-vova-table"
+                <ProTable<IChannelProductListItem>
+                    search={false}
+                    headerTitle="查询表格"
                     rowKey="product_id"
-                    bordered={true}
-                    columns={this.columns}
-                    dataSource={dataSet}
-                    pagination={false}
-                    loading={dataLoading}
-                    scroll={{
-                        x: 'max-content',
-                        scrollToFirstRowOnChange: true,
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    bottom={60}
+                    minHeight={500}
+                    rowSelection={rowSelection}
+                    pagination={{
+                        total: total,
+                        current: pageNumber,
+                        pageSize: pageSize,
+                        showSizeChanger: true,
                     }}
-                    minHeight={600}
-                    bottom={130}
+                    toolBarRender={(action, { selectedRows }) => []}
+                    tableAlertRender={false}
+                    columns={columns}
+                    dataSource={dataSource}
+                    loading={loading}
+                    onChange={onChange}
+                    options={{
+                        density: true,
+                        fullScreen: true,
+                        reload: onReload,
+                        setting: true,
+                    }}
                 />
                 <ExcelDialog
-                    visible={excelDialogStatus}
+                    visible={exportDialog}
                     total={total}
-                    getExcelData={this.getExcelData}
-                    toggleExcelDialog={this.toggleExcelDialog}
+                    form={searchRef}
+                    onCancel={closeExcelDialog}
                 />
-                <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
-                <SkuEditModal ref={this.skuRef} />
-            </div>
+                <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
+                <SkuEditModal ref={skuRef} />
+            </Container>
         );
-    }
-}
+    }, [loading, exportDialog, selectedRowKeys]);
 
-export default Index;
+    return <>{body}</>;
+};
+
+export default ChannelList;

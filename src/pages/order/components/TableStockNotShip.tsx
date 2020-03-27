@@ -1,134 +1,234 @@
 import React from 'react';
-import { Table } from 'antd';
-
+import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+
 import { IOrderItem } from './PaneStockNotShip';
+import { FitTable } from '@/components/FitTable';
+
+import { utcToLocal } from '@/utils/date';
+import { getStatusDesc } from '@/utils/transform';
+import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;
-    colList: string[];
     orderList: IOrderItem[];
-    // changeSelectedRows(selectedRows: IOrderItem[]): void;
+    onCheckAllChange(status: boolean): void;
+    onSelectedRow(row: IOrderItem): void;
 }
 
 declare interface IState {}
 
 class TableStockNotShip extends React.PureComponent<IProps, IState> {
-    private allColumns: ColumnProps<IOrderItem>[] = [
+    private columns: ColumnProps<IOrderItem>[] = [
         {
-            key: 'order_create_time',
-            title: '订单时间',
-            dataIndex: 'order_create_time',
+            fixed: true,
+            key: '_checked',
+            title: () => {
+                const { orderList, onCheckAllChange } = this.props;
+                const rowspanList = orderList.filter(item => item._rowspan);
+                const checkedListLen = rowspanList.filter(item => item._checked).length;
+                let indeterminate = false,
+                    checked = false;
+                if (rowspanList.length && rowspanList.length === checkedListLen) {
+                    checked = true;
+                } else if (checkedListLen) {
+                    indeterminate = true;
+                }
+                return (
+                    <Checkbox
+                        indeterminate={indeterminate}
+                        checked={checked}
+                        onChange={e => onCheckAllChange(e.target.checked)}
+                    />
+                );
+            },
+            dataIndex: '_checked',
             align: 'center',
-            width: 120,
-            render: (value: number, row: IOrderItem) => {
-                return value;
+            width: 50,
+            render: (value: boolean, row: IOrderItem) => {
+                return {
+                    children: (
+                        <Checkbox checked={value} onChange={() => this.props.onSelectedRow(row)} />
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
             },
         },
         {
-            key: 'middleground_order_id',
-            title: '中台订单ID',
-            dataIndex: 'middleground_order_id',
+            key: 'createTime',
+            title: '订单时间',
+            dataIndex: 'createTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'commodity_id',
+            key: 'orderGoodsId',
+            title: '中台订单子ID',
+            dataIndex: 'orderGoodsId',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        {
+            key: 'purchasePlanId',
+            title: '计划子项ID',
+            dataIndex: 'purchasePlanId',
+            align: 'center',
+            width: 120,
+            // render: this.mergeCell
+        },
+        {
+            key: 'productId',
             title: '中台商品ID',
-            dataIndex: 'commodity_id',
+            dataIndex: 'productId',
             align: 'center',
             width: 120,
+            // render: this.mergeCell
         },
         {
-            key: 'purchase_shipping_no',
+            key: 'purchaseWaybillNo',
             title: '采购运单号',
-            dataIndex: 'purchase_shipping_no',
+            dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
         },
         {
-            key: 'purchase_order_status',
+            key: 'purchaseOrderStatus',
             title: '采购订单状态',
-            dataIndex: 'purchase_order_status',
+            dataIndex: 'purchaseOrderStatus',
             align: 'center',
             width: 120,
+            render: (value: number, row: IOrderItem) => {
+                return getStatusDesc(purchaseOrderOptionList, value);
+            },
         },
         {
-            key: 'purchase_shipping_status',
+            key: 'purchaseOrderShippingStatus',
             title: '采购配送状态',
-            dataIndex: 'purchase_shipping_status',
+            dataIndex: 'purchaseOrderShippingStatus',
             align: 'center',
             width: 120,
+            render: (value: number, row: IOrderItem) => {
+                return getStatusDesc(purchaseShippingOptionList, value);
+            },
         },
         {
-            key: 'warehousing_time',
+            key: 'storageTime',
             title: '入库时间',
-            dataIndex: 'warehousing_time',
+            dataIndex: 'storageTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'xxx_time',
+            key: 'deliveryCommandTime',
             title: '发送发货指令时间',
-            dataIndex: 'xxx_time',
+            dataIndex: 'deliveryCommandTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
+        // {
+        //     key: 'a2',
+        //     title: '发货剩余时间',
+        //     dataIndex: 'a1',
+        //     align: 'center',
+        //     width: 120,
+        //     render: (value: string, row: IOrderItem) => {
+        //         return {
+        //             children: utcToLocal(value),
+        //             props: {
+        //                 rowSpan: row._rowspan || 0,
+        //             },
+        //         };
+        //     },
+        // },
         {
-            key: 'a1',
-            title: '订单确认时间',
-            dataIndex: 'a1',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'a2',
-            title: '渠道订单ID',
-            dataIndex: 'a2',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'a3',
-            title: '价格',
-            dataIndex: 'a3',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'a4',
-            title: '运费',
-            dataIndex: 'a4',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'a5',
-            title: '商品数量',
-            dataIndex: 'a5',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'a6',
+            key: 'cancelTime',
             title: '取消订单时间',
-            dataIndex: 'a6',
+            dataIndex: 'cancelTime',
             align: 'center',
             width: 120,
+            render: (value: string, row: IOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'a7',
+            key: '_goodsTotalAmount',
             title: '商品总金额',
-            dataIndex: 'a7',
+            dataIndex: '_goodsTotalAmount',
             align: 'center',
             width: 120,
+            render: (value, row: IOrderItem) => {
+                // console.log(row);
+                const { goodsAmount, goodsNumber } = row;
+                return {
+                    children: Number(goodsAmount) * goodsNumber,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
         {
-            key: 'a8',
-            title: '发货剩余时间',
-            dataIndex: 'a8',
+            key: 'channelOrderGoodsSn',
+            title: '渠道订单ID',
+            dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
+            render: this.mergeCell,
+        },
+        {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        {
+            key: 'confirmTime',
+            title: '订单确认时间',
+            dataIndex: 'confirmTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
     ];
 
@@ -136,30 +236,31 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
         super(props);
     }
 
-    private createColumns = (): ColumnProps<IOrderItem>[] => {
-        const { colList } = this.props;
-        // console.log(111, colList);
-        return colList.map(key => {
-            const i = this.allColumns.findIndex(item => item.key === key);
-            // console.log('key', key, i);
-            return this.allColumns[i];
-        });
-    };
+    // 合并单元格
+    private mergeCell(value: string | number, row: IOrderItem) {
+        return {
+            children: value,
+            props: {
+                rowSpan: row._rowspan || 0,
+            },
+        };
+    }
 
     render() {
         const { loading, orderList } = this.props;
-        const columns = this.createColumns();
 
         return (
-            <Table
-                bordered={true}
-                rowKey="middleground_order_id"
+            <FitTable
+                bordered
+                rowKey={record => {
+                    return record.purchasePlanId || record.orderGoodsId;
+                }}
                 className="order-table"
                 loading={loading}
-                columns={columns}
+                columns={this.columns}
                 // rowSelection={rowSelection}
                 dataSource={orderList}
-                scroll={{ x: true }}
+                scroll={{ x: 'max-content' }}
                 pagination={false}
             />
         );

@@ -17,6 +17,10 @@ export function transNullValue(value?: any) {
     return value === '' || isNull(value) ? undefined : value;
 }
 
+export function transJoinStr(value?: any) {
+    return value && value.length ? value.join(',') : undefined;
+}
+
 export function transNumber(value?: any) {
     const _value =
         typeof value === 'string'
@@ -75,4 +79,17 @@ export function getStatusDesc(
         return list[index][nameKey];
     }
     return '';
+}
+
+export function transOptionList(statusMap: { [key: number]: string; [key: string]: string }) {
+    let statusList = [];
+    for (let key in statusMap) {
+        if (statusMap.hasOwnProperty(key)) {
+            statusList.push({
+                value: key,
+                name: statusMap[key],
+            });
+        }
+    }
+    return statusList;
 }

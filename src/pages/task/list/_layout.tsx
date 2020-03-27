@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { LivePages } from '@/components/LivePages';
 import Index from './index';
-import TaskDetailPage from './detail';
+import TaskDetailPage from './[task_id]';
 
 // 实现LivePage
 export default function(props: any) {
@@ -17,7 +17,7 @@ export default function(props: any) {
                         live: true,
                     },
                     {
-                        path: '/task/list/:id',
+                        path: '/task/list/:task_id',
                         extract: true,
                         component: TaskDetailPage,
                     },

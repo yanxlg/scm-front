@@ -1,0 +1,45 @@
+@import '~antd/es/style/themes/default';
+
+.block {
+    display: block !important;
+}
+
+.inline-block {
+    display: inline-block !important;
+}
+
+.vertical-middle {
+    vertical-align: middle !important;
+}
+
+.margin-none {
+    margin: 0 !important;
+}
+
+.container {
+    padding: 20px 30px;
+
+    @spacing: 64px + 48px;
+
+    min-height: calc(~'100vh - @{spacing}');
+}
+
+.transparent {
+    background: @layout-body-background;
+}
+
+.relative {
+    position: relative;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+}

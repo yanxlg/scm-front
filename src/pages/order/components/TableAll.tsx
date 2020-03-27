@@ -1,8 +1,8 @@
 import React from 'react';
 import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-
 import GoodsDetailDialog from './GoodsDetailDialog';
+import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
@@ -16,10 +16,6 @@ import {
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 
-declare interface ISpecs {
-    [key: string]: string;
-}
-
 declare interface IProps {
     loading: boolean;
     colList: string[];
@@ -30,7 +26,9 @@ declare interface IProps {
 
 declare interface IState {
     detailDialogStatus: boolean;
+    trackDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
+    currentOrder: IChildOrderItem | null;
 }
 
 class OrderTableAll extends React.PureComponent<IProps, IState> {
@@ -235,6 +233,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
+
         {
             key: 'purchaseCancelReason',
             title: '采购取消原因',
@@ -260,6 +259,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IChildOrderItem) => {
                 return utcToLocal(value);
+            },
+        },
+        {
+            key: '_logisticsTrack',
+            title: '物流轨迹',
+            dataIndex: '_logisticsTrack',
+            align: 'center',
+            width: 120,
+            render: (value, row: IChildOrderItem) => {
+                return {
+                    children: <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
             },
         },
         {
@@ -383,15 +397,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: this.mergeCell,
         },
-        // 待确定
-        // {
-        //     key: 'a4',
-        //     title: '运费',
-        //     dataIndex: 'a4',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
         {
             key: 'goodsNumber',
             title: '商品数量',
@@ -488,7 +493,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         super(props);
         this.state = {
             detailDialogStatus: false,
+            trackDialogStatus: false,
             goodsDetail: null,
+            currentOrder: null,
         };
     }
 
@@ -540,6 +547,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return allColumns;
     };
 
+    private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
+        // console.log('showLogisticsTrack', purchaseWaybillNo);
+        this.setState({
+            currentOrder,
+            trackDialogStatus: true,
+        });
+    };
+
+    hideTrackDetail = () => {
+        this.setState({
+            trackDialogStatus: false,
+            currentOrder: null,
+        });
+    };
+
     // 合并单元格
     private mergeCell(value: string | number, row: IChildOrderItem) {
         return {
@@ -588,7 +610,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
 
     render() {
         const { loading, orderList } = this.props;
-        const { detailDialogStatus, goodsDetail } = this.state;
+        const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
         const columns = this.createColumns();
         return (
             <>
@@ -611,6 +633,12 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     visible={detailDialogStatus}
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
+                />
+                <TrackDialog
+                    visible={trackDialogStatus}
+                    orderGoodsId={currentOrder ? currentOrder.orderGoodsId || '' : ''}
+                    lastWaybillNo={currentOrder ? currentOrder.lastWaybillNo || '' : ''}
+                    hideTrackDetail={this.hideTrackDetail}
                 />
             </>
         );

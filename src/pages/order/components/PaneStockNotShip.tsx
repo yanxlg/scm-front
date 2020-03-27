@@ -1,105 +1,95 @@
 import React, { RefObject } from 'react';
-import { Button } from 'antd';
-import { FormInstance } from 'antd/lib/form';
-
-import SearchForm, { IFieldItem } from '@/components/SearchForm';
-import OptionalColumn from './OptionalColumn';
+import { Button, Pagination, notification, message } from 'antd';
+import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import TableStockNotShip from './TableStockNotShip';
+import LoadingButton from '@/components/LoadingButton';
 
-import { getPurchasedNotStockList, IFilterParams } from '@/services/order-manage';
-import { defaultStockNotShipColList, stockNotShipOptionalColList } from '@/enums/OrderEnum';
+import {
+    getStockNotShipList,
+    IFilterParams,
+    delChannelOrders,
+    postExportStockNotShip,
+} from '@/services/order-manage';
+import { defaultOptionItem, channelOptionList, pageSizeOptions } from '@/enums/OrderEnum';
+import { getCurrentPage } from '@/utils/common';
 
-export declare interface IOrderItem {
-    order_create_time: number;
-    middleground_order_id: string;
-    commodity_id: string;
-    purchase_shipping_no: string;
-    purchase_order_status: number;
-    purchase_shipping_status: number;
-    warehousing_time: number;
-    deliver_start_time: number;
-}
-
-const allFieldList: IFieldItem[] = [
-    {
-        type: 'dateRanger',
-        name: ['warehousing_start_time', 'warehousing_start_time'],
-        label: '入库时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
+const fieldList: FormField[] = [
     {
         type: 'input',
-        name: 'middleground_order_id',
-        label: '中台订单ID',
+        name: 'order_goods_id',
+        label: '中台订单子ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单ID',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台订单子ID',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
-        name: 'commodity_id',
+        name: 'product_id',
         label: '中台商品ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台商品ID',
+        formatter: 'strArr',
     },
     {
         type: 'input',
-        name: 'purchase_shipping_no',
+        name: 'purchase_waybill_no',
         label: '采购运单号',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入采购运单号',
+        formatter: 'strArr',
     },
-
     {
         type: 'select',
-        name: 'channel',
+        name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...channelOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['storage_time_start', 'storage_time_end'],
+        label: '入库时间',
+        className: 'order-date-picker',
+        formItemClassName: 'form-item',
+        formatter: ['start_date', 'end_date'],
     },
 ];
+
+export declare interface IOrderItem {
+    [key: string]: any;
+}
+
+declare interface IProps {
+    getAllTabCount(): void;
+}
 
 declare interface IState {
     page: number;
     pageCount: number;
     total: number;
     loading: boolean;
-    showColStatus: boolean;
     orderList: IOrderItem[];
-    fieldList: IFieldItem[];
-    selectedColKeyList: string[];
-    colList: string[];
 }
 
-class PaneStockNotShip extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
-
+class PaneStockNotShip extends React.PureComponent<IProps, IState> {
+    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private currentSearchParams: IFilterParams | null = null;
     private initialValues = {
-        channel: 100,
+        channel_source: 100,
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
             pageCount: 50,
             total: 0,
             loading: false,
-            showColStatus: false,
             orderList: [],
-            fieldList: allFieldList,
-            selectedColKeyList: [],
-            // 表格展示的列
-            colList: defaultStockNotShipColList,
         };
     }
 
@@ -114,10 +104,9 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
             page,
             page_count: pageCount,
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
+        if (this.formRef.current) {
+            params = Object.assign(params, this.formRef.current.getFieldsValue());
+        }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
@@ -125,16 +114,20 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
         this.setState({
             loading: true,
         });
-        getPurchasedNotStockList(params)
+        getStockNotShipList(params)
             .then(res => {
+                this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
-                const { total, list } = res.data;
-                this.setState({
-                    total,
-                    page: params.page as number,
-                    pageCount: params.page_count as number,
-                    orderList: list,
-                });
+                const { all_count: total, list } = res.data;
+                const { page, page_count } = params;
+                if (list) {
+                    this.setState({
+                        total,
+                        page: page as number,
+                        pageCount: page_count as number,
+                        orderList: this.getChildOrderData(list),
+                    });
+                }
             })
             .finally(() => {
                 this.setState({
@@ -143,29 +136,183 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
             });
     };
 
-    changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
+    // 获取子订单=>采购计划数据
+    private getChildOrderData(list: any[]): IOrderItem[] {
+        // console.log(1111, list);
+        const childOrderList: IOrderItem[] = [];
+        list.forEach((goodsItem: any) => {
+            const { orderGoods, orderInfo } = goodsItem;
+            const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
+            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
+            // console.log(111, orderGoodsPurchasePlan, orderGoods);
+            if (orderGoodsPurchasePlan) {
+                // 生成采购计划
+                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                    const {
+                        createTime: purchaseCreateTime,
+                        lastUpdateTime: purchaseLastUpdateTime,
+                        ...purchaseRest
+                    } = purchaseItem;
+                    const childOrderItem: any = {
+                        ...orderRest,
+                        ...purchaseRest,
+                        purchaseCreateTime,
+                        purchaseLastUpdateTime,
+                        currency,
+                        confirmTime,
+                        channelOrderSn,
+                        channelSource,
+                    };
+                    if (index === 0) {
+                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._checked = false;
+                    }
+                    childOrderList.push(childOrderItem);
+                });
+            } else {
+                // 没有生成采购计划
+                childOrderList.push({
+                    currency,
+                    confirmTime,
+                    channelOrderSn,
+                    channelSource,
+                    ...orderRest,
+                    _rowspan: 1,
+                    _checked: false,
+                });
+            }
+        });
+        // console.log(1111, childOrderList);
+        return childOrderList;
+    }
+
+    private onChangePage = (page: number) => {
+        this.onSearch({
+            page,
         });
     };
 
-    changeSelectedColList = (list: string[]) => {
-        this.setState({
-            selectedColKeyList: list,
-            colList: [...defaultStockNotShipColList, ...list],
+    private pageCountChange = (current: number, size: number) => {
+        const { page, pageCount } = this.state;
+        this.onSearch({
+            page: getCurrentPage(size, (page - 1) * pageCount + 1),
+            page_count: size,
         });
+    };
+
+    private handleClickSearch = () => {
+        this.onSearch({
+            page: 1,
+        });
+    };
+
+    // 全选
+    onCheckAllChange = (status: boolean) => {
+        const { orderList } = this.state;
+        this.setState({
+            orderList: orderList.map(item => {
+                if (item._rowspan) {
+                    return {
+                        ...item,
+                        _checked: status,
+                    };
+                }
+                return item;
+            }),
+        });
+    };
+
+    // 单选
+    onSelectedRow = (row: IOrderItem) => {
+        const { orderList } = this.state;
+        this.setState({
+            orderList: orderList.map(item => {
+                if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                    return {
+                        ...item,
+                        _checked: !row._checked,
+                    };
+                }
+                return item;
+            }),
+        });
+    };
+
+    // 获取勾选的orderGoodsId
+    private getOrderGoodsIdList = (): string[] => {
+        const { orderList } = this.state;
+        return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
+    };
+
+    // 批量操作成功
+    private batchOperateSuccess = (name: string = '', list: string[]) => {
+        this.props.getAllTabCount();
+        notification.success({
+            message: `${name}成功`,
+            description: (
+                <div>
+                    {list.map((item: string) => (
+                        <div key={item}>{item}</div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 批量操作失败
+    private batchOperateFail = (
+        name: string = '',
+        list: { order_goods_id: string; result: string }[],
+    ) => {
+        notification.error({
+            message: `${name}失败`,
+            description: (
+                <div>
+                    {list.map((item: any) => (
+                        <div>
+                            {item.order_goods_id}: {item.result.slice(0, 50)}
+                        </div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 取消渠道订单
+    private delChannelOrders = () => {
+        const list = this.getOrderGoodsIdList();
+        if (list.length) {
+            return delChannelOrders({
+                order_goods_ids: list,
+            }).then(res => {
+                this.onSearch();
+                const { success, failed } = res.data;
+
+                if (success!.length) {
+                    this.batchOperateSuccess('取消渠道订单', success);
+                }
+                if (failed!.length) {
+                    this.batchOperateFail('取消渠道订单', failed);
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单');
+            return Promise.resolve();
+        }
+    };
+
+    private postExportStockNotShip = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        return postExportStockNotShip(params);
     };
 
     render() {
-        const {
-            loading,
-            showColStatus,
-            orderList,
-            fieldList,
-            selectedColKeyList,
-            colList,
-        } = this.state;
+        const { loading, total, page, pageCount, orderList } = this.state;
 
         return (
             <>
@@ -173,31 +320,51 @@ class PaneStockNotShip extends React.PureComponent<{}, IState> {
                     <SearchForm
                         fieldList={fieldList}
                         labelClassName="order-label"
-                        formRef={this.formRef}
+                        ref={this.formRef}
                         initialValues={this.initialValues}
                     />
                     <div className="order-operation">
-                        <Button type="primary" className="order-btn">
+                        <Button
+                            type="primary"
+                            className="order-btn"
+                            loading={loading}
+                            onClick={this.handleClickSearch}
+                        >
                             查询
                         </Button>
-                        <Button type="primary" className="order-btn">
+                        <LoadingButton
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.delChannelOrders}
+                        >
                             取消渠道订单
-                        </Button>
-                        <Button type="primary" className="order-btn">
+                        </LoadingButton>
+                        <LoadingButton
+                            type="primary"
+                            className="order-btn"
+                            onClick={this.postExportStockNotShip}
+                        >
                             导出数据
-                        </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
-                            {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
+                        </LoadingButton>
                     </div>
-                    {showColStatus ? (
-                        <OptionalColumn
-                            optionalColList={stockNotShipOptionalColList}
-                            selectedColKeyList={selectedColKeyList}
-                            changeSelectedColList={this.changeSelectedColList}
-                        />
-                    ) : null}
-                    <TableStockNotShip loading={loading} colList={colList} orderList={orderList} />
+                    <TableStockNotShip
+                        loading={loading}
+                        orderList={orderList}
+                        onCheckAllChange={this.onCheckAllChange}
+                        onSelectedRow={this.onSelectedRow}
+                    />
+                    <Pagination
+                        className="order-pagination"
+                        total={total}
+                        current={page}
+                        pageSize={pageCount}
+                        showSizeChanger={true}
+                        showQuickJumper={true}
+                        pageSizeOptions={pageSizeOptions}
+                        onChange={this.onChangePage}
+                        onShowSizeChange={this.pageCountChange}
+                        showTotal={total => `共${total}条`}
+                    />
                 </div>
             </>
         );

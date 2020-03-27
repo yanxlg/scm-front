@@ -24,7 +24,7 @@ export default [
                 extract: true,
             },
             {
-                path: '/task/list/:id',
+                path: '/task/list/:task_id',
                 name: '任务详情',
                 hideInMenu: true,
                 extract: true,
@@ -77,6 +77,10 @@ export default [
         icon: <Icons type="scm-setting" className="menu-icon" />,
         children: [
             {
+                path: '/setting/goodsAttr',
+                name: '商品属性',
+            },
+            {
                 path: '/setting/store',
                 name: '店铺关联',
             },
@@ -87,6 +91,10 @@ export default [
             {
                 path: '/setting/address',
                 name: '中转仓地址设置',
+            },
+            {
+                path: '/setting/info',
+                name: '重要报关信息映射',
             },
         ],
     },

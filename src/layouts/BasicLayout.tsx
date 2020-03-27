@@ -2,7 +2,7 @@ import ProLayout, {
     MenuDataItem,
     BasicLayoutProps as ProLayoutProps,
 } from '@ant-design/pro-layout';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Link } from 'umi';
 import { Dispatch } from 'redux';
 import { connect } from 'umi';
@@ -13,6 +13,10 @@ import MenuData from '@/config/menu';
 import 'nprogress/nprogress.css';
 import '@/styles/menu.less';
 import '@/styles/index.less';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
+import { Modal } from 'antd';
+import NProgress from 'nprogress';
+import { shallowEqual } from 'react-redux';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -26,26 +30,47 @@ const MenuDataList = MenuData.map(item => {
     return item as any;
 });
 
-class BasicLayout extends React.PureComponent<BasicLayoutProps> {
-    private handleMenuCollapse = (payload: boolean): void => {
-        const { dispatch } = this.props;
-        if (dispatch) {
-            dispatch({
-                type: 'global/changeLayoutCollapsed',
-                payload,
-            });
-        }
-    };
+NProgress.configure({ showSpinner: false });
 
-    render() {
-        const { children, dispatch, ...props } = this.props;
+let timer: number | undefined = undefined;
+
+const BasicLayout: React.FC<BasicLayoutProps> = props => {
+    const dispatch = useDispatch();
+    const collapsed = useSelector((state: ConnectState) => state.global.collapsed, shallowEqual);
+
+    const handleMenuCollapse = useCallback((payload: boolean): void => {
+        dispatch({
+            type: 'global/changeLayoutCollapsed',
+            payload,
+        });
+    }, []);
+
+    const onPageChange = useCallback(() => {
+        Modal.destroyAll();
+        // 滚动条自动滚动到顶部
+        if (timer) {
+            clearTimeout(timer);
+            timer = undefined;
+            NProgress.remove();
+        }
+        NProgress.start();
+        NProgress.inc();
+        timer = window.setTimeout(() => {
+            NProgress.done();
+            timer = undefined;
+        }, 200 + Math.floor(Math.random() * 300));
+    }, []);
+
+    return useMemo(() => {
         return (
             <ProLayout
+                onPageChange={onPageChange}
+                collapsed={collapsed}
                 multiple={false}
                 menu={{ locale: false }}
                 logo={<img src={logo} className="menu-logo" alt="" />}
                 title="供应链中台"
-                onCollapse={this.handleMenuCollapse}
+                onCollapse={handleMenuCollapse}
                 menuItemRender={(menuItemProps, defaultDom) => {
                     if (menuItemProps.isUrl) {
                         return defaultDom;
@@ -83,13 +108,9 @@ class BasicLayout extends React.PureComponent<BasicLayoutProps> {
                 fixedHeader={true}
                 // links={[<div key="1" className="menu-link">草稿箱（9999999）</div>]}
                 {...props}
-            >
-                <div className="container">{children}</div>
-            </ProLayout>
+            />
         );
-    }
-}
+    }, [props, collapsed]);
+};
 
-export default connect(({ global }: ConnectState) => ({
-    collapsed: global.collapsed,
-}))(BasicLayout);
+export default BasicLayout;

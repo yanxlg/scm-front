@@ -10,5 +10,8 @@ module.exports = {
         'function-calc-no-invalid': null,
         'declaration-empty-line-before': null,
         'no-duplicate-selectors': null,
+        'selector-pseudo-class-no-unknown': null,
+        'declaration-bang-space-before': null,
+        'color-hex-length': null,
     },
 };

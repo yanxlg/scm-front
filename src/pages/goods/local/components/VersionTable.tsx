@@ -1,15 +1,22 @@
 import React, { RefObject } from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData } from '../version';
-
+import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData, IPageData } from '../version';
+import ProTable from '@/components/ProTable';
+import { PaginationConfig } from 'antd/es/pagination';
 import VersionImgDialog from './VersionImgDialog';
 import SkuDialog from './SkuDialog';
+import { getCurrentPage } from '@/utils/common';
 
+const pageSizeOptions = ['50', '100', '500', '1000'];
 declare interface IVersionTableProps {
     loading: boolean;
+    currentPage: number;
+    pageSize: number;
+    total: number;
     versionGoodsList: IGoodsVersionRowItem[];
     operationVersion(product_id: string, type: string): void;
+    onSearch(pageParams?: IPageData): void;
 }
 
 declare interface VersionTableState {
@@ -243,35 +250,68 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         this.setState(
             {
                 activeRow: rowData,
+                skuDialogStatus: true,
             },
             () => {
-                this.toggleSkuDialog(true);
                 this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
             },
         );
     };
 
-    private toggleSkuDialog = (status: boolean) => {
+    private hideSkuDialog = () => {
         this.setState({
-            skuDialogStatus: status,
+            skuDialogStatus: false,
         });
     };
 
+    private onChangeProTable = ({ current, pageSize }: PaginationConfig) => {
+        const { currentPage, pageSize: _pageSize } = this.props;
+        this.props.onSearch({
+            page:
+                currentPage !== current
+                    ? current
+                    : getCurrentPage(pageSize as number, (currentPage - 1) * _pageSize + 1),
+            page_count: pageSize,
+        });
+    };
+
+    private onReload = () => {
+        this.props.onSearch();
+    };
+
     render() {
-        const { versionGoodsList, loading } = this.props;
+        const { versionGoodsList, loading, total, currentPage, pageSize } = this.props;
         const { versionImgDialogStatus, activeRow, skuDialogStatus } = this.state;
 
         return (
             <>
-                <Table
-                    bordered={true}
-                    rowKey="sku_id"
+                <ProTable<IGoodsVersionRowItem>
+                    search={false}
+                    headerTitle="本地产品库版本列表"
                     className="goods-version-table"
-                    loading={loading}
-                    scroll={{ x: 'max-content', y: 600 }}
-                    pagination={false}
+                    rowKey="sku_id"
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    bottom={60}
+                    minHeight={500}
+                    pagination={{
+                        total: total,
+                        current: currentPage,
+                        pageSize: pageSize,
+                        showSizeChanger: true,
+                        pageSizeOptions: pageSizeOptions,
+                    }}
+                    toolBarRender={(action, { selectedRows }) => []}
+                    tableAlertRender={false}
                     columns={this.columns}
                     dataSource={versionGoodsList}
+                    loading={loading}
+                    onChange={this.onChangeProTable}
+                    options={{
+                        density: true,
+                        fullScreen: true,
+                        reload: this.onReload,
+                        setting: true,
+                    }}
                 />
                 <VersionImgDialog
                     visible={versionImgDialogStatus}
@@ -282,7 +322,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     visible={skuDialogStatus}
                     ref={this.skuDialogRef}
                     currentRowData={activeRow}
-                    toggleSkuDialog={this.toggleSkuDialog}
+                    hideSkuDialog={this.hideSkuDialog}
                 />
             </>
         );

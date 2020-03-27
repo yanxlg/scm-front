@@ -1,4 +1,4 @@
-import { IFieldItem } from '@/components/SearchForm';
+import { FormField } from '@/components/SearchForm';
 
 declare interface optionItem {
     name: string;
@@ -18,6 +18,7 @@ export const channelOptionList = [
 export const orderStatusOptionList = [
     { name: '已确认', value: 1 },
     { name: '已取消', value: 2 },
+    { name: '采购失败', value: 3 },
 ];
 
 export const orderShippingOptionList = [
@@ -96,7 +97,7 @@ export const errorDetailOptionList = [
 
 export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
 
-export const childDefaultFieldList: IFieldItem[] = [
+export const childDefaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
@@ -141,7 +142,7 @@ export const childDefaultFieldList: IFieldItem[] = [
     },
 ];
 
-export const childAllFieldList: IFieldItem[] = [
+export const childAllFieldList: FormField[] = [
     ...childDefaultFieldList,
 
     {
@@ -257,7 +258,7 @@ export const childAllFieldList: IFieldItem[] = [
     {
         type: 'select',
         name: 'order_goods_status',
-        label: '订单状态',
+        label: '中台订单状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...orderStatusOptionList],
@@ -369,6 +370,7 @@ export const defaultColChildList = [
     // 'purchaseCreateTime', // 采购生成时间
     'purchasePlatformOrderId', // 采购订单号
     'purchaseWaybillNo', // 采购运单号
+    '_logisticsTrack', // 物流轨迹
 ];
 
 export const childOptionalColList = [
@@ -408,7 +410,7 @@ export const childOptionalColList = [
     // { key: 'a20', name: '三级类目' },
 ];
 
-export const parentDefaultFieldList: IFieldItem[] = [
+export const parentDefaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
@@ -436,7 +438,7 @@ export const parentDefaultFieldList: IFieldItem[] = [
     },
 ];
 
-export const parentAllFieldList: IFieldItem[] = [
+export const parentAllFieldList: FormField[] = [
     ...parentDefaultFieldList,
     {
         type: 'input',

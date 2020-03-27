@@ -1,56 +1,65 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Table } from 'antd';
 import { TableProps } from 'antd/lib/table';
-import { Bind, Debounce } from 'lodash-decorators';
-
-declare interface IFitTableState {
-    y?: number;
-}
+import { debounce } from 'lodash';
 
 declare interface IFitTableProps<T> extends TableProps<T> {
     bottom?: number;
     minHeight?: number;
+    autoFitY?: boolean;
 }
 
-class FitTable<T extends object> extends React.PureComponent<IFitTableProps<T>, IFitTableState> {
-    constructor(props: TableProps<T>) {
-        super(props);
-        this.state = {
-            y: undefined,
-        };
-    }
+function FitTable<T extends object>(props: IFitTableProps<T>) {
+    const [y, setY] = useState<number | undefined>(undefined);
 
-    componentDidMount(): void {
-        // 计算高度
-        this.resizeHeight();
-        window.addEventListener('resize', this.resizeHeight);
-    }
-    componentWillUnmount(): void {
-        window.removeEventListener('resize', this.resizeHeight);
-    }
-    @Bind
-    @Debounce(300)
-    private resizeHeight() {
-        const el = ReactDOM.findDOMNode(this) as Element;
-        const { bottom = 0, minHeight } = this.props;
-        const height = document.body.offsetHeight - el.getBoundingClientRect().top - bottom;
-        if ((!minHeight || height >= minHeight) && height > 0) {
-            this.setState({
-                y: height,
+    const ref = useRef<HTMLDivElement>(null);
+
+    const calcX = useMemo(() => {
+        const { columns, rowSelection, scroll } = props;
+        if (scroll?.x === true || scroll?.x === 'max-content') {
+            let x: number = 0;
+            if (rowSelection && rowSelection.columnWidth) {
+                x += parseInt(rowSelection.columnWidth as string) || 0;
+            }
+            columns?.forEach(column => {
+                x += parseInt(column.width as string) || 0;
             });
-        } else if (minHeight) {
-            this.setState({
-                y: minHeight,
-            });
+            return x;
+        } else {
+            return scroll?.x;
         }
-    }
+    }, [props.columns, props.rowSelection]);
 
-    render() {
-        const { scroll, ...props } = this.props;
-        const { y } = this.state;
-        return <Table<T> {...props} scroll={{ ...scroll, y: y }} />;
-    }
+    useEffect(() => {
+        const { bottom = 0, minHeight = 500, autoFitY = true } = props;
+        const resizeHeight = debounce(() => {
+            const el = ref.current!;
+            const height = document.body.offsetHeight - el.getBoundingClientRect().top - bottom;
+            if ((!minHeight || height >= minHeight) && height > 0) {
+                setY(height);
+            } else if (minHeight) {
+                setY(minHeight);
+            }
+        }, 300);
+
+        if (autoFitY) {
+            resizeHeight();
+            window.addEventListener('resize', resizeHeight);
+        }
+        return () => {
+            window.removeEventListener('resize', resizeHeight);
+        };
+    }, []);
+
+    return useMemo(() => {
+        // console.log(222222);
+        const { scroll, ..._props } = props;
+        return (
+            <div ref={ref}>
+                <Table<T> {..._props} scroll={{ ...scroll, x: calcX, y: y }} />
+            </div>
+        );
+    }, [props, y]);
 }
 
 export { FitTable };

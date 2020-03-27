@@ -1,17 +1,17 @@
-@import "~antd/es/style/themes/default";
-.task{
-    &-justify{
-        &-1{
-            width:2em;
-            text-align:right;
-            display:inline-block
+@import '~antd/es/style/themes/default';
+.task {
+    &-justify {
+        &-1 {
+            width: 2em;
+            text-align: right;
+            display: inline-block;
         }
     }
-    &-progress{
-        &-circle{
+    &-progress {
+        &-circle {
             margin-right: 10px;
         }
-        &-tag{
+        &-tag {
             width: 60px;
             height: 60px;
             background: #1890ff;
@@ -25,91 +25,89 @@
             padding-top: 10px;
         }
     }
-    &-body{
+    &-body {
         margin-top: 10px;
     }
-    &-detail{
-        &-card{
-            .ant-card-body{
+    &-detail {
+        &-card {
+            .ant-card-body {
                 padding: 0;
             }
         }
-        &-table{
+        &-table {
             text-align: center;
         }
     }
-    &-desc{
-        @labelWidth:100px;
-        .ant-descriptions-item{
-            &-label{
+    &-desc {
+        @labelWidth: 100px;
+        .ant-descriptions-item {
+            &-label {
                 width: @labelWidth;
                 text-align: right;
                 position: absolute;
             }
-            &-content{
+            &-content {
                 margin-left: @labelWidth;
             }
         }
-        .ant-descriptions-row:last-child{
-            .ant-descriptions-item{
+        .ant-descriptions-row:last-child {
+            .ant-descriptions-item {
                 padding-bottom: 0;
             }
         }
     }
-    &-btn{
+    &-btn {
         margin-left: 20px;
         margin-top: -5px;
-        &-copy{
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-        }
-        &-refresh{
-            position: absolute!important;
+        &-refresh {
+            position: absolute !important;
             top: 40px;
             right: 20px;
         }
     }
-    &-picker{
-       width: 180px;
-        &-time{
+    &-picker {
+        width: 180px;
+        &-time {
             width: 200px;
         }
     }
-    &-add{
+    &-add {
         color: @primary-color;
         font-size: 26px;
         cursor: pointer;
         vertical-align: middle;
         margin-left: 16px;
     }
-    &-require{
-        padding-left: 11px!important;
+    &-require {
+        padding-left: 11px !important;
     }
-    &-id{
-        &-title{
+    &-id {
+        &-title {
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 10px;
         }
-        &-item{
+        &-item {
             display: inline-block;
             width: 33.33%;
             border-left: 1px solid #cccccc;
             border-bottom: 1px solid #cccccc;
             padding: 5px 10px;
             text-align: center;
-            &:nth-child(1),&:nth-child(2),&:nth-child(3){
+            &:nth-child(1),
+            &:nth-child(2),
+            &:nth-child(3) {
                 border-top: 1px solid #cccccc;
             }
-            &:nth-child(3n),&:last-child{
+            &:nth-child(3n),
+            &:last-child {
                 border-right: 1px solid #cccccc;
             }
         }
     }
-    &-modal{
-        &-progress{
-            width: 500px!important;
+    &-modal {
+        &-progress {
+            width: 500px !important;
         }
     }
 }
