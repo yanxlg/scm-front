@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Checkbox, Modal } from 'antd';
+import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
@@ -16,10 +16,6 @@ import {
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 
-declare interface ISpecs {
-    [key: string]: string;
-}
-
 declare interface IProps {
     loading: boolean;
     colList: string[];
@@ -32,6 +28,7 @@ declare interface IState {
     detailDialogStatus: boolean;
     trackDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
+    currentOrder: IChildOrderItem | null;
 }
 
 class OrderTableAll extends React.PureComponent<IProps, IState> {
@@ -238,20 +235,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         },
 
         {
-            key: '_logisticsTrack',
-            title: '物流轨迹',
-            dataIndex: '_logisticsTrack',
-            align: 'center',
-            width: 120,
-            render: (value, row: IChildOrderItem) => {
-                const { purchaseWaybillNo } = row;
-                // return purchaseWaybillNo ? (
-                //     <a onClick={() => this.showLogisticsTrack(purchaseWaybillNo)}>物流轨迹</a>
-                // ) : null;
-                return <a onClick={() => this.showLogisticsTrack(purchaseWaybillNo)}>物流轨迹</a>;
-            },
-        },
-        {
             key: 'purchaseCancelReason',
             title: '采购取消原因',
             dataIndex: 'purchaseCancelReason',
@@ -276,6 +259,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IChildOrderItem) => {
                 return utcToLocal(value);
+            },
+        },
+        {
+            key: '_logisticsTrack',
+            title: '物流轨迹',
+            dataIndex: '_logisticsTrack',
+            align: 'center',
+            width: 120,
+            render: (value, row: IChildOrderItem) => {
+                return {
+                    children: <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
             },
         },
         {
@@ -497,6 +495,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             detailDialogStatus: false,
             trackDialogStatus: false,
             goodsDetail: null,
+            currentOrder: null,
         };
     }
 
@@ -548,10 +547,18 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return allColumns;
     };
 
-    private showLogisticsTrack = (purchaseWaybillNo: string) => {
+    private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
         // console.log('showLogisticsTrack', purchaseWaybillNo);
         this.setState({
+            currentOrder,
             trackDialogStatus: true,
+        });
+    };
+
+    hideTrackDetail = () => {
+        this.setState({
+            trackDialogStatus: false,
+            currentOrder: null,
         });
     };
 
@@ -569,12 +576,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         this.setState({
             detailDialogStatus: false,
             goodsDetail: null,
-        });
-    };
-
-    hideTrackDetail = () => {
-        this.setState({
-            trackDialogStatus: false,
         });
     };
 
@@ -609,7 +610,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
 
     render() {
         const { loading, orderList } = this.props;
-        const { detailDialogStatus, trackDialogStatus, goodsDetail } = this.state;
+        const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
         const columns = this.createColumns();
         return (
             <>
@@ -633,7 +634,12 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
                 />
-                <TrackDialog visible={trackDialogStatus} hideTrackDetail={this.hideTrackDetail} />
+                <TrackDialog
+                    visible={trackDialogStatus}
+                    orderGoodsId={currentOrder ? currentOrder.orderGoodsId || '' : ''}
+                    lastWaybillNo={currentOrder ? currentOrder.lastWaybillNo || '' : ''}
+                    hideTrackDetail={this.hideTrackDetail}
+                />
             </>
         );
     }

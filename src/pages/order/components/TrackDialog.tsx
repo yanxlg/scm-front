@@ -1,16 +1,29 @@
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Modal, Timeline, Row, Col } from 'antd';
 
 declare interface IProps {
     visible: boolean;
+    orderGoodsId: string;
+    lastWaybillNo: string;
     hideTrackDetail(): void;
 }
 
-declare interface IState {}
+const TrackDialog: React.FC<IProps> = ({
+    visible,
+    orderGoodsId,
+    lastWaybillNo,
+    hideTrackDetail,
+}) => {
+    const [loading, setLoading] = useState(true);
 
-class TrackDialog extends React.PureComponent<IProps, IState> {
-    render() {
-        const { visible, hideTrackDetail } = this.props;
+    useEffect(() => {
+        if (visible) {
+        } else {
+            setLoading(true);
+        }
+    }, [visible]);
+
+    return useMemo(() => {
         return (
             <Modal
                 title="物流轨迹"
@@ -50,7 +63,7 @@ class TrackDialog extends React.PureComponent<IProps, IState> {
                 </Timeline>
             </Modal>
         );
-    }
-}
+    }, [visible, loading]);
+};
 
 export default TrackDialog;

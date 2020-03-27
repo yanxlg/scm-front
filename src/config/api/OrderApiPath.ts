@@ -44,4 +44,6 @@ export enum OrderApiPath {
     delChannelOrders = '/api/v1/orders/channel',
     // 确认支付
     putConfirmPay = '/api/v1/orders/confirm_pay',
+    // 获取物流轨迹
+    getOrderTruck = '/api/v1/orders/truck',
 }
