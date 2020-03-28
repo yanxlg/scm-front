@@ -250,11 +250,11 @@ const ProTable = <T extends {}, U extends object>(
         tableStyle,
         tableClassName,
         onColumnsStateChange,
-        options,
+        options: proOptions,
         rowSelection: propsRowSelection = {},
         tableAlertRender,
         defaultClassName,
-        size,
+        size: proSize,
         loading,
         dataSource = [],
         onSizeChange,
@@ -266,14 +266,28 @@ const ProTable = <T extends {}, U extends object>(
         rowKey = '',
         ...rest
     } = props;
-    const { fixed, columnWidth, selectedRowKeys, onChange } = propsRowSelection;
+    const { selectedRowKeys, onChange } = propsRowSelection;
+    const rootRef = useRef<HTMLDivElement>(null);
     const [sortKeyColumns, setSortKeyColumns] = useState<(string | number)[]>([]);
 
     const [columnsMap, setColumnsMap] = useState<{
         [key: string]: ColumnsState;
     }>({});
 
-    const [tableColumns, setTableColumns] = useState<ProColumns<T>[]>([]);
+    const [tableColumns, setTableColumns] = useState<ProColumns<T>[]>(proColumns);
+
+    const [tableSize, setTableSize] = useState<SizeType>(proSize || 'large');
+
+    /***********************密度设置**************************/
+    const size = proSize === void 0 ? tableSize : proSize;
+
+    const updateTableSize = useCallback(tableSize => {
+        if (proSize === void 0) {
+            setTableSize(tableSize);
+        } else {
+            onSizeChange && onSizeChange(tableSize);
+        }
+    }, []);
 
     /**
      * Table Column 变化的时候更新一下，这个参数将会用于渲染
@@ -317,25 +331,47 @@ const ProTable = <T extends {}, U extends object>(
         }
     }, [columnsMap, sortKeyColumns.join('-')]);
 
+    /**
+     * columns 过滤筛选  待优化
+     */
+    const onSelectedRowKeysUpdate = useCallback((selectedRowKeys: (string | number)[]) => {
+        toolbarRef.current?.updateSelectedState(selectedRowKeys);
+        alertRef.current?.updateSelectedState(selectedRowKeys);
+    }, []);
+
+    const filterColumns = useMemo(() => {
+        return tableColumns.filter(item => {
+            // 删掉不应该显示的
+            const { key, dataIndex } = item;
+            const columnKey = genColumnKey(key, dataIndex);
+            if (!columnKey) {
+                return true;
+            }
+            const config = columnsMap[columnKey];
+            if (config && config.show === false) {
+                return false;
+            }
+            return true;
+        }) as any;
+    }, [tableColumns]);
+
+    const { columns, rowSelection, clearCheckedRows } = useRowSelection(
+        filterColumns,
+        rowKey,
+        dataSource,
+        propsRowSelection,
+        optimize,
+        onSelectedRowKeysUpdate,
+    );
+
+    /**
+     * 需要清除选中状态时
+     */
     useEffect(() => {
         onCleanSelected();
     }, [dataSource]); //  数据发生改变需要清除selectedRowKeys
 
-    // selectedRowKeys 支持外部管控及放飞模式，放飞模式性能高
-    const rootRef = useRef<HTMLDivElement>(null);
-
-    /***********************密度设置**************************/
-    const [tableSize, setTableSize] = useState<SizeType>('large');
-    const actualSize = useMemo(() => {
-        return size === void 0 ? tableSize : size;
-    }, [size, tableSize]);
-
-    const updateTableSize = useCallback(tableSize => {
-        setTableSize(tableSize);
-        onSizeChange && onSizeChange(tableSize);
-    }, []);
-
-    const fullScreen = () => {
+    const fullScreenFn = () => {
         if (options) {
             if (options.fullScreen && typeof options.fullScreen === 'function') {
                 options.fullScreen();
@@ -357,19 +393,31 @@ const ProTable = <T extends {}, U extends object>(
     /************************toolbar 处理***********************/
     const toolbarRef = useRef<ToolBarRef>(null); // 优化模式用于动态修改selectedRowKeys
 
-    const toolbar = useMemo(() => {
-        const _options =
-            options === false || !options || !options.density
-                ? options
-                : {
-                      ...options,
+    /************************options 处理***********************/
+    const options = useMemo(() => {
+        if (!proOptions) {
+            return proOptions;
+        }
+        const { density, fullScreen } = proOptions;
+        return {
+            ...proOptions,
+            ...(density
+                ? {
                       density: {
-                          tableSize: actualSize,
+                          tableSize: size,
                           setTableSize: updateTableSize,
                       },
-                      fullScreen: options.fullScreen ? fullScreen : undefined,
-                      reload: options.reload ? options.reload : undefined,
-                  };
+                  }
+                : {}),
+            ...(fullScreen
+                ? {
+                      fullScreen: fullScreenFn,
+                  }
+                : {}),
+        };
+    }, [proOptions]);
+
+    const toolbar = useMemo(() => {
         if (optimize) {
             return toolBarRender === false ? null : (
                 <Toolbar
@@ -379,7 +427,7 @@ const ProTable = <T extends {}, U extends object>(
                     setColumnsMap={setColumnsMap}
                     columnsMap={columnsMap}
                     toolbarRef={toolbarRef}
-                    options={_options as OptionConfig | false}
+                    options={options as OptionConfig | false}
                     headerTitle={headerTitle}
                     toolBarRender={toolBarRender}
                 />
@@ -394,13 +442,13 @@ const ProTable = <T extends {}, U extends object>(
                     columnsMap={columnsMap}
                     selectedRowKeys={selectedRowKeys}
                     toolbarRef={toolbarRef}
-                    options={_options as OptionConfig | false}
+                    options={options as OptionConfig | false}
                     headerTitle={headerTitle}
                     toolBarRender={toolBarRender}
                 />
             );
         }
-    }, [actualSize, optimize ? undefined : selectedRowKeys, tableColumns]);
+    }, [size, optimize ? undefined : selectedRowKeys, tableColumns, options]);
 
     /************************alert 处理***********************/
     const alertRef = useRef<TableAlertRef>(null); // 优化模式用于动态修改selectedRowKeys
@@ -439,38 +487,6 @@ const ProTable = <T extends {}, U extends object>(
         }
     }, []);
 
-    // optimize 提供update统一调度
-
-    const onSelectedRowKeysUpdate = useCallback((selectedRowKeys: (string | number)[]) => {
-        toolbarRef.current?.updateSelectedState(selectedRowKeys);
-        alertRef.current?.updateSelectedState(selectedRowKeys);
-    }, []);
-
-    const filterColumns = useMemo(() => {
-        return tableColumns.filter(item => {
-            // 删掉不应该显示的
-            const { key, dataIndex } = item;
-            const columnKey = genColumnKey(key, dataIndex);
-            if (!columnKey) {
-                return true;
-            }
-            const config = columnsMap[columnKey];
-            if (config && config.show === false) {
-                return false;
-            }
-            return true;
-        }) as any;
-    }, [tableColumns]);
-
-    const { columns, rowSelection, clearCheckedRows } = useRowSelection(
-        filterColumns,
-        rowKey,
-        dataSource,
-        propsRowSelection,
-        optimize,
-        onSelectedRowKeysUpdate,
-    );
-
     /************************scroll 处理***********************/
     const scroll = useScrollXY(
         rootRef,
@@ -487,7 +503,7 @@ const ProTable = <T extends {}, U extends object>(
             <Table<T>
                 {...rest}
                 scroll={scroll}
-                size={actualSize}
+                size={size}
                 rowSelection={propsRowSelection === false ? undefined : rowSelection}
                 className={tableClassName}
                 style={tableStyle}
@@ -505,9 +521,9 @@ const ProTable = <T extends {}, U extends object>(
                 }}
             />
         );
-    }, [columns, pagination, actualSize, propsRowSelection, scroll, loading]);
+    }, [columns, pagination, size, propsRowSelection, scroll, loading]);
 
-    if (columns.length < 1) {
+    if (proColumns.length < 1) {
         return <Empty />;
     }
 

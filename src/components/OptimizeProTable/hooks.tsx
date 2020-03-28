@@ -17,17 +17,11 @@ function useRowSelection<T, U>(
     onSelectedRowKeysUpdate: (selectedRowKeys: (string | number)[]) => void,
 ) {
     const { onChange, columnWidth, fixed } = rowSelection;
+    // key=>Ref形式存储
 
-    // optimize === true 才会触发以下处理逻辑
-    // 用set去管理
-    // 全选ref
-    const allCheckedRefList: Array<OptimizeCheckboxRef | null> = useMemo(() => {
-        return [];
-    }, [dataSource]);
-    // 元素ref
-    const itemsRefList: Array<OptimizeCheckboxRef | null> = useMemo(() => {
-        return [];
-    }, [dataSource]);
+    const allCheckedRefList = useRef<Map<string, OptimizeCheckboxRef>>(new Map());
+
+    const itemsRefList = useRef<Map<string, OptimizeCheckboxRef>>(new Map());
 
     const outerOnChange = useCallback(
         (keys: string[], items: T[]) => {
@@ -40,12 +34,13 @@ function useRowSelection<T, U>(
         [onChange],
     );
 
+    console.log(itemsRefList);
     const onSelectAll = useCallback(
         (e: CheckboxChangeEvent) => {
             const checked = e.target.checked;
             if (checked) {
                 let keys: string[] = [];
-                itemsRefList.map(item => {
+                itemsRefList.current.forEach(item => {
                     if (item) {
                         item.updateChecked(true);
                         keys.push(item.getValue());
@@ -53,7 +48,7 @@ function useRowSelection<T, U>(
                 });
                 outerOnChange(keys, dataSource || []);
             } else {
-                itemsRefList.map(item => {
+                itemsRefList.current.forEach(item => {
                     item && item.updateChecked(false);
                 });
                 outerOnChange([], []);
@@ -69,7 +64,7 @@ function useRowSelection<T, U>(
 
             // 从ref中获取keys,不能接收props中selectedKeys，否则columns会发生变化，整个会重新渲染
             let beforeKeys: string[] = [];
-            itemsRefList.forEach(item => {
+            itemsRefList.current.forEach(item => {
                 const values = item?.getValues();
                 if (values?.checked) {
                     beforeKeys.push(values.value);
@@ -86,11 +81,11 @@ function useRowSelection<T, U>(
             beforeKeys = Array.from(set);
             const size = beforeKeys.length;
             if (size === 0) {
-                allCheckedRefList?.forEach(item => item?.updateChecked(false));
+                allCheckedRefList.current.forEach(item => item?.updateChecked(false));
             } else if (size === dataSource!.length) {
-                allCheckedRefList?.forEach(item => item?.updateChecked(true));
+                allCheckedRefList.current.forEach(item => item?.updateChecked(true));
             } else {
-                allCheckedRefList?.forEach(item => item?.setIndeterminate());
+                allCheckedRefList.current.forEach(item => item?.setIndeterminate());
             }
 
             outerOnChange(
@@ -108,11 +103,17 @@ function useRowSelection<T, U>(
         },
         [onChange, dataSource],
     );
+    const clearCheckedRows = () => {
+        allCheckedRefList.current.forEach(item => item?.updateChecked(false));
+        itemsRefList.current.forEach(item => item && item.updateChecked(false));
+    };
 
-    const clearCheckedRows = useCallback(() => {
-        console.log(allCheckedRefList);
-        allCheckedRefList?.forEach(item => item?.updateChecked(false));
-        itemsRefList.map(item => item && item.updateChecked(false));
+    const allCheckBoxUnMont = useCallback(value => {
+        allCheckedRefList.current.clear(); // 仅存在一个全部checkbox
+    }, []);
+
+    const checkBoxUnMont = useCallback(value => {
+        itemsRefList.current.delete(value);
     }, []);
 
     const addRow = useMemo(() => {
@@ -123,9 +124,11 @@ function useRowSelection<T, U>(
         return {
             title: (
                 <OptimizeCheckbox
+                    value="all"
                     disabled={dataSource.length === 0}
-                    ref={ref => allCheckedRefList.push(ref)}
+                    ref={ref => ref && allCheckedRefList.current.set('all', ref)}
                     onChange={onSelectAll}
+                    componentWillUnMont={allCheckBoxUnMont}
                 />
             ),
             dataIndex: 'checked',
@@ -141,8 +144,9 @@ function useRowSelection<T, U>(
                 return (
                     <OptimizeCheckbox
                         value={rowValue}
-                        ref={ref => (itemsRefList[index] = ref)}
+                        ref={ref => ref && itemsRefList.current.set(rowValue, ref)}
                         onChange={onChecked}
+                        componentWillUnMont={checkBoxUnMont}
                     />
                 );
             },

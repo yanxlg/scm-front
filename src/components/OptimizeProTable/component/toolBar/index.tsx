@@ -134,7 +134,7 @@ const renderDefaultOption = (
                             marginLeft: index === 0 ? 8 : 16,
                         }}
                         className={className}
-                        onClick={value}
+                        onClick={value && typeof value === 'function' ? value : undefined}
                     >
                         <Tooltip title={optionItem.text}>{optionItem.icon}</Tooltip>
                     </span>

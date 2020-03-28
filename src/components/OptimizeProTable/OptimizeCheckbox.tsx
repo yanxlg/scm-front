@@ -3,6 +3,7 @@ import React, {
     forwardRef,
     ForwardRefRenderFunction,
     useCallback,
+    useEffect,
     useImperativeHandle,
     useMemo,
     useRef,
@@ -21,9 +22,11 @@ export interface OptimizeCheckboxRef {
 
 const OptimizeCheckbox: ForwardRefRenderFunction<
     OptimizeCheckboxRef,
-    Omit<CheckboxProps, 'checked'>
-> = ({ onChange, ...props }, ref) => {
-    const [state, setState] = useState<{ checked: boolean; indeterminate: boolean }>({
+    Omit<CheckboxProps, 'checked'> & {
+        componentWillUnMont: (value: string) => void;
+    }
+> = ({ componentWillUnMont, onChange, ...props }, ref) => {
+    let [state, setState] = useState<{ checked: boolean; indeterminate: boolean }>({
         checked: false,
         indeterminate: false,
     });
@@ -55,6 +58,13 @@ const OptimizeCheckbox: ForwardRefRenderFunction<
         },
         [state.checked],
     );
+
+    useEffect(() => {
+        return () => {
+            componentWillUnMont(props.value);
+            setState = () => {};
+        };
+    }, []);
 
     const onInnerChange = useCallback(
         (e: CheckboxChangeEvent) => {
