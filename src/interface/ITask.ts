@@ -129,7 +129,7 @@ export interface ITaskDetailInfo {
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;
-    is_upper_shelf: IBoolean;
+    is_upper_shelf: boolean;
     status: TaskStatusCode;
     success: number;
     fail: number;
@@ -192,6 +192,7 @@ export interface ITaskLogResponse {
 export interface ITaskProgressQuery {
     task_id: number;
     plan_id?: string;
+    collect_onsale_type?: 1 | 2;
 }
 
 export interface ITaskProgressItem {

@@ -50,6 +50,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
     const [merchantSort, setMerchantSort] = useState<IPDDSortItem[]>([]);
     const [sortLoading, setSortLoading] = useState(true);
     const reptileRef = useRef<ReptileConditionRef>(null);
+    const [isUpperShelf, setIsUpperShelf] = useState<boolean | undefined>(undefined);
 
     const [merchantModal, setMerchantModal] = useState(false);
 
@@ -152,6 +153,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
         queryTaskDetail(taskId!)
             .then(({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
                 const initValues = convertDetail(task_detail_info as ITaskDetailInfo);
+                setIsUpperShelf(task_detail_info.is_upper_shelf);
                 form.setFieldsValue({
                     ...initValues,
                 });
@@ -420,12 +422,40 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     </div>
                     <TaskCycle form={form} />
                     <div className={formStyles.formItem}>
-                        <LoadingButton onClick={onGather} type="primary" className="btn-default">
-                            {edit ? '创建新采集任务' : '开始采集'}
-                        </LoadingButton>
-                        <Button type="primary" className="btn-default" onClick={onGatherOn}>
-                            {edit ? '创建新采集上架任务' : '一键采集上架'}
-                        </Button>
+                        {edit ? (
+                            isUpperShelf === false ? (
+                                <LoadingButton
+                                    onClick={onGather}
+                                    type="primary"
+                                    className="btn-default"
+                                >
+                                    {edit ? '创建新采集任务' : '开始采集'}
+                                </LoadingButton>
+                            ) : null
+                        ) : (
+                            <LoadingButton
+                                onClick={onGather}
+                                type="primary"
+                                className="btn-default"
+                            >
+                                开始采集
+                            </LoadingButton>
+                        )}
+                        {edit ? (
+                            isUpperShelf === false ? null : (
+                                <LoadingButton
+                                    onClick={onGather}
+                                    type="primary"
+                                    className="btn-default"
+                                >
+                                    创建新采集上架任务
+                                </LoadingButton>
+                            )
+                        ) : (
+                            <Button type="primary" className="btn-default" onClick={onGatherOn}>
+                                一键采集上架
+                            </Button>
+                        )}
                     </div>
                 </Form>
             </Spin>

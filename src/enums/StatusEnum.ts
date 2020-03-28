@@ -28,6 +28,7 @@ export enum TaskRangeEnum {
     Store,
     AllOnShelf,
     SalesOnShelves,
+    GatherGrounding = 9,
 }
 
 //======================= 任务状态 ======================//

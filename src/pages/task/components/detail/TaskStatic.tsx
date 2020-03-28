@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Descriptions, Progress, Statistic, Tooltip } from 'antd';
+import { Descriptions, Progress, Spin, Statistic, Tooltip } from 'antd';
 import styles from '@/styles/_index.less';
 import formStyle from '@/styles/_form.less';
 import taskStyle from '@/styles/_task.less';
@@ -13,14 +13,20 @@ import { TaskExecuteType, TaskRangeMap, TaskTypeCode, TaskTypeEnum } from '@/enu
 import { utcToLocal } from '@/utils/date';
 
 declare interface TaskProgressProps {
-    checkedIds?: string[];
+    checkedIds: string[];
     task_id: number;
     task_type?: TaskTypeCode;
+    collect_onsale_type?: 1 | 2;
 }
 
-const TaskProgress: React.FC<TaskProgressProps> = ({ checkedIds, task_id, task_type }) => {
+const TaskStatic: React.FC<TaskProgressProps> = ({
+    checkedIds,
+    task_id,
+    task_type,
+    collect_onsale_type,
+}) => {
     const [dataSet, setDataSet] = useState<ITaskProgressResponse>({});
-
+    const [loading, setLoading] = useState(false);
     const columns = useMemo<ColumnsType<any>>(() => {
         return [
             {
@@ -82,13 +88,19 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ checkedIds, task_id, task_t
     }, []);
 
     useEffect(() => {
+        setLoading(true);
         queryTaskProgressList({
             task_id: task_id,
-            plan_id: checkedIds ? checkedIds.join(',') : undefined,
-        }).then(({ data }) => {
-            setDataSet(data);
-        });
-    }, [checkedIds]);
+            plan_id: checkedIds && checkedIds.length > 0 ? checkedIds.join(',') : undefined,
+            collect_onsale_type,
+        })
+            .then(({ data }) => {
+                setDataSet(data);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }, [checkedIds.join('')]);
 
     return useMemo(() => {
         const {
@@ -106,7 +118,7 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ checkedIds, task_id, task_t
 
         if (task_type === TaskTypeEnum.Gather) {
             return (
-                <>
+                <Spin spinning={loading}>
                     <Descriptions
                         layout="vertical"
                         bordered={true}
@@ -187,12 +199,12 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ checkedIds, task_id, task_t
                     <div>
                         <FitTable columns={columns} dataSource={list} pagination={false} />
                     </div>
-                </>
+                </Spin>
             );
         }
         if (task_type === TaskTypeEnum.Grounding) {
             return (
-                <>
+                <Spin spinning={loading}>
                     <Descriptions
                         layout="vertical"
                         bordered={true}
@@ -273,14 +285,14 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ checkedIds, task_id, task_t
                     <div>
                         <FitTable columns={columns} dataSource={list} pagination={false} />
                     </div>
-                </>
+                </Spin>
             );
         }
         if (task_type === TaskTypeEnum.Update) {
             return null;
         }
         return null;
-    }, [dataSet]);
+    }, [loading]);
 };
 
-export default TaskProgress;
+export default TaskStatic;
