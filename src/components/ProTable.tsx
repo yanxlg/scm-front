@@ -20,21 +20,28 @@ import { useRowSelection } from '@/utils/hooks';
 import { RequestData, UseFetchDataAction } from '@ant-design/pro-table/lib/useFetchData';
 import { EmptyObject } from '@/config/global';
 
-export type IProTableProps<T, U> = ProTableProps<T, U> & {
+export type TableRowSelectionProps<T> =
+    | {
+          optimize?: true;
+          rowSelection?: Omit<TableRowSelection<T>, 'selectedRowKeys'>;
+      }
+    | {
+          optimize: false;
+          rowSelection?: TableRowSelection<T>;
+      };
+
+export type IProTableProps<T, U> = Omit<ProTableProps<T, U>, 'rowSelection'> & {
     bottom?: number;
     minHeight?: number;
     autoFitY?: boolean;
     children?: React.ReactElement;
-    optimize?: boolean;
-};
+} & TableRowSelectionProps<T>;
 
 export const showTotal = (total: number) => {
     return <span>共有{total}条</span>;
 };
 
 export const goButton = <Button className={btnStyle.btnGo}>Go</Button>;
-
-// 监听selectedRowKeys 变化，动态修改其状态，但是并不根据selectedRowKeys更新
 
 const ProTable = <
     T,
@@ -67,8 +74,7 @@ const ProTable = <
         optimize,
     });
 
-    const { fixed, columnWidth, selectedRowKeys } =
-        _rowSelectionConfig || ({} as TableRowSelection<T>);
+    const { fixed, columnWidth } = _rowSelectionConfig || ({} as TableRowSelection<T>);
 
     const calcTotalX = useCallback((_columns?: ProColumns<T>[]) => {
         if (scroll?.x === true || scroll?.x === 'max-content') {
@@ -117,14 +123,10 @@ const ProTable = <
     }, []);
 
     useEffect(() => {
-        clearCheckedRows();
-    }, [dataSource]);
-
-    useEffect(() => {
-        if (!selectedRowKeys || selectedRowKeys.length === 0) {
-            clearCheckedRows(false);
+        if (optimize) {
+            clearCheckedRows();
         }
-    }, [selectedRowKeys]);
+    }, [dataSource]);
 
     // sorter,filter会触发
     const onDefaultChange = useCallback(

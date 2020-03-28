@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { ProColumns } from '@ant-design/pro-table';
 import { ITaskListItem, ITaskListQuery, ITaskListExtraData } from '@/interface/ITask';
 import { Button, message } from 'antd';
 import {
@@ -14,7 +13,7 @@ import {
     TaskTypeMap,
 } from '@/enums/StatusEnum';
 import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
-import ProTable from '@/components/ProTable';
+import ProTable, { ProColumns } from '@/components/ProTable/index';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
@@ -23,7 +22,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
-import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import btnStyle from '@/styles/_btn.less';
 import TaskStatus from './TaskStatus';
@@ -532,12 +531,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         }
     }, [extraData]);
 
-    const deleteTaskList = useCallback(() => {
+    const deleteTaskList = useCallback(selectedRowKeys => {
         return deleteTasks(selectedRowKeys.join(',')).then(() => {
             message.success('任务删除成功!');
             onReload();
         });
-    }, [selectedRowKeys]);
+    }, []);
 
     const onSelectChange = useCallback((selectedRowKeys: React.Key[]) => {
         setSelectedRowKeys(selectedRowKeys as string[]);
@@ -547,10 +546,31 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         return {
             fixed: true,
             columnWidth: '50px',
-            selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange,
         };
-    }, [selectedRowKeys]);
+    }, []);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+        };
+    }, [loading]);
+
+    const options = useMemo(() => {
+        return {
+            density: true,
+            fullScreen: true,
+            reload: onReload,
+            setting: true,
+        };
+    }, [onReload]);
+
+    const scroll = useMemo(() => {
+        return { x: true, scrollToFirstRowOnChange: true } as any;
+    }, []);
 
     return useMemo(() => {
         return (
@@ -566,20 +586,14 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     </LoadingButton>
                 </SearchForm>
                 <ProTable<ITaskListItem>
-                    search={false}
                     headerTitle="查询表格"
                     rowKey="task_id"
                     rowSelection={rowSelection}
-                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    scroll={scroll}
                     bottom={60}
                     minHeight={500}
-                    pagination={{
-                        total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                    }}
-                    toolBarRender={(action, { selectedRows, selectedRowKeys = [] }) => {
+                    pagination={pagination}
+                    toolBarRender={(selectedRowKeys = []) => {
                         const size = selectedRowKeys.length;
                         return [
                             <PopConfirmLoadingButton
@@ -596,7 +610,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                                     okText: '确定',
                                     cancelText: '取消',
                                     disabled: size === 0,
-                                    onConfirm: deleteTaskList,
+                                    onConfirm: () => deleteTaskList(selectedRowKeys),
                                 }}
                             />,
                         ];
@@ -606,12 +620,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     dataSource={dataSource}
                     loading={loading}
                     onChange={onChange}
-                    options={{
-                        density: true,
-                        fullScreen: true,
-                        reload: onReload,
-                        setting: true,
-                    }}
+                    options={options}
                 />
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>

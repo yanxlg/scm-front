@@ -25,6 +25,7 @@
         "lodash-decorators": "^6.0.1"
     },
     "devDependencies": {
+        "@types/classnames": "^2.2.9",
         "@types/react-virtualized": "^9.21.8",
         "@types/qrcode.react": "^1.0.0",
         "prettier": "^1.19.1",

@@ -152,13 +152,15 @@ function useRowSelection<T, U>(props: IProTableProps<T, U>) {
 
     const UpdateContainerRefList: Array<UpdateContainerRef | null> = useMemo(() => {
         return [];
-    }, []);
+    }, [dataSource]);
 
-    let allCheckedRef = useMemo<OptimizeCheckboxRef | null>(() => null, []);
+    let allCheckedRefList: Array<OptimizeCheckboxRef | null> = useMemo(() => {
+        return [];
+    }, [dataSource]);
 
     const itemsRefList: Array<OptimizeCheckboxRef | null> = useMemo(() => {
         return [];
-    }, []);
+    }, [dataSource]);
 
     const outerOnChange = useCallback(
         (keys: string[], items: T[]) => {
@@ -236,14 +238,13 @@ function useRowSelection<T, U>(props: IProTableProps<T, U>) {
             beforeKeys = Array.from(set);
             const size = beforeKeys.length;
             if (size === 0) {
-                allCheckedRef?.updateChecked(false);
+                allCheckedRefList?.forEach(item => item?.updateChecked(false));
             } else if (size === dataSource!.length) {
-                allCheckedRef?.updateChecked(true);
+                allCheckedRefList?.forEach(item => item?.updateChecked(true));
             } else {
-                allCheckedRef?.setIndeterminate();
+                allCheckedRefList?.forEach(item => item?.setIndeterminate());
             }
 
-            allCheckedRef?.getElement();
             outerOnChange(
                 beforeKeys as string[],
                 dataSource!.filter((item: any, index) => {
@@ -262,7 +263,7 @@ function useRowSelection<T, U>(props: IProTableProps<T, U>) {
 
     const clearCheckedRows = useCallback(
         (callback: boolean = true) => {
-            allCheckedRef?.updateChecked(false);
+            allCheckedRefList?.forEach(item => item?.updateChecked(false));
             itemsRefList.map(item => item && item.updateChecked(false));
             callback && outerOnChange([], []);
         },
@@ -275,10 +276,13 @@ function useRowSelection<T, U>(props: IProTableProps<T, U>) {
         }
         const isString = typeof rowKey === 'string';
         return {
-            title: <OptimizeCheckbox ref={ref => (allCheckedRef = ref)} onChange={onSelectAll} />,
+            title: (
+                <OptimizeCheckbox ref={ref => allCheckedRefList.push(ref)} onChange={onSelectAll} />
+            ),
             dataIndex: 'checked',
             width: columnWidth,
             align: 'center',
+            copyable: false,
             render: (_, record, index) => {
                 const rowValue = isString
                     ? (record as any)[rowKey as string]

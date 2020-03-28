@@ -11,14 +11,12 @@ import React, {
 import { Checkbox } from 'antd';
 import { CheckboxProps } from 'antd/lib/checkbox/Checkbox';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
-import ReactDOM from 'react-dom';
 
 export interface OptimizeCheckboxRef {
     updateChecked: (checked: boolean) => void;
     setIndeterminate: () => void;
     getValue: () => any;
     getValues: () => { value: any; checked: boolean };
-    getElement: () => void;
 }
 
 const OptimizeCheckbox: ForwardRefRenderFunction<
@@ -30,14 +28,11 @@ const OptimizeCheckbox: ForwardRefRenderFunction<
         indeterminate: false,
     });
 
-    const refObject = useRef<any>();
-
     useImperativeHandle(
         ref,
         () => {
             return {
                 updateChecked: (checked: boolean) => {
-                    console.log(checked);
                     setState({
                         checked: checked,
                         indeterminate: false,
@@ -56,9 +51,6 @@ const OptimizeCheckbox: ForwardRefRenderFunction<
                         checked: state.checked,
                     };
                 },
-                getElement: () => {
-                    console.log(refObject);
-                },
             };
         },
         [state.checked],
@@ -75,16 +67,13 @@ const OptimizeCheckbox: ForwardRefRenderFunction<
     const { checked, indeterminate } = state;
 
     return useMemo(() => {
-        console.log(checked, indeterminate);
         return (
-            <span ref={refObject}>
-                <Checkbox
-                    {...props}
-                    checked={checked}
-                    indeterminate={indeterminate}
-                    onChange={onInnerChange}
-                />
-            </span>
+            <Checkbox
+                {...props}
+                checked={checked}
+                indeterminate={indeterminate}
+                onChange={onInnerChange}
+            />
         );
     }, [checked, indeterminate, onChange]);
 };
