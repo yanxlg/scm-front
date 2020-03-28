@@ -254,3 +254,10 @@ export async function putConfirmPay(data: IConfirmPayData) {
         data,
     });
 }
+
+// 查看物流轨迹
+export async function getOrderTrack(params: { order_goods_id: string; last_waybill_no: string }) {
+    return request.get(OrderApiPath.getOrderTrack, {
+        params,
+    });
+}

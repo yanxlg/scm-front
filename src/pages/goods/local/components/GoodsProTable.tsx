@@ -497,6 +497,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     minHeight={500}
                     rowSelection={{
                         fixed: true,
+                        columnWidth: 60,
                         selectedRowKeys: selectedRowKeys,
                         onChange: this.onSelectChange,
                     }}

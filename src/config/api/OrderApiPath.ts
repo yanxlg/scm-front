@@ -45,5 +45,5 @@ export enum OrderApiPath {
     // 确认支付
     putConfirmPay = '/api/v1/orders/confirm_pay',
     // 获取物流轨迹
-    getOrderTruck = '/api/v1/orders/truck',
+    getOrderTrack = '/api/v1/orders/track',
 }
