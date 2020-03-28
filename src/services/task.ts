@@ -195,11 +195,9 @@ export async function queryTaskLog(params: { task_id: number; page: number; page
 }
 
 export async function queryTaskProgressList(params: ITaskProgressQuery) {
-    return request
-        .get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
-            params: transPaginationRequest(params),
-        })
-        .then(transPaginationResponse);
+    return request.get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
+        params: params,
+    });
 }
 
 export async function addAutoPurchaseTask(data: IAPTaskBody) {

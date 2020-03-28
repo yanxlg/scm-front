@@ -10,6 +10,7 @@ export const TaskRangeMap = {
     6: '采购',
     7: '商品上架',
     8: '商品下架',
+    9: '采集上架',
     21: '全站',
     23: '全站',
     22: '指定店铺',
@@ -71,6 +72,7 @@ export enum TaskTypeEnum {
     Grounding = 1,
     Update = 2,
     Purchase = 3,
+    GatherGrounding,
 }
 
 //======================= Hot 任务范围 ======================//

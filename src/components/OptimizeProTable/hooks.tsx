@@ -1,6 +1,8 @@
 import { GetRowKey } from 'antd/es/table/interface';
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import OptimizeCheckbox, { OptimizeCheckboxRef } from '@/components/ProTable/OptimizeCheckbox';
+import OptimizeCheckbox, {
+    OptimizeCheckboxRef,
+} from '@/components/OptimizeProTable/OptimizeCheckbox';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { ProColumns, SimpleRowSelection } from './Table';
 import { debounce } from 'lodash';
@@ -108,6 +110,7 @@ function useRowSelection<T, U>(
     );
 
     const clearCheckedRows = useCallback(() => {
+        console.log(allCheckedRefList);
         allCheckedRefList?.forEach(item => item?.updateChecked(false));
         itemsRefList.map(item => item && item.updateChecked(false));
     }, []);
@@ -119,7 +122,11 @@ function useRowSelection<T, U>(
         const isString = typeof rowKey === 'string';
         return {
             title: (
-                <OptimizeCheckbox ref={ref => allCheckedRefList.push(ref)} onChange={onSelectAll} />
+                <OptimizeCheckbox
+                    disabled={dataSource.length === 0}
+                    ref={ref => allCheckedRefList.push(ref)}
+                    onChange={onSelectAll}
+                />
             ),
             dataIndex: 'checked',
             width: columnWidth,
@@ -141,11 +148,11 @@ function useRowSelection<T, U>(
             },
             fixed: fixed ? 'left' : undefined,
         } as ProColumns<T>;
-    }, [rowKey, fixed, columnWidth]);
+    }, [rowKey, fixed, columnWidth, dataSource]);
 
     const optimizeColumns = useMemo(() => {
         return columns.length === 0 ? [] : [addRow as ProColumns<T>].concat(columns);
-    }, [addRow, columns]);
+    }, [addRow, columns, dataSource]);
 
     return !optimize
         ? {
@@ -208,13 +215,12 @@ function useScrollXY<T>(
     }, []);
 
     return useMemo(() => {
-        return scroll
-            ? {
-                  ...scroll,
-                  y: y,
-                  x: scrollX,
-              }
-            : undefined;
+        return {
+            scrollToFirstRowOnChange: true,
+            ...scroll,
+            y: y,
+            x: scrollX,
+        };
     }, [columns, rowSelection, scroll, y]);
 }
 

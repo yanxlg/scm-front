@@ -189,23 +189,33 @@ export interface ITaskLogResponse {
     total: number;
 }
 
-export interface ITaskProgressQuery extends RequestPagination {
+export interface ITaskProgressQuery {
     task_id: number;
+    plan_id?: string;
 }
 
 export interface ITaskProgressItem {
-    sub_task_id: number;
-    start_time: number;
-    end_time: number;
-    create_status: TaskCreateStatusCode;
-    status: TaskStatusCode;
-    progress: number;
-    task_type: TaskTypeEnum;
+    stage: string;
+    wait_execute: number;
+    executing: string;
+    success: string;
+    fail: string;
+    fail_reason: string;
 }
 
 export interface ITaskProgressResponse {
-    list: ITaskProgressItem[];
-    total: number;
+    list?: ITaskProgressItem[];
+    total?: number;
+    task_type?: TaskTypeCode;
+    total_goods?: string;
+    already_on_sale_goods?: string;
+    already_catch_goods?: string;
+    add_on_sale_goods?: string;
+    add_catch_goods?: string;
+    on_sale_goods?: string;
+    catch_goods?: string;
+    success?: string;
+    fail?: string;
 }
 
 export interface ISubTaskProgressQuery {

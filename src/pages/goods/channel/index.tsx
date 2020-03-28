@@ -629,7 +629,6 @@ const ChannelList: React.FC = props => {
                         pageSize: pageSize,
                         showSizeChanger: true,
                     }}
-                    toolBarRender={(action, { selectedRows }) => []}
                     tableAlertRender={false}
                     columns={columns}
                     dataSource={dataSource}

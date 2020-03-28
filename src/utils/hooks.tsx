@@ -4,12 +4,14 @@ import { IResponse, IPaginationResponse, RequestPagination } from '@/interface/I
 import { PaginationConfig } from 'antd/es/pagination';
 import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
 import { SearchFormRef } from '@/components/SearchForm';
-import OptimizeCheckbox, { OptimizeCheckboxRef } from '@/components/ProTable/OptimizeCheckbox';
+import OptimizeCheckbox, {
+    OptimizeCheckboxRef,
+} from '@/components/OptimizeProTable/OptimizeCheckbox';
 import { ProColumns } from '@ant-design/pro-table/es';
 import { GetRowKey, TableRowSelection } from 'antd/es/table/interface';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { IProTableProps } from '@/components/ProTable';
-import UpdateContainer, { UpdateContainerRef } from '@/components/ProTable/UpdateContainer';
+import UpdateContainer, { UpdateContainerRef } from '@/components/OptimizeProTable/UpdateContainer';
 
 const EmptyArray: string[] = [];
 

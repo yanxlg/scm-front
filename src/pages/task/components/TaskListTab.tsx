@@ -13,7 +13,7 @@ import {
     TaskTypeMap,
 } from '@/enums/StatusEnum';
 import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
-import ProTable, { ProColumns } from '@/components/ProTable/index';
+import ProTable, { ProColumns } from '@/components/OptimizeProTable/index';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
@@ -33,12 +33,15 @@ import {
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
+import { TableProps } from 'antd/es/table';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
     initialValues?: ITaskListQuery;
     setCountArr: (count: number[]) => void;
 }
+
+const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, setCountArr }) => {
     const searchRef = useRef<SearchFormRef>(null);
@@ -167,11 +170,17 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     const statusCode = Number(record.status);
                     const task_id = record.task_id;
                     const onceTask = isOnceTask(record.execute_count);
+                    const taskType = record.task_type;
+
                     return (
                         <>
-                            <Button type="link" onClick={() => viewTaskDetail(task_id)}>
-                                查看详情
-                            </Button>
+                            {taskType === TaskTypeEnum.Gather ||
+                            taskType === TaskTypeEnum.Grounding ||
+                            taskType === TaskTypeEnum.GatherGrounding ? (
+                                <Button type="link" onClick={() => viewTaskDetail(task_id)}>
+                                    查看详情
+                                </Button>
+                            ) : null}
                             {statusCode === TaskStatusEnum.ToBeExecuted ? (
                                 <LoadingButton type="link" onClick={() => activeTask(task_id)}>
                                     立即执行
@@ -539,7 +548,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     }, []);
 
     const onSelectChange = useCallback((selectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(selectedRowKeys as string[]);
+        setSelectedRowKeys(selectedRowKeys as string[]); // 仅用于保存
     }, []);
 
     const rowSelection = useMemo(() => {
@@ -568,9 +577,47 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         };
     }, [onReload]);
 
-    const scroll = useMemo(() => {
-        return { x: true, scrollToFirstRowOnChange: true } as any;
-    }, []);
+    const table = useMemo(() => {
+        return (
+            <ProTable<ITaskListItem>
+                headerTitle="查询表格"
+                rowKey="task_id"
+                rowSelection={rowSelection}
+                scroll={scroll}
+                bottom={60}
+                minHeight={500}
+                pagination={pagination}
+                toolBarRender={(selectedRowKeys = []) => {
+                    const size = selectedRowKeys.length;
+                    return [
+                        <PopConfirmLoadingButton
+                            key="delete"
+                            buttonProps={{
+                                danger: true,
+                                type: 'link',
+                                className: 'btn-clear btn-group',
+                                disabled: size === 0,
+                                children: '删除任务',
+                            }}
+                            popConfirmProps={{
+                                title: '确定要删除选中的任务吗?',
+                                okText: '确定',
+                                cancelText: '取消',
+                                disabled: size === 0,
+                                onConfirm: () => deleteTaskList(selectedRowKeys),
+                            }}
+                        />,
+                    ];
+                }}
+                tableAlertRender={false}
+                columns={columns}
+                dataSource={dataSource}
+                loading={loading}
+                onChange={onChange}
+                options={options}
+            />
+        );
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -585,47 +632,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                         查询
                     </LoadingButton>
                 </SearchForm>
-                <ProTable<ITaskListItem>
-                    headerTitle="查询表格"
-                    rowKey="task_id"
-                    rowSelection={rowSelection}
-                    scroll={scroll}
-                    bottom={60}
-                    minHeight={500}
-                    pagination={pagination}
-                    toolBarRender={(selectedRowKeys = []) => {
-                        const size = selectedRowKeys.length;
-                        return [
-                            <PopConfirmLoadingButton
-                                key="delete"
-                                buttonProps={{
-                                    danger: true,
-                                    type: 'link',
-                                    className: 'btn-clear btn-group',
-                                    disabled: size === 0,
-                                    children: '删除任务',
-                                }}
-                                popConfirmProps={{
-                                    title: '确定要删除选中的任务吗?',
-                                    okText: '确定',
-                                    cancelText: '取消',
-                                    disabled: size === 0,
-                                    onConfirm: () => deleteTaskList(selectedRowKeys),
-                                }}
-                            />,
-                        ];
-                    }}
-                    tableAlertRender={false}
-                    columns={columns}
-                    dataSource={dataSource}
-                    loading={loading}
-                    onChange={onChange}
-                    options={options}
-                />
+                {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 };
 
 export default TaskListTab;

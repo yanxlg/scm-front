@@ -36,6 +36,9 @@ const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) 
     const taskId = Number(match.params.task_id);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const [checkedIds, setCheckedIds] = useState<Array<string>|undefined>(undefined);
+
+
     useEffect(() => {
         setLoading(true);
         queryTaskDetail(taskId)
@@ -140,7 +143,7 @@ const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) 
                     <Descriptions.Item label="任务范围" span={1}>
                         {TaskRangeMap[sub_cat_id] || '--'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="排序类型" span={1}>
+                    <Descriptions.Item label="任务排序" span={1}>
                         {sort_type_name || '--'}
                     </Descriptions.Item>
                     <Descriptions.Item label="爬虫条件" span={1}>
@@ -176,16 +179,11 @@ const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) 
                         {`${price_min || 0}-${price_max || '+∞'}`}
                     </Descriptions.Item>
                     <Descriptions.Item label="任务周期" span={1}>
-                        {task_cycle === TaskExecuteType.once ? '一次性任务' : '定时任务'}
+                        {task_cycle === TaskExecuteType.once ? '单次' : '定时'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="任务开始时间" span={1}>
+                    <Descriptions.Item label="任务时间" span={1}>
                         {utcToLocal(task_start_time) || '--'}
                     </Descriptions.Item>
-                    {task_cycle === TaskExecuteType.once ? null : (
-                        <Descriptions.Item label="任务结束时间" span={1}>
-                            {utcToLocal(task_end_time) || '--'}
-                        </Descriptions.Item>
-                    )}
                     {task_cycle === TaskExecuteType.once ? null : (
                         <Descriptions.Item label="任务间隔" span={1}>
                             {getTimeIntervalString(time_interval)}
@@ -196,18 +194,18 @@ const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) 
         }
         if (task_type === TaskTypeEnum.Grounding) {
             return (
-                <Descriptions column={1} className="task-desc">
+                <Descriptions column={3} size="small">
                     <Descriptions.Item label="任务SN">{detail.task_sn || '--'}</Descriptions.Item>
                     <Descriptions.Item label="任务名称">
                         {detail.task_name || '--'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="任务范围">
-                        {TaskRangeMap[sub_cat_id] || '--'}
+                    <Descriptions.Item label="任务类型">
+                        商品上架
                     </Descriptions.Item>
                     <Descriptions.Item label="任务周期">
-                        {task_cycle === TaskExecuteType.once ? '一次性任务' : '定时任务'}
+                        {task_cycle === TaskExecuteType.once ? '单次' : '定时'}
                     </Descriptions.Item>
-                    <Descriptions.Item label="任务开始时间">
+                    <Descriptions.Item label="任务时间">
                         {utcToLocal(task_start_time) || '--'}
                     </Descriptions.Item>
                 </Descriptions>
@@ -276,19 +274,19 @@ const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) 
                             placement="bottomLeft"
                             getPopupContainer={getPopupContainer}
                             title={undefined}
-                            content={<TaskIdList task_id={taskId} />}
+                            content={<TaskIdList task_id={taskId} checkedIds={checkedIds} setCheckedIds={setCheckedIds}/>}
                             overlayStyle={{ width: '100%' }}
                             trigger="click"
                         >
                             <Select placeholder="全部子任务" dropdownRender={dropdownRender} />
                         </Popover>
                     </div>
-                    <TaskProgress />
+                    <TaskProgress checkedIds={checkedIds} task_id={taskId} task_type={detail.task_type}/>
                 </Card>
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading]);
+    }, [loading,checkedIds]);
 };
 
 export default Task_id;

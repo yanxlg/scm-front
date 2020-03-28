@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Row, Spin, Col, Checkbox, Form } from 'antd';
+import { Row, Spin, Col, Checkbox } from 'antd';
 import { AutoSizer, List as VList, InfiniteLoader } from 'react-virtualized';
 import { ISubTaskIdItem } from '@/interface/ITask';
 import { querySubTaskIdList } from '@/services/task';
@@ -7,20 +7,20 @@ import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
 declare interface TaskIdListProps {
     task_id: number;
+    checkedIds?: Array<string>;
+    setCheckedIds: (checkedIds: Array<string>) => void;
 }
 
 const rowColumns = 4;
 
-const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
+const TaskIdList: React.FC<TaskIdListProps> = ({ task_id, checkedIds, setCheckedIds }) => {
     const [dataSet, setDataSet] = useState<ISubTaskIdItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [pageNumber, setPageNumber] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [checkedAll, setCheckedAll] = useState(true);
-    const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+    const [hasMore, setHasMore] = useState(false); // 一次性加载，关闭瀑布流
 
     const pageSize = useMemo<number>(() => {
-        return 400;
+        return 100000; // 一次性加载
     }, []);
 
     const loadedRowsMap = useMemo<{ [key: number]: 1 }>(() => {
@@ -63,7 +63,7 @@ const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
                         <Col key={`${key}_${i}`} span={24 / rowColumns}>
                             <Checkbox
                                 value={id}
-                                checked={checkedAll || checkedIds.has(id)}
+                                checked={checkedIds && checkedIds.indexOf(id) > -1}
                                 onChange={checkedStateChange}
                             >
                                 {id}
@@ -78,7 +78,7 @@ const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
                 </Row>
             );
         },
-        [dataSet, checkedIds, checkedAll],
+        [dataSet, checkedIds],
     );
 
     const isRowLoaded = useCallback(({ index }) => !!loadedRowsMap[index], []);
@@ -103,23 +103,32 @@ const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
         [dataSet, pageNumber, hasMore, loading],
     );
 
-    const onCheckedAllStateChange = useCallback((e: CheckboxChangeEvent) => {
-        setCheckedAll(e.target.checked);
-    }, []);
+    const onCheckedAllStateChange = useCallback(
+        (e: CheckboxChangeEvent) => {
+            const checked = e.target.checked;
+            if (checked) {
+                setCheckedIds(dataSet.map(data => data.plan_id));
+            } else {
+                setCheckedIds([]);
+            }
+        },
+        [dataSet],
+    );
 
     const checkedStateChange = useCallback(
         (e: CheckboxChangeEvent) => {
             const { checked, value } = e.target;
-            checked ? checkedIds.add(value) : checkedIds.delete(value);
-            const ids = new Set(checkedIds);
-            setCheckedIds(ids);
+            const set = new Set(checkedIds);
+            checked ? set.add(value) : set.delete(value);
+            setCheckedIds(Array.from(set));
         },
-        [checkedIds],
+        [checkedIds, dataSet],
     );
 
     return useMemo(() => {
         const size = dataSet.length;
         const rowCount = Math.ceil(size / rowColumns);
+        const checkedAll = checkedIds?.length === dataSet.length;
         return (
             <div style={{ height: 160 }}>
                 <Row align="middle" style={{ height: 40 }}>
@@ -158,7 +167,7 @@ const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
                 )}
             </div>
         );
-    }, [dataSet, loading]);
+    }, [dataSet, loading, checkedIds]);
 };
 
 export default TaskIdList;

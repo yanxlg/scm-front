@@ -3,7 +3,7 @@ import './index.less';
 import React, { useEffect, CSSProperties, useRef, useState, useCallback, useMemo } from 'react';
 import { Table, ConfigProvider, Card, Typography, Empty, Tooltip } from 'antd';
 import classNames from 'classnames';
-import { ColumnsType, TableProps, ColumnType } from 'antd/es/table';
+import { ColumnsType, ColumnType } from 'antd/es/table';
 import { ConfigConsumer, ConfigConsumerProps } from 'antd/lib/config-provider';
 
 import { IntlProvider, IntlConsumer, IntlType } from './component/intlContext';
@@ -17,8 +17,9 @@ import { checkUndefinedOrNull, genColumnKey, useDeepCompareEffect } from './comp
 import { DensitySize } from './component/toolBar/DensityIcon';
 import { useRowSelection, useScrollXY } from './hooks';
 import { goButton, showTotal } from '@/components/ProTable';
-import TableAlert, { TableAlertRef } from '@/components/ProTable/component/alert';
+import TableAlert, { TableAlertRef } from '@/components/OptimizeProTable/component/alert';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
+import { TableProps } from 'antd/lib/table';
 
 export interface ColumnsState {
     show?: boolean;
@@ -367,6 +368,7 @@ const ProTable = <T extends {}, U extends object>(
                           setTableSize: updateTableSize,
                       },
                       fullScreen: options.fullScreen ? fullScreen : undefined,
+                      reload: options.reload ? options.reload : undefined,
                   };
         if (optimize) {
             return toolBarRender === false ? null : (
@@ -398,7 +400,7 @@ const ProTable = <T extends {}, U extends object>(
                 />
             );
         }
-    }, [toolBarRender, actualSize, optimize ? undefined : selectedRowKeys, tableColumns]);
+    }, [actualSize, optimize ? undefined : selectedRowKeys, tableColumns]);
 
     /************************alert 处理***********************/
     const alertRef = useRef<TableAlertRef>(null); // 优化模式用于动态修改selectedRowKeys
@@ -479,6 +481,7 @@ const ProTable = <T extends {}, U extends object>(
         rowSelection,
         propsScroll,
     );
+
     const table = useMemo(() => {
         return (
             <Table<T>
@@ -493,12 +496,12 @@ const ProTable = <T extends {}, U extends object>(
                 dataSource={dataSource}
                 rowKey={rowKey}
                 pagination={{
-                    ...pagination,
                     pageSizeOptions: ['50', '100', '200'],
                     showQuickJumper: {
                         goButton: goButton,
                     },
                     showTotal: showTotal,
+                    ...pagination,
                 }}
             />
         );

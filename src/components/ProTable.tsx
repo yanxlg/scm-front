@@ -2,12 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ColumnsState, ProTableProps } from '@ant-design/pro-table/lib/Table';
 import { default as DefaultProTable } from '@ant-design/pro-table';
 import { Button, Card, Pagination } from 'antd';
-import {
-    Key,
-    SorterResult,
-    TableCurrentDataSource,
-    TableRowSelection,
-} from 'antd/es/table/interface';
+import { Key, SorterResult, TableCurrentDataSource } from 'antd/es/table/interface';
 import { PaginationConfig } from 'antd/es/pagination';
 import cardStyle from '@/styles/_card.less';
 import formStyle from '@/styles/_form.less';
@@ -16,26 +11,6 @@ import ReactDOM from 'react-dom';
 import { debounce } from 'lodash';
 import { genColumnKey } from '@ant-design/pro-table/es/component/util';
 import { ProColumns } from '@ant-design/pro-table/es';
-import { useRowSelection } from '@/utils/hooks';
-import { RequestData, UseFetchDataAction } from '@ant-design/pro-table/lib/useFetchData';
-import { EmptyObject } from '@/config/global';
-
-export type TableRowSelectionProps<T> =
-    | {
-          optimize?: true;
-          rowSelection?: Omit<TableRowSelection<T>, 'selectedRowKeys'>;
-      }
-    | {
-          optimize: false;
-          rowSelection?: TableRowSelection<T>;
-      };
-
-export type IProTableProps<T, U> = Omit<ProTableProps<T, U>, 'rowSelection'> & {
-    bottom?: number;
-    minHeight?: number;
-    autoFitY?: boolean;
-    children?: React.ReactElement;
-} & TableRowSelectionProps<T>;
 
 export const showTotal = (total: number) => {
     return <span>共有{total}条</span>;
@@ -48,39 +23,26 @@ const ProTable = <
     U extends {
         [key: string]: any;
     } = {}
->({
-    columns: columnsConfig,
-    pagination,
-    options,
-    dataSource,
-    scroll,
-    loading,
-    rowKey,
-    optimize = true,
-    toolBarRender: _toolBarRender,
-    rowSelection: _rowSelectionConfig,
-    ...props
-}: IProTableProps<T, U>) => {
+>(
+    props: ProTableProps<T, U> & {
+        bottom?: number;
+        minHeight?: number;
+        autoFitY?: boolean;
+        children?: React.ReactElement;
+    },
+) => {
     const [filters, setFilters] = useState<Record<string, Key[] | null>>({});
     const [sorters, setSorters] = useState<SorterResult<T> | SorterResult<T>[]>({});
     const [extra, setExtra] = useState<TableCurrentDataSource<T>>({ currentDataSource: [] });
     const [y, setY] = useState<number | undefined>(undefined);
     const cardRef = useRef<Card>(null);
-    const { columns = [], clearCheckedRows, SelectedRowKeysWrap } = useRowSelection<T, U>({
-        rowSelection: _rowSelectionConfig,
-        columns: columnsConfig,
-        rowKey,
-        dataSource,
-        optimize,
-    });
-
-    const { fixed, columnWidth } = _rowSelectionConfig || ({} as TableRowSelection<T>);
 
     const calcTotalX = useCallback((_columns?: ProColumns<T>[]) => {
+        const { columns, rowSelection, scroll } = props;
         if (scroll?.x === true || scroll?.x === 'max-content') {
             let x: number = 0;
-            if (columnWidth) {
-                x += parseInt(columnWidth as string) || 0;
+            if (rowSelection && rowSelection.columnWidth) {
+                x += parseInt(rowSelection.columnWidth as string) || 0;
             }
             (_columns || columns)?.forEach(column => {
                 x += parseInt(column.width as string) || 0;
@@ -122,12 +84,6 @@ const ProTable = <
         };
     }, []);
 
-    useEffect(() => {
-        if (optimize) {
-            clearCheckedRows();
-        }
-    }, [dataSource]);
-
     // sorter,filter会触发
     const onDefaultChange = useCallback(
         (
@@ -139,6 +95,7 @@ const ProTable = <
             setFilters(filters);
             setSorters(sorter);
             setExtra(extra);
+            const { pagination } = props;
             props.onChange?.(
                 pagination ? { pageSize: pagination.pageSize, current: pagination.current } : {},
                 filters,
@@ -166,6 +123,7 @@ const ProTable = <
 
     const onColumnsStateChange = useCallback(
         (map: { [key: string]: ColumnsState }) => {
+            const { columns = [] } = props;
             const _columns = columns.filter(item => {
                 const { key, dataIndex } = item;
                 const columnKey = genColumnKey(key, dataIndex);
@@ -183,53 +141,13 @@ const ProTable = <
         [props.onColumnsStateChange],
     );
 
-    const toolBarRender = useCallback(
-        (
-            action: UseFetchDataAction<RequestData<T>>,
-            rows: {
-                selectedRowKeys?: (string | number)[];
-                selectedRows?: T[];
-            },
-        ) => {
-            return [
-                <SelectedRowKeysWrap
-                    key={'1'}
-                    children={({ selectedKeys = [], selectedRows = [] } = EmptyObject) => {
-                        if (_toolBarRender) {
-                            return _toolBarRender(action, {
-                                selectedRows: selectedRows || [],
-                                selectedRowKeys: selectedKeys || [],
-                            });
-                        } else {
-                            return null;
-                        }
-                    }}
-                />,
-            ];
-        },
-        [],
-    );
-
     return useMemo(() => {
-        const { children, autoFitY, ..._props } = props;
+        const { pagination, scroll, children, autoFitY, ..._props } = props;
         return (
             <Card className={[cardStyle.cardPlain, formStyle.formItem].join(' ')} ref={cardRef}>
                 {children}
                 <DefaultProTable<T, U>
                     {..._props}
-                    toolBarRender={
-                        _toolBarRender
-                            ? optimize
-                                ? toolBarRender
-                                : _toolBarRender
-                            : _toolBarRender
-                    }
-                    loading={loading}
-                    rowKey={rowKey}
-                    dataSource={dataSource}
-                    options={options}
-                    rowSelection={optimize ? undefined : _rowSelectionConfig}
-                    columns={columns}
                     pagination={false}
                     onChange={onDefaultChange}
                     onColumnsStateChange={onColumnsStateChange}
@@ -250,19 +168,7 @@ const ProTable = <
                 ) : null}
             </Card>
         );
-    }, [
-        columns,
-        pagination,
-        options,
-        dataSource,
-        y,
-        x,
-        fixed,
-        columnWidth,
-        scroll,
-        loading,
-        rowKey,
-    ]); // 排除掉selectedRowKeys重新渲染
+    }, [props, y, x]);
 };
 
 export default ProTable;
