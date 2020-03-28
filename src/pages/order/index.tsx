@@ -77,10 +77,14 @@ class Order extends React.PureComponent<{}, IOrderState> {
                             <PaneAll getAllTabCount={this.getAllTabCount} />
                         </TabPane>
                         <TabPane tab={`待拍单（${penddingOrderCount}）`} key="2">
-                            <PanePendingOrder getAllTabCount={this.getAllTabCount} />
+                            <div className="order-tab-content">
+                                <PanePendingOrder getAllTabCount={this.getAllTabCount} />
+                            </div>
                         </TabPane>
                         <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
-                            <PanePay getAllTabCount={this.getAllTabCount} />
+                            <div className="order-tab-content">
+                                <PanePay getAllTabCount={this.getAllTabCount} />
+                            </div>
                         </TabPane>
                         <TabPane tab={`待发货（${penddingShipingOrderCount}）`} key="4">
                             <div className="order-tab-content">
@@ -98,7 +102,9 @@ class Order extends React.PureComponent<{}, IOrderState> {
                             </div>
                         </TabPane>
                         <TabPane tab={`异常订单`} key="7">
-                            <PaneError />
+                            <div className="order-tab-content">
+                                <PaneError />
+                            </div>
                         </TabPane>
                     </Tabs>
                 </div>

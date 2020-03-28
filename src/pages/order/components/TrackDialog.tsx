@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Modal, Timeline, Row, Col, Spin, Card } from 'antd';
 import { getOrderTrack } from '@/services/order-manage';
+import { getStatusDesc } from '@/utils/transform';
+import { purchaseShippingOptionList } from '@/enums/OrderEnum';
 
 declare interface ITrackItem {
     time: string;
@@ -8,8 +10,14 @@ declare interface ITrackItem {
     status: string;
 }
 
-declare interface IBegin {
-    [key: string]: ITrackItem[];
+declare interface IBeginItem {
+    purchase_status: number;
+    purchase_waybill_no: string;
+    list: ITrackItem[]
+}
+
+declare interface IBeginInfo {
+    [key: string]: IBeginItem[];
 }
 
 declare interface IProps {
@@ -26,17 +34,17 @@ const TrackDialog: React.FC<IProps> = ({
     hideTrackDetail,
 }) => {
     const [loading, setLoading] = useState(true);
-    const [beginInfo, setbeginInfo] = useState<IBegin>({});
+    const [beginInfo, setbeginInfo] = useState<IBeginInfo>({});
     const [endList, setEndList] = useState<ITrackItem[]>([]);
 
     const _getOrderTrack = useCallback(() => {
         setLoading(true);
         getOrderTrack({
-            order_goods_id: '1000012825745432664' || orderGoodsId,
-            last_waybill_no: 'UC810741953YP' || lastWaybillNo,
+            order_goods_id: orderGoodsId,
+            last_waybill_no: lastWaybillNo,
         })
             .then(res => {
-                console.log('getOrderTruck', res);
+                // console.log('getOrderTruck', res);
                 const { begin_track, end_track } = res.data;
                 setbeginInfo(begin_track);
                 setEndList(end_track);
@@ -59,67 +67,74 @@ const TrackDialog: React.FC<IProps> = ({
             <Modal
                 title="物流轨迹"
                 visible={visible}
-                style={{ top: 50 }}
-                width={680}
                 footer={null}
                 onCancel={hideTrackDetail}
+                width={720}
             >
-                {loading ? (
-                    <div className="text-center">
-                        <Spin />
-                    </div>
-                ) : (
-                    <>
-                        {Object.keys(beginInfo)?.length > 0 ? (
-                            <Card title="首程物流轨迹">
-                                {Object.keys(beginInfo).map(key => {
-                                    const platformTrackList = beginInfo[key];
-                                    return (
-                                        <div key={key}>
-                                            <Row>
-                                                <Col span={8}>物流订单号: 1111111111</Col>
-                                                <Col span={8}>采购平台: {key}</Col>
-                                                <Col span={8}>
-                                                    首程状态: {platformTrackList[0]?.status || ''}
-                                                </Col>
-                                            </Row>
-                                            <Timeline style={{ marginTop: 30 }}>
-                                                {platformTrackList.map(({ time, info }, index) => (
-                                                    <Timeline.Item
-                                                        key={index}
-                                                        color={index === 0 ? 'red' : 'gray'}
-                                                    >
-                                                        <p>{time}</p>
-                                                        {info}
-                                                    </Timeline.Item>
-                                                ))}
-                                            </Timeline>
-                                        </div>
-                                    );
-                                })}
-                            </Card>
-                        ) : null}
-
-                        <Card title="尾程物流轨迹">
-                            <Row>
-                                <Col span={8}>物流订单号: {lastWaybillNo}</Col>
-                                <Col span={8}>尾程状态: 已妥投</Col>
-                            </Row>
-                            <Timeline style={{ marginTop: 30 }}>
-                                <Timeline.Item>Create a services site 2015-09-01</Timeline.Item>
-                                <Timeline.Item color="gray">
-                                    Solve initial network problems 2015-09-01
-                                </Timeline.Item>
-                                <Timeline.Item color="gray">
-                                    Technical testing 2015-09-01
-                                </Timeline.Item>
-                                <Timeline.Item color="gray">
-                                    Network problems being solved 2015-09-01
-                                </Timeline.Item>
-                            </Timeline>
-                        </Card>
-                    </>
-                )}
+                <div style={{ maxHeight: 600, overflow: 'auto' }}>
+                    {loading ? (
+                        <div className="text-center">
+                            <Spin />
+                        </div>
+                    ) : (
+                        <>
+                            {
+                                Object.keys(beginInfo).length > 0 ? (
+                                    <Card title="首程物流轨迹">
+                                        {Object.keys(beginInfo).map(key => {
+                                            const platformTrackList = beginInfo[key];
+                                            return platformTrackList.map(({ purchase_status, purchase_waybill_no, list }) => (
+                                                <div key={purchase_waybill_no}>
+                                                    <Row>
+                                                        <Col span={10}>物流订单号: {purchase_waybill_no}</Col>
+                                                        <Col span={7}>采购平台: {key}</Col>
+                                                        <Col span={7}>
+                                                            首程状态: {getStatusDesc(purchaseShippingOptionList, purchase_status)}
+                                                        </Col>
+                                                    </Row>
+                                                    <Timeline style={{ marginTop: 16 }}>
+                                                        {list.map(({ time, info }, index) => (
+                                                            <Timeline.Item
+                                                                key={index}
+                                                                color={index === 0 ? 'red' : 'gray'}
+                                                            >
+                                                                <p>{time}</p>
+                                                                {info}
+                                                            </Timeline.Item>
+                                                        ))}
+                                                    </Timeline>
+                                                </div>
+                                            ))
+                                        })}
+                                    </Card>
+                                ) : <p>暂无订单物流轨迹</p>
+                            }
+                            {
+                                endList.length > 0 ? (
+                                    <Card title="尾程物流轨迹" style={{ marginTop: 30 }}>
+                                        <Row>
+                                            <Col span={10}>物流订单号: {lastWaybillNo}</Col>
+                                            <Col span={14}>尾程状态: {endList[0].status}</Col>
+                                        </Row>
+                                        <Timeline style={{ marginTop: 16 }}>
+                                            {endList.map(({ time, info }, index) => (
+                                                <Timeline.Item
+                                                    key={index}
+                                                    color={index === 0 ? 'red' : 'gray'}
+                                                >
+                                                    <p>{time}</p>
+                                                    {info}
+                                                </Timeline.Item>
+                                            ))}
+                                        </Timeline>
+                                    </Card>
+                                ) : null
+                            }
+                            
+                        </>
+                    )}
+                </div>
+                
             </Modal>
         );
     }, [visible, loading]);

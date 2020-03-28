@@ -52,44 +52,28 @@ class PaneErr extends React.PureComponent<{}, IState> {
     private currentSearchParams: IErrFilterParams | null = null;
     private fieldList: FormField[] = [
         {
-            type: 'dateRanger',
-            name: ['order_time_start', 'order_time_end'],
-            label: '订单时间',
-            className: 'order-date-picker',
-            formItemClassName: 'order-form-item',
-            formatter: ['start_date', 'end_date'],
-        },
-        {
-            type: 'dateRanger',
-            name: ['confirm_time_start', 'confirm_time_end'],
-            label: '订单确认时间',
-            className: 'order-date-picker',
-            formItemClassName: 'order-form-item',
-            formatter: ['start_date', 'end_date'],
+            type: 'input',
+            name: 'order_goods_id',
+            label: '订单号',
+            className: 'order-input',
+            formItemClassName: 'form-item',
+            placeholder: '请输入订单号',
+            formatter: 'number',
         },
         {
             type: 'select',
             name: 'channel_source',
             label: '销售渠道',
             className: 'order-input',
-            formItemClassName: 'order-form-item',
+            formItemClassName: 'form-item',
             optionList: [defaultOptionItem, ...channelOptionList],
-        },
-        {
-            type: 'input',
-            name: 'order_goods_id',
-            label: '订单号',
-            className: 'order-input',
-            formItemClassName: 'order-form-item',
-            placeholder: '请输入订单号',
-            formatter: 'number',
         },
         {
             type: 'select',
             name: 'abnormal_type',
             label: '异常类型',
             className: 'order-input',
-            formItemClassName: 'order-form-item',
+            formItemClassName: 'form-item',
             optionList: errorTypeOptionList,
             onChange: (name, form) => {
                 const value = form.getFieldValue(name);
@@ -99,6 +83,17 @@ class PaneErr extends React.PureComponent<{}, IState> {
                             {
                                 abnormalDetailType: 11,
                                 abnormalDetailList: [11, 5, 6],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
+                        break;
+                    case 1:
+                        this.setState(
+                            {
+                                abnormalDetailType: 8,
+                                abnormalDetailList: [8, 9, 10],
                             },
                             () => {
                                 this.onSearch();
@@ -130,6 +125,23 @@ class PaneErr extends React.PureComponent<{}, IState> {
                 }
             },
         },
+        {
+            type: 'dateRanger',
+            name: ['order_time_start', 'order_time_end'],
+            label: '订单时间',
+            className: 'order-error-date-picker',
+            formItemClassName: 'form-item',
+            formatter: ['start_date', 'end_date'],
+        },
+        {
+            type: 'dateRanger',
+            name: ['confirm_time_start', 'confirm_time_end'],
+            label: '订单确认时间',
+            className: 'order-error-date-picker',
+            formItemClassName: 'form-item',
+            formatter: ['start_date', 'end_date'],
+        },
+        
     ];
     private initialValues = {
         channel_source: 100,
@@ -335,7 +347,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
             <>
                 <div>
                     <SearchForm
-                        labelClassName="order-label"
+                        labelClassName="order-error-label"
                         fieldList={this.fieldList}
                         ref={this.formRef}
                         initialValues={this.initialValues}

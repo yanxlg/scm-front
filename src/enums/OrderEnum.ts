@@ -73,7 +73,7 @@ export const purchaseReserveOptionList = [
 
 export const errorTypeOptionList = [
     { name: '仓库异常', value: 1 },
-    // { name: '尾程异常', value: 2 },
+    { name: '尾程异常', value: 2 },
     { name: '采购异常', value: 3 },
     { name: '其他', value: 4 },
 ];

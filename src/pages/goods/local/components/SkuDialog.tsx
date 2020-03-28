@@ -1,7 +1,8 @@
 import React, { ChangeEvent } from 'react';
-import { Modal, Table, Pagination, Row, Col, Button, Input } from 'antd';
+import { Modal, Pagination, Row, Col, Button, Input } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import { FitTable } from '@/components/FitTable';
 
 import { ISkuStyleItem } from '@/interface/ILocalGoods';
 import { getGoodsSkuList, ISkuParams } from '@/services/goods';
@@ -81,7 +82,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             title: '爬虫价格(￥)',
             dataIndex: 'sku_amount',
             align: 'center',
-            width: 100,
+            width: 140,
         },
         {
             key: 'sku_price',
@@ -110,6 +111,14 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             dataIndex: 'sku_inventory',
             align: 'center',
             width: 100,
+        },
+        {
+            fixed: 'right',
+            key: 'xxx',
+            title: '属性',
+            dataIndex: 'xxx',
+            align: 'center',
+            width: 170,
         },
     ];
     constructor(props: IPorps) {
@@ -215,11 +224,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                     style={{ top: 50 }}
                     onCancel={this.handleCancel}
                     maskClosable={false}
-                    footer={null}
-                    // bodyStyle={{
-                    //     maxHeight: 600,
-                    //     overflow: 'auto'
-                    // }}
+                    // footer={null}
                 >
                     <div className="goods-sku-dialog">
                         <div className="goods-info">
@@ -241,36 +246,6 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                                     <Col span={8}>二级分类: {second_catagory.name}</Col>
                                     <Col span={8}>三级分类: {third_catagory.name}</Col>
                                 </Row>
-                                {/* <div className="center">
-                                    <div className="goods-item one">
-                                        <span className="float-left">product id:</span>
-                                        <div className="overflow-hidden">{product_id}</div>
-                                    </div>
-                                    <div className="goods-item two">
-                                        <span className="float-left">commodity id:</span>
-                                        <div className="overflow-hidden">{commodity_id}</div>
-                                    </div>
-                                    <div className="goods-item three">
-                                        <span className="float-left">爬虫商品 id:</span>
-                                        <div className="overflow-hidden">{worm_goods_id}</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="goods-item one">
-                                        <span className="float-left">一级分类:</span>
-                                        <div className="overflow-hidden">{first_catagory.name}</div>
-                                    </div>
-                                    <div className="goods-item two">
-                                        <span className="float-left">二级分类:</span>
-                                        <div className="overflow-hidden">
-                                            {second_catagory.name}
-                                        </div>
-                                    </div>
-                                    <div className="goods-item three">
-                                        <span className="float-left">三级分类:</span>
-                                        <div className="overflow-hidden">{third_catagory.name}</div>
-                                    </div>
-                                </div> */}
                             </div>
                         </div>
                         <Row className="filter-section" gutter={16}>
@@ -293,14 +268,14 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                                 </Button>
                             </Col>
                         </Row>
-                        <Table
+                        <FitTable
                             bordered
                             rowKey="sku_id"
                             className="table"
                             loading={loading}
                             columns={this.columns}
                             dataSource={skuList}
-                            scroll={{ y: 400 }}
+                            scroll={{ x: 'max-content', y: 400 }}
                             pagination={false}
                         />
                         <Pagination

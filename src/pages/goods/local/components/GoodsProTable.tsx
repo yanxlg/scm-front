@@ -9,6 +9,7 @@ import ShelvesDialog, { ISaleStatausItem } from './ShelvesDialog';
 import ImgEditDialog from './ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
+import PopConfirmSetAttr from './PopConfirmSetAttr';
 
 import { IRowDataItem, IPageData } from '../index';
 import { IOnsaleItem, ICatagoryItem } from '@/interface/ILocalGoods';
@@ -91,10 +92,9 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     <>
                         <div>{value}</div>
                         <Button
-                            ghost={true}
-                            size="small"
-                            type="primary"
-                            className="goods-local-img-edit"
+                            // ghost={true}
+                            // size="small"
+                            type="link"
                             onClick={() => this.showMergeDialog(value)}
                         >
                             查看商品组
@@ -146,6 +146,24 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'xxx',
             align: 'center',
             width: 200,
+            render: (value, row: IRowDataItem) => {
+                return (
+                    <div>
+                        <div>
+                            {
+                                ['品牌', '大件'].map(item => (
+                                    <Button 
+                                        size="small" 
+                                        key={item}
+                                        style={{marginRight: 4, marginBottom: 4}}
+                                    >{item}</Button>
+                                ))
+                            }
+                        </div>
+                        <PopConfirmSetAttr text="111"/>
+                    </div>
+                )
+            }
         },
         {
             key: 'first_catagory',
@@ -170,7 +188,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         <div>{value}</div>
                         <Button
                             type="link"
-                            className="goods-local-img-edit"
+                            // className="goods-local-img-edit"
                             onClick={() => this.showSkuDialog(row)}
                         >
                             查看sku信息
