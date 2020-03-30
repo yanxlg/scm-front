@@ -27,6 +27,7 @@ export const transPaginationRequest = ({
         page: pageNumber,
         page_count: pageSize,
         page_number: pageSize,
+        per_page: pageSize,
         ...extra,
     };
 };

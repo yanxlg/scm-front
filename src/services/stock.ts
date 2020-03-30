@@ -1,21 +1,32 @@
-import { IStockINFormData, IStockOUTFormData } from '@/pages/stock/components/InOutStock';
 import request from '@/utils/request';
 import { StockApiPathEnum } from '@/config/api/StockApiPathEnum';
-import { IRequestPagination } from '@/interface/IGlobal';
-import { IStockFormData } from '@/pages/stock/components/StockControl';
-import Stock from '@/pages/stock';
-import { StockType } from '@/config/dictionaries/Stock';
+import { IPaginationResponse, IResponse, RequestPagination } from '@/interface/IGlobal';
+import { transPaginationRequest } from '@/utils/utils';
+import {
+    IStockINFormData,
+    IStockInItem,
+    IStockOUTFormData,
+    IStockOutItem,
+    IStockRequest,
+    IStockItem,
+} from '@/interface/IStock';
 
-export function queryInList(data: IStockINFormData) {
-    return request.post(StockApiPathEnum.QueryInList, {
-        data: data,
-    });
+export function queryInList(data: IStockINFormData & RequestPagination) {
+    return request.post<IResponse<IPaginationResponse<IStockInItem>>>(
+        StockApiPathEnum.QueryInList,
+        {
+            data: transPaginationRequest(data),
+        },
+    );
 }
 
-export function queryOutList(data: IStockOUTFormData) {
-    return request.post(StockApiPathEnum.QueryOutList, {
-        data: data,
-    });
+export function queryOutList(data: IStockOUTFormData & RequestPagination) {
+    return request.post<IResponse<IPaginationResponse<IStockOutItem>>>(
+        StockApiPathEnum.QueryOutList,
+        {
+            data: transPaginationRequest(data),
+        },
+    );
 }
 
 export function exportInList(data: IStockINFormData) {
@@ -66,13 +77,16 @@ export function exportOutList(data: IStockOUTFormData) {
         });
 }
 
-export function queryStockList(data: IStockFormData) {
-    return request.post(StockApiPathEnum.QueryStockList, {
-        data: data,
-    });
+export function queryStockList(data: IStockRequest & RequestPagination) {
+    return request.post<IResponse<IPaginationResponse<IStockItem>>>(
+        StockApiPathEnum.QueryStockList,
+        {
+            data: transPaginationRequest(data),
+        },
+    );
 }
 
-export function exportStockList(data: IStockFormData) {
+export function exportStockList(data: IStockRequest) {
     return request
         .post(StockApiPathEnum.ExportStockList, {
             data: data,

@@ -1,4 +1,4 @@
-import React, { RefObject, useState, useCallback, useEffect } from 'react';
+import React, { RefObject, useState, useCallback, useEffect, useRef } from 'react';
 import { IResponse, IPaginationResponse, RequestPagination } from '@/interface/IGlobal';
 import { PaginationConfig } from 'antd/es/pagination';
 import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
@@ -11,15 +11,20 @@ function useList<T, Q extends RequestPagination = any, S = any>(
     searchRef?: RefObject<SearchFormRef>,
     extraQuery?: { [key: string]: any },
     defaultState?: { pageNumber?: number; pageSize?: number },
+    autoQuery = true,
 ) {
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(autoQuery);
     const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? defaultPageNumber);
     const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? defaultPageSize);
     const [dataSource, setDataSource] = useState<T[]>([]);
     const [total, setTotal] = useState(0);
-    const [query, setQuery] = useState({});
     const [extraData, setExtraData] = useState<S | undefined>(undefined);
     const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>(EmptyArray);
+
+    const query = useRef<object>({});
+    const setQuery = useCallback((nextQuery: object) => {
+        query.current = nextQuery;
+    }, []);
 
     const getListData = useCallback(
         ({
@@ -27,26 +32,31 @@ function useList<T, Q extends RequestPagination = any, S = any>(
             page_count = pageSize,
             ...extra
         }: { page?: number; page_count?: number; [key: string]: any } = {}) => {
-            const formValues = searchRef ? searchRef.current!.getFieldsValue() : undefined;
-            setLoading(true);
-            const query = {
-                pageNumber: page,
-                pageSize: page_count,
-                ...extra,
-                ...formValues,
-            };
-            setQuery(query);
-            setSelectedRowKeys(EmptyArray);
-            return queryList(query as Q)
-                .then(({ data: { total = 0, list = [], ...extraData } = EmptyObject }) => {
-                    setDataSource(list);
-                    setTotal(total);
-                    setPageNumber(page);
-                    setPageSize(page_count);
-                    setExtraData(extraData);
+            return Promise.resolve()
+                .then(() => {
+                    return searchRef ? searchRef.current!.validateFields() : undefined;
                 })
-                .finally(() => {
-                    setLoading(false);
+                .then(formValues => {
+                    setLoading(true);
+                    const query = {
+                        pageNumber: page,
+                        pageSize: page_count,
+                        ...extra,
+                        ...formValues,
+                    };
+                    setQuery(query);
+                    setSelectedRowKeys(EmptyArray);
+                    return queryList(query as Q)
+                        .then(({ data: { total = 0, list = [], ...extraData } = EmptyObject }) => {
+                            setDataSource(list);
+                            setTotal(total);
+                            setPageNumber(page);
+                            setPageSize(page_count);
+                            setExtraData(extraData);
+                        })
+                        .finally(() => {
+                            setLoading(false);
+                        });
                 });
         },
         [pageNumber, pageSize],
@@ -89,7 +99,10 @@ function useList<T, Q extends RequestPagination = any, S = any>(
     );
 
     useEffect(() => {
-        onSearch();
+        if (autoQuery) {
+            // 有些场景可能不需要立即调用接口，添加参数控制，默认为true
+            onSearch();
+        }
     }, []);
 
     return {

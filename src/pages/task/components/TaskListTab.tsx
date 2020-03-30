@@ -34,6 +34,7 @@ import {
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 import { TableProps } from 'antd/es/table';
+import formStyles from '@/styles/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -108,7 +109,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     );
 
     const getCopiedLinkQuery = useCallback(() => {
-        return Object.assign({}, query, {
+        return {
+            ...query.current,
             tabKey:
                 task_status === void 0
                     ? '1'
@@ -121,8 +123,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     : task_status === TaskStatusEnum.Failed
                     ? 5
                     : '6',
-        });
-    }, [query]);
+        };
+    }, []);
 
     const viewTaskDetail = useCallback((task_id: number) => {
         history.push(`/task/list/${task_id}`);
@@ -580,6 +582,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     const table = useMemo(() => {
         return (
             <ProTable<ITaskListItem>
+                className={formStyles.formItem}
                 headerTitle="查询表格"
                 rowKey="task_id"
                 rowSelection={rowSelection}

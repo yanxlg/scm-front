@@ -26,7 +26,7 @@ const LoadingButton: React.FC<ILoadingButtonProps> = props => {
             <Button
                 {..._props}
                 icon={icon}
-                className={classNames(className, btnStyles.btnWithoutAnim)}
+                className={classNames(className, icon ? btnStyles.btnWithoutAnim : '')}
                 loading={currentLoading}
                 onClick={onClick}
             />

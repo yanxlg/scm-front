@@ -235,8 +235,8 @@ const ListTab: React.FC = () => {
     }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
-        return query;
-    }, [query]);
+        return query.current;
+    }, []);
 
     return useMemo(() => {
         return (

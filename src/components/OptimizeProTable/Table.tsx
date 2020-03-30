@@ -20,6 +20,7 @@ import { goButton, showTotal } from '@/components/ProTable';
 import TableAlert, { TableAlertRef } from '@/components/OptimizeProTable/component/alert';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
 import { TableProps } from 'antd/lib/table';
+import { FitTable } from '@/components/FitTable';
 
 export interface ColumnsState {
     show?: boolean;
@@ -357,9 +358,9 @@ const ProTable = <T extends {}, U extends object>(
     }, [dataSource]); //  数据发生改变需要清除selectedRowKeys
 
     const fullScreenFn = () => {
-        if (options) {
-            if (options.fullScreen && typeof options.fullScreen === 'function') {
-                options.fullScreen();
+        if (proOptions) {
+            if (proOptions.fullScreen && typeof proOptions.fullScreen === 'function') {
+                proOptions.fullScreen();
                 return;
             }
         }
@@ -400,7 +401,7 @@ const ProTable = <T extends {}, U extends object>(
                   }
                 : {}),
         };
-    }, [proOptions]);
+    }, [proOptions, size]);
 
     const toolbar = useMemo(() => {
         if (optimize) {
@@ -472,22 +473,11 @@ const ProTable = <T extends {}, U extends object>(
         }
     }, []);
 
-    /************************scroll 处理***********************/
-    const scroll = useScrollXY(
-        rootRef,
-        bottom,
-        minHeight,
-        autoFitY,
-        columns,
-        rowSelection,
-        propsScroll,
-    );
-
     const table = useMemo(() => {
         return (
-            <Table<T>
+            <FitTable<T>
                 {...rest}
-                scroll={scroll}
+                scroll={propsScroll}
                 size={size}
                 rowSelection={propsRowSelection === false ? undefined : rowSelection}
                 className={tableClassName}
@@ -506,7 +496,7 @@ const ProTable = <T extends {}, U extends object>(
                 }}
             />
         );
-    }, [columns, pagination, size, propsRowSelection, scroll, loading]);
+    }, [columns, pagination, size, propsRowSelection, loading]);
 
     if (proColumns.length < 1) {
         return <Empty />;
@@ -518,7 +508,7 @@ const ProTable = <T extends {}, U extends object>(
         >
             <div className={className} id="ant-design-pro-table" style={style} ref={rootRef}>
                 <Card
-                    bordered={false}
+                    bordered={true}
                     style={{
                         height: '100%',
                     }}
