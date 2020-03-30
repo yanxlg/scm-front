@@ -232,7 +232,12 @@ export interface ISubTaskProgressResponse {
 
 export interface ISubTaskIdItem {
     plan_id: string;
-    status: number;
+    status: number; // 3执行失败
+}
+
+export interface ISubTaskIdData {
+    list: ISubTaskIdItem[];
+    fail_count: string;
 }
 
 export interface ISubTaskIdQuery extends RequestPagination {

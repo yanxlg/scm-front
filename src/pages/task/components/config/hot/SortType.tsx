@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { FormInstance } from 'antd/es/form';
 import { Form, Select } from 'antd';
 import { HotTaskRange } from '@/enums/StatusEnum';
-import { mapClassNames } from '@/utils/utils';
 import formStyles from '@/styles/_form.less';
 import { TaskChannelEnum } from '@/config/dictionaries/Task';
 import { IPDDSortItem } from '@/interface/ITask';
+import classNames from 'classnames';
 
 declare interface SortTypeProps {
     form: FormInstance;
@@ -46,10 +46,10 @@ const SortType: React.FC<SortTypeProps> = ({ form, listSort, merchantSort, sortL
                                         validateTrigger={'onBlur'}
                                         name="sort_type"
                                         label="排序类型"
-                                        className={mapClassNames([
+                                        className={classNames(
                                             formStyles.formItem,
                                             formStyles.formInline,
-                                        ])}
+                                        )}
                                         rules={[
                                             {
                                                 required: true,

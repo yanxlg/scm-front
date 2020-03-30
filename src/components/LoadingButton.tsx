@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from 'antd';
 import { ButtonProps } from 'antd/lib/button/button';
 import btnStyles from '@/styles/_btn.less';
-import { mapClassNames } from '@/utils/utils';
+import classNames from 'classnames';
 
 declare interface ILoadingButtonProps extends ButtonProps {
     onClick: (event: React.MouseEvent<HTMLButtonElement>) => Promise<any>;
@@ -26,7 +26,7 @@ const LoadingButton: React.FC<ILoadingButtonProps> = props => {
             <Button
                 {..._props}
                 icon={icon}
-                className={mapClassNames([className, btnStyles.btnWithoutAnim])}
+                className={classNames(className, btnStyles.btnWithoutAnim)}
                 loading={currentLoading}
                 onClick={onClick}
             />

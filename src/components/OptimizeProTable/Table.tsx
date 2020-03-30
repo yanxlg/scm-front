@@ -44,11 +44,6 @@ export interface ProColumnType<T = unknown> extends Omit<ColumnType<T>, 'render'
      * 是否拷贝
      */
     copyable?: boolean;
-
-    /**
-     * 在 table 中隐藏
-     */
-    hideInTable?: boolean;
 }
 
 export interface ProColumnGroupType<RecordType> extends ProColumnType<RecordType> {
@@ -196,39 +191,33 @@ const genColumnList = <T, U = {}>(
     map: {
         [key: string]: ColumnsState;
     },
-): (ColumnsType<T>[number] & { index?: number })[] =>
-    (columns
-        .map((item, columnsIndex) => {
-            const { key, dataIndex } = item;
-            const columnKey = genColumnKey(key, dataIndex);
-            const config = columnKey
-                ? map[columnKey] || { fixed: item.fixed }
-                : { fixed: item.fixed };
-            const tempColumns = {
-                ...item,
-                ellipsis: false,
-                fixed: config.fixed,
-                width: item.width || (item.fixed ? 200 : undefined),
-                // @ts-ignore
-                children: item.children ? genColumnList(item.children, map) : undefined,
-                render: (text: any, row: T, index: number) =>
-                    columRender<T>({ item, text, row, index }),
-            };
-            if (!tempColumns.children || !tempColumns.children.length) {
-                delete tempColumns.children;
-            }
-            if (!tempColumns.dataIndex) {
-                delete tempColumns.dataIndex;
-            }
-            if (!tempColumns.filters || !tempColumns.filters.length) {
-                delete tempColumns.filters;
-            }
-            return tempColumns;
-        })
-        .filter(item => !item.hideInTable) as unknown) as ColumnsType<T>[number] &
-        {
-            index?: number;
-        }[];
+): (ColumnsType<T>[number] & { index?: number })[] => {
+    return columns.map((item, columnsIndex) => {
+        const { key, dataIndex } = item;
+        const columnKey = genColumnKey(key, dataIndex);
+        const config = columnKey ? map[columnKey] || { fixed: item.fixed } : { fixed: item.fixed };
+        const tempColumns = {
+            ...item,
+            ellipsis: false,
+            fixed: config.fixed,
+            width: item.width || (item.fixed ? 200 : undefined),
+            // @ts-ignore
+            children: item.children ? genColumnList(item.children, map) : undefined,
+            render: (text: any, row: T, index: number) =>
+                columRender<T>({ item, text, row, index }),
+        };
+        if (!tempColumns.children || !tempColumns.children.length) {
+            delete tempColumns.children;
+        }
+        if (!tempColumns.dataIndex) {
+            delete tempColumns.dataIndex;
+        }
+        if (!tempColumns.filters || !tempColumns.filters.length) {
+            delete tempColumns.filters;
+        }
+        return tempColumns;
+    });
+};
 
 /**
  * 🏆 Use Ant Design Table like a Pro!
@@ -326,6 +315,18 @@ const ProTable = <T extends {}, U extends object>(
                 return keys.indexOf(aKey) - keys.indexOf(bKey);
             });
         }
+        tableColumn.sort((a: ProColumns<T>, b: ProColumns<T>) => {
+            // if (a.fixed === 'left' && b.fixed === 'left') return -1;
+            if (a.fixed === 'left' && b.fixed !== 'left') return -1;
+            if (a.fixed !== 'left' && b.fixed === 'left') return 1;
+            if (a.fixed === 'right' && b.fixed !== 'right') {
+                return 1;
+            }
+            if (a.fixed !== 'right' && b.fixed === 'right') {
+                return -1;
+            }
+            return -1;
+        });
         if (tableColumn && tableColumn.length > 0) {
             setTableColumns(tableColumn);
         }
@@ -339,24 +340,8 @@ const ProTable = <T extends {}, U extends object>(
         alertRef.current?.updateSelectedState(selectedRowKeys);
     }, []);
 
-    const filterColumns = useMemo(() => {
-        return tableColumns.filter(item => {
-            // 删掉不应该显示的
-            const { key, dataIndex } = item;
-            const columnKey = genColumnKey(key, dataIndex);
-            if (!columnKey) {
-                return true;
-            }
-            const config = columnsMap[columnKey];
-            if (config && config.show === false) {
-                return false;
-            }
-            return true;
-        }) as any;
-    }, [tableColumns]);
-
     const { columns, rowSelection, clearCheckedRows } = useRowSelection(
-        filterColumns,
+        tableColumns,
         rowKey,
         dataSource,
         propsRowSelection,

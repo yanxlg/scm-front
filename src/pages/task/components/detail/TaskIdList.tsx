@@ -1,8 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Row, Spin, Col, Checkbox, List, Button } from 'antd';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Row, Col, Checkbox, List, Button } from 'antd';
 import { AutoSizer, List as VList } from 'react-virtualized';
 import { ISubTaskIdItem } from '@/interface/ITask';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import taskStyles from '@/styles/_task.less';
+import styles from '@/styles/_index.less';
+import btnStyles from '@/styles/_btn.less';
+import classNames from 'classnames';
 
 declare interface TaskIdListProps {
     dataSet: ISubTaskIdItem[];
@@ -34,6 +38,7 @@ const TaskIdList: React.FC<TaskIdListProps> = ({
                                 value={id}
                                 checked={checkedIds && checkedIds.indexOf(id) > -1}
                                 onChange={checkedStateChange}
+                                className={item.status === 3 ? taskStyles.errorText : undefined}
                             >
                                 {id}
                             </Checkbox>
@@ -82,9 +87,11 @@ const TaskIdList: React.FC<TaskIdListProps> = ({
 
     const footer = useMemo(() => {
         return (
-            <div>
+            <div className={classNames(styles.textRight, btnStyles.btnGroup)}>
                 <Button onClick={cancel}>取消</Button>
-                <Button onClick={submit}>确定</Button>
+                <Button onClick={submit} type="primary">
+                    确定
+                </Button>
             </div>
         );
     }, [checkedIds]);

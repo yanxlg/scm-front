@@ -292,6 +292,7 @@ const ChannelList: React.FC = props => {
                         {
                             product_id: row.product_id,
                             commodity_id: row.commodity_id,
+                            merchant_id: row.merchant_id,
                             sale_domain: 'vova',
                         },
                     ],
@@ -317,6 +318,7 @@ const ChannelList: React.FC = props => {
                         {
                             product_id: row.product_id,
                             commodity_id: row.commodity_id,
+                            merchant_id: row.merchant_id,
                             sale_domain: 'vova',
                         },
                     ],
@@ -337,10 +339,11 @@ const ChannelList: React.FC = props => {
             .filter(item => {
                 return selectedRowKeys.indexOf(item.product_id) > -1;
             })
-            .map(({ product_id, commodity_id }) => {
+            .map(({ product_id, commodity_id, merchant_id }) => {
                 return {
                     product_id: product_id,
                     commodity_id: commodity_id,
+                    merchant_id: merchant_id,
                     sale_domain: 'vova',
                 };
             });
@@ -366,10 +369,11 @@ const ChannelList: React.FC = props => {
             .filter(item => {
                 return selectedRowKeys.indexOf(item.product_id) > -1;
             })
-            .map(({ product_id, commodity_id }) => {
+            .map(({ product_id, commodity_id, merchant_id }) => {
                 return {
                     product_id: product_id,
                     commodity_id: commodity_id,
+                    merchant_id: merchant_id,
                     sale_domain: 'vova',
                 };
             });

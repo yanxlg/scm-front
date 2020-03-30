@@ -34,7 +34,6 @@ function useRowSelection<T, U>(
         [onChange],
     );
 
-    console.log(itemsRefList);
     const onSelectAll = useCallback(
         (e: CheckboxChangeEvent) => {
             const checked = e.target.checked;

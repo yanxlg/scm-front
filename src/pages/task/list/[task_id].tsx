@@ -24,28 +24,22 @@ const Task_id: React.FC<RouteComponentProps<{ task_id: string }>> = ({ match }) 
         return {};
     }, []);
 
-    const tab = useCallback((collect_onsale_type?:1|2)=>{
-        if(taskType === TaskTypeEnum.Gather || taskType === TaskTypeEnum.Grounding || taskType === TaskTypeEnum.GatherGrounding){
-            return <TaskProgress task_id={taskId} task_type={taskType as TaskTypeCode} collect_onsale_type={collect_onsale_type}/>
-        }
-        return null;
-    },[taskType]);
-
     return useMemo(() => {
         return (
             <div className={styles.transparent}>
                 <TaskInfo task_id={taskId} setTaskType={setTaskType}/>
                 <Card className={formStyles.formItem} title="任务进度" loading={taskType===void 0}>
                     {
-                        taskType === TaskTypeEnum.Grounding||taskType === TaskTypeEnum.Gather?tab():
+                        taskType === TaskTypeEnum.Grounding||taskType === TaskTypeEnum.Gather?<TaskProgress task_id={taskId} task_type={taskType as TaskTypeCode}/>:
                             <Tabs
                                 defaultActiveKey="1"
                                 type="card"
                                 children={[
-                                    <TabPane tab="采集任务" key="1">{tab(1)}
+                                    <TabPane tab="采集任务" key="1">
+                                        <TaskProgress task_id={taskId} task_type={taskType as TaskTypeCode} collect_onsale_type={1}/>
                                     </TabPane>,
                                     <TabPane tab="上架任务" key="2">
-                                        {tab(2)}
+                                        <TaskProgress task_id={taskId} task_type={taskType as TaskTypeCode} collect_onsale_type={2}/>
                                     </TabPane>,
                                 ]}
                             />

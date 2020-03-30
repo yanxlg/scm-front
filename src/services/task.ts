@@ -19,6 +19,7 @@ import {
     ISubTaskProgressResponse,
     ISubTaskIdItem,
     ISubTaskIdQuery,
+    ISubTaskIdData,
 } from '@/interface/ITask';
 import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
@@ -217,7 +218,7 @@ export async function querySubTaskProgress(query: ISubTaskProgressQuery) {
 }
 
 export async function querySubTaskIdList(params: ISubTaskIdQuery) {
-    return request.get<IResponse<ISubTaskIdItem[]>>(TaskApiPath.QuerySubTaskIdList, {
+    return request.get<IResponse<ISubTaskIdData>>(TaskApiPath.QuerySubTaskIdList, {
         params: transPaginationRequest(params),
     });
 }

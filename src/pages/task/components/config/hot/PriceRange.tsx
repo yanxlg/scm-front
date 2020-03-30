@@ -4,7 +4,7 @@ import IntegerInput from '@/components/Input/IntegerInput';
 import { FormInstance } from 'antd/es/form';
 import { isNull } from '@/utils/validate';
 import formStyles from '@/styles/_form.less';
-import { mapClassNames } from '@/utils/utils';
+import classNames from 'classnames';
 
 declare interface PriceRangeProps {
     form: FormInstance;
@@ -33,17 +33,17 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                 <Form.Item
                     label="价格区间(￥)"
                     required={true}
-                    className={mapClassNames([
+                    className={classNames(
                         formStyles.formInline,
                         'flex-inline',
                         formStyles.formRequiredHide,
-                    ])}
+                    )}
                 >
                     <Form.Item
-                        className={mapClassNames([
+                        className={classNames(
                             formStyles.formInline,
                             'inline-block vertical-middle',
-                        ])}
+                        )}
                         validateTrigger={'onBlur'}
                         name="price_min"
                         rules={[
@@ -56,10 +56,10 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                     </Form.Item>
                     <span className="config-colon vertical-middle">-</span>
                     <Form.Item
-                        className={mapClassNames([
+                        className={classNames(
                             formStyles.formInline,
                             'inline-block vertical-middle',
-                        ])}
+                        )}
                         validateTrigger={'onBlur'}
                         name="price_max"
                         rules={[

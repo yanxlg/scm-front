@@ -8,6 +8,7 @@ import { querySubTaskIdList } from '@/services/task';
 import { ISubTaskIdItem } from '@/interface/ITask';
 import TaskStatic from './TaskStatic';
 import classNames from 'classnames';
+import { isZero } from '@/utils/utils';
 
 declare interface TaskProgressProps {
     task_id: number;
@@ -18,6 +19,7 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
     const containerRef = useRef<HTMLDivElement>(null);
     const [loading, setLoading] = useState(true);
     const [dataSet, setDataSet] = useState<ISubTaskIdItem[]>([]);
+    const [failCount, setFailCount] = useState<string | undefined>();
 
     const [checkedIds, setCheckedIds] = useState<string[]>([]); // 真实ids
 
@@ -29,9 +31,10 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
             pageSize: 10000,
             pageNumber: 1,
         })
-            .then(({ data = [] }) => {
-                setDataSet(data);
-                setCheckedIds(data.map(data => data.plan_id)); // 默认全选
+            .then(({ data: { list = [], fail_count = '0' } }) => {
+                setDataSet(list);
+                setFailCount(fail_count);
+                setCheckedIds(list.map(item => item.plan_id)); // 默认全选
             })
             .finally(() => {
                 setLoading(false);
@@ -65,48 +68,68 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
     }, []);
 
     return useMemo(() => {
+        const placeholder =
+            checkedIds.length === 0 || checkedIds.length === dataSet.length
+                ? '全部子任务'
+                : checkedIds.join(',');
         return (
             <>
                 <div
                     className={classNames(styles.relative, taskStyles.taskDetailContent)}
                     ref={containerRef}
                 >
-                    <Popover
-                        visible={visible}
-                        placement="bottomLeft"
-                        getPopupContainer={getPopupContainer}
-                        title={undefined}
-                        onVisibleChange={onVisibleChange}
-                        destroyTooltipOnHide={true}
-                        content={
-                            <TaskIdList
-                                checkedIds={checkedIds}
-                                dataSet={dataSet}
-                                onSubmit={onSubmit}
-                                onCancel={setPopOverHide}
+                    <div>
+                        <Popover
+                            visible={visible}
+                            placement="bottomLeft"
+                            getPopupContainer={getPopupContainer}
+                            title={undefined}
+                            onVisibleChange={onVisibleChange}
+                            destroyTooltipOnHide={true}
+                            content={
+                                <TaskIdList
+                                    checkedIds={checkedIds}
+                                    dataSet={dataSet}
+                                    onSubmit={onSubmit}
+                                    onCancel={setPopOverHide}
+                                />
+                            }
+                            overlayStyle={{ width: '100%' }}
+                            trigger={'click'}
+                        >
+                            <Select
+                                placeholder={placeholder}
+                                dropdownRender={dropdownRender}
+                                onClick={setPopOverVisible}
+                                loading={loading}
+                                disabled={loading}
+                                dropdownClassName={styles.none}
+                                open={visible}
+                                className={taskStyles.taskIdsSelect}
                             />
-                        }
-                        overlayStyle={{ width: '100%' }}
-                        trigger={'click'}
-                    >
-                        <Select
-                            placeholder="全部子任务"
-                            dropdownRender={dropdownRender}
-                            onClick={setPopOverVisible}
-                            loading={loading}
-                            disabled={loading}
-                            dropdownClassName={styles.none}
+                        </Popover>
+                        {failCount !== void 0 && !isZero(failCount) ? (
+                            <div
+                                className={classNames(
+                                    taskStyles.errorText,
+                                    styles.inlineBlock,
+                                    styles.verticalMiddle,
+                                )}
+                            >
+                                *{failCount}个子任务列表爬取异常
+                            </div>
+                        ) : null}
+                    </div>
+
+                    {checkedIds.length === 0 ? null : (
+                        <TaskStatic
+                            checkedIds={checkedIds}
+                            task_id={task_id}
+                            task_type={task_type}
+                            collect_onsale_type={collect_onsale_type}
                         />
-                    </Popover>
+                    )}
                 </div>
-                {checkedIds.length === 0 ? null : (
-                    <TaskStatic
-                        checkedIds={checkedIds}
-                        task_id={task_id}
-                        task_type={task_type}
-                        collect_onsale_type={collect_onsale_type}
-                    />
-                )}
             </>
         );
     }, [loading, visible, checkedIds.join('')]);

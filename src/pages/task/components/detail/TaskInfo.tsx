@@ -235,9 +235,12 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ task_id, setTaskType }) => {
                 title={loading ? '加载中...' : task_type !== void 0 ? title : '异常'}
                 className={taskStyle.taskDetailCard}
                 extra={
-                    <Button className={btnStyles.btnLink} type="link" onClick={copyTask}>
-                        复制创建新任务
-                    </Button>
+                    task_type === TaskTypeEnum.GatherGrounding ||
+                    task_type === TaskTypeEnum.Gather ? (
+                        <Button className={btnStyles.btnLink} type="link" onClick={copyTask}>
+                            复制创建新任务
+                        </Button>
+                    ) : null
                 }
             >
                 {cardContent}

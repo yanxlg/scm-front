@@ -66,6 +66,7 @@ export type IChannelShelveStateBody =
                   task_body_list: Array<{
                       product_id: string;
                       commodity_id: string;
+                      merchant_id: string;
                       sale_domain: string;
                   }>;
               };
@@ -78,6 +79,7 @@ export type IChannelShelveStateBody =
                   task_body_list: Array<{
                       product_id: string;
                       commodity_id: string;
+                      merchant_id: string;
                       sale_domain: string;
                   }>;
               };

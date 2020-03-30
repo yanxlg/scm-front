@@ -27,10 +27,10 @@ import PriceRange from '@/pages/task/components/config/hot/PriceRange';
 import SalesRange from '@/pages/task/components/config/hot/SalesRange';
 import { TaskChannelList } from '@/config/dictionaries/Task';
 import moment from 'moment';
-import { mapClassNames } from '@/utils/utils';
 import SortType from '@/pages/task/components/config/hot/SortType';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import LoadingButton from '@/components/LoadingButton';
+import classNames from 'classnames';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -318,10 +318,10 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     }}
                 >
                     <Form.Item
-                        className={mapClassNames([
+                        className={classNames(
                             edit ? '' : formStyles.formItem,
                             formStyles.formInline,
-                        ])}
+                        )}
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -335,7 +335,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Input className="picker-default" />
                     </Form.Item>
                     <Form.Item
-                        className={mapClassNames([formStyles.formItem, formStyles.formInline])}
+                        className={classNames(formStyles.formItem, formStyles.formInline)}
                         validateTrigger={'onBlur'}
                         name="channel"
                         label="任务渠道"
@@ -367,11 +367,11 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             validateTrigger={'onBlur'}
                             name="grab_page_count"
                             label="爬取页数"
-                            className={mapClassNames([
+                            className={classNames(
                                 formStyles.formItem,
                                 formStyles.formHorizon,
                                 formStyles.formInline,
-                            ])}
+                            )}
                             rules={[
                                 {
                                     required: true,
@@ -387,11 +387,11 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Form.Item
                             validateTrigger={'onBlur'}
                             name="grab_count_max"
-                            className={mapClassNames([
+                            className={classNames(
                                 formStyles.formItem,
                                 formStyles.formHorizon,
                                 formStyles.formInline,
-                            ])}
+                            )}
                             label={
                                 <span>
                                     爬取数量
