@@ -46,7 +46,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({ visible, onCancel
             if (dataSource.hasOwnProperty(merchant_platform)) {
                 const _list = dataSource[merchant_platform];
                 platformArr.push(
-                    <div id={merchant_platform}>
+                    <div key={merchant_platform}>
                         <Divider orientation="left">{merchant_platform}</Divider>
                         <div>
                             {_list.map(({ merchant_id, merchant_name }) => {
@@ -105,7 +105,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({ visible, onCancel
                 </Spin>
             </Modal>
         );
-    }, [loading, confirmLoading]);
+    }, [loading, confirmLoading, visible]);
 };
 
 export default MerchantListModal;

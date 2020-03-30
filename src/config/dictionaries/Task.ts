@@ -1,8 +1,8 @@
 import { transStatusList } from '@/utils/transform';
 
 export const TaskChannelMap = {
-    1: '拼多多',
-    2: '1688',
+    '1': '拼多多',
+    '2': '1688',
 };
 
 export const TaskChannelEnum = {

@@ -53,7 +53,7 @@ const RichInput: React.FC<RichInputProps> = ({ richType, value, onChange, ...pro
     const showValue = value !== void 0 ? value : innerValue;
 
     return useMemo(() => {
-        return <Input value={showValue} {...props} onChange={onInnerChange} />;
+        return <Input value={showValue} allowClear={true} {...props} onChange={onInnerChange} />;
     }, [props, showValue, onInnerChange]);
 };
 

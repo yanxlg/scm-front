@@ -25,7 +25,7 @@ import TaskRange from '@/pages/task/components/config/hot/TaskRange';
 import TaskCycle from '@/pages/task/components/config/hot/TaskCycle';
 import PriceRange from '@/pages/task/components/config/hot/PriceRange';
 import SalesRange from '@/pages/task/components/config/hot/SalesRange';
-import { TaskChannelList } from '@/config/dictionaries/Task';
+import { TaskChannelList, TaskChannelCode, TaskChannelEnum } from '@/config/dictionaries/Task';
 import moment from 'moment';
 import SortType from '@/pages/task/components/config/hot/SortType';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
@@ -174,6 +174,26 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     filterType: HotTaskFilterType.ByKeywords,
                     sort_type: merchantSort[0]?.value ?? '',
                 });
+            }
+        },
+        [listSort, merchantSort],
+    );
+
+    const taskChannelChange = useCallback(
+        (value: TaskChannelCode) => {
+            if (value === TaskChannelEnum.PDD) {
+                const taskRange = form.getFieldValue('range');
+                if (taskRange === HotTaskRange.fullStack) {
+                    // 全站
+                    form.setFieldsValue({
+                        sort_type: listSort[0]?.value ?? '',
+                    });
+                } else {
+                    form.setFieldsValue({
+                        filterType: HotTaskFilterType.ByKeywords,
+                        sort_type: merchantSort[0]?.value ?? '',
+                    });
+                }
             }
         },
         [listSort, merchantSort],
@@ -345,7 +365,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             },
                         ]}
                     >
-                        <Select className="picker-default">
+                        <Select className="picker-default" onChange={taskChannelChange}>
                             {TaskChannelList.map(({ name, id }) => (
                                 <Select.Option value={id} key={id}>
                                     {name}
@@ -442,13 +462,9 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         )}
                         {edit ? (
                             isUpperShelf === false ? null : (
-                                <LoadingButton
-                                    onClick={onGather}
-                                    type="primary"
-                                    className="btn-default"
-                                >
+                                <Button onClick={onGatherOn} type="primary" className="btn-default">
                                     创建新采集上架任务
-                                </LoadingButton>
+                                </Button>
                             )
                         ) : (
                             <Button type="primary" className="btn-default" onClick={onGatherOn}>
