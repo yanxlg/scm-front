@@ -7,12 +7,13 @@ declare interface IExcelDialogProps {
     visible: boolean;
     allCount: number;
     // saleStatusList: ISaleStatausItem[];
-    getExcelData(count: number): void;
+    getExcelData(count: number): Promise<any>;
     toggleExcelDialog(status: boolean): void;
 }
 
 declare interface IExcelDialogState {
     val: number;
+    loading: boolean;
 }
 
 class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogState> {
@@ -20,6 +21,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
         super(props);
         this.state = {
             val: 0,
+            loading: false,
         };
     }
 
@@ -29,7 +31,14 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
 
     private handleOk = () => {
         const { val } = this.state;
-        this.props.getExcelData(val);
+        this.setState({
+            loading: true,
+        });
+        this.props.getExcelData(val).finally(() => {
+            this.setState({
+                loading: false,
+            });
+        });
     };
 
     private onChange = (e: RadioChangeEvent) => {
@@ -41,7 +50,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
 
     render() {
         const { visible, allCount } = this.props;
-        const { val } = this.state;
+        const { val, loading } = this.state;
 
         if (allCount < 1) {
             return null;
@@ -55,7 +64,8 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
             <Modal
                 title="导出EXCEL"
                 visible={visible}
-                width={660}
+                width={730}
+                confirmLoading={loading}
                 onCancel={this.handleCancel}
                 onOk={this.handleOk}
             >
@@ -75,6 +85,7 @@ class ExcelDialog extends React.PureComponent<IExcelDialogProps, IExcelDialogSta
                                     className="goods-local-excel-radio"
                                     key={index}
                                     value={index}
+                                    style={{ width: 210 }}
                                 >
                                     {desc}
                                 </Radio>

@@ -4,8 +4,7 @@
         position: relative;
         // display: flex;
         padding-left: 112px;
-        // overflow: hidden;
-        // height: 100px;
+        min-height: 100px;
         a {
             position: absolute;
             top: 0;
@@ -48,7 +47,7 @@
     .overflow-hidden {
         overflow: hidden;
     }
-    img {
+    .main-img {
         position: absolute;
         left: 0;
         top: 0;
@@ -58,11 +57,12 @@
     .desc {
         position: relative;
         display: inline-block;
+        margin: 10px 0;
+        padding-right: 100px;
         max-width: 100%;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
-        padding-right: 100px;
     }
     .center {
         margin: 14px 0;
@@ -72,5 +72,23 @@
     }
     .ant-pagination {
         margin-top: 10px;
+    }
+    .sku-img {
+        width: 100%;
+    }
+    .filter-section {
+        margin-top: 20px;
+        .input-wrap {
+            position: relative;
+            padding-left: 52px !important;
+        }
+        .label {
+            position: absolute;
+            left: 0;
+            top: 5px;
+        }
+        .btn {
+            width: 100%;
+        }
     }
 }

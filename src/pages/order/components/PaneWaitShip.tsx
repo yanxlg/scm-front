@@ -1,24 +1,80 @@
 import React, { RefObject } from 'react';
-import { Button } from 'antd';
-import { FormInstance } from 'antd/es/form';
-
+import { Button, Pagination, message, notification } from 'antd';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-
 import TableWaitShip from './TableWaitShip';
+import LoadingButton from '@/components/LoadingButton';
 
-import { getWaitShipList, IFilterParams } from '@/services/order-manage';
+import { getCurrentPage } from '@/utils/common';
+import {
+    getWaitShipList,
+    IWaitShipFilterParams,
+    delPurchaseOrders,
+    delChannelOrders,
+    postExportWaitShip,
+} from '@/services/order-manage';
+import {
+    defaultOptionItem,
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    pageSizeOptions,
+} from '@/enums/OrderEnum';
 
+const fieldList: FormField[] = [
+    {
+        type: 'input',
+        name: 'order_goods_id',
+        label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台订单ID',
+        // numberStrArr
+        // formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'purchase_platform_order_id_list',
+        label: '采购平台订单ID',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台商品ID',
+        formatter: 'strArr',
+    },
+    {
+        type: 'select',
+        name: 'order_goods_status',
+        label: '中台订单状态',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...orderStatusOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_order_status',
+        label: '采购订单状态',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['platform_order_time_start', 'platform_order_time_end'],
+        label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
+        className: 'order-pending-date-picker',
+        formItemClassName: 'form-item',
+        placeholder: '请选择订单时间',
+        formatter: ['start_date', 'end_date'],
+    },
+];
 export declare interface IWaitShipItem {
-    purchase_time: number;
-    middleground_order_id: string;
-    purchase_p_order_id: string;
-    purchase_order_id: string;
-    purchase_price: number;
-    sale_order_status: number;
-    purchase_order_status: number;
-    purchase_pay_status: number;
-    order_create_time: number;
-    comment: string;
+    platformOrderTime: string;
+    purchasePlatformOrderId: string;
+    purchaseAmount: string;
+    orderGoodsStatus: string;
+    purchaseOrderStatus: string;
+    purchaseOrderShippingStatus: string;
+    purchasePlanId: string;
+    orderGoodsId: string;
+    orderCreateTime: string;
 }
 
 declare interface IState {
@@ -26,106 +82,30 @@ declare interface IState {
     pageCount: number;
     total: number;
     loading: boolean;
-    showStatus: boolean;
     orderList: IWaitShipItem[];
+    selectedRowKeys: string[];
 }
 
-const defaultFieldList: FormField[] = [
-    {
-        type: 'dateRanger',
-        name: ['purchase_start_time', 'purchase_end_time'],
-        label: '采购时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
-    {
-        type: 'input',
-        name: 'middleground_order_id',
-        label: '中台订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单ID',
-    },
-    {
-        type: 'select',
-        name: 'channel',
-        label: '销售渠道',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-];
+declare interface IProps {
+    getAllTabCount(): void;
+}
 
-const allFieldList: FormField[] = [
-    ...defaultFieldList,
-    {
-        type: 'dateRanger',
-        name: ['order_start_time', 'order_end_time'],
-        label: '订单时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-    },
-    {
-        type: 'input',
-        name: 'purchase_p_order_id',
-        label: '采购父订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购父订单ID',
-    },
-    {
-        type: 'input',
-        name: 'purchase_order_id',
-        label: '采购订单ID',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入采购订单ID',
-    },
-    {
-        type: 'select',
-        name: 'channel_order_status',
-        label: '渠道订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-    {
-        type: 'select',
-        name: 'purchase_order_status',
-        label: '采购订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [
-            {
-                name: '全部',
-                value: 100,
-            },
-        ],
-    },
-];
-
-class PanePaid extends React.PureComponent<{}, IState> {
+class PaneWaitShip extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
-
-    constructor(props: {}) {
+    private initialValues = {
+        order_goods_status: 100,
+        purchase_order_status: 100,
+    };
+    private currentSearchParams: IWaitShipFilterParams | null = null;
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
             pageCount: 50,
             total: 0,
             loading: false,
-            showStatus: false,
             orderList: [],
+            selectedRowKeys: [],
         };
     }
 
@@ -134,16 +114,15 @@ class PanePaid extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterParams) => {
+    onSearch = (baseParams?: IWaitShipFilterParams) => {
         const { page, pageCount } = this.state;
-        let params: IFilterParams = {
+        let params: IWaitShipFilterParams = {
             page,
             page_count: pageCount,
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
+        if (this.formRef.current) {
+            params = Object.assign(params, this.formRef.current.getFieldsValue());
+        }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
@@ -153,13 +132,14 @@ class PanePaid extends React.PureComponent<{}, IState> {
         });
         getWaitShipList(params)
             .then(res => {
+                this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
-                const { total, list } = res.data;
+                const { all_count: total, list } = res.data;
                 this.setState({
                     total,
-                    // page: params.page,
-                    // pageCount: params.page_count,
-                    orderList: list,
+                    page: params.page as number,
+                    pageCount: params.page_count as number,
+                    orderList: this.handleOrderList(list),
                 });
             })
             .finally(() => {
@@ -169,68 +149,215 @@ class PanePaid extends React.PureComponent<{}, IState> {
             });
     };
 
-    // 获取查询数据
-    getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
-    };
-
-    changeShowStatus = () => {
-        const { showStatus } = this.state;
-        this.setState({
-            showStatus: !showStatus,
+    // 处理接口返回数据
+    handleOrderList = (list: any[]): IWaitShipItem[] => {
+        return list.map(current => {
+            const {
+                platformOrderTime,
+                purchasePlatformOrderId,
+                purchaseAmount,
+                purchaseOrderStatus,
+                purchaseOrderShippingStatus,
+                purchasePlanId,
+                orderGoodsId,
+                orderGoods,
+            } = current;
+            const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
+            return {
+                platformOrderTime,
+                purchasePlatformOrderId,
+                purchaseAmount,
+                orderGoodsStatus,
+                purchaseOrderStatus,
+                purchaseOrderShippingStatus,
+                purchasePlanId,
+                orderGoodsId,
+                orderCreateTime,
+            } as IWaitShipItem;
         });
     };
 
-    render() {
-        const { showStatus, loading, orderList } = this.state;
+    // 获取查询数据
+    getFieldsValue = () => {
+        // console.log('111', );
+    };
 
-        const initialValues = {
-            channel: 100,
-            channel_order_status: 100,
-            purchase_order_status: 100,
-        };
+    private onChangePage = (page: number) => {
+        this.onSearch({
+            page,
+        });
+    };
 
-        const fieldList = showStatus ? allFieldList : defaultFieldList;
+    private pageCountChange = (current: number, size: number) => {
+        const { page, pageCount } = this.state;
+        this.onSearch({
+            page: getCurrentPage(size, (page - 1) * pageCount + 1),
+            page_count: size,
+        });
+    };
 
-        return (
-            <>
+    private changeSelectedRowKeys = (keys: string[]) => {
+        // console.log('keys', keys);
+        this.setState({
+            selectedRowKeys: keys,
+        });
+    };
+
+    private handleClickSearch = () => {
+        const { order_goods_id } = this.formRef.current?.getFieldsValue() as any;
+        if (order_goods_id && /[^0-9]/.test(order_goods_id)) {
+            return message.error('中台订单ID只能输入数字字符');
+        }
+        this.onSearch({
+            page: 1,
+        });
+    };
+
+    // 批量操作成功
+    private batchOperateSuccess = (name: string = '', list: string[]) => {
+        this.props.getAllTabCount();
+        notification.success({
+            message: `${name}成功`,
+            description: (
                 <div>
-                    <SearchForm
-                        labelClassName="order-label"
-                        fieldList={fieldList}
-                        ref={this.formRef}
-                        initialValues={initialValues}
-                    />
-                    <div className="order-operation">
-                        <Button
-                            type="primary"
-                            className="order-btn"
-                            onClick={() => this.getFieldsValue()}
-                        >
-                            查询
-                        </Button>
-                        <Button type="primary" className="order-btn">
-                            取消采购单
-                        </Button>
-                        <Button type="primary" className="order-btn">
-                            取消渠道订单
-                        </Button>
-                        <Button type="primary" className="order-btn">
-                            导出数据
-                        </Button>
-                        <Button
-                            type="default"
-                            className="order-btn"
-                            onClick={this.changeShowStatus}
-                        >
-                            {showStatus ? '收起' : '展示'}搜索条件
-                        </Button>
-                    </div>
-                    <TableWaitShip loading={loading} orderList={orderList} />
+                    {list.map((item: string) => (
+                        <div key={item}>{item}</div>
+                    ))}
                 </div>
-            </>
+            ),
+        });
+    };
+
+    // 批量操作失败
+    private batchOperateFail = (
+        name: string = '',
+        list: { order_goods_id: string; result: string }[],
+    ) => {
+        notification.error({
+            message: `${name}失败`,
+            description: (
+                <div>
+                    {list.map((item: any) => (
+                        <div>
+                            {item.order_goods_id}: {item.result.slice(0, 50)}
+                        </div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 取消采购订单
+    private cancelPurchaseOrder = () => {
+        const { selectedRowKeys } = this.state;
+        if (selectedRowKeys.length) {
+            return delPurchaseOrders({
+                order_goods_ids: selectedRowKeys,
+            }).then(res => {
+                this.onSearch();
+                const { success, failed } = res.data;
+                if (success!.length) {
+                    this.batchOperateSuccess('取消采购单', success);
+                }
+                if (failed!.length) {
+                    this.batchOperateFail('取消采购单', failed);
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单！');
+            return Promise.resolve();
+        }
+    };
+
+    private delChannelOrders = () => {
+        const { selectedRowKeys } = this.state;
+        if (selectedRowKeys.length) {
+            return delChannelOrders({
+                order_goods_ids: selectedRowKeys,
+            }).then(res => {
+                this.onSearch();
+                const { success, failed } = res.data;
+
+                if (success!.length) {
+                    this.batchOperateSuccess('取消渠道订单', success);
+                }
+                if (failed!.length) {
+                    this.batchOperateFail('取消渠道订单', failed);
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单');
+            return Promise.resolve();
+        }
+    };
+
+    private postExportWaitShip = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        return postExportWaitShip(params);
+    };
+
+    render() {
+        const { loading, orderList, total, page, pageCount, selectedRowKeys } = this.state;
+        return (
+            <div>
+                <SearchForm
+                    labelClassName="order-label"
+                    fieldList={fieldList}
+                    ref={this.formRef}
+                    initialValues={this.initialValues}
+                />
+                <div className="order-operation">
+                    <Button type="primary" className="order-btn" onClick={this.handleClickSearch}>
+                        查询
+                    </Button>
+                    <LoadingButton
+                        type="primary"
+                        className="order-btn"
+                        onClick={this.cancelPurchaseOrder}
+                    >
+                        取消采购单
+                    </LoadingButton>
+                    <LoadingButton
+                        type="primary"
+                        className="order-btn"
+                        onClick={this.delChannelOrders}
+                    >
+                        取消渠道订单
+                    </LoadingButton>
+                    <LoadingButton
+                        type="primary"
+                        className="order-btn"
+                        onClick={this.postExportWaitShip}
+                    >
+                        导出数据
+                    </LoadingButton>
+                </div>
+                <TableWaitShip
+                    loading={loading}
+                    orderList={orderList}
+                    selectedRowKeys={selectedRowKeys}
+                    changeSelectedRowKeys={this.changeSelectedRowKeys}
+                />
+                <Pagination
+                    className="order-pagination"
+                    total={total}
+                    current={page}
+                    pageSize={pageCount}
+                    showSizeChanger={true}
+                    showQuickJumper={true}
+                    pageSizeOptions={pageSizeOptions}
+                    onChange={this.onChangePage}
+                    onShowSizeChange={this.pageCountChange}
+                    showTotal={total => `共${total}条`}
+                />
+            </div>
         );
     }
 }
 
-export default PanePaid;
+export default PaneWaitShip;

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormInstance, Rule } from 'antd/es/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
-import { transNullValue, transNumber } from '@/utils/transform';
+import { transNullValue, transNumber, transJoinStr } from '@/utils/transform';
 
 export declare interface IOptionItem {
     name: string;
@@ -11,7 +11,7 @@ export declare interface IOptionItem {
     [key: string]: any; // 子节点key
 }
 
-export type SelectFormatter = 'number';
+export type SelectFormatter = 'number' | 'joinStr';
 
 type OptionsPromise = () => Promise<IOptionItem[]>;
 
@@ -35,6 +35,8 @@ export type SelectProps = FormItemLabelProps &
         name: FormItemName;
         formatter?: SelectFormatter;
         rules?: Rule[];
+        mode?: 'multiple' | 'tags';
+        maxTagCount?: number;
     };
 
 const FormSelect = (props: SelectProps) => {
@@ -50,6 +52,9 @@ const FormSelect = (props: SelectProps) => {
         form,
         optionList,
         rules,
+        mode,
+        maxTagCount,
+        placeholder,
     } = props;
     const [options, setOptions] = useState<IOptionItem[] | undefined>(undefined);
 
@@ -127,7 +132,14 @@ const FormSelect = (props: SelectProps) => {
                     label={<span className={labelClassName}>{label}</span>}
                     rules={rules}
                 >
-                    <Select className={className} loading={loading} {...eventProps}>
+                    <Select
+                        className={className}
+                        loading={loading}
+                        mode={mode}
+                        maxTagCount={maxTagCount}
+                        {...eventProps}
+                        placeholder={placeholder}
+                    >
                         {syncDefaultOption ? (
                             <Select.Option value={syncDefaultOption.value}>
                                 {syncDefaultOption.name}
@@ -192,7 +204,15 @@ const FormSelect = (props: SelectProps) => {
 FormSelect.typeList = typeList;
 
 FormSelect.formatter = (formatter?: SelectFormatter) => {
-    return formatter ? (formatter === 'number' ? transNumber : transNullValue) : transNullValue;
+    // return formatter ? (formatter === 'number' ? transNumber : transNullValue) : transNullValue;
+    switch (formatter) {
+        case 'number':
+            return transNumber;
+        case 'joinStr':
+            return transJoinStr;
+        default:
+            return transNullValue;
+    }
 };
 
 export default FormSelect;

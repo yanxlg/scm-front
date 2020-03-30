@@ -13,5 +13,6 @@ module.exports = {
         'selector-pseudo-class-no-unknown': null,
         'declaration-bang-space-before': null,
         'color-hex-length': null,
+        'declaration-block-trailing-semicolon': null,
     },
 };

@@ -1,13 +1,18 @@
 import React, { RefObject } from 'react';
-import { Button, Pagination } from 'antd';
-import { FormInstance } from 'antd/es/form';
+import { Button, Pagination, notification, message } from 'antd';
+import LoadingButton from '@/components/LoadingButton';
 
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 
 import TablePendingOrder from './TablePendingOrder';
 
-import { getPendingOrderList, IFilterParams } from '@/services/order-manage';
-import { transStartDate, transEndDate, utcToLocal } from '@/utils/date';
+import {
+    getPendingOrderList,
+    IPendingFilterParams,
+    postOrdersPlace,
+    delChannelOrders,
+    postExportPendingOrder,
+} from '@/services/order-manage';
 import {
     defaultOptionItem,
     channelOptionList,
@@ -15,58 +20,58 @@ import {
     pageSizeOptions,
 } from '@/enums/OrderEnum';
 
-const defaultFieldList: FormField[] = [
-    {
-        type: 'dateRanger',
-        name: ['order_start_time', 'order_end_time'],
-        label: '订单时间',
-        className: 'order-date-picker',
-        // formItemClassName: 'order-form-item',
-        placeholder: '请选择订单时间',
-    },
+const fieldList: FormField[] = [
     {
         type: 'input',
-        name: 'middleground_order_id',
+        name: 'order_goods_id',
         label: '中台订单ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
-    },
-    {
-        type: 'select',
-        name: 'channel',
-        label: '销售渠道',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...channelOptionList],
-    },
-];
-
-const allFieldList: FormField[] = [
-    ...defaultFieldList,
-    {
-        type: 'select',
-        name: 'order_goods_status',
-        label: '中台订单状态',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...orderStatusOptionList],
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
         name: 'product_id',
         label: '中台商品ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台商品ID',
+        formatter: 'strArr',
     },
     {
         type: 'input',
         name: 'sku_id',
-        label: '中台sku id',
+        label: '中台SKU ID',
         className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入中台sku id',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台SKU ID',
+        formatter: 'strArr',
+    },
+    {
+        type: 'select',
+        name: 'channel_source',
+        label: '销售渠道',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...channelOptionList],
+    },
+    {
+        type: 'select',
+        name: 'order_goods_status',
+        label: '中台订单状态',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...orderStatusOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['order_start_time', 'order_end_time'],
+        label: '订单时间',
+        className: 'order-pending-date-picker',
+        formItemClassName: 'form-item',
+        placeholder: '请选择订单时间',
+        formatter: ['start_date', 'end_date'],
     },
 ];
 
@@ -83,32 +88,34 @@ export declare interface IOrderItem {
     [key: string]: any;
 }
 
+declare interface IProps {
+    getAllTabCount(): void;
+}
+
 declare interface IState {
     page: number;
     pageCount: number;
     total: number;
     loading: boolean;
-    showStatus: boolean;
     // selectedRowKeys: string[];
     orderList: IOrderItem[];
 }
 
-class PanePendingOrder extends React.PureComponent<{}, IState> {
+class PanePendingOrder extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
-
+    private currentSearchParams: IPendingFilterParams | null = null;
     private initialValues = {
-        channel: 100,
+        channel_source: 100,
         order_goods_status: 100,
     };
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             page: 1,
-            pageCount: 30,
+            pageCount: 50,
             total: 0,
             loading: false,
-            showStatus: false,
             orderList: [],
             // selectedRowKeys: []
         };
@@ -119,16 +126,15 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
         this.onSearch();
     }
 
-    onSearch = (baseParams?: IFilterParams) => {
+    onSearch = (baseParams?: IPendingFilterParams) => {
         const { page, pageCount } = this.state;
-        let params: IFilterParams = {
+        let params: IPendingFilterParams = {
             page,
             page_count: pageCount,
         };
-        // if (this.orderFilterRef.current) {
-        //     // console.log('onSearch', this.orderFilterRef.current.getValues());
-        //     params = Object.assign(params, this.orderFilterRef.current.getValues());
-        // }
+        if (this.formRef.current) {
+            params = Object.assign(params, this.formRef.current?.getFieldsValue());
+        }
         if (baseParams) {
             params = Object.assign(params, baseParams);
         }
@@ -140,18 +146,13 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
             .then(res => {
                 // console.log('getProductOrderList', res);
                 // const { total, list } = res.data;
+                this.currentSearchParams = params;
                 const { all_count, list } = res.data;
-                const childList: any[] = [];
-                list.forEach((item: any) => {
-                    item.orderGoods.forEach((goodsItem: any) => {
-                        childList.push(goodsItem);
-                    });
-                });
                 this.setState({
                     total: all_count,
                     page: params.page as number,
                     pageCount: params.page_count as number,
-                    orderList: this.getOrderData(childList),
+                    orderList: this.getOrderList(list),
                 });
             })
             .finally(() => {
@@ -162,101 +163,54 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
     };
 
     // 获取子订单=>采购计划数据
-    private getOrderData(list: any[]): IOrderItem[] {
-        const orderList: IOrderItem[] = [];
+    private getOrderList(list: any[]): IOrderItem[] {
+        // console.log(1111, list);
+        const childOrderList: IOrderItem[] = [];
         list.forEach((goodsItem: any) => {
-            const {
-                orderGoodsPurchasePlan,
-                channelOrderGoodsSn,
-                createTime: goodsCreateTime,
-                lastUpdateTime: goodsLastUpdateTime,
-                goodsAmount,
-                goodsNumber,
-                orderGoodsExtension,
-                orderGoodsId,
-                orderGoodsShippingStatus,
-                orderGoodsStatus,
-                orderId,
-                productId,
-                productPlatform,
-                productShop,
-                skuId,
-            } = goodsItem;
-            // console.log(111, goodsItem);
-            orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
-                const {
-                    createTime: purchaseCreateTime,
-                    lastUpdateTime: purchaseLastUpdateTime,
-                    // orderGoodsId,
-                    purchaseAmount,
-                    purchaseNumber,
-                    purchaseOrderPayStatus,
-                    purchaseOrderShippingStatus,
-                    purchaseOrderStatus,
-                    purchasePlanId,
-                    purchasePlatform,
-                } = purchaseItem;
-                const orderItem: any = {
-                    channelOrderGoodsSn,
-                    goodsCreateTime,
-                    goodsLastUpdateTime,
-                    goodsAmount,
-                    goodsNumber,
-                    orderGoodsExtension,
-                    orderGoodsId,
-                    orderGoodsShippingStatus,
-                    orderGoodsStatus,
-                    orderId,
-                    productId,
-                    productPlatform,
-                    productShop,
-                    skuId,
-                    purchaseAmount,
-                    purchaseNumber,
-                    purchaseOrderPayStatus,
-                    purchaseOrderShippingStatus,
-                    purchaseOrderStatus,
-                    purchasePlanId,
-                    purchasePlatform,
-                    purchaseCreateTime,
-                    purchaseLastUpdateTime,
-                };
-                if (index === 0) {
-                    orderItem._rowspan = orderGoodsPurchasePlan.length;
-                    orderItem._checked = false;
-                }
-                orderList.push(orderItem);
-            });
+            const { orderGoods, orderInfo } = goodsItem;
+            const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
+            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
+            // console.log(111, orderGoodsPurchasePlan, orderGoods);
+            if (orderGoodsPurchasePlan) {
+                // 生成采购计划
+                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                    const {
+                        createTime: purchaseCreateTime,
+                        lastUpdateTime: purchaseLastUpdateTime,
+                        ...purchaseRest
+                    } = purchaseItem;
+                    const childOrderItem: any = {
+                        ...orderRest,
+                        ...purchaseRest,
+                        purchaseCreateTime,
+                        purchaseLastUpdateTime,
+                        currency,
+                        confirmTime,
+                        channelOrderSn,
+                        channelSource,
+                    };
+                    if (index === 0) {
+                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._checked = false;
+                    }
+                    childOrderList.push(childOrderItem);
+                });
+            } else {
+                // 没有生成采购计划
+                childOrderList.push({
+                    currency,
+                    confirmTime,
+                    channelOrderSn,
+                    channelSource,
+                    ...orderRest,
+                    _rowspan: 1,
+                    _checked: false,
+                });
+            }
         });
         // console.log(1111, childOrderList);
-        return orderList;
+        return childOrderList;
     }
-
-    // 获取查询数据
-    getFieldsValue = () => {
-        // console.log('111', this.formRef.current!.getFieldsValue());
-        const fields = this.formRef.current!.getFieldsValue();
-        const {
-            order_start_time,
-            order_end_time,
-            // middleground_order_id,
-            // product_id,
-            // sku_id
-        } = fields;
-        return Object.assign(fields, {
-            order_start_time: order_start_time
-                ? transStartDate(order_start_time)
-                : order_start_time,
-            order_end_time: order_end_time ? transEndDate(order_end_time) : order_end_time,
-        });
-    };
-
-    changeShowStatus = () => {
-        const { showStatus } = this.state;
-        this.setState({
-            showStatus: !showStatus,
-        });
-    };
 
     // 全选
     onCheckAllChange = (status: boolean) => {
@@ -279,7 +233,8 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
         const { orderList } = this.state;
         this.setState({
             orderList: orderList.map(item => {
-                if (row._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                    // console.log(1111111);
                     return {
                         ...item,
                         _checked: !row._checked,
@@ -290,16 +245,107 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
         });
     };
 
-    render() {
-        const { showStatus, loading, orderList, total, page, pageCount } = this.state;
+    private getOrderGoodsIdList = (): string[] => {
+        const { orderList } = this.state;
+        return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
+    };
 
-        const fieldList = showStatus ? allFieldList : defaultFieldList;
+    // 批量操作成功
+    private batchOperateSuccess = (name: string = '', list: string[]) => {
+        this.props.getAllTabCount();
+        notification.success({
+            message: `${name}成功`,
+            description: (
+                <div>
+                    {list.map((item: string) => (
+                        <div key={item}>{item}</div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 批量操作失败
+    private batchOperateFail = (
+        name: string = '',
+        list: { order_goods_id: string; result: string }[],
+    ) => {
+        notification.error({
+            message: `${name}失败`,
+            description: (
+                <div>
+                    {list.map((item: any) => (
+                        <div>
+                            {item.order_goods_id}: {item.result.slice(0, 50)}
+                        </div>
+                    ))}
+                </div>
+            ),
+        });
+    };
+
+    // 一键拍单
+    private postOrdersPlace = () => {
+        const orderGoodsIdList = this.getOrderGoodsIdList();
+        if (orderGoodsIdList.length) {
+            // console.log('orderGoodsIdList', orderGoodsIdList);
+            return postOrdersPlace({
+                order_goods_ids: orderGoodsIdList,
+            }).then(res => {
+                this.onSearch();
+                const { success, failed } = res.data;
+                if (success?.length) {
+                    this.batchOperateSuccess('拍单', success);
+                }
+                if (failed?.length) {
+                    this.batchOperateFail('拍单', failed);
+                }
+            });
+        } else {
+            message.error('请选择需要拍单的订单！');
+            return Promise.resolve();
+        }
+    };
+
+    // 取消渠道订单
+    private delChannelOrders = () => {
+        const list = this.getOrderGoodsIdList();
+        if (list.length) {
+            return delChannelOrders({
+                order_goods_ids: list,
+            }).then(res => {
+                const { success, failed } = res.data;
+                this.onSearch();
+                if (success!.length) {
+                    this.batchOperateSuccess('取消渠道订单', success);
+                } else if (failed!.length) {
+                    this.batchOperateFail('取消渠道订单', failed);
+                }
+            });
+        } else {
+            message.error('请选择需要取消的订单');
+            return Promise.resolve();
+        }
+    };
+
+    postExportPendingOrder = () => {
+        const params = this.currentSearchParams
+            ? this.currentSearchParams
+            : {
+                  page: 1,
+                  page_count: 50,
+              };
+        return postExportPendingOrder(params);
+    };
+
+    render() {
+        const { loading, orderList, total, page, pageCount } = this.state;
 
         return (
             <>
                 <div>
                     <SearchForm
-                        labelClassName="order-label"
+                        labelClassName="order-pending-label"
                         fieldList={fieldList}
                         ref={this.formRef}
                         initialValues={this.initialValues}
@@ -308,26 +354,32 @@ class PanePendingOrder extends React.PureComponent<{}, IState> {
                         <Button
                             type="primary"
                             className="order-btn"
-                            onClick={() => this.getFieldsValue()}
+                            loading={loading}
+                            onClick={() => this.onSearch()}
                         >
                             查询
                         </Button>
-                        <Button type="primary" className="order-btn">
-                            一键拍单
-                        </Button>
-                        <Button type="primary" className="order-btn">
-                            取消销售单
-                        </Button>
-                        <Button type="primary" className="order-btn">
-                            导出数据
-                        </Button>
-                        <Button
-                            type="default"
+                        <LoadingButton
+                            type="primary"
                             className="order-btn"
-                            onClick={this.changeShowStatus}
+                            onClick={() => this.postOrdersPlace()}
                         >
-                            {showStatus ? '收起' : '展示'}搜索条件
-                        </Button>
+                            一键拍单
+                        </LoadingButton>
+                        <LoadingButton
+                            type="primary"
+                            className="order-btn"
+                            onClick={() => this.delChannelOrders()}
+                        >
+                            取消渠道订单
+                        </LoadingButton>
+                        <LoadingButton
+                            type="primary"
+                            className="order-btn"
+                            onClick={() => this.postExportPendingOrder()}
+                        >
+                            导出数据
+                        </LoadingButton>
                     </div>
                     <TablePendingOrder
                         loading={loading}

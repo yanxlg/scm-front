@@ -36,50 +36,6 @@ export declare interface IErrorOrderItem {
     purchaseWaybillNo?: string; // 首程运单号
     _rowspan?: number;
 }
-
-const fieldList: FormField[] = [
-    {
-        type: 'dateRanger',
-        name: ['order_time_start', 'order_time_end'],
-        label: '订单时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'dateRanger',
-        name: ['confirm_time_start', 'confirm_time_end'],
-        label: '订单确认时间',
-        className: 'order-date-picker',
-        formItemClassName: 'order-form-item',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'select',
-        name: 'channel_source',
-        label: '销售渠道',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...channelOptionList],
-    },
-    {
-        type: 'input',
-        name: 'order_goods_id',
-        label: '订单号',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        placeholder: '请输入订单号',
-    },
-    {
-        type: 'select',
-        name: 'abnormal_type',
-        label: '异常类型',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: errorTypeOptionList,
-    },
-];
-
 declare interface IState {
     loading: boolean;
     exportLoading: boolean;
@@ -88,11 +44,104 @@ declare interface IState {
     total: number;
     abnormalDetailType: number;
     orderList: IErrorOrderItem[];
+    abnormalDetailList: number[];
 }
 
 class PaneErr extends React.PureComponent<{}, IState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
     private currentSearchParams: IErrFilterParams | null = null;
+    private fieldList: FormField[] = [
+        {
+            type: 'input',
+            name: 'order_goods_id',
+            label: '订单号',
+            className: 'order-input',
+            formItemClassName: 'form-item',
+            placeholder: '请输入订单号',
+            formatter: 'number',
+        },
+        {
+            type: 'select',
+            name: 'channel_source',
+            label: '销售渠道',
+            className: 'order-input',
+            formItemClassName: 'form-item',
+            optionList: [defaultOptionItem, ...channelOptionList],
+        },
+        {
+            type: 'select',
+            name: 'abnormal_type',
+            label: '异常类型',
+            className: 'order-input',
+            formItemClassName: 'form-item',
+            optionList: errorTypeOptionList,
+            onChange: (name, form) => {
+                const value = form.getFieldValue(name);
+                switch (value) {
+                    case 1:
+                        this.setState(
+                            {
+                                abnormalDetailType: 11,
+                                abnormalDetailList: [11, 5, 6],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
+                        break;
+                    case 1:
+                        this.setState(
+                            {
+                                abnormalDetailType: 8,
+                                abnormalDetailList: [8, 9, 10],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
+                        break;
+                    case 3:
+                        this.setState(
+                            {
+                                abnormalDetailType: 3,
+                                abnormalDetailList: [3, 4],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
+                        break;
+                    case 4:
+                        this.setState(
+                            {
+                                abnormalDetailType: 7,
+                                abnormalDetailList: [7],
+                            },
+                            () => {
+                                this.onSearch();
+                            },
+                        );
+                        break;
+                }
+            },
+        },
+        {
+            type: 'dateRanger',
+            name: ['order_time_start', 'order_time_end'],
+            label: '订单时间',
+            className: 'order-error-date-picker',
+            formItemClassName: 'form-item',
+            formatter: ['start_date', 'end_date'],
+        },
+        {
+            type: 'dateRanger',
+            name: ['confirm_time_start', 'confirm_time_end'],
+            label: '订单确认时间',
+            className: 'order-error-date-picker',
+            formItemClassName: 'form-item',
+            formatter: ['start_date', 'end_date'],
+        },
+    ];
     private initialValues = {
         channel_source: 100,
         abnormal_type: 1,
@@ -105,13 +154,13 @@ class PaneErr extends React.PureComponent<{}, IState> {
             total: 0,
             loading: false,
             exportLoading: false,
-            abnormalDetailType: 2,
+            abnormalDetailType: 11,
+            abnormalDetailList: [11, 5, 6],
             orderList: [],
         };
     }
 
     componentDidMount() {
-        // console.log('PaneAll');
         this.onSearch();
     }
 
@@ -290,14 +339,15 @@ class PaneErr extends React.PureComponent<{}, IState> {
             page,
             pageCount,
             abnormalDetailType,
+            abnormalDetailList,
         } = this.state;
 
         return (
             <>
                 <div>
                     <SearchForm
-                        labelClassName="order-label"
-                        fieldList={fieldList}
+                        labelClassName="order-error-label"
+                        fieldList={this.fieldList}
                         ref={this.formRef}
                         initialValues={this.initialValues}
                     />
@@ -326,15 +376,17 @@ class PaneErr extends React.PureComponent<{}, IState> {
                                 value={abnormalDetailType}
                                 onChange={this.onCheckErrDetail}
                             >
-                                {errorDetailOptionList.map(item => (
-                                    <Radio
-                                        className="checkbox-item"
-                                        key={item.value}
-                                        value={item.value}
-                                    >
-                                        {item.name}
-                                    </Radio>
-                                ))}
+                                {errorDetailOptionList
+                                    .filter(item => abnormalDetailList.indexOf(item.value) > -1)
+                                    .map(item => (
+                                        <Radio
+                                            className="checkbox-item"
+                                            key={item.value}
+                                            value={item.value}
+                                        >
+                                            {item.name}
+                                        </Radio>
+                                    ))}
                             </Radio.Group>
                         </div>
                     </div>
