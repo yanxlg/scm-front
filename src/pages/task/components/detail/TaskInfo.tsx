@@ -142,18 +142,18 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ task_id, setTaskType }) => {
                     </Descriptions.Item>
                     {category_level_one ? (
                         <>
-                            <Descriptions.Item label="一级类目">
+                            <Descriptions.Item label="一级类目" span={3}>
                                 {cate_name_one || '--'}
                             </Descriptions.Item>
-                            <Descriptions.Item label="二级类目">
+                            <Descriptions.Item label="二级类目" span={3}>
                                 {cate_name_two || '--'}
                             </Descriptions.Item>
-                            <Descriptions.Item label="三级类目">
+                            <Descriptions.Item label="三级类目" span={3}>
                                 {cate_name_three || '--'}
                             </Descriptions.Item>
                         </>
                     ) : (
-                        <Descriptions.Item label="关键词" span={3}>
+                        <Descriptions.Item label="关键词" span={1}>
                             {detail.keywords || '--'}
                         </Descriptions.Item>
                     )}
