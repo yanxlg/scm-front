@@ -8,7 +8,7 @@ import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button, Pagination } from 'antd';
 import { BindAll } from 'lodash-decorators';
 import { FitTable } from '@/components/FitTable';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TableProps } from 'antd/es/table';
 import { TaskStatusEnum } from '@/enums/StatusEnum';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
@@ -191,6 +191,8 @@ const formFields: FormField[] = [
         }),
     },
 ];
+
+const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<SearchFormRef>(null);
@@ -608,6 +610,15 @@ const ChannelList: React.FC = props => {
         );
     }, [selectedRowKeys, loading]);
 
+    const options = useMemo(() => {
+        return {
+            density: true,
+            fullScreen: true,
+            reload: onReload,
+            setting: true,
+        };
+    }, []);
+
     const body = useMemo(() => {
         return (
             <Container>
@@ -623,14 +634,14 @@ const ChannelList: React.FC = props => {
                     search={false}
                     headerTitle="查询表格"
                     rowKey="product_id"
-                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    scroll={scroll}
                     bottom={60}
                     minHeight={500}
                     rowSelection={rowSelection}
                     pagination={{
                         total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
+                        current: pageNumber.current,
+                        pageSize: pageSize.current,
                         showSizeChanger: true,
                     }}
                     tableAlertRender={false}
@@ -638,12 +649,7 @@ const ChannelList: React.FC = props => {
                     dataSource={dataSource}
                     loading={loading}
                     onChange={onChange}
-                    options={{
-                        density: true,
-                        fullScreen: true,
-                        reload: onReload,
-                        setting: true,
-                    }}
+                    options={options}
                 />
                 <ExcelDialog
                     visible={exportDialog}

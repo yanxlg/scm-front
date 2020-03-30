@@ -251,8 +251,8 @@ const ListTab: React.FC = () => {
                     minHeight={500}
                     pagination={{
                         total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
+                        current: pageNumber.current,
+                        pageSize: pageSize.current,
                         showSizeChanger: true,
                     }}
                     toolBarRender={false}

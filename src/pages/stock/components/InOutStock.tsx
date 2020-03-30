@@ -262,8 +262,8 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     </LoadingButton>
                     <Pagination
                         className="float-right form-item"
-                        pageSize={pageSize}
-                        current={pageNumber}
+                        pageSize={pageSize.current}
+                        current={pageNumber.current}
                         total={total}
                         pageSizeOptions={defaultPageSizeOptions}
                         onChange={onPageChange}

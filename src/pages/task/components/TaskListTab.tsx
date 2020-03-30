@@ -564,8 +564,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     const pagination = useMemo(() => {
         return {
             total: total,
-            current: pageNumber,
-            pageSize: pageSize,
+            current: pageNumber.current,
+            pageSize: pageSize.current,
             showSizeChanger: true,
         };
     }, [loading]);

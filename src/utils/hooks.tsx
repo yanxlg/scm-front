@@ -14,8 +14,15 @@ function useList<T, Q extends RequestPagination = any, S = any>(
     autoQuery = true,
 ) {
     const [loading, setLoading] = useState(autoQuery);
-    const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? defaultPageNumber);
-    const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? defaultPageSize);
+
+    const extraQueryRef = useRef<{ [key: string]: any } | undefined>(undefined);
+    extraQueryRef.current = extraQuery;
+
+    const pageNumber = useRef<number>(defaultState?.pageNumber ?? defaultPageNumber);
+    const pageSize = useRef<number>(defaultState?.pageSize ?? defaultPageSize);
+    // optimize pageNumber pageSize 静态管理，不进行状态更新，所有更新都通过loading来控制
+    // const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? defaultPageNumber);
+    // const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? defaultPageSize);
     const [dataSource, setDataSource] = useState<T[]>([]);
     const [total, setTotal] = useState(0);
     const [extraData, setExtraData] = useState<S | undefined>(undefined);
@@ -28,8 +35,8 @@ function useList<T, Q extends RequestPagination = any, S = any>(
 
     const getListData = useCallback(
         ({
-            page = pageNumber,
-            page_count = pageSize,
+            page = pageNumber.current,
+            page_count = pageSize.current,
             ...extra
         }: { page?: number; page_count?: number; [key: string]: any } = {}) => {
             return Promise.resolve()
@@ -48,10 +55,10 @@ function useList<T, Q extends RequestPagination = any, S = any>(
                     setSelectedRowKeys(EmptyArray);
                     return queryList(query as Q)
                         .then(({ data: { total = 0, list = [], ...extraData } = EmptyObject }) => {
+                            pageNumber.current = page;
+                            pageSize.current = page_count;
                             setDataSource(list);
                             setTotal(total);
-                            setPageNumber(page);
-                            setPageSize(page_count);
                             setExtraData(extraData);
                         })
                         .finally(() => {
@@ -59,44 +66,42 @@ function useList<T, Q extends RequestPagination = any, S = any>(
                         });
                 });
         },
-        [pageNumber, pageSize],
+        [],
     );
 
     const onReload = useCallback(
         () =>
             getListData({
-                ...extraQuery,
+                ...extraQueryRef.current,
             }),
-        [pageNumber, pageSize, extraQuery],
+        [],
     );
 
     const onSearch = useCallback(
         () =>
             getListData({
                 page: 1,
-                ...extraQuery,
+                page_count: defaultState?.pageSize ?? defaultPageSize,
+                ...extraQueryRef.current,
             }),
-        [pageNumber, pageSize, extraQuery],
+        [],
     );
 
-    const onChange = useCallback(
-        ({ current, pageSize }: PaginationConfig, filters, sorter) => {
-            const sorterConfig =
-                sorter && sorter.field
-                    ? {
-                          sort_by: sorter.field,
-                          sort_order: sorter.order,
-                      }
-                    : {};
-            getListData({
-                page: current,
-                page_count: pageSize,
-                ...sorterConfig,
-                ...extraQuery,
-            });
-        },
-        [extraQuery],
-    );
+    const onChange = useCallback(({ current, pageSize }: PaginationConfig, filters, sorter) => {
+        const sorterConfig =
+            sorter && sorter.field
+                ? {
+                      sort_by: sorter.field,
+                      sort_order: sorter.order,
+                  }
+                : {};
+        getListData({
+            page: current,
+            page_count: pageSize,
+            ...sorterConfig,
+            ...extraQueryRef.current,
+        });
+    }, []);
 
     useEffect(() => {
         if (autoQuery) {
@@ -114,8 +119,6 @@ function useList<T, Q extends RequestPagination = any, S = any>(
         extraData,
         total,
         setLoading,
-        setPageNumber,
-        setPageSize,
         setDataSource,
         selectedRowKeys,
         setTotal,

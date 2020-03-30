@@ -51,8 +51,8 @@ const ShipFeeModal: React.FC<ShipFeeModalProps> = ({ product_id, merchant_id }) 
                     autoFitY={false}
                     pagination={{
                         total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
+                        current: pageNumber.current,
+                        pageSize: pageSize.current,
                         showSizeChanger: true,
                         showQuickJumper: false,
                         showTotal: undefined,
