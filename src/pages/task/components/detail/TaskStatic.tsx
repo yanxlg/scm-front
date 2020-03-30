@@ -1,4 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, {
+    ForwardRefRenderFunction,
+    useEffect,
+    useMemo,
+    useState,
+    forwardRef,
+    useImperativeHandle,
+    useCallback,
+} from 'react';
 import { Descriptions, Progress, Spin, Statistic, Tooltip } from 'antd';
 import styles from '@/styles/_index.less';
 import formStyle from '@/styles/_form.less';
@@ -11,19 +19,21 @@ import { queryTaskProgressList } from '@/services/task';
 import { ITaskProgressResponse } from '@/interface/ITask';
 import { TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';
 
-declare interface TaskProgressProps {
+declare interface TaskStaticProps {
     checkedIds?: string[];
     task_id: number;
     task_type?: TaskTypeCode;
     collect_onsale_type?: 1 | 2;
 }
 
-const TaskStatic: React.FC<TaskProgressProps> = ({
-    checkedIds,
-    task_id,
-    task_type,
-    collect_onsale_type,
-}) => {
+export declare interface TaskStaticRef {
+    reload: () => Promise<any>;
+}
+
+const TaskStatic: ForwardRefRenderFunction<TaskStaticRef, TaskStaticProps> = (
+    { checkedIds, task_id, task_type, collect_onsale_type },
+    ref,
+) => {
     const [dataSet, setDataSet] = useState<ITaskProgressResponse>({});
     const [loading, setLoading] = useState(false);
     const columns = useMemo<ColumnsType<any>>(() => {
@@ -89,10 +99,9 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
 
     const idKeys = checkedIds === void 0 ? undefined : checkedIds?.join(',');
 
-    // 默认获取全部，
-    useEffect(() => {
+    const queryData = useCallback(() => {
         setLoading(true);
-        queryTaskProgressList({
+        return queryTaskProgressList({
             task_id: task_id,
             plan_id: idKeys,
             collect_onsale_type,
@@ -103,6 +112,22 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
             .finally(() => {
                 setLoading(false);
             });
+    }, [idKeys]);
+
+    useImperativeHandle(
+        ref,
+        () => {
+            return {
+                reload: () => {
+                    return queryData();
+                },
+            };
+        },
+        [idKeys],
+    );
+
+    useEffect(() => {
+        queryData();
     }, [idKeys]);
 
     return useMemo(() => {
@@ -119,7 +144,7 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
             list = [],
         } = dataSet;
 
-        if (task_type === TaskTypeEnum.Gather) {
+        if (task_type === TaskTypeEnum.Gather || collect_onsale_type === 1) {
             return (
                 <Spin spinning={loading}>
                     <Descriptions
@@ -205,7 +230,7 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
                 </Spin>
             );
         }
-        if (task_type === TaskTypeEnum.Grounding) {
+        if (task_type === TaskTypeEnum.Grounding || collect_onsale_type === 2) {
             return (
                 <Spin spinning={loading}>
                     <Descriptions
@@ -303,4 +328,4 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
     }, [loading]);
 };
 
-export default TaskStatic;
+export default forwardRef(TaskStatic);

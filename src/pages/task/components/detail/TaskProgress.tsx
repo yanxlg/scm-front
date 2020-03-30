@@ -1,12 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    forwardRef,
+    ForwardRefRenderFunction,
+    RefObject,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import styles from '@/styles/_index.less';
 import taskStyles from '@/styles/_task.less';
-import { Popover, Select, Skeleton } from 'antd';
+import { Popover, Select } from 'antd';
 import TaskIdList from '@/pages/task/components/detail/TaskIdList';
 import { TaskTypeCode } from '@/enums/StatusEnum';
 import { querySubTaskIdList } from '@/services/task';
 import { ISubTaskIdItem } from '@/interface/ITask';
-import TaskStatic from './TaskStatic';
+import TaskStatic, { TaskStaticRef } from './TaskStatic';
 import classNames from 'classnames';
 import { isZero } from '@/utils/utils';
 
@@ -14,8 +24,15 @@ declare interface TaskProgressProps {
     task_id: number;
     task_type: TaskTypeCode;
     collect_onsale_type?: 1 | 2;
+    staticRef: RefObject<TaskStaticRef>;
 }
-const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect_onsale_type }) => {
+
+const TaskProgress: React.FC<TaskProgressProps> = ({
+    task_id,
+    task_type,
+    collect_onsale_type,
+    staticRef,
+}) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [loading, setLoading] = useState(true);
     const [dataSet, setDataSet] = useState<ISubTaskIdItem[]>([]);
@@ -121,6 +138,7 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
                         ) : null}
                     </div>
                     <TaskStatic
+                        ref={staticRef}
                         checkedIds={checkedAll ? undefined : checkedIds}
                         task_id={task_id}
                         task_type={task_type}
