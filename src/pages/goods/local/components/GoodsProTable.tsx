@@ -10,6 +10,7 @@ import ImgEditDialog from './ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
+import LazyLoad from 'react-lazyload';
 
 import { IRowDataItem, IPageData } from '../index';
 import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
@@ -57,13 +58,13 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                             <Button
                                 type="link"
                                 onClick={() => this.toggleEditGoodsDialog(true, row)}
-                            >编辑商品</Button>
+                            >
+                                编辑商品
+                            </Button>
                         </div>
-                        <div style={{marginTop: -6}}>
+                        <div style={{ marginTop: -6 }}>
                             <Link to={`/goods/local/version?id=${row.commodity_id}`}>
-                                <Button
-                                    type="link"
-                                >查看更多版本</Button>
+                                <Button type="link">查看更多版本</Button>
                             </Link>
                         </div>
                     </>
@@ -134,7 +135,15 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return <AutoEnLargeImg src={value} className="goods-local-img" />;
+                return (
+                    <LazyLoad
+                        height={91}
+                        offset={200}
+                        scrollContainer="#goods-local-table .ant-table-body"
+                    >
+                        <AutoEnLargeImg src={value} className="goods-local-img" />
+                    </LazyLoad>
+                );
             },
         },
         {
@@ -157,20 +166,20 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 return (
                     <div>
                         <div>
-                            {
-                                ['品牌', '大件'].map(item => (
-                                    <Button 
-                                        size="small" 
-                                        key={item}
-                                        style={{marginRight: 4, marginBottom: 4}}
-                                    >{item}</Button>
-                                ))
-                            }
+                            {['品牌', '大件'].map(item => (
+                                <Button
+                                    size="small"
+                                    key={item}
+                                    style={{ marginRight: 4, marginBottom: 4 }}
+                                >
+                                    {item}
+                                </Button>
+                            ))}
                         </div>
-                        <PopConfirmSetAttr text="111"/>
+                        <PopConfirmSetAttr text="111" />
                     </div>
-                )
-            }
+                );
+            },
         },
         {
             key: 'first_catagory',
@@ -279,7 +288,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             width: 140,
             render: (value: IPublishItem[], row: IRowDataItem, index: number) => {
                 const channelInfo: { [key: string]: IPublishItem } = {};
-                value.forEach(item => {
+                value?.forEach(item => {
                     const { publishChannel } = item;
                     if (!channelInfo[publishChannel]) {
                         channelInfo[publishChannel] = item;
@@ -288,24 +297,23 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 const keys = Object.keys(channelInfo);
                 return keys.length > 0 ? (
                     <>
-                        {
-                            keys.map(key => {
-                                const { publishStatus } = channelInfo[key];
-                                const _publishStatus = (publishStatus ? publishStatus : 0) as publishStatusCode;
-                                return (
-                                    <div key={key}>
-                                        {key}
-                                        <div>({publishStatusMap[_publishStatus]})</div>
-                                    </div>
-                                )
-                            })
-                        }
-                        <Button
-                            type="link"
-                            onClick={() => this.showGoodsPublist(value)}
-                        >上架日志</Button>
+                        {keys.map(key => {
+                            const { publishStatus } = channelInfo[key];
+                            const _publishStatus = (publishStatus
+                                ? publishStatus
+                                : 0) as publishStatusCode;
+                            return (
+                                <div key={key}>
+                                    {key}
+                                    <div>({publishStatusMap[_publishStatus]})</div>
+                                </div>
+                            );
+                        })}
+                        <Button type="link" onClick={() => this.showGoodsPublist(value)}>
+                            上架日志
+                        </Button>
                     </>
-                ) : null
+                ) : null;
             },
         },
         {
@@ -536,6 +544,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <ProTable<IRowDataItem>
+                    id="goods-local-table"
                     search={false}
                     headerTitle="本地产品库列表"
                     rowKey="product_id"
