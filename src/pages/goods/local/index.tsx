@@ -25,6 +25,7 @@ import {
     inventoryStatusList,
     productStatusList,
     versionStatusList,
+    publishChannelStatusList
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 
@@ -73,6 +74,15 @@ const formFields: FormField[] = [
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
         // formatter: 'strArr',
+    },
+    {
+        type: 'select',
+        label: '上架渠道',
+        name: 'publish_channel',
+        className: 'local-search-item-select',
+        formItemClassName: 'form-item',
+        formatter: 'number',
+        optionList: [defaultOption, ...publishChannelStatusList],
     },
     {
         type: 'select',
@@ -236,7 +246,14 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     private queryData: any = {};
     // 保存搜索条件
     private searchFilter: IFilterParams | null = null;
-
+    private initialValues = {
+        inventory_status: '',
+        version_status: '',
+        first_catagory: '',
+        second_catagory: '',
+        third_catagory: '',
+        publish_channel: ''
+    }
     constructor(props: LocalPageProps) {
         super(props);
 
@@ -412,9 +429,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     };
 
-    private getCopiedLinkQuery() {
-        return this.queryData;
-    }
+    // private getCopiedLinkQuery() {
+    //     return this.queryData;
+    // }
 
     private handleClickOnsale = () => {
         this.setState({
@@ -488,13 +505,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                 <div className="goods-local">
                     <SearchForm
                         labelClassName="local-search-label"
-                        initialValues={{
-                            inventory_status: '',
-                            version_status: '',
-                            first_catagory: '',
-                            second_catagory: '',
-                            third_catagory: '',
-                        }}
+                        initialValues={this.initialValues}
                         ref={this.formRef}
                         fieldList={formFields}
                     >
@@ -534,6 +545,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             删除
                         </Button>
                         <Button
+                            disabled={allCount === 0}
                             className="local-search-item-btn"
                             onClick={() => this.toggleExcelDialog(true)}
                         >
@@ -557,7 +569,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         getExcelData={this.getExcelData}
                         toggleExcelDialog={this.toggleExcelDialog}
                     />
-                    <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
+                    {/* <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} /> */}
                     <MerchantListModal
                         visible={merchantDialogStatus}
                         onOKey={this.merchantOkey}

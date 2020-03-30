@@ -6,16 +6,20 @@ import {
     postGoodsMerge,
     putGoodsMergeMain,
     delGoodsMergeDelete,
-    getGoodsList,
+    getGoodsMergeList,
 } from '@/services/goods';
 
 const { TextArea } = Input;
 
+// 1: 合并后生成的product 2: 主关联商品 3: 关联商品
+type IProductType = '1' | '2' | '3';
+
 declare interface IGoodsSnItem {
-    commodity_id: string;
-    product_id: string;
-    goods_img: string;
+    commodityId: string;
+    productId: string;
+    image: string;
     title: string;
+    type: IProductType;
 }
 
 declare interface IState {
@@ -23,24 +27,35 @@ declare interface IState {
     loading: boolean;
     productSn: string;
     commodityIds: string;
+    mainCommodityId: string;
     goodsSnList: IGoodsSnItem[];
 }
 
 class MergeDialog extends React.PureComponent<{}, IState> {
     private columns: ColumnProps<IGoodsSnItem>[] = [
         {
-            key: 'commodity_id',
+            key: 'commodityId',
             title: 'Commodity ID',
-            dataIndex: 'commodity_id',
+            dataIndex: 'commodityId',
             align: 'center',
             width: 110,
+            render: (value: string, row: IGoodsSnItem) => {
+                const { type } = row;
+                const desc = type === '2' ? '主关联商品' : type === '3' ? '关联商品' : '';
+                return (
+                    <>
+                        {value}
+                        {desc ? (<div>({desc})</div>) : null}
+                    </>
+                )
+            }
         },
         {
-            key: 'goods_img',
+            key: 'image',
             title: '图片',
-            dataIndex: 'goods_img',
+            dataIndex: 'image',
             align: 'center',
-            width: 110,
+            width: 60,
             render: (value: string) => {
                 return <img style={{ width: '100%' }} src={value} />;
             },
@@ -55,20 +70,25 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         {
             key: 'x',
             title: '操作',
-            // dataIndex: 'commodity_id',
             align: 'center',
             width: 110,
-            render: (value: any, row: IGoodsSnItem) => {
-                return (
+            render: (value, row: IGoodsSnItem) => {
+                const { type, commodityId } = row;
+                return type === '3' ? (
                     <>
-                        <Button ghost={true} size="small" type="primary">
-                            设为主商品
-                        </Button>
-                        <Button ghost={true} size="small" type="primary">
-                            删除关联
-                        </Button>
+                        <div>
+                            <Button type="link" onClick={() => this.setGoodsMain(commodityId)}>
+                                设为主商品
+                            </Button>
+                        </div>
+                        <div style={{marginTop: -10}}>
+                            <Button type="link" onClick={() => this.delGoodsRef(commodityId)}>
+                                删除关联
+                            </Button>
+                        </div>
+                        
                     </>
-                );
+                ) : null;
             },
         },
     ];
@@ -77,35 +97,49 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         super(props);
         this.state = {
             visible: false,
-            loading: true,
+            loading: false,
             productSn: '',
+            mainCommodityId: '',
             commodityIds: '',
             goodsSnList: [],
         };
     }
 
+    showModal = (commodityId: string, productSn: string) => {
+        const _productSn = productSn !== '0' ? productSn : '';
+        this.setState({
+            visible: true,
+            productSn: _productSn,
+            mainCommodityId: commodityId,
+        });
+        _productSn && this.getGoodsList(_productSn)
+    }
+
     getGoodsList = (productSn: string) => {
         this.setState({
-            productSn,
-            visible: true,
             loading: true,
         });
-        getGoodsList({
-            product_sn: productSn,
-        })
+        getGoodsMergeList(productSn)
             .then(res => {
-                // console.log('getGoodsList', res);
-                const { list } = res.data;
+                console.log('getGoodsMergeList', res);
+                const { productGroup, mainProductGroup, subProductGroup } = res.data;
+                // const { list } = res.data;
                 this.setState({
-                    goodsSnList: list.map((item: any) => {
-                        const { commodity_id, product_id, goods_img, title } = item;
-                        return {
-                            commodity_id,
-                            product_id,
-                            goods_img,
-                            title,
-                        };
-                    }),
+                    mainCommodityId: mainProductGroup.commodityId,
+                    goodsSnList: [
+                        {
+                            ...productGroup,
+                            type: '1'
+                        },
+                        {
+                            ...mainProductGroup,
+                            type: '2'
+                        },
+                        ...subProductGroup.map((item: any) => ({
+                            ...item,
+                            type: '3'
+                        }))
+                    ],
                 });
             })
             .finally(() => {
@@ -116,22 +150,89 @@ class MergeDialog extends React.PureComponent<{}, IState> {
     };
 
     private handleCancel = () => {
-        // this.setState({
-        //     commodityIds: ''
-        // })
+        this.setState({
+            visible: false,
+            loading: false,
+            productSn: '',
+            commodityIds: '',
+            goodsSnList: []
+        });
     };
 
     private handleOk = () => {
         // 校验数字字符
-        const { commodityIds } = this.state;
+        const { commodityIds, mainCommodityId } = this.state;
         if (/[^0-9\,]/.test(commodityIds)) {
             return message.error('commodity_id输入了非法字符，只支持检索数字！');
         }
+        this.setState({
+            loading: true
+        });
+        postGoodsMerge({
+            main_commodity_id: mainCommodityId,
+            merge_commodity_ids: commodityIds.split(',')
+        }).then(res => {
+            this.handleCancel();
+        }).finally(() => {
+            this.setState({
+                loading: false
+            })
+        })
     };
 
-    private setGoodsMain = (productId: string) => {};
+    private setGoodsMain = (mainCommodityId: string) => {
+        const { goodsSnList, productSn } = this.state;
+        this.setState({
+            loading: true
+        });
+        putGoodsMergeMain({
+            product_sn: productSn,
+            main_commodity_id: mainCommodityId
+        }).then(() => {
+            this.setState({
+                mainCommodityId: mainCommodityId,
+                goodsSnList: goodsSnList.map(item => {
+                    const { type, commodityId } = item;
+                    if (type === '2') {
+                        return {
+                            ...item,
+                            type: '3'
+                        }
+                    }
+                    if (mainCommodityId === commodityId) {
+                        return {
+                            ...item,
+                            type: '2'
+                        }
+                    }
+                    return item;
+                })
+            })
+        }).finally(() => {
+            this.setState({
+                loading: false
+            });
+        });
+    };
 
-    private delGoodsRef = (productId: string) => {};
+    private delGoodsRef = (commodityId: string) => {
+        const { productSn, goodsSnList } = this.state;
+        this.setState({
+            loading: true
+        });
+        delGoodsMergeDelete({
+            product_sn: productSn,
+            commodity_ids: [commodityId]
+        }).then(() => {
+            this.setState({
+                goodsSnList: goodsSnList.filter(item => item.commodityId !== commodityId)
+            })
+        }).finally(() => {
+            this.setState({
+                loading: false
+            });
+        });
+    };
 
     private handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         // console.log('handleChange', e.target.value);
@@ -142,33 +243,35 @@ class MergeDialog extends React.PureComponent<{}, IState> {
 
     render() {
         const { loading, visible, commodityIds, productSn, goodsSnList } = this.state;
-
+        const title = productSn ? `商品组 Product SN: ${productSn}` : '商品组';
         return (
             <Modal
-                title={`商品组 Product SN: ${productSn}`}
+                title={title}
                 visible={visible}
                 width={860}
+                confirmLoading={loading}
                 onCancel={this.handleCancel}
                 onOk={this.handleOk}
                 okButtonProps={{
-                    disabled: !commodityIds,
+                    disabled: !commodityIds || loading,
                 }}
             >
                 <div className="text-center">
-                    {loading ? (
-                        <Spin />
-                    ) : goodsSnList.length ? (
-                        <Table
-                            bordered={true}
-                            rowKey="product_id"
-                            columns={this.columns}
-                            dataSource={goodsSnList}
-                            scroll={{ y: 300 }}
-                            pagination={false}
-                        />
-                    ) : null}
+                    {
+                        productSn ? (
+                            <Table
+                                bordered
+                                rowKey="commodityId"
+                                loading={loading}
+                                columns={this.columns}
+                                dataSource={goodsSnList}
+                                scroll={{ y: 400 }}
+                                pagination={false}
+                                style={{ marginBottom: 20 }}
+                            />
+                        ) : null
+                    }
                     <TextArea
-                        style={{ marginTop: 20 }}
                         placeholder="输入commodity_id可关联更新商品，以'英文逗号'分割"
                         value={commodityIds}
                         onChange={this.handleChange}

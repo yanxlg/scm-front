@@ -15,4 +15,5 @@ export enum LocalApiPath {
     postGoodsMerge = '/api/v1/goods/merge',
     putGoodsMergeMain = '/api/v1/goods/merge/main',
     delGoodsMergeDelete = '/api/v1/goods/merge/delete',
+    getGoodsMergeList = '/api/v1/goods/groups/:id',
 }

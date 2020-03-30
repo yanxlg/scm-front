@@ -5,16 +5,17 @@ import { PaginationConfig } from 'antd/es/pagination';
 import { ProColumns } from '@ant-design/pro-table';
 import { Link } from 'umi';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
-import ShelvesDialog, { ISaleStatausItem } from './ShelvesDialog';
+import ShelvesDialog from './ShelvesDialog';
 import ImgEditDialog from './ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
 
 import { IRowDataItem, IPageData } from '../index';
-import { IOnsaleItem, ICatagoryItem } from '@/interface/ILocalGoods';
+import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from '@/utils/date';
+import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
 
 const pageSizeOptions = ['50', '100', '500', '1000'];
 
@@ -36,7 +37,7 @@ declare interface IState {
     skuDialogStatus: boolean;
     currentEditGoods: IRowDataItem | null;
     originEditGoods: IRowDataItem | null;
-    saleStatusList: ISaleStatausItem[];
+    publishStatusList: IPublishItem[];
 }
 
 class GoodsProTable extends React.PureComponent<IProps, IState> {
@@ -48,16 +49,21 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             key: '_operation',
             title: '操作',
             align: 'center',
-            width: 150,
+            width: 156,
             render: (value, row: IRowDataItem) => {
                 return (
                     <>
                         <div>
-                            <a onClick={() => this.toggleEditGoodsDialog(true, row)}>编辑商品</a>
+                            <Button
+                                type="link"
+                                onClick={() => this.toggleEditGoodsDialog(true, row)}
+                            >编辑商品</Button>
                         </div>
-                        <div className="spacing-top">
+                        <div style={{marginTop: -6}}>
                             <Link to={`/goods/local/version?id=${row.commodity_id}`}>
-                                <a>查看更多版本</a>
+                                <Button
+                                    type="link"
+                                >查看更多版本</Button>
                             </Link>
                         </div>
                     </>
@@ -87,17 +93,18 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'product_sn',
             align: 'center',
             width: 140,
-            render: (value: string) => {
+            render: (value: string, row: IRowDataItem) => {
+                const _value = value !== '0' ? value : '';
                 return (
                     <>
-                        <div>{value}</div>
+                        <div>{_value}</div>
                         <Button
                             // ghost={true}
                             // size="small"
                             type="link"
-                            onClick={() => this.showMergeDialog(value)}
+                            onClick={() => this.showMergeDialog(row)}
                         >
-                            查看商品组
+                            {_value ? '查看商品组' : '关联商品'}
                         </Button>
                     </>
                 );
@@ -257,26 +264,48 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
+        // {
+        //     key: 'a1',
+        //     title: '采购渠道',
+        //     dataIndex: 'a1',
+        //     align: 'center',
+        //     width: 120,
+        // },
         {
-            key: 'a1',
-            title: '采购渠道',
-            dataIndex: 'a1',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'onsale_info',
+            key: 'publish_status',
             title: '上架渠道',
-            dataIndex: 'onsale_info',
+            dataIndex: 'publish_status',
             align: 'center',
-            width: 100,
-            render: (value: IOnsaleItem[], row: IRowDataItem, index: number) => {
-                const channelList = [...new Set(value.map(item => item.onsale_channel))];
-                return value ? (
-                    <Button type="link" onClick={() => this.searchGoodsSale(row.product_id, value)}>
-                        {channelList.join('、')}
-                    </Button>
-                ) : null;
+            width: 140,
+            render: (value: IPublishItem[], row: IRowDataItem, index: number) => {
+                const channelInfo: { [key: string]: IPublishItem } = {};
+                value.forEach(item => {
+                    const { publishChannel } = item;
+                    if (!channelInfo[publishChannel]) {
+                        channelInfo[publishChannel] = item;
+                    }
+                });
+                const keys = Object.keys(channelInfo);
+                return keys.length > 0 ? (
+                    <>
+                        {
+                            keys.map(key => {
+                                const { publishStatus } = channelInfo[key];
+                                const _publishStatus = (publishStatus ? publishStatus : 0) as publishStatusCode;
+                                return (
+                                    <div key={key}>
+                                        {key}
+                                        <div>({publishStatusMap[_publishStatus]})</div>
+                                    </div>
+                                )
+                            })
+                        }
+                        <Button
+                            type="link"
+                            onClick={() => this.showGoodsPublist(value)}
+                        >上架日志</Button>
+                    </>
+                ) : null
             },
         },
         {
@@ -322,7 +351,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             shelvesDialogStatus: false,
             skuDialogStatus: false,
             originEditGoods: null,
-            saleStatusList: [],
+            publishStatusList: [],
         };
     }
 
@@ -452,8 +481,9 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         });
     };
 
-    private showMergeDialog = (productSn: string) => {
-        this.goodsMergeRef.current?.getGoodsList(productSn);
+    private showMergeDialog = (row: IRowDataItem) => {
+        const { commodity_id, product_sn } = row;
+        this.goodsMergeRef.current?.showModal(commodity_id, product_sn);
     };
 
     // 上架状态记录弹框
@@ -464,15 +494,14 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
     };
 
     // 查询商品上下架记录
-    searchGoodsSale = (product_id: string, saleList: IOnsaleItem[]) => {
+    showGoodsPublist = (publist: IPublishItem[]) => {
         this.toggleShelvesDialog(true);
         this.setState({
-            saleStatusList: saleList.map(
-                (item: IOnsaleItem, index: number): ISaleStatausItem => {
+            publishStatusList: publist.map(
+                (item: IPublishItem, index: number): IPublishItem => {
                     return {
                         ...item,
-                        product_id: product_id,
-                        order: index + 1,
+                        serialNum: index + 1,
                     };
                 },
             ),
@@ -502,7 +531,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             skuDialogStatus,
             originEditGoods,
             currentEditGoods,
-            saleStatusList,
+            publishStatusList,
         } = this.state;
         return (
             <>
@@ -541,7 +570,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 />
                 <ShelvesDialog
                     visible={shelvesDialogStatus}
-                    saleStatusList={saleStatusList}
+                    publishStatusList={publishStatusList}
                     toggleShelvesDialog={this.toggleShelvesDialog}
                 />
                 <ImgEditDialog

@@ -1,55 +1,54 @@
 import React from 'react';
 import { Modal, Table } from 'antd';
-
 import { ColumnProps } from 'antd/es/table';
-
 import { utcToLocal } from '@/utils/date';
-
-export declare interface ISaleStatausItem {
-    order?: number;
-    onsale_channel: string;
-    onsale_time: number;
-    product_id?: string;
-    status_label: string;
-}
+import { IPublishItem } from '@/interface/ILocalGoods';
+import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
 
 declare interface ShelvesDialogProps {
     visible: boolean;
-    saleStatusList: ISaleStatausItem[];
+    publishStatusList: IPublishItem[];
     toggleShelvesDialog(status: boolean): void;
 }
 
 class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
-    private columns: ColumnProps<ISaleStatausItem>[] = [
+    private columns: ColumnProps<IPublishItem>[] = [
         {
-            key: 'order',
+            key: 'serialNum',
             title: '序号',
-            dataIndex: 'order',
+            dataIndex: 'serialNum',
             align: 'center',
         },
         {
-            key: 'onsale_time',
+            key: 'lastUpdateTime',
             title: '时间',
-            dataIndex: 'onsale_time',
+            dataIndex: 'lastUpdateTime',
             align: 'center',
-            render: (val: number) => utcToLocal(val),
+            render: (val: string) => utcToLocal(val),
         },
         {
-            key: 'onsale_channel',
+            key: 'publishChannel',
             title: '销售平台',
-            dataIndex: 'onsale_channel',
+            dataIndex: 'publishChannel',
             align: 'center',
         },
         {
-            key: 'product_id',
+            key: 'publishStore',
+            title: '店铺名称',
+            dataIndex: 'publishStore',
+            align: 'center',
+        },
+        {
+            key: 'publishStatus',
+            title: '上架状态',
+            dataIndex: 'publishStatus',
+            align: 'center',
+            render: (val: publishStatusCode) => publishStatusMap[val ? val : 0]
+        },
+        {
+            key: 'productId',
             title: '中台商品ID',
-            dataIndex: 'product_id',
-            align: 'center',
-        },
-        {
-            key: 'status_label',
-            title: '操作',
-            dataIndex: 'status_label',
+            dataIndex: 'productId',
             align: 'center',
         },
     ];
@@ -59,8 +58,8 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
     };
 
     render() {
-        const { visible, saleStatusList } = this.props;
-        const pagination = saleStatusList.length > 5 ? {} : false;
+        const { visible, publishStatusList } = this.props;
+        const pagination = publishStatusList.length > 5 ? {} : false;
         return (
             <Modal
                 title="上架状态记录"
@@ -71,9 +70,8 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             >
                 <Table
                     bordered={true}
-                    rowKey="order"
-                    pagination={pagination}
-                    dataSource={saleStatusList}
+                    rowKey="serialNum"
+                    dataSource={publishStatusList}
                     columns={this.columns}
                 />
             </Modal>

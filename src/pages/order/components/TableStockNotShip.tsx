@@ -190,9 +190,9 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value, row: IOrderItem) => {
                 // console.log(row);
-                const { goodsAmount, goodsNumber } = row;
+                const { goodsAmount, goodsNumber, freight } = row;
                 return {
-                    children: Number(goodsAmount) * goodsNumber,
+                    children: Number(goodsAmount) * goodsNumber + (Number(freight) || 0),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },

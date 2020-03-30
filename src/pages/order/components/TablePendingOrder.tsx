@@ -96,33 +96,32 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 120,
             render: this.mergeCell,
         },
-        // 缺少
         {
-            key: 'shipping_fee',
+            key: 'freight',
             title: '预估运费',
-            dataIndex: 'shipping_fee',
+            dataIndex: 'freight',
             align: 'center',
             width: 120,
             render: this.mergeCell,
         },
-        // 缺少
-        {
-            key: 'sale_price',
-            title: '销售价',
-            dataIndex: 'sale_price',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        // 缺少
-        {
-            key: 'sale_order_status',
-            title: '销售订单状态',
-            dataIndex: 'sale_order_status',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
+        // // 缺少
+        // {
+        //     key: 'sale_price',
+        //     title: '销售价',
+        //     dataIndex: 'sale_price',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        // },
+        // // 缺少
+        // {
+        //     key: 'sale_order_status',
+        //     title: '销售订单状态',
+        //     dataIndex: 'sale_order_status',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        // },
         {
             key: 'productId',
             title: '中台商品ID',
@@ -182,41 +181,41 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 120,
             // render: this.mergeCell
         },
-        // 缺少
-        {
-            key: 'goods_img',
-            title: '商品图片',
-            dataIndex: 'goods_img',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-            // render: (value: string) => {
-            //     return (
-            //         <img style={{width: '100%'}} src={value}/>
-            //     )
-            // }
-        },
-        // 缺少
-        {
-            key: 'style',
-            title: '商品信息',
-            dataIndex: 'style',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        // 缺少
-        {
-            key: 'second_catagory',
-            title: '中台分类',
-            dataIndex: 'second_catagory',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-            // render: (value: ICatagoryData) => {
-            //     return value.name
-            // }
-        },
+        // // 缺少
+        // {
+        //     key: 'goods_img',
+        //     title: '商品图片',
+        //     dataIndex: 'goods_img',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        //     // render: (value: string) => {
+        //     //     return (
+        //     //         <img style={{width: '100%'}} src={value}/>
+        //     //     )
+        //     // }
+        // },
+        // // 缺少
+        // {
+        //     key: 'style',
+        //     title: '商品信息',
+        //     dataIndex: 'style',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        // },
+        // // 缺少
+        // {
+        //     key: 'second_catagory',
+        //     title: '中台分类',
+        //     dataIndex: 'second_catagory',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        //     // render: (value: ICatagoryData) => {
+        //     //     return value.name
+        //     // }
+        // },
     ];
 
     constructor(props: IProps) {

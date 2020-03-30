@@ -7,10 +7,15 @@ export interface ICatagoryItem {
     children?: ICatagoryItem[];
 }
 
-export interface IOnsaleItem {
-    onsale_channel: string;
-    onsale_time: number;
-    status_label: string;
+// 上架信息
+export interface IPublishItem {
+    createTime: string;
+    lastUpdateTime: string;
+    productId: string;
+    publishChannel: string;
+    publishStatus: number;
+    publishStore: string;
+    serialNum?: number;
 }
 
 export interface ISkuStyleItem {
@@ -60,7 +65,7 @@ export interface IGoodsList {
     goods_status: string;
     hasnew_version: number;
     inventory_status: number;
-    onsale_info: IOnsaleItem[];
+    publish_status: IPublishItem[];
     product_id: string;
     product_sn: string;
     sales_volume: number;
