@@ -12,7 +12,7 @@ declare interface TaskIdListProps {
     dataSet: ISubTaskIdItem[];
     onSubmit: (taskIds: string[]) => void;
     onCancel: () => void;
-    checkedIds: string[];
+    checkedIds: string[] | undefined;
 }
 
 const rowColumns = 4;
@@ -23,7 +23,7 @@ const TaskIdList: React.FC<TaskIdListProps> = ({
     onCancel,
     checkedIds: proIds,
 }) => {
-    const [checkedIds, setCheckedIds] = useState<string[]>(proIds);
+    const [checkedIds, setCheckedIds] = useState<string[]>(proIds || []);
 
     const renderItem = useCallback(
         ({ index, key, style }) => {
@@ -115,23 +115,21 @@ const TaskIdList: React.FC<TaskIdListProps> = ({
                         </Checkbox>
                     </Col>
                 </Row>
-                {size > 0 && (
-                    <List footer={footer}>
-                        <AutoSizer disableHeight={true}>
-                            {({ width }) => (
-                                <VList
-                                    overscanRowCount={8}
-                                    tabIndex={null}
-                                    height={120}
-                                    rowCount={rowCount}
-                                    rowHeight={40}
-                                    rowRenderer={renderItem}
-                                    width={width}
-                                />
-                            )}
-                        </AutoSizer>
-                    </List>
-                )}
+                <List footer={footer}>
+                    <AutoSizer disableHeight={true}>
+                        {({ width }) => (
+                            <VList
+                                overscanRowCount={8}
+                                tabIndex={null}
+                                height={120}
+                                rowCount={rowCount}
+                                rowHeight={40}
+                                rowRenderer={renderItem}
+                                width={width}
+                            />
+                        )}
+                    </AutoSizer>
+                </List>
             </div>
         );
     }, [dataSet, checkedIds]);

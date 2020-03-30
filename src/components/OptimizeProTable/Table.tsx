@@ -325,7 +325,7 @@ const ProTable = <T extends {}, U extends object>(
             if (a.fixed !== 'right' && b.fixed === 'right') {
                 return -1;
             }
-            return -1;
+            return 0;
         });
         if (tableColumn && tableColumn.length > 0) {
             setTableColumns(tableColumn);

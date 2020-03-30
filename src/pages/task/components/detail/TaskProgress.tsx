@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styles from '@/styles/_index.less';
 import taskStyles from '@/styles/_task.less';
-import { Popover, Select } from 'antd';
+import { Popover, Select, Skeleton } from 'antd';
 import TaskIdList from '@/pages/task/components/detail/TaskIdList';
 import { TaskTypeCode } from '@/enums/StatusEnum';
 import { querySubTaskIdList } from '@/services/task';
@@ -21,7 +21,7 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
     const [dataSet, setDataSet] = useState<ISubTaskIdItem[]>([]);
     const [failCount, setFailCount] = useState<string | undefined>();
 
-    const [checkedIds, setCheckedIds] = useState<string[]>([]); // 真实ids
+    const [checkedIds, setCheckedIds] = useState<string[] | undefined>(undefined); // 真实ids
 
     const [visible, setVisible] = useState(false);
 
@@ -57,9 +57,11 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
         setVisible(true);
     }, []);
 
+    const idsKey = checkedIds?.join('');
+
     const setPopOverHide = useCallback(() => {
         setVisible(false);
-    }, [checkedIds.join('')]);
+    }, [idsKey]);
 
     const onVisibleChange = useCallback((visible: boolean) => {
         if (!visible) {
@@ -69,7 +71,7 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
 
     return useMemo(() => {
         const placeholder =
-            checkedIds.length === 0 || checkedIds.length === dataSet.length
+            checkedIds === void 0 || checkedIds.length === dataSet.length
                 ? '全部子任务'
                 : checkedIds.join(',');
         return (
@@ -120,19 +122,20 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
                             </div>
                         ) : null}
                     </div>
-
-                    {checkedIds.length === 0 ? null : (
-                        <TaskStatic
-                            checkedIds={checkedIds}
-                            task_id={task_id}
-                            task_type={task_type}
-                            collect_onsale_type={collect_onsale_type}
-                        />
-                    )}
+                    <Skeleton loading={checkedIds === void 0}>
+                        {checkedIds === void 0 || checkedIds.length === 0 ? null : (
+                            <TaskStatic
+                                checkedIds={checkedIds}
+                                task_id={task_id}
+                                task_type={task_type}
+                                collect_onsale_type={collect_onsale_type}
+                            />
+                        )}
+                    </Skeleton>
                 </div>
             </>
         );
-    }, [loading, visible, checkedIds.join('')]);
+    }, [loading, visible, idsKey]);
 };
 
 export default TaskProgress;
