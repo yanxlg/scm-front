@@ -1,6 +1,7 @@
 import React, { ReactElement, useMemo } from 'react';
 import { Popover } from 'antd';
 import styles from './_index.less';
+import LazyImage from '../LazyImage';
 
 declare interface IAutoEnLargeImgProps {
     className?: string;
@@ -35,8 +36,9 @@ const AutoEnLargeImg: React.FC<IAutoEnLargeImgProps> = ({
                 autoAdjustOverflow={true}
             >
                 {src ? (
-                    <img src={src} className={className} alt="" />
+                    <LazyImage src={src} className={className} alt="" />
                 ) : (
+                    // <img src={src} className={className} alt="" />
                     (children as React.ReactElement)
                 )}
             </Popover>

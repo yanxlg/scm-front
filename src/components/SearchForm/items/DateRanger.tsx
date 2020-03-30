@@ -7,6 +7,7 @@ import { transNullValue } from '@/utils/transform';
 import { transEndDate, transStartDate } from '@/utils/date';
 import formStyles from '@/styles/_form.less';
 import styles from '@/styles/_index.less';
+import classNames from 'classnames';
 
 export type DateRangerFormatter = 'start_date' | 'end_date';
 
@@ -59,12 +60,12 @@ const FormDateRanger = (props: DateRangerProps) => {
     }, []);
 
     return useMemo(() => {
-        const itemClassName = [
+        const itemClassName = classNames(
             formStyles.formInline,
             styles.inlineBlock,
             styles.marginNone,
             styles.verticalMiddle,
-        ].join(' ');
+        );
         return (
             <Form.Item
                 label={<span className={labelClassName}>{label}</span>}
