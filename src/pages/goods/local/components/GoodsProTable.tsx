@@ -10,7 +10,6 @@ import ImgEditDialog from './ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
-import LazyLoad from 'react-lazyload';
 
 import { IRowDataItem, IPageData } from '../index';
 import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
@@ -135,15 +134,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return (
-                    <LazyLoad
-                        height={91}
-                        offset={200}
-                        scrollContainer="#goods-local-table .ant-table-body"
-                    >
-                        <AutoEnLargeImg src={value} className="goods-local-img" />
-                    </LazyLoad>
-                );
+                return <AutoEnLargeImg src={value} className="goods-local-img" />;
             },
         },
         {

@@ -25,7 +25,7 @@ import {
     inventoryStatusList,
     productStatusList,
     versionStatusList,
-    publishChannelStatusList
+    publishChannelStatusList,
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 
@@ -46,7 +46,7 @@ const formFields: FormField[] = [
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
         formItemClassName: 'form-item',
-        formatter: 'strArr',
+        formatter: 'numberStrArr',
     },
     {
         type: 'input',
@@ -218,7 +218,7 @@ const formFields: FormField[] = [
         // placeholder: '多个逗号隔开',
         className: 'local-search-item-input-min',
         formItemClassName: 'form-item',
-        // precision: 0,
+        formatter: 'number',
     },
 ];
 
@@ -243,27 +243,22 @@ type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     private formRef: RefObject<SearchFormRef> = React.createRef();
-    private queryData: any = {};
+    // private queryData: any = {};
     // 保存搜索条件
     private searchFilter: IFilterParams | null = null;
-    private initialValues = {
-        inventory_status: '',
-        version_status: '',
-        first_catagory: '',
-        second_catagory: '',
-        third_catagory: '',
-        publish_channel: ''
-    }
+    private initialValues: any = {};
     constructor(props: LocalPageProps) {
         super(props);
-
+        // console.log(this.computeInitialValues());
+        const { page, page_count, ...initialValues } = this.computeInitialValues();
+        this.initialValues = initialValues;
         this.state = {
             excelDialogStataus: false,
             merchantDialogStatus: false,
             deleteLoading: false,
             searchLoading: false,
-            page: 1,
-            page_count: 50,
+            page,
+            page_count,
             allCount: 0,
             goodsList: [],
             selectedRowKeys: [],
@@ -274,13 +269,33 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     private computeInitialValues = () => {
         // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
+        console.log('computeInitialValues', query, url);
         if (query) {
             window.history.replaceState({}, '', url);
         }
-        const { page = 1, page_count = 50 } = query;
+        const {
+            page = 1,
+            page_count = 50,
+            commodity_id,
+            store_id,
+            task_number,
+            product_status,
+            ...rest
+        } = query;
         return {
             page: Number(page),
             page_count: Number(page_count),
+            commodity_id: commodity_id ? (commodity_id as string[]).join(',') : commodity_id,
+            store_id: store_id ? (store_id as string[]).join(',') : store_id,
+            task_number: task_number ? (task_number as string[]).join(',') : task_number,
+            product_status: product_status ? (product_status as string).split(',') : product_status,
+            inventory_status: '',
+            version_status: '',
+            first_catagory: '',
+            second_catagory: '',
+            third_catagory: '',
+            publish_channel: '',
+            ...rest,
         };
     };
 
@@ -429,9 +444,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     };
 
-    // private getCopiedLinkQuery() {
-    //     return this.queryData;
-    // }
+    private getCopiedLinkQuery = () => {
+        return this.searchFilter as IFilterParams;
+    };
 
     private handleClickOnsale = () => {
         this.setState({
@@ -569,7 +584,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         getExcelData={this.getExcelData}
                         toggleExcelDialog={this.toggleExcelDialog}
                     />
-                    {/* <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} /> */}
+                    <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
                     <MerchantListModal
                         visible={merchantDialogStatus}
                         onOKey={this.merchantOkey}

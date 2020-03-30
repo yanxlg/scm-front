@@ -5,7 +5,8 @@ import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance, Rule } from 'antd/es/form';
 import formStyles from '@/styles/_form.less';
 import styles from '@/styles/_index.less';
-import { transNullValue } from '@/utils/transform';
+// transNullValue,
+import { transNumber } from '@/utils/transform';
 
 export type InputRangeType = 'inputRange';
 const typeList = ['inputRange'];
@@ -144,7 +145,7 @@ const FormInputRange = (props: InputRangeProps) => {
 FormInputRange.typeList = typeList;
 
 FormInputRange.formatter = () => {
-    return transNullValue;
+    return transNumber;
 };
 
 export default FormInputRange;
