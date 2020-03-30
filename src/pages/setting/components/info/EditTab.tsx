@@ -43,16 +43,16 @@ const formConfig: FormField[] = [
         ],
     },
     {
-        label: <span>重&emsp;&emsp;量</span>,
-        type: 'input',
-        name: 'weight',
-        formItemClassName: formStyles.formItem,
-    },
-    {
         label: <span>国&emsp;&emsp;家</span>,
         type: 'select',
         name: 'country',
         optionList: [{ name: '111', value: '2d' }],
+        formItemClassName: formStyles.formItem,
+    },
+    {
+        label: <span>重&emsp;&emsp;量</span>,
+        type: 'input',
+        name: 'weight',
         formItemClassName: formStyles.formItem,
     },
     {
@@ -87,66 +87,147 @@ const formConfig: FormField[] = [
     },
     {
         label: '是否含电',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_electricity',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
     {
         label: '是否金属',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_metal',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
     {
         label: '是否液体',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_fluid',
-        optionList: [{ name: '111', value: '2d' }],
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
         formItemClassName: formStyles.formItem,
     },
     {
         label: '是否可燃',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_burn',
-        optionList: [{ name: '111', value: '2d' }],
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
         formItemClassName: formStyles.formItem,
     },
     {
         label: '是否粉末',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_powder',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
     {
         label: '是否纯属',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_pure_electric',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
     {
         label: '是否香水',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_perfume',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
     {
         label: '是否食品',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_food',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
     {
         label: '是否膏状',
-        type: 'select',
+        type: 'radioGroup',
         name: 'is_paste',
-        optionList: [{ name: '111', value: '2d' }],
         formItemClassName: formStyles.formItem,
+        options: [
+            {
+                label: '是',
+                value: 1,
+            },
+            {
+                label: '否',
+                value: 0,
+            },
+        ],
     },
 ];
 
@@ -155,12 +236,24 @@ const EditTab: React.FC = () => {
     return useMemo(() => {
         return (
             <SearchForm
+                ref={formRef}
                 className={formStyles.formRequiredAbsolute}
                 fieldList={formConfig}
                 itemCol={{ xl: 8, lg: 12, xs: 24 }}
                 itemRow={{ gutter: 60 }}
                 labelCol={{ xl: 8 }}
                 enableCollapse={false}
+                initialValues={{
+                    is_paste: 0,
+                    is_food: 0,
+                    is_perfume: 0,
+                    is_pure_electric: 0,
+                    is_powder: 0,
+                    is_burn: 0,
+                    is_fluid: 0,
+                    is_metal: 0,
+                    is_electricity: 0,
+                }}
             />
         );
     }, []);

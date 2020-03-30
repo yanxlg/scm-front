@@ -40,6 +40,11 @@ import { UpOutlined, DownOutlined } from '@ant-design/icons';
 import { ColProps } from 'antd/lib/grid/col';
 import { RowProps } from 'antd/lib/grid/row';
 import formStyles from '@/styles/_form.less';
+import FormCheckboxGroup, {
+    CheckboxGroupProps,
+    CheckboxGroupType,
+} from '@/components/SearchForm/items/CheckboxGroup';
+import FormRadioGroup, { RadioGroupProps, RadioGroupType } from './items/RadioGroup';
 
 export declare interface CustomFormProps {
     labelClassName?: string;
@@ -51,6 +56,8 @@ export type FormField = (
     | Omit<CheckboxProps, 'form'>
     | Omit<DatePickerProps, 'form'>
     | Omit<DateRangerProps, 'form'>
+    | Omit<CheckboxGroupProps, 'form'>
+    | Omit<RadioGroupProps, 'form'>
 ) & {
     form?: FormInstance;
 };
@@ -274,6 +281,29 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                         key={String(field.name)}
                         {...(field as DateRangerProps)}
                         type={type as DateRangerType}
+                        labelClassName={labelClassName}
+                        form={form}
+                    />,
+                );
+            }
+
+            if (FormCheckboxGroup.typeList.includes(type)) {
+                return getColChildren(
+                    <FormCheckboxGroup
+                        key={String(field.name)}
+                        {...(field as CheckboxGroupProps)}
+                        type={type as CheckboxGroupType}
+                        labelClassName={labelClassName}
+                        form={form}
+                    />,
+                );
+            }
+            if (FormRadioGroup.typeList.includes(type)) {
+                return getColChildren(
+                    <FormRadioGroup
+                        key={String(field.name)}
+                        {...(field as RadioGroupProps)}
+                        type={type as RadioGroupType}
                         labelClassName={labelClassName}
                         form={form}
                     />,
