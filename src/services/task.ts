@@ -196,8 +196,8 @@ export async function queryTaskLog(params: { task_id: number; page: number; page
 }
 
 export async function queryTaskProgressList(params: ITaskProgressQuery) {
-    return request.get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
-        params: params,
+    return request.post<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
+        data: params,
     });
 }
 

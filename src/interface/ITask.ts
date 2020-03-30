@@ -232,7 +232,7 @@ export interface ISubTaskProgressResponse {
 
 export interface ISubTaskIdItem {
     plan_id: string;
-    status: number; // 3执行失败
+    status: string; // 3执行失败
 }
 
 export interface ISubTaskIdData {

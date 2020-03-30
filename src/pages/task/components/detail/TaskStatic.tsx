@@ -9,11 +9,10 @@ import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleOutlined } from 
 import { FitTable } from '@/components/FitTable';
 import { queryTaskProgressList } from '@/services/task';
 import { ITaskProgressResponse } from '@/interface/ITask';
-import { TaskExecuteType, TaskRangeMap, TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';
-import { utcToLocal } from '@/utils/date';
+import { TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';
 
 declare interface TaskProgressProps {
-    checkedIds: string[];
+    checkedIds?: string[];
     task_id: number;
     task_type?: TaskTypeCode;
     collect_onsale_type?: 1 | 2;
@@ -68,13 +67,14 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
                             value={value}
                             className={tableStyle.staticNumber}
                             suffix={
-                                value ? (
-                                    <Tooltip title={record.fail_reason}>
-                                        <ExclamationCircleOutlined
-                                            className={taskStyle.failureSuffixIcon}
-                                        />
-                                    </Tooltip>
-                                ) : null
+                                <Tooltip
+                                    title={record.fail_reason || '--'}
+                                    className={value ? undefined : styles.hide}
+                                >
+                                    <ExclamationCircleOutlined
+                                        className={taskStyle.failureSuffixIcon}
+                                    />
+                                </Tooltip>
                             }
                         />
                     );
@@ -87,11 +87,14 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
         return 50 + Math.ceil(Math.random() * 50);
     }, []);
 
+    const idKeys = checkedIds === void 0 ? undefined : checkedIds?.join(',');
+
+    // 默认获取全部，
     useEffect(() => {
         setLoading(true);
         queryTaskProgressList({
             task_id: task_id,
-            plan_id: checkedIds && checkedIds.length > 0 ? checkedIds.join(',') : undefined,
+            plan_id: idKeys,
             collect_onsale_type,
         })
             .then(({ data }) => {
@@ -100,7 +103,7 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
             .finally(() => {
                 setLoading(false);
             });
-    }, [checkedIds.join('')]);
+    }, [idKeys]);
 
     return useMemo(() => {
         const {
@@ -283,7 +286,12 @@ const TaskStatic: React.FC<TaskProgressProps> = ({
                     </Descriptions>
                     <div className={formStyle.formItem}>新增爬取商品阶段明细</div>
                     <div>
-                        <FitTable columns={columns} dataSource={list} pagination={false} />
+                        <FitTable
+                            rowKey="stage"
+                            columns={columns}
+                            dataSource={list}
+                            pagination={false}
+                        />
                     </div>
                 </Spin>
             );

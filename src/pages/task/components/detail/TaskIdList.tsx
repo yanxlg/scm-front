@@ -38,7 +38,7 @@ const TaskIdList: React.FC<TaskIdListProps> = ({
                                 value={id}
                                 checked={checkedIds && checkedIds.indexOf(id) > -1}
                                 onChange={checkedStateChange}
-                                className={item.status === 3 ? taskStyles.errorText : undefined}
+                                className={item.status === '3' ? taskStyles.errorText : undefined}
                             >
                                 {id}
                             </Checkbox>

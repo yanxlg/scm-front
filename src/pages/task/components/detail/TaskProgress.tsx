@@ -70,10 +70,8 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
     }, []);
 
     return useMemo(() => {
-        const placeholder =
-            checkedIds === void 0 || checkedIds.length === dataSet.length
-                ? '全部子任务'
-                : checkedIds.join(',');
+        const checkedAll = checkedIds === void 0 || checkedIds.length === dataSet.length;
+        const placeholder = checkedAll ? '全部子任务' : checkedIds!.join(',');
         return (
             <>
                 <div
@@ -122,16 +120,12 @@ const TaskProgress: React.FC<TaskProgressProps> = ({ task_id, task_type, collect
                             </div>
                         ) : null}
                     </div>
-                    <Skeleton loading={checkedIds === void 0}>
-                        {checkedIds === void 0 || checkedIds.length === 0 ? null : (
-                            <TaskStatic
-                                checkedIds={checkedIds}
-                                task_id={task_id}
-                                task_type={task_type}
-                                collect_onsale_type={collect_onsale_type}
-                            />
-                        )}
-                    </Skeleton>
+                    <TaskStatic
+                        checkedIds={checkedAll ? undefined : checkedIds}
+                        task_id={task_id}
+                        task_type={task_type}
+                        collect_onsale_type={collect_onsale_type}
+                    />
                 </div>
             </>
         );
