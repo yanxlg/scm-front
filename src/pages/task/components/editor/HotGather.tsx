@@ -109,6 +109,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
             category_level_three = '',
             execute_count,
             sub_cat_id,
+            range,
             ...extra
         } = info;
         const taskType =
@@ -116,8 +117,6 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                 ? TaskExecuteType.once
                 : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
-        const range =
-            sub_cat_id === TaskRangeEnum.FullStack ? HotTaskRange.fullStack : HotTaskRange.store;
         return {
             keywords,
             category_level_one: category_level_one.split(','),

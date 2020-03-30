@@ -29,7 +29,31 @@ export enum TaskRangeEnum {
     AllOnShelf,
     SalesOnShelves,
     GatherGrounding = 9,
+    FullStack1 = 21,
+    FullStack2 = 23,
+    Store1 = 22,
+    Store2 = 24,
 }
+
+export const isGatherTask = (sub_cat_id: number) => {
+    return (
+        sub_cat_id === TaskRangeEnum.FullStack ||
+        sub_cat_id === TaskRangeEnum.Store ||
+        sub_cat_id === TaskRangeEnum.FullStack1 ||
+        sub_cat_id === TaskRangeEnum.FullStack2 ||
+        sub_cat_id === TaskRangeEnum.Store1 ||
+        sub_cat_id === TaskRangeEnum.Store2 ||
+        sub_cat_id === TaskRangeEnum.GatherGrounding
+    );
+};
+
+export const isUrlTask = (sub_cat_id: number) => {
+    return sub_cat_id === TaskRangeEnum.URL;
+};
+
+export const isGoodsUpdateTask = (sub_cat_id: number) => {
+    return sub_cat_id === TaskRangeEnum.AllOnShelf || sub_cat_id === TaskRangeEnum.SalesOnShelves;
+};
 
 //======================= 任务状态 ======================//
 

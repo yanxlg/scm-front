@@ -11,6 +11,8 @@ import {
     PUTaskRangeType,
     AutoPurchaseTaskType,
     TaskCreateStatusCode,
+    TaskRangeEnum,
+    HotTaskRange,
 } from '@/enums/StatusEnum';
 import { IBoolean, RequestPagination } from '@/interface/IGlobal';
 
@@ -114,6 +116,7 @@ export interface ITaskDetailInfo {
     task_sn?: string;
     task_name: string;
     shopId?: number; // 指定店铺类型任务转换出改字段
+    range?: HotTaskRange;
 
     category_level_one?: string;
     category_level_two?: string;

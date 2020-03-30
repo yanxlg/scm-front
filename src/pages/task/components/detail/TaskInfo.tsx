@@ -3,6 +3,7 @@ import { queryTaskDetail } from '@/services/task';
 import { EmptyObject } from '@/config/global';
 import { ITaskDetailInfo } from '@/interface/ITask';
 import {
+    isGatherTask,
     TaskExecuteType,
     TaskRangeEnum,
     TaskRangeMap,
@@ -10,6 +11,8 @@ import {
     TaskTypeCode,
     TaskTypeEnum,
     TaskTypeMap,
+    isUrlTask,
+    isGoodsUpdateTask,
 } from '@/enums/StatusEnum';
 import { Button, Card, Descriptions, Modal } from 'antd';
 import taskStyle from '@/styles/_task.less';
@@ -61,37 +64,28 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ task_id, setTaskType }) => {
         // task_range 分别弹不同的弹窗
         const { sub_cat_id } = detail;
         const taskId = Number(task_id);
-        switch (Number(sub_cat_id)) {
-            case TaskRangeEnum.URL:
-                // url
-                Modal.info({
-                    content: <URLGather taskId={taskId} />,
-                    className: 'modal-empty config-modal-hot',
-                    icon: null,
-                    maskClosable: true,
-                });
-                break;
-            case TaskRangeEnum.FullStack:
-            case TaskRangeEnum.Store:
-            case TaskRangeEnum.GatherGrounding:
-                Modal.info({
-                    content: <HotGather taskId={taskId} />,
-                    className: 'modal-empty config-modal-hot',
-                    icon: null,
-                    maskClosable: true,
-                });
-                break;
-            case TaskRangeEnum.AllOnShelf:
-            case TaskRangeEnum.SalesOnShelves:
-                Modal.info({
-                    content: <TimerUpdate taskId={taskId} />,
-                    className: 'modal-empty config-modal-hot',
-                    icon: null,
-                    maskClosable: true,
-                });
-                break;
-            default:
-                break;
+
+        if (isUrlTask(sub_cat_id)) {
+            Modal.info({
+                content: <URLGather taskId={taskId} />,
+                className: 'modal-empty config-modal-hot',
+                icon: null,
+                maskClosable: true,
+            });
+        } else if (isGatherTask(sub_cat_id)) {
+            Modal.info({
+                content: <HotGather taskId={taskId} />,
+                className: 'modal-empty config-modal-hot',
+                icon: null,
+                maskClosable: true,
+            });
+        } else if (isGoodsUpdateTask(sub_cat_id)) {
+            Modal.info({
+                content: <TimerUpdate taskId={taskId} />,
+                className: 'modal-empty config-modal-hot',
+                icon: null,
+                maskClosable: true,
+            });
         }
     }, [detail]);
 

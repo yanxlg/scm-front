@@ -1,5 +1,5 @@
 import request, { errorHandlerFactory } from '@/utils/request';
-import { TaskExecuteType, TaskStatusCode, TaskRangeEnum } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskStatusCode, TaskRangeEnum, HotTaskRange } from '@/enums/StatusEnum';
 import {
     IHotTaskBody,
     ITaskCreatedResponse,
@@ -24,7 +24,7 @@ import {
 import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
 import { EmptyObject } from '@/config/global';
-import { transPaginationRequest, transPaginationResponse } from '@/utils/utils';
+import { isZero, transPaginationRequest, transPaginationResponse } from '@/utils/utils';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -147,12 +147,13 @@ export async function queryTaskDetail(task_id: number): Promise<IResponse<ITaskD
                     data: {
                         task_detail_info: {
                             sub_cat_id: subCatId,
-                            shopId: subCatId === TaskRangeEnum.Store ? range : undefined,
+                            shopId: isZero(range) ? undefined : range,
                             task_cycle:
                                 executeCount === 1
                                     ? TaskExecuteType.once
                                     : TaskExecuteType.interval,
                             execute_count: executeCount,
+                            range: isZero(range) ? HotTaskRange.fullStack : HotTaskRange.store,
                             ...extra,
                         },
                     },
