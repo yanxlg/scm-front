@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { debounce } from 'lodash';
 import { genColumnKey } from '@ant-design/pro-table/es/component/util';
 import { ProColumns } from '@ant-design/pro-table/es';
+import { defaultPageSizeOptions } from '@/config/global';
 
 export const showTotal = (total: number) => {
     return <span>共有{total}条</span>;
@@ -156,7 +157,7 @@ const ProTable = <
                 {pagination ? (
                     <Pagination
                         className="ant-table-pagination"
-                        pageSizeOptions={['50', '100', '200']}
+                        pageSizeOptions={defaultPageSizeOptions}
                         showQuickJumper={{
                             goButton: goButton,
                         }}

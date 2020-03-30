@@ -12,7 +12,7 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize } from '@/config/global';
+import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { goButton, showTotal } from '@/components/ProTable';
 import LoadingButton from '@/components/LoadingButton';
@@ -265,7 +265,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                         pageSize={pageSize}
                         current={pageNumber}
                         total={total}
-                        pageSizeOptions={['50', '100', '500', '1000']}
+                        pageSizeOptions={defaultPageSizeOptions}
                         onChange={onPageChange}
                         onShowSizeChange={onPageChange}
                         showSizeChanger={true}

@@ -21,6 +21,7 @@ import TableAlert, { TableAlertRef } from '@/components/OptimizeProTable/compone
 import { SizeType } from 'antd/es/config-provider/SizeContext';
 import { TableProps } from 'antd/lib/table';
 import { FitTable } from '@/components/FitTable';
+import { defaultPageSizeOptions } from '@/config/global';
 
 export interface ColumnsState {
     show?: boolean;
@@ -487,7 +488,7 @@ const ProTable = <T extends {}, U extends object>(
                 dataSource={dataSource}
                 rowKey={rowKey}
                 pagination={{
-                    pageSizeOptions: ['50', '100', '200'],
+                    pageSizeOptions: defaultPageSizeOptions,
                     showQuickJumper: {
                         goButton: goButton,
                     },

@@ -11,7 +11,7 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize } from '@/config/global';
+import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { IStockRequest, IStockItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
@@ -228,7 +228,7 @@ const StockControl: React.FC = () => {
                         pageSize={pageSize}
                         current={pageNumber}
                         total={total}
-                        pageSizeOptions={['50', '100', '500', '1000']}
+                        pageSizeOptions={defaultPageSizeOptions}
                         onChange={onPageChange}
                         onShowSizeChange={onPageChange}
                         showSizeChanger={true}
