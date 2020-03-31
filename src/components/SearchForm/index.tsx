@@ -31,11 +31,16 @@ import FormDateRanger, {
     DateRangerProps,
     DateRangerFormatter,
 } from '@/components/SearchForm/items/DateRanger';
+import FormInputRange, {
+    InputRangeType,
+    InputRangeProps,
+} from '@/components/SearchForm/items/InputRange';
 import { Store, ValidateFields } from 'rc-field-form/lib/interface';
 import { FormInstance } from 'antd/es/form';
 import RcResizeObserver from 'rc-resize-observer';
 
 import '@/styles/index.less';
+import '@/styles/form.less';
 import { UpOutlined, DownOutlined } from '@ant-design/icons';
 import { ColProps } from 'antd/lib/grid/col';
 import { RowProps } from 'antd/lib/grid/row';
@@ -58,6 +63,7 @@ export type FormField = (
     | Omit<DateRangerProps, 'form'>
     | Omit<CheckboxGroupProps, 'form'>
     | Omit<RadioGroupProps, 'form'>
+    | Omit<InputRangeProps, 'form'>
 ) & {
     form?: FormInstance;
 };
@@ -146,6 +152,10 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 values[name as string] = FormDatePicker.formatter(formatter as DatePickerFormatter)(
                     form.getFieldValue(name),
                 );
+            } else if (FormInputRange.typeList.includes(type)) {
+                const [name1, name2] = name;
+                values[name1 as string] = FormInputRange.formatter()(form.getFieldValue(name1));
+                values[name2 as string] = FormInputRange.formatter()(form.getFieldValue(name2));
             } else {
                 return form.getFieldValue(name);
             }
@@ -307,6 +317,17 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                         labelClassName={labelClassName}
                         form={form}
                     />,
+                );
+            }
+            if (FormInputRange.typeList.includes(type)) {
+                return (
+                    <FormInputRange
+                        key={String(field.name)}
+                        {...(field as InputRangeProps)}
+                        type={type as InputRangeType}
+                        labelClassName={labelClassName}
+                        form={form}
+                    />
                 );
             }
             return null;

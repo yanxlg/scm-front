@@ -661,4 +661,44 @@ export default {
             });
         }, 100);
     },
+    'GET /v1/goods/groups/:id': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                msg: '',
+                data: {
+                    productGroup: {
+                        commodityId: '111',
+                        productId: 'productId',
+                        title: 'title',
+                        image:
+                            '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                    },
+                    subProductGroup: [
+                        {
+                            commodityId: '222',
+                            productId: 'productId',
+                            title: 'title',
+                            image:
+                                '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                        },
+                        {
+                            commodityId: '333',
+                            productId: 'productId',
+                            title: 'title',
+                            image:
+                                '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                        },
+                    ],
+                    mainProductGroup: {
+                        commodityId: '444',
+                        productId: 'productId',
+                        title: 'title',
+                        image:
+                            '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                    },
+                },
+            });
+        }, 200);
+    },
 };

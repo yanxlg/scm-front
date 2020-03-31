@@ -1,14 +1,10 @@
 import React from 'react';
-import { DatePicker, Button, message, Pagination } from 'antd';
-// import { RangePickerValue } from 'antd/lib/date-picker/interface';
+import { DatePicker, Button, message } from 'antd';
+import Container from '@/components/Container';
 import { RangeValue } from 'rc-picker/lib/interface';
 import moment from 'moment';
-
 import VersionTable from './components/VersionTable';
 import { getCurrentPage } from '@/utils/common';
-
-import '../../../styles/goods-version.less';
-
 import {
     getGoodsVersion,
     postGoodsVersionExport,
@@ -16,6 +12,9 @@ import {
     postGoodsIgnoreVersion,
 } from '@/services/goods';
 import { utcToLocal, transStartDate, transEndDate } from '@/utils/date';
+import LoadingButton from '@/components/LoadingButton';
+
+import '../../../styles/goods-version.less';
 
 const { RangePicker } = DatePicker;
 
@@ -23,7 +22,7 @@ declare interface IVersionProps {
     location: any;
 }
 
-declare interface IPageData {
+export declare interface IPageData {
     page?: number;
     page_count?: number;
 }
@@ -38,12 +37,12 @@ export declare interface ISkuStyle {
 }
 
 declare interface ISkuItem {
-    sku_id: string;
-    origin_sku_id: string;
-    sku_style: ISkuStyle;
-    sku_price: number;
-    sku_weight: number;
-    sku_inventory: number;
+    sku_id?: string;
+    origin_sku_id?: string;
+    sku_style?: ISkuStyle;
+    sku_price?: number;
+    sku_weight?: number;
+    sku_inventory?: number;
 }
 
 export declare interface ICatagoryData {
@@ -77,19 +76,6 @@ declare interface IGoodsVersionItem extends IGoodsVersionItemBase {
 
 export declare interface IGoodsVersionRowItem extends IGoodsVersionItemBase, ISkuItem {}
 
-declare interface IGoodsVersionBase {
-    title: string;
-    goods_url: string;
-    main_image_url: string;
-    goods_id: number;
-    source_goods_id: number;
-    flatform: string;
-    collection_time: string;
-    first_catagory: ICatagoryData;
-    second_catagory: ICatagoryData;
-    third_catagory: ICatagoryData;
-}
-
 declare interface IVersionState {
     loading: boolean;
     start_time: number;
@@ -100,8 +86,6 @@ declare interface IVersionState {
     currentInfo: IGoodsVersionRowItem | null;
     versionGoodsList: IGoodsVersionRowItem[];
 }
-
-const pageSizeOptions = ['50', '100', '500', '1000'];
 
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
     id: string = '';
@@ -186,21 +170,24 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         list.forEach(item => {
             item.commodity_id = this.id;
             const { sku_info, ...rest } = item;
-            // 目前只有一条默认的sku
-            sku_info.forEach(skuItem => {
-                const retItem: IGoodsVersionRowItem = {
-                    ...Object.assign(rest, {
-                        _update_time: utcToLocal(rest.update_time),
-                    }),
-                    ...Object.assign(skuItem, {
-                        sku_price: Number(skuItem.sku_price),
-                        sku_inventory: Number(skuItem.sku_inventory),
-                    }),
-                };
-                ret.push(retItem);
-            });
+            if (sku_info.length) {
+                // 目前只有一条默认的sku
+                sku_info.forEach(skuItem => {
+                    const retItem: IGoodsVersionRowItem = {
+                        ...Object.assign(rest, {
+                            _update_time: utcToLocal(rest.update_time),
+                        }),
+                        ...Object.assign(skuItem, {
+                            sku_price: Number(skuItem.sku_price),
+                            sku_inventory: Number(skuItem.sku_inventory),
+                        }),
+                    };
+                    ret.push(retItem);
+                });
+            } else {
+                ret.push(rest);
+            }
         });
-        // console.log('addRowSpanData', ret);
         return ret;
     }
 
@@ -223,14 +210,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     // 生成表格
     downloadExcel = () => {
         const { start_time, end_time, page, page_count } = this.state;
-        postGoodsVersionExport({
+        return postGoodsVersionExport({
             page,
             page_count,
             start_time: start_time ? start_time : undefined,
             end_time: end_time ? end_time : undefined,
             commodity_id: this.id,
-        }).catch(err => {
-            message.error('下载表格失败');
         });
     };
 
@@ -256,15 +241,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
     postGoodsIgnoreVersion = (product_id: string) => {
         postGoodsIgnoreVersion({
             product_id: product_id,
-        })
-            .then(res => {
-                message.success(`${product_id}忽略成功`);
-                this.onSearch();
-            })
-            .catch(err => {
-                message.success(`${product_id}忽略失败`);
-                this.onSearch();
-            });
+        }).then(res => {
+            message.success(`${product_id}忽略成功`);
+            this.onSearch();
+        });
     };
 
     onChangePage = (page: number) => {
@@ -326,33 +306,27 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         }
 
         return (
-            <div className="goods-version">
-                {currentDom}
-                <div className="goods-version-filter">
-                    <div className="left-item">
-                        <span className="">版本生成时间</span>
-                        <RangePicker className="date" onChange={this.selectedDate} />
-                        <Button onClick={this.downloadExcel}>导出至Excel</Button>
+            <Container>
+                <div className="goods-version">
+                    {currentDom}
+                    <div className="goods-version-filter">
+                        <div className="left-item">
+                            <span className="">版本生成时间</span>
+                            <RangePicker className="date" onChange={this.selectedDate} />
+                            <LoadingButton onClick={this.downloadExcel}>导出至Excel</LoadingButton>
+                        </div>
                     </div>
-                    <Pagination
-                        size="small"
-                        total={allCount}
-                        current={page}
+                    <VersionTable
+                        loading={loading}
+                        currentPage={page}
                         pageSize={page_count}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
+                        total={allCount}
+                        versionGoodsList={versionGoodsList}
+                        operationVersion={this.operationVersion}
+                        onSearch={this.onSearch}
                     />
                 </div>
-                <VersionTable
-                    loading={loading}
-                    versionGoodsList={versionGoodsList}
-                    operationVersion={this.operationVersion}
-                />
-            </div>
+            </Container>
         );
     }
 }

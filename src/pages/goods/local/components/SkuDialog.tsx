@@ -1,31 +1,32 @@
-import React from 'react';
-import { Modal, Table, Pagination } from 'antd';
+import React, { ChangeEvent } from 'react';
+import { Modal, Pagination, Row, Col, Button, Input } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import { FitTable } from '@/components/FitTable';
 
-import { ISkuStyle } from '../index';
-import { getGoodsSkuList } from '@/services/goods';
+import { ISkuStyleItem } from '@/interface/ILocalGoods';
+import { getGoodsSkuList, ISkuParams } from '@/services/goods';
 
 import './SkuDialog.less';
 
 declare interface ISkuItem {
+    origin_sku_id: string;
+    shipping_fee: number;
     sku_id: string;
-    sku_style: ISkuStyle;
+    sku_style: ISkuStyleItem[];
     sku_price: string;
     sku_inventory: string;
     sku_weight: number;
     serial: number;
-}
-
-declare interface IPageData {
-    page?: number;
-    page_count?: number;
+    sku_amount: number; // 爬虫价格 = 价格 + 运费
+    image_url: string;
 }
 
 declare interface IPorps {
     visible: boolean;
     // currentRowData: IRowDataItem | null;
     currentRowData: any;
-    toggleSkuDialog(status: boolean): void;
+    hideSkuDialog(): void;
 }
 
 declare interface IState {
@@ -33,6 +34,7 @@ declare interface IState {
     page: number;
     allCount: number;
     skuList: ISkuItem[];
+    value: string;
 }
 
 class SkuDialog extends React.PureComponent<IPorps, IState> {
@@ -46,10 +48,20 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         },
         {
             key: 'sku_id',
-            title: 'sku id',
+            title: 'SKU ID',
             dataIndex: 'sku_id',
             align: 'center',
             width: 120,
+        },
+        {
+            key: 'image_url',
+            title: '对应图片',
+            dataIndex: 'image_url',
+            align: 'center',
+            width: 120,
+            render: (value: string) => {
+                return <AutoEnLargeImg src={value} className="sku-img" />;
+            },
         },
         {
             key: 'sku_style',
@@ -57,23 +69,34 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             dataIndex: 'sku_style',
             align: 'center',
             width: 200,
-            render: (value: ISkuStyle) => {
-                return Object.keys(value).map(key => (
-                    <div key={key}>
-                        {key}: {value[key]}
+            render: (value: ISkuStyleItem[]) => {
+                return value.map(item => (
+                    <div key={item.option}>
+                        {item.option}: {item.value}
                     </div>
                 ));
             },
         },
         {
+            key: 'sku_amount',
+            title: '爬虫价格(￥)',
+            dataIndex: 'sku_amount',
+            align: 'center',
+            width: 140,
+        },
+        {
             key: 'sku_price',
-            title: '爬虫价格',
+            title: '单价(￥)',
             dataIndex: 'sku_price',
             align: 'center',
             width: 100,
-            render: (value: string) => {
-                return '￥' + value;
-            },
+        },
+        {
+            key: 'shipping_fee',
+            title: '运费(￥)',
+            dataIndex: 'shipping_fee',
+            align: 'center',
+            width: 100,
         },
         {
             key: 'sku_weight',
@@ -89,8 +112,15 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             align: 'center',
             width: 100,
         },
+        {
+            fixed: 'right',
+            key: 'xxx',
+            title: '属性',
+            dataIndex: 'xxx',
+            align: 'center',
+            width: 170,
+        },
     ];
-
     constructor(props: IPorps) {
         super(props);
         this.state = {
@@ -98,19 +128,21 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             page: 1,
             allCount: 0,
             skuList: [],
+            value: '',
         };
     }
 
     private handleCancel = () => {
-        this.props.toggleSkuDialog(false);
+        this.props.hideSkuDialog();
     };
 
-    getSkuList = (productId: string, pageData?: IPageData) => {
-        const { page } = this.state;
-        let params = {
+    getSkuList = (productId: string, pageData?: ISkuParams) => {
+        const { page, value } = this.state;
+        let params: ISkuParams = {
             page,
             product_id: productId,
             page_count: 50,
+            variantids: value,
         };
         if (pageData) {
             params = Object.assign(params, pageData);
@@ -126,14 +158,18 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                     page: params.page,
                     allCount: all_count,
                     skuList: list.map((item: any, index: number) => {
-                        const { sku_id, sku_style, sku_price, sku_weight, sku_inventory } = item;
+                        let { sku_style, sku_price, shipping_fee, variant_image, ...rest } = item;
                         return {
-                            serial: (params.page - 1) * 50 + index + 1,
-                            sku_id,
-                            sku_style,
+                            ...rest,
                             sku_price,
-                            sku_weight,
-                            sku_inventory,
+                            shipping_fee,
+                            sku_amount: Number(sku_price) + Number(shipping_fee),
+                            sku_style: sku_style.map(({ option, value }: any) => ({
+                                option,
+                                value,
+                            })),
+                            image_url: variant_image?.url,
+                            serial: (params.page - 1) * 50 + index + 1,
                         };
                     }),
                 });
@@ -151,9 +187,22 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         });
     };
 
+    changeValue = (e: ChangeEvent<HTMLInputElement>) => {
+        this.setState({
+            value: e.target.value,
+        });
+    };
+
+    handleClickSearch = () => {
+        const { value } = this.state;
+        this.getSkuList(this.props.currentRowData!.product_id, {
+            page: 1,
+        });
+    };
+
     render() {
         const { visible, currentRowData } = this.props;
-        const { loading, page, allCount, skuList } = this.state;
+        const { loading, page, allCount, skuList, value } = this.state;
         if (!currentRowData) {
             return null;
         } else {
@@ -172,64 +221,61 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                 <Modal
                     width={1000}
                     visible={visible}
+                    style={{ top: 50 }}
                     onCancel={this.handleCancel}
                     maskClosable={false}
-                    footer={null}
-                    // bodyStyle={{
-                    //     maxHeight: 600,
-                    //     overflow: 'auto'
-                    // }}
+                    // footer={null}
                 >
                     <div className="goods-sku-dialog">
                         <div className="goods-info">
-                            <img src={goods_img} />
+                            <img className="main-img" src={goods_img} />
                             <div className="content">
+                                <Row>
+                                    <Col span={6}>Product ID: {product_id}</Col>
+                                    <Col span={10}>Commodity ID: {commodity_id}</Col>
+                                    <Col span={5}>爬虫商品 ID: {worm_goods_id}</Col>
+                                </Row>
                                 <div className="desc">
                                     商品标题：{title}
                                     <a href={worm_goodsinfo_link} target="_blank">
                                         【查看源商品】
                                     </a>
                                 </div>
-                                <div className="center">
-                                    <div className="goods-item one">
-                                        <span className="float-left">product id:</span>
-                                        <div className="overflow-hidden">{product_id}</div>
-                                    </div>
-                                    <div className="goods-item two">
-                                        <span className="float-left">commodity id:</span>
-                                        <div className="overflow-hidden">{commodity_id}</div>
-                                    </div>
-                                    <div className="goods-item three">
-                                        <span className="float-left">爬虫商品 id:</span>
-                                        <div className="overflow-hidden">{worm_goods_id}</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="goods-item one">
-                                        <span className="float-left">一级分类:</span>
-                                        <div className="overflow-hidden">{first_catagory.name}</div>
-                                    </div>
-                                    <div className="goods-item two">
-                                        <span className="float-left">二级分类:</span>
-                                        <div className="overflow-hidden">
-                                            {second_catagory.name}
-                                        </div>
-                                    </div>
-                                    <div className="goods-item three">
-                                        <span className="float-left">三级分类:</span>
-                                        <div className="overflow-hidden">{third_catagory.name}</div>
-                                    </div>
-                                </div>
+                                <Row>
+                                    <Col span={8}>一级分类: {first_catagory.name}</Col>
+                                    <Col span={8}>二级分类: {second_catagory.name}</Col>
+                                    <Col span={8}>三级分类: {third_catagory.name}</Col>
+                                </Row>
                             </div>
                         </div>
-                        <Table
-                            bordered={true}
+                        <Row className="filter-section" gutter={16}>
+                            <Col span={21} className="input-wrap">
+                                <span className="label">SKU ID:</span>
+                                <Input
+                                    value={value}
+                                    onChange={this.changeValue}
+                                    placeholder="支持多个搜索，以英文逗号隔开"
+                                />
+                            </Col>
+                            <Col span={3}>
+                                <Button
+                                    type="primary"
+                                    className="btn"
+                                    loading={loading}
+                                    onClick={this.handleClickSearch}
+                                >
+                                    搜索
+                                </Button>
+                            </Col>
+                        </Row>
+                        <FitTable
+                            bordered
                             rowKey="sku_id"
                             className="table"
                             loading={loading}
                             columns={this.columns}
                             dataSource={skuList}
-                            scroll={{ y: 400 }}
+                            scroll={{ x: 'max-content', y: 400 }}
                             pagination={false}
                         />
                         <Pagination

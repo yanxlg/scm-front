@@ -20,10 +20,11 @@ export interface IResponse<T> {
     data: T;
 }
 
-export interface IPaginationResponse<T> {
-    total: number;
+export type IPaginationResponse<T> = {
+    total?: number;
+    all_count?: number;
     list: T[];
     [key: string]: any;
-}
+};
 
 export type IBoolean = 0 | 1;

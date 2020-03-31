@@ -3,14 +3,14 @@ import React, { useMemo } from 'react';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormInstance, Rule } from 'antd/es/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
-import { transNullValue, transNumber } from '@/utils/transform';
+import { transNullValue, transNumber, transNumberStrArr, transStrArr } from '@/utils/transform';
 import RichInput, { RichType } from '@/components/Input/RichInput';
 import { InputProps as AntInputProps } from 'antd/es/input';
 
 export type InputType = RichType;
 const typeList = ['input', 'integer', 'number', 'positiveInteger'];
 
-export type InputFormatter = 'number';
+export type InputFormatter = 'number' | 'strArr' | 'numberStrArr';
 
 export type InputProps = FormItemLabelProps &
     CustomFormProps & {
@@ -72,7 +72,18 @@ const FormInput = (props: InputProps) => {
 FormInput.typeList = typeList;
 
 FormInput.formatter = (formatter?: InputFormatter) => {
-    return formatter ? (formatter === 'number' ? transNumber : transNullValue) : transNullValue;
+    // return formatter ? (formatter === 'number' ? transNumber : transNullValue) : transNullValue;
+    // return
+    switch (formatter) {
+        case 'number':
+            return transNumber;
+        case 'strArr':
+            return transStrArr;
+        case 'numberStrArr':
+            return transNumberStrArr;
+        default:
+            return transNullValue;
+    }
 };
 
 export default FormInput;

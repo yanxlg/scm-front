@@ -1,22 +1,20 @@
 import React from 'react';
 import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-
 import GoodsDetailDialog from './GoodsDetailDialog';
+import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
+    orderShippingOptionList,
     purchaseOrderOptionList,
     purchasePayOptionList,
     purchaseShippingOptionList,
+    purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-
-declare interface ISpecs {
-    [key: string]: string;
-}
 
 declare interface IProps {
     loading: boolean;
@@ -28,7 +26,9 @@ declare interface IProps {
 
 declare interface IState {
     detailDialogStatus: boolean;
+    trackDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
+    currentOrder: IChildOrderItem | null;
 }
 
 class OrderTableAll extends React.PureComponent<IProps, IState> {
@@ -125,6 +125,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: 'orderGoodsShippingStatus',
+            title: '中台订单配送状态',
+            dataIndex: 'orderGoodsShippingStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return {
+                    children: getStatusDesc(orderShippingOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
             key: 'productId',
             title: '中台商品ID',
             dataIndex: 'productId',
@@ -163,6 +178,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             // render: this.mergeCell
+        },
+        {
+            key: 'reserveStatus',
+            title: '库存预定状态',
+            dataIndex: 'reserveStatus',
+            align: 'center',
+            width: 120,
+            render: (value: number, row: IChildOrderItem) => {
+                return getStatusDesc(purchaseReserveOptionList, value);
+            },
         },
         {
             key: 'purchaseOrderStatus',
@@ -208,6 +233,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
+
         {
             key: 'purchaseCancelReason',
             title: '采购取消原因',
@@ -236,9 +262,39 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             },
         },
         {
+            key: '_logisticsTrack',
+            title: '物流轨迹',
+            dataIndex: '_logisticsTrack',
+            align: 'center',
+            width: 120,
+            render: (value, row: IChildOrderItem) => {
+                return {
+                    children: <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>,
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
             key: 'confirmTime',
             title: '订单确认时间',
             dataIndex: 'confirmTime',
+            align: 'center',
+            width: 120,
+            render: (value: string, row: IChildOrderItem) => {
+                return {
+                    children: utcToLocal(value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+        },
+        {
+            key: 'cancelTime',
+            title: '订单取消时间',
+            dataIndex: 'cancelTime',
             align: 'center',
             width: 120,
             render: (value: string, row: IChildOrderItem) => {
@@ -341,19 +397,18 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: this.mergeCell,
         },
-        // 待确定
-        // {
-        //     key: 'a4',
-        //     title: '运费',
-        //     dataIndex: 'a4',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
         {
             key: 'goodsNumber',
             title: '商品数量',
             dataIndex: 'goodsNumber',
+            align: 'center',
+            width: 120,
+            render: this.mergeCell,
+        },
+        {
+            key: 'freight',
+            title: '商品运费',
+            dataIndex: 'freight',
             align: 'center',
             width: 120,
             render: this.mergeCell,
@@ -366,9 +421,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value, row: IChildOrderItem) => {
                 // console.log(row);
-                const { goodsAmount, goodsNumber } = row;
+                const { goodsAmount, goodsNumber, freight } = row;
                 return {
-                    children: Number(goodsAmount) * goodsNumber,
+                    children: Number(goodsAmount) * goodsNumber + (Number(freight) || 0),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -438,7 +493,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         super(props);
         this.state = {
             detailDialogStatus: false,
+            trackDialogStatus: false,
             goodsDetail: null,
+            currentOrder: null,
         };
     }
 
@@ -490,6 +547,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return allColumns;
     };
 
+    private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
+        // console.log('showLogisticsTrack', purchaseWaybillNo);
+        this.setState({
+            currentOrder,
+            trackDialogStatus: true,
+        });
+    };
+
+    hideTrackDetail = () => {
+        this.setState({
+            trackDialogStatus: false,
+            currentOrder: null,
+        });
+    };
+
     // 合并单元格
     private mergeCell(value: string | number, row: IChildOrderItem) {
         return {
@@ -514,29 +586,31 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
         getOrderGoodsDetail(productId).then(res => {
             const { sku_info, product_id, goods_img, title } = res.data;
-            const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
-            const goodsDetail: IGoodsDetail = {
-                product_id,
-                goods_img,
-                title,
-            };
-            if (i > -1) {
-                const { sku_style, sku_sn, sku_img } = sku_info[i];
-                Object.assign(goodsDetail, {
-                    sku_sn,
-                    sku_img,
-                    sku_style,
+            if (sku_info) {
+                const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
+                const goodsDetail: IGoodsDetail = {
+                    product_id,
+                    goods_img,
+                    title,
+                };
+                if (i > -1) {
+                    const { sku_style, sku_sn, sku_img } = sku_info[i];
+                    Object.assign(goodsDetail, {
+                        sku_sn,
+                        sku_img,
+                        sku_style,
+                    });
+                }
+                this.setState({
+                    goodsDetail,
                 });
             }
-            this.setState({
-                goodsDetail,
-            });
         });
     };
 
     render() {
         const { loading, orderList } = this.props;
-        const { detailDialogStatus, goodsDetail } = this.state;
+        const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
         const columns = this.createColumns();
         return (
             <>
@@ -559,6 +633,12 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     visible={detailDialogStatus}
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
+                />
+                <TrackDialog
+                    visible={trackDialogStatus}
+                    orderGoodsId={currentOrder ? currentOrder.orderGoodsId || '' : ''}
+                    lastWaybillNo={currentOrder ? currentOrder.lastWaybillNo || '' : ''}
+                    hideTrackDetail={this.hideTrackDetail}
                 />
             </>
         );
