@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 
 const formConfig: FormField[] = [
     {

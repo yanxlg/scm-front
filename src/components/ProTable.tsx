@@ -1,23 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ColumnsState, ProTableProps } from '@ant-design/pro-table/lib/Table';
 import { default as DefaultProTable } from '@ant-design/pro-table';
-import { Button, Card, Pagination } from 'antd';
+import { Card, Pagination } from 'antd';
 import { Key, SorterResult, TableCurrentDataSource } from 'antd/es/table/interface';
 import { PaginationConfig } from 'antd/es/pagination';
 import cardStyle from '@/styles/_card.less';
-import formStyle from '@/styles/_form.less';
-import btnStyle from '@/styles/_btn.less';
+import formStyle from '@/components/SearchForm/_form.less';
 import ReactDOM from 'react-dom';
 import { debounce } from 'lodash';
 import { genColumnKey } from '@ant-design/pro-table/es/component/util';
 import { ProColumns } from '@ant-design/pro-table/es';
 import { defaultPageSizeOptions } from '@/config/global';
-
-export const showTotal = (total: number) => {
-    return <span>共有{total}条</span>;
-};
-
-export const goButton = <Button className={btnStyle.btnGo}>Go</Button>;
+import { goButton, showTotal } from './FitTable';
 
 const ProTable = <
     T,

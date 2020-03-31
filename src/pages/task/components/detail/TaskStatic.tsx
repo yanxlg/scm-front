@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { Descriptions, Progress, Spin, Statistic, Tooltip } from 'antd';
 import styles from '@/styles/_index.less';
-import formStyle from '@/styles/_form.less';
+import formStyle from '@/components/SearchForm/_form.less';
 import taskStyle from '@/styles/_task.less';
 import tableStyle from '@/styles/_table.less';
 import { ColumnsType } from 'antd/lib/table/interface';

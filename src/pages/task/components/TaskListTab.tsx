@@ -34,7 +34,7 @@ import {
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 import { TableProps } from 'antd/es/table';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;

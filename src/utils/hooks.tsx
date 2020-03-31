@@ -114,6 +114,14 @@ function useList<T, Q extends RequestPagination = any, S = any>({
         }
     }, []);
 
+    const setPageSize = useCallback((size: number) => {
+        pageSize.current = size;
+    }, []);
+
+    const setPageNumber = useCallback((current: number) => {
+        pageNumber.current = current;
+    }, []);
+
     return {
         get query() {
             return query.current;
@@ -137,6 +145,8 @@ function useList<T, Q extends RequestPagination = any, S = any>({
         onChange,
         getListData,
         setSelectedRowKeys,
+        setPageSize,
+        setPageNumber,
     };
 }
 

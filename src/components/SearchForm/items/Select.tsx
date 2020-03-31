@@ -4,6 +4,7 @@ import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormInstance, Rule } from 'antd/es/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { transNullValue, transNumber, transJoinStr } from '../utils';
+import formStyles from '../_form.less';
 
 export declare interface IOptionItem {
     name: string;
@@ -43,7 +44,7 @@ const FormSelect = (props: SelectProps) => {
     const {
         name,
         label,
-        className,
+        className = formStyles.formItemDefault,
         formItemClassName,
         syncDefaultOption,
         optionListDependence,

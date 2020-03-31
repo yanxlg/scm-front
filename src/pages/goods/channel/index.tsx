@@ -39,7 +39,7 @@ import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
 import { Icons } from '@/components/Icon';
 import ProTable, { ProColumns } from '@/components/OptimizeProTable';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import styles from '@/styles/_index.less';
 import classNames from 'classnames';
 

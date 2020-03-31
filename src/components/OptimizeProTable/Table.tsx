@@ -15,12 +15,11 @@ import { TableRowSelection } from 'antd/es/table/interface';
 import { checkUndefinedOrNull, genColumnKey, useDeepCompareEffect } from './component/util';
 
 import { DensitySize } from './component/toolBar/DensityIcon';
-import { useRowSelection, useScrollXY } from './hooks';
-import { goButton, showTotal } from '@/components/ProTable';
+import { useRowSelection } from './hooks';
 import TableAlert, { TableAlertRef } from '@/components/OptimizeProTable/component/alert';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
 import { TableProps } from 'antd/lib/table';
-import { FitTable } from '@/components/FitTable';
+import { FitTable, goButton, showTotal } from '@/components/FitTable';
 import { defaultPageSizeOptions } from '@/config/global';
 
 export interface ColumnsState {

@@ -1,13 +1,20 @@
 import React, { useMemo, useRef } from 'react';
-import { Table } from 'antd';
+import { Table, Button } from 'antd';
 import { TableProps } from 'antd/lib/table';
 import { useScrollXY } from '@/components/OptimizeProTable/hooks';
+import btnStyle from '@/styles/_btn.less';
 
 declare interface IFitTableProps<T> extends TableProps<T> {
     bottom?: number;
     minHeight?: number;
     autoFitY?: boolean;
 }
+
+export const showTotal = (total: number) => {
+    return <span>共有{total}条</span>;
+};
+
+export const goButton = <Button className={btnStyle.btnGo}>Go</Button>;
 
 function FitTable<T extends object>({
     bottom = 0,
