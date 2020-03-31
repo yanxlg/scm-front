@@ -14,7 +14,7 @@ import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
 import { useList } from '@/utils/hooks';
-import { goButton, showTotal } from '@/components/ProTable';
+import { goButton, showTotal } from '@/components/FitTable';
 import LoadingButton from '@/components/LoadingButton';
 import { RequestPagination } from '@/interface/IGlobal';
 import { SearchOutlined } from '@ant-design/icons/lib';

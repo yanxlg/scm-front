@@ -15,7 +15,7 @@ import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/co
 import { useList } from '@/utils/hooks';
 import { IStockRequest, IStockItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
-import { goButton, showTotal } from '@/components/ProTable';
+import { goButton, showTotal } from '@/components/FitTable';
 import LoadingButton from '@/components/LoadingButton';
 import { SearchOutlined } from '@ant-design/icons/lib';
 import { Icons } from '@/components/Icon';
