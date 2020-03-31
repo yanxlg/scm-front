@@ -68,8 +68,8 @@ export type FormField<T = string> = (
     form?: FormInstance;
 };
 
-declare interface SearchFormProps extends FormProps, CustomFormProps {
-    fieldList: Array<FormField>;
+declare interface SearchFormProps<T = any> extends FormProps, CustomFormProps {
+    fieldList: Array<FormField<T>>;
     rowHeight?: number; // 行高，默认为60
     defaultCollapse?: boolean; // 初始状态，默认为true
     enableCollapse?: boolean; // 默认为true
