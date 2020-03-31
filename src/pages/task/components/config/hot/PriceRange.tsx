@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
 import IntegerInput from '@/components/Input/IntegerInput';
 import { FormInstance } from 'antd/es/form';
-import { isNull } from '@/utils/validate';
+import { isNull } from '@/components/SearchForm/utils';
 import formStyles from '@/styles/_form.less';
 import classNames from 'classnames';
 

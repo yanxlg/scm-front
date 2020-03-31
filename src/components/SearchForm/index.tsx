@@ -55,15 +55,15 @@ export declare interface CustomFormProps {
     labelClassName?: string;
 }
 
-export type FormField = (
-    | Omit<InputProps, 'form'>
-    | Omit<SelectProps, 'form'>
-    | Omit<CheckboxProps, 'form'>
-    | Omit<DatePickerProps, 'form'>
-    | Omit<DateRangerProps, 'form'>
-    | Omit<CheckboxGroupProps, 'form'>
-    | Omit<RadioGroupProps, 'form'>
-    | Omit<InputRangeProps, 'form'>
+export type FormField<T = string> = (
+    | Omit<InputProps<T>, 'form'>
+    | Omit<SelectProps<T>, 'form'>
+    | Omit<CheckboxProps<T>, 'form'>
+    | Omit<DatePickerProps<T>, 'form'>
+    | Omit<DateRangerProps<T>, 'form'>
+    | Omit<CheckboxGroupProps<T>, 'form'>
+    | Omit<RadioGroupProps<T>, 'form'>
+    | Omit<InputRangeProps<T>, 'form'>
 ) & {
     form?: FormInstance;
 };
@@ -77,7 +77,7 @@ declare interface SearchFormProps extends FormProps, CustomFormProps {
     itemRow?: RowProps;
 }
 
-export type FormItemName = string;
+export type FormItemName<T = string> = T;
 
 export declare interface CustomFormProps {
     labelClassName?: string;
@@ -400,3 +400,5 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
 };
 
 export default forwardRef(SearchForm);
+
+export * from './utils';

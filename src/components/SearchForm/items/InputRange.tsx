@@ -5,21 +5,20 @@ import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance, Rule } from 'antd/es/form';
 import formStyles from '@/styles/_form.less';
 import styles from '@/styles/_index.less';
-// transNullValue,
-import { transNumber } from '@/utils/transform';
+import { transNumber } from '../utils';
 
 export type InputRangeType = 'inputRange';
 const typeList = ['inputRange'];
 
-export type InputRangeProps = FormItemLabelProps &
+export type InputRangeProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
         form: FormInstance;
         type: InputRangeType;
         placeholder?: string;
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        name: [FormItemName, FormItemName];
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        name: [FormItemName<T>, FormItemName];
         formatter?: any;
         precision?: number;
         rules?: [Rule[], Rule[]];
@@ -44,7 +43,7 @@ const FormInputRange = (props: InputRangeProps) => {
                         return Promise.resolve();
                     },
                 }),
-            ],
+            ] as Rule[],
             [
                 ({ getFieldValue, validateFields }) => ({
                     validator(rule, value) {
@@ -60,7 +59,7 @@ const FormInputRange = (props: InputRangeProps) => {
                         return Promise.reject('请检查范围区间!');
                     },
                 }),
-            ],
+            ] as Rule[],
         ],
     } = props;
 

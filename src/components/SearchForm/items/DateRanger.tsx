@@ -3,8 +3,7 @@ import React, { useMemo } from 'react';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance, Rule } from 'antd/es/form';
-import { transNullValue } from '@/utils/transform';
-import { transEndDate, transStartDate } from '@/utils/date';
+import { transNullValue, transEndDate, transStartDate } from '../utils';
 import formStyles from '@/styles/_form.less';
 import styles from '@/styles/_index.less';
 import classNames from 'classnames';
@@ -14,15 +13,15 @@ export type DateRangerFormatter = 'start_date' | 'end_date';
 export type DateRangerType = 'dateRanger';
 const typeList = ['dateRanger'];
 
-export type DateRangerProps = FormItemLabelProps &
+export type DateRangerProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
         form: FormInstance;
         type: DateRangerType;
         placeholder?: string;
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        name: [FormItemName, FormItemName];
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        name: [FormItemName<T>, FormItemName<T>];
         formatter?: [DateRangerFormatter, DateRangerFormatter];
         rules?: [Rule[], Rule[]];
     };

@@ -8,14 +8,14 @@ import { RadioGroupProps as AntdRadioGroupProps } from 'antd/lib/radio/interface
 export type RadioGroupType = 'radioGroup';
 const typeList = ['radioGroup'];
 
-export type RadioGroupProps = FormItemLabelProps &
+export type RadioGroupProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
         form: FormInstance;
         type: RadioGroupType;
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        name: FormItemName;
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        name: FormItemName<T>;
         formatter?: undefined;
         rules?: Rule[];
     } & AntdRadioGroupProps;

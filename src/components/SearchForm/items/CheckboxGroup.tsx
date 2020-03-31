@@ -8,14 +8,14 @@ import { CheckboxGroupProps as AntdCheckboxGroupProps } from 'antd/lib/checkbox/
 export type CheckboxGroupType = 'checkboxGroup';
 const typeList = ['checkboxGroup'];
 
-export type CheckboxGroupProps = FormItemLabelProps &
+export type CheckboxGroupProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
         form: FormInstance;
         type: CheckboxGroupType;
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        name: FormItemName;
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        name: FormItemName<T>;
         formatter?: undefined;
         rules?: Rule[];
     } & AntdCheckboxGroupProps;

@@ -11,7 +11,7 @@ import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessMod
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { AutoPurchaseTaskType, TaskStatusCode, TaskStatusMap } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { transStartDate } from '@/utils/date';
+import { transStartDate } from '@/components/SearchForm/utils';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { IResponse } from '@/interface/IGlobal';
 import { ITaskDetailResponse } from '@/interface/ITask';
