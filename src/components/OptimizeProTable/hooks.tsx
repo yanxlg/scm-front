@@ -154,7 +154,11 @@ function useRowSelection<T, U>(
     }, [rowKey, fixed, columnWidth, dataSource]);
 
     const optimizeColumns = useMemo(() => {
-        return columns.length === 0 ? [] : [addRow as ProColumns<T>].concat(columns);
+        return columns.length === 0
+            ? []
+            : addRow
+            ? [addRow as ProColumns<T>].concat(columns)
+            : columns;
     }, [addRow, columns, dataSource]);
 
     return !optimize
