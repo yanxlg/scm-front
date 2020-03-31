@@ -592,7 +592,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     currentRowData={currentEditGoods}
                     hideSkuDialog={this.hideSkuDialog}
                 />
-                <GoodsMergeDialog ref={this.goodsMergeRef} />
+                <GoodsMergeDialog onReload={this.onReload} ref={this.goodsMergeRef} />
             </>
         );
     }

@@ -7,6 +7,7 @@ import {
     putGoodsMergeMain,
     delGoodsMergeDelete,
     getGoodsMergeList,
+    putGoodsMergeAdd,
 } from '@/services/goods';
 
 const { TextArea } = Input;
@@ -22,16 +23,21 @@ declare interface IGoodsSnItem {
     type: IProductType;
 }
 
+declare interface IProps {
+    onReload(): void;
+}
+
 declare interface IState {
     visible: boolean;
     loading: boolean;
+    isChange: boolean; // 记录当前弹框是否有改变关联关系
     productSn: string;
     commodityIds: string;
     mainCommodityId: string;
     goodsSnList: IGoodsSnItem[];
 }
 
-class MergeDialog extends React.PureComponent<{}, IState> {
+class MergeDialog extends React.PureComponent<IProps, IState> {
     private columns: ColumnProps<IGoodsSnItem>[] = [
         {
             key: 'commodityId',
@@ -92,11 +98,12 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         },
     ];
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             visible: false,
             loading: false,
+            isChange: false,
             productSn: '',
             mainCommodityId: '',
             commodityIds: '',
@@ -120,7 +127,7 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         });
         getGoodsMergeList(productSn)
             .then(res => {
-                console.log('getGoodsMergeList', res);
+                // console.log('getGoodsMergeList', res);
                 const { productGroup, mainProductGroup, subProductGroup } = res.data;
                 // const { list } = res.data;
                 this.setState({
@@ -149,9 +156,12 @@ class MergeDialog extends React.PureComponent<{}, IState> {
     };
 
     private handleCancel = () => {
+        const { isChange } = this.state;
+        isChange && this.props.onReload();
         this.setState({
             visible: false,
             loading: false,
+            isChange: false,
             productSn: '',
             commodityIds: '',
             goodsSnList: [],
@@ -159,20 +169,53 @@ class MergeDialog extends React.PureComponent<{}, IState> {
     };
 
     private handleOk = () => {
-        // 校验数字字符
-        const { commodityIds, mainCommodityId } = this.state;
-        if (/[^0-9\,]/.test(commodityIds)) {
-            return message.error('commodity_id输入了非法字符，只支持检索数字！');
-        }
+        const { productSn } = this.state;
         this.setState({
             loading: true,
         });
+        productSn ? this.putGoodsMergeAdd() : this.postGoodsMerge();
+    };
+
+    // 首次关联
+    postGoodsMerge = () => {
+        const { commodityIds, mainCommodityId } = this.state;
         postGoodsMerge({
             main_commodity_id: mainCommodityId,
             merge_commodity_ids: commodityIds.split(','),
         })
             .then(res => {
-                this.handleCancel();
+                this.setState(
+                    {
+                        isChange: true,
+                    },
+                    () => {
+                        this.handleCancel();
+                    },
+                );
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
+
+    // 关联后新增
+    putGoodsMergeAdd = () => {
+        const { commodityIds, productSn } = this.state;
+        putGoodsMergeAdd({
+            product_sn: productSn,
+            commodity_ids: commodityIds.split(','),
+        })
+            .then(res => {
+                this.setState(
+                    {
+                        isChange: true,
+                    },
+                    () => {
+                        this.handleCancel();
+                    },
+                );
             })
             .finally(() => {
                 this.setState({
@@ -192,6 +235,7 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         })
             .then(() => {
                 this.setState({
+                    isChange: true,
                     mainCommodityId: mainCommodityId,
                     goodsSnList: goodsSnList.map(item => {
                         const { type, commodityId } = item;
@@ -229,6 +273,7 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         })
             .then(() => {
                 this.setState({
+                    isChange: true,
                     goodsSnList: goodsSnList.filter(item => item.commodityId !== commodityId),
                 });
             })

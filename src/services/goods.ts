@@ -233,7 +233,7 @@ export async function getGoodsSkuList(params: ISkuParams) {
     });
 }
 
-// 合并商品
+// 首次合并商品
 export async function postGoodsMerge(data: {
     main_commodity_id: string;
     merge_commodity_ids: string[];
@@ -260,4 +260,28 @@ export async function delGoodsMergeDelete(data: { product_sn: string; commodity_
 // 查询合并商品列表
 export async function getGoodsMergeList(product_sn: string) {
     return request.get(LocalApiPath.getGoodsMergeList.replace(':id', product_sn));
+}
+
+// 合并商品后新增关联
+export async function putGoodsMergeAdd(data: { product_sn: string; commodity_ids: string[] }) {
+    return request.put(LocalApiPath.putGoodsMergeAdd, {
+        data,
+    });
+}
+
+// 获取所有
+export async function getGoodsStatusList() {
+    return request.get(LocalApiPath.getGoodsStatusList).then((res: any) => {
+        // console.log('getGoodsStatusList', res);
+        // // const { data } = res;
+        // // return {
+        // //     list: data,
+        // //     convertList: convertCategory(data),
+        // // };
+        // return res
+        return res.data.result.map((item: any) => ({
+            name: item.msg,
+            value: item.code,
+        }));
+    });
 }
