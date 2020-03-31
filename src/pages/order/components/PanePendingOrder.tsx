@@ -66,7 +66,7 @@ const fieldList: FormField[] = [
     },
     {
         type: 'dateRanger',
-        name: ['order_start_time', 'order_end_time'],
+        name: ['order_time_start', 'order_time_end'],
         label: '订单时间',
         className: 'order-pending-date-picker',
         formItemClassName: 'form-item',

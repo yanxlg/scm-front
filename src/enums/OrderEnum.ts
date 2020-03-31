@@ -18,7 +18,7 @@ export const channelOptionList = [
 export const orderStatusOptionList = [
     { name: '已确认', value: 1 },
     { name: '已取消', value: 2 },
-    { name: '采购失败', value: 3 },
+    // { name: '采购失败', value: 3 },
 ];
 
 export const orderShippingOptionList = [
