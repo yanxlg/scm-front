@@ -38,18 +38,17 @@ import FormInputRange, {
 import { Store, ValidateFields } from 'rc-field-form/lib/interface';
 import { FormInstance } from 'antd/es/form';
 import RcResizeObserver from 'rc-resize-observer';
-
-import '@/styles/index.less';
-import '@/styles/form.less';
+import './index.less';
 import { UpOutlined, DownOutlined } from '@ant-design/icons';
 import { ColProps } from 'antd/lib/grid/col';
 import { RowProps } from 'antd/lib/grid/row';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import FormCheckboxGroup, {
     CheckboxGroupProps,
     CheckboxGroupType,
 } from '@/components/SearchForm/items/CheckboxGroup';
 import FormRadioGroup, { RadioGroupProps, RadioGroupType } from './items/RadioGroup';
+import classNames from 'classnames';
 
 export declare interface CustomFormProps {
     labelClassName?: string;
@@ -207,7 +206,7 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
                 >
                     <Button
                         type="link"
-                        className="form-item"
+                        className={formStyles.formItem}
                         style={{ float: 'right' }}
                         onClick={onCollapseChange}
                     >
@@ -355,8 +354,11 @@ const SearchForm: ForwardRefRenderFunction<SearchFormRef, SearchFormProps> = (pr
             );
         } else {
             return (
-                <div className="flex flex-1">
-                    <div className="flex-1 flex-row" style={{ flexWrap: 'wrap' }}>
+                <div className={classNames(formStyles.flex, formStyles.flex1)}>
+                    <div
+                        className={classNames(formStyles.flex1, formStyles.flexRow)}
+                        style={{ flexWrap: 'wrap' }}
+                    >
                         {fromItemList}
                     </div>
                     {children}

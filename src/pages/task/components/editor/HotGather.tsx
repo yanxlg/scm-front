@@ -3,7 +3,7 @@ import { Button, Input, Select, Spin, Tooltip, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { addPddHotTask, querySortCondition, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';

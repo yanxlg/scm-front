@@ -3,7 +3,7 @@ import { Form, InputNumber } from 'antd';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance, Rule } from 'antd/es/form';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import styles from '@/styles/_index.less';
 import { transNumber } from '../utils';
 

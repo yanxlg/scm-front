@@ -3,7 +3,7 @@ import { Form } from 'antd';
 import IntegerInput from '@/components/Input/IntegerInput';
 import { FormInstance } from 'antd/es/form';
 import { isNull } from '@/components/SearchForm/utils';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import classNames from 'classnames';
 
 declare interface PriceRangeProps {

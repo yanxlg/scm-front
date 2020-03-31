@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import queryString from 'query-string';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';

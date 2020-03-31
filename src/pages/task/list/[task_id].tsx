@@ -7,7 +7,7 @@ import '@/styles/card.less';
 import { TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';
 import CopyLink from '@/components/copyLink';
 import { RouteComponentProps } from 'react-router';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 import styles from '@/styles/_index.less';
 import TaskInfo from '@/pages/task/components/detail/TaskInfo';
 import TaskProgress  from '../components/detail/TaskProgress';

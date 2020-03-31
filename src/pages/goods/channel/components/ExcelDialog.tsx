@@ -4,7 +4,7 @@ import { RadioChangeEvent } from 'antd/lib/radio';
 import { SearchFormRef } from '@/components/SearchForm';
 import { exportChannelProductList } from '@/services/channel';
 import channelStyles from '@/styles/_channel.less';
-import formStyles from '@/styles/_form.less';
+import formStyles from '@/components/SearchForm/_form.less';
 
 declare interface IExcelDialogProps {
     visible: boolean;
