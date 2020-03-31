@@ -211,14 +211,18 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const { query, loading, pageNumber, pageSize, dataSource, total, onSearch, onChange } = useList<
         IStockInItem | IStockOutItem,
         IStockINFormData & RequestPagination
-    >(type === StockType.In ? queryInList : queryOutList, formRef, undefined, {
-        pageSize: page_size,
-        pageNumber: page_number,
+    >({
+        queryList: type === StockType.In ? queryInList : queryOutList,
+        formRef: formRef,
+        defaultState: {
+            pageSize: page_size,
+            pageNumber: page_number,
+        },
     });
 
     const getCopiedLinkQuery = useCallback(() => {
         return {
-            ...query.current,
+            ...query,
             tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
         };
     }, []);
@@ -262,8 +266,8 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     </LoadingButton>
                     <Pagination
                         className="float-right form-item"
-                        pageSize={pageSize.current}
-                        current={pageNumber.current}
+                        pageSize={pageSize}
+                        current={pageNumber}
                         total={total}
                         pageSizeOptions={defaultPageSizeOptions}
                         onChange={onPageChange}

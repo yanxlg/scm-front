@@ -1,7 +1,10 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { Table } from 'antd';
 import { TableProps } from 'antd/lib/table';
 import { useScrollXY } from '@/components/OptimizeProTable/hooks';
+import { PaginationConfig } from 'antd/es/pagination';
+import { Key, SorterResult, TableCurrentDataSource } from 'antd/lib/table/interface';
+import { TablePaginationConfig } from 'antd/es/table';
 
 declare interface IFitTableProps<T> extends TableProps<T> {
     bottom?: number;
@@ -28,6 +31,7 @@ function FitTable<T extends object>({
         rowSelection,
         propsScroll,
     );
+
     return useMemo(() => {
         return (
             <div ref={ref}>

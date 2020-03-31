@@ -156,20 +156,19 @@ const StockControl: React.FC = () => {
     const { query, loading, pageNumber, pageSize, dataSource, total, onSearch, onChange } = useList<
         IStockItem,
         IStockRequest & RequestPagination
-    >(
-        queryStockList,
-        formRef,
-        undefined,
-        {
+    >({
+        queryList: queryStockList,
+        formRef: formRef,
+        defaultState: {
             pageSize: page_size,
             pageNumber: page_number,
         },
-        false,
-    );
+        autoQuery: false,
+    });
 
     const getCopiedLinkQuery = useCallback(() => {
         return {
-            ...query.current,
+            ...query,
             tabKey: '3',
         };
     }, []);
@@ -225,8 +224,8 @@ const StockControl: React.FC = () => {
                     </SearchForm>
                     <Pagination
                         className="float-right form-item"
-                        pageSize={pageSize.current}
-                        current={pageNumber.current}
+                        pageSize={pageSize}
+                        current={pageNumber}
                         total={total}
                         pageSizeOptions={defaultPageSizeOptions}
                         onChange={onPageChange}

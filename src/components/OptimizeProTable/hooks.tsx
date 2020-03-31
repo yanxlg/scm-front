@@ -180,7 +180,7 @@ function useScrollXY<T>(
         scrollToFirstRowOnChange?: boolean;
     },
 ) {
-    const [y, setY] = useState<number | undefined>(undefined);
+    const [y, setY] = useState<number | undefined | string>(scroll?.y);
 
     const scrollX = useMemo(() => {
         if (scroll?.x === true || scroll?.x === 'max-content') {

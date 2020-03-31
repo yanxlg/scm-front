@@ -1,20 +1,16 @@
-import React, { RefObject, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import '@/styles/form.less';
 import channelStyles from '@/styles/_channel.less';
-import { Modal, message, Button, Pagination } from 'antd';
-import { BindAll } from 'lodash-decorators';
-import { FitTable } from '@/components/FitTable';
-import { ColumnProps, TableProps } from 'antd/es/table';
-import { TaskStatusEnum } from '@/enums/StatusEnum';
+import { Modal, message, Button } from 'antd';
+import { TableProps } from 'antd/es/table';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import AutoEnLargeImg from '@/components/AutoEnLargeImg';
 import {
     queryChannelGoodsList,
-    exportChannelProductList,
     updateChannelShelveState,
     queryChannelCategory,
     queryShopList,
@@ -26,8 +22,8 @@ import {
     checkLowerShelf,
     checkUpperShelf,
 } from '@/config/dictionaries/Product';
-import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
-import { IChannelProductListItem, IChannelCategoryItem } from '@/interface/IChannel';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
+import { IChannelProductListItem } from '@/interface/IChannel';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { convertEndDate, convertStartDate } from '@/utils/date';
 import queryString from 'query-string';
@@ -36,16 +32,16 @@ import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
 import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
-import { ITaskListExtraData, ITaskListItem, ITaskListQuery } from '@/interface/ITask';
-import { getTaskList } from '@/services/task';
+import { ITaskListItem } from '@/interface/ITask';
 import LoadingButton from '@/components/LoadingButton';
 import { SearchOutlined } from '@ant-design/icons';
-import ProTable from '@/components/ProTable';
-import { ProColumns } from '@ant-design/pro-table';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
-import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import { Icons } from '@/components/Icon';
+import ProTable, { ProColumns } from '@/components/OptimizeProTable';
+import formStyles from '@/styles/_form.less';
+import styles from '@/styles/_index.less';
+import classNames from 'classnames';
 
 const salesVolumeList = [
     {
@@ -96,7 +92,7 @@ const formFields: FormField[] = [
         name: ['onshelf_time_start', 'onshelf_time_end'],
         label: <span>时&emsp;&emsp;&emsp;间</span>,
         className: 'product-picker',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
         formatter: ['start_date', 'end_date'],
     },
     {
@@ -105,7 +101,7 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'input-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
     },
     {
         type: 'input',
@@ -113,7 +109,7 @@ const formFields: FormField[] = [
         name: 'vova_virtual_id',
         placeholder: '多个逗号隔开',
         className: 'input-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
     },
     {
         type: 'input',
@@ -121,14 +117,14 @@ const formFields: FormField[] = [
         name: 'product_id',
         placeholder: '多个逗号隔开',
         className: 'input-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
     },
     {
         type: 'select',
         label: <span>销&emsp;&emsp;&emsp;量</span>,
         name: 'sales_volume',
         className: 'select-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
         optionList: salesVolumeList,
     },
     {
@@ -137,7 +133,7 @@ const formFields: FormField[] = [
         name: 'mechant_ids',
         placeholder: '多个逗号隔开',
         className: 'select-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -154,7 +150,7 @@ const formFields: FormField[] = [
         label: '一级类目',
         name: 'level_one_category',
         className: 'select-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -169,7 +165,7 @@ const formFields: FormField[] = [
         label: '二级类目',
         name: 'level_two_category',
         className: 'select-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
         optionListDependence: {
             name: 'level_one_category',
             key: 'children',
@@ -185,7 +181,7 @@ const formFields: FormField[] = [
         label: '商品状态',
         name: 'product_status',
         className: 'select-default',
-        formItemClassName: 'form-item',
+        formItemClassName: formStyles.formItem,
         optionList: ProductStatusList.map(({ name, id }) => {
             return { name: name, value: id };
         }),
@@ -249,14 +245,16 @@ const ChannelList: React.FC = props => {
         pageSize,
         dataSource,
         total,
-        selectedRowKeys,
         onSearch,
         onReload,
         onChange,
-        setSelectedRowKeys,
-    } = useList(queryChannelGoodsList, searchRef, undefined, {
-        pageSize: page_size,
-        pageNumber: page_number,
+    } = useList({
+        queryList: queryChannelGoodsList,
+        formRef: searchRef,
+        defaultState: {
+            pageSize: page_size,
+            pageNumber: page_number,
+        },
     });
 
     const showExcelDialog = useCallback(() => {
@@ -267,7 +265,7 @@ const ChannelList: React.FC = props => {
     }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
-        return query.current;
+        return query;
     }, []);
 
     const showSkuDialog = useCallback((id: string, merchant_id: string) => {
@@ -336,67 +334,73 @@ const ChannelList: React.FC = props => {
             });
     }, []);
 
-    const onShelveList = useCallback(() => {
-        const taskBodyList = dataSource
-            .filter(item => {
-                return selectedRowKeys.indexOf(item.product_id) > -1;
-            })
-            .map(({ product_id, commodity_id, merchant_id }) => {
-                return {
-                    product_id: product_id,
-                    commodity_id: commodity_id,
-                    merchant_id: merchant_id,
-                    sale_domain: 'vova',
-                };
-            });
-        return updateChannelShelveState({
-            type: 'onsale',
-            info: {
-                onsale: {
-                    task_body_list: taskBodyList,
+    const onShelveList = useCallback(
+        (rowKeys: string[]) => {
+            const taskBodyList = dataSource
+                .filter(item => {
+                    return rowKeys.indexOf(item.product_id) > -1;
+                })
+                .map(({ product_id, commodity_id, merchant_id }) => {
+                    return {
+                        product_id: product_id,
+                        commodity_id: commodity_id,
+                        merchant_id: merchant_id,
+                        sale_domain: 'vova',
+                    };
+                });
+            return updateChannelShelveState({
+                type: 'onsale',
+                info: {
+                    onsale: {
+                        task_body_list: taskBodyList,
+                    },
                 },
-            },
-        })
-            .then(res => {
-                message.success('上架任务已发送');
-                onReload();
             })
-            .catch(() => {
-                message.error('上架任务发送失败');
-            });
-    }, [selectedRowKeys, dataSource]);
+                .then(res => {
+                    message.success('上架任务已发送');
+                    onReload();
+                })
+                .catch(() => {
+                    message.error('上架任务发送失败');
+                });
+        },
+        [dataSource],
+    );
 
-    const offShelveList = useCallback(() => {
-        const taskBodyList = dataSource
-            .filter(item => {
-                return selectedRowKeys.indexOf(item.product_id) > -1;
-            })
-            .map(({ product_id, commodity_id, merchant_id }) => {
-                return {
-                    product_id: product_id,
-                    commodity_id: commodity_id,
-                    merchant_id: merchant_id,
-                    sale_domain: 'vova',
-                };
-            });
-        return updateChannelShelveState({
-            type: 'offsale',
-            info: {
-                offsale: {
-                    task_body_list: taskBodyList,
+    const offShelveList = useCallback(
+        (rowKeys: string[]) => {
+            const taskBodyList = dataSource
+                .filter(item => {
+                    return rowKeys.indexOf(item.product_id) > -1;
+                })
+                .map(({ product_id, commodity_id, merchant_id }) => {
+                    return {
+                        product_id: product_id,
+                        commodity_id: commodity_id,
+                        merchant_id: merchant_id,
+                        sale_domain: 'vova',
+                    };
+                });
+            return updateChannelShelveState({
+                type: 'offsale',
+                info: {
+                    offsale: {
+                        task_body_list: taskBodyList,
+                    },
                 },
-            },
-        })
-            .then(res => {
-                message.success('下架任务已发送');
-                onReload();
             })
-            .catch(() => {
-                message.error('下架任务发送失败');
-            });
-    }, [selectedRowKeys, dataSource]);
+                .then(res => {
+                    message.success('下架任务已发送');
+                    onReload();
+                })
+                .catch(() => {
+                    message.error('下架任务发送失败');
+                });
+        },
+        [dataSource],
+    );
 
-    const columns = useMemo(() => {
+    const columns = useMemo<ProColumns<IChannelProductListItem>[]>(() => {
         return [
             {
                 title: '店铺名称',
@@ -507,10 +511,11 @@ const ChannelList: React.FC = props => {
             },
             {
                 title: '操作',
-                dataIndex: 'product_status',
+                dataIndex: 'operation',
                 align: 'center',
                 width: 140,
-                render: (status: ProductStatusCode, item) => {
+                render: (_, item) => {
+                    const status = item.product_status;
                     const canUpper = !checkUpperShelf(status);
                     const canDown = !checkLowerShelf(status);
                     return {
@@ -551,64 +556,28 @@ const ChannelList: React.FC = props => {
                     };
                 },
             },
-        ] as ProColumns<IChannelProductListItem>[];
-    }, []);
-
-    const onSelectChange = useCallback((selectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(selectedRowKeys as string[]);
+        ];
     }, []);
 
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
-            selectedRowKeys: selectedRowKeys,
-            onChange: onSelectChange,
         };
-    }, [selectedRowKeys]);
+    }, []);
 
     const children = useMemo(() => {
-        const rowSize = selectedRowKeys.length;
         return (
-            <div>
-                <LoadingButton
-                    type="primary"
-                    className="btn-group vertical-middle form-item"
-                    icon={<Icons type="scm-on-sale" />}
-                    onClick={onShelveList}
-                    disabled={rowSize === 0}
-                >
-                    一键上架
-                </LoadingButton>
-                <LoadingButton
-                    type="primary"
-                    className="btn-group vertical-middle form-item"
-                    icon={<Icons type="scm-of-sale" />}
-                    onClick={offShelveList}
-                    disabled={rowSize === 0}
-                >
-                    一键下架
-                </LoadingButton>
-                <LoadingButton
-                    type="primary"
-                    className="btn-group vertical-middle form-item"
-                    icon={<SearchOutlined />}
-                    onClick={onSearch}
-                >
-                    查询
-                </LoadingButton>
-                <Button
-                    disabled={total <= 0}
-                    type="primary"
-                    className="btn-group vertical-middle form-item"
-                    onClick={showExcelDialog}
-                    icon={<Icons type="scm-export" />}
-                >
-                    导出
-                </Button>
-            </div>
+            <LoadingButton
+                type="primary"
+                className={classNames(formStyles.formItem, channelStyles.channelSearch)}
+                icon={<SearchOutlined />}
+                onClick={onSearch}
+            >
+                查询
+            </LoadingButton>
         );
-    }, [selectedRowKeys, loading]);
+    }, []);
 
     const options = useMemo(() => {
         return {
@@ -619,49 +588,100 @@ const ChannelList: React.FC = props => {
         };
     }, []);
 
+    const search = useMemo(() => {
+        return (
+            <SearchForm
+                ref={searchRef}
+                fieldList={formFields}
+                labelClassName="product-form-label"
+                initialValues={defaultInitialValues}
+            >
+                {children}
+            </SearchForm>
+        );
+    }, []);
+
+    const toolBarRender = useCallback(
+        (selectedRowKeys = []) => {
+            const size = selectedRowKeys.length;
+            return [
+                <LoadingButton
+                    key="on"
+                    type="primary"
+                    className="btn-group vertical-middle"
+                    icon={<Icons type="scm-on-sale" />}
+                    onClick={() => onShelveList(selectedRowKeys)}
+                    disabled={size === 0}
+                >
+                    一键上架
+                </LoadingButton>,
+                <LoadingButton
+                    key={'of'}
+                    type="primary"
+                    className="btn-group vertical-middle"
+                    icon={<Icons type="scm-of-sale" />}
+                    onClick={() => offShelveList(selectedRowKeys)}
+                    disabled={size === 0}
+                >
+                    一键下架
+                </LoadingButton>,
+                <Button
+                    key="export"
+                    disabled={total <= 0}
+                    type="primary"
+                    className="btn-group vertical-middle"
+                    onClick={showExcelDialog}
+                    icon={<Icons type="scm-export" />}
+                >
+                    导出
+                </Button>,
+            ];
+        },
+        [loading],
+    );
+    const table = useMemo(() => {
+        return (
+            <ProTable<IChannelProductListItem>
+                headerTitle="查询表格"
+                rowKey="product_id"
+                scroll={scroll}
+                bottom={60}
+                minHeight={500}
+                rowSelection={rowSelection}
+                toolBarRender={toolBarRender}
+                className={formStyles.formItem}
+                pagination={{
+                    total: total,
+                    current: pageNumber,
+                    pageSize: pageSize,
+                    showSizeChanger: true,
+                }}
+                tableAlertRender={false}
+                columns={columns}
+                dataSource={dataSource}
+                loading={loading}
+                onChange={onChange}
+                options={options}
+            />
+        );
+    }, [loading]);
+
     const body = useMemo(() => {
         return (
             <Container>
-                <SearchForm
-                    ref={searchRef}
-                    fieldList={formFields}
-                    labelClassName="product-form-label"
-                    initialValues={defaultInitialValues}
-                >
-                    {children}
-                </SearchForm>
-                <ProTable<IChannelProductListItem>
-                    search={false}
-                    headerTitle="查询表格"
-                    rowKey="product_id"
-                    scroll={scroll}
-                    bottom={60}
-                    minHeight={500}
-                    rowSelection={rowSelection}
-                    pagination={{
-                        total: total,
-                        current: pageNumber.current,
-                        pageSize: pageSize.current,
-                        showSizeChanger: true,
-                    }}
-                    tableAlertRender={false}
-                    columns={columns}
-                    dataSource={dataSource}
-                    loading={loading}
-                    onChange={onChange}
-                    options={options}
-                />
+                {search}
+                {table}
                 <ExcelDialog
                     visible={exportDialog}
                     total={total}
                     form={searchRef}
                     onCancel={closeExcelDialog}
                 />
-                <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
                 <SkuEditModal ref={skuRef} />
+                <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog, selectedRowKeys]);
+    }, [loading, exportDialog]);
 
     return <>{body}</>;
 };

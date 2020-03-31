@@ -6,13 +6,19 @@ import { SearchFormRef } from '@/components/SearchForm';
 
 const EmptyArray: string[] = [];
 
-function useList<T, Q extends RequestPagination = any, S = any>(
-    queryList: (query: Q) => Promise<IResponse<IPaginationResponse<T>>>,
-    searchRef?: RefObject<SearchFormRef>,
-    extraQuery?: { [key: string]: any },
-    defaultState?: { pageNumber?: number; pageSize?: number },
+function useList<T, Q extends RequestPagination = any, S = any>({
+    queryList,
+    formRef,
+    extraQuery,
+    defaultState,
     autoQuery = true,
-) {
+}: {
+    queryList: (query: Q) => Promise<IResponse<IPaginationResponse<T>>>;
+    formRef?: RefObject<SearchFormRef>;
+    extraQuery?: { [key: string]: any };
+    defaultState?: { pageNumber?: number; pageSize?: number };
+    autoQuery?: boolean;
+}) {
     const [loading, setLoading] = useState(autoQuery);
 
     const extraQueryRef = useRef<{ [key: string]: any } | undefined>(undefined);
@@ -20,9 +26,7 @@ function useList<T, Q extends RequestPagination = any, S = any>(
 
     const pageNumber = useRef<number>(defaultState?.pageNumber ?? defaultPageNumber);
     const pageSize = useRef<number>(defaultState?.pageSize ?? defaultPageSize);
-    // optimize pageNumber pageSize 静态管理，不进行状态更新，所有更新都通过loading来控制
-    // const [pageNumber, setPageNumber] = useState(defaultState?.pageNumber ?? defaultPageNumber);
-    // const [pageSize, setPageSize] = useState(defaultState?.pageSize ?? defaultPageSize);
+
     const [dataSource, setDataSource] = useState<T[]>([]);
     const [total, setTotal] = useState(0);
     const [extraData, setExtraData] = useState<S | undefined>(undefined);
@@ -41,7 +45,7 @@ function useList<T, Q extends RequestPagination = any, S = any>(
         }: { page?: number; page_count?: number; [key: string]: any } = {}) => {
             return Promise.resolve()
                 .then(() => {
-                    return searchRef ? searchRef.current!.validateFields() : undefined;
+                    return formRef ? formRef.current!.validateFields() : undefined;
                 })
                 .then(formValues => {
                     setLoading(true);
@@ -111,10 +115,16 @@ function useList<T, Q extends RequestPagination = any, S = any>(
     }, []);
 
     return {
-        query,
+        get query() {
+            return query.current;
+        },
+        get pageNumber() {
+            return pageNumber.current;
+        },
+        get pageSize() {
+            return pageSize.current;
+        },
         loading,
-        pageNumber,
-        pageSize,
         dataSource,
         extraData,
         total,

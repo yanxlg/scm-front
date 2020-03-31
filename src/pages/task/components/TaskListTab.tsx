@@ -90,27 +90,25 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         pageSize,
         dataSource,
         extraData,
-        selectedRowKeys,
         total,
         onSearch,
         onReload,
         onChange,
-        setSelectedRowKeys,
-    } = useList<ITaskListItem, ITaskListQuery, ITaskListExtraData>(
-        getTaskList,
-        searchRef,
-        {
+    } = useList<ITaskListItem, ITaskListQuery, ITaskListExtraData>({
+        queryList: getTaskList,
+        formRef: searchRef,
+        extraQuery: {
             task_status: task_status,
         },
-        {
+        defaultState: {
             pageSize: page_size,
             pageNumber: page_number,
         },
-    );
+    });
 
     const getCopiedLinkQuery = useCallback(() => {
         return {
-            ...query.current,
+            ...query,
             tabKey:
                 task_status === void 0
                     ? '1'
@@ -549,23 +547,18 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         });
     }, []);
 
-    const onSelectChange = useCallback((selectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(selectedRowKeys as string[]); // 仅用于保存
-    }, []);
-
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
-            onChange: onSelectChange,
         };
     }, []);
 
     const pagination = useMemo(() => {
         return {
             total: total,
-            current: pageNumber.current,
-            pageSize: pageSize.current,
+            current: pageNumber,
+            pageSize: pageSize,
             showSizeChanger: true,
         };
     }, [loading]);
@@ -579,6 +572,29 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         };
     }, [onReload]);
 
+    const toolBarRender = useCallback((selectedRowKeys = []) => {
+        const size = selectedRowKeys.length;
+        return [
+            <PopConfirmLoadingButton
+                key="delete"
+                buttonProps={{
+                    danger: true,
+                    type: 'link',
+                    className: 'btn-clear btn-group',
+                    disabled: size === 0,
+                    children: '删除任务',
+                }}
+                popConfirmProps={{
+                    title: '确定要删除选中的任务吗?',
+                    okText: '确定',
+                    cancelText: '取消',
+                    disabled: size === 0,
+                    onConfirm: () => deleteTaskList(selectedRowKeys),
+                }}
+            />,
+        ];
+    }, []);
+
     const table = useMemo(() => {
         return (
             <ProTable<ITaskListItem>
@@ -590,28 +606,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 bottom={60}
                 minHeight={500}
                 pagination={pagination}
-                toolBarRender={(selectedRowKeys = []) => {
-                    const size = selectedRowKeys.length;
-                    return [
-                        <PopConfirmLoadingButton
-                            key="delete"
-                            buttonProps={{
-                                danger: true,
-                                type: 'link',
-                                className: 'btn-clear btn-group',
-                                disabled: size === 0,
-                                children: '删除任务',
-                            }}
-                            popConfirmProps={{
-                                title: '确定要删除选中的任务吗?',
-                                okText: '确定',
-                                cancelText: '取消',
-                                disabled: size === 0,
-                                onConfirm: () => deleteTaskList(selectedRowKeys),
-                            }}
-                        />,
-                    ];
-                }}
+                toolBarRender={toolBarRender}
                 tableAlertRender={false}
                 columns={columns}
                 dataSource={dataSource}
@@ -622,24 +617,29 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         );
     }, [loading]);
 
+    const search = useMemo(() => {
+        return (
+            <SearchForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
+                <LoadingButton
+                    className="form-item"
+                    onClick={onSearch}
+                    type="primary"
+                    icon={<SearchOutlined />}
+                >
+                    查询
+                </LoadingButton>
+            </SearchForm>
+        );
+    }, []);
     return useMemo(() => {
         return (
             <div>
-                <SearchForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
-                    <LoadingButton
-                        className="form-item"
-                        onClick={onSearch}
-                        type="primary"
-                        icon={<SearchOutlined />}
-                    >
-                        查询
-                    </LoadingButton>
-                </SearchForm>
+                {search}
                 {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading]);
 };
 
 export default TaskListTab;

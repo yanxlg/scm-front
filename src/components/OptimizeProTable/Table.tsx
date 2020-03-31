@@ -435,7 +435,7 @@ const ProTable = <T extends {}, U extends object>(
                 />
             );
         }
-    }, [size, optimize ? undefined : selectedRowKeys, tableColumns, options]);
+    }, [size, optimize ? undefined : selectedRowKeys, tableColumns, options, toolBarRender]);
 
     /************************alert 处理***********************/
     const alertRef = useRef<TableAlertRef>(null); // 优化模式用于动态修改selectedRowKeys
