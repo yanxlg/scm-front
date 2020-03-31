@@ -56,14 +56,14 @@ const fieldList: FormField[] = [
         formItemClassName: 'form-item',
         optionList: [defaultOptionItem, ...channelOptionList],
     },
-    {
-        type: 'select',
-        name: 'order_goods_status',
-        label: '中台订单状态',
-        className: 'order-input',
-        formItemClassName: 'form-item',
-        optionList: [defaultOptionItem, ...orderStatusOptionList],
-    },
+    // {
+    //     type: 'select',
+    //     name: 'order_goods_status',
+    //     label: '中台订单状态',
+    //     className: 'order-input',
+    //     formItemClassName: 'form-item',
+    //     optionList: [defaultOptionItem, ...orderStatusOptionList],
+    // },
     {
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
@@ -106,7 +106,7 @@ class PanePendingOrder extends React.PureComponent<IProps, IState> {
     private currentSearchParams: IPendingFilterParams | null = null;
     private initialValues = {
         channel_source: 100,
-        order_goods_status: 100,
+        // order_goods_status: 100,
     };
 
     constructor(props: IProps) {

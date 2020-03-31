@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Modal, Input, Spin, Table, Button, message } from 'antd';
+import { Modal, Input, Table, Button, notification } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 import {
@@ -87,7 +87,7 @@ class MergeDialog extends React.PureComponent<IProps, IState> {
                                 设为主商品
                             </Button>
                         </div>
-                        <div style={{ marginTop: -10 }}>
+                        <div style={{ marginTop: -4 }}>
                             <Button type="link" onClick={() => this.delGoodsRef(commodityId)}>
                                 删除关联
                             </Button>
@@ -184,6 +184,17 @@ class MergeDialog extends React.PureComponent<IProps, IState> {
             merge_commodity_ids: commodityIds.split(','),
         })
             .then(res => {
+                const { commodityId, productSn } = res.data;
+                notification.success({
+                    message: '关联商品成功',
+                    duration: 8,
+                    description: (
+                        <>
+                            <p>Commodity ID: {commodityId.parts[0]}</p>
+                            <p>Product SN: {productSn.parts[0]}</p>
+                        </>
+                    ),
+                });
                 this.setState(
                     {
                         isChange: true,
@@ -208,6 +219,10 @@ class MergeDialog extends React.PureComponent<IProps, IState> {
             commodity_ids: commodityIds.split(','),
         })
             .then(res => {
+                notification.success({
+                    message: '新增关联商品成功',
+                    duration: 3,
+                });
                 this.setState(
                     {
                         isChange: true,
@@ -234,28 +249,16 @@ class MergeDialog extends React.PureComponent<IProps, IState> {
             main_commodity_id: mainCommodityId,
         })
             .then(() => {
-                this.setState({
-                    isChange: true,
-                    mainCommodityId: mainCommodityId,
-                    goodsSnList: goodsSnList.map(item => {
-                        const { type, commodityId } = item;
-                        if (type === '2') {
-                            return {
-                                ...item,
-                                type: '3',
-                            };
-                        }
-                        if (mainCommodityId === commodityId) {
-                            return {
-                                ...item,
-                                type: '2',
-                            };
-                        }
-                        return item;
-                    }),
-                });
+                this.setState(
+                    {
+                        isChange: true,
+                    },
+                    () => {
+                        this.getGoodsList(productSn);
+                    },
+                );
             })
-            .finally(() => {
+            .catch(() => {
                 this.setState({
                     loading: false,
                 });
