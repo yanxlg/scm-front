@@ -24,7 +24,6 @@ import { IGoodsList, ISkuItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import {
     defaultOption,
     inventoryStatusList,
-    productStatusList,
     versionStatusList,
     publishChannelStatusList,
 } from '@/enums/LocalGoodsEnum';

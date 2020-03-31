@@ -1,4 +1,6 @@
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -6,16 +8,19 @@ body {
   margin: 0;
 }
 
-.relative{
-    position: relative;
+.relative {
+  position: relative;
 }
 
-
-.ant-pro-basicLayout-content{
-    background: #fff;
+.ant-pro-basicLayout-content {
+  background: #fff;
 }
-
-/****************fix pro table style**************/
+/**************** fix pro table style **************/
 .ant-pro-table .ant-table-row .ant-table-cell:first-child {
-    padding: 16px 16px!important;
+  padding: 16px 16px!important;
+}
+
+.ant-pro-table .ant-popover-inner-content {
+  max-height: 400px;
+  overflow: auto;
 }
