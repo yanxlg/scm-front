@@ -8,6 +8,7 @@ import {
     orderStatusOptionList,
     purchaseOrderOptionList,
     purchaseShippingOptionList,
+    purchasePayOptionList,
 } from '@/enums/OrderEnum';
 
 declare interface IProps {
@@ -34,9 +35,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderCreateTime',
             align: 'center',
             width: 120,
-            render: (value: number, row: IOrderItem) => {
-                return value;
-            },
+            render: (value: string) => utcToLocal(value),
         },
         {
             key: 'productId',
@@ -97,6 +96,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'platformOrderTime',
             align: 'center',
             width: 120,
+            render: (value: string) => utcToLocal(value),
         },
         {
             key: 'purchaseOrderStatus',
@@ -104,20 +104,27 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
             width: 120,
-        },
-        {
-            key: 'payTime',
-            title: '采购支付状态',
-            dataIndex: 'payTime',
-            align: 'center',
-            width: 120,
+            render: (value: number, row: IOrderItem) => {
+                return getStatusDesc(purchaseOrderOptionList, value);
+            },
         },
         {
             key: 'purchaseOrderPayStatus',
-            title: '采购支付时间',
+            title: '采购支付状态',
             dataIndex: 'purchaseOrderPayStatus',
             align: 'center',
             width: 120,
+            render: (value: number, row: IOrderItem) => {
+                return getStatusDesc(purchasePayOptionList, value);
+            },
+        },
+        {
+            key: 'payTime',
+            title: '采购支付时间',
+            dataIndex: 'payTime',
+            align: 'center',
+            width: 120,
+            render: (value: string) => utcToLocal(value),
         },
         {
             key: 'purchaseOrderShippingStatus',
@@ -125,6 +132,9 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseOrderShippingStatus',
             align: 'center',
             width: 120,
+            render: (value: number, row: IOrderItem) => {
+                return getStatusDesc(purchaseShippingOptionList, value);
+            },
         },
 
         {
@@ -133,6 +143,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
+            render: (value: string) => utcToLocal(value),
         },
         {
             key: 'channelOrderSn',
