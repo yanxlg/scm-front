@@ -7,6 +7,7 @@ import { useList } from '@/utils/hooks';
 import ProTable from '@/components/ProTable';
 import { ConfigProvider, Statistic } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
+import { FitTable } from '@/components/FitTable';
 
 declare interface ShipFeeModalProps {
     product_id: string;
@@ -37,15 +38,17 @@ const columns: ColumnProps<IRegionShippingFeeItem>[] = [
 const ShipFeeModal: React.FC<ShipFeeModalProps> = ({ product_id, merchant_id }) => {
     const { loading, dataSource, pageNumber, pageSize, total, onChange } = useList<
         IRegionShippingFeeItem
-    >(queryRegionShippingFee, undefined, {
-        product_id: product_id,
-        merchant_id: merchant_id,
+    >({
+        queryList: queryRegionShippingFee,
+        extraQuery: {
+            product_id: product_id,
+            merchant_id: merchant_id,
+        },
     });
     return useMemo(() => {
         return (
             <ConfigProvider locale={zhCN}>
-                <ProTable<IRegionShippingFeeItem>
-                    search={false}
+                <FitTable<IRegionShippingFeeItem>
                     rowKey="country_code"
                     scroll={{ y: 280, scrollToFirstRowOnChange: true }}
                     autoFitY={false}
@@ -57,13 +60,10 @@ const ShipFeeModal: React.FC<ShipFeeModalProps> = ({ product_id, merchant_id }) 
                         showQuickJumper: false,
                         showTotal: undefined,
                     }}
-                    toolBarRender={false}
-                    tableAlertRender={false}
                     columns={columns}
                     dataSource={dataSource}
                     loading={loading}
                     onChange={onChange}
-                    options={false}
                 />
             </ConfigProvider>
         );

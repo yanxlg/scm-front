@@ -4,25 +4,24 @@ import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance, Rule } from 'antd/es/form';
 import moment, { Moment } from 'moment';
-import { transNullValue } from '@/utils/transform';
-import { transEndDate, transStartDate } from '@/utils/date';
+import { transNullValue, transEndDate, transStartDate } from '../utils';
 
 export type DatePickerFormatter = 'start_date' | 'end_date';
 
 export type DatePickerType = 'datePicker';
 const typeList = ['datePicker'];
 
-export type DatePickerProps = FormItemLabelProps &
+export type DatePickerProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
-        name: FormItemName;
+        name: FormItemName<T>;
         form: FormInstance;
         type: DatePickerType;
         placeholder?: string;
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        dateBeginWith?: Array<FormItemName | 'now'>;
-        dateEndWith?: Array<FormItemName | 'now'>;
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        dateBeginWith?: Array<FormItemName<T> | 'now'>;
+        dateEndWith?: Array<FormItemName<T> | 'now'>;
         formatter?: DatePickerFormatter;
         rules?: Rule[];
     };

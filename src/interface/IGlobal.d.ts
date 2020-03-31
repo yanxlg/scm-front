@@ -25,6 +25,6 @@ export type IPaginationResponse<T> = {
     all_count?: number;
     list: T[];
     [key: string]: any;
-}
+};
 
 export type IBoolean = 0 | 1;

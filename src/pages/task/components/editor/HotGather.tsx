@@ -25,12 +25,12 @@ import TaskRange from '@/pages/task/components/config/hot/TaskRange';
 import TaskCycle from '@/pages/task/components/config/hot/TaskCycle';
 import PriceRange from '@/pages/task/components/config/hot/PriceRange';
 import SalesRange from '@/pages/task/components/config/hot/SalesRange';
-import { TaskChannelList } from '@/config/dictionaries/Task';
+import { TaskChannelList, TaskChannelCode, TaskChannelEnum } from '@/config/dictionaries/Task';
 import moment from 'moment';
-import { mapClassNames } from '@/utils/utils';
 import SortType from '@/pages/task/components/config/hot/SortType';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import LoadingButton from '@/components/LoadingButton';
+import classNames from 'classnames';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -50,6 +50,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
     const [merchantSort, setMerchantSort] = useState<IPDDSortItem[]>([]);
     const [sortLoading, setSortLoading] = useState(true);
     const reptileRef = useRef<ReptileConditionRef>(null);
+    const [isUpperShelf, setIsUpperShelf] = useState<boolean | undefined>(undefined);
 
     const [merchantModal, setMerchantModal] = useState(false);
 
@@ -108,6 +109,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
             category_level_three = '',
             execute_count,
             sub_cat_id,
+            range,
             ...extra
         } = info;
         const taskType =
@@ -115,8 +117,6 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                 ? TaskExecuteType.once
                 : TaskExecuteType.interval;
         const isDay = task_interval_seconds && task_interval_seconds % 86400 === 0;
-        const range =
-            sub_cat_id === TaskRangeEnum.FullStack ? HotTaskRange.fullStack : HotTaskRange.store;
         return {
             keywords,
             category_level_one: category_level_one.split(','),
@@ -152,6 +152,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
         queryTaskDetail(taskId!)
             .then(({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
                 const initValues = convertDetail(task_detail_info as ITaskDetailInfo);
+                setIsUpperShelf(task_detail_info.is_upper_shelf);
                 form.setFieldsValue({
                     ...initValues,
                 });
@@ -173,6 +174,26 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     filterType: HotTaskFilterType.ByKeywords,
                     sort_type: merchantSort[0]?.value ?? '',
                 });
+            }
+        },
+        [listSort, merchantSort],
+    );
+
+    const taskChannelChange = useCallback(
+        (value: TaskChannelCode) => {
+            if (value === TaskChannelEnum.PDD) {
+                const taskRange = form.getFieldValue('range');
+                if (taskRange === HotTaskRange.fullStack) {
+                    // 全站
+                    form.setFieldsValue({
+                        sort_type: listSort[0]?.value ?? '',
+                    });
+                } else {
+                    form.setFieldsValue({
+                        filterType: HotTaskFilterType.ByKeywords,
+                        sort_type: merchantSort[0]?.value ?? '',
+                    });
+                }
             }
         },
         [listSort, merchantSort],
@@ -316,10 +337,10 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     }}
                 >
                     <Form.Item
-                        className={mapClassNames([
+                        className={classNames(
                             edit ? '' : formStyles.formItem,
                             formStyles.formInline,
-                        ])}
+                        )}
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -333,7 +354,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Input className="picker-default" />
                     </Form.Item>
                     <Form.Item
-                        className={mapClassNames([formStyles.formItem, formStyles.formInline])}
+                        className={classNames(formStyles.formItem, formStyles.formInline)}
                         validateTrigger={'onBlur'}
                         name="channel"
                         label="任务渠道"
@@ -344,7 +365,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             },
                         ]}
                     >
-                        <Select className="picker-default">
+                        <Select className="picker-default" onChange={taskChannelChange}>
                             {TaskChannelList.map(({ name, id }) => (
                                 <Select.Option value={id} key={id}>
                                     {name}
@@ -365,11 +386,11 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             validateTrigger={'onBlur'}
                             name="grab_page_count"
                             label="爬取页数"
-                            className={mapClassNames([
+                            className={classNames(
                                 formStyles.formItem,
                                 formStyles.formHorizon,
                                 formStyles.formInline,
-                            ])}
+                            )}
                             rules={[
                                 {
                                     required: true,
@@ -385,11 +406,11 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Form.Item
                             validateTrigger={'onBlur'}
                             name="grab_count_max"
-                            className={mapClassNames([
+                            className={classNames(
                                 formStyles.formItem,
                                 formStyles.formHorizon,
                                 formStyles.formInline,
-                            ])}
+                            )}
                             label={
                                 <span>
                                     爬取数量
@@ -420,12 +441,36 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     </div>
                     <TaskCycle form={form} />
                     <div className={formStyles.formItem}>
-                        <LoadingButton onClick={onGather} type="primary" className="btn-default">
-                            {edit ? '创建新采集任务' : '开始采集'}
-                        </LoadingButton>
-                        <Button type="primary" className="btn-default" onClick={onGatherOn}>
-                            {edit ? '创建新采集上架任务' : '一键采集上架'}
-                        </Button>
+                        {edit ? (
+                            isUpperShelf === false ? (
+                                <LoadingButton
+                                    onClick={onGather}
+                                    type="primary"
+                                    className="btn-default"
+                                >
+                                    {edit ? '创建新采集任务' : '开始采集'}
+                                </LoadingButton>
+                            ) : null
+                        ) : (
+                            <LoadingButton
+                                onClick={onGather}
+                                type="primary"
+                                className="btn-default"
+                            >
+                                开始采集
+                            </LoadingButton>
+                        )}
+                        {edit ? (
+                            isUpperShelf === false ? null : (
+                                <Button onClick={onGatherOn} type="primary" className="btn-default">
+                                    创建新采集上架任务
+                                </Button>
+                            )
+                        ) : (
+                            <Button type="primary" className="btn-default" onClick={onGatherOn}>
+                                一键采集上架
+                            </Button>
+                        )}
                     </div>
                 </Form>
             </Spin>

@@ -27,6 +27,7 @@ export const transPaginationRequest = ({
         page: pageNumber,
         page_count: pageSize,
         page_number: pageSize,
+        per_page: pageSize,
         ...extra,
     };
 };
@@ -53,10 +54,10 @@ export const transPaginationResponse = <T>({
 
 export { singlePromiseWrap };
 
-export const mapClassNames = (classNames: string[]) => {
-    return classNames.join(' ');
-};
-
 export const isEmptyObject = (target: object) => {
     return JSON.stringify(target) === '{}';
+};
+
+export const isZero = (num: number | string) => {
+    return num === 0 || num === '0';
 };

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
 import IntegerInput from '@/components/Input/IntegerInput';
-import { isNull } from '@/utils/validate';
+import { isNull } from '@/components/SearchForm/utils';
 import { FormInstance } from 'antd/es/form';
 
 declare interface SalesRangeProps {

@@ -8,9 +8,8 @@ import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
     purchaseOrderOptionList,
-    purchaseShippingOptionList
+    purchaseShippingOptionList,
 } from '@/enums/OrderEnum';
-
 
 declare interface IProps {
     loading: boolean;
@@ -31,7 +30,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string) => {
                 return utcToLocal(value);
-            }
+            },
         },
         {
             key: 'purchasePlatformOrderId',
@@ -54,8 +53,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(orderStatusOptionList, value)
-            }
+                return getStatusDesc(orderStatusOptionList, value);
+            },
         },
         {
             key: 'purchaseOrderStatus',
@@ -64,9 +63,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(purchaseOrderOptionList, value)
-            }
-            
+                return getStatusDesc(purchaseOrderOptionList, value);
+            },
         },
         {
             key: 'purchaseOrderShippingStatus',
@@ -75,8 +73,8 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(purchaseShippingOptionList, value)
-            }
+                return getStatusDesc(purchaseShippingOptionList, value);
+            },
         },
         {
             key: 'purchasePlanId',
@@ -100,7 +98,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string) => {
                 return utcToLocal(value);
-            }
+            },
         },
     ];
 

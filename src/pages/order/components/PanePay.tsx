@@ -238,8 +238,8 @@ class PanePay extends React.PureComponent<IProps, IState> {
         return [...new Set(list)];
     };
 
-     // 批量操作成功
-     private batchOperateSuccess = (name: string = '', list: string[]) => {
+    // 批量操作成功
+    private batchOperateSuccess = (name: string = '', list: string[]) => {
         this.props.getAllTabCount();
         notification.success({
             message: `${name}成功`,
@@ -302,7 +302,7 @@ class PanePay extends React.PureComponent<IProps, IState> {
             }).then(res => {
                 this.onSearch();
                 const { success, failed } = res.data;
-                
+
                 if (success!.length) {
                     this.batchOperateSuccess('取消渠道订单', success);
                 }

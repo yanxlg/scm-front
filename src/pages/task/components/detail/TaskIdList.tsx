@@ -1,56 +1,29 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Row, Spin, Col, Checkbox, Form } from 'antd';
-import { AutoSizer, List as VList, InfiniteLoader } from 'react-virtualized';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Row, Col, Checkbox, List, Button } from 'antd';
+import { AutoSizer, List as VList } from 'react-virtualized';
 import { ISubTaskIdItem } from '@/interface/ITask';
-import { querySubTaskIdList } from '@/services/task';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import taskStyles from '@/styles/_task.less';
+import styles from '@/styles/_index.less';
+import btnStyles from '@/styles/_btn.less';
+import classNames from 'classnames';
 
 declare interface TaskIdListProps {
-    task_id: number;
+    dataSet: ISubTaskIdItem[];
+    onSubmit: (taskIds: string[]) => void;
+    onCancel: () => void;
+    checkedIds: string[] | undefined;
 }
 
 const rowColumns = 4;
 
-const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
-    const [dataSet, setDataSet] = useState<ISubTaskIdItem[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [checkedAll, setCheckedAll] = useState(true);
-    const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
-
-    const pageSize = useMemo<number>(() => {
-        return 400;
-    }, []);
-
-    const loadedRowsMap = useMemo<{ [key: number]: 1 }>(() => {
-        return {};
-    }, []);
-
-    const queryList = useCallback(
-        (pageNumberSize: number) => {
-            setLoading(true);
-            return querySubTaskIdList({
-                task_id,
-                pageSize,
-                pageNumber: pageNumberSize,
-            })
-                .then(({ data = [] }) => {
-                    setDataSet(dataSet.concat(data));
-                    if (data.length < pageSize) {
-                        setHasMore(false);
-                    }
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        },
-        [dataSet],
-    );
-
-    useEffect(() => {
-        queryList(pageNumber);
-    }, []);
+const TaskIdList: React.FC<TaskIdListProps> = ({
+    dataSet,
+    onSubmit,
+    onCancel,
+    checkedIds: proIds,
+}) => {
+    const [checkedIds, setCheckedIds] = useState<string[]>(proIds || []);
 
     const renderItem = useCallback(
         ({ index, key, style }) => {
@@ -63,8 +36,9 @@ const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
                         <Col key={`${key}_${i}`} span={24 / rowColumns}>
                             <Checkbox
                                 value={id}
-                                checked={checkedAll || checkedIds.has(id)}
+                                checked={checkedIds && checkedIds.indexOf(id) > -1}
                                 onChange={checkedStateChange}
+                                className={item.status === '3' ? taskStyles.errorText : undefined}
                             >
                                 {id}
                             </Checkbox>
@@ -78,87 +52,87 @@ const TaskIdList: React.FC<TaskIdListProps> = ({ task_id }) => {
                 </Row>
             );
         },
-        [dataSet, checkedIds, checkedAll],
+        [dataSet, checkedIds],
     );
 
-    const isRowLoaded = useCallback(({ index }) => !!loadedRowsMap[index], []);
-
-    const handleInfiniteOnLoad = useCallback(
-        ({ startIndex, stopIndex }) => {
-            for (let i = startIndex; i <= stopIndex; i++) {
-                loadedRowsMap[i] = 1;
-            }
-            if (startIndex === 0 || loading || !hasMore) {
-                return Promise.resolve();
-            }
-            const rowCount = Math.ceil(dataSet.length / rowColumns) - 1;
-            if (stopIndex === rowCount) {
-                const number = pageNumber + 1;
-                setPageNumber(number);
-                return queryList(number);
+    const onCheckedAllStateChange = useCallback(
+        (e: CheckboxChangeEvent) => {
+            const checked = e.target.checked;
+            if (checked) {
+                setCheckedIds(dataSet.map(data => data.plan_id));
             } else {
-                return Promise.resolve();
+                setCheckedIds([]);
             }
         },
-        [dataSet, pageNumber, hasMore, loading],
+        [dataSet],
     );
-
-    const onCheckedAllStateChange = useCallback((e: CheckboxChangeEvent) => {
-        setCheckedAll(e.target.checked);
-    }, []);
 
     const checkedStateChange = useCallback(
         (e: CheckboxChangeEvent) => {
             const { checked, value } = e.target;
-            checked ? checkedIds.add(value) : checkedIds.delete(value);
-            const ids = new Set(checkedIds);
-            setCheckedIds(ids);
+            const set = new Set(checkedIds);
+            checked ? set.add(value) : set.delete(value);
+            setCheckedIds(Array.from(set));
         },
-        [checkedIds],
+        [checkedIds, dataSet],
     );
+
+    const submit = useCallback(() => {
+        onSubmit(checkedIds);
+    }, [checkedIds]);
+
+    const cancel = useCallback(() => {
+        onCancel();
+    }, []);
+
+    const footer = useMemo(() => {
+        return (
+            <div className={classNames(styles.textRight, btnStyles.btnGroup)}>
+                <Button onClick={cancel}>取消</Button>
+                <Button onClick={submit} type="primary">
+                    确定
+                </Button>
+            </div>
+        );
+    }, [checkedIds]);
 
     return useMemo(() => {
         const size = dataSet.length;
         const rowCount = Math.ceil(size / rowColumns);
+        const checkedLength = checkedIds?.length;
+        const checkedAll = checkedIds?.length === size;
+        const indeterminate = checkedLength > 0 && !checkedAll;
         return (
-            <div style={{ height: 160 }}>
+            <div style={{ height: 200 }}>
                 <Row align="middle" style={{ height: 40 }}>
                     <Col>
-                        <Checkbox checked={checkedAll} onChange={onCheckedAllStateChange}>
+                        <Checkbox
+                            checked={checkedAll}
+                            onChange={onCheckedAllStateChange}
+                            indeterminate={indeterminate}
+                        >
                             全部子任务
                         </Checkbox>
-                        <Spin size="small" spinning={loading} />
                     </Col>
                 </Row>
-                {size > 0 && (
-                    <InfiniteLoader
-                        isRowLoaded={isRowLoaded}
-                        loadMoreRows={handleInfiniteOnLoad}
-                        rowCount={rowCount}
-                        minimumBatchSize={1}
-                        threshold={4}
-                    >
-                        {({ onRowsRendered, registerChild }) => (
-                            <AutoSizer disableHeight={true}>
-                                {({ width }) => (
-                                    <VList
-                                        overscanRowCount={8}
-                                        tabIndex={null}
-                                        height={120}
-                                        onRowsRendered={onRowsRendered}
-                                        rowCount={rowCount}
-                                        rowHeight={40}
-                                        rowRenderer={renderItem}
-                                        width={width}
-                                    />
-                                )}
-                            </AutoSizer>
+                <List footer={footer}>
+                    <AutoSizer disableHeight={true}>
+                        {({ width }) => (
+                            <VList
+                                overscanRowCount={8}
+                                tabIndex={null}
+                                height={120}
+                                rowCount={rowCount}
+                                rowHeight={40}
+                                rowRenderer={renderItem}
+                                width={width}
+                            />
                         )}
-                    </InfiniteLoader>
-                )}
+                    </AutoSizer>
+                </List>
             </div>
         );
-    }, [dataSet, loading]);
+    }, [dataSet, checkedIds]);
 };
 
 export default TaskIdList;

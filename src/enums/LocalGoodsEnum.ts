@@ -38,8 +38,8 @@ export const versionStatusList = transOptionList(versionStatusMap);
 export const publishChannelStatusMap = {
     1: 'VOVA',
     2: 'FD',
-    3: 'AZ'
-}
+    3: 'AZ',
+};
 
 export const publishChannelStatusList = transOptionList(publishChannelStatusMap);
 
@@ -47,8 +47,7 @@ export const publishChannelStatusList = transOptionList(publishChannelStatusMap)
 export const publishStatusMap = {
     0: 'publishing',
     1: 'published',
-    2: 'unpublished'
-}
+    2: 'unpublished',
+};
 
 export type publishStatusCode = keyof typeof publishStatusMap;
-

@@ -43,7 +43,7 @@ class ShelvesDialog extends React.PureComponent<ShelvesDialogProps> {
             title: '上架状态',
             dataIndex: 'publishStatus',
             align: 'center',
-            render: (val: publishStatusCode) => publishStatusMap[val ? val : 0]
+            render: (val: publishStatusCode) => publishStatusMap[val ? val : 0],
         },
         {
             key: 'productId',

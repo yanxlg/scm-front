@@ -15,7 +15,9 @@ declare interface ILivePagesProps extends RouteComponentProps {
     routers: IRouter[];
 }
 
-declare interface IRouterListItem extends IRouter, RouteComponentProps {}
+declare interface IRouterListItem extends IRouter, RouteComponentProps {
+    mounted: boolean;
+}
 
 const LivePages: React.FC<ILivePagesProps> = ({ routers, location, history, ...props }) => {
     let routerList = useMemo<IRouterListItem[]>(() => [], []); // cache
@@ -33,7 +35,11 @@ const LivePages: React.FC<ILivePagesProps> = ({ routers, location, history, ...p
             }
             route.location = location;
             route.history = history;
-            routerList[index] = { ...props, ...route };
+            routerList[index] = {
+                ...props,
+                ...route,
+                mounted: route.mounted || activeIndex === index,
+            };
         });
         return {
             routerList: routerList,
@@ -43,17 +49,20 @@ const LivePages: React.FC<ILivePagesProps> = ({ routers, location, history, ...p
 
     return useMemo(() => {
         const { activeIndex, routerList } = getRouterList();
+        // 不能一次性加载，仅做保留
         return (
             <React.Fragment>
-                {routerList.map(({ component: Component, live, path, ...props }, index) => {
-                    const show = activeIndex === index;
-                    const mounted = live || show;
-                    return mounted ? (
-                        <div key={path} className={show ? styles.pageShow : styles.pageHide}>
-                            <Component {...props} />
-                        </div>
-                    ) : null;
-                })}
+                {routerList.map(
+                    ({ component: Component, live, mounted, path, ...props }, index) => {
+                        const show = activeIndex === index;
+                        const render = (live && mounted) || show;
+                        return render ? (
+                            <div key={path} className={show ? styles.pageShow : styles.hide}>
+                                <Component {...props} />
+                            </div>
+                        ) : null;
+                    },
+                )}
             </React.Fragment>
         );
     }, [location.pathname]);

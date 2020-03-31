@@ -21,3 +21,11 @@
 .btn-without-anim {
     transition: none !important;
 }
+
+:global(.ant-btn) {
+    & ~ & {
+        :local .btn-group & {
+            margin-left: 10px;
+        }
+    }
+}

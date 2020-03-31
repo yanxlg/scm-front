@@ -16,12 +16,15 @@ const PopConfirmLoadingButton: React.FC<IPopConfirmLoadingButtonProps> = ({
     buttonProps,
 }) => {
     const [loading, setLoading] = useState(false);
-    const onConfirm = useCallback((e?: React.MouseEvent<HTMLElement>) => {
-        setLoading(true);
-        popConfirmProps?.onConfirm(e).finally(() => {
-            setLoading(false);
-        });
-    }, []);
+    const onConfirm = useCallback(
+        (e?: React.MouseEvent<HTMLElement>) => {
+            setLoading(true);
+            popConfirmProps?.onConfirm(e).finally(() => {
+                setLoading(false);
+            });
+        },
+        [popConfirmProps?.onConfirm],
+    );
     return useMemo(() => {
         return (
             <Popconfirm {...popConfirmProps} onConfirm={onConfirm}>

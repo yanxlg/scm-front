@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormInstance, Rule } from 'antd/es/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
-import { transNullValue, transNumber, transNumberStrArr, transStrArr } from '@/utils/transform';
+import { transNullValue, transNumber, transNumberStrArr, transStrArr } from '../utils';
 import RichInput, { RichType } from '@/components/Input/RichInput';
 import { InputProps as AntInputProps } from 'antd/es/input';
 
@@ -12,15 +12,15 @@ const typeList = ['input', 'integer', 'number', 'positiveInteger'];
 
 export type InputFormatter = 'number' | 'strArr' | 'numberStrArr';
 
-export type InputProps = FormItemLabelProps &
+export type InputProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
         form: FormInstance;
         type: InputType;
         placeholder?: string;
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        name: FormItemName;
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        name: FormItemName<T>;
         formatter?: InputFormatter;
         rules?: Rule[];
     } & Omit<AntInputProps, 'type' | 'size' | 'onPressEnter' | 'form'>;

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CustomFormProps, FormItemName } from '@/components/SearchForm';
 import { FormInstance, Rule } from 'antd/es/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
-import { transNullValue, transNumber, transJoinStr } from '@/utils/transform';
+import { transNullValue, transNumber, transJoinStr } from '../utils';
 
 export declare interface IOptionItem {
     name: string;
@@ -18,7 +18,7 @@ type OptionsPromise = () => Promise<IOptionItem[]>;
 export type SelectType = 'select';
 const typeList = ['select'];
 
-export type SelectProps = FormItemLabelProps &
+export type SelectProps<T = string> = FormItemLabelProps &
     CustomFormProps & {
         type: SelectType;
         form: FormInstance;
@@ -31,8 +31,8 @@ export type SelectProps = FormItemLabelProps &
         };
         className?: string;
         formItemClassName?: string;
-        onChange?: (name: FormItemName, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
-        name: FormItemName;
+        onChange?: (name: FormItemName<T>, form: FormInstance) => void; // change监听，支持外部执行表单操作，可以实现关联筛选，重置等操作
+        name: FormItemName<T>;
         formatter?: SelectFormatter;
         rules?: Rule[];
         mode?: 'multiple' | 'tags';

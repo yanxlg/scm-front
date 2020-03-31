@@ -11,7 +11,8 @@ import {
     postGoodsOnsale,
     postGoodsIgnoreVersion,
 } from '@/services/goods';
-import { utcToLocal, transStartDate, transEndDate } from '@/utils/date';
+import { utcToLocal } from '@/utils/date';
+import { transStartDate, transEndDate } from '@/components/SearchForm/utils';
 import LoadingButton from '@/components/LoadingButton';
 
 import '../../../styles/goods-version.less';

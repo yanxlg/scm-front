@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Button, DatePicker, Input, Form } from 'antd';
 import '@/styles/config.less';
 import { BindAll } from 'lodash-decorators';
-import { transEndDate, transStartDate } from '@/utils/date';
+import { transEndDate, transStartDate } from '@/components/SearchForm';
 import { FormInstance } from 'antd/es/form';
 
 export declare interface IApiParams {

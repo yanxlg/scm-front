@@ -4,30 +4,12 @@ import formStyles from '@/styles/_form.less';
 import queryString from 'query-string';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
-import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
 import { useList } from '@/utils/hooks';
-import { ITaskListExtraData, ITaskListItem, ITaskListQuery } from '@/interface/ITask';
-import { getTaskList } from '@/services/task';
 import { queryCustomDeclarationList } from '@/services/setting';
 import { ICustomDeclarationListItem, ICustomDeclarationListQuery } from '@/interface/ISetting';
 import ProTable from '@/components/ProTable';
-import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import CopyLink from '@/components/copyLink';
-import { Button } from 'antd';
-import {
-    TaskRangeCode,
-    TaskRangeMap,
-    TaskStatusCode,
-    TaskStatusEnum,
-    TaskTypeCode,
-    TaskTypeEnum,
-    TaskTypeMap,
-} from '@/enums/StatusEnum';
-import LoadingButton from '@/components/LoadingButton';
-import btnStyle from '@/styles/_btn.less';
-import TaskStatus from '@/pages/task/components/TaskStatus';
-import { TaskChannelCode, TaskChannelMap } from '@/config/dictionaries/Task';
-import { ProColumns } from '@ant-design/pro-table';
+import { ProColumns } from '@/components/OptimizeProTable';
 
 const formConfig: FormField[] = [
     {
@@ -111,15 +93,14 @@ const ListTab: React.FC = () => {
         onSearch,
         onReload,
         onChange,
-    } = useList<ICustomDeclarationListItem, ICustomDeclarationListQuery>(
-        queryCustomDeclarationList,
-        searchRef,
-        undefined,
-        {
+    } = useList<ICustomDeclarationListItem, ICustomDeclarationListQuery>({
+        queryList: queryCustomDeclarationList,
+        formRef: searchRef,
+        defaultState: {
             pageSize: page_size,
             pageNumber: page_number,
         },
-    );
+    });
 
     const columns = useMemo(() => {
         return [
@@ -236,7 +217,7 @@ const ListTab: React.FC = () => {
 
     const getCopiedLinkQuery = useCallback(() => {
         return query;
-    }, [query]);
+    }, []);
 
     return useMemo(() => {
         return (

@@ -141,7 +141,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
             formItemClassName: 'form-item',
             formatter: ['start_date', 'end_date'],
         },
-        
     ];
     private initialValues = {
         channel_source: 100,

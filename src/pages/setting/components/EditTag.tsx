@@ -9,7 +9,6 @@ declare interface IProps {
 }
 
 const EditTag: React.FC<IProps> = ({ className, text }) => {
-
     const [editStatus, setEditStatus] = useState(false);
     const inputRef = useRef<Input>(null);
 
@@ -22,38 +21,33 @@ const EditTag: React.FC<IProps> = ({ className, text }) => {
 
     useEffect(() => {
         editStatus && inputRef.current?.focus();
-    }, [editStatus])
+    }, [editStatus]);
 
     return useMemo(() => {
         return (
             <div className={className}>
-                {
-                    editStatus ? (
-                        <div className={styles.editBox}>
-                            <Input
-                                ref={inputRef}
-                                className={styles.input}
-                                defaultValue={text}
-                                // onBlur={handleBlur}
-                                placeholder="请输入新标签"
-                            />
-                            <Button 
-                                size="small"
-                                type="primary"
-                                className={styles.btnUpdate}
-                            >修改</Button>
-                            <Button 
-                                size="small"
-                                className={styles.btnDel}
-                            >删除</Button>
-                        </div>
-                    ) : (
-                        <Button onClick={clickTag}>{text}</Button>
-                    )
-                }
+                {editStatus ? (
+                    <div className={styles.editBox}>
+                        <Input
+                            ref={inputRef}
+                            className={styles.input}
+                            defaultValue={text}
+                            // onBlur={handleBlur}
+                            placeholder="请输入新标签"
+                        />
+                        <Button size="small" type="primary" className={styles.btnUpdate}>
+                            修改
+                        </Button>
+                        <Button size="small" className={styles.btnDel}>
+                            删除
+                        </Button>
+                    </div>
+                ) : (
+                    <Button onClick={clickTag}>{text}</Button>
+                )}
             </div>
-        )
+        );
     }, [editStatus, text]);
-}
+};
 
 export default EditTag;

@@ -11,6 +11,8 @@ import {
     PUTaskRangeType,
     AutoPurchaseTaskType,
     TaskCreateStatusCode,
+    TaskRangeEnum,
+    HotTaskRange,
 } from '@/enums/StatusEnum';
 import { IBoolean, RequestPagination } from '@/interface/IGlobal';
 
@@ -114,6 +116,7 @@ export interface ITaskDetailInfo {
     task_sn?: string;
     task_name: string;
     shopId?: number; // 指定店铺类型任务转换出改字段
+    range?: HotTaskRange;
 
     category_level_one?: string;
     category_level_two?: string;
@@ -129,7 +132,7 @@ export interface ITaskDetailInfo {
     task_start_time?: number;
     task_end_time?: number;
     task_interval_seconds?: number;
-    is_upper_shelf: IBoolean;
+    is_upper_shelf: boolean;
     status: TaskStatusCode;
     success: number;
     fail: number;
@@ -189,23 +192,34 @@ export interface ITaskLogResponse {
     total: number;
 }
 
-export interface ITaskProgressQuery extends RequestPagination {
+export interface ITaskProgressQuery {
     task_id: number;
+    plan_id?: string;
+    collect_onsale_type?: 1 | 2;
 }
 
 export interface ITaskProgressItem {
-    sub_task_id: number;
-    start_time: number;
-    end_time: number;
-    create_status: TaskCreateStatusCode;
-    status: TaskStatusCode;
-    progress: number;
-    task_type: TaskTypeEnum;
+    stage: string;
+    wait_execute: number;
+    executing: string;
+    success: string;
+    fail: string;
+    fail_reason: string;
 }
 
 export interface ITaskProgressResponse {
-    list: ITaskProgressItem[];
-    total: number;
+    list?: ITaskProgressItem[];
+    total?: number;
+    task_type?: TaskTypeCode;
+    total_goods?: string;
+    already_on_sale_goods?: string;
+    already_catch_goods?: string;
+    add_on_sale_goods?: string;
+    add_catch_goods?: string;
+    on_sale_goods?: string;
+    catch_goods?: string;
+    success?: string;
+    fail?: string;
 }
 
 export interface ISubTaskProgressQuery {
@@ -221,7 +235,12 @@ export interface ISubTaskProgressResponse {
 
 export interface ISubTaskIdItem {
     plan_id: string;
-    status: number;
+    status: string; // 3执行失败
+}
+
+export interface ISubTaskIdData {
+    list: ISubTaskIdItem[];
+    fail_count: string;
 }
 
 export interface ISubTaskIdQuery extends RequestPagination {

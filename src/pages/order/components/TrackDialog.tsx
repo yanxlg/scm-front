@@ -13,7 +13,7 @@ declare interface ITrackItem {
 declare interface IBeginItem {
     purchase_status: number;
     purchase_waybill_no: string;
-    list: ITrackItem[]
+    list: ITrackItem[];
 }
 
 declare interface IBeginInfo {
@@ -78,18 +78,24 @@ const TrackDialog: React.FC<IProps> = ({
                         </div>
                     ) : (
                         <>
-                            {
-                                Object.keys(beginInfo).length > 0 ? (
-                                    <Card title="首程物流轨迹">
-                                        {Object.keys(beginInfo).map(key => {
-                                            const platformTrackList = beginInfo[key];
-                                            return platformTrackList.map(({ purchase_status, purchase_waybill_no, list }) => (
+                            {Object.keys(beginInfo).length > 0 ? (
+                                <Card title="首程物流轨迹">
+                                    {Object.keys(beginInfo).map(key => {
+                                        const platformTrackList = beginInfo[key];
+                                        return platformTrackList.map(
+                                            ({ purchase_status, purchase_waybill_no, list }) => (
                                                 <div key={purchase_waybill_no}>
                                                     <Row>
-                                                        <Col span={10}>物流订单号: {purchase_waybill_no}</Col>
+                                                        <Col span={10}>
+                                                            物流订单号: {purchase_waybill_no}
+                                                        </Col>
                                                         <Col span={7}>采购平台: {key}</Col>
                                                         <Col span={7}>
-                                                            首程状态: {getStatusDesc(purchaseShippingOptionList, purchase_status)}
+                                                            首程状态:{' '}
+                                                            {getStatusDesc(
+                                                                purchaseShippingOptionList,
+                                                                purchase_status,
+                                                            )}
                                                         </Col>
                                                     </Row>
                                                     <Timeline style={{ marginTop: 16 }}>
@@ -104,37 +110,35 @@ const TrackDialog: React.FC<IProps> = ({
                                                         ))}
                                                     </Timeline>
                                                 </div>
-                                            ))
-                                        })}
-                                    </Card>
-                                ) : <p>暂无订单物流轨迹</p>
-                            }
-                            {
-                                endList.length > 0 ? (
-                                    <Card title="尾程物流轨迹" style={{ marginTop: 30 }}>
-                                        <Row>
-                                            <Col span={10}>物流订单号: {lastWaybillNo}</Col>
-                                            <Col span={14}>尾程状态: {endList[0].status}</Col>
-                                        </Row>
-                                        <Timeline style={{ marginTop: 16 }}>
-                                            {endList.map(({ time, info }, index) => (
-                                                <Timeline.Item
-                                                    key={index}
-                                                    color={index === 0 ? 'red' : 'gray'}
-                                                >
-                                                    <p>{time}</p>
-                                                    {info}
-                                                </Timeline.Item>
-                                            ))}
-                                        </Timeline>
-                                    </Card>
-                                ) : null
-                            }
-                            
+                                            ),
+                                        );
+                                    })}
+                                </Card>
+                            ) : (
+                                <p>暂无订单物流轨迹</p>
+                            )}
+                            {endList.length > 0 ? (
+                                <Card title="尾程物流轨迹" style={{ marginTop: 30 }}>
+                                    <Row>
+                                        <Col span={10}>物流订单号: {lastWaybillNo}</Col>
+                                        <Col span={14}>尾程状态: {endList[0].status}</Col>
+                                    </Row>
+                                    <Timeline style={{ marginTop: 16 }}>
+                                        {endList.map(({ time, info }, index) => (
+                                            <Timeline.Item
+                                                key={index}
+                                                color={index === 0 ? 'red' : 'gray'}
+                                            >
+                                                <p>{time}</p>
+                                                {info}
+                                            </Timeline.Item>
+                                        ))}
+                                    </Timeline>
+                                </Card>
+                            ) : null}
                         </>
                     )}
                 </div>
-                
             </Modal>
         );
     }, [visible, loading]);

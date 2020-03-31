@@ -7,7 +7,7 @@ import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
     purchaseOrderOptionList,
-    purchaseShippingOptionList
+    purchaseShippingOptionList,
 } from '@/enums/OrderEnum';
 
 declare interface IProps {
@@ -52,8 +52,8 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number) => {
-                return getStatusDesc(orderStatusOptionList, value)
-            }
+                return getStatusDesc(orderStatusOptionList, value);
+            },
         },
         {
             key: 'purchasePlanId',
@@ -90,7 +90,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
-        
+
         {
             key: 'platformOrderTime',
             title: '采购生成时间',
@@ -126,7 +126,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
-        
+
         {
             key: 'confirmTime',
             title: '订单确认时间',
@@ -141,7 +141,6 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
-        
     ];
 
     constructor(props: IProps) {

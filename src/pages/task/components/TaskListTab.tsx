@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { ProColumns } from '@ant-design/pro-table';
 import { ITaskListItem, ITaskListQuery, ITaskListExtraData } from '@/interface/ITask';
 import { Button, message } from 'antd';
 import {
@@ -14,7 +13,7 @@ import {
     TaskTypeMap,
 } from '@/enums/StatusEnum';
 import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
-import ProTable from '@/components/ProTable';
+import ProTable, { ProColumns } from '@/components/OptimizeProTable/index';
 import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
@@ -23,7 +22,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import LoadingButton from '@/components/LoadingButton';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
-import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
 import btnStyle from '@/styles/_btn.less';
 import TaskStatus from './TaskStatus';
@@ -34,12 +33,16 @@ import {
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
+import { TableProps } from 'antd/es/table';
+import formStyles from '@/styles/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
     initialValues?: ITaskListQuery;
     setCountArr: (count: number[]) => void;
 }
+
+const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, setCountArr }) => {
     const searchRef = useRef<SearchFormRef>(null);
@@ -87,26 +90,25 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         pageSize,
         dataSource,
         extraData,
-        selectedRowKeys,
         total,
         onSearch,
         onReload,
         onChange,
-        setSelectedRowKeys,
-    } = useList<ITaskListItem, ITaskListQuery, ITaskListExtraData>(
-        getTaskList,
-        searchRef,
-        {
+    } = useList<ITaskListItem, ITaskListQuery, ITaskListExtraData>({
+        queryList: getTaskList,
+        formRef: searchRef,
+        extraQuery: {
             task_status: task_status,
         },
-        {
+        defaultState: {
             pageSize: page_size,
             pageNumber: page_number,
         },
-    );
+    });
 
     const getCopiedLinkQuery = useCallback(() => {
-        return Object.assign({}, query, {
+        return {
+            ...query,
             tabKey:
                 task_status === void 0
                     ? '1'
@@ -119,8 +121,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     : task_status === TaskStatusEnum.Failed
                     ? 5
                     : '6',
-        });
-    }, [query]);
+        };
+    }, []);
 
     const viewTaskDetail = useCallback((task_id: number) => {
         history.push(`/task/list/${task_id}`);
@@ -168,11 +170,17 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     const statusCode = Number(record.status);
                     const task_id = record.task_id;
                     const onceTask = isOnceTask(record.execute_count);
+                    const taskType = record.task_type;
+
                     return (
                         <>
-                            <Button type="link" onClick={() => viewTaskDetail(task_id)}>
-                                查看详情
-                            </Button>
+                            {taskType === TaskTypeEnum.Gather ||
+                            taskType === TaskTypeEnum.Grounding ||
+                            taskType === TaskTypeEnum.GatherGrounding ? (
+                                <Button type="link" onClick={() => viewTaskDetail(task_id)}>
+                                    查看详情
+                                </Button>
+                            ) : null}
                             {statusCode === TaskStatusEnum.ToBeExecuted ? (
                                 <LoadingButton type="link" onClick={() => activeTask(task_id)}>
                                     立即执行
@@ -532,87 +540,102 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         }
     }, [extraData]);
 
-    const deleteTaskList = useCallback(() => {
+    const deleteTaskList = useCallback(selectedRowKeys => {
         return deleteTasks(selectedRowKeys.join(',')).then(() => {
             message.success('任务删除成功!');
             onReload();
         });
-    }, [selectedRowKeys]);
-
-    const onSelectChange = useCallback((selectedRowKeys: React.Key[]) => {
-        setSelectedRowKeys(selectedRowKeys as string[]);
     }, []);
 
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
-            selectedRowKeys: selectedRowKeys,
-            onChange: onSelectChange,
         };
-    }, [selectedRowKeys]);
+    }, []);
 
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+        };
+    }, [loading]);
+
+    const options = useMemo(() => {
+        return {
+            density: true,
+            fullScreen: true,
+            reload: onReload,
+            setting: true,
+        };
+    }, [onReload]);
+
+    const toolBarRender = useCallback((selectedRowKeys = []) => {
+        const size = selectedRowKeys.length;
+        return [
+            <PopConfirmLoadingButton
+                key="delete"
+                buttonProps={{
+                    danger: true,
+                    type: 'link',
+                    className: 'btn-clear btn-group',
+                    disabled: size === 0,
+                    children: '删除任务',
+                }}
+                popConfirmProps={{
+                    title: '确定要删除选中的任务吗?',
+                    okText: '确定',
+                    cancelText: '取消',
+                    disabled: size === 0,
+                    onConfirm: () => deleteTaskList(selectedRowKeys),
+                }}
+            />,
+        ];
+    }, []);
+
+    const table = useMemo(() => {
+        return (
+            <ProTable<ITaskListItem>
+                className={formStyles.formItem}
+                headerTitle="查询表格"
+                rowKey="task_id"
+                rowSelection={rowSelection}
+                scroll={scroll}
+                bottom={60}
+                minHeight={500}
+                pagination={pagination}
+                toolBarRender={toolBarRender}
+                tableAlertRender={false}
+                columns={columns}
+                dataSource={dataSource}
+                loading={loading}
+                onChange={onChange}
+                options={options}
+            />
+        );
+    }, [loading]);
+
+    const search = useMemo(() => {
+        return (
+            <SearchForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
+                <LoadingButton
+                    className="form-item"
+                    onClick={onSearch}
+                    type="primary"
+                    icon={<SearchOutlined />}
+                >
+                    查询
+                </LoadingButton>
+            </SearchForm>
+        );
+    }, []);
     return useMemo(() => {
         return (
             <div>
-                <SearchForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
-                    <LoadingButton
-                        className="form-item"
-                        onClick={onSearch}
-                        type="primary"
-                        icon={<SearchOutlined />}
-                    >
-                        查询
-                    </LoadingButton>
-                </SearchForm>
-                <ProTable<ITaskListItem>
-                    search={false}
-                    headerTitle="查询表格"
-                    rowKey="task_id"
-                    rowSelection={rowSelection}
-                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                    bottom={60}
-                    minHeight={500}
-                    pagination={{
-                        total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                    }}
-                    toolBarRender={(action, { selectedRows, selectedRowKeys = [] }) => {
-                        const size = selectedRowKeys.length;
-                        return [
-                            <PopConfirmLoadingButton
-                                key="delete"
-                                buttonProps={{
-                                    danger: true,
-                                    type: 'link',
-                                    className: 'btn-clear btn-group',
-                                    disabled: size === 0,
-                                    children: '删除任务',
-                                }}
-                                popConfirmProps={{
-                                    title: '确定要删除选中的任务吗?',
-                                    okText: '确定',
-                                    cancelText: '取消',
-                                    disabled: size === 0,
-                                    onConfirm: deleteTaskList,
-                                }}
-                            />,
-                        ];
-                    }}
-                    tableAlertRender={false}
-                    columns={columns}
-                    dataSource={dataSource}
-                    loading={loading}
-                    onChange={onChange}
-                    options={{
-                        density: true,
-                        fullScreen: true,
-                        reload: onReload,
-                        setting: true,
-                    }}
-                />
+                {search}
+                {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );

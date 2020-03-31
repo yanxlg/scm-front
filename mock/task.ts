@@ -40,20 +40,4 @@ export default {
             },
         });
     },
-    'GET /api/v1/task/plan_info': async (req: Request, res: Response) => {
-        const { page, page_count } = req.query;
-        await sleep(4);
-        res.status(200).send({
-            code: 200,
-            message: 'By mock.js',
-            data: Mock.mock({
-                [`data|${page_count}`]: [
-                    {
-                        plan_id: '@increment(18)',
-                        status: '@increment',
-                    },
-                ],
-            }).data,
-        });
-    },
 };
