@@ -30,6 +30,7 @@ import {
 import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
+import '@/styles/form.less';
 
 export declare interface IPageData {
     page?: number;
