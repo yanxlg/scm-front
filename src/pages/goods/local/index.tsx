@@ -14,6 +14,7 @@ import {
     IFilterParams,
     getCatagoryList,
     getAllGoodsOnsale,
+    getGoodsStatusList,
 } from '@/services/goods';
 
 import { RouteComponentProps } from 'react-router';
@@ -103,7 +104,7 @@ const formFields: FormField[] = [
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,
-        optionList: productStatusList,
+        optionList: () => getGoodsStatusList(),
     },
     {
         type: 'select',
