@@ -6,6 +6,7 @@ import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { transNullValue, transNumber, transNumberStrArr, transStrArr } from '../utils';
 import RichInput, { RichType } from '@/components/Input/RichInput';
 import { InputProps as AntInputProps } from 'antd/es/input';
+import formStyles from '@/components/SearchForm/_form.less';
 
 export type InputType = RichType;
 const typeList = ['input', 'integer', 'number', 'positiveInteger'];
@@ -30,7 +31,7 @@ const FormInput = (props: InputProps) => {
         name,
         placeholder,
         label,
-        className,
+        className = formStyles.formItemDefault,
         formItemClassName,
         onChange,
         labelClassName,

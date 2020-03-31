@@ -5,6 +5,7 @@ import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { FormInstance, Rule } from 'antd/es/form';
 import moment, { Moment } from 'moment';
 import { transNullValue, transEndDate, transStartDate } from '../utils';
+import formStyles from '@/components/SearchForm/_form.less';
 
 export type DatePickerFormatter = 'start_date' | 'end_date';
 
@@ -31,7 +32,7 @@ const FormDatePicker = (props: DatePickerProps) => {
         name,
         placeholder,
         label,
-        className,
+        className = formStyles.formItemDefault,
         formItemClassName,
         dateBeginWith,
         dateEndWith,
