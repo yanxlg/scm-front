@@ -45,7 +45,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
     private goodsMergeRef: RefObject<GoodsMergeDialog> = React.createRef();
     private columns = [
         {
-            fixed: true,
+            fixed: 'left',
             key: '_operation',
             title: '操作',
             align: 'center',
@@ -536,6 +536,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             <>
                 <ProTable<IRowDataItem>
                     id="goods-local-table"
+                    optimize={false}
                     headerTitle="本地产品库列表"
                     rowKey="product_id"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
@@ -591,7 +592,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     currentRowData={currentEditGoods}
                     hideSkuDialog={this.hideSkuDialog}
                 />
-                <GoodsMergeDialog ref={this.goodsMergeRef} />
+                <GoodsMergeDialog onReload={this.onReload} ref={this.goodsMergeRef} />
             </>
         );
     }

@@ -1,5 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import { Modal, Input, Spin, Table, Button, message } from 'antd';
+import { Modal, Input, Table, Button, notification } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 import {
@@ -7,6 +7,7 @@ import {
     putGoodsMergeMain,
     delGoodsMergeDelete,
     getGoodsMergeList,
+    putGoodsMergeAdd,
 } from '@/services/goods';
 
 const { TextArea } = Input;
@@ -22,16 +23,21 @@ declare interface IGoodsSnItem {
     type: IProductType;
 }
 
+declare interface IProps {
+    onReload(): void;
+}
+
 declare interface IState {
     visible: boolean;
     loading: boolean;
+    isChange: boolean; // 记录当前弹框是否有改变关联关系
     productSn: string;
     commodityIds: string;
     mainCommodityId: string;
     goodsSnList: IGoodsSnItem[];
 }
 
-class MergeDialog extends React.PureComponent<{}, IState> {
+class MergeDialog extends React.PureComponent<IProps, IState> {
     private columns: ColumnProps<IGoodsSnItem>[] = [
         {
             key: 'commodityId',
@@ -81,7 +87,7 @@ class MergeDialog extends React.PureComponent<{}, IState> {
                                 设为主商品
                             </Button>
                         </div>
-                        <div style={{ marginTop: -10 }}>
+                        <div style={{ marginTop: -4 }}>
                             <Button type="link" onClick={() => this.delGoodsRef(commodityId)}>
                                 删除关联
                             </Button>
@@ -92,11 +98,12 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         },
     ];
 
-    constructor(props: {}) {
+    constructor(props: IProps) {
         super(props);
         this.state = {
             visible: false,
             loading: false,
+            isChange: false,
             productSn: '',
             mainCommodityId: '',
             commodityIds: '',
@@ -120,7 +127,7 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         });
         getGoodsMergeList(productSn)
             .then(res => {
-                console.log('getGoodsMergeList', res);
+                // console.log('getGoodsMergeList', res);
                 const { productGroup, mainProductGroup, subProductGroup } = res.data;
                 // const { list } = res.data;
                 this.setState({
@@ -149,9 +156,12 @@ class MergeDialog extends React.PureComponent<{}, IState> {
     };
 
     private handleCancel = () => {
+        const { isChange } = this.state;
+        isChange && this.props.onReload();
         this.setState({
             visible: false,
             loading: false,
+            isChange: false,
             productSn: '',
             commodityIds: '',
             goodsSnList: [],
@@ -159,20 +169,68 @@ class MergeDialog extends React.PureComponent<{}, IState> {
     };
 
     private handleOk = () => {
-        // 校验数字字符
-        const { commodityIds, mainCommodityId } = this.state;
-        if (/[^0-9\,]/.test(commodityIds)) {
-            return message.error('commodity_id输入了非法字符，只支持检索数字！');
-        }
+        const { productSn } = this.state;
         this.setState({
             loading: true,
         });
+        productSn ? this.putGoodsMergeAdd() : this.postGoodsMerge();
+    };
+
+    // 首次关联
+    postGoodsMerge = () => {
+        const { commodityIds, mainCommodityId } = this.state;
         postGoodsMerge({
             main_commodity_id: mainCommodityId,
             merge_commodity_ids: commodityIds.split(','),
         })
             .then(res => {
-                this.handleCancel();
+                const { commodityId, productSn } = res.data;
+                notification.success({
+                    message: '关联商品成功',
+                    duration: 8,
+                    description: (
+                        <>
+                            <p>Commodity ID: {commodityId.parts[0]}</p>
+                            <p>Product SN: {productSn.parts[0]}</p>
+                        </>
+                    ),
+                });
+                this.setState(
+                    {
+                        isChange: true,
+                    },
+                    () => {
+                        this.handleCancel();
+                    },
+                );
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
+
+    // 关联后新增
+    putGoodsMergeAdd = () => {
+        const { commodityIds, productSn } = this.state;
+        putGoodsMergeAdd({
+            product_sn: productSn,
+            commodity_ids: commodityIds.split(','),
+        })
+            .then(res => {
+                notification.success({
+                    message: '新增关联商品成功',
+                    duration: 3,
+                });
+                this.setState(
+                    {
+                        isChange: true,
+                    },
+                    () => {
+                        this.handleCancel();
+                    },
+                );
             })
             .finally(() => {
                 this.setState({
@@ -191,27 +249,16 @@ class MergeDialog extends React.PureComponent<{}, IState> {
             main_commodity_id: mainCommodityId,
         })
             .then(() => {
-                this.setState({
-                    mainCommodityId: mainCommodityId,
-                    goodsSnList: goodsSnList.map(item => {
-                        const { type, commodityId } = item;
-                        if (type === '2') {
-                            return {
-                                ...item,
-                                type: '3',
-                            };
-                        }
-                        if (mainCommodityId === commodityId) {
-                            return {
-                                ...item,
-                                type: '2',
-                            };
-                        }
-                        return item;
-                    }),
-                });
+                this.setState(
+                    {
+                        isChange: true,
+                    },
+                    () => {
+                        this.getGoodsList(productSn);
+                    },
+                );
             })
-            .finally(() => {
+            .catch(() => {
                 this.setState({
                     loading: false,
                 });
@@ -229,6 +276,7 @@ class MergeDialog extends React.PureComponent<{}, IState> {
         })
             .then(() => {
                 this.setState({
+                    isChange: true,
                     goodsSnList: goodsSnList.filter(item => item.commodityId !== commodityId),
                 });
             })

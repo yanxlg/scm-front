@@ -153,7 +153,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             page: 1,
             page_count: 50,
             commodity_id: this.id,
-            product_status: [5],
+            product_status: [80],
         }).then(res => {
             const { list } = res.data;
             const goodsList = this.addRowSpanData(list);

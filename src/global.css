@@ -19,3 +19,8 @@ body {
 * {
     outline: none;
 }
+
+.ant-pro-table .ant-popover-inner-content {
+  max-height: 400px;
+  overflow: auto;
+}

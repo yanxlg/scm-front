@@ -90,7 +90,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
                             },
                         );
                         break;
-                    case 1:
+                    case 2:
                         this.setState(
                             {
                                 abnormalDetailType: 8,

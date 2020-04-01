@@ -15,6 +15,7 @@ import {
     IFilterParams,
     getCatagoryList,
     getAllGoodsOnsale,
+    getGoodsStatusList,
 } from '@/services/goods';
 
 import { RouteComponentProps } from 'react-router';
@@ -24,13 +25,13 @@ import { IGoodsList, ISkuItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import {
     defaultOption,
     inventoryStatusList,
-    productStatusList,
     versionStatusList,
     publishChannelStatusList,
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
+import '@/styles/form.less';
 
 export declare interface IPageData {
     page?: number;
@@ -104,7 +105,7 @@ const formFields: FormField[] = [
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,
-        optionList: productStatusList,
+        optionList: () => getGoodsStatusList(),
     },
     {
         type: 'select',

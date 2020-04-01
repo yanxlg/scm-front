@@ -179,9 +179,9 @@ class TableError extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'x2',
+            key: 'signDeliveryTime',
             title: '标记发货时间',
-            dataIndex: 'x2',
+            dataIndex: 'signDeliveryTime',
             align: 'center',
             width: 120,
             render: (value: string) => {
