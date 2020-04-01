@@ -62,7 +62,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             align: 'center',
             width: 100,
             render: (value: string) => {
-                return '￥' + value;
+                return '$' + value;
             },
         },
         {
