@@ -242,7 +242,7 @@ const ProTable = <T extends {}, U extends object>(
         onColumnsStateChange,
         options: proOptions,
         rowSelection: propsRowSelection = {},
-        tableAlertRender,
+        tableAlertRender = false,
         defaultClassName,
         size: proSize,
         loading,
