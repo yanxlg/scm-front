@@ -1,8 +1,9 @@
 import React, { RefObject } from 'react';
 import { Button, message, Pagination, notification } from 'antd';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import TableNotStock from './TableNotStock';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 
 import {
     getPurchasedNotStockList,
@@ -97,7 +98,7 @@ declare interface IState {
 }
 
 class PaneNotStock extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private formRef: RefObject<JsonFormRef> = React.createRef();
     private currentSearchParams: IWaitShipFilterParams | null = null;
     private initialValues = {
         order_goods_status: 100,
@@ -304,7 +305,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <div>
-                    <SearchForm
+                    <JsonForm
                         fieldList={fieldList}
                         labelClassName="order-label"
                         ref={this.formRef}

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { FormInstance } from 'antd/es/form';
 import { Form, Select } from 'antd';
 import { HotTaskRange } from '@/enums/StatusEnum';
-import formStyles from '@/components/SearchForm/_form.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import { TaskChannelEnum } from '@/config/dictionaries/Task';
 import { IPDDSortItem } from '@/interface/ITask';
 import classNames from 'classnames';

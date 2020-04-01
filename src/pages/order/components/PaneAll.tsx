@@ -1,8 +1,10 @@
 import React, { RefObject } from 'react';
 import { Pagination, Button, message, notification } from 'antd';
 
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-import LoadingButton from '@/components/LoadingButton';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
+
+import { LoadingButton } from 'react-components';
 import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
@@ -77,7 +79,7 @@ declare interface IState {
 }
 
 class PaneAll extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private formRef: RefObject<JsonFormRef> = React.createRef();
     private optionalRef: RefObject<OptionalColumn> = React.createRef();
     private currentSearchParams: IFilterParams | null = null;
     private initialValues = {
@@ -561,7 +563,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <div>
-                    <SearchForm
+                    <JsonForm
                         ref={this.formRef}
                         fieldList={fieldList}
                         labelClassName="order-label"

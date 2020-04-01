@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Input, Modal, Button, Checkbox } from 'antd';
-import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import { AutoEnLargeImg } from 'react-components';
 
 import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';

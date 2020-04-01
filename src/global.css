@@ -1,21 +1,21 @@
-html, body, #root {
-  height: 100%;
+html,
+body,
+#root {
+    height: 100%;
 }
 
 body {
-  margin: 0;
+    margin: 0;
 }
 
-.relative{
+.relative {
     position: relative;
 }
 
-
-.ant-pro-basicLayout-content{
+.ant-pro-basicLayout-content {
     background: #fff;
 }
 
-/****************fix pro table style**************/
-.ant-pro-table .ant-table-row .ant-table-cell:first-child {
-    padding: 16px 16px!important;
+* {
+    outline: none;
 }

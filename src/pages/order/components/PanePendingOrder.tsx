@@ -1,8 +1,9 @@
 import React, { RefObject } from 'react';
 import { Button, Pagination, notification, message } from 'antd';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 
 import TablePendingOrder from './TablePendingOrder';
 
@@ -102,7 +103,7 @@ declare interface IState {
 }
 
 class PanePendingOrder extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private formRef: RefObject<JsonFormRef> = React.createRef();
     private currentSearchParams: IPendingFilterParams | null = null;
     private initialValues = {
         channel_source: 100,
@@ -344,7 +345,7 @@ class PanePendingOrder extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <div>
-                    <SearchForm
+                    <JsonForm
                         labelClassName="order-pending-label"
                         fieldList={fieldList}
                         ref={this.formRef}

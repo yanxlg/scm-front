@@ -13,17 +13,19 @@ import {
     TaskTypeMap,
 } from '@/enums/StatusEnum';
 import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
-import ProTable, { ProColumns } from '@/components/OptimizeProTable/index';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { ProColumns } from 'react-components/es/ProTable';
+import { ProTable } from 'react-components';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
 import { history } from '@@/core/history';
 import { SearchOutlined } from '@ant-design/icons';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
-import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
+import { PopConfirmLoadingButton } from 'react-components';
 import btnStyle from '@/styles/_btn.less';
 import TaskStatus from './TaskStatus';
 import {
@@ -34,7 +36,7 @@ import {
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 import { TableProps } from 'antd/es/table';
-import formStyles from '@/components/SearchForm/_form.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -45,7 +47,7 @@ declare interface TaskListTabProps {
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, setCountArr }) => {
-    const searchRef = useRef<SearchFormRef>(null);
+    const searchRef = useRef<JsonFormRef>(null);
     const {
         pageSize: page_size,
         pageNumber: page_number,
@@ -619,7 +621,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
 
     const search = useMemo(() => {
         return (
-            <SearchForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
+            <JsonForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
                 <LoadingButton
                     className="form-item"
                     onClick={onSearch}
@@ -628,7 +630,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 >
                     查询
                 </LoadingButton>
-            </SearchForm>
+            </JsonForm>
         );
     }, []);
     return useMemo(() => {

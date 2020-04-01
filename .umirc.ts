@@ -28,6 +28,17 @@ const config = defineConfig({
         loading: '@/components/PageLoading/index',
     },
     headScripts: dev ? ['http://localhost:8097'] : undefined,
+    extraBabelPlugins: [
+        [
+            'import',
+            {
+                libraryName: 'react-components',
+                libraryDirectory: 'es',
+                camel2DashComponentName: false,
+            },
+            'react-components',
+        ],
+    ],
     cssLoader: {
         localsConvention: 'camelCaseOnly',
         modules: {
@@ -39,15 +50,19 @@ const config = defineConfig({
                 localName: string,
             ) => {
                 const { resourcePath } = context;
+
                 if (/_[a-zA-Z\.\-_0-9]+\.less$/.test(resourcePath)) {
-                    const match = resourcePath.match(/src(.*)/);
+                    const match =
+                        resourcePath.match(/src(.*)/) || resourcePath.match(/node_modules(.*)/);
                     if (match && match[1]) {
                         const hash = shajs('sha256')
                             .update(resourcePath)
                             .digest('hex')
                             .substr(0, 8); //最大长度
+
                         return `${localName.replace(/([A-Z])/g, '-$1').toLowerCase()}_${hash}`;
                     }
+                    // support node_modules
                 }
                 return localName;
             },

@@ -12,8 +12,8 @@ import {
     postGoodsIgnoreVersion,
 } from '@/services/goods';
 import { utcToLocal } from '@/utils/date';
-import { transStartDate, transEndDate } from '@/components/SearchForm/utils';
-import LoadingButton from '@/components/LoadingButton';
+import { transStartDate, transEndDate } from 'react-components/es/JsonForm';
+import { LoadingButton } from 'react-components';
 
 import '../../../styles/goods-version.less';
 

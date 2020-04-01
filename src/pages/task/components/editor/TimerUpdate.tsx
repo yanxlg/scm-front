@@ -9,7 +9,7 @@ import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
-import IntegerInput from '@/components/Input/IntegerInput';
+import { IntegerInput } from 'react-components';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';

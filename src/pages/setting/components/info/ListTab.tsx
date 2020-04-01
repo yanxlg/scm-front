@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-import formStyles from '@/components/SearchForm/_form.less';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import queryString from 'query-string';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
@@ -9,7 +10,7 @@ import { queryCustomDeclarationList } from '@/services/setting';
 import { ICustomDeclarationListItem, ICustomDeclarationListQuery } from '@/interface/ISetting';
 import ProTable from '@/components/ProTable';
 import CopyLink from '@/components/copyLink';
-import { ProColumns } from '@/components/OptimizeProTable';
+import { ProColumns } from 'react-components/es/ProTable';
 
 const formConfig: FormField[] = [
     {
@@ -54,7 +55,7 @@ const formConfig: FormField[] = [
 ];
 
 const ListTab: React.FC = () => {
-    const searchRef = useRef<SearchFormRef>(null);
+    const searchRef = useRef<JsonFormRef>(null);
 
     const {
         pageSize: page_size,
@@ -222,9 +223,8 @@ const ListTab: React.FC = () => {
     return useMemo(() => {
         return (
             <div>
-                <SearchForm fieldList={formConfig} ref={searchRef} />
+                <JsonForm fieldList={formConfig} ref={searchRef} />
                 <ProTable<ICustomDeclarationListItem>
-                    search={false}
                     headerTitle="查询表格"
                     rowKey="task_id"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}

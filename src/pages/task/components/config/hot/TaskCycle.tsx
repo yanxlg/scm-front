@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { DatePicker, Form, Radio, Select } from 'antd';
 import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
 import locale from 'antd/es/date-picker/locale/zh_CN';
-import IntegerInput from '@/components/Input/IntegerInput';
+import { IntegerInput } from 'react-components';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
 

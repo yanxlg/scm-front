@@ -1,8 +1,9 @@
 import React, { RefObject } from 'react';
 import { Button, Pagination, message, notification } from 'antd';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import TableWaitShip from './TableWaitShip';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 
 import { getCurrentPage } from '@/utils/common';
 import {
@@ -91,7 +92,7 @@ declare interface IProps {
 }
 
 class PaneWaitShip extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private formRef: RefObject<JsonFormRef> = React.createRef();
     private initialValues = {
         order_goods_status: 100,
         purchase_order_status: 100,
@@ -305,7 +306,7 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
         const { loading, orderList, total, page, pageCount, selectedRowKeys } = this.state;
         return (
             <div>
-                <SearchForm
+                <JsonForm
                     labelClassName="order-label"
                     fieldList={fieldList}
                     ref={this.formRef}

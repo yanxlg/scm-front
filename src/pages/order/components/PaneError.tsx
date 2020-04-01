@@ -3,7 +3,8 @@ import { Button, Radio, Pagination } from 'antd';
 // import { FormInstance } from 'antd/es/form';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import TableError from './TableError';
 
 import { getErrorOrderList, postExportErrOrder, IErrFilterParams } from '@/services/order-manage';
@@ -48,7 +49,7 @@ declare interface IState {
 }
 
 class PaneErr extends React.PureComponent<{}, IState> {
-    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private formRef: RefObject<JsonFormRef> = React.createRef();
     private currentSearchParams: IErrFilterParams | null = null;
     private fieldList: FormField[] = [
         {
@@ -345,7 +346,7 @@ class PaneErr extends React.PureComponent<{}, IState> {
         return (
             <>
                 <div>
-                    <SearchForm
+                    <JsonForm
                         labelClassName="order-error-label"
                         fieldList={this.fieldList}
                         ref={this.formRef}

@@ -22,11 +22,11 @@ import {
     IEditSkuResponse,
     ISHopList,
 } from '@/interface/IChannel';
-import { IRequestPagination1, IResponse, RequestPagination } from '@/interface/IGlobal';
+import { IResponse, RequestPagination } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
 import { singlePromiseWrap, transPaginationRequest, transPaginationResponse } from '@/utils/utils';
 import { EmptyObject } from '@/config/global';
-import { IOptionItem } from '@/components/SearchForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 export async function queryChannelProductVersion(query?: IChannelProductVersionQuery) {
     return request.get<IResponse<IChannelProductVersionResponse>>(

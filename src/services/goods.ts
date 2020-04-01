@@ -1,8 +1,8 @@
 import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
-import { IResponse, IRequestPagination, IPaginationResponse } from '@/interface/IGlobal';
-import { IGoodsListQuery, IGoodsList, ICatagoryItem } from '@/interface/ILocalGoods';
-import { IOptionItem } from '@/components/SearchForm/items/Select';
+import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
+import { IGoodsList, ICatagoryItem } from '@/interface/ILocalGoods';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 export declare interface IFilterParams {
     page?: number;

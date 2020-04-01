@@ -4,10 +4,9 @@ import { ColumnProps } from 'antd/es/table';
 import { queryRegionShippingFee } from '@/services/channel';
 import { IRegionShippingFeeItem } from '@/interface/IChannel';
 import { useList } from '@/utils/hooks';
-import ProTable from '@/components/ProTable';
-import { ConfigProvider, Statistic } from 'antd';
+import { ConfigProvider } from 'antd';
 import zhCN from 'antd/es/locale/zh_CN';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
 
 declare interface ShipFeeModalProps {
     product_id: string;

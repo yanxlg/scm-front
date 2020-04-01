@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Button, Card, Tabs } from 'antd';
+import { Card, Tabs } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/task.less';
@@ -7,12 +7,12 @@ import '@/styles/card.less';
 import { TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';
 import CopyLink from '@/components/copyLink';
 import { RouteComponentProps } from 'react-router';
-import formStyles from '@/components/SearchForm/_form.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '@/styles/_index.less';
 import TaskInfo from '@/pages/task/components/detail/TaskInfo';
 import TaskProgress  from '../components/detail/TaskProgress';
 import { TaskStaticRef } from '../components/detail/TaskStatic';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 
 const { TabPane } = Tabs;
 

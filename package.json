@@ -21,9 +21,9 @@
         "antd": "^4.0.3",
         "@ant-design/pro-layout": "^5.0.5",
         "@ant-design/icons":"^4.0.2",
-        "@ant-design/pro-table": "^2.1.8",
         "lodash-decorators": "^6.0.1",
-        "react-lazyload": "^2.6.6"
+        "react-lazyload": "^2.6.6",
+        "react-components": "git+https://g.gitvv.com/trigram/react-components.git#0.0.2"
     },
     "devDependencies": {
         "@types/react-lazyload": "^2.6.0",

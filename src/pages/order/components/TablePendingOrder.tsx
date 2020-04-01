@@ -1,8 +1,8 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
 
-import { IOrderItem, IStyleData, ICatagoryData } from './PanePendingOrder';
+import { IOrderItem } from './PanePendingOrder';
 import { ColumnProps } from 'antd/lib/table/Column';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';

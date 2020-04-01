@@ -2,9 +2,9 @@ import React, { RefObject } from 'react';
 import { Button } from 'antd';
 import ProTable from '@/components/ProTable';
 import { PaginationConfig } from 'antd/es/pagination';
-import { ProColumns } from '@ant-design/pro-table';
+import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
-import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import { AutoEnLargeImg } from 'react-components';
 import ShelvesDialog from './ShelvesDialog';
 import ImgEditDialog from './ImgEditDialog';
 import SkuDialog from './SkuDialog';
@@ -536,7 +536,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             <>
                 <ProTable<IRowDataItem>
                     id="goods-local-table"
-                    search={false}
                     headerTitle="本地产品库列表"
                     rowKey="product_id"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
@@ -555,7 +554,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         showSizeChanger: true,
                         pageSizeOptions: pageSizeOptions,
                     }}
-                    toolBarRender={(action, { selectedRows }) => []}
+                    toolBarRender={false}
                     tableAlertRender={false}
                     columns={this.columns}
                     dataSource={goodsList}

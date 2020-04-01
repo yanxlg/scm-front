@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from 'react';
 import { Modal, Pagination, Row, Col, Button, Input } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import AutoEnLargeImg from '@/components/AutoEnLargeImg';
-import { FitTable } from '@/components/FitTable';
+import { AutoEnLargeImg } from 'react-components';
+import { FitTable } from 'react-components';
 
 import { ISkuStyleItem } from '@/interface/ILocalGoods';
 import { getGoodsSkuList, ISkuParams } from '@/services/goods';

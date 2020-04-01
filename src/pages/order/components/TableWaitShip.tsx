@@ -1,5 +1,5 @@
 import React from 'react';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
 
 import { ColumnProps } from 'antd/es/table';
 import { IWaitShipItem } from './PaneWaitShip';

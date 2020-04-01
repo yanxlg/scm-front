@@ -3,7 +3,7 @@ import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 import { IOrderItem } from './PaneStockNotShip';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
 
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';

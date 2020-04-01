@@ -1,4 +1,4 @@
-import { FormField } from '@/components/SearchForm';
+import { FormField } from 'react-components/es/JsonForm';
 
 declare interface optionItem {
     name: string;

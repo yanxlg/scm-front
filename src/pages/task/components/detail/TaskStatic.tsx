@@ -9,12 +9,12 @@ import React, {
 } from 'react';
 import { Descriptions, Progress, Spin, Statistic, Tooltip } from 'antd';
 import styles from '@/styles/_index.less';
-import formStyle from '@/components/SearchForm/_form.less';
+import formStyle from 'react-components/es/JsonForm/_form.less';
 import taskStyle from '@/styles/_task.less';
 import tableStyle from '@/styles/_table.less';
 import { ColumnsType } from 'antd/lib/table/interface';
 import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleOutlined } from '@ant-design/icons';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
 import { queryTaskProgressList } from '@/services/task';
 import { ITaskProgressResponse } from '@/interface/ITask';
 import { TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';

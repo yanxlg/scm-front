@@ -1,7 +1,8 @@
 import React, { RefObject } from 'react';
 import { message, Button } from 'antd';
 import ExcelDialog from './components/ExcelDialog';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import Container from '@/components/Container';
 import GoodsProTable from './components/GoodsProTable';
 import MerchantListModal from '../components/MerchantListModal';
@@ -242,7 +243,7 @@ declare interface IIndexState {
 type LocalPageProps = RouteComponentProps<{}, any, { task_id?: number }>;
 
 class Local extends React.PureComponent<LocalPageProps, IIndexState> {
-    private formRef: RefObject<SearchFormRef> = React.createRef();
+    private formRef: RefObject<JsonFormRef> = React.createRef();
     // private queryData: any = {};
     // 保存搜索条件
     private searchFilter: IFilterParams | null = null;
@@ -518,7 +519,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         return (
             <Container>
                 <div className="goods-local">
-                    <SearchForm
+                    <JsonForm
                         labelClassName="local-search-label"
                         initialValues={this.initialValues}
                         ref={this.formRef}
@@ -534,7 +535,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                                 查询
                             </Button>
                         </div>
-                    </SearchForm>
+                    </JsonForm>
                     <div style={{ marginTop: 20 }}>
                         <Button
                             type="primary"

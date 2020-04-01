@@ -1,14 +1,9 @@
 import React from 'react';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
 import { IOrderItem } from './PaneNotStock';
-import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import {
-    orderStatusOptionList,
-    purchaseOrderOptionList,
-    purchaseShippingOptionList,
-} from '@/enums/OrderEnum';
+import { orderStatusOptionList } from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;

@@ -286,7 +286,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         return (
             <>
                 <ProTable<IGoodsVersionRowItem>
-                    search={false}
                     headerTitle="本地产品库版本列表"
                     className="goods-version-table"
                     rowKey="sku_id"
@@ -300,7 +299,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         showSizeChanger: true,
                         pageSizeOptions: pageSizeOptions,
                     }}
-                    toolBarRender={(action, { selectedRows }) => []}
+                    toolBarRender={false}
                     tableAlertRender={false}
                     columns={this.columns}
                     dataSource={versionGoodsList}

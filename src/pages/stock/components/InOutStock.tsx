@@ -1,12 +1,14 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
+import { goButton, showTotal } from 'react-components/es/FitTable';
 import { message, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { convertEndDate, convertStartDate } from '@/utils/date';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
@@ -14,8 +16,7 @@ import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
 import { useList } from '@/utils/hooks';
-import { goButton, showTotal } from '@/components/FitTable';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
 import { SearchOutlined } from '@ant-design/icons/lib';
 import { Icons } from '@/components/Icon';
@@ -26,7 +27,7 @@ declare interface IInOutStockProps {
 }
 
 const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
-    const formRef = useRef<SearchFormRef>(null);
+    const formRef = useRef<JsonFormRef>(null);
 
     const columns = useMemo<ColumnProps<IStockInItem | IStockOutItem>[]>(() => {
         if (type === StockType.In) {
@@ -243,7 +244,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         return (
             <div>
                 <div className="float-clear">
-                    <SearchForm
+                    <JsonForm
                         labelClassName="stock-form-label"
                         ref={formRef}
                         fieldList={fieldList}

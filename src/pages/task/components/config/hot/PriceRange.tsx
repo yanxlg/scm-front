@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
-import IntegerInput from '@/components/Input/IntegerInput';
+import { IntegerInput } from 'react-components';
 import { FormInstance } from 'antd/es/form';
-import { isNull } from '@/components/SearchForm/utils';
-import formStyles from '@/components/SearchForm/_form.less';
+import { isNull } from 'react-components/es/JsonForm';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 
 declare interface PriceRangeProps {

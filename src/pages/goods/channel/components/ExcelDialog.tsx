@@ -1,16 +1,16 @@
 import React, { RefObject, useCallback, useMemo, useState } from 'react';
 import { message, Modal, Radio } from 'antd';
 import { RadioChangeEvent } from 'antd/lib/radio';
-import { SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 import { exportChannelProductList } from '@/services/channel';
 import channelStyles from '@/styles/_channel.less';
-import formStyles from '@/components/SearchForm/_form.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface IExcelDialogProps {
     visible: boolean;
     total: number;
     onCancel: () => void;
-    form: RefObject<SearchFormRef>;
+    form: RefObject<JsonFormRef>;
 }
 
 const exportNum = 10000;

@@ -1,27 +1,28 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable } from '@/components/FitTable';
+import { FitTable } from 'react-components';
+import { goButton, showTotal } from 'react-components/es/FitTable';
 import { message, Pagination } from 'antd';
 import '@/styles/index.less';
 import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import { FormInstance } from 'rc-field-form/lib/interface';
 import { exportStockList, queryStockList } from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import { AutoEnLargeImg } from 'react-components';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { IStockRequest, IStockItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
-import { goButton, showTotal } from '@/components/FitTable';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 import { SearchOutlined } from '@ant-design/icons/lib';
 import { Icons } from '@/components/Icon';
 
 const StockControl: React.FC = () => {
-    const formRef = useRef<SearchFormRef>(null);
+    const formRef = useRef<JsonFormRef>(null);
     const columns = useMemo<ColumnProps<IStockItem>[]>(() => {
         return [
             {
@@ -189,7 +190,7 @@ const StockControl: React.FC = () => {
         return (
             <div>
                 <div className="float-clear">
-                    <SearchForm
+                    <JsonForm
                         className="form-help-absolute"
                         initialValues={defaultInitialValues}
                         fieldList={fieldsList}
@@ -221,7 +222,7 @@ const StockControl: React.FC = () => {
                                 点击同步库存
                             </Button>*/}
                         </React.Fragment>
-                    </SearchForm>
+                    </JsonForm>
                     <Pagination
                         className="float-right form-item"
                         pageSize={pageSize}

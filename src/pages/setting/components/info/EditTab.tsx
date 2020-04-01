@@ -1,6 +1,7 @@
 import React, { useMemo, useRef } from 'react';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
-import formStyles from '@/components/SearchForm/_form.less';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 const formConfig: FormField[] = [
     {
@@ -232,10 +233,10 @@ const formConfig: FormField[] = [
 ];
 
 const EditTab: React.FC = () => {
-    const formRef = useRef<SearchFormRef>(null);
+    const formRef = useRef<JsonFormRef>(null);
     return useMemo(() => {
         return (
-            <SearchForm
+            <JsonForm
                 ref={formRef}
                 className={formStyles.formRequiredAbsolute}
                 fieldList={formConfig}

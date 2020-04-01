@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Checkbox, Form, Modal, Divider, Spin } from 'antd';
 import { IShopItem } from '@/interface/IChannel';
 import { queryShopList } from '@/services/channel';
-import formStyles from '@/components/SearchForm/_form.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '@/styles/_merchant.less';
 import style from '@/styles/_index.less';
 

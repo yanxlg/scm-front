@@ -3,7 +3,7 @@ import { Button, Input, Select, Spin, Tooltip, Form } from 'antd';
 import '@/styles/config.less';
 import '@/styles/form.less';
 import '@/styles/modal.less';
-import formStyles from '@/components/SearchForm/_form.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { addPddHotTask, querySortCondition, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
@@ -13,9 +13,8 @@ import {
     TaskExecuteType,
     TaskIntervalConfigType,
     HotTaskFilterType,
-    TaskRangeEnum,
 } from '@/enums/StatusEnum';
-import IntegerInput from '@/components/Input/IntegerInput';
+import { IntegerInput } from 'react-components';
 import { IHotTaskBody, IPDDSortItem, ITaskDetailInfo } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
@@ -29,7 +28,7 @@ import { TaskChannelList, TaskChannelCode, TaskChannelEnum } from '@/config/dict
 import moment from 'moment';
 import SortType from '@/pages/task/components/config/hot/SortType';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 import classNames from 'classnames';
 
 export declare interface IFormData extends IHotTaskBody {

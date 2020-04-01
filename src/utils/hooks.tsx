@@ -2,7 +2,7 @@ import React, { RefObject, useState, useCallback, useEffect, useRef } from 'reac
 import { IResponse, IPaginationResponse, RequestPagination } from '@/interface/IGlobal';
 import { PaginationConfig } from 'antd/es/pagination';
 import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
-import { SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 
 const EmptyArray: string[] = [];
 
@@ -14,7 +14,7 @@ function useList<T, Q extends RequestPagination = any, S = any>({
     autoQuery = true,
 }: {
     queryList: (query: Q) => Promise<IResponse<IPaginationResponse<T>>>;
-    formRef?: RefObject<SearchFormRef>;
+    formRef?: RefObject<JsonFormRef>;
     extraQuery?: { [key: string]: any };
     defaultState?: { pageNumber?: number; pageSize?: number };
     autoQuery?: boolean;

@@ -7,8 +7,8 @@ import '@/styles/form.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import PopConfirmLoadingButton from '@/components/PopConfirmLoadingButton';
-import AutoEnLargeImg from '@/components/AutoEnLargeImg';
+import { PopConfirmLoadingButton } from 'react-components';
+import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
     updateChannelShelveState,
@@ -24,7 +24,8 @@ import {
 } from '@/config/dictionaries/Product';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
-import SearchForm, { FormField, SearchFormRef } from '@/components/SearchForm';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import { convertEndDate, convertStartDate } from '@/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
@@ -33,14 +34,14 @@ import SkuEditModal from './components/SkuEditModal';
 import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
 import { ITaskListItem } from '@/interface/ITask';
-import LoadingButton from '@/components/LoadingButton';
+import { LoadingButton } from 'react-components';
 import { SearchOutlined } from '@ant-design/icons';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
 import { Icons } from '@/components/Icon';
-import ProTable, { ProColumns } from '@/components/OptimizeProTable';
-import formStyles from '@/components/SearchForm/_form.less';
-import styles from '@/styles/_index.less';
+import { ProColumns } from 'react-components/es/ProTable';
+import { ProTable } from 'react-components';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 
 const salesVolumeList = [
@@ -191,7 +192,7 @@ const formFields: FormField[] = [
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const ChannelList: React.FC = props => {
-    const searchRef = useRef<SearchFormRef>(null);
+    const searchRef = useRef<JsonFormRef>(null);
     const [exportDialog, setExportDialog] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
@@ -590,14 +591,14 @@ const ChannelList: React.FC = props => {
 
     const search = useMemo(() => {
         return (
-            <SearchForm
+            <JsonForm
                 ref={searchRef}
                 fieldList={formFields}
                 labelClassName="product-form-label"
                 initialValues={defaultInitialValues}
             >
                 {children}
-            </SearchForm>
+            </JsonForm>
         );
     }, []);
 
