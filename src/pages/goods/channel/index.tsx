@@ -220,7 +220,7 @@ const ChannelList: React.FC = props => {
             shop_name = '',
             level_one_category = '',
             level_two_category = '',
-            mechant_ids = '',
+            merchant_ids = '',
         } = query;
         return {
             pageNumber: Number(pageNumber),
@@ -235,7 +235,7 @@ const ChannelList: React.FC = props => {
             level_one_category,
             level_two_category,
             product_status,
-            mechant_ids,
+            merchant_ids,
         };
     }, []);
 
