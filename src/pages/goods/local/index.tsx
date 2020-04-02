@@ -271,7 +271,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     private computeInitialValues = () => {
         // copy link 解析
         const { query, url } = queryString.parseUrl(window.location.href);
-        console.log('computeInitialValues', query, url);
+        // console.log('computeInitialValues', query, url);
         if (query) {
             window.history.replaceState({}, '', url);
         }
@@ -504,6 +504,21 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     };
 
+    private setProductTags = (productId: string, tags: string[]) => {
+        const { goodsList } = this.state;
+        this.setState({
+            goodsList: goodsList.map(item => {
+                if (item.product_id === productId) {
+                    return {
+                        ...item,
+                        tags,
+                    };
+                }
+                return item;
+            }),
+        });
+    };
+
     render() {
         const {
             page,
@@ -582,6 +597,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         allCatagoryList={allCatagoryList}
                         onSearch={this.onSearch}
                         changeSelectedRowKeys={this.changeSelectedRowKeys}
+                        setProductTags={this.setProductTags}
                     />
                     <ExcelDialog
                         visible={excelDialogStataus}
