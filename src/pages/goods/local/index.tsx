@@ -468,7 +468,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     postGoodsOnsale = (merchants_id: string[]) => {
         const { selectedRowKeys } = this.state;
 
-        return postGoodsOnsale({ scm_goods_id: selectedRowKeys, merchants_id }).then(res => {
+        return postGoodsOnsale({
+            scm_goods_id: selectedRowKeys,
+            merchants_id: merchants_id.join(','),
+        }).then(res => {
             this.onSearch();
             message.success('上架任务已发送');
         });
@@ -477,7 +480,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     // 查询商品一键上架
     getAllGoodsOnsale = (merchants_id: string[]) => {
         const searchParams = {
-            merchants_id,
+            merchants_id: merchants_id.join(','),
             ...this.formRef.current?.getFieldsValue(),
         };
         return getAllGoodsOnsale(searchParams).then(res => {
@@ -537,7 +540,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             </Button>
                         </div>
                     </JsonForm>
-                    <div style={{ marginTop: 20 }}>
+                    <div style={{ margin: '16px 0' }}>
                         <Button
                             type="primary"
                             className="local-search-item-btn"
