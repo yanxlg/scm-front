@@ -14,6 +14,7 @@ import {
 import { utcToLocal } from '@/utils/date';
 import { transStartDate, transEndDate } from 'react-components/es/JsonForm';
 import { LoadingButton } from 'react-components';
+import MerchantListModal from '../components/MerchantListModal';
 
 import '../../../styles/goods-version.less';
 
@@ -90,7 +91,7 @@ declare interface IVersionState {
 
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
     id: string = '';
-
+    productId: string = '';
     constructor(props: IVersionProps) {
         super(props);
         this.state = {

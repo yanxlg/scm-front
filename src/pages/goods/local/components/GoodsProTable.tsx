@@ -1,6 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button } from 'antd';
-import ProTable from '@/components/ProTable';
+// import ProTable from '@/components/ProTable';
+import { ProTable } from 'react-components';
 import { PaginationConfig } from 'antd/es/pagination';
 import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';

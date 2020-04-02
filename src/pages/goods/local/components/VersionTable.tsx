@@ -162,7 +162,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'sku_price',
             align: 'center',
             render: (value: number) => {
-                return `￥${value}`;
+                return value ? `￥${value}` : '-';
             },
         },
         {
