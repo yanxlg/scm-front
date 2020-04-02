@@ -3,6 +3,7 @@ import { LocalApiPath } from '@/config/api/LocalApiPath';
 import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
 import { IGoodsList, ICatagoryItem } from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { ICountryItem } from '@/interface/ISetting';
 
 export declare interface IFilterParams {
     page?: number;

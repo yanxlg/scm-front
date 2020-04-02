@@ -60,7 +60,13 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return <AutoEnLargeImg src={value} className="sku-img" />;
+                return (
+                    <AutoEnLargeImg
+                        src={value}
+                        className="sku-img"
+                        scrollContainer="#local_sku_modal .ant-table-body"
+                    />
+                );
             },
         },
         {
@@ -269,7 +275,8 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                             </Col>
                         </Row>
                         <FitTable
-                            bordered
+                            id="local_sku_modal"
+                            bordered={true}
                             rowKey="sku_id"
                             className="table"
                             loading={loading}

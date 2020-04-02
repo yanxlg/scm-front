@@ -1,28 +1,55 @@
 import { RequestPagination } from '@/interface/IGlobal';
 
-export type ICustomDeclarationListQuery = {
-    category_level_one?: string;
-    category_level_two?: string;
-    category_level_three?: string;
+export type ICustomListQuery = {
+    one_cat_id?: string;
+    two_cat_id?: string;
+    three_cat_id?: string;
+    country_code?: string;
 } & RequestPagination;
 
-export declare interface ICustomDeclarationListItem {
-    category_level_one: string;
-    category_level_two: string;
-    category_level_three: string;
-    weight: string;
-    country: string;
-    customs_code: string;
-    length: string;
-    width: string;
-    height: string;
-    is_electricity: string;
-    is_metal: string;
-    is_fluid: string;
-    is_burn: string;
-    is_powder: string;
-    is_pure_electric: string;
-    is_perfume: string;
-    is_food: string;
-    is_paste: string;
+export declare interface ICustomItem {
+    one_cat_id?: string;
+    two_cat_id?: string;
+    three_cat_id?: string;
+    one_cat_name?: string;
+    two_cat_name?: string;
+    three_cat_name?: string;
+    weight?: string;
+    country_name?: string;
+    country_code?: string;
+    customs_code?: string;
+    length?: string;
+    width?: string;
+    height?: string;
+    is_electricity?: boolean;
+    is_metal?: boolean;
+    is_liquid?: boolean;
+    is_combustible?: boolean;
+    is_powder?: boolean;
+    is_battery?: boolean;
+    is_perfume?: boolean;
+    is_food?: boolean;
+    is_paste?: boolean;
+    oneCatName?: string;
+    oneCatId?: string;
+    twoCatId?: string;
+    twoCatName?: string;
+    threeCatId?: string;
+    threeCatName?: string;
+    customsCode?: string;
+    countryName?: string;
+    isElectricity?: boolean;
+    isMetal?: boolean;
+    isFluid?: boolean;
+    isBurn?: boolean;
+    isPowder?: boolean;
+    isPureElectric?: boolean;
+    isPerfume?: boolean;
+    isFood?: boolean;
+    isPaste?: boolean;
+}
+
+export declare interface ICountryItem {
+    code: string;
+    name: string;
 }

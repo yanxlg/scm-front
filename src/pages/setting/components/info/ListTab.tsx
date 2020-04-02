@@ -1,61 +1,68 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
+import { JsonForm, LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import queryString from 'query-string';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
-import { queryCustomDeclarationList } from '@/services/setting';
-import { ICustomDeclarationListItem, ICustomDeclarationListQuery } from '@/interface/ISetting';
+import { queryCustomList } from '@/services/setting';
+import { ICustomItem, ICustomListQuery } from '@/interface/ISetting';
 import ProTable from '@/components/ProTable';
 import CopyLink from '@/components/copyLink';
 import { ProColumns } from 'react-components/es/ProTable';
-
-const formConfig: FormField[] = [
-    {
-        label: '一级品类',
-        name: 'category_level_one',
-        type: 'select',
-        rules: [
-            {
-                required: true,
-                message: '请选择一级品类',
-            },
-        ],
-        formItemClassName: formStyles.formItem,
-        className: formStyles.formItemDefault,
-    },
-    {
-        label: '二级品类',
-        name: 'category_level_two',
-        type: 'select',
-        rules: [
-            {
-                required: true,
-                message: '请选择二级品类',
-            },
-        ],
-        formItemClassName: formStyles.formItem,
-        className: formStyles.formItemDefault,
-    },
-    {
-        label: '三级品类',
-        name: 'category_level_three',
-        type: 'select',
-        rules: [
-            {
-                required: true,
-                message: '请选择三级品类',
-            },
-        ],
-        formItemClassName: formStyles.formItem,
-        className: formStyles.formItemDefault,
-    },
-];
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { getCatagoryList } from '@/services/goods';
 
 const ListTab: React.FC = () => {
     const searchRef = useRef<JsonFormRef>(null);
+    const categoryRef = useRef<Promise<IOptionItem[]>>(
+        getCatagoryList()
+            .then(({ convertList = [] }) => {
+                return convertList;
+            })
+            .catch(() => {
+                return [];
+            }),
+    );
+
+    const formConfig: FormField[] = [
+        {
+            label: '一级品类',
+            type: 'select',
+            name: 'one_cat_id',
+            formItemClassName: formStyles.formItem,
+            optionList: () => categoryRef.current,
+            onChange: (name, form) => {
+                form.resetFields(['two_cat_id', 'three_cat_id']);
+            },
+        },
+        {
+            label: '二级品类',
+            type: 'select',
+            name: 'two_cat_id',
+            formItemClassName: formStyles.formItem,
+            optionListDependence: {
+                name: 'one_cat_id',
+                key: 'children',
+            },
+            optionList: () => categoryRef.current,
+            onChange: (name, form) => {
+                form.resetFields(['three_cat_id']);
+            },
+        },
+        {
+            label: '三级品类',
+            type: 'select',
+            name: 'three_cat_id',
+            formItemClassName: formStyles.formItem,
+            optionListDependence: {
+                name: ['one_cat_id', 'two_cat_id'],
+                key: 'children',
+            },
+            optionList: () => categoryRef.current,
+        },
+    ];
 
     const {
         pageSize: page_size,
@@ -94,8 +101,8 @@ const ListTab: React.FC = () => {
         onSearch,
         onReload,
         onChange,
-    } = useList<ICustomDeclarationListItem, ICustomDeclarationListQuery>({
-        queryList: queryCustomDeclarationList,
+    } = useList<ICustomItem, ICustomListQuery>({
+        queryList: queryCustomList,
         formRef: searchRef,
         defaultState: {
             pageSize: page_size,
@@ -107,113 +114,113 @@ const ListTab: React.FC = () => {
         return [
             {
                 title: '中台一级品类',
-                dataIndex: 'category_level_one',
+                dataIndex: 'oneCatName',
                 align: 'center',
                 width: '150px',
             },
             {
                 title: '中台二级品类',
-                width: '100px',
-                dataIndex: 'category_level_two',
+                width: '150px',
+                dataIndex: 'twoCatName',
                 align: 'center',
             },
             {
                 title: '中台三级品类',
-                width: '200px',
-                dataIndex: 'category_level_three',
+                width: '150px',
+                dataIndex: 'threeCatName',
                 align: 'center',
             },
             {
-                title: '重量',
+                title: '重量（g）',
                 dataIndex: 'weight',
                 width: '178px',
                 align: 'center',
             },
             {
                 title: '国家',
-                dataIndex: 'country',
+                dataIndex: 'countryName',
                 width: '130px',
                 align: 'center',
             },
             {
                 title: '海关代码',
-                dataIndex: 'customs_code',
+                dataIndex: 'customsCode',
                 width: '223px',
                 align: 'center',
             },
             {
-                title: '长度',
+                title: '长度（cm）',
                 dataIndex: 'length',
                 width: '223px',
                 align: 'center',
             },
             {
-                title: '宽度',
+                title: '宽度（cm）',
                 dataIndex: 'width',
                 width: '223px',
                 align: 'center',
             },
             {
-                title: '高度',
+                title: '高度（cm）',
                 dataIndex: 'height',
                 width: '182px',
                 align: 'center',
             },
             {
                 title: '是否含电',
-                dataIndex: 'is_electricity',
+                dataIndex: 'isElectricity',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '是否金属',
-                dataIndex: 'is_metal',
+                dataIndex: 'isMetal',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '是否液体',
-                dataIndex: 'is_fluid',
+                dataIndex: 'isFluid',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '是否可燃',
-                dataIndex: 'is_burn',
+                dataIndex: 'isBurn',
                 width: '200px',
                 align: 'center',
             },
             {
                 title: '是否粉末',
-                dataIndex: 'is_powder',
+                dataIndex: 'isPowder',
                 width: '200px',
                 align: 'center',
             },
             {
                 title: '是否纯电',
-                dataIndex: 'is_pure_electric',
+                dataIndex: 'isPureElectric',
                 width: '200px',
                 align: 'center',
             },
             {
                 title: '是否香水',
-                dataIndex: 'is_perfume',
+                dataIndex: 'isPerfume',
                 width: '200px',
                 align: 'center',
             },
             {
                 title: '是否食品',
-                dataIndex: 'is_food',
+                dataIndex: 'isFood',
                 width: '200px',
                 align: 'center',
             },
             {
                 title: '是否膏状',
-                dataIndex: 'is_paste',
+                dataIndex: 'isPaste',
                 width: '200px',
                 align: 'center',
             },
-        ] as ProColumns<ICustomDeclarationListItem>[];
+        ] as ProColumns<ICustomItem>[];
     }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
@@ -223,10 +230,19 @@ const ListTab: React.FC = () => {
     return useMemo(() => {
         return (
             <div>
-                <JsonForm fieldList={formConfig} ref={searchRef} />
-                <ProTable<ICustomDeclarationListItem>
+                <JsonForm fieldList={formConfig} ref={searchRef}>
+                    <LoadingButton
+                        onClick={onSearch}
+                        type="primary"
+                        className={formStyles.formItem}
+                    >
+                        查询
+                    </LoadingButton>
+                </JsonForm>
+                <ProTable<ICustomItem>
                     headerTitle="查询表格"
-                    rowKey="task_id"
+                    className={formStyles.formItem}
+                    rowKey="country_code"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
                     bottom={60}
                     minHeight={500}
