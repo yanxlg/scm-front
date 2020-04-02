@@ -61,3 +61,15 @@ export const isEmptyObject = (target: object) => {
 export const isZero = (num: number | string) => {
     return num === 0 || num === '0';
 };
+
+// export const formatRequestData = (data: any) => {
+//     if (typeof data !== 'object') {
+//         return data
+//     }
+//     if (Array.isArray(data)) {
+//         return
+//     } else {
+
+//     }
+//     return
+// }

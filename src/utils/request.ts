@@ -166,4 +166,18 @@ request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
     };
 });
 
+// 参数过滤 '' undefined null
+// request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
+//     console.log('interceptors', options);
+//     return {
+//         url,
+//         options: {
+//             ...options,
+//             data: ,
+//             params: ,
+//             interceptors: true
+//         },
+//     };
+// });
+
 export default request;
