@@ -299,7 +299,6 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                         showSizeChanger: true,
                         pageSizeOptions: pageSizeOptions,
                     }}
-                    toolBarRender={false}
                     tableAlertRender={false}
                     columns={this.columns}
                     dataSource={versionGoodsList}

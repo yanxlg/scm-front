@@ -536,8 +536,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <ProTable<IRowDataItem>
-                    id="goods-local-table"
-                    optimize={false}
+                    // optimize={false}
                     headerTitle="本地产品库列表"
                     rowKey="product_id"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
@@ -556,7 +555,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         showSizeChanger: true,
                         pageSizeOptions: pageSizeOptions,
                     }}
-                    toolBarRender={false}
+                    // toolBarRender={false}
                     tableAlertRender={false}
                     columns={this.columns}
                     dataSource={goodsList}

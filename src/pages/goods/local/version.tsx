@@ -87,6 +87,7 @@ declare interface IVersionState {
     allCount: number;
     currentInfo: IGoodsVersionRowItem | null;
     versionGoodsList: IGoodsVersionRowItem[];
+    merchantDialogStatus: boolean;
 }
 
 class Version extends React.PureComponent<IVersionProps, IVersionState> {
@@ -103,6 +104,7 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
             allCount: 0,
             currentInfo: null,
             versionGoodsList: [],
+            merchantDialogStatus: false,
         };
     }
 
@@ -230,13 +232,10 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
 
     // 应用版本
     postGoodsOnsale = (product_id: string) => {
-        postGoodsOnsale({
-            scm_goods_id: [product_id],
-        }).then(res => {
-            message.success(`${product_id}应用成功`);
-            this.onSearch();
-            this.searchReleasedGoods();
+        this.setState({
+            merchantDialogStatus: true,
         });
+        this.productId = product_id;
     };
 
     // 忽略版本
@@ -263,8 +262,33 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         });
     };
 
+    private merchantOkey = (merchants_id: string[]) => {
+        return postGoodsOnsale({
+            scm_goods_id: [this.productId],
+            merchants_id: merchants_id.join(','),
+        }).then(res => {
+            message.success(`${this.productId}应用成功`);
+            this.onSearch();
+            this.searchReleasedGoods();
+        });
+    };
+
+    private merchantCancel = () => {
+        this.setState({
+            merchantDialogStatus: false,
+        });
+    };
+
     render() {
-        const { loading, page, page_count, allCount, currentInfo, versionGoodsList } = this.state;
+        const {
+            loading,
+            page,
+            page_count,
+            allCount,
+            currentInfo,
+            versionGoodsList,
+            merchantDialogStatus,
+        } = this.state;
         let currentDom = null;
         if (currentInfo) {
             const {
@@ -326,6 +350,11 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
                         versionGoodsList={versionGoodsList}
                         operationVersion={this.operationVersion}
                         onSearch={this.onSearch}
+                    />
+                    <MerchantListModal
+                        visible={merchantDialogStatus}
+                        onOKey={this.merchantOkey}
+                        onCancel={this.merchantCancel}
                     />
                 </div>
             </Container>

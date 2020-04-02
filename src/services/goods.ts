@@ -24,7 +24,7 @@ export declare interface IFilterParams {
     min_comment?: number; // 评论数量最小值
     product_status?: string; // 版本状态
     // product_sn?: string;
-    merchants_id?: string[];
+    merchants_id?: string;
 }
 
 declare interface IImgEditData {
@@ -34,7 +34,7 @@ declare interface IImgEditData {
 
 declare interface IOnsaleData {
     scm_goods_id: string[];
-    merchants_id?: string[];
+    merchants_id?: string;
 }
 
 declare interface IGoodsDeleteData {
