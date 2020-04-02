@@ -77,7 +77,7 @@ const fieldList: FormField[] = [
         type: 'dateRanger',
         name: ['platform_order_time_start', 'platform_order_time_end'],
         label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
-        className: 'order-pending-date-picker',
+        className: 'order-date-picker',
         formItemClassName: 'form-item',
         placeholder: '请选择订单时间',
         formatter: ['start_date', 'end_date'],

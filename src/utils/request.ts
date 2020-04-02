@@ -7,6 +7,7 @@ import { extend, RequestOptionsInit, ResponseError } from 'umi-request';
 import { history } from 'umi';
 import { parse, stringify } from 'querystring';
 import User from '@/storage/User';
+import { formatRequestData } from '@/utils/utils';
 
 let messageQueue: string[] = []; // 消息队列 避免重复msg显示
 
@@ -167,17 +168,16 @@ request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
 });
 
 // 参数过滤 '' undefined null
-// request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
-//     console.log('interceptors', options);
-//     return {
-//         url,
-//         options: {
-//             ...options,
-//             data: ,
-//             params: ,
-//             interceptors: true
-//         },
-//     };
-// });
+request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
+    const { params, data } = options;
+    return {
+        url,
+        options: {
+            ...options,
+            data: formatRequestData(data),
+            params: formatRequestData(params),
+        },
+    };
+});
 
 export default request;

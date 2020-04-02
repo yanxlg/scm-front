@@ -62,14 +62,27 @@ export const isZero = (num: number | string) => {
     return num === 0 || num === '0';
 };
 
-// export const formatRequestData = (data: any) => {
-//     if (typeof data !== 'object') {
-//         return data
-//     }
-//     if (Array.isArray(data)) {
-//         return
-//     } else {
-
-//     }
-//     return
-// }
+const filterList = ['', undefined, null];
+export const formatRequestData = (data: any): any => {
+    if (typeof data !== 'object') {
+        return data;
+    }
+    if (Array.isArray(data)) {
+        // return data.map(item => formatRequestData(data))
+        for (let i = 0; i < data.length; i++) {
+            if (typeof data[i] === 'object') {
+                formatRequestData(data[i]);
+            }
+        }
+    } else {
+        for (let key in data) {
+            let val = data[key];
+            if (filterList.indexOf(val) > -1) {
+                delete data[key];
+            } else if (typeof val === 'object') {
+                formatRequestData(val);
+            }
+        }
+    }
+    return data;
+};
