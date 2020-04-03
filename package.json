@@ -6,7 +6,8 @@
         "build": "umi build",
         "test": "umi test",
         "lint-staged": "lint-staged",
-        "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx "
+        "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx ",
+        "analyze": "ANALYZE=1 umi dev"
     },
     "dependencies": {
         "moment": "^2.24.0",
