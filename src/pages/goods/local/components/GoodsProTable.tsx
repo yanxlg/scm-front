@@ -136,7 +136,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return <AutoEnLargeImg src={value} className="goods-local-img"/>;
+                return <AutoEnLargeImg src={value} className="goods-local-img" />;
             },
         },
         {
@@ -284,27 +284,32 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             title: '上架渠道',
             dataIndex: 'publish_status',
             align: 'center',
-            width: 140,
+            width: 160,
             render: (value: IPublishItem[], row: IRowDataItem, index: number) => {
                 const channelInfo: { [key: string]: IPublishItem } = {};
                 value?.forEach(item => {
-                    const { publishChannel } = item;
-                    if (!channelInfo[publishChannel]) {
-                        channelInfo[publishChannel] = item;
+                    const { publishChannel, publishStore } = item;
+                    const key = `${publishStore}_${publishChannel}`;
+                    if (!channelInfo[key]) {
+                        channelInfo[key] = item;
                     }
                 });
                 const keys = Object.keys(channelInfo);
                 return keys.length > 0 ? (
                     <>
                         {keys.map(key => {
-                            const { publishStatus } = channelInfo[key];
-                            // const _publishStatus = (publishStatus
-                            //     ? publishStatus
-                            //     : 0) as publishStatusCode;
+                            const { publishStatus, publishChannel, publishStore } = channelInfo[
+                                key
+                            ];
+                            const _publishStatus = (publishStatus
+                                ? publishStatus
+                                : 0) as publishStatusCode;
                             return (
                                 <div key={key}>
-                                    {key}
-                                    {/* <div>({publishStatusMap[_publishStatus]})</div> */}
+                                    <div>
+                                        {publishChannel}-{publishStore}
+                                    </div>
+                                    <div>({publishStatusMap[_publishStatus]})</div>
                                 </div>
                             );
                         })}

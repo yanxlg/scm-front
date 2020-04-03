@@ -83,7 +83,9 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'onsale_info',
             align: 'center',
             render: (value: IOnsaleItem[], row: IGoodsVersionRowItem) => {
-                return <div>{[...new Set(value.map(item => item.onsale_channel))].join('、')}</div>;
+                return [...new Set(value.map(item => item.onsale_channel))].map(channel => (
+                    <div key={channel}>{channel}</div>
+                ));
             },
         },
         {
