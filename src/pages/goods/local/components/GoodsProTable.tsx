@@ -30,6 +30,7 @@ declare interface IProps {
     allCatagoryList: ICatagoryItem[];
     onSearch(pageData?: IPageData, isRefresh?: boolean): void;
     changeSelectedRowKeys(keys: string[]): void;
+    setProductTags(productId: string, tags: string[]): void;
 }
 
 declare interface IState {
@@ -135,7 +136,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return <AutoEnLargeImg src={value} className="goods-local-img" />;
+                return <AutoEnLargeImg src={value} className="goods-local-img"/>;
             },
         },
         {
@@ -149,16 +150,17 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             },
         },
         {
-            key: 'xxx',
+            key: 'tags',
             title: '商品属性',
-            dataIndex: 'xxx',
+            dataIndex: 'tags',
             align: 'center',
             width: 200,
-            render: (value, row: IRowDataItem) => {
+            render: (value: string[], row: IRowDataItem) => {
+                const { commodity_id, product_id } = row;
                 return (
                     <div>
                         <div>
-                            {['品牌', '大件'].map(item => (
+                            {value.map(item => (
                                 <Button
                                     size="small"
                                     key={item}
@@ -168,7 +170,12 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                                 </Button>
                             ))}
                         </div>
-                        <PopConfirmSetAttr text="111" />
+                        <PopConfirmSetAttr
+                            tags={value}
+                            commodityId={commodity_id}
+                            productId={product_id}
+                            setProductTags={this.props.setProductTags}
+                        />
                     </div>
                 );
             },
@@ -291,13 +298,13 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     <>
                         {keys.map(key => {
                             const { publishStatus } = channelInfo[key];
-                            const _publishStatus = (publishStatus
-                                ? publishStatus
-                                : 0) as publishStatusCode;
+                            // const _publishStatus = (publishStatus
+                            //     ? publishStatus
+                            //     : 0) as publishStatusCode;
                             return (
                                 <div key={key}>
                                     {key}
-                                    <div>({publishStatusMap[_publishStatus]})</div>
+                                    {/* <div>({publishStatusMap[_publishStatus]})</div> */}
                                 </div>
                             );
                         })}

@@ -6,6 +6,7 @@ import { FitTable } from 'react-components';
 
 import { ISkuStyleItem } from '@/interface/ILocalGoods';
 import { getGoodsSkuList, ISkuParams } from '@/services/goods';
+import { setCommoditySkuTag } from '@/services/goods-attr';
 
 import './SkuDialog.less';
 
@@ -20,6 +21,8 @@ declare interface ISkuItem {
     serial: number;
     sku_amount: number; // 爬虫价格 = 价格 + 运费
     image_url: string;
+    commodity_sku_id: string;
+    tags: string[];
 }
 
 declare interface IPorps {
@@ -114,11 +117,35 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         },
         {
             fixed: 'right',
-            key: 'xxx',
+            key: '_attr',
             title: '属性',
-            dataIndex: 'xxx',
+            // dataIndex: 'xxx',
             align: 'center',
             width: 170,
+            render: (value, row: ISkuItem) => {
+                const { currentRowData } = this.props;
+                const { tags, commodity_sku_id } = row;
+                return (
+                    <div style={{ textAlign: 'left' }}>
+                        {currentRowData.tags.map((item: string) => {
+                            const isActive = tags.indexOf(item) > -1;
+                            return (
+                                <Button
+                                    size="small"
+                                    className="tag-btn"
+                                    type={isActive ? 'primary' : 'default'}
+                                    key={item}
+                                    onClick={() =>
+                                        this.setCommoditySkuTag(commodity_sku_id, item, tags)
+                                    }
+                                >
+                                    {item}
+                                </Button>
+                            );
+                        })}
+                    </div>
+                );
+            },
         },
     ];
     constructor(props: IPorps) {
@@ -131,6 +158,44 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             value: '',
         };
     }
+
+    private setCommoditySkuTag = (commodity_sku_id: string, item: string, tags: string[]) => {
+        // console.log('commodity_sku_id', commodity_sku_id);
+        const index = tags.indexOf(item);
+        let list: string[] = [];
+        if (index > -1) {
+            list = [...tags.slice(0, index), ...tags.slice(index + 1)];
+        } else {
+            list = [...tags, item];
+        }
+        this.setState({
+            loading: true,
+        });
+        setCommoditySkuTag({
+            commodity_sku_id,
+            tag_name: list,
+        })
+            .then(() => {
+                // console.log('setCommoditySkuTag', res);
+                const { skuList } = this.state;
+                this.setState({
+                    skuList: skuList.map(item => {
+                        if (item.commodity_sku_id === commodity_sku_id) {
+                            return {
+                                ...item,
+                                tags: list,
+                            };
+                        }
+                        return item;
+                    }),
+                });
+            })
+            .finally(() => {
+                this.setState({
+                    loading: false,
+                });
+            });
+    };
 
     private handleCancel = () => {
         this.props.hideSkuDialog();
@@ -224,7 +289,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                     style={{ top: 50 }}
                     onCancel={this.handleCancel}
                     maskClosable={false}
-                    // footer={null}
+                    footer={null}
                 >
                     <div className="goods-sku-dialog">
                         <div className="goods-info">
@@ -276,6 +341,8 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                             columns={this.columns}
                             dataSource={skuList}
                             scroll={{ x: 'max-content', y: 400 }}
+                            // minHeight={100}
+                            autoFitY={false}
                             pagination={false}
                         />
                         <Pagination

@@ -28,13 +28,14 @@ export declare interface IOrderItem {
     purchaseNumber: number; // 采购数量
     purchasePlatformOrderId: string; // 采购订单号
     purchaseWaybillNo: string; // 采购运单号
-    platformOrderTime: string; // 采购生成时间
+    // platformOrderTime: string; // 采购生成时间
     payTime: string; // 采购支付时间
     purchaseOrderStatus: number; // 采购订单状态
     purchaseOrderShippingStatus: number; // 采购配送状态
     purchaseOrderPayStatus: number; // 采购支付状态
     confirmTime: string; // 订单确认时间
     channelOrderSn: string; // 渠道订单ID
+    platformSendOrderTime: string; // 采购生成时间
 }
 
 const fieldList: FormField[] = [
@@ -77,7 +78,7 @@ const fieldList: FormField[] = [
         type: 'dateRanger',
         name: ['platform_order_time_start', 'platform_order_time_end'],
         label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
-        className: 'order-pending-date-picker',
+        className: 'order-date-picker',
         formItemClassName: 'form-item',
         placeholder: '请选择订单时间',
         formatter: ['start_date', 'end_date'],
@@ -170,8 +171,9 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 purchaseOrderPayStatus,
                 purchasePlatformOrderId,
                 purchaseWaybillNo,
-                platformOrderTime,
+                // platformOrderTime,
                 payTime,
+                platformSendOrderTime,
 
                 orderGoods,
                 orderInfo,
@@ -190,8 +192,9 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 purchaseOrderPayStatus,
                 purchasePlatformOrderId,
                 purchaseWaybillNo,
-                platformOrderTime,
+                // platformOrderTime,
                 payTime,
+                platformSendOrderTime,
 
                 confirmTime,
                 channelOrderSn,

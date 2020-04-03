@@ -30,7 +30,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
 
     private columns: ColumnProps<IGoodsVersionRowItem>[] = [
         {
-            fixed: true,
+            fixed: 'left',
             key: 'goods_status',
             width: 160,
             title: '操作',
@@ -62,7 +62,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             },
         },
         {
-            fixed: true,
+            fixed: 'left',
             key: 'product_id',
             width: 140,
             title: 'Product ID',
@@ -83,7 +83,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'onsale_info',
             align: 'center',
             render: (value: IOnsaleItem[], row: IGoodsVersionRowItem) => {
-                return <div>{value.map(item => item.onsale_channel).join('、')}</div>;
+                return <div>{[...new Set(value.map(item => item.onsale_channel))].join('、')}</div>;
             },
         },
         {
