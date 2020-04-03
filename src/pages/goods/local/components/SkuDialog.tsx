@@ -341,6 +341,8 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                             columns={this.columns}
                             dataSource={skuList}
                             scroll={{ x: 'max-content', y: 400 }}
+                            // minHeight={100}
+                            autoFitY={false}
                             pagination={false}
                         />
                         <Pagination

@@ -91,9 +91,9 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
         },
 
         {
-            key: 'platformOrderTime',
+            key: 'platformSendOrderTime',
             title: '采购生成时间',
-            dataIndex: 'platformOrderTime',
+            dataIndex: 'platformSendOrderTime',
             align: 'center',
             width: 120,
             render: (value: string) => utcToLocal(value),
