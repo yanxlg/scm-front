@@ -136,7 +136,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IRowDataItem) => {
-                return <AutoEnLargeImg src={value} className="goods-local-img"/>;
+                return <AutoEnLargeImg src={value} className="goods-local-img" />;
             },
         },
         {
