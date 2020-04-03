@@ -40,10 +40,10 @@ export declare interface ICustomItem {
     countryName?: string;
     isElectricity?: boolean;
     isMetal?: boolean;
-    isFluid?: boolean;
-    isBurn?: boolean;
+    isLiquid?: boolean;
+    isCombustible?: boolean;
     isPowder?: boolean;
-    isPureElectric?: boolean;
+    isBattery?: boolean;
     isPerfume?: boolean;
     isFood?: boolean;
     isPaste?: boolean;

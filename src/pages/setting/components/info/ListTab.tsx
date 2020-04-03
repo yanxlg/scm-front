@@ -13,18 +13,22 @@ import CopyLink from '@/components/copyLink';
 import { ProColumns } from 'react-components/es/ProTable';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getCatagoryList } from '@/services/goods';
+import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import settingStyles from '@/styles/_setting.less';
 
 const ListTab: React.FC = () => {
     const searchRef = useRef<JsonFormRef>(null);
-    const categoryRef = useRef<Promise<IOptionItem[]>>(
-        getCatagoryList()
+    const categoryRef = useRef<Promise<IOptionItem[]>>();
+
+    if (!categoryRef.current) {
+        categoryRef.current = getCatagoryList()
             .then(({ convertList = [] }) => {
                 return convertList;
             })
             .catch(() => {
                 return [];
-            }),
-    );
+            });
+    }
 
     const formConfig: FormField[] = [
         {
@@ -32,7 +36,11 @@ const ListTab: React.FC = () => {
             type: 'select',
             name: 'one_cat_id',
             formItemClassName: formStyles.formItem,
-            optionList: () => categoryRef.current,
+            optionList: () => categoryRef.current!,
+            syncDefaultOption: {
+                name: '全部',
+                value: '',
+            },
             onChange: (name, form) => {
                 form.resetFields(['two_cat_id', 'three_cat_id']);
             },
@@ -46,7 +54,11 @@ const ListTab: React.FC = () => {
                 name: 'one_cat_id',
                 key: 'children',
             },
-            optionList: () => categoryRef.current,
+            syncDefaultOption: {
+                name: '全部',
+                value: '',
+            },
+            optionList: () => categoryRef.current!,
             onChange: (name, form) => {
                 form.resetFields(['three_cat_id']);
             },
@@ -60,39 +72,15 @@ const ListTab: React.FC = () => {
                 name: ['one_cat_id', 'two_cat_id'],
                 key: 'children',
             },
-            optionList: () => categoryRef.current,
+            syncDefaultOption: {
+                name: '全部',
+                value: '',
+            },
+            optionList: () => categoryRef.current!,
         },
     ];
 
     const {
-        pageSize: page_size,
-        pageNumber: page_number,
-        ...defaultInitialValues
-    } = useMemo(() => {
-        // copy link 解析
-        const { query, url } = queryString.parseUrl(window.location.href);
-        if (!isEmptyObject(query)) {
-            window.history.replaceState({}, '', url);
-        }
-
-        const {
-            pageNumber = defaultPageNumber,
-            pageSize = defaultPageSize,
-            category_level_one = '',
-            category_level_two = '',
-            category_level_three = '',
-        } = query;
-        return {
-            pageNumber: Number(pageNumber),
-            pageSize: Number(pageSize),
-            category_level_one,
-            category_level_two,
-            category_level_three,
-        };
-    }, []);
-
-    const {
-        query,
         loading,
         pageNumber,
         pageSize,
@@ -104,10 +92,6 @@ const ListTab: React.FC = () => {
     } = useList<ICustomItem, ICustomListQuery>({
         queryList: queryCustomList,
         formRef: searchRef,
-        defaultState: {
-            pageSize: page_size,
-            pageNumber: page_number,
-        },
     });
 
     const columns = useMemo(() => {
@@ -171,66 +155,133 @@ const ListTab: React.FC = () => {
                 dataIndex: 'isElectricity',
                 width: '223px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否金属',
                 dataIndex: 'isMetal',
                 width: '223px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否液体',
-                dataIndex: 'isFluid',
+                dataIndex: 'isLiquid',
                 width: '223px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否可燃',
-                dataIndex: 'isBurn',
+                dataIndex: 'isCombustible',
                 width: '200px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否粉末',
                 dataIndex: 'isPowder',
                 width: '200px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否纯电',
-                dataIndex: 'isPureElectric',
+                dataIndex: 'isBattery',
                 width: '200px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否香水',
                 dataIndex: 'isPerfume',
                 width: '200px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否食品',
                 dataIndex: 'isFood',
                 width: '200px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
             {
                 title: '是否膏状',
                 dataIndex: 'isPaste',
                 width: '200px',
                 align: 'center',
+                render: (_: any) => {
+                    return _ === true ? (
+                        <CheckOutlined className={settingStyles.checkedIcon} />
+                    ) : (
+                        <CloseOutlined className={settingStyles.uncheckedIcon} />
+                    );
+                },
             },
         ] as ProColumns<ICustomItem>[];
-    }, []);
-
-    const getCopiedLinkQuery = useCallback(() => {
-        return query;
     }, []);
 
     return useMemo(() => {
         return (
             <div>
-                <JsonForm fieldList={formConfig} ref={searchRef}>
+                <JsonForm
+                    fieldList={formConfig}
+                    ref={searchRef}
+                    initialValues={{
+                        one_cat_id: '',
+                        two_cat_id: '',
+                        three_cat_id: '',
+                    }}
+                >
                     <LoadingButton
                         onClick={onSearch}
                         type="primary"
@@ -242,7 +293,7 @@ const ListTab: React.FC = () => {
                 <ProTable<ICustomItem>
                     headerTitle="查询表格"
                     className={formStyles.formItem}
-                    rowKey="country_code"
+                    rowKey="countryCode"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
                     bottom={60}
                     minHeight={500}
@@ -252,7 +303,6 @@ const ListTab: React.FC = () => {
                         pageSize: pageSize,
                         showSizeChanger: true,
                     }}
-                    toolBarRender={false}
                     tableAlertRender={false}
                     columns={columns}
                     dataSource={dataSource}
@@ -265,7 +315,6 @@ const ListTab: React.FC = () => {
                         setting: true,
                     }}
                 />
-                <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
     }, [loading]);

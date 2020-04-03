@@ -5,7 +5,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { getCatagoryList } from '@/services/goods';
 import { queryCountryList, queryCustomList, updateCustom } from '@/services/setting';
 import { EmptyObject } from '@/config/global';
-import { Form, Spin } from 'antd';
+import { Form, message, Spin } from 'antd';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import styles from '@/styles/_index.less';
 import classNames from 'classnames';
@@ -16,15 +16,55 @@ const EditTab: React.FC = () => {
         countryRef.current = queryCountryList();
     }
 
-    const categoryRef = useRef<Promise<IOptionItem[]>>();
+    const categoryRef = useRef<
+        Promise<{
+            oneLevelArray: IOptionItem[];
+            middleLevelArray: IOptionItem[];
+            lastLevelArray: IOptionItem[];
+        }>
+    >();
 
     if (!categoryRef.current) {
         categoryRef.current = getCatagoryList()
             .then(({ convertList = [] }) => {
-                return convertList;
+                // 区分出一级、二级、三级
+                let oneLevelArray: IOptionItem[] = [];
+                let middleLevelArray: IOptionItem[] = [];
+                let lastLevelArray: IOptionItem[] = [];
+                convertList.map(({ name, value, children }) => {
+                    oneLevelArray.push({ name, value });
+                    if (children) {
+                        (children as IOptionItem[]).map(
+                            ({ name: name1, value: value1, children: children1 }) => {
+                                middleLevelArray.push({ name: name1, value: value1 });
+                                if (children1) {
+                                    (children1 as IOptionItem[]).map(
+                                        ({ name: name2, value: value2 }) => {
+                                            lastLevelArray.push({
+                                                name: name2,
+                                                value: value2,
+                                                middle_id: value1,
+                                                first_id: value,
+                                            });
+                                        },
+                                    );
+                                }
+                            },
+                        );
+                    }
+                });
+                return {
+                    oneLevelArray,
+                    middleLevelArray,
+                    lastLevelArray,
+                };
             })
             .catch(() => {
-                return [];
+                return {
+                    oneLevelArray: [],
+                    middleLevelArray: [],
+                    lastLevelArray: [],
+                };
             });
     }
 
@@ -40,51 +80,17 @@ const EditTab: React.FC = () => {
 
     const getCategoryName = useCallback(
         async (one_cat_id?: string, two_cat_id?: string, three_cat_id?: string) => {
-            const options = await categoryRef.current!;
-            let one_cat_name = undefined;
-            let two_cat_name = undefined;
-            let three_cat_name = undefined;
-            if (!one_cat_id) {
-                return {
-                    one_cat_name,
-                    two_cat_name,
-                    three_cat_name,
-                };
-            }
-            options.find(({ value, name, children }) => {
-                if (value === one_cat_id) {
-                    one_cat_name = name;
-                    if (two_cat_id) {
-                        (children as IOptionItem[])?.find(
-                            ({ value: value1, name: name1, children: children1 }) => {
-                                if (value1 === two_cat_id) {
-                                    two_cat_name = name1;
-                                    if (three_cat_id) {
-                                        (children1 as IOptionItem[])?.find(
-                                            ({ value: value2, name: name2 }) => {
-                                                if (value2 === three_cat_id) {
-                                                    three_cat_name = name2;
-                                                    return true;
-                                                }
-                                                return false;
-                                            },
-                                        );
-                                    }
-                                    return true;
-                                }
-                                return false;
-                            },
-                        );
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
-            });
+            const { oneLevelArray, middleLevelArray, lastLevelArray } = await categoryRef.current!;
             return {
-                one_cat_name,
-                two_cat_name,
-                three_cat_name,
+                one_cat_name: one_cat_id
+                    ? oneLevelArray.find(option => option.value === one_cat_id)?.name
+                    : undefined,
+                two_cat_name: two_cat_id
+                    ? middleLevelArray.find(option => option.value === two_cat_id)?.name
+                    : undefined,
+                three_cat_name: three_cat_id
+                    ? lastLevelArray.find(option => option.value === three_cat_id)?.name
+                    : undefined,
             };
         },
         [],
@@ -107,32 +113,32 @@ const EditTab: React.FC = () => {
             .then(({ data: { list } }) => {
                 const detail = list[0] || EmptyObject;
                 const {
-                    oneCatId,
-                    twoCatId,
-                    threeCatId,
+                    oneCatId = '',
+                    twoCatId = '',
+                    threeCatId = '',
                     customsCode,
                     isElectricity = false,
                     isMetal = false,
-                    isFluid = false,
-                    isBurn = false,
+                    isLiquid = false,
+                    isCombustible = false,
                     isPowder = false,
-                    isPureElectric = false,
+                    isBattery = false,
                     isPerfume = false,
                     isFood = false,
                     isPaste = false,
                     ...extra
                 } = detail;
                 form.setFieldsValue({
-                    one_cat_id: oneCatId,
-                    two_cat_id: twoCatId,
-                    three_cat_id: threeCatId,
+                    one_cat_id: String(oneCatId),
+                    two_cat_id: String(twoCatId),
+                    three_cat_id: String(threeCatId),
                     customs_code: customsCode,
                     is_electricity: isElectricity,
                     is_metal: isMetal,
-                    is_fluid: isFluid,
-                    is_burn: isBurn,
-                    is_powder: isBurn,
-                    is_pure_electric: isPureElectric,
+                    is_liquid: isLiquid,
+                    is_combustible: isCombustible,
+                    is_powder: isPowder,
+                    is_battery: isBattery,
                     is_perfume: isPerfume,
                     is_food: isFood,
                     is_paste: isPaste,
@@ -174,10 +180,8 @@ const EditTab: React.FC = () => {
                         message: '请选择一级品类',
                     },
                 ],
-                optionList: () => categoryRef.current!,
-                onChange: (name, form) => {
-                    form.resetFields(['two_cat_id', 'three_cat_id']);
-                },
+                disabled: true,
+                optionList: () => categoryRef.current!.then(result => result.oneLevelArray),
             },
             {
                 label: '二级品类',
@@ -185,20 +189,14 @@ const EditTab: React.FC = () => {
                 name: 'two_cat_id',
                 className: '',
                 formItemClassName: formStyles.formItem,
-                optionListDependence: {
-                    name: 'one_cat_id',
-                    key: 'children',
-                },
+                disabled: true,
                 rules: [
                     {
                         required: true,
                         message: '请选择二级品类',
                     },
                 ],
-                optionList: () => categoryRef.current!,
-                onChange: (name, form) => {
-                    form.resetFields(['three_cat_id']);
-                },
+                optionList: () => categoryRef.current!.then(result => result.middleLevelArray),
             },
             {
                 label: '三级品类',
@@ -206,17 +204,23 @@ const EditTab: React.FC = () => {
                 name: 'three_cat_id',
                 className: '',
                 formItemClassName: formStyles.formItem,
-                optionListDependence: {
-                    name: ['one_cat_id', 'two_cat_id'],
-                    key: 'children',
-                },
                 rules: [
                     {
                         required: true,
                         message: '请选择三级品类',
                     },
                 ],
-                optionList: () => categoryRef.current!,
+                optionList: () => categoryRef.current!.then(result => result.lastLevelArray),
+                onChange: (name, form) => {
+                    const cat_id = form.getFieldValue('three_cat_id');
+                    categoryRef.current!.then(({ lastLevelArray }) => {
+                        const item = lastLevelArray.find(option => option.value === cat_id);
+                        form.setFieldsValue({
+                            two_cat_id: item?.middle_id,
+                            one_cat_id: item?.first_id,
+                        });
+                    });
+                },
             },
 
             {
@@ -425,6 +429,7 @@ const EditTab: React.FC = () => {
             two_cat_name,
             three_cat_name,
         });
+        message.success('提交成功!');
     }, []);
 
     return useMemo(() => {
