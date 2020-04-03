@@ -30,13 +30,49 @@ const config = defineConfig({
     headScripts: dev ? ['http://localhost:8097'] : undefined,
     extraBabelPlugins: [
         [
-            'import',
+            'babel-plugin-import',
+            {
+                libraryName: 'lodash',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'lodash',
+        ],
+        [
+            'babel-plugin-import',
+            {
+                libraryName: 'lodash-decorator',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'lodash-decorator',
+        ],
+        [
+            'babel-plugin-import',
             {
                 libraryName: 'react-components',
                 libraryDirectory: 'es',
                 camel2DashComponentName: false,
             },
             'react-components',
+        ],
+        [
+            'babel-plugin-import',
+            {
+                libraryName: 'react-components/es/hooks',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'react-components/es/hooks',
+        ],
+        [
+            'babel-plugin-import',
+            {
+                libraryName: 'react-components/lib/hooks',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'react-components/lib/hooks',
         ],
     ],
     cssLoader: {
