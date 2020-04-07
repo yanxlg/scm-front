@@ -69,7 +69,7 @@ const TrackDialog: React.FC<IProps> = ({
                 visible={visible}
                 footer={null}
                 onCancel={hideTrackDetail}
-                width={720}
+                width={800}
             >
                 <div style={{ maxHeight: 600, overflow: 'auto' }}>
                     {loading ? (
@@ -99,7 +99,7 @@ const TrackDialog: React.FC<IProps> = ({
                                                         </Col>
                                                     </Row>
                                                     <Timeline style={{ marginTop: 16 }}>
-                                                        {list.map(({ time, info }, index) => (
+                                                        {list?.map(({ time, info }, index) => (
                                                             <Timeline.Item
                                                                 key={index}
                                                                 color={index === 0 ? 'red' : 'gray'}
