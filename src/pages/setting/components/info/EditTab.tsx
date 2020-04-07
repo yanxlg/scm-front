@@ -245,7 +245,7 @@ const EditTab: React.FC = () => {
 
             {
                 label: <span>重&emsp;&emsp;量</span>,
-                type: 'input',
+                type: 'number',
                 name: 'weight',
                 className: '',
                 addonAfter: 'g',
@@ -258,7 +258,7 @@ const EditTab: React.FC = () => {
             },
             {
                 label: '预计长度',
-                type: 'input',
+                type: 'number',
                 name: 'length',
                 className: '',
                 addonAfter: 'cm',
