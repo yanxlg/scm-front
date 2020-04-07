@@ -53,9 +53,9 @@ class GoodsDetailDialog extends React.PureComponent<IGoodsDetailDialogProps> {
                             <div>
                                 <div className="float-left">商品规格:</div>
                                 <div className="overflow-hidden">
-                                    {Object.keys(goodsDetail.sku_style).map(key => (
-                                        <span className="style" key={key}>
-                                            {key}: {goodsDetail.sku_style![key]}
+                                    {goodsDetail.sku_style.map((item: any) => (
+                                        <span className="style" key={item.option}>
+                                            {item.option}: {item.value}
                                         </span>
                                     ))}
                                 </div>
