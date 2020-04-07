@@ -339,7 +339,7 @@ const ChannelList: React.FC = props => {
         (rowKeys: string[]) => {
             const taskBodyList = dataSource
                 .filter(item => {
-                    return rowKeys.indexOf(item.product_id) > -1;
+                    return rowKeys.indexOf(item.id) > -1;
                 })
                 .map(({ product_id, commodity_id, merchant_id }) => {
                     return {
@@ -372,7 +372,7 @@ const ChannelList: React.FC = props => {
         (rowKeys: string[]) => {
             const taskBodyList = dataSource
                 .filter(item => {
-                    return rowKeys.indexOf(item.product_id) > -1;
+                    return rowKeys.indexOf(item.id) > -1;
                 })
                 .map(({ product_id, commodity_id, merchant_id }) => {
                     return {
@@ -644,7 +644,7 @@ const ChannelList: React.FC = props => {
         return (
             <ProTable<IChannelProductListItem>
                 headerTitle="查询表格"
-                rowKey="product_id"
+                rowKey="id"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}

@@ -30,13 +30,49 @@ const config = defineConfig({
     headScripts: dev ? ['http://localhost:8097'] : undefined,
     extraBabelPlugins: [
         [
-            'import',
+            'babel-plugin-import',
+            {
+                libraryName: 'lodash',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'lodash',
+        ],
+        [
+            'babel-plugin-import',
+            {
+                libraryName: 'lodash-decorator',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'lodash-decorator',
+        ],
+        [
+            'babel-plugin-import',
             {
                 libraryName: 'react-components',
                 libraryDirectory: 'es',
                 camel2DashComponentName: false,
             },
             'react-components',
+        ],
+        [
+            'babel-plugin-import',
+            {
+                libraryName: 'react-components/es/hooks',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'react-components/es/hooks',
+        ],
+        [
+            'babel-plugin-import',
+            {
+                libraryName: 'react-components/lib/hooks',
+                libraryDirectory: '',
+                camel2DashComponentName: false, // default: true
+            },
+            'react-components/lib/hooks',
         ],
     ],
     cssLoader: {
@@ -70,7 +106,7 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t3.vova.com.hk/',
+            target: 'https://scm-api-t.vova.com.hk/',
             // target: 'http://192.168.120.17:3026',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
