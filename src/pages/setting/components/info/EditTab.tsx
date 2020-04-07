@@ -98,57 +98,61 @@ const EditTab: React.FC = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const queryDetail = useCallback((country_code: string) => {
-        setLoading(true);
-        if (country_code === 'all') {
-            form.resetFields();
-            setLoading(false);
-            return;
-        }
-        queryCustomList({
-            pageSize: 10,
-            pageNumber: 1,
-            country_code: country_code,
-        })
-            .then(({ data: { list } }) => {
-                const detail = list[0] || EmptyObject;
-                const {
-                    oneCatId = '',
-                    twoCatId = '',
-                    threeCatId = '',
-                    customsCode,
-                    isElectricity = false,
-                    isMetal = false,
-                    isLiquid = false,
-                    isCombustible = false,
-                    isPowder = false,
-                    isBattery = false,
-                    isPerfume = false,
-                    isFood = false,
-                    isPaste = false,
-                    ...extra
-                } = detail;
-                form.setFieldsValue({
-                    one_cat_id: String(oneCatId),
-                    two_cat_id: String(twoCatId),
-                    three_cat_id: String(threeCatId),
-                    customs_code: customsCode,
-                    is_electricity: isElectricity,
-                    is_metal: isMetal,
-                    is_liquid: isLiquid,
-                    is_combustible: isCombustible,
-                    is_powder: isPowder,
-                    is_battery: isBattery,
-                    is_perfume: isPerfume,
-                    is_food: isFood,
-                    is_paste: isPaste,
-                    ...extra,
-                });
+    const queryDetail = useCallback(
+        (country_code: string, one_cat_id: string, two_cat_id: string, three_cat_id: string) => {
+            setLoading(true);
+
+            queryCustomList({
+                pageSize: 1,
+                pageNumber: 1,
+                country_code: country_code,
+                one_cat_id: one_cat_id,
+                two_cat_id: two_cat_id,
+                three_cat_id: three_cat_id,
             })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
+                .then(({ data: { list } }) => {
+                    const detail = list[0] || EmptyObject;
+                    const {
+                        customsCode,
+                        isElectricity = false,
+                        isMetal = false,
+                        isLiquid = false,
+                        isCombustible = false,
+                        isPowder = false,
+                        isBattery = false,
+                        isPerfume = false,
+                        isFood = false,
+                        isPaste = false,
+                        weight = '',
+                        length = '',
+                        width = '',
+                        height = '',
+                        ...extra
+                    } = detail;
+                    form.setFieldsValue({
+                        customs_code: customsCode,
+                        is_electricity: isElectricity,
+                        is_metal: isMetal,
+                        is_liquid: isLiquid,
+                        is_combustible: isCombustible,
+                        is_powder: isPowder,
+                        is_battery: isBattery,
+                        is_perfume: isPerfume,
+                        is_food: isFood,
+                        is_paste: isPaste,
+                        weight: weight,
+                        length: length,
+                        width: width,
+                        height: height,
+                        ...extra,
+                    });
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [],
+    );
 
     const formConfig = useMemo<FormField[]>(() => {
         return [
@@ -164,7 +168,19 @@ const EditTab: React.FC = () => {
                 optionList: () => countryRef.current!,
                 onChange: (name, form) => {
                     const country_code = form.getFieldValue('country_code');
-                    queryDetail(country_code);
+                    const { one_cat_id, two_cat_id, three_cat_id } = form.getFieldsValue([
+                        'one_cat_id',
+                        'two_cat_id',
+                        'three_cat_id',
+                    ]);
+                    if (country_code === 'all') {
+                        form.resetFields();
+                        return;
+                    }
+                    if (!three_cat_id) {
+                        return;
+                    }
+                    queryDetail(country_code, one_cat_id, two_cat_id, three_cat_id);
                 },
             },
             {
@@ -200,6 +216,8 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'three_cat_id',
                 className: '',
+                showSearch: true,
+                optionFilterProp: 'children',
                 rules: [
                     {
                         required: true,
@@ -215,6 +233,12 @@ const EditTab: React.FC = () => {
                             two_cat_id: item?.middle_id,
                             one_cat_id: item?.first_id,
                         });
+
+                        const country_code = form.getFieldValue('country_code');
+                        if (!country_code || country_code === 'all') {
+                            return;
+                        }
+                        queryDetail(country_code, item?.first_id, item?.middle_id, cat_id);
                     });
                 },
             },
