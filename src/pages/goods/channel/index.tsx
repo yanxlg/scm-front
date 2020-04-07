@@ -644,7 +644,7 @@ const ChannelList: React.FC = props => {
         return (
             <ProTable<IChannelProductListItem>
                 headerTitle="查询表格"
-                rowKey="product_id"
+                rowKey="virtual_id"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
