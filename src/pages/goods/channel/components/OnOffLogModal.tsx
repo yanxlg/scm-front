@@ -5,6 +5,7 @@ import channelStyles from '@/styles/_channel.less';
 import { useDataSet } from 'react-components/es/hooks';
 import { ILogItem } from '@/interface/IChannel';
 import { queryOnOffLog } from '@/services/channel';
+import { FitTable } from 'react-components';
 
 declare interface OnOffLogModalProps {
     visible: string | false;
@@ -16,9 +17,9 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
     const columns = useMemo<TableProps<ILogItem>['columns']>(() => {
         return [
             {
-                title: '序号',
+                title: `序号（${dataSet.length}）`,
                 dataIndex: 'index',
-                width: 100,
+                width: '150px',
                 align: 'center',
                 render: (_, record, index: number) => {
                     return index + 1;
@@ -26,23 +27,24 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
             },
             {
                 title: '时间',
-                width: 180,
-                dataIndex: 'create_time',
+                width: '180px',
+                dataIndex: 'finish_time',
                 align: 'center',
             },
             {
                 title: '状态',
-                width: 100,
-                dataIndex: 'status',
+                width: '100px',
+                dataIndex: 'status_label',
                 align: 'center',
             },
             {
                 title: '原因',
+                width: '300px',
                 dataIndex: 'reason',
                 align: 'center',
             },
         ];
-    }, []);
+    }, [dataSet]);
     useEffect(() => {
         if (visible) {
             setDataSet([]);
@@ -58,6 +60,11 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
             setLoading(false);
         }
     }, [visible]);
+
+    const scroll = useMemo(() => {
+        return { y: 500, x: 'max-content' }; // x需要设置，否则Table会闪
+    }, []);
+
     return useMemo(() => {
         return (
             <Modal
@@ -66,12 +73,16 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
                 onCancel={onClose}
                 className={channelStyles.logModal}
             >
-                <Table
-                    columns={columns}
-                    scroll={{ y: 600 }}
-                    dataSource={dataSet}
-                    loading={loading}
-                />
+                <div className={channelStyles.logContent}>
+                    <FitTable
+                        tableLayout="fixed"
+                        columns={columns}
+                        scroll={scroll}
+                        dataSource={dataSet}
+                        loading={loading}
+                        pagination={false}
+                    />
+                </div>
             </Modal>
         );
     }, [visible, loading]);

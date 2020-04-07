@@ -123,7 +123,7 @@ export default {
             message: '',
             code: 200,
             ...Mock.mock({
-                'data|100-500': [
+                'data|5-10': [
                     {
                         reason: '@string',
                         finish_time: '@date',
