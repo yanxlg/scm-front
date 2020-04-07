@@ -44,7 +44,6 @@ const fieldList: FormField[] = [
         name: 'order_goods_id',
         label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
         className: 'order-input',
-        formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
         // numberStrArr
         // formatter: 'strArr',
@@ -54,7 +53,6 @@ const fieldList: FormField[] = [
         name: 'purchase_platform_order_id_list',
         label: '采购平台订单ID',
         className: 'order-input',
-        formItemClassName: 'form-item',
         placeholder: '请输入中台商品ID',
         formatter: 'strArr',
     },
@@ -63,7 +61,6 @@ const fieldList: FormField[] = [
         name: 'order_goods_status',
         label: '中台订单状态',
         className: 'order-input',
-        formItemClassName: 'form-item',
         optionList: [defaultOptionItem, ...orderStatusOptionList],
     },
     {
@@ -71,7 +68,6 @@ const fieldList: FormField[] = [
         name: 'purchase_order_status',
         label: '采购订单状态',
         className: 'order-input',
-        formItemClassName: 'form-item',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
     },
     {
@@ -79,7 +75,6 @@ const fieldList: FormField[] = [
         name: ['platform_order_time_start', 'platform_order_time_end'],
         label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
         className: 'order-date-picker',
-        formItemClassName: 'form-item',
         placeholder: '请选择订单时间',
         formatter: ['start_date', 'end_date'],
     },

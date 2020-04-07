@@ -4,6 +4,8 @@ import { Form, Radio } from 'antd';
 import { HotTaskRange } from '@/enums/StatusEnum';
 import { IntegerInput } from 'react-components';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface TaskRangeProps {
     form: FormInstance;
@@ -34,7 +36,11 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                 <Form.Item
                     label="任务范围"
                     name="range"
-                    className="form-item form-item-inline form-item-horizon form-horizon-always"
+                    className={classNames(
+                        formStyles.formItem,
+                        formStyles.formHorizon,
+                        formStyles.formHorizonAlways,
+                    )}
                     required={true}
                 >
                     <Radio.Group onChange={taskRangeChange}>
@@ -53,7 +59,11 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                         const required = range === HotTaskRange.store;
                         return (
                             <Form.Item
-                                className="form-required-absolute form-item form-item-inline form-item-horizon"
+                                className={classNames(
+                                    formStyles.formRequiredAbsolute,
+                                    formStyles.formItem,
+                                    formStyles.formHorizon,
+                                )}
                                 validateTrigger={'onBlur'}
                                 label="店铺ID"
                                 name="shopId"
@@ -67,7 +77,7 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                                 <IntegerInput
                                     min={0}
                                     placeholder={'请输入'}
-                                    className="input-default input-handler"
+                                    className={classNames(formStyles.formItemDefault)}
                                     disabled={!required}
                                 />
                             </Form.Item>

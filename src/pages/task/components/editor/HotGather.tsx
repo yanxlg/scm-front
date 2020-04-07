@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select, Spin, Tooltip, Form } from 'antd';
 import '@/styles/config.less';
-import '@/styles/form.less';
 import '@/styles/modal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
@@ -14,7 +13,7 @@ import {
     TaskIntervalConfigType,
     HotTaskFilterType,
 } from '@/enums/StatusEnum';
-import { IntegerInput } from 'react-components';
+import { IntegerInput, RichInput } from 'react-components';
 import { IHotTaskBody, IPDDSortItem, ITaskDetailInfo } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
@@ -397,10 +396,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                                 },
                             ]}
                         >
-                            <IntegerInput
-                                positive={true}
-                                className="picker-default input-handler"
-                            />
+                            <RichInput richType="positiveInteger" className="picker-default" />
                         </Form.Item>
                         <Form.Item
                             validateTrigger={'onBlur'}
@@ -428,10 +424,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                                 },
                             ]}
                         >
-                            <IntegerInput
-                                positive={true}
-                                className="picker-default input-handler"
-                            />
+                            <RichInput richType="positiveInteger" className="picker-default" />
                         </Form.Item>
                     </div>
                     <div>

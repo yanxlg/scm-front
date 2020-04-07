@@ -1,13 +1,14 @@
 import React, { RefObject } from 'react';
 import '@/styles/product.less';
-import '@/styles/form.less';
 import { Button, Modal, Form, Spin } from 'antd';
 import { Bind } from 'lodash-decorators';
 import { editChannelProductDetail, queryChannelProductDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
-import { IntegerInput, NumberInput } from 'react-components';
+import { IntegerInput, NumberInput, RichInput } from 'react-components';
 import { IChannelProductDetailResponse, ISku } from '@/interface/IChannel';
 import { EmptyObject } from '@/config/global';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface IProductEditProps {
     product_id: string;
@@ -119,25 +120,25 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
         } = this.state;
         return (
             <Form
-                className="form-help-absolute"
+                className={formStyles.formHelpAbsolute}
                 layout="horizontal"
                 autoComplete={'off'}
                 ref={this.formRef}
             >
                 <Spin spinning={loading}>
                     <div className="product-modal-content">
-                        <div className="form-item">
+                        <div className={formStyles.formItem}>
                             <label className="ant-form-item-label">
                                 商品&emsp;ID：{product_id}
                             </label>
                         </div>
-                        <div className="form-item">
+                        <div className={formStyles.formItem}>
                             <label className="ant-form-item-label">
                                 商品名称：
                                 <div className="product-modal-item-value">{product_name}</div>
                             </label>
                         </div>
-                        <div className="form-item">
+                        <div className={formStyles.formItem}>
                             <label className="ant-form-item-label">
                                 商品描述：
                                 <div className="product-modal-item-value">
@@ -145,7 +146,7 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                 </div>
                             </label>
                         </div>
-                        <div className="form-item">
+                        <div className={formStyles.formItem}>
                             <label className="ant-form-item-label">商品主图：</label>
                             {main_image ? (
                                 <img
@@ -160,7 +161,14 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                         {sku_list.map((sku: ISku, index: number) => {
                             const { specs = [], sku_name = '', sku_image } = sku;
                             return (
-                                <div className="form-item flex flex-align" key={sku_name + index}>
+                                <div
+                                    className={classNames(
+                                        formStyles.formItem,
+                                        formStyles.flex,
+                                        formStyles.flexAlign,
+                                    )}
+                                    key={sku_name + index}
+                                >
                                     <div
                                         className="ant-form-item-label product-modal-item product-modal-name"
                                         title={sku_name}
@@ -173,7 +181,13 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                             <span>{sku_name}</span>
                                         </Form.Item>
                                     </div>
-                                    <div className="ant-form-item-label product-modal-item flex flex-align">
+                                    <div
+                                        className={classNames(
+                                            'ant-form-item-label product-modal-item',
+                                            formStyles.flex,
+                                            formStyles.flexAlign,
+                                        )}
+                                    >
                                         <label title="对应图片">对应图片</label>
                                         {sku_image ? (
                                             <img
@@ -185,7 +199,13 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                             <div className="product-modal-avatar-small" />
                                         )}
                                     </div>
-                                    <div className="ant-form-item-label product-modal-item product-modal-specs flex flex-align">
+                                    <div
+                                        className={classNames(
+                                            'ant-form-item-label product-modal-item product-modal-specs',
+                                            formStyles.flex,
+                                            formStyles.flexAlign,
+                                        )}
+                                    >
                                         <label title="商品规格">商品规格</label>
                                         <div className="product-modal-specs-value">
                                             {specs.map(({ name, value }) => {
@@ -201,37 +221,37 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                                         </div>
                                     </div>
                                     <Form.Item
-                                        className="form-item-horizon form-item-inline"
+                                        className={classNames(
+                                            formStyles.formHorizon,
+                                            formStyles.formItemClean,
+                                        )}
                                         validateTrigger={'onBlur'}
                                         name={['sku_list', index, 'price']}
                                         label="价格"
                                     >
-                                        <NumberInput
-                                            min={0}
-                                            className="input-small input-handler"
-                                        />
+                                        <RichInput richType="number" className="input-small" />
                                     </Form.Item>
                                     <Form.Item
-                                        className="form-item-horizon form-item-inline"
+                                        className={classNames(
+                                            formStyles.formHorizon,
+                                            formStyles.formItemClean,
+                                        )}
                                         validateTrigger={'onBlur'}
                                         name={['sku_list', index, 'shipping_fee']}
                                         label="运费"
                                     >
-                                        <NumberInput
-                                            min={0}
-                                            className="input-small input-handler"
-                                        />
+                                        <RichInput richType="number" className="input-small" />
                                     </Form.Item>
                                     <Form.Item
-                                        className="form-item-horizon form-item-inline"
+                                        className={classNames(
+                                            formStyles.formHorizon,
+                                            formStyles.formItemClean,
+                                        )}
                                         validateTrigger={'onBlur'}
                                         name={['sku_list', index, 'storage']}
                                         label="库存"
                                     >
-                                        <IntegerInput
-                                            min={0}
-                                            className="input-small input-handler"
-                                        />
+                                        <RichInput richType="integer" className="input-small" />
                                     </Form.Item>
                                 </div>
                             );

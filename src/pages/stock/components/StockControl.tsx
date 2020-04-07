@@ -3,7 +3,6 @@ import { FitTable } from 'react-components';
 import { goButton, showTotal } from 'react-components/es/FitTable';
 import { message, Pagination } from 'antd';
 import '@/styles/index.less';
-import '@/styles/form.less';
 import { ColumnProps } from 'antd/es/table';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
@@ -20,6 +19,8 @@ import { RequestPagination } from '@/interface/IGlobal';
 import { LoadingButton } from 'react-components';
 import { SearchOutlined } from '@ant-design/icons/lib';
 import { Icons } from '@/components/Icon';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 const StockControl: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -95,8 +96,6 @@ const StockControl: React.FC = () => {
                 type: 'input',
                 label: '中台商品ID',
                 name: 'commodity_id',
-                formItemClassName: 'form-item',
-                className: 'input-default',
                 rules: [
                     (form: FormInstance) => {
                         return {
@@ -116,8 +115,6 @@ const StockControl: React.FC = () => {
                 type: 'input',
                 label: 'commodity_sku_id',
                 name: 'commodity_sku_id',
-                formItemClassName: 'form-item',
-                className: 'input-default',
                 rules: [
                     (form: FormInstance) => {
                         return {
@@ -191,7 +188,7 @@ const StockControl: React.FC = () => {
             <div>
                 <div className="float-clear">
                     <JsonForm
-                        className="form-help-absolute"
+                        className={formStyles.formHelpAbsolute}
                         initialValues={defaultInitialValues}
                         fieldList={fieldsList}
                         ref={formRef}
@@ -201,30 +198,28 @@ const StockControl: React.FC = () => {
                             <LoadingButton
                                 onClick={onSearch}
                                 type="primary"
-                                className="btn-group vertical-middle form-item"
+                                className={classNames(
+                                    formStyles.formBtn,
+                                    formStyles.verticalMiddle,
+                                )}
                                 icon={<SearchOutlined />}
                             >
                                 查询
                             </LoadingButton>
                             <LoadingButton
                                 onClick={onExport}
-                                className="btn-group vertical-middle form-item"
+                                className={classNames(
+                                    formStyles.formBtn,
+                                    formStyles.verticalMiddle,
+                                )}
                                 icon={<Icons type="scm-export" />}
                             >
                                 导出Excel表
                             </LoadingButton>
-                            {/* <Button
-                                loading={syncLoading}
-                                className="btn-group vertical-middle form-item btn-clear"
-                                type="link"
-                                onClick={this.syncStock}
-                            >
-                                点击同步库存
-                            </Button>*/}
                         </React.Fragment>
                     </JsonForm>
                     <Pagination
-                        className="float-right form-item"
+                        className="float-right"
                         pageSize={pageSize}
                         current={pageNumber}
                         total={total}
@@ -240,7 +235,7 @@ const StockControl: React.FC = () => {
                     />
                 </div>
                 <FitTable<IStockItem>
-                    className="form-item"
+                    className={formStyles.formNextCard}
                     rowKey="in_order"
                     bordered={true}
                     columns={columns}

@@ -57,7 +57,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
             name: 'order_goods_id',
             label: '订单号',
             className: 'order-input',
-            formItemClassName: 'form-item',
             placeholder: '请输入订单号',
             formatter: 'number',
         },
@@ -66,7 +65,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
             name: 'channel_source',
             label: '销售渠道',
             className: 'order-input',
-            formItemClassName: 'form-item',
             optionList: [defaultOptionItem, ...channelOptionList],
         },
         {
@@ -74,7 +72,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
             name: 'abnormal_type',
             label: '异常类型',
             className: 'order-input',
-            formItemClassName: 'form-item',
             optionList: errorTypeOptionList,
             onChange: (name, form) => {
                 const value = form.getFieldValue(name);
@@ -131,7 +128,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
             name: ['order_time_start', 'order_time_end'],
             label: '订单时间',
             className: 'order-error-date-picker',
-            formItemClassName: 'form-item',
             formatter: ['start_date', 'end_date'],
         },
         {
@@ -139,7 +135,6 @@ class PaneErr extends React.PureComponent<{}, IState> {
             name: ['confirm_time_start', 'confirm_time_end'],
             label: '订单确认时间',
             className: 'order-error-date-picker',
-            formItemClassName: 'form-item',
             formatter: ['start_date', 'end_date'],
         },
     ];

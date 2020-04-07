@@ -2,19 +2,20 @@ import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
 import { Button, DatePicker, Input, Radio, Form, Spin, Select } from 'antd';
 import '@/styles/config.less';
-import '@/styles/form.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
-import { IntegerInput } from 'react-components';
+import { IntegerInput, RichInput } from 'react-components';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
 import { EmptyObject } from '@/config/global';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
@@ -201,7 +202,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
             <Spin spinning={queryLoading} tip="Loading...">
                 <Form
                     ref={this.formRef}
-                    className="form-help-absolute"
+                    className={formStyles.formHelpAbsolute}
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
@@ -211,7 +212,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     }}
                 >
                     <Form.Item
-                        className="form-item form-item-inline"
+                        className={formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -230,7 +231,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                         name="range"
                         label="商品范围"
                         required={true}
-                        className="form-item form-item-inline"
+                        className={formStyles.formItem}
                     >
                         <Select className="picker-default">
                             <Select.Option value={PUTaskRangeType.AllOnShelves}>
@@ -245,7 +246,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                         <Form.Item
                             label="开始时间"
                             validateTrigger={'onChange'}
-                            className="form-item-inline form-item-horizon form-item"
+                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
                             name="task_start_time"
                             dependencies={['task_end_time']}
                             rules={[
@@ -270,7 +271,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             label="结束时间"
                             name="task_end_time"
                             dependencies={['task_start_time']}
-                            className="form-item-inline form-item-horizon form-item"
+                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
                             rules={[
                                 {
                                     required: true,
@@ -293,14 +294,22 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                         validateTrigger={'onBlur'}
                         label="任务间隔"
                         name="taskIntervalType"
-                        className="form-item-inline form-item"
+                        className={formStyles.formItem}
                         required={true}
                     >
                         <Radio.Group>
                             <Radio value={TaskIntervalConfigType.day}>
-                                <div className="inline-block vertical-middle">
+                                <div
+                                    className={classNames(
+                                        formStyles.inlineBlock,
+                                        formStyles.verticalMiddle,
+                                    )}
+                                >
                                     <Form.Item
-                                        className="form-item-inline flex-inline"
+                                        className={classNames(
+                                            formStyles.formItemClean,
+                                            formStyles.flexInline,
+                                        )}
                                         shouldUpdate={(prevValues, currentValues) =>
                                             prevValues.taskIntervalType !==
                                             currentValues.taskIntervalType
@@ -315,7 +324,11 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                     <Form.Item
                                                         validateTrigger={'onBlur'}
                                                         name="day"
-                                                        className="form-item-inline inline-block vertical-middle"
+                                                        className={classNames(
+                                                            formStyles.formItemClean,
+                                                            formStyles.inlineBlock,
+                                                            formStyles.verticalMiddle,
+                                                        )}
                                                         rules={[
                                                             {
                                                                 required:
@@ -325,16 +338,22 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                             },
                                                         ]}
                                                     >
-                                                        <IntegerInput
-                                                            positive={true}
-                                                            className="input-small input-handler"
+                                                        <RichInput
+                                                            richType="positiveInteger"
+                                                            className="input-small"
                                                             disabled={
                                                                 taskIntervalType !==
                                                                 TaskIntervalConfigType.day
                                                             }
                                                         />
                                                     </Form.Item>
-                                                    <span className="form-unit inline-block vertical-middle">
+                                                    <span
+                                                        className={classNames(
+                                                            formStyles.formUnit,
+                                                            formStyles.inlineBlock,
+                                                            formStyles.verticalMiddle,
+                                                        )}
+                                                    >
                                                         天
                                                     </span>
                                                 </React.Fragment>
@@ -344,9 +363,17 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                 </div>
                             </Radio>
                             <Radio value={TaskIntervalConfigType.second}>
-                                <div className="inline-block vertical-middle">
+                                <div
+                                    className={classNames(
+                                        formStyles.inlineBlock,
+                                        formStyles.verticalMiddle,
+                                    )}
+                                >
                                     <Form.Item
-                                        className="form-item-inline flex-inline"
+                                        className={classNames(
+                                            formStyles.formItemClean,
+                                            formStyles.flexInline,
+                                        )}
                                         shouldUpdate={(prevValues, currentValues) =>
                                             prevValues.taskIntervalType !==
                                             currentValues.taskIntervalType
@@ -369,18 +396,28 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                                                 message: '请输入间隔秒数',
                                                             },
                                                         ]}
-                                                        className="form-item-inline inline-block vertical-middle"
+                                                        className={classNames(
+                                                            formStyles.formItemClean,
+                                                            formStyles.inlineBlock,
+                                                            formStyles.verticalMiddle,
+                                                        )}
                                                     >
-                                                        <IntegerInput
-                                                            positive={true}
-                                                            className="input-small input-handler"
+                                                        <RichInput
+                                                            richType="positiveInteger"
+                                                            className="input-small"
                                                             disabled={
                                                                 taskIntervalType !==
                                                                 TaskIntervalConfigType.second
                                                             }
                                                         />
                                                     </Form.Item>
-                                                    <span className="form-unit inline-block vertical-middle">
+                                                    <span
+                                                        className={classNames(
+                                                            formStyles.formUnit,
+                                                            formStyles.inlineBlock,
+                                                            formStyles.verticalMiddle,
+                                                        )}
+                                                    >
                                                         秒
                                                     </span>
                                                 </React.Fragment>
@@ -391,7 +428,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                             </Radio>
                         </Radio.Group>
                     </Form.Item>
-                    <div className="form-item">
+                    <div className={formStyles.formNextCard}>
                         <Button
                             loading={createLoading}
                             type="primary"

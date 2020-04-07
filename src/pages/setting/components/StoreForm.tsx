@@ -2,7 +2,6 @@ import React, { RefObject } from 'react';
 import { Bind } from 'lodash-decorators';
 import { Button, Card, Divider, Input, Form } from 'antd';
 import '@/styles/setting.less';
-import '@/styles/form.less';
 import { FormInstance } from 'antd/es/form';
 import { IntegerInput } from 'react-components';
 

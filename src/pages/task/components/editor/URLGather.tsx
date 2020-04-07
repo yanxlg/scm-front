@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, DatePicker, Form, Input, Spin } from 'antd';
 import '@/styles/config.less';
-import '@/styles/form.less';
 import moment, { Moment } from 'moment';
 import { parseText, stringifyText, scrollToFirstError } from '@/utils/common';
 import { addPddURLTask, queryTaskDetail } from '@/services/task';
@@ -18,6 +17,8 @@ import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IURLTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
 import { EmptyObject } from '@/config/global';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface IURLGatherProps {
     taskId?: number;
@@ -157,13 +158,13 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                     form={form}
                     layout="horizontal"
                     autoComplete={'off'}
-                    className="form-help-absolute"
+                    className={formStyles.formHelpAbsolute}
                     initialValues={{
                         taskIntervalType: TaskIntervalConfigType.day,
                     }}
                 >
                     <Form.Item
-                        className="form-item"
+                        className={formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -178,7 +179,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                         <Input className="input-default" />
                     </Form.Item>
                     <Form.Item
-                        className="form-item form-control-full"
+                        className={formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="urls"
                         required={true}
@@ -206,7 +207,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                         validateTrigger={'onBlur'}
                         label="开始时间"
                         name="task_start_time"
-                        className="form-item-inline form-item"
+                        className={formStyles.formItem}
                         rules={[
                             {
                                 validator: checkDate,
@@ -220,7 +221,7 @@ const URLGather: React.FC<IURLGatherProps> = ({ taskId }) => {
                             placeholder="立即开始"
                         />
                     </Form.Item>
-                    <div className="form-item">
+                    <div className={formStyles.formNextCard}>
                         <Button
                             loading={gatherLoading}
                             type="primary"

@@ -3,7 +3,6 @@ import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
-import '@/styles/form.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
@@ -93,7 +92,6 @@ const formFields: FormField[] = [
         name: ['onshelf_time_start', 'onshelf_time_end'],
         label: <span>时&emsp;&emsp;&emsp;间</span>,
         className: 'product-picker',
-        formItemClassName: formStyles.formItem,
         formatter: ['start_date', 'end_date'],
     },
     {
@@ -101,31 +99,23 @@ const formFields: FormField[] = [
         label: 'Commodity ID',
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
-        formItemClassName: formStyles.formItem,
     },
     {
         type: 'input',
         label: <span>虚拟&emsp;ID</span>,
         name: 'vova_virtual_id',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
-        formItemClassName: formStyles.formItem,
     },
     {
         type: 'input',
         label: 'Product ID',
         name: 'product_id',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
-        formItemClassName: formStyles.formItem,
     },
     {
         type: 'select',
         label: <span>销&emsp;&emsp;&emsp;量</span>,
         name: 'sales_volume',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         optionList: salesVolumeList,
     },
     {
@@ -133,8 +123,6 @@ const formFields: FormField[] = [
         label: '店铺名称',
         name: 'merchant_ids',
         placeholder: '多个逗号隔开',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -150,8 +138,6 @@ const formFields: FormField[] = [
         type: 'select',
         label: '一级类目',
         name: 'level_one_category',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -165,8 +151,6 @@ const formFields: FormField[] = [
         type: 'select',
         label: '二级类目',
         name: 'level_two_category',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         optionListDependence: {
             name: 'level_one_category',
             key: 'children',
@@ -181,8 +165,6 @@ const formFields: FormField[] = [
         type: 'select',
         label: '商品状态',
         name: 'product_status',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         optionList: ProductStatusList.map(({ name, id }) => {
             return { name: name, value: id };
         }),
@@ -569,12 +551,7 @@ const ChannelList: React.FC = props => {
 
     const children = useMemo(() => {
         return (
-            <LoadingButton
-                type="primary"
-                className={classNames(formStyles.formItem, channelStyles.channelSearch)}
-                icon={<SearchOutlined />}
-                onClick={onSearch}
-            >
+            <LoadingButton type="primary" icon={<SearchOutlined />} onClick={onSearch}>
                 查询
             </LoadingButton>
         );
@@ -650,7 +627,6 @@ const ChannelList: React.FC = props => {
                 minHeight={500}
                 rowSelection={rowSelection}
                 toolBarRender={toolBarRender}
-                className={formStyles.formItem}
                 pagination={{
                     total: total,
                     current: pageNumber,
