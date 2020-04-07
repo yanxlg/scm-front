@@ -1,14 +1,21 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { Button, Input, Spin, message } from 'antd';
+import { Button, Input, Spin, message, Tabs, Form, Popconfirm } from 'antd';
 import Container from '@/components/Container';
 // import EditTag from './components/EditTag';
 import { getTagsList, addTag, enabledTag, deleteTag } from '@/services/goods-attr';
 import { ITagItem } from '@/interface/IGoodsAttr';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { FitTable } from 'react-components';
+import { IAttrItem } from '@/interface/ISetting';
+import EditableCell from './components/EditableCell';
+import { ColumnsType } from 'antd/lib/table/interface';
+import PublishIntercept from './components/PublishIntercept';
 
 import styles from './_goodsAttr.less';
 
-const GoodsAttr: React.FC = props => {
+const { TabPane } = Tabs;
+
+const _GoodsAttr: React.FC = props => {
     const addInputRef = useRef<Input>(null);
     const [loading, setLoading] = useState(false);
     const [tagList, setTagList] = useState<ITagItem[]>([]);
@@ -141,6 +148,216 @@ const GoodsAttr: React.FC = props => {
             </Container>
         );
     }, [addBox, enabledTagList, loading]);
+};
+
+const GoodsAttr: React.FC = props => {
+    const [form] = Form.useForm();
+    const [attrList, setAttrList] = useState<IAttrItem[]>([
+        {
+            key: '0',
+            name: '测试1',
+            description:
+                '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
+        },
+        {
+            key: '1',
+            name: '测试2',
+            description:
+                '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
+        },
+    ]);
+    const [editingKey, setEditingKey] = useState('');
+    const [isAdd, setIsAdd] = useState(false);
+
+    const isEditing = (record: IAttrItem) => record.key === editingKey;
+
+    const edit = (record: IAttrItem) => {
+        // console.log(11111);
+        form.setFieldsValue({ ...record });
+        setEditingKey(record.key);
+    };
+
+    const cancel = () => {
+        if (isAdd) {
+            deleteAttr();
+            setIsAdd(false);
+        }
+        setEditingKey('');
+    };
+
+    const addAttr = () => {
+        const key = attrList.length + '';
+        const newAttrList = [...attrList];
+        newAttrList.push({
+            key,
+            name: '',
+            description: '',
+        });
+        setIsAdd(true);
+        setEditingKey(key);
+        setAttrList(newAttrList);
+    };
+
+    const deleteAttr = useCallback(
+        (key = '') => {
+            const newAttrList = [...attrList];
+            if (key) {
+                const index = newAttrList.findIndex(item => key === item.key);
+                if (index > -1) {
+                    newAttrList.splice(index, 1);
+                    setAttrList(newAttrList);
+                }
+            } else {
+                // 新增时的取消
+                newAttrList.pop();
+                setAttrList(newAttrList);
+            }
+        },
+        [attrList],
+    );
+
+    const save = useCallback(
+        async (key: string) => {
+            try {
+                const row = (await form.validateFields()) as IAttrItem;
+                const newAttrList = [...attrList];
+                const index = newAttrList.findIndex(item => key === item.key);
+                if (index > -1) {
+                    const item = newAttrList[index];
+                    newAttrList.splice(index, 1, {
+                        ...item,
+                        ...row,
+                    });
+                    setAttrList(newAttrList);
+                } else {
+                    newAttrList.push(row);
+                    setAttrList(newAttrList);
+                }
+                setEditingKey('');
+            } catch (errInfo) {
+                console.log('Validate Failed:', errInfo);
+            }
+        },
+        [attrList],
+    );
+
+    const columns = useMemo(() => {
+        return [
+            {
+                title: '商品标签名称',
+                dataIndex: 'name',
+                width: 140,
+                align: 'center',
+                editable: true,
+            },
+            {
+                title: '关键词',
+                dataIndex: 'description',
+                width: 400,
+                align: 'center',
+                editable: true,
+            },
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                width: 260,
+                align: 'center',
+                render: (_: any, record: IAttrItem) => {
+                    const editable = isEditing(record);
+                    return (
+                        <>
+                            {editable ? (
+                                <>
+                                    <Button
+                                        type="link"
+                                        size="small"
+                                        onClick={() => save(record.key)}
+                                    >
+                                        保存
+                                    </Button>
+                                    <Popconfirm title="确认取消吗?" onConfirm={cancel}>
+                                        <Button type="link" size="small">
+                                            取消
+                                        </Button>
+                                    </Popconfirm>
+                                </>
+                            ) : (
+                                <Button
+                                    type="link"
+                                    size="small"
+                                    disabled={editingKey !== ''}
+                                    onClick={() => edit(record)}
+                                >
+                                    编辑
+                                </Button>
+                            )}
+                            <Button
+                                type="link"
+                                size="small"
+                                disabled={editingKey !== ''}
+                                onClick={() => deleteAttr(record.key)}
+                            >
+                                删除
+                            </Button>
+                        </>
+                    );
+                    return;
+                },
+            },
+        ];
+    }, [editingKey]);
+
+    const mergedColumns = useMemo(() => {
+        return columns.map(col => {
+            if (!col.editable) {
+                return col;
+            }
+            return {
+                ...col,
+                onCell: (record: IAttrItem) => ({
+                    record,
+                    inputType: col.dataIndex === 'name' ? 'text' : 'textarea',
+                    dataIndex: col.dataIndex,
+                    title: col.title,
+                    editing: isEditing(record),
+                }),
+            };
+        }) as ColumnsType<any>;
+    }, [columns, editingKey]);
+    // , attrList, editingKey
+
+    return useMemo(() => {
+        return (
+            <Container>
+                <Tabs defaultActiveKey="2" type="card">
+                    <TabPane tab="商品属性配置" key="1">
+                        <Form form={form} component={false}>
+                            <FitTable
+                                style={{ width: '80%' }}
+                                components={{
+                                    body: {
+                                        cell: EditableCell,
+                                    },
+                                }}
+                                bordered
+                                dataSource={attrList}
+                                columns={mergedColumns}
+                                // rowClassName="editable-row"
+                                pagination={false}
+                            />
+                        </Form>
+                        <Button ghost type="primary" style={{ marginTop: 20 }} onClick={addAttr}>
+                            <PlusOutlined />
+                            添加新标签
+                        </Button>
+                    </TabPane>
+                    <TabPane tab="上架拦截策略" key="2">
+                        <PublishIntercept />
+                    </TabPane>
+                </Tabs>
+            </Container>
+        );
+    }, [attrList, editingKey, mergedColumns]);
 };
 
 export default GoodsAttr;
