@@ -1,19 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, Table } from 'antd';
 import { TableProps } from 'antd/es/table';
 import channelStyles from '@/styles/_channel.less';
-import { useList } from 'react-components/es/hooks';
+import { useDataSet } from 'react-components/es/hooks';
+import { ILogItem } from '@/interface/IChannel';
+import { queryOnOffLog } from '@/services/channel';
 
 declare interface OnOffLogModalProps {
     visible: string | false;
     onClose: () => void;
 }
 
-declare interface LogItem {}
-
 const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
-    // const {} = useList({});
-    const columns = useMemo<TableProps<LogItem>['columns']>(() => {
+    const { dataSet, setDataSet, loading, setLoading } = useDataSet<ILogItem>();
+    const columns = useMemo<TableProps<ILogItem>['columns']>(() => {
         return [
             {
                 title: '序号',
@@ -43,6 +43,21 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
             },
         ];
     }, []);
+    useEffect(() => {
+        if (visible) {
+            setDataSet([]);
+            setLoading(true);
+            queryOnOffLog(visible)
+                .then(({ data }) => {
+                    setDataSet(data);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        } else {
+            setLoading(false);
+        }
+    }, [visible]);
     return useMemo(() => {
         return (
             <Modal
@@ -51,10 +66,15 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
                 onCancel={onClose}
                 className={channelStyles.logModal}
             >
-                <Table columns={columns} scroll={{ y: 600 }} />
+                <Table
+                    columns={columns}
+                    scroll={{ y: 600 }}
+                    dataSource={dataSet}
+                    loading={loading}
+                />
             </Modal>
         );
-    }, [visible]);
+    }, [visible, loading]);
 };
 
 export default OnOffLogModal;

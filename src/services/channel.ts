@@ -21,6 +21,7 @@ import {
     IEditSkuBody,
     IEditSkuResponse,
     ISHopList,
+    ILogItem,
 } from '@/interface/IChannel';
 import { IResponse, RequestPagination } from '@/interface/IGlobal';
 import { downloadExcel } from '@/utils/common';
@@ -158,3 +159,11 @@ export async function editSkuPrice(data: IEditSkuBody) {
 export const queryShopList = singlePromiseWrap(() => {
     return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
 });
+
+export async function queryOnOffLog(product_ids: string) {
+    return request.get<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
+        params: {
+            product_ids,
+        },
+    });
+}
