@@ -1,6 +1,6 @@
 import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
-import { Button, DatePicker, Input, Radio, Form, Spin, Select } from 'antd';
+import { Button, DatePicker, Input, Radio, Form, Spin, Select, Checkbox } from 'antd';
 import '@/styles/config.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
@@ -206,7 +206,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        range: PUTaskRangeType.AllOnShelves,
+                        range: [PUTaskRangeType.AllOnShelves],
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
                     }}
@@ -229,18 +229,28 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     <Form.Item
                         validateTrigger={'onBlur'}
                         name="range"
-                        label="商品范围"
+                        label="商品条件"
                         required={true}
                         className={formStyles.formItem}
                     >
-                        <Select className="picker-default">
-                            <Select.Option value={PUTaskRangeType.AllOnShelves}>
-                                全部已上架商品
-                            </Select.Option>
-                            <Select.Option value={PUTaskRangeType.HasSales}>
-                                有销量的已上架商品
-                            </Select.Option>
-                        </Select>
+                        <Checkbox.Group>
+                            <Checkbox value={PUTaskRangeType.AllOnShelves}>有销量在架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.HasSales}>无销量在架商品</Checkbox>
+                            <Checkbox>有销量下架商品</Checkbox>
+                            <Checkbox>无销量下架商品</Checkbox>
+                        </Checkbox.Group>
+                    </Form.Item>
+                    <Form.Item
+                        validateTrigger={'onBlur'}
+                        name="update"
+                        label="更新字段"
+                        required={true}
+                        className={formStyles.formItem}
+                    >
+                        <Checkbox.Group>
+                            <Checkbox value={'all'}>全部</Checkbox>
+                            <Checkbox value={'ignore_img'}>不含图片</Checkbox>
+                        </Checkbox.Group>
                     </Form.Item>
                     <div>
                         <Form.Item
