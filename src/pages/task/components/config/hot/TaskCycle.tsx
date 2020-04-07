@@ -2,9 +2,11 @@ import React, { useCallback, useMemo } from 'react';
 import { DatePicker, Form, Radio, Select } from 'antd';
 import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
 import locale from 'antd/es/date-picker/locale/zh_CN';
-import { IntegerInput } from 'react-components';
+import { IntegerInput, RichInput } from 'react-components';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface TaskCycleProps {
     form: FormInstance;
@@ -109,7 +111,7 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                 <Form.Item
                     label="任务周期"
                     name="task_type"
-                    className="form-item form-item-inline"
+                    className={formStyles.formItem}
                     required={true}
                 >
                     <Select onChange={resetTaskTypeError} className="picker-default">
@@ -132,7 +134,10 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                     validateTrigger={'onBlur'}
                                     label="开始时间"
                                     name="task_start_time"
-                                    className="form-item-inline form-item form-required-hide"
+                                    className={classNames(
+                                        formStyles.formItem,
+                                        formStyles.formRequiredHide,
+                                    )}
                                     required={true}
                                     rules={[
                                         {
@@ -157,7 +162,10 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                     <Form.Item
                                         label="开始时间"
                                         validateTrigger={'onChange'}
-                                        className="form-item-inline form-item form-item-horizon"
+                                        className={classNames(
+                                            formStyles.formItem,
+                                            formStyles.formHorizon,
+                                        )}
                                         name="task_start_time"
                                         dependencies={['task_end_time']}
                                         rules={[
@@ -181,7 +189,10 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                         label="结束时间"
                                         name="task_end_time"
                                         dependencies={['task_start_time']}
-                                        className="form-item form-item-inline form-item-horizon"
+                                        className={classNames(
+                                            formStyles.formItem,
+                                            formStyles.formHorizon,
+                                        )}
                                         rules={[
                                             {
                                                 required: true,
@@ -203,14 +214,17 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                     validateTrigger={'onBlur'}
                                     label="任务间隔"
                                     name="taskIntervalType"
-                                    className="form-item-inline form-item"
+                                    className={formStyles.formItem}
                                     required={true}
                                 >
                                     <Radio.Group>
                                         <Radio value={TaskIntervalConfigType.day}>
                                             <div className="inline-block vertical-middle">
                                                 <Form.Item
-                                                    className="form-item-inline flex-inline"
+                                                    className={classNames(
+                                                        formStyles.formItemClean,
+                                                        formStyles.flexInline,
+                                                    )}
                                                     shouldUpdate={(prevValues, currentValues) =>
                                                         prevValues.taskIntervalType !==
                                                         currentValues.taskIntervalType
@@ -225,7 +239,11 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                                                 <Form.Item
                                                                     validateTrigger={'onBlur'}
                                                                     name="day"
-                                                                    className="form-item-inline inline-block vertical-middle"
+                                                                    className={classNames(
+                                                                        formStyles.formItemClean,
+                                                                        formStyles.inlineBlock,
+                                                                        formStyles.verticalMiddle,
+                                                                    )}
                                                                     rules={[
                                                                         {
                                                                             required:
@@ -236,16 +254,22 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                                                         },
                                                                     ]}
                                                                 >
-                                                                    <IntegerInput
-                                                                        positive={true}
-                                                                        className="input-small input-handler"
+                                                                    <RichInput
+                                                                        richType="positiveInteger"
+                                                                        className="input-small"
                                                                         disabled={
                                                                             taskIntervalType !==
                                                                             TaskIntervalConfigType.day
                                                                         }
                                                                     />
                                                                 </Form.Item>
-                                                                <span className="form-unit inline-block vertical-middle">
+                                                                <span
+                                                                    className={classNames(
+                                                                        formStyles.formUnit,
+                                                                        formStyles.inlineBlock,
+                                                                        formStyles.verticalMiddle,
+                                                                    )}
+                                                                >
                                                                     天
                                                                 </span>
                                                             </React.Fragment>
@@ -255,9 +279,17 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                             </div>
                                         </Radio>
                                         <Radio value={TaskIntervalConfigType.second}>
-                                            <div className="inline-block vertical-middle">
+                                            <div
+                                                className={classNames(
+                                                    formStyles.inlineBlock,
+                                                    formStyles.verticalMiddle,
+                                                )}
+                                            >
                                                 <Form.Item
-                                                    className="form-item-inline flex-inline"
+                                                    className={classNames(
+                                                        formStyles.formItemClean,
+                                                        formStyles.flexInline,
+                                                    )}
                                                     shouldUpdate={(prevValues, currentValues) =>
                                                         prevValues.taskIntervalType !==
                                                         currentValues.taskIntervalType
@@ -281,18 +313,28 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
                                                                                 '请输入间隔秒数',
                                                                         },
                                                                     ]}
-                                                                    className="form-item-inline inline-block vertical-middle"
+                                                                    className={classNames(
+                                                                        formStyles.formItemClean,
+                                                                        formStyles.inlineBlock,
+                                                                        formStyles.verticalMiddle,
+                                                                    )}
                                                                 >
-                                                                    <IntegerInput
-                                                                        positive={true}
-                                                                        className="input-small input-handler"
+                                                                    <RichInput
+                                                                        richType="positiveInteger"
+                                                                        className="input-small"
                                                                         disabled={
                                                                             taskIntervalType !==
                                                                             TaskIntervalConfigType.second
                                                                         }
                                                                     />
                                                                 </Form.Item>
-                                                                <span className="form-unit inline-block vertical-middle">
+                                                                <span
+                                                                    className={classNames(
+                                                                        formStyles.formUnit,
+                                                                        formStyles.inlineBlock,
+                                                                        formStyles.verticalMiddle,
+                                                                    )}
+                                                                >
                                                                     秒
                                                                 </span>
                                                             </React.Fragment>

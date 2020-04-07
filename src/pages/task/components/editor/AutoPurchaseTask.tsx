@@ -2,7 +2,6 @@ import React, { RefObject } from 'react';
 import { BindAll } from 'lodash-decorators';
 import { Button, Card, DatePicker, Form, Input, Radio, Spin, TimePicker } from 'antd';
 import '@/styles/config.less';
-import '@/styles/form.less';
 import '@/styles/task.less';
 import moment, { Moment } from 'moment';
 import { FormInstance } from 'antd/es/form';
@@ -17,6 +16,8 @@ import { IResponse } from '@/interface/IGlobal';
 import { ITaskDetailResponse } from '@/interface/ITask';
 import { scrollToFirstError } from '@/utils/common';
 import { EmptyObject } from '@/config/global';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface IFormData {
     task_name: string;
@@ -193,7 +194,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
         return (
             <Form
                 ref={this.formRef}
-                className="form-help-absolute"
+                className={formStyles.formHelpAbsolute}
                 layout="horizontal"
                 autoComplete={'off'}
                 initialValues={{
@@ -203,7 +204,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                 }}
             >
                 <Form.Item
-                    className="form-item"
+                    className={formStyles.formItem}
                     validateTrigger={'onBlur'}
                     name="task_name"
                     label="任务名称"
@@ -217,19 +218,22 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                 >
                     <Input className="input-default" />
                 </Form.Item>
-                <Card
-                    className="form-item"
-                    title={<span className="form-required">定时采购时间：</span>}
-                >
+                <Card className={formStyles.formNextCard} title={<span>定时采购时间：</span>}>
                     <Form.Item
                         validateTrigger={'onBlur'}
-                        className="form-item-inline"
+                        className={formStyles.formItemClean}
                         name="type"
                         label="任务周期"
                         required={true}
                     >
                         <Radio.Group onChange={this.onTypeChange}>
-                            <Form.Item className="form-item-inline form-item-horizon vertical-middle">
+                            <Form.Item
+                                className={classNames(
+                                    formStyles.formItemClean,
+                                    formStyles.formHorizon,
+                                    formStyles.verticalMiddle,
+                                )}
+                            >
                                 <Radio value={AutoPurchaseTaskType.EveryDay}>每天</Radio>
                                 <Form.Item
                                     noStyle={true}
@@ -243,7 +247,11 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                         return (
                                             <Form.Item
                                                 colon={false}
-                                                className="form-item-inline form-item-horizon vertical-middle"
+                                                className={classNames(
+                                                    formStyles.formItemClean,
+                                                    formStyles.formHorizon,
+                                                    formStyles.verticalMiddle,
+                                                )}
                                                 name="dateRange"
                                                 rules={[
                                                     {
@@ -264,7 +272,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                 </Form.Item>
                             </Form.Item>
                             <Radio
-                                className="vertical-middle"
+                                className={formStyles.verticalMiddle}
                                 value={AutoPurchaseTaskType.OnlyOnce}
                             >
                                 只执行一次
@@ -278,9 +286,11 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                     <Form.Item
                                         key={field.key}
                                         label={`采购时间${index + 1}`}
-                                        className={`form-item-inline form-item ${
-                                            index > 0 ? 'task-require' : 'form-item-horizon'
-                                        }`}
+                                        className={classNames(
+                                            formStyles.formItemClean,
+                                            formStyles.formItem,
+                                            index > 0 ? 'task-require' : formStyles.formHorizon,
+                                        )}
                                         required={index === 0}
                                     >
                                         <Form.Item
@@ -360,7 +370,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                         }}
                     </Form.List>
                 </Card>
-                <div className="form-item">
+                <div className={formStyles.formNextCard}>
                     <Button
                         loading={createLoading}
                         type="primary"

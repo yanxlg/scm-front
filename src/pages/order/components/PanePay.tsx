@@ -48,7 +48,6 @@ const defaultFieldList: FormField[] = [
         name: 'purchase_order_sn',
         label: '采购子订单ID',
         className: 'order-input',
-        formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
     },
     {
@@ -56,7 +55,6 @@ const defaultFieldList: FormField[] = [
         name: 'purchase_parent_order_sn',
         label: '采购父订单ID',
         className: 'order-input',
-        formItemClassName: 'form-item',
         placeholder: '请输入采购父订单ID',
     },
     {
@@ -64,7 +62,6 @@ const defaultFieldList: FormField[] = [
         name: 'purchase_platform',
         label: '采购渠道',
         className: 'order-input',
-        formItemClassName: 'form-item',
         optionList: [defaultOptionItem, ...purchasePlatformOptionList],
     },
     {
@@ -72,7 +69,6 @@ const defaultFieldList: FormField[] = [
         name: ['purchase_order_stime', 'purchase_order_etime'],
         label: '采购时间',
         className: 'order-date-picker',
-        formItemClassName: 'form-item',
         formatter: ['start_date', 'end_date'],
     },
 ];

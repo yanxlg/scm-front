@@ -1,15 +1,11 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import queryString from 'query-string';
-import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { queryCustomList } from '@/services/setting';
 import { ICustomItem, ICustomListQuery } from '@/interface/ISetting';
 import ProTable from '@/components/ProTable';
-import CopyLink from '@/components/copyLink';
 import { ProColumns } from 'react-components/es/ProTable';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getCatagoryList } from '@/services/goods';
@@ -35,7 +31,6 @@ const ListTab: React.FC = () => {
             label: '一级品类',
             type: 'select',
             name: 'one_cat_id',
-            formItemClassName: formStyles.formItem,
             optionList: () => categoryRef.current!,
             syncDefaultOption: {
                 name: '全部',
@@ -49,7 +44,6 @@ const ListTab: React.FC = () => {
             label: '二级品类',
             type: 'select',
             name: 'two_cat_id',
-            formItemClassName: formStyles.formItem,
             optionListDependence: {
                 name: 'one_cat_id',
                 key: 'children',
@@ -67,7 +61,6 @@ const ListTab: React.FC = () => {
             label: '三级品类',
             type: 'select',
             name: 'three_cat_id',
-            formItemClassName: formStyles.formItem,
             optionListDependence: {
                 name: ['one_cat_id', 'two_cat_id'],
                 key: 'children',
@@ -282,11 +275,7 @@ const ListTab: React.FC = () => {
                         three_cat_id: '',
                     }}
                 >
-                    <LoadingButton
-                        onClick={onSearch}
-                        type="primary"
-                        className={formStyles.formItem}
-                    >
+                    <LoadingButton onClick={onSearch} type="primary">
                         查询
                     </LoadingButton>
                 </JsonForm>
