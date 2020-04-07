@@ -7,8 +7,13 @@ import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
-import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
-import { IntegerInput, RichInput } from 'react-components';
+import {
+    TaskIntervalConfigType,
+    TaskStatusCode,
+    PUTaskRangeType,
+    UpdateItemType,
+} from '@/enums/StatusEnum';
+import { RichInput } from 'react-components';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
 import { dateToUnix } from '@/utils/date';
@@ -17,10 +22,12 @@ import { EmptyObject } from '@/config/global';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 
-declare interface IFormData extends IPUTaskBody {
+declare interface IFormData extends Omit<IPUTaskBody, 'range'> {
     taskIntervalType?: TaskIntervalConfigType;
     day: number;
     second: number;
+    update_item: UpdateItemType;
+    range: UpdateItemType[];
 }
 
 declare interface ITimerUpdateProps {
@@ -99,10 +106,12 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
             task_end_time,
             task_start_time,
             task_name,
+            update_item,
         } = values;
         return {
             task_name,
-            range,
+            range: range.join(','),
+            update_item,
             task_start_time: dateToUnix(task_start_time),
             task_end_time: dateToUnix(task_end_time),
             task_interval_seconds:
@@ -206,9 +215,10 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        range: [PUTaskRangeType.AllOnShelves],
+                        range: [PUTaskRangeType.HasSalesOn],
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
+                        update_item: UpdateItemType.All,
                     }}
                 >
                     <Form.Item
@@ -234,23 +244,23 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                         className={formStyles.formItem}
                     >
                         <Checkbox.Group>
-                            <Checkbox value={PUTaskRangeType.AllOnShelves}>有销量在架商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.HasSales}>无销量在架商品</Checkbox>
-                            <Checkbox>有销量下架商品</Checkbox>
-                            <Checkbox>无销量下架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.HasSalesOn}>有销量在架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.NoSalesOn}>无销量在架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.HasSalesOff}>有销量下架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.NoSalesOff}>无销量下架商品</Checkbox>
                         </Checkbox.Group>
                     </Form.Item>
                     <Form.Item
                         validateTrigger={'onBlur'}
-                        name="update"
+                        name="update_item"
                         label="更新字段"
                         required={true}
                         className={formStyles.formItem}
                     >
-                        <Checkbox.Group>
-                            <Checkbox value={'all'}>全部</Checkbox>
-                            <Checkbox value={'ignore_img'}>不含图片</Checkbox>
-                        </Checkbox.Group>
+                        <Radio.Group>
+                            <Radio value={UpdateItemType.All}>全部</Radio>
+                            <Radio value={UpdateItemType.IgnoreImage}>不含图片</Radio>
+                        </Radio.Group>
                     </Form.Item>
                     <div>
                         <Form.Item

@@ -218,158 +218,156 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                 >
                     <Input className="input-default" />
                 </Form.Item>
-                <Card className={formStyles.formNextCard} title={<span>定时采购时间：</span>}>
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        className={formStyles.formItemClean}
-                        name="type"
-                        label="任务周期"
-                        required={true}
-                    >
-                        <Radio.Group onChange={this.onTypeChange}>
+                <Form.Item
+                    validateTrigger={'onBlur'}
+                    className={formStyles.formItem}
+                    name="type"
+                    label="任务周期"
+                    required={true}
+                >
+                    <Radio.Group onChange={this.onTypeChange}>
+                        <Form.Item
+                            className={classNames(
+                                formStyles.formItemClean,
+                                formStyles.formHorizon,
+                                formStyles.verticalMiddle,
+                            )}
+                        >
+                            <Radio value={AutoPurchaseTaskType.EveryDay}>每天</Radio>
                             <Form.Item
-                                className={classNames(
-                                    formStyles.formItemClean,
-                                    formStyles.formHorizon,
-                                    formStyles.verticalMiddle,
-                                )}
+                                noStyle={true}
+                                shouldUpdate={(prevValues, curValues) =>
+                                    prevValues.type !== curValues.type
+                                }
                             >
-                                <Radio value={AutoPurchaseTaskType.EveryDay}>每天</Radio>
-                                <Form.Item
-                                    noStyle={true}
-                                    shouldUpdate={(prevValues, curValues) =>
-                                        prevValues.type !== curValues.type
-                                    }
-                                >
-                                    {({ getFieldValue }) => {
-                                        const type = getFieldValue('type');
-                                        const disabled = type === AutoPurchaseTaskType.OnlyOnce;
-                                        return (
-                                            <Form.Item
-                                                colon={false}
-                                                className={classNames(
-                                                    formStyles.formItemClean,
-                                                    formStyles.formHorizon,
-                                                    formStyles.verticalMiddle,
-                                                )}
-                                                name="dateRange"
-                                                rules={[
-                                                    {
-                                                        required: !disabled,
-                                                        message: '请选择任务执行时间段',
-                                                    },
-                                                ]}
-                                            >
-                                                <DatePicker.RangePicker
-                                                    locale={locale}
-                                                    allowEmpty={[disabled, disabled]}
-                                                    disabled={[disabled, disabled]}
-                                                    disabledDate={disabledDate}
-                                                />
-                                            </Form.Item>
-                                        );
-                                    }}
-                                </Form.Item>
-                            </Form.Item>
-                            <Radio
-                                className={formStyles.verticalMiddle}
-                                value={AutoPurchaseTaskType.OnlyOnce}
-                            >
-                                只执行一次
-                            </Radio>
-                        </Radio.Group>
-                    </Form.Item>
-                    <Form.List name="purchase_times">
-                        {(fields, { add, remove }) => {
-                            return fields.map((field, index) => {
-                                return (
-                                    <Form.Item
-                                        key={field.key}
-                                        label={`采购时间${index + 1}`}
-                                        className={classNames(
-                                            formStyles.formItemClean,
-                                            formStyles.formItem,
-                                            index > 0 ? 'task-require' : formStyles.formHorizon,
-                                        )}
-                                        required={index === 0}
-                                    >
+                                {({ getFieldValue }) => {
+                                    const type = getFieldValue('type');
+                                    const disabled = type === AutoPurchaseTaskType.OnlyOnce;
+                                    return (
                                         <Form.Item
-                                            noStyle={true}
-                                            shouldUpdate={(prevValues, curValues) =>
-                                                prevValues.type !== curValues.type
-                                            }
+                                            colon={false}
+                                            className={classNames(
+                                                formStyles.formItemClean,
+                                                formStyles.formHorizon,
+                                                formStyles.verticalMiddle,
+                                            )}
+                                            name="dateRange"
+                                            rules={[
+                                                {
+                                                    required: !disabled,
+                                                    message: '请选择任务执行时间段',
+                                                },
+                                            ]}
                                         >
-                                            {({ getFieldValue }) => {
-                                                const type = getFieldValue('type');
-                                                if (type === AutoPurchaseTaskType.EveryDay) {
-                                                    return (
-                                                        <Form.Item
-                                                            {...field}
-                                                            label={`采购时间${index + 1}`}
-                                                            validateTrigger={['onChange']}
-                                                            noStyle={true}
-                                                            rules={[
-                                                                {
-                                                                    required: index === 0,
-                                                                    message: '请选择时间',
-                                                                },
-                                                                {
-                                                                    validator: this.checkTime,
-                                                                },
-                                                            ]}
-                                                        >
-                                                            <TimePicker
-                                                                locale={locale}
-                                                                className="task-picker-time"
-                                                                placeholder="请选择时间"
-                                                            />
-                                                        </Form.Item>
-                                                    );
-                                                } else {
-                                                    return (
-                                                        <Form.Item
-                                                            {...field}
-                                                            label={`采购时间${index + 1}`}
-                                                            validateTrigger={['onChange']}
-                                                            noStyle={true}
-                                                            rules={[
-                                                                {
-                                                                    required: index === 0,
-                                                                    message: '请选择时间',
-                                                                },
-                                                                {
-                                                                    validator: this.checkDate,
-                                                                },
-                                                            ]}
-                                                        >
-                                                            <DatePicker
-                                                                locale={locale}
-                                                                placeholder="请选择时间"
-                                                                className="task-picker-time"
-                                                                showTime={true}
-                                                                disabledDate={disabledDate}
-                                                            />
-                                                        </Form.Item>
-                                                    );
-                                                }
-                                            }}
-                                        </Form.Item>
-                                        {index === 0 ? (
-                                            <PlusCircleOutlined
-                                                className="task-add"
-                                                onClick={() => {
-                                                    add();
-                                                }}
+                                            <DatePicker.RangePicker
+                                                locale={locale}
+                                                allowEmpty={[disabled, disabled]}
+                                                disabled={[disabled, disabled]}
+                                                disabledDate={disabledDate}
                                             />
-                                        ) : (
-                                            <span />
-                                        )}
+                                        </Form.Item>
+                                    );
+                                }}
+                            </Form.Item>
+                        </Form.Item>
+                        <Radio
+                            className={formStyles.verticalMiddle}
+                            value={AutoPurchaseTaskType.OnlyOnce}
+                        >
+                            只执行一次
+                        </Radio>
+                    </Radio.Group>
+                </Form.Item>
+                <Form.List name="purchase_times">
+                    {(fields, { add, remove }) => {
+                        return fields.map((field, index) => {
+                            return (
+                                <Form.Item
+                                    key={field.key}
+                                    label={`采购时间${index + 1}`}
+                                    className={classNames(
+                                        formStyles.formItemClean,
+                                        formStyles.formItem,
+                                        index > 0 ? 'task-require' : formStyles.formHorizon,
+                                    )}
+                                    required={index === 0}
+                                >
+                                    <Form.Item
+                                        noStyle={true}
+                                        shouldUpdate={(prevValues, curValues) =>
+                                            prevValues.type !== curValues.type
+                                        }
+                                    >
+                                        {({ getFieldValue }) => {
+                                            const type = getFieldValue('type');
+                                            if (type === AutoPurchaseTaskType.EveryDay) {
+                                                return (
+                                                    <Form.Item
+                                                        {...field}
+                                                        label={`采购时间${index + 1}`}
+                                                        validateTrigger={['onChange']}
+                                                        noStyle={true}
+                                                        rules={[
+                                                            {
+                                                                required: index === 0,
+                                                                message: '请选择时间',
+                                                            },
+                                                            {
+                                                                validator: this.checkTime,
+                                                            },
+                                                        ]}
+                                                    >
+                                                        <TimePicker
+                                                            locale={locale}
+                                                            className="task-picker-time"
+                                                            placeholder="请选择时间"
+                                                        />
+                                                    </Form.Item>
+                                                );
+                                            } else {
+                                                return (
+                                                    <Form.Item
+                                                        {...field}
+                                                        label={`采购时间${index + 1}`}
+                                                        validateTrigger={['onChange']}
+                                                        noStyle={true}
+                                                        rules={[
+                                                            {
+                                                                required: index === 0,
+                                                                message: '请选择时间',
+                                                            },
+                                                            {
+                                                                validator: this.checkDate,
+                                                            },
+                                                        ]}
+                                                    >
+                                                        <DatePicker
+                                                            locale={locale}
+                                                            placeholder="请选择时间"
+                                                            className="task-picker-time"
+                                                            showTime={true}
+                                                            disabledDate={disabledDate}
+                                                        />
+                                                    </Form.Item>
+                                                );
+                                            }
+                                        }}
                                     </Form.Item>
-                                );
-                            });
-                        }}
-                    </Form.List>
-                </Card>
+                                    {index === 0 ? (
+                                        <PlusCircleOutlined
+                                            className="task-add"
+                                            onClick={() => {
+                                                add();
+                                            }}
+                                        />
+                                    ) : (
+                                        <span />
+                                    )}
+                                </Form.Item>
+                            );
+                        });
+                    }}
+                </Form.List>
                 <div className={formStyles.formNextCard}>
                     <Button
                         loading={createLoading}

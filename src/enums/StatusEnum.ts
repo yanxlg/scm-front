@@ -121,7 +121,15 @@ export enum TaskIntervalConfigType {
 //======================= 定时更新任务商品范围 ======================//
 export enum PUTaskRangeType {
     AllOnShelves = 2,
-    HasSales,
+    HasSalesOn,
+    NoSalesOn,
+    HasSalesOff,
+    NoSalesOff,
+}
+
+export enum UpdateItemType {
+    All = 1,
+    IgnoreImage,
 }
 
 //======================= Hot 任务筛选类型 ======================//
