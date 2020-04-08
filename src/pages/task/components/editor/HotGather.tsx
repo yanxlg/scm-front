@@ -319,7 +319,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
         return (
             <Spin spinning={queryLoading} tip="Loading...">
                 <Form
-                    className={formStyles.formHelpAbsolute}
+                    className={classNames(formStyles.formHelpAbsolute, formStyles.formContainer)}
                     layout="horizontal"
                     autoComplete={'off'}
                     form={form}

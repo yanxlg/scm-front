@@ -27,6 +27,24 @@ const config = defineConfig({
     dynamicImport: {
         loading: '@/components/PageLoading/index',
     },
+    externals: dev
+        ? {}
+        : {
+              react: 'window.React',
+              'react-dom': 'window.ReactDOM',
+          },
+    scripts: dev
+        ? []
+        : [
+              {
+                  src: 'https://unpkg.com/react@16.13.1/umd/react.production.min.js',
+                  crossOrigin: '',
+              },
+              {
+                  src: 'https://unpkg.com/react-dom@16.13.1/umd/react-dom.production.min.js',
+                  crossOrigin: '',
+              },
+          ], // for cdn
     headScripts: dev ? ['http://localhost:8097'] : undefined,
     extraBabelPlugins: [
         [
@@ -106,7 +124,7 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t.vova.com.hk/',
+            target: 'https://scm-api-t2.vova.com.hk/',
             // target: 'http://192.168.120.17:3026',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },

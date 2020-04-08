@@ -256,7 +256,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataIndex: 'channel',
                 width: '223px',
                 align: 'center',
-                render: (text: TaskChannelCode) => TaskChannelMap[text] || '——',
+                render: (text: TaskChannelCode) => TaskChannelMap[text] || '--',
             },
             {
                 title: '任务类型',
@@ -270,7 +270,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataIndex: 'task_range',
                 width: '182px',
                 align: 'center',
-                render: (text: TaskRangeCode) => TaskRangeMap[text],
+                render: (text: TaskRangeCode) => TaskRangeMap[text] || '--',
             },
             {
                 title: '任务周期',

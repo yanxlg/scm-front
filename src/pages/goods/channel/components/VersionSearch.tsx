@@ -1,7 +1,6 @@
 import React, { RefObject } from 'react';
 import { Button, DatePicker, Input, Form } from 'antd';
 import '@/styles/config.less';
-import { BindAll } from 'lodash-decorators';
 import { transEndDate, transStartDate } from 'react-components/es/JsonForm';
 import { FormInstance } from 'antd/es/form';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -25,7 +24,6 @@ declare interface IVersionSearchState {
     activeLoading: boolean;
 }
 
-@BindAll()
 class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSearchState> {
     private formRef: RefObject<FormInstance> = React.createRef();
     constructor(props: IVersionSearchProps) {

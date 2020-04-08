@@ -1,10 +1,8 @@
-import React, { RefObject } from 'react';
-import { BindAll } from 'lodash-decorators';
-import { Button, Card, DatePicker, Form, Input, Radio, Spin, TimePicker } from 'antd';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { DatePicker, Form, Input, Radio, Spin, TimePicker } from 'antd';
 import '@/styles/config.less';
 import '@/styles/task.less';
 import moment, { Moment } from 'moment';
-import { FormInstance } from 'antd/es/form';
 import { addAutoPurchaseTask, queryPurchaseIds, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
@@ -18,6 +16,7 @@ import { scrollToFirstError } from '@/utils/common';
 import { EmptyObject } from '@/config/global';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
+import { LoadingButton } from 'react-components';
 
 declare interface IFormData {
     task_name: string;
@@ -30,103 +29,81 @@ declare interface IAutoPurchaseTaskProps {
     taskId?: number;
 }
 
-declare interface IAutoPurchaseTaskState {
-    createLoading: boolean;
-    queryLoading: boolean;
-    status?: TaskStatusCode;
-    successTimes?: number;
-    failTimes?: number;
-    idList: string[];
-}
-
 function disabledDate(current: Moment) {
     return current && current < moment().startOf('day');
 }
 
-@BindAll()
-class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAutoPurchaseTaskState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
+const convertFormData = (values: IFormData) => {
+    const { task_name, purchase_times, type, dateRange } = values;
+    return {
+        task_name,
+        type,
+        task_start_time:
+            type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![0]) : undefined,
+        task_end_time:
+            type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![1]) : undefined,
+        purchase_times: purchase_times
+            .filter(date => date)
+            .map(date =>
+                date!.format(
+                    type === AutoPurchaseTaskType.EveryDay ? 'hh:mm:ss' : 'YYYY-MM-DD HH:mm:ss',
+                ),
+            ),
+    };
+};
 
-    constructor(props: IAutoPurchaseTaskProps) {
-        super(props);
-        this.state = {
-            createLoading: false,
-            queryLoading: props.taskId !== void 0,
-            idList: [],
-        };
-    }
+const AutoPurchaseTask: React.FC<IAutoPurchaseTaskProps> = ({ taskId }) => {
+    const [form] = Form.useForm();
+    const [queryLoading, setQueryLoading] = useState(taskId !== void 0);
+    const [idList, setIdList] = useState<string[]>([]);
+    const [status, setStatus] = useState<TaskStatusCode>(); // 详情保留字段
+    const [successTimes, setSuccessTimes] = useState<number>(); // 详情保留字段
+    const [failTimes, setFailTimes] = useState<number>(); // 详情保留字段
 
-    componentDidMount(): void {
-        const { taskId } = this.props;
+    useEffect(() => {
         if (taskId !== void 0) {
             Promise.all<IResponse<ITaskDetailResponse>, IResponse<any>>([
                 queryTaskDetail(taskId),
                 queryPurchaseIds(taskId),
-            ]).then(
-                ([
-                    { data: { task_detail_info = {} } = {} } = {},
-                    { data: { order_id_list = [] } = {} } = {},
-                ]) => {
-                    const { success, fail, status } = task_detail_info;
-                    this.setState({
-                        queryLoading: false,
-                        status: status,
-                        successTimes: success,
-                        failTimes: fail,
-                        idList: order_id_list,
-                    });
-                },
-            );
-        }
-    }
-
-    private convertFormData(values: IFormData) {
-        const { task_name, purchase_times, type, dateRange } = values;
-        return {
-            task_name,
-            type,
-            task_start_time:
-                type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![0]) : undefined,
-            task_end_time:
-                type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![1]) : undefined,
-            purchase_times: purchase_times
-                .filter(date => date)
-                .map(date =>
-                    date!.format(
-                        type === AutoPurchaseTaskType.EveryDay ? 'hh:mm:ss' : 'YYYY-MM-DD HH:mm:ss',
-                    ),
-                ),
-        };
-    }
-
-    private onCreate() {
-        this.formRef
-            .current!.validateFields()
-            .then((values: any) => {
-                const params = this.convertFormData(values);
-                this.setState({
-                    createLoading: true,
+            ])
+                .then(
+                    ([
+                        { data: { task_detail_info = {} } = {} } = {},
+                        { data: { order_id_list = [] } = {} } = {},
+                    ]) => {
+                        const { success, fail, status } = task_detail_info;
+                        setSuccessTimes(success);
+                        setFailTimes(fail);
+                        setStatus(status);
+                        setIdList(order_id_list);
+                    },
+                )
+                .finally(() => {
+                    setQueryLoading(false);
                 });
-                addAutoPurchaseTask(params)
+        }
+    }, []);
+
+    const onCreate = useCallback(() => {
+        return form
+            .validateFields()
+            .then((values: any) => {
+                const params = convertFormData(values);
+                return addAutoPurchaseTask(params)
                     .then(({ data = EmptyObject } = EmptyObject) => {
-                        this.formRef.current!.resetFields();
+                        form.resetFields();
                         showSuccessModal(data);
                     })
                     .catch(() => {
                         showFailureModal();
-                    })
-                    .finally(() => {
-                        this.setState({
-                            createLoading: false,
-                        });
                     });
             })
             .catch(({ errorFields }) => {
-                scrollToFirstError(this.formRef.current!, errorFields);
+                scrollToFirstError(form, errorFields);
             });
-    }
+    }, []);
 
-    private checkDate(type: any, value: Moment) {
+    const checkDate = useCallback((type: any, value: Moment) => {
         if (!value) {
             return Promise.resolve();
         }
@@ -136,10 +113,10 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
         } else {
             return Promise.reject('任务时间不能早于当前时间');
         }
-    }
+    }, []);
 
-    private checkTime(type: any, value: Moment) {
-        const dateRange = this.formRef.current!.getFieldValue('dateRange');
+    const checkTime = useCallback((type: any, value: Moment) => {
+        const dateRange = form.getFieldValue('dateRange');
         if (dateRange && value) {
             const [startDate] = dateRange;
             const nowDate = moment();
@@ -154,23 +131,15 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
             }
         }
         return Promise.resolve();
-    }
+    }, []);
 
-    private onTypeChange() {
-        this.formRef.current!.resetFields(['purchase_times', 'dateRange']);
-    }
+    const onTypeChange = useCallback(() => {
+        form.resetFields(['purchase_times', 'dateRange']);
+    }, []);
 
-    render() {
-        const {
-            createLoading,
-            queryLoading,
-            status,
-            successTimes,
-            failTimes,
-            idList = [],
-        } = this.state;
-        const { taskId } = this.props;
-        const edit = taskId !== void 0;
+    const edit = taskId !== void 0;
+
+    return useMemo(() => {
         if (edit) {
             return (
                 <Spin spinning={queryLoading} tip="Loading...">
@@ -193,8 +162,8 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
         }
         return (
             <Form
-                ref={this.formRef}
-                className={formStyles.formHelpAbsolute}
+                form={form}
+                className={classNames(formStyles.formHelpAbsolute, formStyles.formContainer)}
                 layout="horizontal"
                 autoComplete={'off'}
                 initialValues={{
@@ -225,7 +194,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     label="任务周期"
                     required={true}
                 >
-                    <Radio.Group onChange={this.onTypeChange}>
+                    <Radio.Group onChange={onTypeChange}>
                         <Form.Item
                             className={classNames(
                                 formStyles.formItemClean,
@@ -313,7 +282,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                                                 message: '请选择时间',
                                                             },
                                                             {
-                                                                validator: this.checkTime,
+                                                                validator: checkTime,
                                                             },
                                                         ]}
                                                     >
@@ -337,7 +306,7 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                                                                 message: '请选择时间',
                                                             },
                                                             {
-                                                                validator: this.checkDate,
+                                                                validator: checkDate,
                                                             },
                                                         ]}
                                                     >
@@ -369,18 +338,13 @@ class AutoPurchaseTask extends React.PureComponent<IAutoPurchaseTaskProps, IAuto
                     }}
                 </Form.List>
                 <div className={formStyles.formNextCard}>
-                    <Button
-                        loading={createLoading}
-                        type="primary"
-                        className="btn-default"
-                        onClick={this.onCreate}
-                    >
+                    <LoadingButton type="primary" className="btn-default" onClick={onCreate}>
                         创建任务
-                    </Button>
+                    </LoadingButton>
                 </div>
             </Form>
         );
-    }
-}
+    }, [edit, queryLoading]);
+};
 
 export default AutoPurchaseTask;

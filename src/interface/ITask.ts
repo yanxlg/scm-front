@@ -10,11 +10,9 @@ import {
     TaskStatusCode,
     PUTaskRangeType,
     AutoPurchaseTaskType,
-    TaskCreateStatusCode,
-    TaskRangeEnum,
     HotTaskRange,
 } from '@/enums/StatusEnum';
-import { IBoolean, RequestPagination } from '@/interface/IGlobal';
+import { RequestPagination } from '@/interface/IGlobal';
 
 export type ITaskListQuery = {
     task_id?: string;

@@ -5,7 +5,6 @@ import { ITaskDetailInfo } from '@/interface/ITask';
 import {
     isGatherTask,
     TaskExecuteType,
-    TaskRangeEnum,
     TaskRangeMap,
     TaskStatusMap,
     TaskTypeCode,
