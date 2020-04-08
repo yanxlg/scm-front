@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -12,7 +12,11 @@ import { getCatagoryList } from '@/services/goods';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import settingStyles from '@/styles/_setting.less';
 
-const ListTab: React.FC = () => {
+interface ListTabProps {
+    activeKey: string;
+}
+
+const ListTab: React.FC<ListTabProps> = ({ activeKey }) => {
     const searchRef = useRef<JsonFormRef>(null);
     const categoryRef = useRef<Promise<IOptionItem[]>>();
 
@@ -85,8 +89,14 @@ const ListTab: React.FC = () => {
     } = useList<ICustomItem, ICustomListQuery>({
         queryList: queryCustomList,
         formRef: searchRef,
+        autoQuery: false,
     });
 
+    useEffect(() => {
+        if (activeKey === '2') {
+            onSearch();
+        }
+    }, [activeKey]);
     const columns = useMemo(() => {
         return [
             {
