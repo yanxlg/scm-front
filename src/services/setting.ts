@@ -7,6 +7,7 @@ import {
     ICustomItem,
     ICustomListQuery,
     ICookieBody,
+    ICookieResponse,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -49,7 +50,7 @@ export async function updateCustom(data: ICustomItem) {
 }
 
 export async function queryCookies() {
-    return request.get<IResponse<ICookieItem[]>>(SettingApiPath.QueryCookie);
+    return request.get<IResponse<ICookieResponse>>(SettingApiPath.QueryCookie);
 }
 
 export async function saveCookie(data: ICookieBody) {

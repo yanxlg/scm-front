@@ -11,21 +11,23 @@ const sleep = async (second: number) => {
 };
 
 export default {
-    'GET /api/v1/account/cookie': async (req: Request, res: Response) => {
+    'GET /api/v1/spider/account/list': async (req: Request, res: Response) => {
         await sleep(3);
         res.status(200).send({
             code: 200,
             message: 'By mock.js',
-            ...Mock.mock({
-                'data|100-500': [
-                    {
-                        account_id: '@increment',
-                        phone: '@phone',
-                        cookie: '@string',
-                        'status|1': [1, 2],
-                    },
-                ],
-            }),
+            data: {
+                ...Mock.mock({
+                    'list|100-500': [
+                        {
+                            account_id: '@increment',
+                            phone: '@phone',
+                            cookie: '@string',
+                            'status|1': [1, 2],
+                        },
+                    ],
+                }),
+            },
         });
     },
 };

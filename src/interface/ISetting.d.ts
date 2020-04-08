@@ -61,6 +61,10 @@ export interface ICookieItem {
     status: number;
 }
 
+export interface ICookieResponse {
+    list: ICookieItem[];
+}
+
 export interface ICookieBody {
     account_id: string;
     cookie: string;
