@@ -1,66 +1,28 @@
-@import '~antd/es/style/themes/default';
+@btnWidth: 140px;
 
-.tag-section {
-    margin: 20px 0 30px;
+.table-container {
+    width: 80%;
+}
+
+.pagination-container {
+    margin-top: 20px;
     overflow: hidden;
 }
 
-.add-box {
-    position: relative;
-    width: 200px;
-    height: 32px;
-    padding: 3px 56px 3px 4px;
-    border: 1px dashed @normal-color;
-    border-radius: 2px;
-}
-
-.item {
-    float: left;
-    margin-right: 12px;
-}
-
 .btn-add {
-    position: absolute;
-    top: 3px;
-    right: 4px;
+    float: left;
+    width: @btnWidth;
 }
 
-.input {
-    height: 100%;
-    border: 0;
-    // outline: 0;
-    &:focus {
-        border: 0 !important;
-        box-shadow: none !important;
-    }
+.pagination {
+    float: right;
 }
 
-.save-btn {
-    margin-right: 20px;
+.ops-container {
+    margin-top: 40px;
 }
 
-.edit-box {
-    position: relative;
-    width: 200px;
-    height: 32px;
-    padding: 3px 56px 3px 4px;
-    border: 1px dashed @normal-color;
-    border-radius: 2px;
-}
-
-.btn-update {
-    position: absolute;
-    top: 3px;
-    right: 58px;
-}
-
-.btn-del {
-    position: absolute;
-    top: 3px;
-    right: 4px;
-}
-
-.icon {
-    display: inline-block;
-    margin-left: 6px;
+.btn-save {
+    width: @btnWidth;
+    margin-right: 12px;
 }

@@ -1,10 +1,10 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { Button, Input, Spin, message, Tabs, Form, Popconfirm } from 'antd';
+import { Button, Input, Spin, message, Tabs, Popconfirm, Pagination, Modal } from 'antd';
 import Container from '@/components/Container';
 // import EditTag from './components/EditTag';
 import { getTagsList, addTag, enabledTag, deleteTag } from '@/services/goods-attr';
 import { ITagItem } from '@/interface/IGoodsAttr';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { FitTable } from 'react-components';
 import { IAttrItem } from '@/interface/ISetting';
 import EditableCell from './components/EditableCell';
@@ -14,6 +14,8 @@ import PublishIntercept from './components/PublishIntercept';
 import styles from './_goodsAttr.less';
 
 const { TabPane } = Tabs;
+const { TextArea } = Input;
+const { confirm } = Modal;
 
 const _GoodsAttr: React.FC = props => {
     const addInputRef = useRef<Input>(null);
@@ -151,7 +153,22 @@ const _GoodsAttr: React.FC = props => {
 };
 
 const GoodsAttr: React.FC = props => {
-    const [form] = Form.useForm();
+    const pageDataRef = useRef<any>({
+        pageOneOriginData: [
+            {
+                key: '0',
+                name: '测试1',
+                description:
+                    '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
+            },
+            {
+                key: '1',
+                name: '测试2',
+                description:
+                    '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
+            },
+        ]
+    });
     const [attrList, setAttrList] = useState<IAttrItem[]>([
         {
             key: '0',
@@ -166,25 +183,11 @@ const GoodsAttr: React.FC = props => {
                 '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
         },
     ]);
-    const [editingKey, setEditingKey] = useState('');
-    const [isAdd, setIsAdd] = useState(false);
-
-    const isEditing = (record: IAttrItem) => record.key === editingKey;
-
-    const edit = (record: IAttrItem) => {
-        // console.log(11111);
-        form.setFieldsValue({ ...record });
-        setEditingKey(record.key);
-    };
-
-    const cancel = () => {
-        if (isAdd) {
-            deleteAttr();
-            setIsAdd(false);
-        }
-        setEditingKey('');
-    };
-
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [total, setPageTotal] = useState(20);
+    const [editAttrList, setEditAttrList] = useState<IAttrItem[]>([]);
+      
     const addAttr = () => {
         const key = attrList.length + '';
         const newAttrList = [...attrList];
@@ -193,52 +196,78 @@ const GoodsAttr: React.FC = props => {
             name: '',
             description: '',
         });
-        setIsAdd(true);
-        setEditingKey(key);
         setAttrList(newAttrList);
     };
+
+    const editAttr = useCallback(
+        (type, value, index) => {
+            setAttrList(attrList.map((item, i) => {
+                if (i === index) {
+                    return {
+                        ...item,
+                        [type]: value
+                    }
+                }
+                return item;
+            }));
+        },
+        [attrList]
+    );
 
     const deleteAttr = useCallback(
         (key = '') => {
             const newAttrList = [...attrList];
-            if (key) {
-                const index = newAttrList.findIndex(item => key === item.key);
-                if (index > -1) {
-                    newAttrList.splice(index, 1);
-                    setAttrList(newAttrList);
-                }
-            } else {
-                // 新增时的取消
-                newAttrList.pop();
+            const index = newAttrList.findIndex(item => key === item.key);
+            if (index > -1) {
+                newAttrList.splice(index, 1);
                 setAttrList(newAttrList);
             }
         },
         [attrList],
     );
 
-    const save = useCallback(
-        async (key: string) => {
-            try {
-                const row = (await form.validateFields()) as IAttrItem;
-                const newAttrList = [...attrList];
-                const index = newAttrList.findIndex(item => key === item.key);
-                if (index > -1) {
-                    const item = newAttrList[index];
-                    newAttrList.splice(index, 1, {
-                        ...item,
-                        ...row,
-                    });
-                    setAttrList(newAttrList);
-                } else {
-                    newAttrList.push(row);
-                    setAttrList(newAttrList);
-                }
-                setEditingKey('');
-            } catch (errInfo) {
-                console.log('Validate Failed:', errInfo);
-            }
+    const showConfirm = useCallback(
+        () => {
+            confirm({
+                title: '保存即应用标签',
+                icon: <ExclamationCircleOutlined />,
+                content: '系统会根据关键字自动匹配商品打标签，这个过程预计需要30分钟。任务执行中不可再次编辑，请确认是否立刻执行？',
+                onOk() {
+                    console.log('OK');
+                },
+                // onCancel() {
+                //     console.log('Cancel');
+                // },
+            });
         },
-        [attrList],
+        []
+    );
+
+    const changePage = useCallback(
+        (current: number) => {
+            // console.log('changePage', page);
+            const cacheData = pageDataRef.current;
+            cacheData[page] = attrList;
+            if (cacheData[current]) {
+                setAttrList(cacheData[current]);
+            }
+            // console.log('changePage', pageDataRef.current);
+            setPage(current);
+            
+        },
+        [attrList, page]
+    );
+
+    const handleReset = useCallback(
+        () => {
+            setPage(1);
+            const { pageOneOriginData } = pageDataRef.current;
+            pageDataRef.current = {
+                pageOneOriginData
+            }
+            setAttrList(pageOneOriginData);
+        },
+        []
     );
 
     const columns = useMemo(() => {
@@ -246,94 +275,48 @@ const GoodsAttr: React.FC = props => {
             {
                 title: '商品标签名称',
                 dataIndex: 'name',
-                width: 140,
+                width: 100,
                 align: 'center',
-                editable: true,
+                render: (val: string, record: IAttrItem, index: number) => {
+                    return <Input value={val} onChange={e => editAttr('name', e.target.value, index)} />
+                }
             },
             {
                 title: '关键词',
                 dataIndex: 'description',
-                width: 400,
+                width: 200,
                 align: 'center',
-                editable: true,
+                render: (val: string, record: IAttrItem, index: number) => {
+                    return <TextArea value={val} onChange={e => editAttr('description', e.target.value, index)} autoSize />
+                }
             },
             {
                 title: '操作',
                 dataIndex: 'operation',
-                width: 260,
+                width: 100,
                 align: 'center',
                 render: (_: any, record: IAttrItem) => {
-                    const editable = isEditing(record);
                     return (
-                        <>
-                            {editable ? (
-                                <>
-                                    <Button
-                                        type="link"
-                                        size="small"
-                                        onClick={() => save(record.key)}
-                                    >
-                                        保存
-                                    </Button>
-                                    <Popconfirm title="确认取消吗?" onConfirm={cancel}>
-                                        <Button type="link" size="small">
-                                            取消
-                                        </Button>
-                                    </Popconfirm>
-                                </>
-                            ) : (
-                                <Button
-                                    type="link"
-                                    size="small"
-                                    disabled={editingKey !== ''}
-                                    onClick={() => edit(record)}
-                                >
-                                    编辑
-                                </Button>
-                            )}
-                            <Button
-                                type="link"
-                                size="small"
-                                disabled={editingKey !== ''}
-                                onClick={() => deleteAttr(record.key)}
-                            >
-                                删除
-                            </Button>
-                        </>
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={() => deleteAttr(record.key)}
+                        >
+                            删除
+                        </Button>
                     );
-                    return;
                 },
             },
-        ];
-    }, [editingKey]);
-
-    const mergedColumns = useMemo(() => {
-        return columns.map(col => {
-            if (!col.editable) {
-                return col;
-            }
-            return {
-                ...col,
-                onCell: (record: IAttrItem) => ({
-                    record,
-                    inputType: col.dataIndex === 'name' ? 'text' : 'textarea',
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: isEditing(record),
-                }),
-            };
-        }) as ColumnsType<any>;
-    }, [columns, editingKey]);
-    // , attrList, editingKey
+        ] as ColumnsType<any>;
+    }, [attrList]);
 
     return useMemo(() => {
         return (
             <Container>
-                <Tabs defaultActiveKey="2" type="card">
+                <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="商品属性配置" key="1">
-                        <Form form={form} component={false}>
+                        <div className={styles.tableContainer}>
                             <FitTable
-                                style={{ width: '80%' }}
                                 components={{
                                     body: {
                                         cell: EditableCell,
@@ -341,15 +324,31 @@ const GoodsAttr: React.FC = props => {
                                 }}
                                 bordered
                                 dataSource={attrList}
-                                columns={mergedColumns}
+                                columns={columns}
                                 // rowClassName="editable-row"
                                 pagination={false}
                             />
-                        </Form>
-                        <Button ghost type="primary" style={{ marginTop: 20 }} onClick={addAttr}>
-                            <PlusOutlined />
-                            添加新标签
-                        </Button>
+                            <div className={styles.paginationContainer}>
+                                <Button ghost type="primary" onClick={addAttr} className={styles.btnAdd}>
+                                    <PlusOutlined />
+                                    添加新标签
+                                </Button>
+                                <Pagination
+                                    current={page}
+                                    pageSize={pageSize}
+                                    total={total}
+                                    className={styles.pagination}
+                                    showTotal={total => `共 ${total} 条`}
+                                    showQuickJumper={true}
+                                    onChange={changePage}
+                                />
+                            </div>
+                            
+                        </div>
+                        <div className={styles.opsContainer}>
+                            <Button type="primary" className={styles.btnSave} onClick={showConfirm}>保存即应用</Button>
+                            <Button onClick={handleReset}>还原</Button>
+                        </div>
                     </TabPane>
                     <TabPane tab="上架拦截策略" key="2">
                         <PublishIntercept />
@@ -357,7 +356,7 @@ const GoodsAttr: React.FC = props => {
                 </Tabs>
             </Container>
         );
-    }, [attrList, editingKey, mergedColumns]);
+    }, [attrList, columns, page]);
 };
 
 export default GoodsAttr;
