@@ -1,7 +1,13 @@
 import { transPaginationRequest } from '@/utils/utils';
 import request from '@/utils/request';
 import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
-import { ICountryItem, ICustomItem, ICustomListQuery } from '@/interface/ISetting';
+import {
+    ICookieItem,
+    ICountryItem,
+    ICustomItem,
+    ICustomListQuery,
+    ICookieBody,
+} from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
@@ -38,6 +44,16 @@ export async function queryCountryList() {
 
 export async function updateCustom(data: ICustomItem) {
     return request.post(SettingApiPath.UpdateCustom, {
+        data: data,
+    });
+}
+
+export async function queryCookies() {
+    return request.get<IResponse<ICookieItem[]>>(SettingApiPath.QueryCookie);
+}
+
+export async function saveCookie(data: ICookieBody) {
+    return request.post(SettingApiPath.UpdateCookie, {
         data: data,
     });
 }
