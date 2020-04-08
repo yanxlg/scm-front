@@ -174,7 +174,6 @@ const CookieSetting: React.FC = () => {
 
     const scroll = useMemo(() => {
         return {
-            y: 600,
             x: 'max-content',
         };
     }, []);
@@ -211,6 +210,7 @@ const CookieSetting: React.FC = () => {
                     columns={mergedColumns}
                     pagination={false}
                     scroll={scroll}
+                    bottom={100}
                 />
             </Form>
         );
