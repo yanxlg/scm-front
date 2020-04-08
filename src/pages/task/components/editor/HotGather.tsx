@@ -6,7 +6,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { addPddHotTask, querySortCondition, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
-import { QuestionCircleOutlined } from '@ant-design/icons/lib';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
     HotTaskRange,
     TaskExecuteType,

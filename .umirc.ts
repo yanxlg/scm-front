@@ -47,23 +47,15 @@ const config = defineConfig({
           ], // for cdn
     headScripts: dev ? ['http://localhost:8097'] : undefined,
     extraBabelPlugins: [
+        // 'babel-plugin-lodash',
         [
             'babel-plugin-import',
             {
                 libraryName: 'lodash',
                 libraryDirectory: '',
-                camel2DashComponentName: false, // default: true
+                camel2DashComponentName: false,
             },
             'lodash',
-        ],
-        [
-            'babel-plugin-import',
-            {
-                libraryName: 'lodash-decorator',
-                libraryDirectory: '',
-                camel2DashComponentName: false, // default: true
-            },
-            'lodash-decorator',
         ],
         [
             'babel-plugin-import',
@@ -124,7 +116,7 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t2.vova.com.hk/',
+            target: 'https://scm-api-t4.vova.com.hk/',
             // target: 'http://192.168.120.17:3026',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
@@ -142,6 +134,7 @@ const config = defineConfig({
                 },
             ]);
         }
+        // config.plugin('lodash-webpack-plugin').use(require('lodash-webpack-plugin'));
     },
 });
 

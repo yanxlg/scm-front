@@ -17,7 +17,7 @@ import { useList } from '@/utils/hooks';
 import { IStockRequest, IStockItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
 import { LoadingButton } from 'react-components';
-import { SearchOutlined } from '@ant-design/icons/lib';
+import { SearchOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';

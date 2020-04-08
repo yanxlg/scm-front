@@ -17,7 +17,7 @@ import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/co
 import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
-import { SearchOutlined } from '@ant-design/icons/lib';
+import { SearchOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';

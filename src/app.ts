@@ -1,5 +1,9 @@
 const logger = require('dva-logger');
 
+// const _ = require('lodash/lodash.js');
+//
+// console.log(_);
+
 export const dva = {
     config: {
         onError(err: ErrorEvent) {

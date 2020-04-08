@@ -11,7 +11,7 @@ const sleep = async (second: number) => {
 };
 
 export default {
-    'GET /api/v1/spider/account/list': async (req: Request, res: Response) => {
+    'GET /v1/spider/account/list': async (req: Request, res: Response) => {
         await sleep(3);
         res.status(200).send({
             code: 200,
