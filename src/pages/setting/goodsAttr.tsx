@@ -37,7 +37,7 @@ const GoodsAttr: React.FC = props => {
             .then(res => {
                 // console.log('getTagsList', res);
                 const { tags } = res.data;
-                setTagList(tags);
+                setTagList(tags || []);
             })
             .finally(() => {
                 setLoading(false);
@@ -99,7 +99,7 @@ const GoodsAttr: React.FC = props => {
     }, [handleAdd]);
 
     const enabledTagList = useMemo(() => {
-        return tagList.filter(item => item.isActive === 'ENABLED');
+        return tagList?.filter(item => item.isActive === 'ENABLED') || [];
     }, [tagList]);
 
     useEffect(() => {
