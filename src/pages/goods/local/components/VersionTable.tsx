@@ -1,15 +1,22 @@
 import React, { RefObject } from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData } from '../version';
-
+import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData, IPageData } from '../version';
+import ProTable from '@/components/ProTable';
+import { PaginationConfig } from 'antd/es/pagination';
 import VersionImgDialog from './VersionImgDialog';
 import SkuDialog from './SkuDialog';
+import { getCurrentPage } from '@/utils/common';
 
+const pageSizeOptions = ['50', '100', '500', '1000'];
 declare interface IVersionTableProps {
     loading: boolean;
+    currentPage: number;
+    pageSize: number;
+    total: number;
     versionGoodsList: IGoodsVersionRowItem[];
     operationVersion(product_id: string, type: string): void;
+    onSearch(pageParams?: IPageData): void;
 }
 
 declare interface VersionTableState {
@@ -23,7 +30,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
 
     private columns: ColumnProps<IGoodsVersionRowItem>[] = [
         {
-            fixed: true,
+            fixed: 'left',
             key: 'goods_status',
             width: 160,
             title: '操作',
@@ -55,7 +62,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             },
         },
         {
-            fixed: true,
+            fixed: 'left',
             key: 'product_id',
             width: 140,
             title: 'Product ID',
@@ -76,7 +83,9 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'onsale_info',
             align: 'center',
             render: (value: IOnsaleItem[], row: IGoodsVersionRowItem) => {
-                return <div>{value.map(item => item.onsale_channel).join('、')}</div>;
+                return [...new Set(value.map(item => item.onsale_channel))].map(channel => (
+                    <div key={channel}>{channel}</div>
+                ));
             },
         },
         {
@@ -155,7 +164,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
             dataIndex: 'sku_price',
             align: 'center',
             render: (value: number) => {
-                return `￥${value}`;
+                return value ? `￥${value}` : '-';
             },
         },
         {
@@ -243,35 +252,66 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
         this.setState(
             {
                 activeRow: rowData,
+                skuDialogStatus: true,
             },
             () => {
-                this.toggleSkuDialog(true);
                 this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
             },
         );
     };
 
-    private toggleSkuDialog = (status: boolean) => {
+    private hideSkuDialog = () => {
         this.setState({
-            skuDialogStatus: status,
+            skuDialogStatus: false,
         });
     };
 
+    private onChangeProTable = ({ current, pageSize }: PaginationConfig) => {
+        const { currentPage, pageSize: _pageSize } = this.props;
+        this.props.onSearch({
+            page:
+                currentPage !== current
+                    ? current
+                    : getCurrentPage(pageSize as number, (currentPage - 1) * _pageSize + 1),
+            page_count: pageSize,
+        });
+    };
+
+    private onReload = () => {
+        this.props.onSearch();
+    };
+
     render() {
-        const { versionGoodsList, loading } = this.props;
+        const { versionGoodsList, loading, total, currentPage, pageSize } = this.props;
         const { versionImgDialogStatus, activeRow, skuDialogStatus } = this.state;
 
         return (
             <>
-                <Table
-                    bordered={true}
-                    rowKey="sku_id"
+                <ProTable<IGoodsVersionRowItem>
+                    headerTitle="本地产品库版本列表"
                     className="goods-version-table"
-                    loading={loading}
-                    scroll={{ x: true, y: 600 }}
-                    pagination={false}
+                    rowKey="sku_id"
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    bottom={60}
+                    minHeight={500}
+                    pagination={{
+                        total: total,
+                        current: currentPage,
+                        pageSize: pageSize,
+                        showSizeChanger: true,
+                        pageSizeOptions: pageSizeOptions,
+                    }}
+                    tableAlertRender={false}
                     columns={this.columns}
                     dataSource={versionGoodsList}
+                    loading={loading}
+                    onChange={this.onChangeProTable}
+                    options={{
+                        density: true,
+                        fullScreen: true,
+                        reload: this.onReload,
+                        setting: true,
+                    }}
                 />
                 <VersionImgDialog
                     visible={versionImgDialogStatus}
@@ -282,7 +322,7 @@ class VersionTable extends React.PureComponent<IVersionTableProps, VersionTableS
                     visible={skuDialogStatus}
                     ref={this.skuDialogRef}
                     currentRowData={activeRow}
-                    toggleSkuDialog={this.toggleSkuDialog}
+                    hideSkuDialog={this.hideSkuDialog}
                 />
             </>
         );

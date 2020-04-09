@@ -1,5 +1,5 @@
 import request, { errorHandlerFactory } from '@/utils/request';
-import { TaskExecuteType, TaskStatusCode, TaskTypeEnum, TaskRangeEnum } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskStatusCode, TaskRangeEnum, HotTaskRange } from '@/enums/StatusEnum';
 import {
     IHotTaskBody,
     ITaskCreatedResponse,
@@ -17,10 +17,14 @@ import {
     ITaskProgressResponse,
     ISubTaskProgressQuery,
     ISubTaskProgressResponse,
+    ISubTaskIdItem,
+    ISubTaskIdQuery,
+    ISubTaskIdData,
 } from '@/interface/ITask';
-import { IResponse } from '@/interface/IGlobal';
+import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
-import { EmptyObject } from '@/enums/ConfigEnum';
+import { EmptyObject } from '@/config/global';
+import { isZero, transPaginationRequest, transPaginationResponse } from '@/utils/utils';
 
 export declare interface IPddHotTaskParams {
     range?: number;
@@ -47,10 +51,13 @@ export declare interface IPddHotTaskParams {
     status?: TaskStatusCode;
 }
 
-export async function getTaskList(params: ITaskListQuery) {
-    return request.get<IResponse<ITaskListResponse>>(TaskApiPath.QueryTaskList, {
-        params: params,
-    });
+export async function getTaskList(query: ITaskListQuery) {
+    const params = transPaginationRequest(query);
+    return request
+        .get<IResponse<ITaskListResponse>>(TaskApiPath.QueryTaskList, {
+            params: params,
+        })
+        .then(transPaginationResponse);
 }
 
 export async function addPddHotTask(params: IHotTaskBody) {
@@ -95,11 +102,10 @@ export async function activeTasks(task_ids: string) {
     });
 }
 
-export async function reActiveTasks(task_ids: string) {
-    return request.post(TaskApiPath.ActiveTask, {
-        data: {
-            task_ids,
-            type: 1,
+export async function reTryTasks(task_id: string) {
+    return request.get(TaskApiPath.RetryTask, {
+        params: {
+            task_id,
         },
     });
 }
@@ -141,12 +147,13 @@ export async function queryTaskDetail(task_id: number): Promise<IResponse<ITaskD
                     data: {
                         task_detail_info: {
                             sub_cat_id: subCatId,
-                            shopId: subCatId === TaskRangeEnum.Store ? range : undefined,
+                            shopId: isZero(range) ? undefined : range,
                             task_cycle:
                                 executeCount === 1
                                     ? TaskExecuteType.once
                                     : TaskExecuteType.interval,
                             execute_count: executeCount,
+                            range: isZero(range) ? HotTaskRange.fullStack : HotTaskRange.store,
                             ...extra,
                         },
                     },
@@ -168,12 +175,19 @@ export async function queryCategory() {
     return request.get<IResponse<IPDDCategoryResponse>>(TaskApiPath.QueryPDDCategory);
 }
 
-export async function querySortCondition(type: IPDDSortQueryType) {
-    return request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
-        params: {
-            type: type,
-        },
-    });
+export async function querySortCondition() {
+    return Promise.all([
+        request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
+            params: {
+                type: 'list',
+            },
+        }),
+        request.get<IResponse<IPDDSortResponse>>(TaskApiPath.QueryPDDSortList, {
+            params: {
+                type: 'merchant',
+            },
+        }),
+    ]);
 }
 
 export async function queryTaskLog(params: { task_id: number; page: number; page_number: number }) {
@@ -183,8 +197,8 @@ export async function queryTaskLog(params: { task_id: number; page: number; page
 }
 
 export async function queryTaskProgressList(params: ITaskProgressQuery) {
-    return request.get<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
-        params: params,
+    return request.post<IResponse<ITaskProgressResponse>>(TaskApiPath.QueryTaskProgressList, {
+        data: params,
     });
 }
 
@@ -201,5 +215,11 @@ export async function addAutoPurchaseTask(data: IAPTaskBody) {
 export async function querySubTaskProgress(query: ISubTaskProgressQuery) {
     return request.get<IResponse<ISubTaskProgressResponse>>(TaskApiPath.QuerySubTaskProgress, {
         params: query,
+    });
+}
+
+export async function querySubTaskIdList(params: ISubTaskIdQuery) {
+    return request.get<IResponse<ISubTaskIdData>>(TaskApiPath.QuerySubTaskIdList, {
+        params: transPaginationRequest(params),
     });
 }

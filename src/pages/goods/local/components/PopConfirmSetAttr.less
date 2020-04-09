@@ -1,0 +1,52 @@
+@import '~antd/es/style/themes/default';
+@defaultTickColor: #fff;
+
+.select-attr {
+    margin: 0 -6px -8px -24px;
+    max-width: 300px;
+    .btn {
+        position: relative;
+        margin: 0 6px 6px 0;
+        padding: 2px 10px;
+        height: 28px;
+        color: rgba(0, 0, 0, 0.65);
+        border-color: @normal-color;
+        .bg {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent @normal-color @normal-color transparent;
+        }
+        .tick {
+            position: absolute;
+            bottom: 3px;
+            right: 1px;
+            width: 6px;
+            height: 3px;
+            border-left: 1px solid @defaultTickColor;
+            border-bottom: 1px solid @defaultTickColor;
+            transform: rotate(-56deg);
+        }
+        &:hover {
+            .bg {
+                border-color: transparent @blue-base @blue-base transparent;
+            }
+        }
+        &.ant-btn-primary {
+            border-color: @blue-base;
+            color: @blue-base;
+            .bg {
+                border-color: transparent @blue-base @blue-base transparent;
+            }
+        }
+        // &:active,
+        // &:focus {
+        //     color: @normal-color;
+        //     border-color: @normal-color;
+        // }
+    }
+}

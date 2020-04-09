@@ -18,7 +18,9 @@ export type IChannelProductListBody = {
 };
 
 export interface IChannelProductListItem {
+    id: string;
     shop_name: string;
+    merchant_id: string;
     virtual_id: string;
     main_image: string;
     commodity_id: string;
@@ -61,11 +63,12 @@ export type IChannelShelveStateBody =
           type: 'onsale';
           info: {
               onsale: {
-                  task_body: {
+                  task_body_list: Array<{
                       product_id: string;
                       commodity_id: string;
+                      merchant_id: string;
                       sale_domain: string;
-                  };
+                  }>;
               };
           };
       }
@@ -73,11 +76,12 @@ export type IChannelShelveStateBody =
           type: 'offsale';
           info: {
               offsale: {
-                  task_body: {
+                  task_body_list: Array<{
                       product_id: string;
                       commodity_id: string;
+                      merchant_id: string;
                       sale_domain: string;
-                  };
+                  }>;
               };
           };
       };
@@ -163,3 +167,91 @@ export type IActiveChannelProductVersionBody = Array<{
     virtual_id: number;
     product_id: number;
 }>;
+
+export interface IRegionShippingFeeBody {
+    product_id: string;
+    merchant_id: string;
+}
+
+export interface IRegionShippingFeeItem {
+    country: string;
+    country_code: string;
+    country_name: string;
+    fee: number;
+    weight: number;
+}
+
+export interface IRegionShippingFeeResponse {
+    total: number;
+    page: string;
+    fee: IRegionShippingFeeItem[];
+}
+
+export interface IGoodsDetailBody {
+    id: string;
+    channel: string;
+}
+
+export interface IGoodsDetailResponse {
+    product_name: string;
+    product_description: string;
+    main_image: string;
+    product_id: string;
+    commodity_id: string;
+    spider_product_id: string;
+    category_level_1: string;
+    category_level_2: string;
+    category_level_3: string;
+}
+
+export interface IGoodsSkuBody {
+    id: string;
+    channel: string;
+    page: number;
+    page_count: number;
+}
+
+export interface ISpecsItem {
+    name: string;
+    value: string;
+}
+
+export interface IGoodsSkuItem {
+    sku_name: string;
+    sku_image: string;
+    price: string;
+    shipping_fee: string;
+    storage: string;
+    specs: ISpecsItem[];
+    adjust_price: string;
+    adjust_reason: string;
+    serial?: number;
+}
+
+export interface IGoodsSkuResponse {
+    total: string;
+    sku_list: IGoodsSkuItem[];
+}
+
+export interface IEditSkuItem {
+    sku: string;
+    adjustment_price: string;
+    adjustment_reason: string;
+}
+
+export interface IEditSkuBody {
+    sku_list: IEditSkuItem[];
+    merchant_id: string;
+}
+
+export interface IEditSkuResponse {
+    execute_status: string;
+}
+
+export interface IShopItem {
+    merchant_id: string;
+    merchant_name: string;
+    merchant_platform: string;
+}
+
+export type ISHopList = IShopItem[];

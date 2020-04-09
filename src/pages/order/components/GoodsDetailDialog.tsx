@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Spin } from 'antd';
 
-import { IGoodsDetail } from './OrderTable';
+import { IGoodsDetail } from './PaneAll';
 
 declare interface IGoodsDetailDialogProps {
     visible: boolean;
@@ -31,28 +31,36 @@ class GoodsDetailDialog extends React.PureComponent<IGoodsDetailDialogProps> {
             >
                 {goodsDetail ? (
                     <div className="order-goods-content">
-                        <div>渠道商品ID: {goodsDetail.channel_goods_id}</div>
                         <div className="img-line">
-                            <div>父SKU: {goodsDetail.psku}</div>
+                            <div className="desc">渠道商品ID: {goodsDetail.product_id}</div>
                             <div className="img-wrap">
-                                <span>商品主图:</span> <img src={goodsDetail.main_img} />
+                                <span>商品主图:</span> <img src={goodsDetail.goods_img} />
                             </div>
                         </div>
-                        <div className="img-line">
-                            <div>子SKU: {goodsDetail.sku}</div>
-                            <div className="img-wrap">
-                                <span>SKU对应图片:</span> <img src={goodsDetail.sku_img} />
+                        {goodsDetail.sku_sn ? (
+                            <div className="img-line">
+                                <div className="desc">子SKU: {goodsDetail.commodity_sku_id}</div>
+                                <div className="img-wrap">
+                                    <span>SKU对应图片:</span> <img src={goodsDetail.sku_img} />
+                                </div>
                             </div>
-                        </div>
-                        <div>商品名称: {goodsDetail.goods_name}</div>
+                        ) : null}
                         <div>
-                            商品规格:{' '}
-                            {Object.keys(goodsDetail.specs).map(key => (
-                                <span className="style" key={key}>
-                                    {key}: {goodsDetail.specs[key as 'color']}
-                                </span>
-                            ))}
+                            <div className="float-left">商品名称:</div>
+                            <div className="overflow-hidden">{goodsDetail.title}</div>
                         </div>
+                        {goodsDetail.sku_style ? (
+                            <div>
+                                <div className="float-left">商品规格:</div>
+                                <div className="overflow-hidden">
+                                    {goodsDetail.sku_style.map((item: any) => (
+                                        <span className="style" key={item.option}>
+                                            {item.option}: {item.value}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 ) : (
                     <div className="order-goods-none">

@@ -4,19 +4,50 @@
         position: relative;
         // display: flex;
         padding-left: 112px;
-        // overflow: hidden;
-        height: 100px;
+        min-height: 100px;
         a {
             position: absolute;
             top: 0;
             right: 0;
         }
-        span {
-            display: inline-block;
-            width: 280px;
+    }
+    .goods-item {
+        display: inline-block;
+        vertical-align: top;
+        .float-left {
+            float: left;
+            margin-right: 4px;
+            text-align: justify;
+            &:after {
+                display: inline-block;
+                width: 100%;
+                content: '';
+            }
+        }
+        &.one {
+            width: 240px;
+            .float-left {
+                width: 72px;
+            }
+        }
+        &.two {
+            width: 320px;
+            margin-right: 20px;
+            .float-left {
+                width: 94px;
+            }
+        }
+        &.three {
+            width: 240px;
+            .float-left {
+                width: 76px;
+            }
         }
     }
-    img {
+    .overflow-hidden {
+        overflow: hidden;
+    }
+    .main-img {
         position: absolute;
         left: 0;
         top: 0;
@@ -26,11 +57,12 @@
     .desc {
         position: relative;
         display: inline-block;
-        max-width: 100%;
-        text-overflow :ellipsis;
-        white-space :nowrap;
-        overflow : hidden;
+        margin: 10px 0;
         padding-right: 100px;
+        max-width: 100%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
     }
     .center {
         margin: 14px 0;
@@ -40,5 +72,28 @@
     }
     .ant-pagination {
         margin-top: 10px;
+    }
+    .sku-img {
+        // width: 100%;
+        width: 80px !important;
+        height: 80px !important;
+    }
+    .filter-section {
+        margin-top: 20px;
+        .input-wrap {
+            position: relative;
+            padding-left: 52px !important;
+        }
+        .label {
+            position: absolute;
+            left: 0;
+            top: 5px;
+        }
+        .btn {
+            width: 100%;
+        }
+    }
+    .tag-btn {
+        margin: 0 4px 4px 0;
     }
 }

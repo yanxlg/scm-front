@@ -47,13 +47,13 @@ const allCatagory = [
                 children: [
                     {
                         id: 111,
-                        name: '苹果6'
+                        name: '苹果6',
                     },
                     {
                         id: 112,
-                        name: '苹果7'
+                        name: '苹果7',
                     },
-                ]
+                ],
             },
             {
                 id: 12,
@@ -61,15 +61,15 @@ const allCatagory = [
                 children: [
                     {
                         id: 121,
-                        name: '华为P20'
+                        name: '华为P20',
                     },
                     {
                         id: 122,
-                        name: '华为P30'
+                        name: '华为P30',
                     },
-                ]
-            }
-        ]
+                ],
+            },
+        ],
     },
     {
         id: 2,
@@ -81,13 +81,13 @@ const allCatagory = [
                 children: [
                     {
                         id: 211,
-                        name: '男装1'
+                        name: '男装1',
                     },
                     {
                         id: 212,
-                        name: '男装2'
+                        name: '男装2',
                     },
-                ]
+                ],
             },
             {
                 id: 22,
@@ -95,37 +95,38 @@ const allCatagory = [
                 children: [
                     {
                         id: 221,
-                        name: '女装1'
+                        name: '女装1',
                     },
                     {
                         id: 222,
-                        name: '女装2'
+                        name: '女装2',
                     },
-                ]
-            }
-        ]
-    }
-]
+                ],
+            },
+        ],
+    },
+];
 
 const list = [
     {
         commodityId: '111',
         productId: '111111',
-        goodsImg: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+        goodsImg:
+            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
         wormTaskId: 111,
         wormGoodsId: 111,
         isOnSale: 0,
         translateInfo: [
             {
                 language: 'language',
-                updateTime: 111
-            }
+                updateTime: 111,
+            },
         ],
         onSaleInfo: [
             {
                 onSaleChannel: 'onSaleChannel',
-                onSaleTime: 111
-            }
+                onSaleTime: 111,
+            },
         ],
         title: 'title',
         description: 'description',
@@ -135,52 +136,52 @@ const list = [
                 scmSkuSn: '111',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
+                scmSkuShoppingFee: 111,
             },
             {
                 scmSkuSn: '222',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
+                scmSkuShoppingFee: 111,
             },
             {
                 scmSkuSn: '333',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
-            }
+                scmSkuShoppingFee: 111,
+            },
         ],
         salesVolume: 111,
         comments: 111,
         firstCatagory: {
             id: 1,
-            name: '手机'
+            name: '手机',
         },
         secondCatagory: {
             id: 11,
-            name: '苹果'
+            name: '苹果',
         },
         thirdCatagory: {
             id: 111,
-            name: '苹果6'
+            name: '苹果6',
         },
         brand: 'brand',
         storeId: 'storeId',
@@ -190,30 +191,31 @@ const list = [
         skuImage: [
             '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
             '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
-            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
+            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
         ],
-        hasNewVersion: 0
+        hasNewVersion: 0,
     },
     {
         commodityId: '111',
         productId: '222222',
         // commodityId: '111',
         // productId: 222222,
-        goodsImg: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+        goodsImg:
+            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
         wormTaskId: 111,
         wormGoodsId: 111,
         isOnSale: 0,
         translateInfo: [
             {
                 language: 'language',
-                updateTime: 111
-            }
+                updateTime: 111,
+            },
         ],
         onSaleInfo: [
             {
                 onSaleChannel: 'onSaleChannel',
-                onSaleTime: 111
-            }
+                onSaleTime: 111,
+            },
         ],
         title: 'title',
         description: 'description',
@@ -223,52 +225,52 @@ const list = [
                 scmSkuSn: '444',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
+                scmSkuShoppingFee: 111,
             },
             {
                 scmSkuSn: '555',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
+                scmSkuShoppingFee: 111,
             },
             {
                 scmSkuSn: '666',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
-            }
+                scmSkuShoppingFee: 111,
+            },
         ],
         salesVolume: 111,
         comments: 111,
         firstCatagory: {
             id: 1,
-            name: '手机'
+            name: '手机',
         },
         secondCatagory: {
             id: 11,
-            name: '苹果'
+            name: '苹果',
         },
         thirdCatagory: {
             id: 111,
-            name: '苹果6'
+            name: '苹果6',
         },
         brand: 'brand',
         storeId: 'storeId',
@@ -278,28 +280,29 @@ const list = [
         skuImage: [
             '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
             '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
-            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
+            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
         ],
-        hasNewVersion: 1
+        hasNewVersion: 1,
     },
     {
         commodityId: '111',
         productId: '333333',
-        goodsImg: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+        goodsImg:
+            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
         wormTaskId: 111,
         wormGoodsId: 111,
         isOnSale: 0,
         translateInfo: [
             {
                 language: 'language',
-                updateTime: 111
-            }
+                updateTime: 111,
+            },
         ],
         onSaleInfo: [
             {
                 onSaleChannel: 'onSaleChannel',
-                onSaleTime: 111
-            }
+                onSaleTime: 111,
+            },
         ],
         title: 'title',
         description: 'description',
@@ -309,52 +312,52 @@ const list = [
                 scmSkuSn: '777',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
+                scmSkuShoppingFee: 111,
             },
             {
                 scmSkuSn: '888',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
+                scmSkuShoppingFee: 111,
             },
             {
                 scmSkuSn: '999',
                 scmSkuStyle: {
                     size: 'size',
-                    color: 'color'
+                    color: 'color',
                 },
                 scmSkuPrice: 111,
                 scmSkuWeight: 111,
                 scmSkuInventory: 111,
                 scmSkuShoppingTime: 111,
-                scmSkuShoppingFee: 111
-            }
+                scmSkuShoppingFee: 111,
+            },
         ],
         salesVolume: 111,
         comments: 111,
         firstCatagory: {
             id: 1,
-            name: '手机'
+            name: '手机',
         },
         secondCatagory: {
             id: 11,
-            name: '苹果'
+            name: '苹果',
         },
         thirdCatagory: {
             id: 111,
-            name: '苹果6'
+            name: '苹果6',
         },
         brand: 'brand',
         storeId: 'storeId',
@@ -364,16 +367,17 @@ const list = [
         skuImage: [
             '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
             '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
-            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg'
+            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
         ],
-        hasNewVersion: 1
+        hasNewVersion: 1,
     },
-]
+];
 
 const versionInfo = {
     goods_title: '商品标题',
     goods_url: '源商品链接',
-    main_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+    main_image_url:
+        '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
     goods_id: 888888,
     source_goods_id: 999999,
     flatform: '源平台',
@@ -387,13 +391,15 @@ const versionInfo = {
             up_shelf_channel: '上架渠道',
             goods_imgs: {
                 version: 111111,
-                main_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                main_image_url:
+                    '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
                 sub_image: [
                     {
-                        sub_image_url: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
-                        sku_id: '11'
-                    } 
-                ]
+                        sub_image_url:
+                            '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+                        sku_id: '11',
+                    },
+                ],
             },
             goods_title: '商品标题111',
             goods_description: '商品描述111',
@@ -412,7 +418,7 @@ const versionInfo = {
                     category_two_level: '二级类目',
                     category_three_level: '三级类目',
                     change_time: '变更时间',
-                    change_operator: '变更人'
+                    change_operator: '变更人',
                 },
                 {
                     middle_sku_id: 22,
@@ -428,26 +434,29 @@ const versionInfo = {
                     category_two_level: '二级类目',
                     category_three_level: '三级类目',
                     change_time: '变更时间',
-                    change_operator: '变更人'
+                    change_operator: '变更人',
                 },
-            ]
+            ],
         },
         {
             product_id: 222222,
             up_shelf_channel: '上架渠道',
             goods_imgs: {
                 version: 222222,
-                main_image_url: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
+                main_image_url:
+                    '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
                 sub_image: [
                     {
-                        sub_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
-                        sku_id: '11'
+                        sub_image_url:
+                            '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                        sku_id: '11',
                     },
                     {
-                        sub_image_url: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
-                        sku_id: '22'
-                    }   
-                ]
+                        sub_image_url:
+                            '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
+                        sku_id: '22',
+                    },
+                ],
             },
             goods_title: '商品标题',
             goods_description: '商品描述',
@@ -466,7 +475,7 @@ const versionInfo = {
                     category_two_level: '二级类目',
                     category_three_level: '三级类目',
                     change_time: '变更时间',
-                    change_operator: '变更人'
+                    change_operator: '变更人',
                 },
                 {
                     middle_sku_id: 44,
@@ -482,16 +491,17 @@ const versionInfo = {
                     category_two_level: '二级类目',
                     category_three_level: '三级类目',
                     change_time: '变更时间',
-                    change_operator: '变更人'
+                    change_operator: '变更人',
                 },
-            ]
+            ],
         },
         {
             product_id: 333333,
             up_shelf_channel: '上架渠道',
             goods_imgs: {
                 version: 333333,
-                main_image_url: '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
+                main_image_url:
+                    '//image-tb.airyclub.com/image/500_500/filler/29/6f/6a69f58c96aa7b793b62c6c5af8f296f.jpg',
                 sub_image: [
                     // {
                     //     sub_image_url: '//image-tb.vova.com/image/500_500/filler/6d/1a/2d391127928221c2a442c8b0e1f26d1a.jpg',
@@ -500,8 +510,8 @@ const versionInfo = {
                     // {
                     //     sub_image_url: '//image-tb.vova.com/image/500_500/filler/97/b8/d41a4dab05900caf879244f041cc97b8.jpg',
                     //     sku_id: '22'
-                    // }   
-                ]
+                    // }
+                ],
             },
             goods_title: '商品标题',
             goods_description: '商品描述',
@@ -520,7 +530,7 @@ const versionInfo = {
                     category_two_level: '二级类目',
                     category_three_level: '三级类目',
                     change_time: '变更时间',
-                    change_operator: '变更人'
+                    change_operator: '变更人',
                 },
                 {
                     middle_sku_id: 66,
@@ -536,13 +546,12 @@ const versionInfo = {
                     category_two_level: '二级类目',
                     category_three_level: '三级类目',
                     change_time: '变更时间',
-                    change_operator: '变更人'
+                    change_operator: '变更人',
                 },
-                
             ],
-        }
-    ]
-}
+        },
+    ],
+};
 
 export default {
     'POST /v1/goods/list': (req: Request, res: Response) => {
@@ -556,23 +565,22 @@ export default {
                 data: {
                     allCount: 58888,
                     // list.data
-                    'list': list
+                    list: list,
                     // .slice(
                     //     Number(page_count) * Number(page-1),
                     //     Number(page_count) * (Number(page)),
                     // )
                 },
             });
-        }, 2000)
-        
+        }, 2000);
     },
     'PUT /v1/goods/pic/edit': (req: Request, res: Response) => {
         const { pic } = req.query;
         // console.log('/v1/goods/pic/edit', pic);
         res.status(200).send({
             code: 'success',
-            msg: ''
-        })
+            msg: '',
+        });
     },
     'POST /v1/goods/pic/upload': (req: Request, res: Response) => {
         // const { pic } = req.query;
@@ -581,84 +589,116 @@ export default {
             code: 'success',
             msg: '',
             data: {
-                url: '//image-tb.vova.com/image/262_262/filler/00/43/43b20914df9aaf70d450472529aa0043.jpg'
-            }
-        })
+                url:
+                    '//image-tb.vova.com/image/262_262/filler/00/43/43b20914df9aaf70d450472529aa0043.jpg',
+            },
+        });
     },
     'GET /v1/goods/onsale': (req: Request, res: Response) => {
         setTimeout(() => {
             res.status(200).send({
-                    code: 'success',
-                    msg: '',
-                    data: {},
-                },
-            );
-        }, 2000)
-        
+                code: 'success',
+                msg: '',
+                data: {},
+            });
+        }, 2000);
     },
     'GET /v1/goods/delete': (req: Request, res: Response) => {
         setTimeout(() => {
             res.status(200).send({
-                    code: 'success',
-                    msg: '',
-                    data: {},
-                },
-            );
-        }, 2000)
+                code: 'success',
+                msg: '',
+                data: {},
+            });
+        }, 2000);
     },
     'PUT /v1/goods/edits': (req: Request, res: Response) => {
         setTimeout(() => {
             res.status(200).send({
-                    code: 'success',
-                    msg: '',
-                    data: {},
-                },
-            );
-        }, 200)
-        
+                code: 'success',
+                msg: '',
+                data: {},
+            });
+        }, 200);
     },
     'GET /v1/goods/sales': (req: Request, res: Response) => {
         setTimeout(() => {
             res.status(200).send({
-                    code: 'success',
-                    msg: '',
-                    data: [
-                        {
-                            channel: 'VOVA',
-                            onsale_time: 111,
-                            product_id: '111',
-                            onsaleStatus: '1'
-                        },
-                        {
-                            channel: 'VOVA',
-                            onsale_time: 111,
-                            product_id: '111',
-                            onsaleStatus: '1'
-                        }
-                    ],
-                },
-            );
-        }, 200)
-        
+                code: 'success',
+                msg: '',
+                data: [
+                    {
+                        channel: 'VOVA',
+                        onsale_time: 111,
+                        product_id: '111',
+                        onsaleStatus: '1',
+                    },
+                    {
+                        channel: 'VOVA',
+                        onsale_time: 111,
+                        product_id: '111',
+                        onsaleStatus: '1',
+                    },
+                ],
+            });
+        }, 200);
     },
     'GET /v1/goods_version': (req: Request, res: Response) => {
         setTimeout(() => {
             res.status(200).send({
-                    code: 'success',
-                    msg: '',
-                    data: versionInfo,
-                },
-            );
-        }, 500)
+                code: 'success',
+                msg: '',
+                data: versionInfo,
+            });
+        }, 500);
     },
     'GET /v1/catagory/list': (req: Request, res: Response) => {
         setTimeout(() => {
             res.status(200).send({
-                    code: 'success',
-                    msg: '',
-                    data: allCatagory,
+                code: 'success',
+                msg: '',
+                data: allCatagory,
+            });
+        }, 100);
+    },
+    'GET /v1/goods/groups/:id': (req: Request, res: Response) => {
+        setTimeout(() => {
+            res.status(200).send({
+                code: 200,
+                msg: '',
+                data: {
+                    productGroup: {
+                        commodityId: '111',
+                        productId: 'productId',
+                        title: 'title',
+                        image:
+                            '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                    },
+                    subProductGroup: [
+                        {
+                            commodityId: '222',
+                            productId: 'productId',
+                            title: 'title',
+                            image:
+                                '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                        },
+                        {
+                            commodityId: '333',
+                            productId: 'productId',
+                            title: 'title',
+                            image:
+                                '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                        },
+                    ],
+                    mainProductGroup: {
+                        commodityId: '444',
+                        productId: 'productId',
+                        title: 'title',
+                        image:
+                            '//t00img.yangkeduo.com/goods/images/2019-11-15/454c5e0ae4cd43181730319354d11eba.jpeg',
+                    },
                 },
-            );
-        }, 100)
+            });
+        }, 200);
     },
 };

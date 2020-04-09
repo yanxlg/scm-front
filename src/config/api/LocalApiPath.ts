@@ -11,5 +11,11 @@ export enum LocalApiPath {
     getGoodsVersion = '/api/v1/goods/version_list',
     postGoodsVersionExport = '/api/v1/goods/version_export',
     postGoodsIgnoreVersion = '/api/v1/goods/ignore_version',
-    postAllGoodsOnsale = '/api/v1/goods/batch_onsale_goods',
+    getAllGoodsOnsale = '/api/v1/goods/batch_onsale_goods',
+    postGoodsMerge = '/api/v1/goods/merge',
+    putGoodsMergeMain = '/api/v1/goods/merge/main',
+    delGoodsMergeDelete = '/api/v1/goods/merge/delete',
+    getGoodsMergeList = '/api/v1/goods/groups/:id',
+    putGoodsMergeAdd = '/api/v1/goods/merge/add',
+    getGoodsStatusList = '/api/v1/status/product',
 }

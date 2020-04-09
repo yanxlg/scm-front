@@ -5,10 +5,9 @@ import { Button, Modal, Form, Spin } from 'antd';
 import { Bind } from 'lodash-decorators';
 import { editChannelProductDetail, queryChannelProductDetail } from '@/services/channel';
 import { FormInstance } from 'antd/es/form';
-import NumberInput from '@/components/NumberInput';
-import IntegerInput from '@/components/IntegerInput';
-import { EmptyObject } from '@/enums/ConfigEnum';
-import { IChannelProductDetailResponse, ISku, ISkuBody } from '@/interface/IChannel';
+import { IntegerInput, NumberInput } from 'react-components';
+import { IChannelProductDetailResponse, ISku } from '@/interface/IChannel';
+import { EmptyObject } from '@/config/global';
 
 declare interface IProductEditProps {
     product_id: string;
@@ -59,9 +58,10 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
     @Bind
     private diffSkuList(nextSkuList: ISku[], beforeSkuList: ISku[]) {
         // 仅 diff价格、运费、库存三个字段
+        let updated = false;
+        let i = 0;
         const length = nextSkuList.length;
-        let updatedItems: ISku[] = [];
-        for (let i = 0; i < length; i++) {
+        while (!updated && i < length) {
             const next = nextSkuList[i];
             const before = beforeSkuList[i];
             if (
@@ -69,32 +69,33 @@ class ProductEditModal extends React.PureComponent<IProductEditProps, IProductEd
                 Number(next.storage) !== Number(before.storage) ||
                 Number(next.shipping_fee) !== Number(before.shipping_fee)
             ) {
-                updatedItems.push(next);
+                updated = true;
+            } else {
+                i++;
             }
         }
-        return updatedItems;
+        return updated;
     }
     @Bind
     private onSubmit() {
         const { product_id } = this.props;
         const { sku_list = [] } = this.formRef.current!.getFieldsValue();
         const { sku_list: _sku_list = [] } = this.state;
-        const mergeList = this.diffSkuList(sku_list, _sku_list);
         // diff
-        if (sku_list.length > 0 && mergeList.length > 0) {
+        if (sku_list.length > 0 && this.diffSkuList(sku_list, _sku_list)) {
             this.setState({
                 submitting: true,
             });
             editChannelProductDetail({
                 product_id: product_id,
-                sku_list: (mergeList.map((sku: ISku) => {
+                sku_list: sku_list.map((sku: ISku) => {
                     return {
-                        sku: sku.sku_name as string,
+                        sku: sku.sku_name,
                         shop_price: sku.price,
                         shipping_fee: sku.shipping_fee,
                         storage: sku.storage,
                     };
-                }) as unknown) as ISkuBody[],
+                }),
             })
                 .then(() => {
                     this.onClose();

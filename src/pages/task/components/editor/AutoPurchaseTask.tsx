@@ -11,12 +11,12 @@ import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessMod
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { AutoPurchaseTaskType, TaskStatusCode, TaskStatusMap } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { transStartDate } from '@/utils/date';
+import { transStartDate } from 'react-components/es/JsonForm';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { IResponse } from '@/interface/IGlobal';
 import { ITaskDetailResponse } from '@/interface/ITask';
-import { EmptyObject } from '@/enums/ConfigEnum';
 import { scrollToFirstError } from '@/utils/common';
+import { EmptyObject } from '@/config/global';
 
 declare interface IFormData {
     task_name: string;

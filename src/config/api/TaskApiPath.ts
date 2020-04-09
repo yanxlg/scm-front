@@ -8,6 +8,7 @@ export enum TaskApiPath {
     AddPUTask = '/api/v1/task/spider/goods_update',
     DeleteTask = '/api/v1/task/delete',
     ActiveTask = '/api/v1/task/plan',
+    RetryTask = '/api/v1/task/retry',
     AbortTask = '/api/v1/task/termination',
     QueryTaskDetail = '/api/v1/task/detail',
     QueryPurchaseIds = '/api/v1/orders/purchase',
@@ -17,4 +18,5 @@ export enum TaskApiPath {
     QueryTaskProgressList = '/api/v1/task/progress',
     AddAPTask = '/api/v1/task/spider/auto_purchase',
     QuerySubTaskProgress = '/api/v1/task/progress_detail',
+    QuerySubTaskIdList = '/api/v1/task/plan_info',
 }

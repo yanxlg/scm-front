@@ -1,20 +1,18 @@
 import React from 'react';
 import { DashboardOutlined } from '@ant-design/icons/lib';
-import Icon from '@/components/Icons/Icon';
+import { Icons } from '@/components/Icon';
+import '@/styles/menu.less';
+
 export default [
     {
         path: '/',
         name: '首页',
-        icon: <DashboardOutlined />,
+        icon: <DashboardOutlined className="menu-icon" />,
     },
     {
         path: '/task',
         name: '任务中心',
-        icon: (
-            <span className="anticon">
-                <Icon type="task" />
-            </span>
-        ),
+        icon: <Icons type="scm-task" className="menu-icon" />,
         children: [
             {
                 path: '/task/config',
@@ -26,7 +24,7 @@ export default [
                 extract: true,
             },
             {
-                path: '/task/list/:id',
+                path: '/task/list/:task_id',
                 name: '任务详情',
                 hideInMenu: true,
                 extract: true,
@@ -41,11 +39,7 @@ export default [
     {
         path: '/goods',
         name: '商品中心',
-        icon: (
-            <span className="anticon">
-                <Icon type="goods" />
-            </span>
-        ),
+        icon: <Icons type="scm-goods" className="menu-icon" />,
         children: [
             {
                 path: '/goods/local',
@@ -70,30 +64,22 @@ export default [
     {
         path: '/order',
         name: '订单管理',
-        icon: (
-            <span className="anticon">
-                <Icon type="order" />
-            </span>
-        ),
+        icon: <Icons type="scm-order" className="menu-icon" />,
     },
     {
         path: '/stock',
         name: '出入库管理',
-        icon: (
-            <span className="anticon">
-                <Icon type="io" />
-            </span>
-        ),
+        icon: <Icons type="scm-io" className="menu-icon" />,
     },
     {
         path: '/setting',
         name: '基本设置',
-        icon: (
-            <span className="anticon">
-                <Icon type="setting" />
-            </span>
-        ),
+        icon: <Icons type="scm-setting" className="menu-icon" />,
         children: [
+            {
+                path: '/setting/goodsAttr',
+                name: '商品属性',
+            },
             {
                 path: '/setting/store',
                 name: '店铺关联',
@@ -105,6 +91,10 @@ export default [
             {
                 path: '/setting/address',
                 name: '中转仓地址设置',
+            },
+            {
+                path: '/setting/info',
+                name: '重要报关信息映射',
             },
         ],
     },

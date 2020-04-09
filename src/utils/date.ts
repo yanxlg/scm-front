@@ -25,28 +25,12 @@ function padLeftZero(str: string) {
     return ('00' + str).substr(str.length);
 }
 
-export function transStartDate(moment?: Moment) {
-    // 日期转换成unix
-    return moment
-        ? moment
-              .clone()
-              .hour(0)
-              .minute(0)
-              .second(0)
-              .unix()
-        : moment;
+export function convertStartDate(unix: number) {
+    return !unix ? undefined : moment.unix(unix);
 }
 
-export function transEndDate(moment?: Moment) {
-    return moment
-        ? moment
-              .clone()
-              .add(1, 'd')
-              .hour(0)
-              .minute(0)
-              .second(0)
-              .unix()
-        : moment;
+export function convertEndDate(unix: number) {
+    return !unix ? undefined : moment.unix(unix).add(-1, 'd');
 }
 
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';

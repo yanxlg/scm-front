@@ -1,5 +1,9 @@
 import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
+import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
+import { IGoodsList, ICatagoryItem } from '@/interface/ILocalGoods';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { ICountryItem } from '@/interface/ISetting';
 
 export declare interface IFilterParams {
     page?: number;
@@ -7,19 +11,21 @@ export declare interface IFilterParams {
     task_number?: string[]; // 任务 id
     store_id?: string[]; // 店铺 ID
     commodity_id?: number[]; // Commodity_ID
-    inventory_status?: number | undefined; // 库存
-    version_status?: number | undefined; // 版本更新
-    first_catagory?: number | undefined; // 一级类目
-    second_catagory?: number | undefined; // 二级类目
-    third_catagory?: number | undefined; // 三级类目
-    min_sale?: number | undefined; // 销量最小
-    max_sale?: number | undefined; // 销量最大值
-    min_sku?: number | undefined; // sku数量最小值
-    max_sku?: number | undefined; // sku最大值
-    min_price?: number | undefined; // 价格范围最小值
-    max_price?: number | undefined; // 价格范围最大值
-    min_comment?: number | undefined; // 评论数量最小值
-    product_status?: string | undefined; // 版本状态
+    inventory_status?: number; // 库存
+    version_status?: number; // 版本更新
+    first_catagory?: number; // 一级类目
+    second_catagory?: number; // 二级类目
+    third_catagory?: number; // 三级类目
+    min_sale?: number; // 销量最小
+    max_sale?: number; // 销量最大值
+    min_sku?: number; // sku数量最小值
+    max_sku?: number; // sku最大值
+    min_price?: number; // 价格范围最小值
+    max_price?: number; // 价格范围最大值
+    min_comment?: number; // 评论数量最小值
+    product_status?: string; // 版本状态
+    // product_sn?: string;
+    merchants_id?: string;
 }
 
 declare interface IImgEditData {
@@ -29,6 +35,7 @@ declare interface IImgEditData {
 
 declare interface IOnsaleData {
     scm_goods_id: string[];
+    merchants_id?: string;
 }
 
 declare interface IGoodsDeleteData {
@@ -66,14 +73,17 @@ export declare interface IGoodsEditData {
     imgs: IGoodsEditImgItem[];
 }
 
-declare interface ISkuParams {
+export declare interface ISkuParams {
     page: number;
-    page_count: number;
-    product_id: string;
+    page_count?: number;
+    product_id?: string;
+    variantids?: string;
 }
 
+// 兼容SearchForm数据结构 { name: '', value: '' }
+
 export async function getGoodsList(params: IFilterParams) {
-    return request.post(LocalApiPath.getGoodsList, {
+    return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
         // requestType: 'form',
         data: params,
     });
@@ -126,8 +136,8 @@ export async function postGoodsOnsale(data: IOnsaleData) {
 }
 
 // 查询商品一键上架
-export async function postAllGoodsOnsale(data: IFilterParams) {
-    return request.post(LocalApiPath.postAllGoodsOnsale, {
+export async function getAllGoodsOnsale(data: IFilterParams) {
+    return request.post(LocalApiPath.getAllGoodsOnsale, {
         data,
     });
 }
@@ -155,9 +165,25 @@ export async function getGoodsSales(params: IProductId) {
     });
 }
 
+function convertCategory(data: ICatagoryItem[]): IOptionItem[] {
+    return data.map(({ name, id, children }) => {
+        return {
+            name: name as string,
+            value: id as string,
+            ...(children ? { children: convertCategory(children) } : undefined),
+        };
+    });
+}
+
 // 获取所有
 export async function getCatagoryList() {
-    return request.get(LocalApiPath.getCatagoryList);
+    return request.get(LocalApiPath.getCatagoryList).then(res => {
+        const { data } = res;
+        return {
+            list: data,
+            convertList: convertCategory(data),
+        };
+    });
 }
 
 // 获取商品版本
@@ -205,5 +231,58 @@ export async function postGoodsIgnoreVersion(data: IProductId) {
 export async function getGoodsSkuList(params: ISkuParams) {
     return request.get(`/api/v1/goods/skus/${params.product_id}`, {
         params,
+    });
+}
+
+// 首次合并商品
+export async function postGoodsMerge(data: {
+    main_commodity_id: string;
+    merge_commodity_ids: string[];
+}) {
+    return request.post(LocalApiPath.postGoodsMerge, {
+        data,
+    });
+}
+
+// 设置主商品
+export async function putGoodsMergeMain(data: { product_sn: string; main_commodity_id: string }) {
+    return request.put(LocalApiPath.putGoodsMergeMain, {
+        data,
+    });
+}
+
+// 删除关联商品
+export async function delGoodsMergeDelete(data: { product_sn: string; commodity_ids: string[] }) {
+    return request.delete(LocalApiPath.delGoodsMergeDelete, {
+        data,
+    });
+}
+
+// 查询合并商品列表
+export async function getGoodsMergeList(product_sn: string) {
+    return request.get(LocalApiPath.getGoodsMergeList.replace(':id', product_sn));
+}
+
+// 合并商品后新增关联
+export async function putGoodsMergeAdd(data: { product_sn: string; commodity_ids: string[] }) {
+    return request.put(LocalApiPath.putGoodsMergeAdd, {
+        data,
+    });
+}
+
+// 获取所有
+export async function getGoodsStatusList() {
+    return request.get(LocalApiPath.getGoodsStatusList).then((res: any) => {
+        // console.log('getGoodsStatusList', res);
+        // // const { data } = res;
+        // // return {
+        // //     list: data,
+        // //     convertList: convertCategory(data),
+        // // };
+        // return res
+        return res.data.result.map((item: any) => ({
+            name: item.msg,
+            value: item.code,
+        }));
     });
 }

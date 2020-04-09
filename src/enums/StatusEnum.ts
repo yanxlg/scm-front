@@ -1,15 +1,5 @@
 import { transStatusList } from '@/utils/transform';
 
-// 返回哪些状态可以执行上架操作
-export const checkUpperShelf = function(status: number) {
-    return status === 1; // 待上架
-};
-
-//返回哪些状态可执行下架操作
-export const checkLowerShelf = function(status: number) {
-    return status === 2; // 已上架
-};
-
 //======================= 任务范围 ======================//
 export const TaskRangeMap = {
     1: '指定URL',
@@ -20,6 +10,11 @@ export const TaskRangeMap = {
     6: '采购',
     7: '商品上架',
     8: '商品下架',
+    9: '采集上架',
+    21: '全站',
+    23: '全站',
+    22: '指定店铺',
+    24: '指定店铺',
     // 11 :'',
 };
 
@@ -33,19 +28,42 @@ export enum TaskRangeEnum {
     Store,
     AllOnShelf,
     SalesOnShelves,
+    GatherGrounding = 9,
+    FullStack1 = 21,
+    FullStack2 = 23,
+    Store1 = 22,
+    Store2 = 24,
 }
+
+export const isGatherTask = (sub_cat_id: number) => {
+    return (
+        sub_cat_id === TaskRangeEnum.FullStack ||
+        sub_cat_id === TaskRangeEnum.Store ||
+        sub_cat_id === TaskRangeEnum.FullStack1 ||
+        sub_cat_id === TaskRangeEnum.FullStack2 ||
+        sub_cat_id === TaskRangeEnum.Store1 ||
+        sub_cat_id === TaskRangeEnum.Store2 ||
+        sub_cat_id === TaskRangeEnum.GatherGrounding
+    );
+};
+
+export const isUrlTask = (sub_cat_id: number) => {
+    return sub_cat_id === TaskRangeEnum.URL;
+};
+
+export const isGoodsUpdateTask = (sub_cat_id: number) => {
+    return sub_cat_id === TaskRangeEnum.AllOnShelf || sub_cat_id === TaskRangeEnum.SalesOnShelves;
+};
 
 //======================= 任务状态 ======================//
 
 export const TaskStatusMap = {
-    0: '未执行',
-    1: '执行中',
-    2: '已发送',
+    1: '待执行',
+    2: '执行中',
     3: '执行失败',
-    // 4: '已取消',
-    5: '已完成',
+    4: '已取消',
+    5: '执行成功',
     6: '已终止',
-    7: '部分失败',
 };
 
 export type TaskStatusCode = keyof typeof TaskStatusMap;
@@ -53,13 +71,12 @@ export type TaskStatusCode = keyof typeof TaskStatusMap;
 export const TaskStatusList = transStatusList(TaskStatusMap);
 
 export enum TaskStatusEnum {
-    UnExecuted, // 未执行
+    ToBeExecuted = 1, // 待执行
     Executing, // 执行中
-    Executed, // 已发送
     Failed, // 执行失败
-    Finished = 5,
-    Terminated = 6,
-    PartFailed,
+    Canceled,
+    Success,
+    Terminated,
 }
 
 //======================= 任务类型 ======================//
@@ -68,6 +85,7 @@ export const TaskTypeMap = {
     1: '上架任务',
     2: '更新任务',
     3: '采购任务',
+    4: '采集上架任务',
 };
 
 export type TaskTypeCode = keyof typeof TaskTypeMap;
@@ -79,6 +97,7 @@ export enum TaskTypeEnum {
     Grounding = 1,
     Update = 2,
     Purchase = 3,
+    GatherGrounding,
 }
 
 //======================= Hot 任务范围 ======================//

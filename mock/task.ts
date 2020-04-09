@@ -2,6 +2,14 @@ import { Request, Response } from 'express';
 
 import Mock, { Random } from 'mockjs';
 
+const sleep = async (second: number) => {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, second * 1000);
+    });
+};
+
 const list = Mock.mock({
     'data|100-500': [
         {

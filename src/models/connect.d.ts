@@ -1,7 +1,7 @@
 import { AnyAction, Dispatch } from 'redux';
 import { MenuDataItem } from '@ant-design/pro-layout';
-import { RouterTypes } from 'umi';
 import { GlobalModelState } from './global';
+import { RouterTypes } from '@ant-design/pro-layout/es/typings';
 
 export { GlobalModelState };
 
@@ -16,6 +16,6 @@ export interface Route extends MenuDataItem {
 /**
  * @type T: Params matched in dynamic routing
  */
-export interface ConnectProps<T = {}> extends Partial<RouterTypes<Route, T>> {
+export interface ConnectProps<T = {}> extends Partial<RouterTypes<T>> {
     dispatch?: Dispatch<AnyAction>;
 }

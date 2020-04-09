@@ -4,7 +4,7 @@ import { Button, Card, Divider, Input, Form } from 'antd';
 import '@/styles/setting.less';
 import '@/styles/form.less';
 import { FormInstance } from 'antd/es/form';
-import IntegerInput from '@/components/IntegerInput';
+import { IntegerInput } from 'react-components';
 
 declare interface IStore {
     name?: string;

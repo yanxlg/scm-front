@@ -1,0 +1,74 @@
+@import '~antd/es/style/themes/default';
+
+.task-modal {
+    min-width: 80% !important;
+    max-width: 90%;
+}
+
+.task-detail-card {
+    min-height: 220px;
+}
+
+@iconSpacing: 5px;
+
+.wait-icon {
+    color: @primary-color;
+    margin-right: @iconSpacing;
+}
+
+.warn-icon {
+    color: @info-color;
+    margin-right: @iconSpacing;
+}
+
+.progress-icon {
+    margin-right: @iconSpacing;
+}
+
+.success-icon {
+    color: @success-color;
+    margin-right: @iconSpacing;
+}
+
+.error-icon {
+    color: @error-color;
+    margin-right: @iconSpacing;
+}
+
+.progress-text {
+    color: @primary-color;
+
+    :global .ant-statistic-content {
+        color: @primary-color !important;
+    }
+}
+
+.success-text {
+    color: @success-color;
+
+    :global .ant-statistic-content {
+        color: @success-color !important;
+    }
+}
+
+.error-text {
+    color: @error-color;
+
+    :global .ant-statistic-content {
+        color: @error-color !important;
+    }
+}
+
+.failure-suffix-icon {
+    margin-left: @iconSpacing;
+    color: @error-color;
+}
+
+.task-detail-content {
+    min-height: 300px;
+}
+
+.task-ids-select {
+    max-width: calc(~'100% - 200px');
+    margin-right: 10px;
+}
