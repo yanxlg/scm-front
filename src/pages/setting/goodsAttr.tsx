@@ -75,8 +75,18 @@ const GoodsAttr: React.FC = props => {
             setTagList(list);
 
             return deleteTag(name).then(() => {
-                list.splice(index, 1);
-                setTagList([...list]);
+                setTagList(
+                    list.map((item, i) => {
+                        if (i === index) {
+                            return {
+                                ...item,
+                                _loading: false,
+                                isActive: 'DISABLED',
+                            };
+                        }
+                        return item;
+                    }),
+                );
                 message.success('删除成功！');
             });
         },
