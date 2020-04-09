@@ -47,6 +47,20 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'productId',
+            title: '中台商品ID',
+            dataIndex: 'productId',
+            align: 'center',
+            width: 120,
+        },
+        {
             key: 'orderGoodsStatus',
             title: '中台订单状态',
             dataIndex: 'orderGoodsStatus',
@@ -76,6 +90,13 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 return getStatusDesc(purchaseShippingOptionList, value);
             },
         },
+        // {
+        //     key: 'purchaseWaybillNo',
+        //     title: '采购运单号',
+        //     dataIndex: 'purchaseWaybillNo',
+        //     align: 'center',
+        //     width: 120,
+        // },
         {
             key: 'purchasePlanId',
             title: '计划子项ID',

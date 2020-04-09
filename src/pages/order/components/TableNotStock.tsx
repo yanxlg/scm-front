@@ -146,6 +146,13 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             render: (value: string) => utcToLocal(value),
         },
         {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
+        },
+        {
             key: 'channelOrderSn',
             title: '渠道订单ID',
             dataIndex: 'channelOrderSn',
