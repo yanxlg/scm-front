@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, Spin } from 'antd';
 import { history } from 'umi';
-import '@/styles/form.less';
 import { queryChannelChangedProperties } from '@/services/channel';
 import { IChannelChangedProperty } from '@/interface/IChannel';
 import { EmptyObject } from '@/config/global';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 const DataStatusUpdate: React.FC = () => {
     const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ const DataStatusUpdate: React.FC = () => {
 
     return useMemo(() => {
         return (
-            <Card title="数据/状态更新" className="form-item">
+            <Card title="数据/状态更新" className={formStyles.formNextCard}>
                 <Spin spinning={loading} tip="Loading...">
                     <div className="product-tags cursor-pointer" onClick={goTo}>
                         {list.map((item, index) => {

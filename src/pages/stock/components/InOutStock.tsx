@@ -3,7 +3,6 @@ import { FitTable } from 'react-components';
 import { goButton, showTotal } from 'react-components/es/FitTable';
 import { message, Pagination } from 'antd';
 import '@/styles/index.less';
-import '@/styles/form.less';
 import '@/styles/stock.less';
 import { ColumnProps } from 'antd/es/table';
 import { convertEndDate, convertStartDate } from '@/utils/date';
@@ -21,6 +20,8 @@ import { RequestPagination } from '@/interface/IGlobal';
 import { SearchOutlined } from '@ant-design/icons/lib';
 import { Icons } from '@/components/Icon';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
@@ -123,7 +124,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     type: 'dateRanger',
                     label: <span>入库&emsp;时间</span>,
                     name: ['time_start', 'time_end'],
-                    formItemClassName: 'form-item',
                     className: 'stock-form-picker',
                     formatter: ['start_date', 'end_date'],
                 },
@@ -131,22 +131,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     type: 'input',
                     label: '入库订单号',
                     name: 'inbound_order_sn',
-                    formItemClassName: 'form-item',
-                    className: 'input-default',
                 },
                 {
                     type: 'input',
                     label: '采购订单号',
                     name: 'purchase_order_sn',
-                    formItemClassName: 'form-item',
-                    className: 'input-default',
                 },
                 {
                     type: 'input',
                     label: '中台商品ID',
                     name: 'commodity_id',
-                    formItemClassName: 'form-item',
-                    className: 'input-default',
                 },
             ];
         }
@@ -155,7 +149,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 type: 'dateRanger',
                 label: <span>出库&emsp;时间</span>,
                 name: ['time_start', 'time_end'],
-                formItemClassName: 'form-item',
                 className: 'stock-form-picker',
                 formatter: ['start_date', 'end_date'],
             },
@@ -163,22 +156,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 type: 'input',
                 label: '出库订单号',
                 name: 'outbound_order_sn',
-                formItemClassName: 'form-item',
-                className: 'input-default',
             },
             {
                 type: 'input',
                 label: '尾程运单号',
                 name: 'last_waybill_no',
-                formItemClassName: 'form-item',
-                className: 'input-default',
             },
             {
                 type: 'input',
                 label: '中台商品ID',
                 name: 'commodity_id',
-                formItemClassName: 'form-item',
-                className: 'input-default',
             },
         ];
     }, []);
@@ -249,24 +236,25 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                         ref={formRef}
                         fieldList={fieldList}
                         initialValues={defaultInitialValues}
+                        enableCollapse={false}
                     />
                     <LoadingButton
                         onClick={onSearch}
                         type="primary"
-                        className="btn-group vertical-middle form-item"
+                        className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
                         icon={<SearchOutlined />}
                     >
                         查询
                     </LoadingButton>
                     <LoadingButton
                         onClick={onExport}
-                        className="btn-group vertical-middle form-item"
+                        className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
                         icon={<Icons type="scm-export" />}
                     >
                         导出Excel表
                     </LoadingButton>
                     <Pagination
-                        className="float-right form-item"
+                        className="float-right"
                         pageSize={pageSize}
                         current={pageNumber}
                         total={total}
@@ -282,7 +270,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     />
                 </div>
                 <FitTable<IStockInItem | IStockOutItem>
-                    className="form-item"
+                    className={formStyles.formNextCard}
                     rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
                     bordered={true}
                     columns={columns}
