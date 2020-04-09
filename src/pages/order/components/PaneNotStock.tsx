@@ -16,6 +16,7 @@ import {
     orderStatusOptionList,
     purchaseOrderOptionList,
     pageSizeOptions,
+    channelOptionList,
 } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
 
@@ -36,6 +37,7 @@ export declare interface IOrderItem {
     confirmTime: string; // 订单确认时间
     channelOrderSn: string; // 渠道订单ID
     platformSendOrderTime: string; // 采购生成时间
+    channelSource: string; //销售渠道
 }
 
 const fieldList: FormField[] = [
@@ -44,6 +46,7 @@ const fieldList: FormField[] = [
         name: 'order_goods_id',
         label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
         className: 'order-input',
+        formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
         // numberStrArr
         // formatter: 'strArr',
@@ -53,14 +56,42 @@ const fieldList: FormField[] = [
         name: 'purchase_platform_order_id_list',
         label: '采购平台订单ID',
         className: 'order-input',
-        placeholder: '请输入中台商品ID',
+        formItemClassName: 'form-item',
+        placeholder: '请输入采购平台订单ID',
         formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'product_id',
+        label: '中台商品ID',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台商品ID',
+        // formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'purchase_waybill_no',
+        label: '采购运单号',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入采购运单号',
+        // formatter: 'strArr',
+    },
+    {
+        type: 'select',
+        name: 'channel_source',
+        label: '销售渠道',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...channelOptionList],
     },
     {
         type: 'select',
         name: 'order_goods_status',
         label: '中台订单状态',
         className: 'order-input',
+        formItemClassName: 'form-item',
         optionList: [defaultOptionItem, ...orderStatusOptionList],
     },
     {
@@ -68,6 +99,7 @@ const fieldList: FormField[] = [
         name: 'purchase_order_status',
         label: '采购订单状态',
         className: 'order-input',
+        formItemClassName: 'form-item',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
     },
     {
@@ -75,6 +107,7 @@ const fieldList: FormField[] = [
         name: ['platform_order_time_start', 'platform_order_time_end'],
         label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
         className: 'order-date-picker',
+        formItemClassName: 'form-item',
         placeholder: '请选择订单时间',
         formatter: ['start_date', 'end_date'],
     },
@@ -99,6 +132,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
     private initialValues = {
         order_goods_status: 100,
         purchase_order_status: 100,
+        channel_source: 100,
     };
 
     constructor(props: IProps) {
@@ -173,7 +207,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 orderGoods,
                 orderInfo,
             } = current;
-            const { confirmTime, channelOrderSn } = orderInfo;
+            const { confirmTime, channelOrderSn, channelSource } = orderInfo;
             const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
 
             return {
@@ -193,6 +227,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
 
                 confirmTime,
                 channelOrderSn,
+                channelSource,
 
                 orderGoodsStatus,
                 orderCreateTime,

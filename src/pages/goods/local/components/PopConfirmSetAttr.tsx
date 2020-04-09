@@ -72,7 +72,7 @@ const SetAttr: React.FC<IProps> = ({ tags, commodityId, productId, setProductTag
             .then(res => {
                 // console.log('getEnabledTagsList', res);
                 const { tags } = res.data;
-                setTagList(tags);
+                setTagList(tags || []);
             })
             .finally(() => {
                 setLoading(false);
