@@ -58,7 +58,7 @@ data:
             root $prjroot/;
             add_header Content-Type text/plain;
         }
-        location ~.*\.(js|css|html|png|jpg)$
+        location ~.*\.(js|css|png|jpg)$
         {
             expires 7d;
             try_files $uri $uri/ /index.html;
