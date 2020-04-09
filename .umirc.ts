@@ -23,7 +23,7 @@ const config = defineConfig({
     title: '供应链管理中台',
     ignoreMomentLocale: true, // 简化moment.js locale
     locale: {
-        antd: false,
+        antd: true, // 需要设置为true，否则antd会使用默认语言en-US
         title: false,
         default: 'zh-CN',
         baseNavigator: false,
