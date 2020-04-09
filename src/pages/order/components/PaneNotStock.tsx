@@ -16,6 +16,7 @@ import {
     orderStatusOptionList,
     purchaseOrderOptionList,
     pageSizeOptions,
+    channelOptionList,
 } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
 
@@ -36,6 +37,7 @@ export declare interface IOrderItem {
     confirmTime: string; // 订单确认时间
     channelOrderSn: string; // 渠道订单ID
     platformSendOrderTime: string; // 采购生成时间
+    channelSource: string; //销售渠道
 }
 
 const fieldList: FormField[] = [
@@ -55,8 +57,34 @@ const fieldList: FormField[] = [
         label: '采购平台订单ID',
         className: 'order-input',
         formItemClassName: 'form-item',
-        placeholder: '请输入中台商品ID',
+        placeholder: '请输入采购平台订单ID',
         formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'product_id',
+        label: '中台商品ID',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台商品ID',
+        // formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'purchase_waybill_no',
+        label: '采购运单号',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入采购运单号',
+        // formatter: 'strArr',
+    },
+    {
+        type: 'select',
+        name: 'channel_source',
+        label: '销售渠道',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...channelOptionList],
     },
     {
         type: 'select',
@@ -104,6 +132,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
     private initialValues = {
         order_goods_status: 100,
         purchase_order_status: 100,
+        channel_source: 100,
     };
 
     constructor(props: IProps) {
@@ -178,7 +207,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                 orderGoods,
                 orderInfo,
             } = current;
-            const { confirmTime, channelOrderSn } = orderInfo;
+            const { confirmTime, channelOrderSn, channelSource } = orderInfo;
             const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
 
             return {
@@ -198,6 +227,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
 
                 confirmTime,
                 channelOrderSn,
+                channelSource,
 
                 orderGoodsStatus,
                 orderCreateTime,
