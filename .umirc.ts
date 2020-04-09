@@ -17,7 +17,7 @@ const config = defineConfig({
         hmr: true,
     },
     title: '供应链管理中台',
-    // dll: !dev,
+    ignoreMomentLocale: true, // 简化moment.js locale
     locale: {
         antd: true,
         title: false,
@@ -27,7 +27,25 @@ const config = defineConfig({
     dynamicImport: {
         loading: '@/components/PageLoading/index',
     },
-    headScripts: dev ? ['http://localhost:8097'] : undefined,
+    externals: dev
+        ? {}
+        : {
+              react: 'window.React',
+              'react-dom': 'window.ReactDOM',
+          },
+    scripts: dev
+        ? []
+        : [
+              {
+                  src: 'https://unpkg.com/react@16.13.1/umd/react.production.min.js',
+                  crossOrigin: '',
+              },
+              {
+                  src: 'https://unpkg.com/react-dom@16.13.1/umd/react-dom.production.min.js',
+                  crossOrigin: '',
+              },
+          ], // for cdn
+    headScripts: dev ? ['http://localhost:8097'] : undefined, // for react-tools
     extraBabelPlugins: [
         [
             'babel-plugin-import',
