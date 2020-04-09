@@ -18,6 +18,7 @@ import {
     orderStatusOptionList,
     purchaseOrderOptionList,
     pageSizeOptions,
+    channelOptionList,
 } from '@/enums/OrderEnum';
 
 const fieldList: FormField[] = [
@@ -37,8 +38,34 @@ const fieldList: FormField[] = [
         label: '采购平台订单ID',
         className: 'order-input',
         formItemClassName: 'form-item',
-        placeholder: '请输入中台商品ID',
+        placeholder: '请输入采购平台订单ID',
         formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'product_id',
+        label: '中台商品ID',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        placeholder: '请输入中台商品ID',
+        // formatter: 'strArr',
+    },
+    // {
+    //     type: 'input',
+    //     name: 'purchase_waybill_no',
+    //     label: '采购运单号',
+    //     className: 'order-input',
+    //     formItemClassName: 'form-item',
+    //     placeholder: '请输入采购运单号',
+    //     formatter: 'strArr',
+    // },
+    {
+        type: 'select',
+        name: 'channel_source',
+        label: '销售渠道',
+        className: 'order-input',
+        formItemClassName: 'form-item',
+        optionList: [defaultOptionItem, ...channelOptionList],
     },
     {
         type: 'select',
@@ -85,6 +112,9 @@ export declare interface IWaitShipItem {
     purchasePlanId: string;
     orderGoodsId: string;
     orderCreateTime: string;
+    productId: string;
+    // purchasewaybillNo: string;
+    channelSource: string;
 }
 
 declare interface IState {
@@ -103,6 +133,7 @@ declare interface IProps {
 class PaneWaitShip extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<JsonFormRef> = React.createRef();
     private initialValues = {
+        channel_source: 100,
         order_goods_status: 100,
         purchase_order_status: 100,
     };
@@ -170,9 +201,13 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                 purchaseOrderShippingStatus,
                 purchasePlanId,
                 orderGoodsId,
+                productId,
+                // purchasewaybillNo,
                 orderGoods,
+                orderInfo,
             } = current;
             const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
+            const { channelSource } = orderInfo;
             return {
                 platformOrderTime,
                 purchasePlatformOrderId,
@@ -183,6 +218,9 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                 purchasePlanId,
                 orderGoodsId,
                 orderCreateTime,
+                productId,
+                // purchasewaybillNo,
+                channelSource,
             } as IWaitShipItem;
         });
     };
