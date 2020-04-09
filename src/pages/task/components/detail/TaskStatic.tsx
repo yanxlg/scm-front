@@ -153,7 +153,7 @@ const TaskStatic: ForwardRefRenderFunction<TaskStaticRef, TaskStaticProps> = (
                         column={{
                             xl: 6,
                         }}
-                        className={[styles.textCenter, formStyle.formSItem].join(' ')}
+                        className={[styles.textCenter, formStyle.formItem].join(' ')}
                     >
                         <Descriptions.Item label="列表商品总量">
                             <Statistic value={total_goods} className={tableStyle.staticNumber} />
@@ -239,7 +239,7 @@ const TaskStatic: ForwardRefRenderFunction<TaskStaticRef, TaskStaticProps> = (
                         column={{
                             xl: 6,
                         }}
-                        className={[styles.textCenter, formStyle.formSItem].join(' ')}
+                        className={[styles.textCenter, formStyle.formItem].join(' ')}
                     >
                         <Descriptions.Item label="列表商品总量">
                             <Statistic value={total_goods} className={tableStyle.staticNumber} />

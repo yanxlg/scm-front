@@ -36,7 +36,6 @@ import {
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 import { TableProps } from 'antd/es/table';
-import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -315,8 +314,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'input',
                     name: 'task_id',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: (
@@ -326,16 +323,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    className: 'input-default input-handler',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                 },
                 {
                     label: '任务状态',
                     type: 'select',
                     name: 'task_status',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -355,15 +348,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '任务名称',
                     type: 'input',
                     name: 'task_name',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: '任务渠道',
                     type: 'select',
                     name: 'channel',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -383,8 +372,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '任务类型',
                     type: 'select',
                     name: 'task_type',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -404,8 +391,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '开始时间',
                     type: 'datePicker',
                     name: 'task_begin_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     formatter: 'start_date',
                     dateEndWith: ['task_end_time'],
                 },
@@ -413,8 +398,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '结束时间',
                     type: 'datePicker',
                     name: 'task_end_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     formatter: 'end_date',
                     dateBeginWith: ['task_begin_time'],
                 },
@@ -429,8 +412,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'input',
                     name: 'task_id',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: (
@@ -440,23 +421,17 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    className: 'input-default input-handler',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                 },
                 {
                     label: '任务名称',
                     type: 'input',
                     name: 'task_name',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: '任务渠道',
                     type: 'select',
                     name: 'channel',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -476,8 +451,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '任务类型',
                     type: 'select',
                     name: 'task_type',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -497,8 +470,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '开始时间',
                     type: 'datePicker',
                     name: 'task_begin_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     dateEndWith: ['task_end_time'],
                     formatter: 'start_date',
                 },
@@ -506,8 +477,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '结束时间',
                     type: 'datePicker',
                     name: 'task_end_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     dateBeginWith: ['task_begin_time'],
                     formatter: 'end_date',
                 },
@@ -600,7 +569,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     const table = useMemo(() => {
         return (
             <ProTable<ITaskListItem>
-                className={formStyles.formItem}
                 headerTitle="查询表格"
                 rowKey="task_id"
                 rowSelection={rowSelection}
@@ -622,12 +590,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     const search = useMemo(() => {
         return (
             <JsonForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
-                <LoadingButton
-                    className="form-item"
-                    onClick={onSearch}
-                    type="primary"
-                    icon={<SearchOutlined />}
-                >
+                <LoadingButton onClick={onSearch} type="primary" icon={<SearchOutlined />}>
                     查询
                 </LoadingButton>
             </JsonForm>

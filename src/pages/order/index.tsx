@@ -12,7 +12,6 @@ import Container from '@/components/Container';
 import { getAllTabCount } from '@/services/order-manage';
 
 import '@/styles/order.less';
-import '@/styles/form.less';
 
 const { TabPane } = Tabs;
 

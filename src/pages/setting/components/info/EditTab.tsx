@@ -166,7 +166,6 @@ const EditTab: React.FC = () => {
                 },
                 className: '',
                 optionList: () => countryRef.current!,
-                formItemClassName: formStyles.formItem,
                 onChange: (name, form) => {
                     const country_code = form.getFieldValue('country_code');
                     const { one_cat_id, two_cat_id, three_cat_id } = form.getFieldsValue([
@@ -189,7 +188,6 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'one_cat_id',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 rules: [
                     {
                         required: true,
@@ -204,7 +202,6 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'two_cat_id',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 disabled: true,
                 rules: [
                     {
@@ -219,10 +216,8 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'three_cat_id',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 showSearch: true,
                 optionFilterProp: 'children',
-                autoClearSearchValue: true,
                 rules: [
                     {
                         required: true,
@@ -254,21 +249,18 @@ const EditTab: React.FC = () => {
                 name: 'weight',
                 className: '',
                 addonAfter: 'g',
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '海关代码',
                 type: 'input',
                 name: 'customs_code',
                 className: '',
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '预计长度',
                 type: 'number',
                 name: 'length',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 addonAfter: 'cm',
                 placeholder: '填写包裹预计长度',
             },
@@ -277,7 +269,6 @@ const EditTab: React.FC = () => {
                 type: 'number',
                 name: 'width',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 addonAfter: 'cm',
                 placeholder: '填写包裹预计宽度',
             },
@@ -286,7 +277,6 @@ const EditTab: React.FC = () => {
                 type: 'number',
                 name: 'height',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 addonAfter: 'cm',
                 placeholder: '填写包裹预计高度',
             },
@@ -294,7 +284,6 @@ const EditTab: React.FC = () => {
                 label: '是否含电',
                 type: 'radioGroup',
                 name: 'is_electricity',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -310,7 +299,6 @@ const EditTab: React.FC = () => {
                 label: '是否金属',
                 type: 'radioGroup',
                 name: 'is_metal',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -336,7 +324,6 @@ const EditTab: React.FC = () => {
                         value: false,
                     },
                 ],
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '是否可燃',
@@ -352,13 +339,11 @@ const EditTab: React.FC = () => {
                         value: false,
                     },
                 ],
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '是否粉末',
                 type: 'radioGroup',
                 name: 'is_powder',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -374,7 +359,6 @@ const EditTab: React.FC = () => {
                 label: '是否纯电',
                 type: 'radioGroup',
                 name: 'is_battery',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -390,7 +374,6 @@ const EditTab: React.FC = () => {
                 label: '是否香水',
                 type: 'radioGroup',
                 name: 'is_perfume',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -406,7 +389,6 @@ const EditTab: React.FC = () => {
                 label: '是否食品',
                 type: 'radioGroup',
                 name: 'is_food',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -422,7 +404,6 @@ const EditTab: React.FC = () => {
                 label: '是否膏状',
                 type: 'radioGroup',
                 name: 'is_paste',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',

@@ -1,8 +1,9 @@
 import React from 'react';
 import DraftSearch from '@/pages/task/components/DraftSearchForm';
 import '@/styles/index.less';
-import { Button, Pagination, Table } from 'antd';
+import { Button, Form, Pagination, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface IDataItem {
     taskId: string;
@@ -124,7 +125,7 @@ class Drafts extends React.PureComponent<{}, IDraftsState> {
         return (
             <div>
                 <DraftSearch />
-                <div className="block form-item">
+                <div className={formStyles.formItem}>
                     <Button loading={searchLoading} onClick={this.onSearch} type="primary">
                         查询
                     </Button>
@@ -148,7 +149,7 @@ class Drafts extends React.PureComponent<{}, IDraftsState> {
                     />
                 </div>
                 <Table
-                    className="form-item"
+                    className={formStyles.formNextCard}
                     rowKey="order_goods_sn"
                     bordered={true}
                     rowSelection={rowSelection}

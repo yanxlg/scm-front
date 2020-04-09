@@ -1,8 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
-import { IntegerInput } from 'react-components';
+import { RichInput } from 'react-components';
 import { isNull } from 'react-components/es/JsonForm';
 import { FormInstance } from 'antd/es/form';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 declare interface SalesRangeProps {
     form: FormInstance;
@@ -34,14 +36,29 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
 
     return useMemo(() => {
         return (
-            <div className="flex-inline flex-align form-item">
+            <div
+                className={classNames(
+                    formStyles.flexInline,
+                    formStyles.flexAlign,
+                    formStyles.formItem,
+                )}
+            >
                 <Form.Item
                     label="销量区间"
                     required={true}
-                    className="form-item-inline flex-inline form-required-hide form-item-horizon"
+                    className={classNames(
+                        formStyles.flexInline,
+                        formStyles.formRequiredHide,
+                        formStyles.formHorizon,
+                        formStyles.formItemClean,
+                    )}
                 >
                     <Form.Item
-                        className="form-item-inline inline-block vertical-middle"
+                        className={classNames(
+                            formStyles.formItemClean,
+                            formStyles.inlineBlock,
+                            formStyles.verticalMiddle,
+                        )}
                         validateTrigger={'onBlur'}
                         name="sales_volume_min"
                         rules={[
@@ -50,11 +67,15 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
                             },
                         ]}
                     >
-                        <IntegerInput min={0} className="input-small input-handler" />
+                        <RichInput richType="integer" className="input-small" />
                     </Form.Item>
-                    <span className="config-colon vertical-middle">-</span>
+                    <span className={classNames('config-colon', formStyles.verticalMiddle)}>-</span>
                     <Form.Item
-                        className="form-item-inline inline-block vertical-middle"
+                        className={classNames(
+                            formStyles.formItemClean,
+                            formStyles.inlineBlock,
+                            formStyles.verticalMiddle,
+                        )}
                         validateTrigger={'onBlur'}
                         name="sales_volume_max"
                         rules={[
@@ -63,7 +84,7 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
                             },
                         ]}
                     >
-                        <IntegerInput min={0} className="input-small input-handler" />
+                        <RichInput richType="integer" className="input-small" />
                     </Form.Item>
                 </Form.Item>
             </div>
