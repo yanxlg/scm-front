@@ -23,8 +23,7 @@
         "antd": "^4.0.3",
         "@ant-design/pro-layout": "^5.0.5",
         "@ant-design/icons":"^4.0.2",
-        "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.4-alpha.21",
-        "lodash-es": "^4.17.15"
+        "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.4-alpha.22"
     },
     "devDependencies": {
         "@types/react-lazyload": "^2.6.0",
