@@ -39,6 +39,7 @@ declare interface IAddImgItem extends IGoodsEditImgItem {
 
 declare interface ImgEditDialogState {
     loading: boolean;
+    confirmLoading: boolean;
     addImgList: IAddImgItem[];
 }
 
@@ -49,6 +50,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         super(props);
         this.state = {
             loading: false,
+            confirmLoading: false,
             addImgList: [],
         };
     }
@@ -63,6 +65,9 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             if (data && !data.description) {
                 return message.error('描述不能为空');
             }
+            this.setState({
+                confirmLoading: true
+            });
             putGoodsEdit(data as IGoodsEditData).then(res => {
                 // console.log('putGoodsEdit', res);
                 toggleEditGoodsDialog(false);
@@ -70,6 +75,10 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 onSearch({}, true);
                 this.setState({
                     addImgList: [],
+                });
+            }).finally(() => {
+                this.setState({
+                    confirmLoading: false
                 });
             });
         } else {
@@ -323,7 +332,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             changeGoodsCatagory,
             resetGoodsData,
         } = this.props;
-        const { loading } = this.state;
+        const { loading, confirmLoading } = this.state;
         if (!currentEditGoods) {
             return null;
         }
@@ -355,6 +364,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 okText="保存"
                 visible={visible}
                 width={950}
+                confirmLoading={confirmLoading}
                 onOk={this.handleOk}
                 onCancel={this.handleCancel}
                 maskClosable={false}

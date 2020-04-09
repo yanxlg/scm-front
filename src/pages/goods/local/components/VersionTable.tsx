@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData, IPageData } from '../version';
+import { IGoodsVersionRowItem, IOnsaleItem, ICatagoryData, IPageData } from '../_version';
 import ProTable from '@/components/ProTable';
 import { PaginationConfig } from 'antd/es/pagination';
 import VersionImgDialog from './VersionImgDialog';

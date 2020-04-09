@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
-import { IGoodsVersionRowItem } from '../version';
+import { IGoodsVersionRowItem } from '../_version';
 
 declare interface IDataSource {
     product_id: string;

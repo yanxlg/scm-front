@@ -46,7 +46,7 @@ export default [
                 name: '本地产品库',
             },
             {
-                path: '/goods/local/version',
+                path: '/goods/local/:id',
                 name: '商品版本',
                 hideInMenu: true,
             },

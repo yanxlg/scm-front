@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
 import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
-import { IGoodsList, ICatagoryItem } from '@/interface/ILocalGoods';
+import { IGoodsList, ICatagoryItem, IGoodsVersionItem } from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ICountryItem } from '@/interface/ISetting';
 
@@ -188,7 +188,7 @@ export async function getCatagoryList() {
 
 // 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {
-    return request.get(LocalApiPath.getGoodsVersion, {
+    return request.get<IResponse<IPaginationResponse<IGoodsVersionItem>>>(LocalApiPath.getGoodsVersion, {
         params: params,
     });
 }

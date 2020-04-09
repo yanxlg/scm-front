@@ -85,3 +85,60 @@ export interface IGoodsList {
     shipping_fee_max: number;
     tags: string[];
 }
+
+
+/*** 商品版本 ***/ 
+
+export interface IOnsaleItem {
+    onsale_channel: string;
+    onsale_time: number;
+}
+
+export interface IGoodsVersionSkuItem {
+    origin_sku_id?: string;
+    sku_id?: string;
+    sku_inventory?: string;
+    sku_price?: string;
+    sku_style?: ISkuStyleItem[];
+    sku_weight?: string;
+}
+
+export interface IGoodsVersionItem {
+    comments: string;
+    description: string;
+    goods_img: string;
+    goods_status: string;
+    inventory_status: number;
+    onsale_info: IOnsaleItem[];
+    product_id: string;
+    sales_volume: string;
+    sku_image: string[];
+    sku_info: IGoodsVersionSkuItem[];
+    sku_number: number;
+    store_id: string;
+    store_name: string;
+    tags: string[];
+    first_catagory: ICatagoryItem;
+    second_catagory: ICatagoryItem;
+    third_catagory: ICatagoryItem;
+    title: string;
+    update_time: number;
+    worm_goods_id: string;
+    worm_goodsinfo_link: string;
+    worm_task_id: string;
+    _update_time?: string;
+}
+
+export type IGoodsAndSkuItem = IGoodsVersionItem & IGoodsVersionSkuItem;
+
+export interface IGoodsVersionInfo {
+    title: string;
+    product_id: string;
+    goods_img: string;
+    first_catagory: ICatagoryItem;
+    second_catagory: ICatagoryItem;
+    third_catagory: ICatagoryItem;
+    worm_goodsinfo_link: string;
+    worm_goods_id: string;
+    _update_time: string;
+}
