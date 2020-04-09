@@ -6,6 +6,7 @@ import { useDataSet } from 'react-components/es/hooks';
 import { ILogItem } from '@/interface/IChannel';
 import { queryOnOffLog } from '@/services/channel';
 import { FitTable } from 'react-components';
+import { utcToLocal } from '@/utils/date';
 
 declare interface OnOffLogModalProps {
     visible: string | false;
@@ -30,6 +31,7 @@ const OnOffLogModal: React.FC<OnOffLogModalProps> = ({ visible, onClose }) => {
                 width: '180px',
                 dataIndex: 'finish_time',
                 align: 'center',
+                render: _ => utcToLocal(_),
             },
             {
                 title: '状态',

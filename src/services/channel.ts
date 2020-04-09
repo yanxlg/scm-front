@@ -161,8 +161,8 @@ export const queryShopList = singlePromiseWrap(() => {
 });
 
 export async function queryOnOffLog(product_ids: string) {
-    return request.get<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
-        params: {
+    return request.post<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
+        data: {
             product_ids,
         },
     });

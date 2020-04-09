@@ -117,7 +117,7 @@ export default {
             },
         });
     },
-    'get /api/v1/vova_goods/sales_log': async (req: Request, res: Response) => {
+    'get /v1/vova_goods/sales_log': async (req: Request, res: Response) => {
         await sleep(3);
         res.status(200).send({
             message: '',
