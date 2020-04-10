@@ -24,7 +24,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     private allColumns: ColumnProps<IParentOrderItem>[] = [
         {
             key: 'createTime',
-            title: '订单时间',
+            title: '订单生成时间',
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
@@ -39,7 +39,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         },
         {
             key: 'orderId',
-            title: '中台订单父订单ID',
+            title: '父订单ID',
             dataIndex: 'orderId',
             align: 'center',
             width: 120,
@@ -74,7 +74,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'productId',
-            title: '中台商品ID',
+            title: 'Version ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,

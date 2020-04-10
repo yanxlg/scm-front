@@ -7,6 +7,7 @@ import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
+import { AutoEnLargeImg } from 'react-components';
 import {
     orderStatusOptionList,
     orderShippingOptionList,
@@ -35,141 +36,297 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     private allColumns: ColumnProps<IChildOrderItem>[] = [
         {
             key: 'createTime',
-            title: '订单时间',
+            title: '订单生成时间',
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
+            render: (value: string) => utcToLocal(value),
         },
-        {
-            key: 'orderGoodsId',
-            title: '中台订单子ID',
-            dataIndex: 'orderGoodsId',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'goodsDetail',
-            title: '商品详情',
-            dataIndex: 'goodsDetail',
-            align: 'center',
-            width: 120,
-            render: (value: any, row: IChildOrderItem) => {
-                return {
-                    children: (
-                        <a onClick={() => this.getOrderGoodsDetail(row.productId, row.skuId)}>
-                            查看商品详情
-                        </a>
-                    ),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        // {
-        //     key: 'channelOrderGoodsSn',
-        //     title: 'Product SN',
-        //     dataIndex: 'channelOrderGoodsSn',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell,
-        // },
-        {
-            key: 'skuId',
-            title: 'SKU ID',
-            dataIndex: 'skuId',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        // 缺失
-        // {
-        //     key: 'channel_order_status',
-        //     title: '渠道订单状态',
-        //     dataIndex: 'channel_order_status',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // 缺失
-        // {
-        //     key: 'channel_delivery_status',
-        //     title: '渠道发货状态',
-        //     dataIndex: 'channel_delivery_status',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
         {
             key: 'orderGoodsStatus',
-            title: '中台订单状态',
+            title: '订单状态',
             dataIndex: 'orderGoodsStatus',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return {
-                    children: getStatusDesc(orderStatusOptionList, value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
+            render: (value: number) => getStatusDesc(orderStatusOptionList, value),
         },
         {
-            key: 'orderGoodsShippingStatus',
-            title: '中台订单配送状态',
-            dataIndex: 'orderGoodsShippingStatus',
+            key: 'orderGoodsShippingStatusShow',
+            title: '配送状态',
+            dataIndex: 'orderGoodsShippingStatusShow',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return {
-                    children: getStatusDesc(orderShippingOptionList, value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
+            render: (value: number) => getStatusDesc(orderShippingOptionList, value),
+        },
+        // 勾选展示
+        {
+            key: 'orderId',
+            title: '父订单ID',
+            dataIndex: 'orderId',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'orderGoodsId',
+            title: '子订单ID',
+            dataIndex: 'orderGoodsId',
+            align: 'center',
+            width: 120,
         },
         {
             key: 'productId',
-            title: '中台商品ID',
+            title: 'Version ID',
             dataIndex: 'productId',
             align: 'center',
-            width: 120,
-            // render: this.mergeCell
+            width: 120
         },
+        // 勾选展示
         {
-            key: 'purchasePlanId',
-            title: '计划子项ID',
-            dataIndex: 'purchasePlanId',
+            key: 'skuId',
+            title: '中台SKU ID',
+            dataIndex: 'skuId',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
+        },
+        // 勾选展示 - 待确认
+        // {
+        //     key: '',
+        //     title: '采购渠道Goods ID',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        // 勾选展示 - 待确认
+        // {
+        //     key: '',
+        //     title: '采购渠道SKU ID',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'productImage',
+            title: 'SKU图片',
+            dataIndex: 'productImage',
+            align: 'center',
+            width: 120,
+            render: (value: string) => {
+                return <AutoEnLargeImg src={value} className="order-img-lazy"/>
+            }
+        },
+        // // 待补充
+        // {
+        //     key: '',
+        //     title: '商品名称',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'productStyle',
+            title: '商品规格',
+            dataIndex: 'productStyle',
+            align: 'center',
+            width: 160,
+            render: (value: string) => {
+                let child: any = null;
+                if (value) {
+                    try {
+                        const styleInfo = JSON.parse(value);
+                        child = (
+                            <>
+                                {
+                                    Object.keys(styleInfo).map(key => (
+                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                    ))
+                                }
+                            </>
+                        )
+                    }
+                    catch(err) {}
+                }
+                return child;
+            }
+        },
+        {
+            key: 'goodsAmount',
+            title: '销售商品单价',
+            dataIndex: 'goodsAmount',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'goodsNumber',
+            title: '销售商品数量',
+            dataIndex: 'goodsNumber',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'freight',
+            title: '销售商品运费',
+            dataIndex: 'freight',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: '_goodsTotalAmount',
+            title: '销售商品总金额',
+            dataIndex: '_goodsTotalAmount',
+            align: 'center',
+            width: 140,
+            render: (_, row: IChildOrderItem) => {
+                const { goodsAmount, goodsNumber, freight } = row;
+                const total = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                return total.toFixed(2);
+            },
+        },
+        // 勾选展示
+        {
+            key: 'currency',
+            title: '销售金额货币',
+            dataIndex: 'currency',
+            align: 'center',
+            width: 120,
         },
         {
             key: 'purchaseNumber',
-            title: '采购数量',
+            title: '采购商品数量',
             dataIndex: 'purchaseNumber',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
         },
+        // 勾选展示
         {
             key: 'purchaseAmount',
-            title: '采购单价',
+            title: '采购商品单价',
             dataIndex: 'purchaseAmount',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
+        },
+        {
+            key: '_purchaseTotalAmount',
+            title: '采购商品总金额',
+            dataIndex: '_purchaseTotalAmount',
+            align: 'center',
+            width: 140,
+            render: (_, row: IChildOrderItem) => {
+                const { purchaseNumber, purchaseAmount } = row;
+                const total = Number(purchaseNumber) * Number(purchaseAmount);
+                return total.toFixed(2);
+            },
+        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '商品属性标签',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
+        },
+        // 勾选展示
+        {
+            key: 'productShop',
+            title: '销售店铺名称',
+            dataIndex: 'productShop',
+            align: 'center',
+            width: 120,
+        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '销售渠道二级分类',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        // // 待补充
+        // {
+        //     key: '',
+        //     title: '销售渠道Goods ID',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'confirmTime',
+            title: '销售订单确认时间',
+            dataIndex: 'confirmTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value),
+        },
+        {
+            key: 'channelOrderGoodsSn',
+            title: '销售订单ID',
+            dataIndex: 'channelOrderGoodsSn',
+            align: 'center',
+            width: 120,
+        },
+        // 勾选展示
+        {
+            key: 'cancelTime',
+            title: '销售订单取消时间',
+            dataIndex: 'cancelTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value)
+        },
+        // 勾选展示
+        {
+            key: 'deliveryTime',
+            title: '销售订单出库时间',
+            dataIndex: 'deliveryTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) =>  utcToLocal(value),
+        },
+        // 勾选展示
+        {
+            key: 'collectTime',
+            title: '销售订单揽收时间',
+            dataIndex: 'collectTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value),
+        },
+        {
+            key: 'lastWaybillNo',
+            title: '销售尾程运单ID',
+            dataIndex: 'lastWaybillNo',
+            align: 'center',
+            width: 136,
+        },
+        // 勾选展示
+        {
+            key: 'receiveTime',
+            title: '妥投时间',
+            dataIndex: 'receiveTime',
+            align: 'center',
+            width: 120,
+            render: (value: string) => utcToLocal(value),
+        },
+        {
+            key: 'purchasePlanId',
+            title: '采购计划ID',
+            dataIndex: 'purchasePlanId',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'reserveStatus',
+            title: '仓库库存预定状态',
+            dataIndex: 'reserveStatus',
+            align: 'center',
+            width: 148,
+            render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
         },
         {
             key: 'purchasePlatform',
@@ -177,18 +334,15 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchasePlatform',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
         },
-        {
-            key: 'reserveStatus',
-            title: '库存预定状态',
-            dataIndex: 'reserveStatus',
-            align: 'center',
-            width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchaseReserveOptionList, value);
-            },
-        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '采购店铺名称',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
         {
             key: 'purchaseOrderStatus',
             title: '采购订单状态',
@@ -196,8 +350,37 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchaseOrderOptionList, value);
-            },
+                const { reserveStatus } = row;
+                if (reserveStatus === 3 && value === 1) {
+                    return ''
+                }
+                return getStatusDesc(purchaseOrderOptionList, value)
+            }
+        },
+        // 勾选展示
+        {
+            key: 'purchaseCreateTime',
+            title: '采购订单生成时间',
+            dataIndex: 'purchaseCreateTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value),
+        },
+        // 勾选展示
+        {
+            key: 'purchasePlatformParentOrderId',
+            title: '采购父订单ID',
+            dataIndex: 'purchasePlatformParentOrderId',
+            align: 'center',
+            width: 120,
+        },
+        // 勾选展示
+        {
+            key: 'purchasePlatformOrderId',
+            title: '采购订单ID',
+            dataIndex: 'purchasePlatformOrderId',
+            align: 'center',
+            width: 120,
         },
         {
             key: 'purchaseOrderPayStatus',
@@ -206,34 +389,28 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchasePayOptionList, value);
-            },
+                const { purchasePlatformOrderId } = row;
+                return purchasePlatformOrderId ? getStatusDesc(purchasePayOptionList, value) : '';
+            }
         },
+        // 勾选展示
         {
-            key: 'purchaseOrderShippingStatus',
-            title: '采购配送状态',
-            dataIndex: 'purchaseOrderShippingStatus',
+            key: 'payTime',
+            title: '采购支付时间',
+            dataIndex: 'payTime',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchaseShippingOptionList, value);
-            },
+            render: (value: string, row: IChildOrderItem) => utcToLocal(value),
         },
-        {
-            key: 'purchasePlatformOrderId',
-            title: '采购订单号',
-            dataIndex: 'purchasePlatformOrderId',
-            align: 'center',
-            width: 120,
-        },
+        // 勾选展示
         {
             key: 'purchaseWaybillNo',
-            title: '采购运单号',
+            title: '采购运单ID',
             dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
         },
-
+        // 勾选展示
         {
             key: 'purchaseCancelReason',
             title: '采购取消原因',
@@ -241,26 +418,34 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
+        // 勾选展示
         {
-            key: 'purchaseCreateTime',
-            title: '采购时间',
-            dataIndex: 'purchaseCreateTime',
+            key: 'purchaseTime',
+            title: '采购签收时间',
+            dataIndex: 'purchaseTime',
             align: 'center',
             width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return utcToLocal(value);
-            },
+            render: (value: string) => utcToLocal(value),
         },
+        // 勾选展示
         {
-            key: 'payTime',
-            title: '支付时间',
-            dataIndex: 'payTime',
+            key: 'storageTime',
+            title: '采购入库时间',
+            dataIndex: 'storageTime',
             align: 'center',
             width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return utcToLocal(value);
-            },
+            render: (value: string) => utcToLocal(value),
         },
+        // {
+        //     key: 'purchaseOrderShippingStatus',
+        //     title: '采购配送状态',
+        //     dataIndex: 'purchaseOrderShippingStatus',
+        //     align: 'center',
+        //     width: 120,
+        //     render: (value: number, row: IChildOrderItem) => {
+        //         return getStatusDesc(purchaseShippingOptionList, value);
+        //     },
+        // },
         {
             key: '_logisticsTrack',
             title: '物流轨迹',
@@ -268,224 +453,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value, row: IChildOrderItem) => {
-                return {
-                    children: <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>
             },
-        },
-        {
-            key: 'confirmTime',
-            title: '订单确认时间',
-            dataIndex: 'confirmTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'cancelTime',
-            title: '订单取消时间',
-            dataIndex: 'cancelTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'purchaseTime',
-            title: '采购完成时间',
-            dataIndex: 'purchaseTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'storageTime',
-            title: '入库时间',
-            dataIndex: 'storageTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'deliveryTime',
-            title: '出库时间',
-            dataIndex: 'deliveryTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'collectTime',
-            title: '揽收时间',
-            dataIndex: 'collectTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'receiveTime',
-            title: '收货时间',
-            dataIndex: 'receiveTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'channelOrderGoodsSn',
-            title: '渠道订单ID',
-            dataIndex: 'channelOrderGoodsSn',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'goodsAmount',
-            title: '价格',
-            dataIndex: 'goodsAmount',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'goodsNumber',
-            title: '商品数量',
-            dataIndex: 'goodsNumber',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'freight',
-            title: '商品运费',
-            dataIndex: 'freight',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: '_goodsTotalAmount',
-            title: '商品总金额',
-            dataIndex: '_goodsTotalAmount',
-            align: 'center',
-            width: 120,
-            render: (value, row: IChildOrderItem) => {
-                // console.log(row);
-                const { goodsAmount, goodsNumber, freight } = row;
-                return {
-                    children: Number(goodsAmount) * goodsNumber + (Number(freight) || 0),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'channelSource',
-            title: '销售渠道',
-            dataIndex: 'channelSource',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'orderId',
-            title: '中台父订单ID',
-            dataIndex: 'orderId',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'currency',
-            title: '货币类型',
-            dataIndex: 'currency',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'productShop',
-            title: '渠道店铺名',
-            dataIndex: 'productShop',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-
-        {
-            key: 'a14',
-            title: '渠道订单状态',
-            dataIndex: 'a14',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'orderGoodsId',
-            title: '中台子订单ID',
-            dataIndex: 'orderGoodsId',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'lastWaybillNo',
-            title: '尾程运单号',
-            dataIndex: 'lastWaybillNo',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
         },
     ];
 
@@ -535,13 +504,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 },
             },
         ];
-        colList.forEach(key => {
-            const i = this.allColumns.findIndex(item => item.key === key);
-            // console.log('key', key, i);
-            if (i === -1) {
-                // console.log('colList没找到', key);
-            } else {
-                allColumns.push(this.allColumns[i]);
+        this.allColumns.forEach(item => {
+            if (colList.indexOf(item.key as string) > -1) {
+                allColumns.push(item);
             }
         });
         return allColumns;
