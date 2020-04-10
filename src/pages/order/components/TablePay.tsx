@@ -64,7 +64,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 150,
             render: (value: string, row: IPayItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },

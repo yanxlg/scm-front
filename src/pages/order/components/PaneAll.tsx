@@ -643,20 +643,21 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             orderList={parentOrderList}
                         />
                     )}
-
-                    <Pagination
-                        className="order-pagination"
-                        // size="small"
-                        total={total}
-                        current={page}
-                        pageSize={pageCount}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
-                    />
+                    <div style={{ textAlign: 'right' }}>
+                        <Pagination
+                            className="order-pagination"
+                            size="small"
+                            total={total}
+                            current={page}
+                            pageSize={pageCount}
+                            showSizeChanger={true}
+                            showQuickJumper={true}
+                            pageSizeOptions={pageSizeOptions}
+                            onChange={this.onChangePage}
+                            onShowSizeChange={this.pageCountChange}
+                            showTotal={total => `共${total}条`}
+                        />
+                    </div>
                 </div>
             </>
         );

@@ -359,7 +359,7 @@ export const defaultColChildList = [
     'productImage',                   // SKU图片
     // 'a1',                             // 商品名称 - 待确认
     'productStyle',                   // 商品规格
-    'goodsAmount',                    // 销售商品单价
+    
     'goodsNumber',                    // 销售商品数量
     'freight',                        // 销售商品运费
     '_goodsTotalAmount',              // 销售商品总金额
@@ -382,16 +382,17 @@ export const defaultColChildList = [
 export const childOptionalColList = [
     { key: 'orderId', name: '父订单ID' },
     { key: 'skuId', name: '中台SKU ID' },
+    { key: 'goodsAmount', name: '销售商品单价' },
     { key: 'currency', name: '销售金额货币' },
     { key: 'purchaseAmount', name: '采购商品单价' },
     // { key: '', name: '商品属性标签' },               // 待补充
-    { key: 'productShop', name: '销售店铺名称' },      
-    // { key: '', name: '销售渠道二级分类' },            // 待补充
+    // { key: 'productShop', name: '销售店铺名称' },    // 待补充   
+    // { key: '', name: '销售渠道二级分类' },           // 待补充
     { key: 'cancelTime', name: '销售订单取消时间' },  
     { key: 'deliveryTime', name: '销售订单出库时间' },
     { key: 'collectTime', name: '销售订单揽收时间' },
     { key: 'receiveTime', name: '妥投时间' },
-    // { key: '', name: '采购店铺名称' },                // 待补充
+    // { key: 'productShop', name: '采购店铺名称' },     // 待补充
     { key: 'purchaseCreateTime', name: '采购订单生成时间' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
     { key: 'purchasePlatformOrderId', name: '采购订单ID' },

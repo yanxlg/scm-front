@@ -1,5 +1,6 @@
 import React from 'react';
-import { Table, Checkbox } from 'antd';
+import { Checkbox } from 'antd';
+import { AutoEnLargeImg, FitTable } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
@@ -7,7 +8,6 @@ import { IChildOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import { AutoEnLargeImg } from 'react-components';
 import {
     orderStatusOptionList,
     orderShippingOptionList,
@@ -40,7 +40,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'orderGoodsStatus',
@@ -109,7 +109,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             title: 'SKU图片',
             dataIndex: 'productImage',
             align: 'center',
-            width: 120,
+            width: 100,
             render: (value: string) => {
                 return <AutoEnLargeImg src={value} className="order-img-lazy"/>
             }
@@ -127,7 +127,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             title: '商品规格',
             dataIndex: 'productStyle',
             align: 'center',
-            width: 160,
+            width: 180,
             render: (value: string) => {
                 let child: any = null;
                 if (value) {
@@ -231,14 +231,14 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
-        // 勾选展示
-        {
-            key: 'productShop',
-            title: '销售店铺名称',
-            dataIndex: 'productShop',
-            align: 'center',
-            width: 120,
-        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '销售店铺名称',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -261,7 +261,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'confirmTime',
             align: 'center',
             width: 146,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'channelOrderGoodsSn',
@@ -277,7 +277,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'cancelTime',
             align: 'center',
             width: 146,
-            render: (value: string) => utcToLocal(value)
+            render: (value: string) => utcToLocal(value, '')
         },
         // 勾选展示
         {
@@ -286,7 +286,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'deliveryTime',
             align: 'center',
             width: 146,
-            render: (value: string) =>  utcToLocal(value),
+            render: (value: string) =>  utcToLocal(value, ''),
         },
         // 勾选展示
         {
@@ -295,7 +295,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'collectTime',
             align: 'center',
             width: 146,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'lastWaybillNo',
@@ -311,7 +311,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'receiveTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'purchasePlanId',
@@ -364,7 +364,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseCreateTime',
             align: 'center',
             width: 146,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         // 勾选展示
         {
@@ -400,7 +400,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'payTime',
             align: 'center',
             width: 120,
-            render: (value: string, row: IChildOrderItem) => utcToLocal(value),
+            render: (value: string, row: IChildOrderItem) => utcToLocal(value, ''),
         },
         // 勾选展示
         {
@@ -425,7 +425,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         // 勾选展示
         {
@@ -434,7 +434,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'storageTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         // {
         //     key: 'purchaseOrderShippingStatus',
@@ -527,16 +527,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    // 合并单元格
-    private mergeCell(value: string | number, row: IChildOrderItem) {
-        return {
-            children: value,
-            props: {
-                rowSpan: row._rowspan || 0,
-            },
-        };
-    }
-
     hideGoodsDetailDialog = () => {
         this.setState({
             detailDialogStatus: false,
@@ -579,19 +569,22 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         const columns = this.createColumns();
         return (
             <>
-                <Table
-                    key={columns.length}
+                <FitTable
+                    // key={columns.length}
                     bordered={true}
-                    // "purchasePlanId"
-                    rowKey={record => {
-                        return record.purchasePlanId || record.orderGoodsId;
-                    }}
+                    // rowKey={record => {
+                    //     return record.purchasePlanId || record.orderGoodsId;
+                    // }}
+                    rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
-                    scroll={{ x: 'max-content', y: 500 }}
+                    scroll={{ x: 'max-content' }}
+                    // bottom={20}
+                    minHeight={100}
+                    autoFitY={true}
                     pagination={false}
                 />
                 <GoodsDetailDialog

@@ -25,7 +25,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -40,7 +40,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -101,7 +101,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -116,7 +116,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -131,7 +131,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -145,7 +145,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -155,7 +155,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -165,7 +165,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -175,7 +175,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -185,7 +185,7 @@ class TableError extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {

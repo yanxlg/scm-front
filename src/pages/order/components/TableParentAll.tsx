@@ -30,7 +30,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -170,7 +170,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
