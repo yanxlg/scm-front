@@ -11,7 +11,6 @@
         "analyze:build": "ANALYZE=1 umi build"
     },
     "dependencies": {
-        "moment": "^2.24.0",
         "react": "^16.13.0",
         "react-dom": "^16.13.0",
         "classnames": "^2.2.6",
@@ -20,9 +19,9 @@
         "query-string": "^6.11.1",
         "qrcode.react": "^1.0.0",
         "react-virtualized": "^9.21.2",
-        "antd": "^4.0.3",
-        "@ant-design/pro-layout": "^5.0.5",
-        "@ant-design/icons":"^4.0.2",
+        "antd": "^4.1.1",
+        "@ant-design/pro-layout": "^5.0.9",
+        "@ant-design/icons": "^4.0.5",
         "dayjs": "^1.8.23",
         "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.4-alpha.29"
     },
