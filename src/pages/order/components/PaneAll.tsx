@@ -164,6 +164,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     } else {
                         this.setState({
                             childOrderList: this.getChildOrderData(list),
+                        }, () => {
+                            this.bindMouseenter();
                         });
                     }
                 }
@@ -541,6 +543,28 @@ class PaneAll extends React.PureComponent<IProps, IState> {
               };
         return postExportAll(params);
     };
+
+    // 绑定事件，处理hover问题
+    private bindMouseenter = () => {
+        [...document.querySelectorAll('.colspan-cell')].forEach(item => {
+            // console.log(item);
+            item.addEventListener('mouseenter', function(e) {
+                // console.log(e.target?.parentNode);
+                const id = (e.target as any).parentNode.getAttribute('data-id');
+                [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
+                    node.classList.add('hover');
+                })
+            })
+
+            item.addEventListener('mouseleave', function(e) {
+                // console.log(e.target?.parentNode);
+                const id = (e.target as any).parentNode.getAttribute('data-id');
+                [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
+                    node.classList.remove('hover');
+                })
+            })
+        })
+    }
 
     render() {
         const {

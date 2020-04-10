@@ -1,6 +1,6 @@
 import React from 'react';
-import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+import { FitTable } from 'react-components';
 
 import GoodsDetailDialog from './GoodsDetailDialog';
 import { IParentOrderItem, IGoodsDetail } from './PaneAll';
@@ -278,16 +278,17 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         const columns = this.createColumns();
         return (
             <>
-                <Table
+                <FitTable
                     bordered
-                    key={columns.length}
+                    // key={columns.length}
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
-                    scroll={{ x: 'max-content', y: 600 }}
+                    scroll={{ x: 'max-content' }}
+                    autoFitY={true}
                     pagination={false}
                 />
                 <GoodsDetailDialog

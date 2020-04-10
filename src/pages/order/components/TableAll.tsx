@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { HtmlHTMLAttributes } from 'react';
 import { Checkbox } from 'antd';
 import { AutoEnLargeImg, FitTable } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
@@ -178,7 +178,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (_, row: IChildOrderItem) => {
                 const { goodsAmount, goodsNumber, freight } = row;
                 const total = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
-                return total.toFixed(2);
+                return isNaN(total) ? '' : total.toFixed(2);
             },
         },
         // 勾选展示
@@ -186,13 +186,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             key: 'currency',
             title: '销售金额货币',
             dataIndex: 'currency',
-            align: 'center',
-            width: 120,
-        },
-        {
-            key: 'purchaseNumber',
-            title: '采购商品数量',
-            dataIndex: 'purchaseNumber',
             align: 'center',
             width: 120,
         },
@@ -205,6 +198,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
+            key: 'purchaseNumber',
+            title: '采购商品数量',
+            dataIndex: 'purchaseNumber',
+            align: 'center',
+            width: 120,
+        },
+        {
             key: '_purchaseTotalAmount',
             title: '采购商品总金额',
             dataIndex: '_purchaseTotalAmount',
@@ -213,7 +213,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (_, row: IChildOrderItem) => {
                 const { purchaseNumber, purchaseAmount } = row;
                 const total = Number(purchaseNumber) * Number(purchaseAmount);
-                return total.toFixed(2);
+                return isNaN(total) ? '' : total.toFixed(2);
             },
         },
         // // 勾选展示 - 待补充
@@ -494,6 +494,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 dataIndex: '_checked',
                 align: 'center',
                 width: 50,
+                className: 'colspan-cell',
                 render: (value: boolean, row: IChildOrderItem) => {
                     return {
                         children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
@@ -572,20 +573,24 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 <FitTable
                     // key={columns.length}
                     bordered={true}
-                    // rowKey={record => {
-                    //     return record.purchasePlanId || record.orderGoodsId;
-                    // }}
-                    rowKey="orderGoodsId"
+                    rowKey={record => {
+                        return record.purchasePlanId || record.orderGoodsId;
+                    }}
+                    // rowKey="orderGoodsId"
                     className="order-table"
+                    rowClassName="order-tr"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
-                    // bottom={20}
-                    minHeight={100}
                     autoFitY={true}
                     pagination={false}
+                    onRow={record => {
+                        return {
+                            'data-id': record.orderGoodsId
+                        } as any;
+                    }}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}

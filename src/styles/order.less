@@ -1,3 +1,4 @@
+@import '~antd/es/style/themes/default';
 @divisionSpacing: 6px;
 @btnSpacing: 12px;
 @inputWidth: 140px;
@@ -147,5 +148,10 @@
     &-img-lazy {
         width: 68px;
         height: 68px;
+    }
+    &-tr.hover {
+        td {
+            background: @item-hover-bg !important;
+        }
     }
 }
