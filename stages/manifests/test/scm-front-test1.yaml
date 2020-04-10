@@ -60,7 +60,7 @@ data:
 
         location ~.*\.(js|css|png|jpg)$
         {
-            expires 7d;
+            expires 30d;
             try_files $uri $uri/ /index.html;
         }
 
