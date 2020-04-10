@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { Button } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
 
-import { IPublishInterceptItem } from '@/interface/ISetting';
+import { IPublishInterceptItem } from '@/interface/IGoodsAttr';
 
 const PublishIntercept: React.FC = props => {
     const [tagList, setTagList] = useState<IPublishInterceptItem[]>([

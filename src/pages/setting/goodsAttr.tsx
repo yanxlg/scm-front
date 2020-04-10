@@ -1,13 +1,12 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { Button, Input, Spin, message, Tabs, Popconfirm, Pagination, Modal } from 'antd';
+import { Button, Input, Tabs, Pagination, Modal, message } from 'antd';
 import Container from '@/components/Container';
 // import EditTag from './components/EditTag';
-import { getTagsList, addTag, enabledTag, deleteTag } from '@/services/goods-attr';
-import { ITagItem } from '@/interface/IGoodsAttr';
-import { DeleteOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { getTagsList } from '@/services/goods-attr';
+import { ITagItem, IGetTagsListRequest } from '@/interface/IGoodsAttr';
+import { PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { FitTable } from 'react-components';
-import { IAttrItem } from '@/interface/ISetting';
-import EditableCell from './components/EditableCell';
+
 import { ColumnsType } from 'antd/lib/table/interface';
 import PublishIntercept from './components/PublishIntercept';
 
@@ -16,110 +15,244 @@ import styles from './_goodsAttr.less';
 const { TabPane } = Tabs;
 const { TextArea } = Input;
 const { confirm } = Modal;
+// const typeList = ['delete', 'add-delete'];
 
-const _GoodsAttr: React.FC = props => {
-    const addInputRef = useRef<Input>(null);
+const GoodsAttr: React.FC = props => {
+    const pageDataRef = useRef<any>({
+        pageOneOriginData: [],
+        cacheData: {},
+    });
+    const [pending, setPending] = useState(true);
+    const [page, setPage] = useState(1);
+    // const [pageSize, setPageSize] = useState(10);
+    const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [tagList, setTagList] = useState<ITagItem[]>([]);
+    const [attrList, setAttrList] = useState<ITagItem[]>([]);
 
-    const handleAdd = useCallback(() => {
-        // console.log(addInputRef.current?.state.value);
-        const value = addInputRef.current?.state.value?.replace(/\s+/g, '');
-        if (value) {
-            const index = tagList.findIndex(item => item.name === value);
-            if (index === -1) {
-                _addTag(value);
+    const addAttr = () => {
+        const newAttrList = [...attrList];
+        newAttrList.push({
+            name: '',
+            description: '',
+            type: 'add',
+        });
+        setAttrList(newAttrList);
+    };
+
+    const editAttr = useCallback(
+        (name, value, index) => {
+            setAttrList(
+                attrList.map((item, i) => {
+                    if (i === index) {
+                        const ret: ITagItem = {
+                            ...item,
+                            [name]: value,
+                            type: item.type === 'add' ? 'add' : 'edit',
+                        };
+                        return ret;
+                    }
+                    return item;
+                }),
+            );
+        },
+        [attrList],
+    );
+
+    const deleteAttr = useCallback(
+        index => {
+            // const index =
+            if (attrList[index].type === 'add') {
+                const newAttrList = [...attrList];
+                newAttrList.splice(index, 1);
+                setAttrList(newAttrList);
             } else {
-                const currentTag = tagList[index];
-                if (currentTag.isActive === 'ENABLED') {
-                    message.info('当前标签已存在！');
-                } else {
-                    _enabledTag(value);
-                }
-            }
-        }
-    }, [tagList]);
-
-    const _getTagsList = useCallback(() => {
-        setLoading(true);
-        getTagsList()
-            .then(res => {
-                // console.log('getTagsList', res);
-                const { tags } = res.data;
-                setTagList(tags || []);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
-
-    const _addTag = useCallback((name: string) => {
-        setLoading(true);
-        addTag(name).then(res => {
-            addInputRef.current?.setValue('');
-            _getTagsList();
-        });
-    }, []);
-
-    const _enabledTag = useCallback((name: string) => {
-        setLoading(true);
-        enabledTag(name).then(res => {
-            addInputRef.current?.setValue('');
-            _getTagsList();
-        });
-    }, []);
-
-    const _deleteTag = useCallback(
-        (name: string) => {
-            const index = tagList.findIndex(item => item.name === name);
-            const list = tagList.map((item, i) => {
-                if (i === index) {
-                    return {
-                        ...item,
-                        _loading: true,
-                    };
-                }
-                return item;
-            });
-            setTagList(list);
-
-            return deleteTag(name).then(() => {
-                setTagList(
-                    list.map((item, i) => {
-                        if (i === index) {
+                setAttrList(
+                    attrList.map((item, i) => {
+                        if (index === i) {
                             return {
                                 ...item,
-                                _loading: false,
-                                isActive: 'DISABLED',
+                                type: 'delete',
                             };
                         }
                         return item;
                     }),
                 );
-                message.success('删除成功！');
-            });
+            }
         },
-        [tagList],
+        [attrList],
     );
 
-    // const reset = useCallback(() => {
-    //     setTagList([...tagList]);
-    // }, [tagList]);
+    const validateList = useCallback((editList): boolean => {
+        console.log('editList', editList);
+        for (let i = 0, len = editList.length; i < len; i++) {
+            const { name, description, page, type } = editList[i];
+            if (type !== 'delete' && (!name || !description)) {
+                message.error(`第${page}页面存在空值，请检查`);
+                return false;
+            }
+        }
+        return false;
+    }, []);
 
-    const addBox = useMemo(() => {
-        return (
-            <div className={[styles.addBox, styles.item].join(' ')}>
-                <Input ref={addInputRef} className={styles.input} placeholder="请输入新标签" />
-                <Button size="small" type="primary" className={styles.btnAdd} onClick={handleAdd}>
-                    添加
-                </Button>
-            </div>
-        );
-    }, [handleAdd]);
+    const showConfirm = useCallback(() => {
+        const { cacheData } = pageDataRef.current;
+        // const keys = ;
+        // console.log('showConfirm', keys);
+        // 获取所有编辑过的数据
+        const editList: ITagItem[] = [];
+        // const keys = Object.keys(cacheData);
+        if (cacheData[page]) {
+            Object.keys(cacheData)?.forEach(key => {
+                // let list: ITagItem[] = [];
+                let currentPage = Number(key);
+                const list: ITagItem[] = currentPage !== page ? cacheData[key] : attrList;
+                list.forEach(item => {
+                    if (item.type) {
+                        editList.push({
+                            ...item,
+                            page: currentPage,
+                        });
+                    }
+                });
+            });
+        } else {
+            attrList.forEach(item => {
+                if (item.type) {
+                    editList.push({
+                        ...item,
+                        page,
+                    });
+                }
+            });
+        }
+        if (validateList(editList)) {
+            confirm({
+                title: '保存即应用标签',
+                icon: <ExclamationCircleOutlined />,
+                content:
+                    '系统会根据关键字自动匹配商品打标签，这个过程预计需要30分钟。任务执行中不可再次编辑，请确认是否立刻执行？',
+                onOk() {
+                    console.log('OK');
+                },
+            });
+        }
+    }, [page, attrList]);
 
-    const enabledTagList = useMemo(() => {
-        return tagList?.filter(item => item.isActive === 'ENABLED') || [];
-    }, [tagList]);
+    const changePage = useCallback(
+        (current: number) => {
+            // console.log('changePage', page);
+            const { cacheData } = pageDataRef.current;
+            cacheData[page] = attrList;
+            if (cacheData[current]) {
+                setAttrList(cacheData[current]);
+                setPage(current);
+            } else {
+                _getTagsList({ page: current });
+            }
+        },
+        [attrList, page],
+    );
+
+    const handleReset = useCallback(() => {
+        setPage(1);
+        const { pageOneOriginData } = pageDataRef.current;
+        // pageDataRef.current = {
+        //     pageOneOriginData
+        // }
+        setAttrList(pageOneOriginData);
+    }, []);
+
+    const _getTagsList = useCallback(
+        (params: IGetTagsListRequest = { page }) => {
+            setLoading(true);
+            getTagsList({
+                ...params,
+                page_count: 10,
+                is_active: 'ENABLED',
+            })
+                .then(res => {
+                    // console.log('getTagsList', res);
+                    const paramsPage = params.page as number;
+                    const { tags, all_count } = res.data;
+                    setPage(paramsPage);
+                    setTotal(all_count as number), setAttrList(tags || []);
+                    if (paramsPage === 1) {
+                        // const { pageOneOriginData } = pageDataRef.current;
+                        pageDataRef.current.pageOneOriginData = tags || [];
+                    }
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [page],
+    );
+
+    const columns = useMemo(() => {
+        if (pending) {
+            return [
+                {
+                    title: '商品标签名称',
+                    dataIndex: 'name',
+                    width: 100,
+                    align: 'center',
+                },
+                {
+                    title: '关键词',
+                    dataIndex: 'description',
+                    width: 200,
+                    align: 'center',
+                },
+            ] as ColumnsType<ITagItem>;
+        } else {
+            return [
+                {
+                    title: '商品标签名称',
+                    dataIndex: 'name',
+                    width: 100,
+                    align: 'center',
+                    render: (val: string, record: ITagItem, index: number) => {
+                        return (
+                            <Input
+                                value={val}
+                                onChange={e => editAttr('name', e.target.value, index)}
+                            />
+                        );
+                    },
+                },
+                {
+                    title: '关键词',
+                    dataIndex: 'description',
+                    width: 200,
+                    align: 'center',
+                    render: (val: string, record: ITagItem, index: number) => {
+                        return (
+                            <TextArea
+                                value={val}
+                                onChange={e => editAttr('description', e.target.value, index)}
+                                autoSize
+                            />
+                        );
+                    },
+                },
+                {
+                    title: '操作',
+                    dataIndex: 'operation',
+                    width: 100,
+                    align: 'center',
+                    render: (_: any, record: ITagItem, index: number) => {
+                        return (
+                            <Button type="link" size="small" onClick={() => deleteAttr(index)}>
+                                删除
+                            </Button>
+                        );
+                    },
+                },
+            ] as ColumnsType<ITagItem>;
+        }
+
+        // attrList
+    }, [pending]);
 
     useEffect(() => {
         _getTagsList();
@@ -128,224 +261,38 @@ const _GoodsAttr: React.FC = props => {
     return useMemo(() => {
         return (
             <Container>
-                <Spin spinning={loading} tip="加载中...">
-                    <h3>所有标签</h3>
-                    <div className={styles.tagSection}>
-                        {/* {enabledTagList.map(item => (
-                            <EditTag 
-                                className={styles.item} 
-                                text={item.name}
-                                key={item.name + Date.now()}
-                                getTagsList={_getTagsList}
-                                setLoading={setLoading}
-                            />
-                        ))} */}
-                        {enabledTagList.map(item => (
-                            <Button className={styles.item} key={item.name} loading={item._loading}>
-                                {item.name}{' '}
-                                <div className={styles.icon}>
-                                    <DeleteOutlined onClick={() => _deleteTag(item.name)} />
-                                </div>
-                            </Button>
-                        ))}
-                        {addBox}
-                    </div>
-                    <div>
-                        {/* <Button type="primary" className={styles.saveBtn}>
-                            保存设置
-                        </Button> */}
-                        {/* <Button type="primary" onClick={reset}>还原</Button> */}
-                    </div>
-                </Spin>
-            </Container>
-        );
-    }, [addBox, enabledTagList, loading]);
-};
-
-const GoodsAttr: React.FC = props => {
-    const pageDataRef = useRef<any>({
-        pageOneOriginData: [
-            {
-                key: '0',
-                name: '测试1',
-                description:
-                    '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
-            },
-            {
-                key: '1',
-                name: '测试2',
-                description:
-                    '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
-            },
-        ]
-    });
-    const [attrList, setAttrList] = useState<IAttrItem[]>([
-        {
-            key: '0',
-            name: '测试1',
-            description:
-                '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
-        },
-        {
-            key: '1',
-            name: '测试2',
-            description:
-                '耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯，耐克，阿迪达斯',
-        },
-    ]);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [total, setPageTotal] = useState(20);
-    const [editAttrList, setEditAttrList] = useState<IAttrItem[]>([]);
-      
-    const addAttr = () => {
-        const key = attrList.length + '';
-        const newAttrList = [...attrList];
-        newAttrList.push({
-            key,
-            name: '',
-            description: '',
-        });
-        setAttrList(newAttrList);
-    };
-
-    const editAttr = useCallback(
-        (type, value, index) => {
-            setAttrList(attrList.map((item, i) => {
-                if (i === index) {
-                    return {
-                        ...item,
-                        [type]: value
-                    }
-                }
-                return item;
-            }));
-        },
-        [attrList]
-    );
-
-    const deleteAttr = useCallback(
-        (key = '') => {
-            const newAttrList = [...attrList];
-            const index = newAttrList.findIndex(item => key === item.key);
-            if (index > -1) {
-                newAttrList.splice(index, 1);
-                setAttrList(newAttrList);
-            }
-        },
-        [attrList],
-    );
-
-    const showConfirm = useCallback(
-        () => {
-            confirm({
-                title: '保存即应用标签',
-                icon: <ExclamationCircleOutlined />,
-                content: '系统会根据关键字自动匹配商品打标签，这个过程预计需要30分钟。任务执行中不可再次编辑，请确认是否立刻执行？',
-                onOk() {
-                    console.log('OK');
-                },
-                // onCancel() {
-                //     console.log('Cancel');
-                // },
-            });
-        },
-        []
-    );
-
-    const changePage = useCallback(
-        (current: number) => {
-            // console.log('changePage', page);
-            const cacheData = pageDataRef.current;
-            cacheData[page] = attrList;
-            if (cacheData[current]) {
-                setAttrList(cacheData[current]);
-            }
-            // console.log('changePage', pageDataRef.current);
-            setPage(current);
-            
-        },
-        [attrList, page]
-    );
-
-    const handleReset = useCallback(
-        () => {
-            setPage(1);
-            const { pageOneOriginData } = pageDataRef.current;
-            pageDataRef.current = {
-                pageOneOriginData
-            }
-            setAttrList(pageOneOriginData);
-        },
-        []
-    );
-
-    const columns = useMemo(() => {
-        return [
-            {
-                title: '商品标签名称',
-                dataIndex: 'name',
-                width: 100,
-                align: 'center',
-                render: (val: string, record: IAttrItem, index: number) => {
-                    return <Input value={val} onChange={e => editAttr('name', e.target.value, index)} />
-                }
-            },
-            {
-                title: '关键词',
-                dataIndex: 'description',
-                width: 200,
-                align: 'center',
-                render: (val: string, record: IAttrItem, index: number) => {
-                    return <TextArea value={val} onChange={e => editAttr('description', e.target.value, index)} autoSize />
-                }
-            },
-            {
-                title: '操作',
-                dataIndex: 'operation',
-                width: 100,
-                align: 'center',
-                render: (_: any, record: IAttrItem) => {
-                    return (
-                        <Button
-                            type="link"
-                            size="small"
-                            onClick={() => deleteAttr(record.key)}
-                        >
-                            删除
-                        </Button>
-                    );
-                },
-            },
-        ] as ColumnsType<any>;
-    }, [attrList]);
-
-    return useMemo(() => {
-        return (
-            <Container>
                 <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="商品属性配置" key="1">
                         <div className={styles.tableContainer}>
                             <FitTable
-                                components={{
-                                    body: {
-                                        cell: EditableCell,
-                                    },
-                                }}
                                 bordered
+                                // rowKey="tagId"
+                                loading={loading}
                                 dataSource={attrList}
                                 columns={columns}
-                                // rowClassName="editable-row"
+                                scroll={{ y: 400 }}
+                                // minHeight={100}
+                                autoFitY={false}
                                 pagination={false}
+                                onRow={({ type }) => ({
+                                    hidden: type === 'delete' ? true : false,
+                                })}
                             />
                             <div className={styles.paginationContainer}>
-                                <Button ghost type="primary" onClick={addAttr} className={styles.btnAdd}>
-                                    <PlusOutlined />
-                                    添加新标签
-                                </Button>
+                                {!pending && (
+                                    <Button
+                                        ghost
+                                        type="primary"
+                                        onClick={addAttr}
+                                        className={styles.btnAdd}
+                                    >
+                                        <PlusOutlined />
+                                        添加新标签
+                                    </Button>
+                                )}
                                 <Pagination
                                     current={page}
-                                    pageSize={pageSize}
+                                    pageSize={10}
                                     total={total}
                                     className={styles.pagination}
                                     showTotal={total => `共 ${total} 条`}
@@ -353,12 +300,19 @@ const GoodsAttr: React.FC = props => {
                                     onChange={changePage}
                                 />
                             </div>
-                            
                         </div>
-                        <div className={styles.opsContainer}>
-                            <Button type="primary" className={styles.btnSave} onClick={showConfirm}>保存即应用</Button>
-                            <Button onClick={handleReset}>还原</Button>
-                        </div>
+                        {!pending && (
+                            <div className={styles.opsContainer}>
+                                <Button
+                                    type="primary"
+                                    className={styles.btnSave}
+                                    onClick={showConfirm}
+                                >
+                                    保存即应用
+                                </Button>
+                                <Button onClick={handleReset}>还原</Button>
+                            </div>
+                        )}
                     </TabPane>
                     <TabPane tab="上架拦截策略" key="2">
                         <PublishIntercept />
@@ -366,7 +320,7 @@ const GoodsAttr: React.FC = props => {
                 </Tabs>
             </Container>
         );
-    }, [attrList, columns, page]);
+    }, [attrList, columns, page, total, loading, pending]);
 };
 
 export default GoodsAttr;

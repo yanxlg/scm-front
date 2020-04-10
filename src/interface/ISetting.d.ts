@@ -53,14 +53,3 @@ export declare interface ICountryItem {
     code: string;
     name: string;
 }
-
-export declare interface IAttrItem {
-    key: string;
-    name: string;
-    description: string;
-}
-
-export declare interface IPublishInterceptItem {
-    name: string;
-    checked: boolean;
-}

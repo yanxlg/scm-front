@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Button } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
 import classnames from 'classnames';
-import { IPublishInterceptItem } from '@/interface/ISetting';
+import { IPublishInterceptItem } from '@/interface/IGoodsAttr';
 
 import styles from './_index.less';
 
