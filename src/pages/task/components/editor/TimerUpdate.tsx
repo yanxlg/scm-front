@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DatePicker, Input, Radio, Form, Spin, Checkbox } from 'antd';
 import '@/styles/config.less';
-import moment, { Moment } from 'moment';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
@@ -14,11 +13,12 @@ import {
 import { LoadingButton, RichInput } from 'react-components';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
-import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
 import { EmptyObject } from '@/config/global';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
+import { dateToUnix } from 'react-components/es/utils/date';
+import dayjs, { Dayjs } from 'dayjs';
 
 declare interface IFormData extends Omit<IPUTaskBody, 'range'> {
     taskIntervalType?: TaskIntervalConfigType;
@@ -48,8 +48,8 @@ const convertDetail = (info: ITaskDetailInfo) => {
                 ? TaskIntervalConfigType.day
                 : TaskIntervalConfigType.second
             : TaskIntervalConfigType.day,
-        task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
-        task_end_time: task_end_time ? moment(task_end_time * 1000) : undefined,
+        task_start_time: task_start_time ? dayjs(task_start_time * 1000) : undefined,
+        task_end_time: task_end_time ? dayjs(task_end_time * 1000) : undefined,
         day: isDay ? time_interval! / 86400 : undefined,
         second: time_interval && !isDay ? time_interval : undefined,
         ...extra,
@@ -123,12 +123,12 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
             });
     }, []);
 
-    const checkStartDate = useCallback((type: any, value: Moment) => {
+    const checkStartDate = useCallback((type: any, value: Dayjs) => {
         if (!value) {
             return Promise.resolve();
         }
         const endDate = form.getFieldValue('task_end_time');
-        const now = moment();
+        const now = dayjs();
         if (value.isAfter(now)) {
             if (endDate && value.isSameOrAfter(endDate)) {
                 return Promise.reject('开始时间不能晚于结束时间');
@@ -139,12 +139,12 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
         }
     }, []);
 
-    const checkEndDate = useCallback((type: any, value: Moment) => {
+    const checkEndDate = useCallback((type: any, value: Dayjs) => {
         if (!value) {
             return Promise.resolve();
         }
         const startDate = form!.getFieldValue('timerStartTime');
-        const now = moment();
+        const now = dayjs();
         if (value.isAfter(now)) {
             if (startDate && value.isSameOrBefore(startDate)) {
                 return Promise.reject('结束时间不能早于开始时间');
@@ -155,26 +155,26 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
         }
     }, []);
 
-    const disabledStartDate = useCallback((startTime: Moment | null) => {
+    const disabledStartDate = useCallback((startTime: Dayjs | null) => {
         const endTime = form.getFieldValue('task_end_time');
         if (!startTime) {
             return false;
         }
         const startValue = startTime.valueOf();
-        const currentDay = moment().startOf('day');
+        const currentDay = dayjs().startOf('day');
         if (!endTime) {
             return startTime < currentDay;
         }
         return startValue > endTime.clone().endOf('day') || startTime < currentDay;
     }, []);
 
-    const disabledEndDate = useCallback((endTime: Moment | null) => {
+    const disabledEndDate = useCallback((endTime: Dayjs | null) => {
         const startTime = form.getFieldValue('task_start_time');
         if (!endTime) {
             return false;
         }
         const endValue = endTime.valueOf();
-        const currentDay = moment().startOf('day');
+        const currentDay = dayjs().startOf('day');
         if (!startTime) {
             return endTime < currentDay;
         }

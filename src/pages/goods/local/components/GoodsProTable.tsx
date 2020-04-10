@@ -15,7 +15,7 @@ import PopConfirmSetAttr from './PopConfirmSetAttr';
 import { IRowDataItem, IPageData } from '../index';
 import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
 
 const pageSizeOptions = ['50', '100', '500', '1000'];

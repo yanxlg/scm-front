@@ -1,11 +1,10 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable, PopConfirmLoadingButton, ProTable } from 'react-components';
-import { goButton, showTotal } from 'react-components/es/FitTable';
-import { message, Pagination } from 'antd';
+import { ProTable } from 'react-components';
+import { message } from 'antd';
 import '@/styles/index.less';
 import '@/styles/stock.less';
 import { ColumnProps, TableProps } from 'antd/es/table';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
@@ -13,7 +12,7 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
@@ -22,8 +21,6 @@ import { Icons } from '@/components/Icon';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
-import { ITaskListItem } from '@/interface/ITask';
-import { ProTableProps } from 'react-components/es/ProTable';
 
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
@@ -197,8 +194,8 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            time_start: convertStartDate(Number(time_start)),
-            time_end: convertEndDate(Number(time_end)),
+            time_start: unixToStartDate(Number(time_start)),
+            time_end: unixToEndDate(Number(time_end)),
             ...extra,
         };
     }, []);

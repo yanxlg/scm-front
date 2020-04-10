@@ -12,7 +12,8 @@ import {
     TaskTypeList,
     TaskTypeMap,
 } from '@/enums/StatusEnum';
-import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
+import { unixToEndDate, unixToStartDate } from 'react-components/es/utils/date';
 import { ProColumns } from 'react-components/es/ProTable';
 import { ProTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -79,8 +80,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             task_status,
             task_name,
             task_type,
-            task_begin_time: convertStartDate(Number(task_begin_time)),
-            task_end_time: convertEndDate(Number(task_end_time)),
+            task_begin_time: unixToStartDate(Number(task_begin_time)),
+            task_end_time: unixToEndDate(Number(task_end_time)),
         };
     }, []);
 

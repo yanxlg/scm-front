@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Table } from 'antd';
+import React, { useEffect, useMemo } from 'react';
+import { Modal } from 'antd';
 import { TableProps } from 'antd/es/table';
 import channelStyles from '@/styles/_channel.less';
 import { useDataSet } from 'react-components/es/hooks';
 import { ILogItem } from '@/interface/IChannel';
 import { queryOnOffLog } from '@/services/channel';
 import { FitTable } from 'react-components';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 declare interface OnOffLogModalProps {
     visible: string | false;

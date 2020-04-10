@@ -92,6 +92,7 @@ const config = defineConfig({
     cssLoader: {
         localsConvention: 'camelCaseOnly',
         modules: {
+            auto: /_[a-zA-Z\.\-_0-9]+\.less$/, // 仅符合要求的文件生成module，减少code体积
             getLocalIdent: (
                 context: {
                     resourcePath: string;
@@ -128,6 +129,7 @@ const config = defineConfig({
     },
     chainWebpack(config, { webpack }) {
         config.plugin('lodash-webpack-plugin').use(require('lodash-webpack-plugin')); // lodash 简化，实际可能并没有作用，如果babel-plugin-lodash已经极尽简化
+        config.plugin('antd-dayjs-webpack-plugin').use(require('antd-dayjs-webpack-plugin')); // dayjs代替moment
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         if (dev) {
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [

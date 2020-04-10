@@ -2,13 +2,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DatePicker, Form, Input, Radio, Spin, TimePicker } from 'antd';
 import '@/styles/config.less';
 import '@/styles/task.less';
-import moment, { Moment } from 'moment';
 import { addAutoPurchaseTask, queryPurchaseIds, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { AutoPurchaseTaskType, TaskStatusCode, TaskStatusMap } from '@/enums/StatusEnum';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { transStartDate } from 'react-components/es/JsonForm';
+import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { IResponse } from '@/interface/IGlobal';
 import { ITaskDetailResponse } from '@/interface/ITask';
@@ -17,20 +16,21 @@ import { EmptyObject } from '@/config/global';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 import { LoadingButton } from 'react-components';
+import dayjs, { Dayjs } from 'dayjs';
 
 declare interface IFormData {
     task_name: string;
-    purchase_times: Array<Moment | undefined>;
+    purchase_times: Array<Dayjs | undefined>;
     type: AutoPurchaseTaskType;
-    dateRange?: [Moment, Moment];
+    dateRange?: [Dayjs, Dayjs];
 }
 
 declare interface IAutoPurchaseTaskProps {
     taskId?: number;
 }
 
-function disabledDate(current: Moment) {
-    return current && current < moment().startOf('day');
+function disabledDate(current: Dayjs) {
+    return current && current < dayjs().startOf('day');
 }
 
 const convertFormData = (values: IFormData) => {
@@ -39,9 +39,9 @@ const convertFormData = (values: IFormData) => {
         task_name,
         type,
         task_start_time:
-            type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![0]) : undefined,
+            type === AutoPurchaseTaskType.EveryDay ? startDateToUnix(dateRange![0]) : undefined,
         task_end_time:
-            type === AutoPurchaseTaskType.EveryDay ? transStartDate(dateRange![1]) : undefined,
+            type === AutoPurchaseTaskType.EveryDay ? endDateToUnix(dateRange![1]) : undefined,
         purchase_times: purchase_times
             .filter(date => date)
             .map(date =>
@@ -103,11 +103,11 @@ const AutoPurchaseTask: React.FC<IAutoPurchaseTaskProps> = ({ taskId }) => {
             });
     }, []);
 
-    const checkDate = useCallback((type: any, value: Moment) => {
+    const checkDate = useCallback((type: any, value: Dayjs) => {
         if (!value) {
             return Promise.resolve();
         }
-        const now = moment();
+        const now = dayjs();
         if (value.isAfter(now)) {
             return Promise.resolve();
         } else {
@@ -115,11 +115,11 @@ const AutoPurchaseTask: React.FC<IAutoPurchaseTaskProps> = ({ taskId }) => {
         }
     }, []);
 
-    const checkTime = useCallback((type: any, value: Moment) => {
+    const checkTime = useCallback((type: any, value: Dayjs) => {
         const dateRange = form.getFieldValue('dateRange');
         if (dateRange && value) {
             const [startDate] = dateRange;
-            const nowDate = moment();
+            const nowDate = dayjs();
             let clone = startDate.clone();
             clone
                 .hour(value.hour())

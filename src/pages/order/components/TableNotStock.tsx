@@ -9,7 +9,7 @@ import {
     purchaseShippingOptionList,
     purchasePayOptionList,
 } from '@/enums/OrderEnum';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 declare interface IProps {
     loading: boolean;

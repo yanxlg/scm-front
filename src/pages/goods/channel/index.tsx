@@ -25,7 +25,7 @@ import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
@@ -209,8 +209,8 @@ const ChannelList: React.FC = props => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
-            onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
+            onshelf_time_start: unixToStartDate(Number(onshelf_time_start)),
+            onshelf_time_end: unixToEndDate(Number(onshelf_time_end)),
             commodity_id,
             vova_virtual_id,
             product_id,

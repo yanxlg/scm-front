@@ -4,7 +4,7 @@ import { FitTable } from 'react-components';
 
 import { IOrderItem } from './PanePendingOrder';
 import { ColumnProps } from 'antd/lib/table/Column';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { purchaseOrderOptionList } from '@/enums/OrderEnum';
 
