@@ -566,7 +566,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     <JsonForm
                         ref={this.formRef}
                         fieldList={fieldList}
-                        labelClassName="order-label"
+                        labelClassName="order-all-label"
                         initialValues={this.initialValues}
                         enableCollapse={false}
                     />
