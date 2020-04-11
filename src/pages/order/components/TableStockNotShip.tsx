@@ -5,7 +5,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IOrderItem } from './PaneStockNotShip';
 import { FitTable } from 'react-components';
 
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
 

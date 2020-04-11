@@ -1,9 +1,14 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { Button } from 'antd';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsVersion } from '@/services/goods';
-import { IGoodsAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
-import { utcToLocal } from '@/utils/date';
+import { IGoodsVersionAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
+import { utcToLocal } from 'react-components/es/utils/date';
+import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
+import SkuDialog from './SkuDialog';
+import useEditDialog from '../hooks/useEditDialog';
+import useSkuDialog from '../hooks/useSkuDialog';
 
 import styles from '../_version.less';
 import { LockOutlined } from '@ant-design/icons';
@@ -16,7 +21,29 @@ const CurrentPane: React.FC<IProps> = ({
     commodityId
 }) => {
     const [loading, setLoading] = useState(false);
-    const [goodsList, setGoodsList] = useState<IGoodsAndSkuItem[]>([]);
+    const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
+    const {
+        goodsEditStatus,
+        // setGoodsEditStatus,
+        currentEditGoods,
+        // setCurrentEditGoods,
+        originEditGoods,
+        // setOriginEditGoods,
+        allCatagoryList,
+        getCurrentCatagory,
+        toggleEditGoodsDialog,
+        changeGoodsText,
+        changeGoodsCatagory,
+        changeGoodsImg,
+        resetGoodsData
+    } = useEditDialog();
+    const {
+        skuStatus,
+        currentSkuGoods,
+        skuDialogRef,
+        showSkuDialog,
+        hideSkuDialog
+    } = useSkuDialog();
     
     const getCurrentList = useCallback(
         () => {
@@ -34,12 +61,14 @@ const CurrentPane: React.FC<IProps> = ({
                     if (sku_info?.length > 0) {
                         return {
                             _update_time,
+                            commodity_id: commodityId,
                             ...item,
                             ...sku_info[0]
                         }
                     }
                     return {
                         _update_time,
+                        commodity_id: commodityId,
                         ...item
                     };
                 }))
@@ -50,7 +79,7 @@ const CurrentPane: React.FC<IProps> = ({
         [],
     );
 
-    const columns = useMemo<ColumnType<IGoodsAndSkuItem>[]>(
+    const columns = useMemo<ColumnType<IGoodsVersionAndSkuItem>[]>(
         () => {
             return [
                 {
@@ -59,6 +88,13 @@ const CurrentPane: React.FC<IProps> = ({
                     // dataIndex: 'goods_status',
                     width: 120,
                     align: 'center',
+                    render: (_, row: IGoodsVersionAndSkuItem) => {
+                        return (
+                            <>
+                                <Button type="link" onClick={() => toggleEditGoodsDialog(true, row)}>编辑</Button>   
+                            </>
+                        )
+                    }
                 },
                 {
                     title: 'Product ID',
@@ -114,7 +150,7 @@ const CurrentPane: React.FC<IProps> = ({
                     dataIndex: 'first_catagory',
                     align: 'center',
                     width: 160,
-                    render: (_, row: IGoodsAndSkuItem) => {
+                    render: (_, row: IGoodsVersionAndSkuItem) => {
                         const { first_catagory, second_catagory, third_catagory } = row;
                         return `${first_catagory.name || ''}-${second_catagory.name || ''}-${third_catagory.name || ''}`;
                     }
@@ -124,6 +160,20 @@ const CurrentPane: React.FC<IProps> = ({
                     dataIndex: 'sku_number',
                     width: 120,
                     align: 'center',
+                    render: (value: number, row: IGoodsVersionAndSkuItem) => {
+                        return (
+                            <>
+                                <div>{value}</div>
+                                <Button
+                                    type="link"
+                                    className={styles.link}
+                                    onClick={() => showSkuDialog(row)}
+                                >
+                                    查看sku信息
+                                </Button>
+                            </>
+                        );
+                    }
                 },
                 {
                     title: '爬虫价格(￥)',
@@ -155,18 +205,41 @@ const CurrentPane: React.FC<IProps> = ({
     return useMemo(
         () => {
             return (
-                <FitTable
-                    bordered
-                    rowKey="product_id"
-                    loading={loading}
-                    columns={columns}
-                    dataSource={goodsList}
-                    scroll={{ x: 'max-content', y: 400 }}
-                    pagination={false}
-                />
+                <>
+                    <FitTable
+                        bordered
+                        rowKey="product_id"
+                        loading={loading}
+                        columns={columns}
+                        dataSource={goodsList}
+                        scroll={{ x: 'max-content' }}
+                        autoFitY={true}
+                        pagination={false}
+                    />
+                    <ImgEditDialog
+                        visible={goodsEditStatus}
+                        originEditGoods={originEditGoods}
+                        currentEditGoods={currentEditGoods}
+                        allCatagoryList={allCatagoryList}
+                        toggleEditGoodsDialog={toggleEditGoodsDialog}
+                        getCurrentCatagory={getCurrentCatagory}
+                        changeGoodsText={changeGoodsText}
+                        changeGoodsCatagory={changeGoodsCatagory}
+                        changeGoodsImg={changeGoodsImg}
+                        resetGoodsData={resetGoodsData}
+                        onSearch={getCurrentList}
+                    />
+                    <SkuDialog
+                        visible={skuStatus}
+                        ref={skuDialogRef}
+                        currentRowData={currentSkuGoods}
+                        hideSkuDialog={hideSkuDialog}
+                    />
+                </>
+                
             )
         }, 
-        [goodsList, loading]
+        [goodsList, loading, goodsEditStatus, currentEditGoods, skuStatus, currentSkuGoods]
     )
 }
 

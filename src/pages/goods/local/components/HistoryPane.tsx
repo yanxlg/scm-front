@@ -3,8 +3,8 @@ import { Pagination, Button } from 'antd';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsVersion } from '@/services/goods';
-import { IGoodsAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
-import { utcToLocal } from '@/utils/date';
+import { IGoodsVersionAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
+import { utcToLocal } from 'react-components/es/utils/date';
 import usePagination from '../hooks/usePagination';
 import VersionParentDialog from './VersionParentDialog';
 
@@ -17,7 +17,7 @@ interface IProps {
 const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
     const [loading, setLoading] = useState(false);
     const [parentDialogStatus, setParentDialogStatus] = useState(false);
-    const [goodsList, setGoodsList] = useState<IGoodsAndSkuItem[]>([]);
+    const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
     const [productId, setProductId] = useState('');
 
     const { page, setPage, pageSize, setPageSize, total, setTotal } = usePagination();
@@ -64,7 +64,7 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
             });
     }, []);
 
-    const columns = useMemo<ColumnType<IGoodsAndSkuItem>[]>(() => {
+    const columns = useMemo<ColumnType<IGoodsVersionAndSkuItem>[]>(() => {
         return [
             {
                 title: 'Product ID',
@@ -130,7 +130,7 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'first_catagory',
                 align: 'center',
                 width: 160,
-                render: (_, row: IGoodsAndSkuItem) => {
+                render: (_, row: IGoodsVersionAndSkuItem) => {
                     const { first_catagory, second_catagory, third_catagory } = row;
                     return `${first_catagory.name || ''}-${second_catagory.name ||
                         ''}-${third_catagory.name || ''}`;

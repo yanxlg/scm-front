@@ -4,6 +4,7 @@ import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
 import { IGoodsList, ICatagoryItem, IGoodsVersionItem } from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ICountryItem } from '@/interface/ISetting';
+import { singlePromiseWrap } from '@/utils/utils';
 
 export declare interface IFilterParams {
     page?: number;
@@ -176,7 +177,7 @@ function convertCategory(data: ICatagoryItem[]): IOptionItem[] {
 }
 
 // 获取所有
-export async function getCatagoryList() {
+export const getCatagoryList = singlePromiseWrap(() => {
     return request.get(LocalApiPath.getCatagoryList).then(res => {
         const { data } = res;
         return {
@@ -184,7 +185,7 @@ export async function getCatagoryList() {
             convertList: convertCategory(data),
         };
     });
-}
+})
 
 // 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {

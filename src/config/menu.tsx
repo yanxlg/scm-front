@@ -1,5 +1,5 @@
 import React from 'react';
-import { DashboardOutlined } from '@ant-design/icons/lib';
+import { DashboardOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import '@/styles/menu.less';
 
@@ -77,12 +77,12 @@ export default [
         icon: <Icons type="scm-setting" className="menu-icon" />,
         children: [
             {
-                path: '/setting/goodsAttr',
-                name: '商品属性',
+                path: '/setting/account',
+                name: '账户管理',
             },
             {
-                path: '/setting/store',
-                name: '店铺关联',
+                path: '/setting/goodsAttr',
+                name: '商品属性',
             },
             {
                 path: '/setting/price',

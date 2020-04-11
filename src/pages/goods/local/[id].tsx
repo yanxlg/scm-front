@@ -23,7 +23,7 @@ const Version: React.FC<RouteComponentProps<{ id: string }>> = ({
         return (
             <Container>
                 <GoodsInfo releasedGoods={releasedGoods}/>
-                <Tabs defaultActiveKey="2" type="card" className={styles.tabs}>
+                <Tabs defaultActiveKey="1" type="card" className={styles.tabs}>
                     <TabPane tab="当前最新版本" key="1">
                         <CurrentPane commodityId={commodityId}/>
                     </TabPane>

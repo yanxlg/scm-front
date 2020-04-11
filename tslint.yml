@@ -7,7 +7,7 @@ rules:
     no-console: true
     no-construct: true
     no-debugger: true
-    no-reference: true
+    no-reference: false
     jsx-no-multiline-js: false
     jsx-wrap-multiline: false
     jsx-alignment: false

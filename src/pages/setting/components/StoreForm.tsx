@@ -1,5 +1,4 @@
 import React, { RefObject } from 'react';
-import { Bind } from 'lodash-decorators';
 import { Button, Card, Divider, Input, Form } from 'antd';
 import '@/styles/setting.less';
 import { FormInstance } from 'antd/es/form';
@@ -33,7 +32,6 @@ class StoreForm extends React.PureComponent<IStoreFormProps, IStoreFormState> {
             list: [1],
         };
     }
-    @Bind
     private convertFormData(values: IFormData) {
         /*   const {range,shopId,onceStartTime,timerStartTime,day=0,second,taskIntervalType,task_type,task_end_time,...extra} = values;
         return {
@@ -50,13 +48,10 @@ class StoreForm extends React.PureComponent<IStoreFormProps, IStoreFormState> {
         }*/
         return values;
     }
-    @Bind
     private onGather(is_upper_shelf: boolean = false) {}
-    @Bind
     private onStartGather() {
         this.onGather();
     }
-    @Bind
     private onAcquisitionRack() {
         this.onGather(true);
     }

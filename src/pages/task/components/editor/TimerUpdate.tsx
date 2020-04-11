@@ -1,148 +1,134 @@
-import React, { RefObject } from 'react';
-import { BindAll } from 'lodash-decorators';
-import { Button, DatePicker, Input, Radio, Form, Spin, Select } from 'antd';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { DatePicker, Input, Radio, Form, Spin, Checkbox } from 'antd';
 import '@/styles/config.less';
-import moment, { Moment } from 'moment';
-import { FormInstance } from 'antd/es/form';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
-import { TaskIntervalConfigType, TaskStatusCode, PUTaskRangeType } from '@/enums/StatusEnum';
-import { IntegerInput, RichInput } from 'react-components';
+import {
+    TaskIntervalConfigType,
+    TaskStatusCode,
+    PUTaskRangeType,
+    UpdateItemType,
+} from '@/enums/StatusEnum';
+import { LoadingButton, RichInput } from 'react-components';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { ITaskDetailInfo, IPUTaskBody } from '@/interface/ITask';
-import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
 import { EmptyObject } from '@/config/global';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
+import { dateToUnix } from 'react-components/es/utils/date';
+import dayjs, { Dayjs } from 'dayjs';
 
-declare interface IFormData extends IPUTaskBody {
+declare interface IFormData extends Omit<IPUTaskBody, 'range'> {
     taskIntervalType?: TaskIntervalConfigType;
     day: number;
     second: number;
+    update_item: UpdateItemType;
+    range: UpdateItemType[];
 }
 
 declare interface ITimerUpdateProps {
     taskId?: number;
 }
 
-declare interface ITimerUpdateState {
-    createLoading: boolean;
-    queryLoading: boolean;
-    status?: TaskStatusCode;
-    successTimes?: number;
-    failTimes?: number;
-}
+const convertDetail = (info: ITaskDetailInfo) => {
+    const {
+        update_type = PUTaskRangeType.AllOnShelves,
+        task_end_time,
+        task_start_time,
+        time_interval,
+        ...extra
+    } = info;
+    const isDay = time_interval && time_interval % 86400 === 0;
+    return {
+        range: update_type,
+        taskIntervalType: time_interval
+            ? isDay
+                ? TaskIntervalConfigType.day
+                : TaskIntervalConfigType.second
+            : TaskIntervalConfigType.day,
+        task_start_time: task_start_time ? dayjs(task_start_time * 1000) : undefined,
+        task_end_time: task_end_time ? dayjs(task_end_time * 1000) : undefined,
+        day: isDay ? time_interval! / 86400 : undefined,
+        second: time_interval && !isDay ? time_interval : undefined,
+        ...extra,
+    };
+};
 
-@BindAll()
-class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateState> {
-    private formRef: RefObject<FormInstance> = React.createRef();
-    constructor(props: ITimerUpdateProps) {
-        super(props);
-        this.state = {
-            createLoading: false,
-            queryLoading: props.taskId !== void 0,
-        };
-    }
-    componentDidMount(): void {
-        const { taskId } = this.props;
+const convertFormData = (values: IFormData) => {
+    const {
+        range,
+        day = 0,
+        second,
+        taskIntervalType,
+        task_end_time,
+        task_start_time,
+        task_name,
+        update_item,
+    } = values;
+    return {
+        task_name,
+        range: range.join(','),
+        update_item,
+        task_start_time: dateToUnix(task_start_time),
+        task_end_time: dateToUnix(task_end_time),
+        task_interval_seconds:
+            taskIntervalType === TaskIntervalConfigType.second ? second : day * 60 * 60 * 24,
+    };
+};
+
+const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
+    const [form] = Form.useForm();
+    const [queryLoading, setQueryLoading] = useState(taskId !== void 0);
+    const [status, setStatus] = useState<TaskStatusCode>(); // 详情保留字段
+    const [successTimes, setSuccessTimes] = useState<number>(); // 详情保留字段
+    const [failTimes, setFailTimes] = useState<number>(); // 详情保留字段
+
+    useEffect(() => {
         if (taskId !== void 0) {
-            queryTaskDetail(taskId).then(
-                ({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
-                    const initValues = this.convertDetail(task_detail_info as ITaskDetailInfo);
+            queryTaskDetail(taskId)
+                .then(({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
+                    const initValues = convertDetail(task_detail_info as ITaskDetailInfo);
                     const { success, fail, status } = initValues;
-                    this.formRef.current!.setFieldsValue({
+                    form.setFieldsValue({
                         ...initValues,
                     });
-                    this.setState({
-                        queryLoading: false,
-                        status: status,
-                        successTimes: success,
-                        failTimes: fail,
-                    });
-                },
-            );
-        }
-    }
-
-    private convertDetail(info: ITaskDetailInfo) {
-        const {
-            update_type = PUTaskRangeType.AllOnShelves,
-            task_end_time,
-            task_start_time,
-            time_interval,
-            ...extra
-        } = info;
-        const isDay = time_interval && time_interval % 86400 === 0;
-        return {
-            range: update_type,
-            taskIntervalType: time_interval
-                ? isDay
-                    ? TaskIntervalConfigType.day
-                    : TaskIntervalConfigType.second
-                : TaskIntervalConfigType.day,
-            task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
-            task_end_time: task_end_time ? moment(task_end_time * 1000) : undefined,
-            day: isDay ? time_interval! / 86400 : undefined,
-            second: time_interval && !isDay ? time_interval : undefined,
-            ...extra,
-        };
-    }
-
-    private convertFormData(values: IFormData) {
-        const {
-            range,
-            day = 0,
-            second,
-            taskIntervalType,
-            task_end_time,
-            task_start_time,
-            task_name,
-        } = values;
-        return {
-            task_name,
-            range,
-            task_start_time: dateToUnix(task_start_time),
-            task_end_time: dateToUnix(task_end_time),
-            task_interval_seconds:
-                taskIntervalType === TaskIntervalConfigType.second ? second : day * 60 * 60 * 24,
-        };
-    }
-
-    private onCreate() {
-        this.formRef
-            .current!.validateFields()
-            .then((values: any) => {
-                const params = this.convertFormData(values);
-                this.setState({
-                    createLoading: true,
+                    setStatus(status);
+                    setSuccessTimes(success);
+                    setFailTimes(fail);
+                })
+                .finally(() => {
+                    setQueryLoading(false);
                 });
-                addPDDTimerUpdateTask(params)
+        }
+    }, []);
+
+    const onCreate = useCallback(() => {
+        return form
+            .validateFields()
+            .then((values: any) => {
+                const params = convertFormData(values);
+                return addPDDTimerUpdateTask(params)
                     .then(({ data = EmptyObject } = EmptyObject) => {
-                        this.formRef.current!.resetFields();
+                        form.resetFields();
                         showSuccessModal(data);
                     })
                     .catch(() => {
                         showFailureModal();
-                    })
-                    .finally(() => {
-                        this.setState({
-                            createLoading: false,
-                        });
                     });
             })
             .catch(({ errorFields }) => {
-                scrollToFirstError(this.formRef.current!, errorFields);
+                scrollToFirstError(form, errorFields);
             });
-    }
+    }, []);
 
-    private checkStartDate(type: any, value: Moment) {
+    const checkStartDate = useCallback((type: any, value: Dayjs) => {
         if (!value) {
             return Promise.resolve();
         }
-        const endDate = this.formRef.current!.getFieldValue('task_end_time');
-        const now = moment();
+        const endDate = form.getFieldValue('task_end_time');
+        const now = dayjs();
         if (value.isAfter(now)) {
             if (endDate && value.isSameOrAfter(endDate)) {
                 return Promise.reject('开始时间不能晚于结束时间');
@@ -151,14 +137,14 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
         } else {
             return Promise.reject('开始时间不能早于当前时间');
         }
-    }
+    }, []);
 
-    private checkEndDate(type: any, value: Moment) {
+    const checkEndDate = useCallback((type: any, value: Dayjs) => {
         if (!value) {
             return Promise.resolve();
         }
-        const startDate = this.formRef.current!.getFieldValue('timerStartTime');
-        const now = moment();
+        const startDate = form!.getFieldValue('timerStartTime');
+        const now = dayjs();
         if (value.isAfter(now)) {
             if (startDate && value.isSameOrBefore(startDate)) {
                 return Promise.reject('结束时间不能早于开始时间');
@@ -167,48 +153,48 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
         } else {
             return Promise.reject('结束时间不能早于当前时间');
         }
-    }
+    }, []);
 
-    private disabledStartDate(startTime: Moment | null) {
-        const endTime = this.formRef.current!.getFieldValue('task_end_time');
+    const disabledStartDate = useCallback((startTime: Dayjs | null) => {
+        const endTime = form.getFieldValue('task_end_time');
         if (!startTime) {
             return false;
         }
         const startValue = startTime.valueOf();
-        const currentDay = moment().startOf('day');
+        const currentDay = dayjs().startOf('day');
         if (!endTime) {
             return startTime < currentDay;
         }
         return startValue > endTime.clone().endOf('day') || startTime < currentDay;
-    }
+    }, []);
 
-    private disabledEndDate(endTime: Moment | null) {
-        const startTime = this.formRef.current!.getFieldValue('task_start_time');
+    const disabledEndDate = useCallback((endTime: Dayjs | null) => {
+        const startTime = form.getFieldValue('task_start_time');
         if (!endTime) {
             return false;
         }
         const endValue = endTime.valueOf();
-        const currentDay = moment().startOf('day');
+        const currentDay = dayjs().startOf('day');
         if (!startTime) {
             return endTime < currentDay;
         }
         return startTime.clone().startOf('day') > endValue || endTime < currentDay;
-    }
-    render() {
-        const { createLoading, queryLoading } = this.state;
-        const { taskId } = this.props;
-        const edit = taskId !== void 0;
+    }, []);
+    const edit = taskId !== void 0;
+
+    return useMemo(() => {
         return (
             <Spin spinning={queryLoading} tip="Loading...">
                 <Form
-                    ref={this.formRef}
-                    className={formStyles.formHelpAbsolute}
+                    form={form}
+                    className={classNames(formStyles.formHelpAbsolute, formStyles.formContainer)}
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        range: PUTaskRangeType.AllOnShelves,
+                        range: [PUTaskRangeType.HasSalesOn],
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
+                        update_item: UpdateItemType.All,
                     }}
                 >
                     <Form.Item
@@ -229,18 +215,28 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                     <Form.Item
                         validateTrigger={'onBlur'}
                         name="range"
-                        label="商品范围"
+                        label="商品条件"
                         required={true}
                         className={formStyles.formItem}
                     >
-                        <Select className="picker-default">
-                            <Select.Option value={PUTaskRangeType.AllOnShelves}>
-                                全部已上架商品
-                            </Select.Option>
-                            <Select.Option value={PUTaskRangeType.HasSales}>
-                                有销量的已上架商品
-                            </Select.Option>
-                        </Select>
+                        <Checkbox.Group>
+                            <Checkbox value={PUTaskRangeType.HasSalesOn}>有销量在架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.NoSalesOn}>无销量在架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.HasSalesOff}>有销量下架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.NoSalesOff}>无销量下架商品</Checkbox>
+                        </Checkbox.Group>
+                    </Form.Item>
+                    <Form.Item
+                        validateTrigger={'onBlur'}
+                        name="update_item"
+                        label="更新字段"
+                        required={true}
+                        className={formStyles.formItem}
+                    >
+                        <Radio.Group>
+                            <Radio value={UpdateItemType.All}>全部</Radio>
+                            <Radio value={UpdateItemType.IgnoreImage}>不含图片</Radio>
+                        </Radio.Group>
                     </Form.Item>
                     <div>
                         <Form.Item
@@ -255,7 +251,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                     message: '请选择开始时间',
                                 },
                                 {
-                                    validator: this.checkStartDate,
+                                    validator: checkStartDate,
                                 },
                             ]}
                         >
@@ -263,7 +259,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                 className="picker-default"
                                 locale={locale}
                                 showTime={true}
-                                disabledDate={this.disabledStartDate}
+                                disabledDate={disabledStartDate}
                             />
                         </Form.Item>
                         <Form.Item
@@ -278,7 +274,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                     message: '请选择结束时间',
                                 },
                                 {
-                                    validator: this.checkEndDate,
+                                    validator: checkEndDate,
                                 },
                             ]}
                         >
@@ -286,7 +282,7 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                                 className="picker-default"
                                 locale={locale}
                                 showTime={true}
-                                disabledDate={this.disabledEndDate}
+                                disabledDate={disabledEndDate}
                             />
                         </Form.Item>
                     </div>
@@ -429,19 +425,14 @@ class TimerUpdate extends React.PureComponent<ITimerUpdateProps, ITimerUpdateSta
                         </Radio.Group>
                     </Form.Item>
                     <div className={formStyles.formNextCard}>
-                        <Button
-                            loading={createLoading}
-                            type="primary"
-                            className="btn-default"
-                            onClick={this.onCreate}
-                        >
+                        <LoadingButton type="primary" className="btn-default" onClick={onCreate}>
                             {edit ? '创建新任务' : '创建任务'}
-                        </Button>
+                        </LoadingButton>
                     </div>
                 </Form>
             </Spin>
         );
-    }
-}
+    }, [queryLoading, edit]);
+};
 
 export default TimerUpdate;

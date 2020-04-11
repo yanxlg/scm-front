@@ -2,11 +2,11 @@ import React, { useCallback, useMemo } from 'react';
 import { DatePicker, Form, Radio, Select } from 'antd';
 import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
 import locale from 'antd/es/date-picker/locale/zh_CN';
-import { IntegerInput, RichInput } from 'react-components';
-import moment, { Moment } from 'moment';
+import { RichInput } from 'react-components';
 import { FormInstance } from 'antd/es/form';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
+import dayjs, { Dayjs } from 'dayjs';
 
 declare interface TaskCycleProps {
     form: FormInstance;
@@ -17,12 +17,12 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
         form.resetFields(['task_end_time', 'task_start_time', 'day', 'second', 'taskIntervalType']);
     }, []);
 
-    const checkDate = useCallback((type: any, value: Moment) => {
+    const checkDate = useCallback((type: any, value: Dayjs) => {
         const taskType = form.getFieldValue('task_type');
         if (!value || taskType === TaskExecuteType.interval) {
             return Promise.resolve();
         }
-        const now = moment();
+        const now = dayjs();
         if (value.isAfter(now)) {
             return Promise.resolve();
         } else {
@@ -30,13 +30,13 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
         }
     }, []);
 
-    const checkStartDate = useCallback((type: any, value: Moment) => {
+    const checkStartDate = useCallback((type: any, value: Dayjs) => {
         const taskType = form.getFieldValue('task_type');
         if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
         }
         const endDate = form.getFieldValue('task_end_time');
-        const now = moment();
+        const now = dayjs();
         if (value.isAfter(now)) {
             if (endDate && value.isSameOrAfter(endDate)) {
                 return Promise.reject('开始时间不能晚于结束时间');
@@ -47,7 +47,7 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
         }
     }, []);
 
-    const checkEndDate = useCallback((type: any, value: Moment) => {
+    const checkEndDate = useCallback((type: any, value: Dayjs) => {
         const taskType = form.getFieldValue('task_type');
         if (!value || taskType === TaskExecuteType.once) {
             return Promise.resolve();
@@ -61,7 +61,7 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
         const offsetSeconds =
             taskIntervalType === TaskIntervalConfigType.day ? day * 60 * 60 * 24 : second;
 
-        const now = moment();
+        const now = dayjs();
         if (value.isAfter(now)) {
             if (startDate) {
                 if (value.isSameOrBefore(startDate)) {
@@ -77,7 +77,7 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
         }
     }, []);
 
-    const disabledStartDate = useCallback((startTime: Moment | null) => {
+    const disabledStartDate = useCallback((startTime: Dayjs | null) => {
         const taskType = form.getFieldValue('task_type');
         const endTime =
             taskType === TaskExecuteType.interval ? form.getFieldValue('task_end_time') : null;
@@ -85,20 +85,20 @@ const TaskCycle: React.FC<TaskCycleProps> = ({ form }) => {
             return false;
         }
         const startValue = startTime.valueOf();
-        const currentDay = moment().startOf('day');
+        const currentDay = dayjs().startOf('day');
         if (!endTime) {
             return startTime < currentDay;
         }
         return startValue > endTime.clone().endOf('day') || startTime < currentDay;
     }, []);
 
-    const disabledEndDate = useCallback((endTime: Moment | null) => {
+    const disabledEndDate = useCallback((endTime: Dayjs | null) => {
         const startTime = form.getFieldValue('task_start_time');
         if (!endTime) {
             return false;
         }
         const endValue = endTime.valueOf();
-        const currentDay = moment().startOf('day');
+        const currentDay = dayjs().startOf('day');
         if (!startTime) {
             return endTime < currentDay;
         }

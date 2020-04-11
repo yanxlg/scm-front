@@ -25,7 +25,7 @@ import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
@@ -40,8 +40,8 @@ import { isEmptyObject } from '@/utils/utils';
 import { Icons } from '@/components/Icon';
 import { ProColumns } from 'react-components/es/ProTable';
 import { ProTable } from 'react-components';
-import formStyles from 'react-components/es/JsonForm/_form.less';
-import classNames from 'classnames';
+import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
+import { useModal } from 'react-components/es/hooks';
 
 const salesVolumeList = [
     {
@@ -179,6 +179,8 @@ const ChannelList: React.FC = props => {
 
     const skuRef = useRef<SkuDialog>(null);
 
+    const { visible, onClose, setVisibleProps } = useModal<string>();
+
     const {
         pageSize: page_size,
         pageNumber: page_number,
@@ -207,8 +209,8 @@ const ChannelList: React.FC = props => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
-            onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
+            onshelf_time_start: unixToStartDate(Number(onshelf_time_start)),
+            onshelf_time_end: unixToEndDate(Number(onshelf_time_end)),
             commodity_id,
             vova_virtual_id,
             product_id,
@@ -383,8 +385,60 @@ const ChannelList: React.FC = props => {
         [dataSource],
     );
 
+    const showLog = useCallback((record: IChannelProductListItem) => {
+        setVisibleProps(record.product_id);
+    }, []);
+
     const columns = useMemo<ProColumns<IChannelProductListItem>[]>(() => {
         return [
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                align: 'center',
+                width: 140,
+                fixed: 'left',
+                render: (_, item) => {
+                    const status = item.product_status;
+                    const canUpper = !checkUpperShelf(status);
+                    const canDown = !checkLowerShelf(status);
+                    return {
+                        children: (
+                            <>
+                                <PopConfirmLoadingButton
+                                    buttonProps={{
+                                        disabled: canUpper,
+                                        children: '上架',
+                                        type: 'link',
+                                    }}
+                                    popConfirmProps={{
+                                        title: '确定需要上架该商品吗?',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        disabled: canUpper,
+                                        placement: 'topRight',
+                                        onConfirm: () => onShelves(item),
+                                    }}
+                                />
+                                <PopConfirmLoadingButton
+                                    buttonProps={{
+                                        disabled: canDown,
+                                        children: '下架',
+                                        type: 'link',
+                                    }}
+                                    popConfirmProps={{
+                                        title: '确定需要下架该商品吗?',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        disabled: canDown,
+                                        placement: 'topRight',
+                                        onConfirm: () => offShelves(item),
+                                    }}
+                                />
+                            </>
+                        ),
+                    };
+                },
+            },
             {
                 title: '店铺名称',
                 dataIndex: 'shop_name',
@@ -452,9 +506,16 @@ const ChannelList: React.FC = props => {
                 title: '商品状态',
                 dataIndex: 'product_status',
                 align: 'center',
-                width: 100,
-                render: (status: ProductStatusCode) => {
-                    return ProductStatusMap[status];
+                width: 150,
+                render: (status: ProductStatusCode, record) => {
+                    return (
+                        <div>
+                            {ProductStatusMap[status]}
+                            <Button type="link" onClick={() => showLog(record)}>
+                                上下架日志
+                            </Button>
+                        </div>
+                    );
                 },
             },
             {
@@ -490,53 +551,6 @@ const ChannelList: React.FC = props => {
                             查看国家运费
                         </Button>
                     );
-                },
-            },
-            {
-                title: '操作',
-                dataIndex: 'operation',
-                align: 'center',
-                width: 140,
-                render: (_, item) => {
-                    const status = item.product_status;
-                    const canUpper = !checkUpperShelf(status);
-                    const canDown = !checkLowerShelf(status);
-                    return {
-                        children: (
-                            <>
-                                <PopConfirmLoadingButton
-                                    buttonProps={{
-                                        disabled: canUpper,
-                                        children: '上架',
-                                        type: 'link',
-                                    }}
-                                    popConfirmProps={{
-                                        title: '确定需要上架该商品吗?',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        disabled: canUpper,
-                                        placement: 'topRight',
-                                        onConfirm: () => onShelves(item),
-                                    }}
-                                />
-                                <PopConfirmLoadingButton
-                                    buttonProps={{
-                                        disabled: canDown,
-                                        children: '下架',
-                                        type: 'link',
-                                    }}
-                                    popConfirmProps={{
-                                        title: '确定需要下架该商品吗?',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        disabled: canDown,
-                                        placement: 'topRight',
-                                        onConfirm: () => offShelves(item),
-                                    }}
-                                />
-                            </>
-                        ),
-                    };
                 },
             },
         ];
@@ -660,7 +674,16 @@ const ChannelList: React.FC = props => {
         );
     }, [loading, exportDialog]);
 
-    return <>{body}</>;
+    const logModal = useMemo(() => {
+        return <OnOffLogModal visible={visible} onClose={onClose} />;
+    }, [visible]);
+
+    return (
+        <>
+            {body}
+            {logModal}
+        </>
+    );
 };
 
 export default ChannelList;

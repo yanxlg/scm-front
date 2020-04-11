@@ -64,3 +64,19 @@ export declare interface IPublishInterceptItem {
     name: string;
     checked: boolean;
 }
+
+export interface ICookieItem {
+    account_id: string;
+    phone: string;
+    cookie: string;
+    status: number;
+}
+
+export interface ICookieResponse {
+    list: ICookieItem[];
+}
+
+export interface ICookieBody {
+    account_id: string;
+    cookie: string;
+}

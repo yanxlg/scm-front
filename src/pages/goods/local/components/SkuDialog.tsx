@@ -4,7 +4,7 @@ import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import { FitTable } from 'react-components';
 
-import { ISkuStyleItem } from '@/interface/ILocalGoods';
+import { ISkuStyleItem, IGoodsAndSkuItem, IGoodsVersionAndSkuItem } from '@/interface/ILocalGoods';
 import { getGoodsSkuList, ISkuParams } from '@/services/goods';
 import { setCommoditySkuTag } from '@/services/goods-attr';
 
@@ -27,8 +27,8 @@ declare interface ISkuItem {
 
 declare interface IPorps {
     visible: boolean;
-    // currentRowData: IRowDataItem | null;
-    currentRowData: any;
+    currentRowData: IGoodsAndSkuItem | IGoodsVersionAndSkuItem | null;
+    // currentRowData: any;
     hideSkuDialog(): void;
 }
 
@@ -127,7 +127,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                 const { tags, commodity_sku_id } = row;
                 return (
                     <div style={{ textAlign: 'left' }}>
-                        {currentRowData.tags.map((item: string) => {
+                        {currentRowData?.tags.map((item: string) => {
                             const isActive = tags.indexOf(item) > -1;
                             return (
                                 <Button

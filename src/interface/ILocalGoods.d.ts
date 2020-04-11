@@ -86,6 +86,7 @@ export interface IGoodsList {
     tags: string[];
 }
 
+export type IGoodsAndSkuItem = IGoodsList & ISkuItem;
 
 /*** 商品版本 ***/ 
 
@@ -126,10 +127,11 @@ export interface IGoodsVersionItem {
     worm_goods_id: string;
     worm_goodsinfo_link: string;
     worm_task_id: string;
+    commodity_id?: string;
     _update_time?: string;
 }
 
-export type IGoodsAndSkuItem = IGoodsVersionItem & IGoodsVersionSkuItem;
+export type IGoodsVersionAndSkuItem = IGoodsVersionItem & IGoodsVersionSkuItem;
 
 export interface IGoodsVersionInfo {
     title: string;
@@ -141,4 +143,15 @@ export interface IGoodsVersionInfo {
     worm_goodsinfo_link: string;
     worm_goods_id: string;
     _update_time: string;
+}
+
+export interface IGoodsEditItem {
+    product_id: string;
+    title: string;
+    description: string;
+    first_catagory: ICatagoryItem;
+    second_catagory: ICatagoryItem;
+    third_catagory: ICatagoryItem;
+    goods_img: string;
+    sku_image: string[];
 }

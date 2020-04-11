@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getGoodsVersion } from '@/services/goods';
 import { IGoodsVersionInfo } from '@/interface/ILocalGoods';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 export default function useReleasedGoods(commodityId: string) {
 

@@ -1,5 +1,5 @@
 import request, { errorHandlerFactory } from '@/utils/request';
-import { TaskExecuteType, TaskStatusCode, TaskRangeEnum, HotTaskRange } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskStatusCode, HotTaskRange } from '@/enums/StatusEnum';
 import {
     IHotTaskBody,
     ITaskCreatedResponse,
@@ -8,7 +8,6 @@ import {
     IURLTaskBody,
     ITaskDetailResponse,
     IPDDCategoryResponse,
-    IPDDSortQueryType,
     IPDDSortResponse,
     ITaskLogResponse,
     IPUTaskBody,
@@ -17,11 +16,10 @@ import {
     ITaskProgressResponse,
     ISubTaskProgressQuery,
     ISubTaskProgressResponse,
-    ISubTaskIdItem,
     ISubTaskIdQuery,
     ISubTaskIdData,
 } from '@/interface/ITask';
-import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
+import { IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
 import { EmptyObject } from '@/config/global';
 import { isZero, transPaginationRequest, transPaginationResponse } from '@/utils/utils';

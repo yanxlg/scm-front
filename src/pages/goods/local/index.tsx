@@ -6,7 +6,6 @@ import { JsonForm } from 'react-components';
 import Container from '@/components/Container';
 import GoodsProTable from './components/GoodsProTable';
 import MerchantListModal from '../components/MerchantListModal';
-
 import {
     getGoodsList,
     postGoodsExports,
@@ -21,7 +20,7 @@ import {
 import { RouteComponentProps } from 'react-router';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import { IGoodsList, ISkuItem, ICatagoryItem } from '@/interface/ILocalGoods';
+import { IGoodsList, ISkuItem, ICatagoryItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
 import {
     defaultOption,
     inventoryStatusList,
@@ -208,8 +207,6 @@ const formFields: FormField[] = [
     },
 ];
 
-export type IRowDataItem = IGoodsList & ISkuItem;
-
 declare interface IIndexState {
     excelDialogStataus: boolean;
     merchantDialogStatus: boolean;
@@ -219,7 +216,7 @@ declare interface IIndexState {
     page: number;
     page_count: number;
     allCount: number;
-    goodsList: IRowDataItem[];
+    goodsList: IGoodsAndSkuItem[];
     selectedRowKeys: string[];
     allCatagoryList: ICatagoryItem[];
     onsaleType: 'default' | 'all';
@@ -361,7 +358,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 处理表格数据
-    private handleRowData(list: IGoodsList[]): IRowDataItem[] {
+    private handleRowData(list: IGoodsList[]): IGoodsAndSkuItem[] {
         return list.map(item => {
             const { sku_info } = item;
             if (sku_info.length > 0) {
