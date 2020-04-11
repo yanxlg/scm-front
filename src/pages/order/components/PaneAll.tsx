@@ -164,6 +164,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     } else {
                         this.setState({
                             childOrderList: this.getChildOrderData(list),
+                        }, () => {
+                            this.bindMouseenter();
                         });
                     }
                 }
@@ -542,6 +544,28 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         return postExportAll(params);
     };
 
+    // 绑定事件，处理hover问题
+    private bindMouseenter = () => {
+        [...document.querySelectorAll('.colspan-cell')].forEach(item => {
+            // console.log(item);
+            item.addEventListener('mouseenter', function(e) {
+                // console.log(e.target?.parentNode);
+                const id = (e.target as any).parentNode.getAttribute('data-id');
+                [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
+                    node.classList.add('hover');
+                })
+            })
+
+            item.addEventListener('mouseleave', function(e) {
+                // console.log(e.target?.parentNode);
+                const id = (e.target as any).parentNode.getAttribute('data-id');
+                [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
+                    node.classList.remove('hover');
+                })
+            })
+        })
+    }
+
     render() {
         const {
             page,
@@ -566,7 +590,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     <JsonForm
                         ref={this.formRef}
                         fieldList={fieldList}
-                        labelClassName="order-label"
+                        labelClassName="order-all-label"
                         initialValues={this.initialValues}
                         enableCollapse={false}
                     />
@@ -643,20 +667,21 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             orderList={parentOrderList}
                         />
                     )}
-
-                    <Pagination
-                        className="order-pagination"
-                        // size="small"
-                        total={total}
-                        current={page}
-                        pageSize={pageCount}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
-                    />
+                    <div style={{ textAlign: 'right' }}>
+                        <Pagination
+                            className="order-pagination"
+                            size="small"
+                            total={total}
+                            current={page}
+                            pageSize={pageCount}
+                            showSizeChanger={true}
+                            showQuickJumper={true}
+                            pageSizeOptions={pageSizeOptions}
+                            onChange={this.onChangePage}
+                            onShowSizeChange={this.pageCountChange}
+                            showTotal={total => `共${total}条`}
+                        />
+                    </div>
                 </div>
             </>
         );
