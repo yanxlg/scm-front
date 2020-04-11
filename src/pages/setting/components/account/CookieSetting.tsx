@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useDataSet } from 'react-components/es/hooks';
 import { ICookieItem } from '@/interface/ISetting';
-import { Form, Button, Table, Input } from 'antd';
-import { FitTable, LoadingButton, ProTable } from 'react-components';
+import { Form, Button, Input } from 'antd';
+import { FitTable, LoadingButton } from 'react-components';
 import { queryCookies, saveCookie } from '@/services/setting';
 import settingStyles from '@/styles/_setting.less';
 import { ColumnType } from 'antd/es/table/interface';
@@ -186,25 +186,14 @@ const CookieSetting: React.FC = () => {
         };
     }, []);
 
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: refresh,
-            setting: false,
-        };
-    }, []);
-
     return useMemo(() => {
         return (
             <Form form={form} className={formStyles.formHelpAbsolute}>
-                <ProTable
-                    headerTitle="cookie 列表"
+                <FitTable
                     loading={loading}
                     tableLayout="fixed"
                     rowKey="account_id"
                     components={components}
-                    options={options}
                     bordered={true}
                     dataSource={dataSet}
                     columns={mergedColumns}

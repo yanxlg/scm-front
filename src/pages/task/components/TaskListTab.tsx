@@ -540,8 +540,31 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             current: pageNumber,
             pageSize: pageSize,
             showSizeChanger: true,
-        };
+            position: ['topRight', 'bottomRight'],
+        } as any;
     }, [loading]);
+
+    const toolBarRender = useCallback(() => {
+        const size = selectedRowKeys.length;
+        return [
+            <PopConfirmLoadingButton
+                key="delete"
+                buttonProps={{
+                    danger: true,
+                    disabled: size === 0,
+                    children: '删除任务',
+                    className: formStyles.formBtn,
+                }}
+                popConfirmProps={{
+                    title: '确定要删除选中的任务吗?',
+                    okText: '确定',
+                    cancelText: '取消',
+                    disabled: size === 0,
+                    onConfirm: deleteTaskList,
+                }}
+            />,
+        ];
+    }, [selectedRowKeys]);
 
     const table = useMemo(() => {
         return (
@@ -556,38 +579,22 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
+                toolBarRender={toolBarRender}
             />
         );
     }, [loading, selectedRowKeys]);
 
     const search = useMemo(() => {
-        const size = selectedRowKeys.length;
         return (
             <JsonForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
-                <LoadingButton
-                    onClick={onSearch}
-                    className={formStyles.formBtn}
-                    type="primary"
-                    icon={<SearchOutlined />}
-                >
-                    查询
-                </LoadingButton>
-                <PopConfirmLoadingButton
-                    key="delete"
-                    buttonProps={{
-                        danger: true,
-                        disabled: size === 0,
-                        children: '删除任务',
-                        className: formStyles.formBtn,
-                    }}
-                    popConfirmProps={{
-                        title: '确定要删除选中的任务吗?',
-                        okText: '确定',
-                        cancelText: '取消',
-                        disabled: size === 0,
-                        onConfirm: deleteTaskList,
-                    }}
-                />
+                <div>
+                    <LoadingButton onClick={onSearch} className={formStyles.formBtn} type="primary">
+                        查询
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                        刷新
+                    </LoadingButton>
+                </div>
             </JsonForm>
         );
     }, [selectedRowKeys]);
