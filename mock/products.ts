@@ -10,7 +10,7 @@ const sleep = async (second: number) => {
 };
 
 export default {
-    'get /v1/vova_goods/version': (req: Request, res: Response) => {
+    'get /api/v1/vova_goods/version_list': (req: Request, res: Response) => {
         res.status(200).send({
             message: '',
             code: 200,

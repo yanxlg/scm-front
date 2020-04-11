@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { ReactText, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ITaskListItem, ITaskListQuery, ITaskListExtraData } from '@/interface/ITask';
 import { Button, message } from 'antd';
 import {
@@ -14,8 +14,7 @@ import {
 } from '@/enums/StatusEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { unixToEndDate, unixToStartDate } from 'react-components/es/utils/date';
-import { ProColumns } from 'react-components/es/ProTable';
-import { ProTable } from 'react-components';
+import { FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { useList } from '@/utils/hooks';
@@ -36,7 +35,8 @@ import {
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
-import { TableProps } from 'antd/es/table';
+import { ColumnType, TableProps } from 'antd/es/table';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -96,6 +96,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         onSearch,
         onReload,
         onChange,
+        selectedRowKeys,
+        setSelectedRowKeys,
     } = useList<ITaskListItem, ITaskListQuery, ITaskListExtraData>({
         queryList: getTaskList,
         formRef: searchRef,
@@ -301,7 +303,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 align: 'center',
                 render: (dateString: string) => utcToLocal(dateString),
             },
-        ] as ProColumns<ITaskListItem>[];
+        ] as ColumnType<ITaskListItem>[];
     }, []);
 
     const fieldList = useMemo<FormField[]>(() => {
@@ -512,19 +514,25 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         }
     }, [extraData]);
 
-    const deleteTaskList = useCallback(selectedRowKeys => {
+    const deleteTaskList = useCallback(() => {
         return deleteTasks(selectedRowKeys.join(',')).then(() => {
             message.success('任务删除成功!');
             onReload();
         });
+    }, [selectedRowKeys]);
+
+    const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
+        setSelectedRowKeys(selectedKeys as string[]);
     }, []);
 
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectedRowKeysChange,
         };
-    }, []);
+    }, [selectedRowKeys]);
 
     const pagination = useMemo(() => {
         return {
@@ -535,68 +543,55 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         };
     }, [loading]);
 
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
-    }, [onReload]);
-
-    const toolBarRender = useCallback((selectedRowKeys = []) => {
-        const size = selectedRowKeys.length;
-        return [
-            <PopConfirmLoadingButton
-                key="delete"
-                buttonProps={{
-                    danger: true,
-                    type: 'link',
-                    className: 'btn-clear btn-group',
-                    disabled: size === 0,
-                    children: '删除任务',
-                }}
-                popConfirmProps={{
-                    title: '确定要删除选中的任务吗?',
-                    okText: '确定',
-                    cancelText: '取消',
-                    disabled: size === 0,
-                    onConfirm: () => deleteTaskList(selectedRowKeys),
-                }}
-            />,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
-            <ProTable<ITaskListItem>
-                headerTitle="查询表格"
+            <FitTable<ITaskListItem>
                 rowKey="task_id"
                 rowSelection={rowSelection}
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
-                tableAlertRender={false}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
             />
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 
     const search = useMemo(() => {
+        const size = selectedRowKeys.length;
         return (
             <JsonForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
-                <LoadingButton onClick={onSearch} type="primary" icon={<SearchOutlined />}>
+                <LoadingButton
+                    onClick={onSearch}
+                    className={formStyles.formBtn}
+                    type="primary"
+                    icon={<SearchOutlined />}
+                >
                     查询
                 </LoadingButton>
+                <PopConfirmLoadingButton
+                    key="delete"
+                    buttonProps={{
+                        danger: true,
+                        disabled: size === 0,
+                        children: '删除任务',
+                        className: formStyles.formBtn,
+                    }}
+                    popConfirmProps={{
+                        title: '确定要删除选中的任务吗?',
+                        okText: '确定',
+                        cancelText: '取消',
+                        disabled: size === 0,
+                        onConfirm: deleteTaskList,
+                    }}
+                />
             </JsonForm>
         );
-    }, []);
+    }, [selectedRowKeys]);
+
     return useMemo(() => {
         return (
             <div>
@@ -605,7 +600,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 };
 
 export default TaskListTab;
