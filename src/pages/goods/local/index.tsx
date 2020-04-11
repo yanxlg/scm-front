@@ -1,8 +1,8 @@
 import React, { RefObject } from 'react';
 import { message, Button } from 'antd';
 import ExcelDialog from './components/ExcelDialog';
-import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
+import { JsonFormRef, FormField } from 'react-components/lib/JsonForm';
+import { JsonForm, LoadingButton } from 'react-components';
 import Container from '@/components/Container';
 import GoodsProTable from './components/GoodsProTable';
 import MerchantListModal from '../components/MerchantListModal';
@@ -20,7 +20,12 @@ import {
 import { RouteComponentProps } from 'react-router';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import { IGoodsList, ISkuItem, ICatagoryItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
+import {
+    ISearchPageParams,
+    IGoodsList,
+    ICatagoryItem,
+    IGoodsAndSkuItem,
+} from '@/interface/ILocalGoods';
 import {
     defaultOption,
     inventoryStatusList,
@@ -30,11 +35,7 @@ import {
 import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
-
-export declare interface IPageData {
-    page?: number;
-    page_count?: number;
-}
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 const getCatagoryListPromise = getCatagoryList();
 
@@ -212,7 +213,6 @@ declare interface IIndexState {
     merchantDialogStatus: boolean;
     // 按钮加载中状态
     searchLoading: boolean;
-    deleteLoading: boolean;
     page: number;
     page_count: number;
     allCount: number;
@@ -238,7 +238,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.state = {
             excelDialogStataus: false,
             merchantDialogStatus: false,
-            deleteLoading: false,
             searchLoading: false,
             page,
             page_count,
@@ -301,7 +300,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     };
 
-    private onSearch = (searchData?: IPageData, isRefresh?: boolean) => {
+    private onSearch = (searchData?: ISearchPageParams, isRefresh?: boolean) => {
         const { page, page_count } = this.state;
         let params: IFilterParams = {
             page,
@@ -339,13 +338,15 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     private handleClickSearch = () => {
-        // console.log(this.formRef.current?.getFieldsValue());
-        this.formRef.current?.validateFields().then(values => {
-            // console.log('handleClickSearch', values);
-            this.onSearch({
+        return this.formRef.current!.validateFields().then(values => {
+            return this.onSearch({
                 page: 1,
             });
         });
+    };
+
+    private onReload = () => {
+        return this.onSearch({}, true);
     };
 
     private getCatagoryList = () => {
@@ -374,10 +375,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     // 删除
     getGoodsDelete = () => {
         const { selectedRowKeys, goodsList } = this.state;
-        this.setState({
-            deleteLoading: true,
-        });
-        getGoodsDelete({
+        return getGoodsDelete({
             commodity_ids: [
                 ...new Set(
                     selectedRowKeys.map(productId => {
@@ -386,26 +384,17 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     }),
                 ),
             ],
-        })
-            .then(res => {
-                this.setState({
-                    deleteLoading: false,
-                });
-                this.onSearch();
-                const { success, failed } = res.data;
-                let str = '';
-                if (success.length) {
-                    str += `删除成功${success.join('、')}。`;
-                } else if (failed.length) {
-                    str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
-                }
-                message.info(str);
-            })
-            .finally(() => {
-                this.setState({
-                    deleteLoading: false,
-                });
-            });
+        }).then(res => {
+            this.onSearch();
+            const { success, failed } = res.data;
+            let str = '';
+            if (success.length) {
+                str += `删除成功${success.join('、')}。`;
+            } else if (failed.length) {
+                str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
+            }
+            message.info(str);
+        });
     };
 
     // 获取下载表格数据
@@ -509,12 +498,43 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             excelDialogStataus,
             merchantDialogStatus,
             selectedRowKeys,
-            deleteLoading,
             searchLoading,
             allCatagoryList,
         } = this.state;
 
         const disabled = selectedRowKeys.length === 0;
+
+        const toolBarRender = [
+            <Button
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={this.handleClickOnsale}
+                disabled={disabled}
+            >
+                一键上架
+            </Button>,
+            <Button
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={this.handleClickAllOnsale}
+            >
+                查询商品一键上架
+            </Button>,
+            <LoadingButton
+                className={formStyles.formBtn}
+                onClick={this.getGoodsDelete}
+                disabled={disabled}
+            >
+                删除
+            </LoadingButton>,
+            <Button
+                disabled={allCount === 0}
+                className={formStyles.formBtn}
+                onClick={() => this.toggleExcelDialog(true)}
+            >
+                导出至Excel
+            </Button>,
+        ];
 
         return (
             <Container>
@@ -526,47 +546,21 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         fieldList={formFields}
                     >
                         <div>
-                            <Button
+                            <LoadingButton
                                 type="primary"
-                                loading={searchLoading}
+                                className={formStyles.formBtn}
                                 onClick={this.handleClickSearch}
                             >
                                 查询
-                            </Button>
+                            </LoadingButton>
+                            <LoadingButton className={formStyles.formBtn} onClick={this.onReload}>
+                                刷新
+                            </LoadingButton>
                         </div>
                     </JsonForm>
-                    <div style={{ margin: '0 0 16px 0' }}>
-                        <Button
-                            type="primary"
-                            className="local-search-item-btn"
-                            onClick={this.handleClickOnsale}
-                            disabled={disabled}
-                        >
-                            一键上架
-                        </Button>
-                        <Button
-                            type="primary"
-                            className="local-search-all-btn"
-                            onClick={this.handleClickAllOnsale}
-                        >
-                            查询商品一键上架
-                        </Button>
-                        <Button
-                            className="local-search-item-btn"
-                            loading={deleteLoading}
-                            onClick={this.getGoodsDelete}
-                            disabled={disabled}
-                        >
-                            删除
-                        </Button>
-                        <Button
-                            disabled={allCount === 0}
-                            className="local-search-item-btn"
-                            onClick={() => this.toggleExcelDialog(true)}
-                        >
-                            导出至Excel
-                        </Button>
-                    </div>
+                    {/* <div style={{ margin: '0 0 16px 0' }}>
+                        
+                    </div> */}
                     <GoodsProTable
                         loading={searchLoading}
                         currentPage={page}
@@ -578,6 +572,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         onSearch={this.onSearch}
                         changeSelectedRowKeys={this.changeSelectedRowKeys}
                         setProductTags={this.setProductTags}
+                        toolBarRender={toolBarRender}
                     />
                     <ExcelDialog
                         visible={excelDialogStataus}

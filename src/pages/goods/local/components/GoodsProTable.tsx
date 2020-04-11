@@ -1,7 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button } from 'antd';
 // import ProTable from '@/components/ProTable';
-import { ProTable } from 'react-components';
+import { ProTable, FitTable } from 'react-components';
 import { PaginationConfig } from 'antd/es/pagination';
 import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
@@ -11,9 +11,14 @@ import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
-
-import { IPageData } from '../index';
-import { IPublishItem, ICatagoryItem, IGoodsEditItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
+import { ColumnsType } from 'antd/es/table';
+import {
+    ISearchPageParams,
+    IPublishItem,
+    ICatagoryItem,
+    IGoodsEditItem,
+    IGoodsAndSkuItem,
+} from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
@@ -28,9 +33,10 @@ declare interface IProps {
     selectedRowKeys: string[];
     goodsList: IGoodsAndSkuItem[];
     allCatagoryList: ICatagoryItem[];
-    onSearch(pageData?: IPageData, isRefresh?: boolean): void;
+    onSearch(pageData?: ISearchPageParams, isRefresh?: boolean): void;
     changeSelectedRowKeys(keys: string[]): void;
     setProductTags(productId: string, tags: string[]): void;
+    toolBarRender: JSX.Element[];
 }
 
 declare interface IState {
@@ -46,7 +52,7 @@ declare interface IState {
 class GoodsProTable extends React.PureComponent<IProps, IState> {
     private skuDialogRef: RefObject<SkuDialog> = React.createRef();
     private goodsMergeRef: RefObject<GoodsMergeDialog> = React.createRef();
-    private columns = [
+    private columns: ColumnsType<IGoodsAndSkuItem> = [
         {
             fixed: 'left',
             key: '_operation',
@@ -355,7 +361,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 );
             },
         },
-    ] as ProColumns<IGoodsAndSkuItem>[];
+    ];
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -405,25 +411,34 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
 
     // 编辑商品-弹框
     toggleEditGoodsDialog = (status: boolean, rowData?: IGoodsAndSkuItem) => {
-        let currentEditGoods: IGoodsEditItem | null = null
+        let currentEditGoods: IGoodsEditItem | null = null;
         if (rowData) {
-            const { product_id, title, description, first_catagory, second_catagory, third_catagory, goods_img, sku_image } = rowData;
+            const {
+                product_id,
+                title,
+                description,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                goods_img,
+                sku_image,
+            } = rowData;
             currentEditGoods = {
-                product_id, 
-                title, 
-                description, 
-                first_catagory, 
-                second_catagory, 
-                third_catagory, 
-                goods_img, 
-                sku_image
-            }
+                product_id,
+                title,
+                description,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                goods_img,
+                sku_image,
+            };
         }
         this.setState({
             goodsEditDialogStatus: status,
             currentEditGoods: currentEditGoods ? { ...currentEditGoods } : null,
             originEditGoods: currentEditGoods ? { ...currentEditGoods } : null,
-        })
+        });
     };
 
     // 编辑title和description
@@ -551,6 +566,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             goodsList,
             loading,
             allCatagoryList,
+            toolBarRender,
         } = this.props;
         const {
             goodsEditDialogStatus,
@@ -559,12 +575,11 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             originEditGoods,
             currentEditGoods,
             publishStatusList,
-            currentRowData
+            currentRowData,
         } = this.state;
         return (
             <>
-                <ProTable<IGoodsAndSkuItem>
-                    // optimize={false}
+                {/* <ProTable<IGoodsAndSkuItem>
                     headerTitle="本地产品库列表"
                     rowKey="product_id"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
@@ -583,7 +598,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         showSizeChanger: true,
                         pageSizeOptions: pageSizeOptions,
                     }}
-                    // toolBarRender={false}
                     tableAlertRender={false}
                     columns={this.columns}
                     dataSource={goodsList}
@@ -595,6 +609,33 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         reload: this.onReload,
                         setting: true,
                     }}
+                /> */}
+                <FitTable<IGoodsAndSkuItem>
+                    rowKey="product_id"
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    bottom={60}
+                    rowSelection={{
+                        fixed: true,
+                        columnWidth: 60,
+                        selectedRowKeys: selectedRowKeys,
+                        onChange: this.onSelectChange,
+                    }}
+                    pagination={
+                        {
+                            total: total,
+                            current: currentPage,
+                            pageSize: pageSize,
+                            showSizeChanger: true,
+                            // pageSizeOptions: pageSizeOptions,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
+                    columns={this.columns}
+                    dataSource={goodsList}
+                    loading={loading}
+                    onChange={this.onChangeProTable}
+                    columnsSettingRender={true}
+                    toolBarRender={() => toolBarRender}
                 />
                 <ShelvesDialog
                     visible={shelvesDialogStatus}

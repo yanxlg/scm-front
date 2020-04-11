@@ -1,6 +1,11 @@
 /**
  * 本地商品库接口
  */
+export interface ISearchPageParams {
+    page?: number;
+    page_count?: number;
+}
+
 export interface ICatagoryItem {
     id?: string;
     name?: string;
@@ -88,7 +93,7 @@ export interface IGoodsList {
 
 export type IGoodsAndSkuItem = IGoodsList & ISkuItem;
 
-/*** 商品版本 ***/ 
+/*** 商品版本 ***/
 
 export interface IOnsaleItem {
     onsale_channel: string;
