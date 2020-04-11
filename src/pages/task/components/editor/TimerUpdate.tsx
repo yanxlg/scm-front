@@ -20,12 +20,11 @@ import classNames from 'classnames';
 import { dateToUnix } from 'react-components/es/utils/date';
 import dayjs, { Dayjs } from 'dayjs';
 
-declare interface IFormData extends Omit<IPUTaskBody, 'range'> {
+declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
     day: number;
     second: number;
     update_item: UpdateItemType;
-    range: UpdateItemType[];
 }
 
 declare interface ITimerUpdateProps {
@@ -58,7 +57,7 @@ const convertDetail = (info: ITaskDetailInfo) => {
 
 const convertFormData = (values: IFormData) => {
     const {
-        range,
+        ranges,
         day = 0,
         second,
         taskIntervalType,
@@ -69,7 +68,7 @@ const convertFormData = (values: IFormData) => {
     } = values;
     return {
         task_name,
-        range: range.join(','),
+        ranges: ranges,
         update_item,
         task_start_time: dateToUnix(task_start_time),
         task_end_time: dateToUnix(task_end_time),
@@ -191,7 +190,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        range: [PUTaskRangeType.HasSalesOn],
+                        ranges: [PUTaskRangeType.HasSalesOn],
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
                         update_item: UpdateItemType.All,
@@ -214,7 +213,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                     </Form.Item>
                     <Form.Item
                         validateTrigger={'onBlur'}
-                        name="range"
+                        name="ranges"
                         label="商品条件"
                         required={true}
                         className={formStyles.formItem}
