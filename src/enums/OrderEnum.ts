@@ -351,32 +351,29 @@ export const childAllFieldList: FormField[] = [
 
 // 未勾选仅展示父订单ID
 export const defaultColChildList = [
-    'createTime',                     // 订单生成时间
-    'orderGoodsStatus',               // 订单状态
-    'orderGoodsShippingStatusShow',       // 配送状态
-    'orderGoodsId',                   // 子订单ID
-    'productId',                      // Product ID
-    'productImage',                   // SKU图片
+    'createTime', // 订单生成时间
+    'orderGoodsStatus', // 订单状态
+    'orderGoodsShippingStatusShow', // 配送状态
+    'orderGoodsId', // 子订单ID
+    'productId', // Product ID
+    'productImage', // SKU图片
     // 'a1',                             // 商品名称 - 待确认
-    'productStyle',                   // 商品规格
-    
-    'goodsNumber',                    // 销售商品数量
-    'freight',                        // 销售商品运费
-    '_goodsTotalAmount',              // 销售商品总金额
-    'purchaseNumber',                 // 采购商品数量
-    '_purchaseTotalAmount',           // 采购商品总金额
-    'channelSource',                  // 销售渠道
+    'productStyle', // 商品规格
+    'goodsNumber', // 销售商品数量
+    'freight', // 销售商品运费
+    '_goodsTotalAmount', // 销售商品总金额
+    'purchaseNumber', // 采购商品数量
+    '_purchaseTotalAmount', // 采购商品总金额
+    'channelSource', // 销售渠道
     // 'a2',                             // 销售渠道Goods ID
-    'confirmTime',                    // 销售订单确认时间
-    'channelOrderGoodsSn',            // 渠道订单ID
-    'lastWaybillNo',                  // 销售尾程运单ID
-    'purchasePlanId',                 // 采购计划ID
-    'reserveStatus',                  // 仓库库存预定状态
-    'purchasePlatform',               // 采购平台
-    'purchaseOrderStatus',            // 采购订单状态
-    'purchaseOrderPayStatus',         // 采购支付状态
-    '_logisticsTrack',                // 物流轨迹
-
+    'confirmTime', // 销售订单确认时间
+    'channelOrderGoodsSn', // 渠道订单ID
+    'lastWaybillNo', // 销售尾程运单ID
+    'purchasePlanId', // 采购计划ID
+    'reserveStatus', // 仓库库存预定状态
+    'purchasePlatform', // 采购平台
+    'purchaseOrderStatus', // 采购订单状态
+    'purchaseOrderPayStatus', // 采购支付状态
 ];
 
 export const childOptionalColList = [
@@ -386,9 +383,9 @@ export const childOptionalColList = [
     { key: 'currency', name: '销售金额货币' },
     { key: 'purchaseAmount', name: '采购商品单价' },
     // { key: '', name: '商品属性标签' },               // 待补充
-    // { key: 'productShop', name: '销售店铺名称' },    // 待补充   
+    // { key: 'productShop', name: '销售店铺名称' },    // 待补充
     // { key: '', name: '销售渠道二级分类' },           // 待补充
-    { key: 'cancelTime', name: '销售订单取消时间' },  
+    { key: 'cancelTime', name: '销售订单取消时间' },
     { key: 'deliveryTime', name: '销售订单出库时间' },
     { key: 'collectTime', name: '销售订单揽收时间' },
     { key: 'receiveTime', name: '妥投时间' },
@@ -401,6 +398,7 @@ export const childOptionalColList = [
     { key: 'purchaseCancelReason', name: '采购取消原因' },
     { key: 'purchaseTime', name: '采购签收时间' },
     { key: 'storageTime', name: '采购入库时间' },
+    { key: '_logisticsTrack', name: '物流轨迹' },
 ];
 
 export const parentDefaultFieldList: FormField[] = [
