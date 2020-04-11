@@ -7,10 +7,10 @@
         "test": "umi test",
         "lint-staged": "lint-staged",
         "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx ",
-        "analyze": "ANALYZE=1 umi dev"
+        "analyze": "ANALYZE=1 umi dev",
+        "analyze:build": "ANALYZE=1 umi build"
     },
     "dependencies": {
-        "moment": "^2.24.0",
         "react": "^16.13.0",
         "react-dom": "^16.13.0",
         "classnames": "^2.2.6",
@@ -19,11 +19,11 @@
         "query-string": "^6.11.1",
         "qrcode.react": "^1.0.0",
         "react-virtualized": "^9.21.2",
-        "antd": "^4.0.3",
-        "@ant-design/pro-layout": "^5.0.5",
-        "@ant-design/icons":"^4.0.2",
-        "lodash-decorators": "^6.0.1",
-        "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.5-alpha"
+        "antd": "^4.1.1",
+        "@ant-design/pro-layout": "^5.0.9",
+        "@ant-design/icons": "^4.0.5",
+        "dayjs": "^1.8.23",
+        "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.4-alpha.46"
     },
     "devDependencies": {
         "@types/react-lazyload": "^2.6.0",
@@ -59,14 +59,17 @@
         "tslint-eslint-rules": "^5.4.0",
         "tslint-react": "^3.6.0",
         "typescript": "3.8.3",
-        "umi": "^3.0.10",
+        "umi": "^3.1.1",
         "@umijs/preset-react": "^1.3.12",
         "@typescript-eslint/eslint-plugin": "^2.23.0",
         "@typescript-eslint/parser": "^2.23.0",
         "fork-ts-checker-webpack-plugin": "^4.0.5",
         "stylelint": "^13.2.1",
         "husky": "^4.2.3",
-        "stylelint-config-standard": "^20.0.0"
+        "stylelint-config-standard": "^20.0.0",
+        "babel-plugin-lodash": "^3.3.4",
+        "lodash-webpack-plugin": "^0.11.5",
+        "antd-dayjs-webpack-plugin": "^1.0.0"
     },
 
     "husky": {

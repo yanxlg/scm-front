@@ -1,20 +1,19 @@
-@cardSpacing:20px;
-@colonSpacing:10px;
-@btnDefaultWidth:80px;
-@textAreaHeight:280px;
-@consoleModalWidth:500px;
-@consoleModalHeight:400px;
+@cardSpacing: 20px;
+@colonSpacing: 10px;
+@btnDefaultWidth: 80px;
+@textAreaHeight: 280px;
+@consoleModalWidth: 500px;
+@consoleModalHeight: 400px;
 
-
-.config{
-    &-colon{
+.config {
+    &-colon {
         margin: 0 @colonSpacing;
     }
-    &-textarea{
+    &-textarea {
         min-height: @textAreaHeight!important;
     }
-    &-modal{
-        &-title{
+    &-modal {
+        &-title {
             font-size: 14px;
             font-weight: bold;
             text-align: center;
@@ -22,46 +21,46 @@
                 margin-top: 16px;
             }
         }
-        &-btn{
+        &-btn {
             width: 140px;
             margin: 20px auto 0;
             display: block;
         }
-        &-tip{
+        &-tip {
             color: #999;
             font-size: 12px;
             margin-top: 10px;
             text-align: center;
         }
-        &-hot{
-            width: 80%!important;
-            .ant-modal-content{
+        &-hot {
+            width: 80% !important;
+            .ant-modal-content {
                 max-height: ~'calc(100vh - 200px)';
                 overflow: auto;
             }
         }
     }
-    &-task{
-        &-label{
-            & ~ &{
+    &-task {
+        &-label {
+            & ~ & {
                 margin-top: 8px;
             }
         }
     }
-    &-ques{
+    &-ques {
         margin-left: 8px;
     }
-    &-label{
-        &-after{
+    &-label {
+        &-after {
             color: #999999;
         }
     }
-    &-radio{
+    &-radio {
         padding-left: 35px;
     }
-    &-hot{
-        &-category{
-            margin-right: 38px!important;
+    &-hot {
+        &-category.ant-form-item {
+            margin-right: 38px !important;
         }
     }
 }

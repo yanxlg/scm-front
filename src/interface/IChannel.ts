@@ -255,3 +255,13 @@ export interface IShopItem {
 }
 
 export type ISHopList = IShopItem[];
+
+export declare interface ILogItem {
+    id: string;
+    sale_domain: string;
+    product_id: string;
+    commodity_id: string;
+    status_label: string;
+    finish_time: string;
+    reason: string;
+}

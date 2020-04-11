@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
-import { IntegerInput } from 'react-components';
+import { RichInput } from 'react-components';
 import { FormInstance } from 'antd/es/form';
 import { isNull } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -29,20 +29,28 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
 
     return useMemo(() => {
         return (
-            <div className="flex-inline flex-align form-item form-item-horizon">
+            <div
+                className={classNames(
+                    formStyles.flexInline,
+                    formStyles.flexAlign,
+                    formStyles.formItem,
+                )}
+            >
                 <Form.Item
                     label="价格区间(￥)"
                     required={true}
                     className={classNames(
                         formStyles.formInline,
-                        'flex-inline',
+                        formStyles.flexInline,
                         formStyles.formRequiredHide,
+                        formStyles.formItemClean,
                     )}
                 >
                     <Form.Item
                         className={classNames(
-                            formStyles.formInline,
-                            'inline-block vertical-middle',
+                            formStyles.formItemClean,
+                            formStyles.inlineBlock,
+                            formStyles.verticalMiddle,
                         )}
                         validateTrigger={'onBlur'}
                         name="price_min"
@@ -52,13 +60,14 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                             },
                         ]}
                     >
-                        <IntegerInput min={0} className="input-small input-handler" />
+                        <RichInput richType="number" className="input-small" />
                     </Form.Item>
-                    <span className="config-colon vertical-middle">-</span>
+                    <span className={classNames('config-colon', formStyles.verticalMiddle)}>-</span>
                     <Form.Item
                         className={classNames(
-                            formStyles.formInline,
-                            'inline-block vertical-middle',
+                            formStyles.formItemClean,
+                            formStyles.inlineBlock,
+                            formStyles.verticalMiddle,
                         )}
                         validateTrigger={'onBlur'}
                         name="price_max"
@@ -68,7 +77,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                             },
                         ]}
                     >
-                        <IntegerInput min={0} className="input-small input-handler" />
+                        <RichInput richType="number" className="input-small" />
                     </Form.Item>
                 </Form.Item>
             </div>

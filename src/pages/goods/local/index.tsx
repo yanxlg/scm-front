@@ -31,7 +31,6 @@ import {
 import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
-import '@/styles/form.less';
 
 export declare interface IPageData {
     page?: number;
@@ -47,7 +46,6 @@ const formFields: FormField[] = [
         name: 'task_number',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
         formatter: 'numberStrArr',
     },
     {
@@ -56,7 +54,6 @@ const formFields: FormField[] = [
         name: 'store_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
         formatter: 'strArr',
     },
     {
@@ -65,7 +62,6 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
         formatter: 'strArr',
     },
     {
@@ -74,7 +70,6 @@ const formFields: FormField[] = [
         name: 'title',
         placeholder: '请输入商品名称',
         className: 'local-search-item-input',
-        formItemClassName: 'form-item',
         // formatter: 'strArr',
     },
     {
@@ -82,7 +77,6 @@ const formFields: FormField[] = [
         label: '上架渠道',
         name: 'publish_channel',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'number',
         optionList: [defaultOption, ...publishChannelStatusList],
     },
@@ -91,7 +85,6 @@ const formFields: FormField[] = [
         label: '销售状态',
         name: 'inventory_status',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'number',
         optionList: [defaultOption, ...inventoryStatusList],
     },
@@ -100,7 +93,6 @@ const formFields: FormField[] = [
         label: '请选择版本状态',
         name: 'product_status',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'joinStr',
         placeholder: '请选择版本状态',
         mode: 'multiple',
@@ -112,7 +104,6 @@ const formFields: FormField[] = [
         label: '版本更新',
         name: 'version_status',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'number',
         optionList: [defaultOption, ...versionStatusList],
     },
@@ -121,7 +112,6 @@ const formFields: FormField[] = [
         label: '一级类目',
         name: 'first_catagory',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'number',
         syncDefaultOption: {
             value: '',
@@ -145,7 +135,6 @@ const formFields: FormField[] = [
         label: '二级类目',
         name: 'second_catagory',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'number',
         optionListDependence: {
             name: 'first_catagory',
@@ -172,7 +161,6 @@ const formFields: FormField[] = [
         label: '三级类目',
         name: 'third_catagory',
         className: 'local-search-item-select',
-        formItemClassName: 'form-item',
         formatter: 'number',
         optionListDependence: {
             name: ['first_catagory', 'second_catagory'],
@@ -196,14 +184,12 @@ const formFields: FormField[] = [
         label: 'sku数量',
         name: ['min_sku', 'max_sku'],
         className: 'local-search-item-input-min',
-        formItemClassName: 'form-item',
     },
     {
         type: 'inputRange',
         label: '价格范围（￥）',
         name: ['min_price', 'max_price'],
         className: 'local-search-item-input-min',
-        formItemClassName: 'form-item',
         precision: 2,
     },
     {
@@ -211,7 +197,6 @@ const formFields: FormField[] = [
         label: '销量',
         name: ['min_sale', 'max_sale'],
         className: 'local-search-item-input-min',
-        formItemClassName: 'form-item',
     },
     {
         type: 'positiveInteger',
@@ -219,7 +204,6 @@ const formFields: FormField[] = [
         name: 'min_comment',
         // placeholder: '多个逗号隔开',
         className: 'local-search-item-input-min',
-        formItemClassName: 'form-item',
         formatter: 'number',
     },
 ];
@@ -547,7 +531,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         <div>
                             <Button
                                 type="primary"
-                                className="btn-group form-item"
                                 loading={searchLoading}
                                 onClick={this.handleClickSearch}
                             >
@@ -555,7 +538,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             </Button>
                         </div>
                     </JsonForm>
-                    <div style={{ margin: '16px 0' }}>
+                    <div style={{ margin: '0 0 16px 0' }}>
                         <Button
                             type="primary"
                             className="local-search-item-btn"

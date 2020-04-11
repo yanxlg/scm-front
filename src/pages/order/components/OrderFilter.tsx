@@ -2,7 +2,7 @@ import React, { RefObject } from 'react';
 import { Form, DatePicker, Input, Select } from 'antd';
 import { FormInstance } from 'antd/es/form';
 // import { FormComponentProps } from 'antd/es/form';
-import { Moment } from 'moment';
+import { Dayjs } from 'dayjs';
 
 const { Option } = Select;
 
@@ -26,7 +26,7 @@ class OrderFilter extends React.PureComponent {
     //     super(props);
     // }
 
-    private disabledStartDate = (startTime: Moment | null) => {
+    private disabledStartDate = (startTime: Dayjs | null) => {
         // const { form } = this.props;
         // const endTime = form.getFieldValue('order_confirm_time2');
         // if (!startTime || !endTime) {
@@ -35,7 +35,7 @@ class OrderFilter extends React.PureComponent {
         // return startTime.valueOf() > endTime.valueOf();
     };
 
-    private disabledEndDate = (endTime: Moment | null) => {
+    private disabledEndDate = (endTime: Dayjs | null) => {
         // const { form } = this.props;
         // const startTime = form.getFieldValue('order_confirm_time1');
         // if (!endTime || !startTime) {

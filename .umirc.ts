@@ -1,3 +1,7 @@
+/**
+ * 待 optimize
+ *  - @ant-design/icons
+ */
 import { defineConfig } from 'umi';
 const shajs = require('sha.js');
 
@@ -17,9 +21,9 @@ const config = defineConfig({
         hmr: true,
     },
     title: '供应链管理中台',
-    // dll: !dev,
+    ignoreMomentLocale: true, // 简化moment.js locale
     locale: {
-        antd: true,
+        antd: true, // 需要设置为true，否则antd会使用默认语言en-US
         title: false,
         default: 'zh-CN',
         baseNavigator: false,
@@ -27,25 +31,35 @@ const config = defineConfig({
     dynamicImport: {
         loading: '@/components/PageLoading/index',
     },
-    headScripts: dev ? ['http://localhost:8097'] : undefined,
+    externals: dev
+        ? {}
+        : {
+              react: 'window.React',
+              'react-dom': 'window.ReactDOM',
+          },
+    scripts: dev
+        ? []
+        : [
+              {
+                  src: 'https://unpkg.com/react@16.13.1/umd/react.production.min.js',
+                  crossOrigin: '',
+              },
+              {
+                  src: 'https://unpkg.com/react-dom@16.13.1/umd/react-dom.production.min.js',
+                  crossOrigin: '',
+              },
+          ], // for cdn
+    headScripts: dev ? ['http://localhost:8097'] : undefined, // for react-tools
     extraBabelPlugins: [
+        'babel-plugin-lodash',
         [
             'babel-plugin-import',
             {
                 libraryName: 'lodash',
                 libraryDirectory: '',
-                camel2DashComponentName: false, // default: true
+                camel2DashComponentName: false,
             },
             'lodash',
-        ],
-        [
-            'babel-plugin-import',
-            {
-                libraryName: 'lodash-decorator',
-                libraryDirectory: '',
-                camel2DashComponentName: false, // default: true
-            },
-            'lodash-decorator',
         ],
         [
             'babel-plugin-import',
@@ -78,6 +92,7 @@ const config = defineConfig({
     cssLoader: {
         localsConvention: 'camelCaseOnly',
         modules: {
+            auto: /_[a-zA-Z\.\-_0-9]+\.less$/, // 仅符合要求的文件生成module，减少code体积
             getLocalIdent: (
                 context: {
                     resourcePath: string;
@@ -106,13 +121,15 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t3.vova.com.hk/',
+            target: 'https://scm-api-t.vova.com.hk/',
             // target: 'http://192.168.120.17:3026',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
         },
     },
     chainWebpack(config, { webpack }) {
+        config.plugin('lodash-webpack-plugin').use(require('lodash-webpack-plugin')); // lodash 简化，实际可能并没有作用，如果babel-plugin-lodash已经极尽简化
+        config.plugin('antd-dayjs-webpack-plugin').use(require('antd-dayjs-webpack-plugin')); // dayjs代替moment
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         if (dev) {
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [

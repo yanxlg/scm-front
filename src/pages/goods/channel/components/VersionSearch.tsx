@@ -1,9 +1,10 @@
 import React, { RefObject } from 'react';
 import { Button, DatePicker, Input, Form } from 'antd';
 import '@/styles/config.less';
-import { BindAll } from 'lodash-decorators';
-import { transEndDate, transStartDate } from 'react-components/es/JsonForm';
+import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
 import { FormInstance } from 'antd/es/form';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 export declare interface IApiParams {
     start_time?: number;
@@ -23,7 +24,6 @@ declare interface IVersionSearchState {
     activeLoading: boolean;
 }
 
-@BindAll()
 class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSearchState> {
     private formRef: RefObject<FormInstance> = React.createRef();
     constructor(props: IVersionSearchProps) {
@@ -78,8 +78,8 @@ class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSea
         const { start_time, end_time, ...extra } = this.formRef.current!.getFieldsValue();
         return {
             ...extra,
-            start_time: transStartDate(start_time),
-            end_time: transEndDate(end_time),
+            start_time: startDateToUnix(start_time),
+            end_time: endDateToUnix(end_time),
         };
     }
 
@@ -88,7 +88,7 @@ class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSea
         return (
             <React.Fragment>
                 <Form ref={this.formRef} layout="inline" autoComplete={'off'}>
-                    <Form.Item label="时间" className="form-item">
+                    <Form.Item label="时间" className={formStyles.formItem}>
                         <Form.Item
                             noStyle={true}
                             shouldUpdate={(prevValues, currentValues) =>
@@ -139,14 +139,18 @@ class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSea
                             }}
                         </Form.Item>
                     </Form.Item>
-                    <Form.Item className="form-item" name="virtual_id" label="虚拟ID">
+                    <Form.Item className={formStyles.formItem} name="virtual_id" label="虚拟ID">
                         <Input className="input-default" />
                     </Form.Item>
                     <Button
                         loading={searchLoading}
                         onClick={this.onSearch}
                         type="primary"
-                        className="btn-group vertical-middle form-item"
+                        className={classNames(
+                            formStyles.formBtn,
+                            formStyles.verticalMiddle,
+                            formStyles.formItem,
+                        )}
                     >
                         查询
                     </Button>
@@ -154,7 +158,11 @@ class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSea
                         loading={exportLoading}
                         onClick={this.onExport}
                         type="primary"
-                        className="btn-group vertical-middle form-item"
+                        className={classNames(
+                            formStyles.formBtn,
+                            formStyles.verticalMiddle,
+                            formStyles.formItem,
+                        )}
                     >
                         导出Excel
                     </Button>
@@ -162,7 +170,11 @@ class VersionSearch extends React.PureComponent<IVersionSearchProps, IVersionSea
                         loading={activeLoading}
                         onClick={this.onActive}
                         type="primary"
-                        className="btn-group vertical-middle form-item"
+                        className={classNames(
+                            formStyles.formBtn,
+                            formStyles.verticalMiddle,
+                            formStyles.formItem,
+                        )}
                     >
                         应用新版本
                     </Button>

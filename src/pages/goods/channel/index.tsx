@@ -1,13 +1,12 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
-import '@/styles/form.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { PopConfirmLoadingButton } from 'react-components';
+import { PopConfirmLoadingButton, FitTable } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
@@ -26,7 +25,7 @@ import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
@@ -35,14 +34,12 @@ import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
 import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
-import { SearchOutlined } from '@ant-design/icons';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
 import { Icons } from '@/components/Icon';
-import { ProColumns } from 'react-components/es/ProTable';
-import { ProTable } from 'react-components';
+import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
+import { useModal } from 'react-components/es/hooks';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import classNames from 'classnames';
 
 const salesVolumeList = [
     {
@@ -93,7 +90,6 @@ const formFields: FormField[] = [
         name: ['onshelf_time_start', 'onshelf_time_end'],
         label: <span>时&emsp;&emsp;&emsp;间</span>,
         className: 'product-picker',
-        formItemClassName: formStyles.formItem,
         formatter: ['start_date', 'end_date'],
     },
     {
@@ -101,31 +97,23 @@ const formFields: FormField[] = [
         label: 'Commodity ID',
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
-        formItemClassName: formStyles.formItem,
     },
     {
         type: 'input',
         label: <span>虚拟&emsp;ID</span>,
         name: 'vova_virtual_id',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
-        formItemClassName: formStyles.formItem,
     },
     {
         type: 'input',
         label: 'Product ID',
         name: 'product_id',
         placeholder: '多个逗号隔开',
-        className: 'input-default',
-        formItemClassName: formStyles.formItem,
     },
     {
         type: 'select',
         label: <span>销&emsp;&emsp;&emsp;量</span>,
         name: 'sales_volume',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         optionList: salesVolumeList,
     },
     {
@@ -133,8 +121,6 @@ const formFields: FormField[] = [
         label: '店铺名称',
         name: 'merchant_ids',
         placeholder: '多个逗号隔开',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -150,8 +136,6 @@ const formFields: FormField[] = [
         type: 'select',
         label: '一级类目',
         name: 'level_one_category',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -165,8 +149,6 @@ const formFields: FormField[] = [
         type: 'select',
         label: '二级类目',
         name: 'level_two_category',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         optionListDependence: {
             name: 'level_one_category',
             key: 'children',
@@ -181,8 +163,6 @@ const formFields: FormField[] = [
         type: 'select',
         label: '商品状态',
         name: 'product_status',
-        className: 'select-default',
-        formItemClassName: formStyles.formItem,
         optionList: ProductStatusList.map(({ name, id }) => {
             return { name: name, value: id };
         }),
@@ -196,6 +176,8 @@ const ChannelList: React.FC = props => {
     const [exportDialog, setExportDialog] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
+
+    const { visible, onClose, setVisibleProps } = useModal<string>();
 
     const {
         pageSize: page_size,
@@ -225,8 +207,8 @@ const ChannelList: React.FC = props => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
-            onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
+            onshelf_time_start: unixToStartDate(Number(onshelf_time_start)),
+            onshelf_time_end: unixToEndDate(Number(onshelf_time_end)),
             commodity_id,
             vova_virtual_id,
             product_id,
@@ -249,6 +231,8 @@ const ChannelList: React.FC = props => {
         onSearch,
         onReload,
         onChange,
+        selectedRowKeys,
+        setSelectedRowKeys,
     } = useList({
         queryList: queryChannelGoodsList,
         formRef: searchRef,
@@ -339,7 +323,7 @@ const ChannelList: React.FC = props => {
         (rowKeys: string[]) => {
             const taskBodyList = dataSource
                 .filter(item => {
-                    return rowKeys.indexOf(item.product_id) > -1;
+                    return rowKeys.indexOf(item.id) > -1;
                 })
                 .map(({ product_id, commodity_id, merchant_id }) => {
                     return {
@@ -372,7 +356,7 @@ const ChannelList: React.FC = props => {
         (rowKeys: string[]) => {
             const taskBodyList = dataSource
                 .filter(item => {
-                    return rowKeys.indexOf(item.product_id) > -1;
+                    return rowKeys.indexOf(item.id) > -1;
                 })
                 .map(({ product_id, commodity_id, merchant_id }) => {
                     return {
@@ -401,8 +385,60 @@ const ChannelList: React.FC = props => {
         [dataSource],
     );
 
-    const columns = useMemo<ProColumns<IChannelProductListItem>[]>(() => {
+    const showLog = useCallback((record: IChannelProductListItem) => {
+        setVisibleProps(record.product_id);
+    }, []);
+
+    const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
         return [
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                align: 'center',
+                width: 140,
+                fixed: 'left',
+                render: (_, item) => {
+                    const status = item.product_status;
+                    const canUpper = !checkUpperShelf(status);
+                    const canDown = !checkLowerShelf(status);
+                    return {
+                        children: (
+                            <>
+                                <PopConfirmLoadingButton
+                                    buttonProps={{
+                                        disabled: canUpper,
+                                        children: '上架',
+                                        type: 'link',
+                                    }}
+                                    popConfirmProps={{
+                                        title: '确定需要上架该商品吗?',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        disabled: canUpper,
+                                        placement: 'topRight',
+                                        onConfirm: () => onShelves(item),
+                                    }}
+                                />
+                                <PopConfirmLoadingButton
+                                    buttonProps={{
+                                        disabled: canDown,
+                                        children: '下架',
+                                        type: 'link',
+                                    }}
+                                    popConfirmProps={{
+                                        title: '确定需要下架该商品吗?',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        disabled: canDown,
+                                        placement: 'topRight',
+                                        onConfirm: () => offShelves(item),
+                                    }}
+                                />
+                            </>
+                        ),
+                    };
+                },
+            },
             {
                 title: '店铺名称',
                 dataIndex: 'shop_name',
@@ -470,9 +506,16 @@ const ChannelList: React.FC = props => {
                 title: '商品状态',
                 dataIndex: 'product_status',
                 align: 'center',
-                width: 100,
-                render: (status: ProductStatusCode) => {
-                    return ProductStatusMap[status];
+                width: 150,
+                render: (status: ProductStatusCode, record) => {
+                    return (
+                        <div>
+                            {ProductStatusMap[status]}
+                            <Button type="link" onClick={() => showLog(record)}>
+                                上下架日志
+                            </Button>
+                        </div>
+                    );
                 },
             },
             {
@@ -510,83 +553,43 @@ const ChannelList: React.FC = props => {
                     );
                 },
             },
-            {
-                title: '操作',
-                dataIndex: 'operation',
-                align: 'center',
-                width: 140,
-                render: (_, item) => {
-                    const status = item.product_status;
-                    const canUpper = !checkUpperShelf(status);
-                    const canDown = !checkLowerShelf(status);
-                    return {
-                        children: (
-                            <>
-                                <PopConfirmLoadingButton
-                                    buttonProps={{
-                                        disabled: canUpper,
-                                        children: '上架',
-                                        type: 'link',
-                                    }}
-                                    popConfirmProps={{
-                                        title: '确定需要上架该商品吗?',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        disabled: canUpper,
-                                        placement: 'topRight',
-                                        onConfirm: () => onShelves(item),
-                                    }}
-                                />
-                                <PopConfirmLoadingButton
-                                    buttonProps={{
-                                        disabled: canDown,
-                                        children: '下架',
-                                        type: 'link',
-                                    }}
-                                    popConfirmProps={{
-                                        title: '确定需要下架该商品吗?',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        disabled: canDown,
-                                        placement: 'topRight',
-                                        onConfirm: () => offShelves(item),
-                                    }}
-                                />
-                            </>
-                        ),
-                    };
-                },
-            },
         ];
+    }, []);
+
+    const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
+        setSelectedRowKeys(selectedKeys as string[]);
     }, []);
 
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectedRowKeysChange,
         };
-    }, []);
+    }, [selectedRowKeys]);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
 
     const children = useMemo(() => {
         return (
-            <LoadingButton
-                type="primary"
-                className={classNames(formStyles.formItem, channelStyles.channelSearch)}
-                icon={<SearchOutlined />}
-                onClick={onSearch}
-            >
-                查询
-            </LoadingButton>
+            <div>
+                <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
+                    查询
+                </LoadingButton>
+                <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                    刷新
+                </LoadingButton>
+            </div>
         );
-    }, []);
-
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
     }, []);
 
     const search = useMemo(() => {
@@ -602,70 +605,56 @@ const ChannelList: React.FC = props => {
         );
     }, []);
 
-    const toolBarRender = useCallback(
-        (selectedRowKeys = []) => {
-            const size = selectedRowKeys.length;
-            return [
-                <LoadingButton
-                    key="on"
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    icon={<Icons type="scm-on-sale" />}
-                    onClick={() => onShelveList(selectedRowKeys)}
-                    disabled={size === 0}
-                >
-                    一键上架
-                </LoadingButton>,
-                <LoadingButton
-                    key={'of'}
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    icon={<Icons type="scm-of-sale" />}
-                    onClick={() => offShelveList(selectedRowKeys)}
-                    disabled={size === 0}
-                >
-                    一键下架
-                </LoadingButton>,
-                <Button
-                    key="export"
-                    disabled={total <= 0}
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    onClick={showExcelDialog}
-                    icon={<Icons type="scm-export" />}
-                >
-                    导出
-                </Button>,
-            ];
-        },
-        [loading],
-    );
+    const toolBarRender = useCallback(() => {
+        const size = selectedRowKeys.length;
+        return [
+            <LoadingButton
+                key="on"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => onShelveList(selectedRowKeys)}
+                disabled={size === 0}
+            >
+                一键上架
+            </LoadingButton>,
+            <LoadingButton
+                key={'of'}
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => offShelveList(selectedRowKeys)}
+                disabled={size === 0}
+            >
+                一键下架
+            </LoadingButton>,
+            <Button
+                key="export"
+                disabled={total <= 0}
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={showExcelDialog}
+            >
+                导出
+            </Button>,
+        ];
+    }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
-            <ProTable<IChannelProductListItem>
-                headerTitle="查询表格"
-                rowKey="product_id"
+            <FitTable<IChannelProductListItem>
+                rowKey="id"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 rowSelection={rowSelection}
-                toolBarRender={toolBarRender}
-                className={formStyles.formItem}
-                pagination={{
-                    total: total,
-                    current: pageNumber,
-                    pageSize: pageSize,
-                    showSizeChanger: true,
-                }}
-                tableAlertRender={false}
+                pagination={pagination}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
+                columnsSettingRender={true}
+                toolBarRender={toolBarRender}
             />
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 
     const body = useMemo(() => {
         return (
@@ -682,9 +671,18 @@ const ChannelList: React.FC = props => {
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog]);
+    }, [loading, exportDialog, selectedRowKeys]);
 
-    return <>{body}</>;
+    const logModal = useMemo(() => {
+        return <OnOffLogModal visible={visible} onClose={onClose} />;
+    }, [visible]);
+
+    return (
+        <>
+            {body}
+            {logModal}
+        </>
+    );
 };
 
 export default ChannelList;

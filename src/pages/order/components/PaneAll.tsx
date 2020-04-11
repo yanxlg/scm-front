@@ -96,6 +96,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         type: 'checkbox',
         name: 'only_p_order',
         label: '仅展示父订单ID',
+        formItemClassName: 'order-form-item',
         // name, form, setState
         onChange: (name, form) => {
             this.changeParentOrder(form.getFieldValue(name));

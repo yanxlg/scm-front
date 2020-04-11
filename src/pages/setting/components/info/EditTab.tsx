@@ -98,57 +98,61 @@ const EditTab: React.FC = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const queryDetail = useCallback((country_code: string) => {
-        setLoading(true);
-        if (country_code === 'all') {
-            form.resetFields();
-            setLoading(false);
-            return;
-        }
-        queryCustomList({
-            pageSize: 10,
-            pageNumber: 1,
-            country_code: country_code,
-        })
-            .then(({ data: { list } }) => {
-                const detail = list[0] || EmptyObject;
-                const {
-                    oneCatId = '',
-                    twoCatId = '',
-                    threeCatId = '',
-                    customsCode,
-                    isElectricity = false,
-                    isMetal = false,
-                    isLiquid = false,
-                    isCombustible = false,
-                    isPowder = false,
-                    isBattery = false,
-                    isPerfume = false,
-                    isFood = false,
-                    isPaste = false,
-                    ...extra
-                } = detail;
-                form.setFieldsValue({
-                    one_cat_id: String(oneCatId),
-                    two_cat_id: String(twoCatId),
-                    three_cat_id: String(threeCatId),
-                    customs_code: customsCode,
-                    is_electricity: isElectricity,
-                    is_metal: isMetal,
-                    is_liquid: isLiquid,
-                    is_combustible: isCombustible,
-                    is_powder: isPowder,
-                    is_battery: isBattery,
-                    is_perfume: isPerfume,
-                    is_food: isFood,
-                    is_paste: isPaste,
-                    ...extra,
-                });
+    const queryDetail = useCallback(
+        (country_code: string, one_cat_id: string, two_cat_id: string, three_cat_id: string) => {
+            setLoading(true);
+
+            queryCustomList({
+                pageSize: 1,
+                pageNumber: 1,
+                country_code: country_code,
+                one_cat_id: one_cat_id,
+                two_cat_id: two_cat_id,
+                three_cat_id: three_cat_id,
             })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
+                .then(({ data: { list } }) => {
+                    const detail = list[0] || EmptyObject;
+                    const {
+                        customsCode,
+                        isElectricity = false,
+                        isMetal = false,
+                        isLiquid = false,
+                        isCombustible = false,
+                        isPowder = false,
+                        isBattery = false,
+                        isPerfume = false,
+                        isFood = false,
+                        isPaste = false,
+                        weight = '',
+                        length = '',
+                        width = '',
+                        height = '',
+                        ...extra
+                    } = detail;
+                    form.setFieldsValue({
+                        customs_code: customsCode,
+                        is_electricity: isElectricity,
+                        is_metal: isMetal,
+                        is_liquid: isLiquid,
+                        is_combustible: isCombustible,
+                        is_powder: isPowder,
+                        is_battery: isBattery,
+                        is_perfume: isPerfume,
+                        is_food: isFood,
+                        is_paste: isPaste,
+                        weight: weight,
+                        length: length,
+                        width: width,
+                        height: height,
+                        ...extra,
+                    });
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [],
+    );
 
     const formConfig = useMemo<FormField[]>(() => {
         return [
@@ -162,10 +166,21 @@ const EditTab: React.FC = () => {
                 },
                 className: '',
                 optionList: () => countryRef.current!,
-                formItemClassName: formStyles.formItem,
                 onChange: (name, form) => {
                     const country_code = form.getFieldValue('country_code');
-                    queryDetail(country_code);
+                    const { one_cat_id, two_cat_id, three_cat_id } = form.getFieldsValue([
+                        'one_cat_id',
+                        'two_cat_id',
+                        'three_cat_id',
+                    ]);
+                    if (country_code === 'all') {
+                        form.resetFields();
+                        return;
+                    }
+                    if (!three_cat_id) {
+                        return;
+                    }
+                    queryDetail(country_code, one_cat_id, two_cat_id, three_cat_id);
                 },
             },
             {
@@ -173,7 +188,6 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'one_cat_id',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 rules: [
                     {
                         required: true,
@@ -188,7 +202,6 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'two_cat_id',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 disabled: true,
                 rules: [
                     {
@@ -203,7 +216,8 @@ const EditTab: React.FC = () => {
                 type: 'select',
                 name: 'three_cat_id',
                 className: '',
-                formItemClassName: formStyles.formItem,
+                showSearch: true,
+                optionFilterProp: 'children',
                 rules: [
                     {
                         required: true,
@@ -219,31 +233,34 @@ const EditTab: React.FC = () => {
                             two_cat_id: item?.middle_id,
                             one_cat_id: item?.first_id,
                         });
+
+                        const country_code = form.getFieldValue('country_code');
+                        if (!country_code || country_code === 'all') {
+                            return;
+                        }
+                        queryDetail(country_code, item?.first_id, item?.middle_id, cat_id);
                     });
                 },
             },
 
             {
                 label: <span>重&emsp;&emsp;量</span>,
-                type: 'input',
+                type: 'number',
                 name: 'weight',
                 className: '',
                 addonAfter: 'g',
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '海关代码',
                 type: 'input',
                 name: 'customs_code',
                 className: '',
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '预计长度',
-                type: 'input',
+                type: 'number',
                 name: 'length',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 addonAfter: 'cm',
                 placeholder: '填写包裹预计长度',
             },
@@ -252,7 +269,6 @@ const EditTab: React.FC = () => {
                 type: 'number',
                 name: 'width',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 addonAfter: 'cm',
                 placeholder: '填写包裹预计宽度',
             },
@@ -261,7 +277,6 @@ const EditTab: React.FC = () => {
                 type: 'number',
                 name: 'height',
                 className: '',
-                formItemClassName: formStyles.formItem,
                 addonAfter: 'cm',
                 placeholder: '填写包裹预计高度',
             },
@@ -269,7 +284,6 @@ const EditTab: React.FC = () => {
                 label: '是否含电',
                 type: 'radioGroup',
                 name: 'is_electricity',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -285,7 +299,6 @@ const EditTab: React.FC = () => {
                 label: '是否金属',
                 type: 'radioGroup',
                 name: 'is_metal',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -311,7 +324,6 @@ const EditTab: React.FC = () => {
                         value: false,
                     },
                 ],
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '是否可燃',
@@ -327,13 +339,11 @@ const EditTab: React.FC = () => {
                         value: false,
                     },
                 ],
-                formItemClassName: formStyles.formItem,
             },
             {
                 label: '是否粉末',
                 type: 'radioGroup',
                 name: 'is_powder',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -349,7 +359,6 @@ const EditTab: React.FC = () => {
                 label: '是否纯电',
                 type: 'radioGroup',
                 name: 'is_battery',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -365,7 +374,6 @@ const EditTab: React.FC = () => {
                 label: '是否香水',
                 type: 'radioGroup',
                 name: 'is_perfume',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -381,7 +389,6 @@ const EditTab: React.FC = () => {
                 label: '是否食品',
                 type: 'radioGroup',
                 name: 'is_food',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',
@@ -397,7 +404,6 @@ const EditTab: React.FC = () => {
                 label: '是否膏状',
                 type: 'radioGroup',
                 name: 'is_paste',
-                formItemClassName: formStyles.formItem,
                 options: [
                     {
                         label: '是',

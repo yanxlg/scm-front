@@ -2,7 +2,6 @@ import React from 'react';
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
-import { BindAll } from 'lodash-decorators';
 import { userLogin } from '@/services/user';
 import { getPageQuery } from '@/utils/request';
 import { history } from 'umi';
@@ -21,7 +20,6 @@ declare interface ILoginState {
     login: boolean;
 }
 
-@BindAll()
 class Login extends React.PureComponent<{}, ILoginState> {
     constructor(props: {}) {
         super(props);
