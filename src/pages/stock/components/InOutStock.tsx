@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { ProTable } from 'react-components';
+import { ProTable, FitTable } from 'react-components';
 import { message } from 'antd';
 import '@/styles/index.less';
 import '@/styles/stock.less';
@@ -234,36 +234,19 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         });
     }, []);
 
-    const onPageChange = useCallback((page: number, pageSize?: number) => {
-        onChange({ current: page, pageSize }, {}, {});
-    }, []);
-
     const pagination = useMemo(() => {
         return {
             total: total,
             current: pageNumber,
             pageSize: pageSize,
             showSizeChanger: true,
-        };
+            position: ['topRight', 'bottomRight'],
+        } as any;
     }, [loading]);
 
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
-    }, [onReload]);
-
-    const toolBarRender = useCallback((selectedRowKeys = []) => {
+    const toolBarRender = useCallback(() => {
         return [
-            <LoadingButton
-                key="export"
-                onClick={onExport}
-                className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                icon={<Icons type="scm-export" />}
-            >
+            <LoadingButton key="export" onClick={onExport} className={formStyles.formBtn}>
                 导出Excel表
             </LoadingButton>,
         ];
@@ -271,20 +254,17 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
 
     const table = useMemo(() => {
         return (
-            <ProTable<IStockInItem | IStockOutItem>
-                headerTitle={type === StockType.In ? '入库列表' : '出库列表'}
+            <FitTable<IStockInItem | IStockOutItem>
                 rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
                 toolBarRender={toolBarRender}
-                tableAlertRender={false}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
             />
         );
     }, [loading]);
@@ -298,14 +278,14 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 initialValues={defaultInitialValues}
                 enableCollapse={false}
             >
-                <LoadingButton
-                    onClick={onSearch}
-                    type="primary"
-                    className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                    icon={<SearchOutlined />}
-                >
-                    查询
-                </LoadingButton>
+                <div>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
+                        查询
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                        刷新
+                    </LoadingButton>
+                </div>
             </JsonForm>
         );
     }, []);

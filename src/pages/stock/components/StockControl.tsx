@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable, ProTable } from 'react-components';
-import { goButton, showTotal } from 'react-components/es/FitTable';
-import { message, Pagination } from 'antd';
+import { FitTable } from 'react-components';
+import { message } from 'antd';
 import '@/styles/index.less';
 import { ColumnProps, TableProps } from 'antd/es/table';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -12,7 +11,7 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { AutoEnLargeImg } from 'react-components';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { IStockRequest, IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
@@ -21,7 +20,6 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
-import { StockType } from '@/config/dictionaries/Stock';
 
 const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
     x: true,
@@ -192,14 +190,9 @@ const StockControl: React.FC = () => {
         });
     }, []);
 
-    const toolBarRender = useCallback((selectedRowKeys = []) => {
+    const toolBarRender = useCallback(() => {
         return [
-            <LoadingButton
-                key="export"
-                onClick={onExport}
-                className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                icon={<Icons type="scm-export" />}
-            >
+            <LoadingButton key="export" onClick={onExport} className={formStyles.formBtn}>
                 导出Excel表
             </LoadingButton>,
         ];
@@ -214,31 +207,19 @@ const StockControl: React.FC = () => {
         };
     }, [loading]);
 
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
-    }, [onReload]);
-
     const table = useMemo(() => {
         return (
-            <ProTable<IStockItem>
-                headerTitle={'库存列表'}
+            <FitTable<IStockItem>
                 rowKey={'in_order'}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
                 toolBarRender={toolBarRender}
-                tableAlertRender={false}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
             />
         );
     }, [loading]);
@@ -252,13 +233,11 @@ const StockControl: React.FC = () => {
                 ref={formRef}
                 enableCollapse={false}
             >
-                <LoadingButton
-                    onClick={onSearch}
-                    type="primary"
-                    className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                    icon={<SearchOutlined />}
-                >
+                <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                     查询
+                </LoadingButton>
+                <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                    刷新
                 </LoadingButton>
             </JsonForm>
         );

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import '@/styles/product.less';
@@ -6,7 +6,7 @@ import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { PopConfirmLoadingButton } from 'react-components';
+import { PopConfirmLoadingButton, FitTable } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
@@ -34,14 +34,12 @@ import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
 import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
-import { SearchOutlined } from '@ant-design/icons';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
 import { Icons } from '@/components/Icon';
-import { ProColumns } from 'react-components/es/ProTable';
-import { ProTable } from 'react-components';
 import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components/es/hooks';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 const salesVolumeList = [
     {
@@ -233,6 +231,8 @@ const ChannelList: React.FC = props => {
         onSearch,
         onReload,
         onChange,
+        selectedRowKeys,
+        setSelectedRowKeys,
     } = useList({
         queryList: queryChannelGoodsList,
         formRef: searchRef,
@@ -389,7 +389,7 @@ const ChannelList: React.FC = props => {
         setVisibleProps(record.product_id);
     }, []);
 
-    const columns = useMemo<ProColumns<IChannelProductListItem>[]>(() => {
+    const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
         return [
             {
                 title: '操作',
@@ -556,28 +556,40 @@ const ChannelList: React.FC = props => {
         ];
     }, []);
 
+    const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
+        setSelectedRowKeys(selectedKeys as string[]);
+    }, []);
+
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectedRowKeysChange,
         };
-    }, []);
+    }, [selectedRowKeys]);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
 
     const children = useMemo(() => {
         return (
-            <LoadingButton type="primary" icon={<SearchOutlined />} onClick={onSearch}>
-                查询
-            </LoadingButton>
+            <div>
+                <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
+                    查询
+                </LoadingButton>
+                <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                    刷新
+                </LoadingButton>
+            </div>
         );
-    }, []);
-
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
     }, []);
 
     const search = useMemo(() => {
@@ -593,69 +605,56 @@ const ChannelList: React.FC = props => {
         );
     }, []);
 
-    const toolBarRender = useCallback(
-        (selectedRowKeys = []) => {
-            const size = selectedRowKeys.length;
-            return [
-                <LoadingButton
-                    key="on"
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    icon={<Icons type="scm-on-sale" />}
-                    onClick={() => onShelveList(selectedRowKeys)}
-                    disabled={size === 0}
-                >
-                    一键上架
-                </LoadingButton>,
-                <LoadingButton
-                    key={'of'}
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    icon={<Icons type="scm-of-sale" />}
-                    onClick={() => offShelveList(selectedRowKeys)}
-                    disabled={size === 0}
-                >
-                    一键下架
-                </LoadingButton>,
-                <Button
-                    key="export"
-                    disabled={total <= 0}
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    onClick={showExcelDialog}
-                    icon={<Icons type="scm-export" />}
-                >
-                    导出
-                </Button>,
-            ];
-        },
-        [loading],
-    );
+    const toolBarRender = useCallback(() => {
+        const size = selectedRowKeys.length;
+        return [
+            <LoadingButton
+                key="on"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => onShelveList(selectedRowKeys)}
+                disabled={size === 0}
+            >
+                一键上架
+            </LoadingButton>,
+            <LoadingButton
+                key={'of'}
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => offShelveList(selectedRowKeys)}
+                disabled={size === 0}
+            >
+                一键下架
+            </LoadingButton>,
+            <Button
+                key="export"
+                disabled={total <= 0}
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={showExcelDialog}
+            >
+                导出
+            </Button>,
+        ];
+    }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
-            <ProTable<IChannelProductListItem>
-                headerTitle="查询表格"
+            <FitTable<IChannelProductListItem>
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 rowSelection={rowSelection}
-                toolBarRender={toolBarRender}
-                pagination={{
-                    total: total,
-                    current: pageNumber,
-                    pageSize: pageSize,
-                    showSizeChanger: true,
-                }}
-                tableAlertRender={false}
+                pagination={pagination}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
+                columnsSettingRender={true}
+                toolBarRender={toolBarRender}
             />
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 
     const body = useMemo(() => {
         return (
@@ -672,7 +671,7 @@ const ChannelList: React.FC = props => {
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog]);
+    }, [loading, exportDialog, selectedRowKeys]);
 
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;
