@@ -565,6 +565,7 @@ const PaneErrTab = () => {
                 loading={loading}
                 scroll={scroll}
                 pagination={pagination}
+                onChange={onSearch}
             />
         );
     }, [loading]);
