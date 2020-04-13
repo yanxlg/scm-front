@@ -107,30 +107,31 @@ const GoodsAttr: React.FC = props => {
         // 获取所有编辑过的数据
         const editList: ITagItem[] = [];
         const keys = Object.keys(cacheData);
+        // console.log(keys);
         if (keys.length > 0) {
             keys.forEach(key => {
                 // let list: ITagItem[] = [];
                 let currentPage = Number(key);
-                const list: ITagItem[] = currentPage !== page ? cacheData[key] : attrList;
-                list.forEach(item => {
-                    if (item.type) {
-                        editList.push({
-                            ...item,
-                            page: currentPage,
-                        });
-                    }
-                });
-            });
-        } else {
-            attrList.forEach(item => {
-                if (item.type) {
-                    editList.push({
-                        ...item,
-                        page,
+                if (currentPage !== page) {
+                    cacheData[key].forEach((item: ITagItem) => {
+                        if (item.type) {
+                            editList.push({
+                                ...item,
+                                page: currentPage,
+                            });
+                        }
                     });
                 }
             });
         }
+        attrList.forEach(item => {
+            if (item.type) {
+                editList.push({
+                    ...item,
+                    page,
+                });
+            }
+        });
         if (validateList(editList)) {
             confirm({
                 title: '保存即应用标签',
@@ -138,7 +139,6 @@ const GoodsAttr: React.FC = props => {
                 content:
                     '系统会根据关键字自动匹配商品打标签，这个过程预计需要30分钟。任务执行中不可再次编辑，请确认是否立刻执行？',
                 onOk() {
-                    // console.log('OK');
                     _putBatchUpdateTags(editList);
                 },
             });
