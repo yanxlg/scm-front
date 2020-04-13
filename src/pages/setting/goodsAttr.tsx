@@ -2,9 +2,9 @@ import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import { Button, Input, Tabs, Pagination, Modal, message } from 'antd';
 import Container from '@/components/Container';
 // import EditTag from './components/EditTag';
-import { getTagsList } from '@/services/goods-attr';
+import { getTagsList, putBatchUpdateTags, getBatchUpdateProgress } from '@/services/goods-attr';
 import { ITagItem, IGetTagsListRequest } from '@/interface/IGoodsAttr';
-import { PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { FitTable } from 'react-components';
 
 import { ColumnsType } from 'antd/lib/table/interface';
@@ -22,7 +22,8 @@ const GoodsAttr: React.FC = props => {
         pageOneOriginData: [],
         cacheData: {},
     });
-    const [pending, setPending] = useState(true);
+    const [pending, setPending] = useState(false);
+    const [saveLoading, setSaveLoading] = useState(false);
     const [page, setPage] = useState(1);
     // const [pageSize, setPageSize] = useState(10);
     const [total, setTotal] = useState(0);
@@ -33,7 +34,7 @@ const GoodsAttr: React.FC = props => {
         const newAttrList = [...attrList];
         newAttrList.push({
             name: '',
-            description: '',
+            keyWords: '',
             type: 'add',
         });
         setAttrList(newAttrList);
@@ -41,19 +42,18 @@ const GoodsAttr: React.FC = props => {
 
     const editAttr = useCallback(
         (name, value, index) => {
-            setAttrList(
-                attrList.map((item, i) => {
-                    if (i === index) {
-                        const ret: ITagItem = {
-                            ...item,
-                            [name]: value,
-                            type: item.type === 'add' ? 'add' : 'edit',
-                        };
-                        return ret;
-                    }
-                    return item;
-                }),
-            );
+            setAttrList(attrList.map((item, i) => {
+                // console.log(index, i);
+                if (i === index) {
+                    const ret: ITagItem = {
+                        ...item,
+                        [name]: value,
+                        type: item.type === 'add' ? 'add' : 'edit',
+                    };
+                    return ret;
+                }
+                return item;
+            }));
         },
         [attrList],
     );
@@ -83,15 +83,19 @@ const GoodsAttr: React.FC = props => {
     );
 
     const validateList = useCallback((editList): boolean => {
-        console.log('editList', editList);
+        if (editList.length === 0) {
+            message.error('没有任何更改！');
+                return false;
+        }
+        // console.log('editList', editList);
         for (let i = 0, len = editList.length; i < len; i++) {
-            const { name, description, page, type } = editList[i];
-            if (type !== 'delete' && (!name || !description)) {
+            const { name, keyWords, page, type } = editList[i];
+            if (type !== 'delete' && (!name || !keyWords)) {
                 message.error(`第${page}页面存在空值，请检查`);
                 return false;
             }
         }
-        return false;
+        return true;
     }, []);
 
     const showConfirm = useCallback(() => {
@@ -132,7 +136,8 @@ const GoodsAttr: React.FC = props => {
                 content:
                     '系统会根据关键字自动匹配商品打标签，这个过程预计需要30分钟。任务执行中不可再次编辑，请确认是否立刻执行？',
                 onOk() {
-                    console.log('OK');
+                    // console.log('OK');
+                    _putBatchUpdateTags(editList);
                 },
             });
         }
@@ -188,6 +193,42 @@ const GoodsAttr: React.FC = props => {
         [page],
     );
 
+    const _getBatchUpdateProgress = useCallback(
+        () => {
+            getBatchUpdateProgress().then(res => {
+                // console.log('getBatchUpdateProgress', res);
+                setPending(res.data === 'finish' ? false : true);
+            });
+        },
+        []
+    );
+
+    const _putBatchUpdateTags = useCallback(
+        (editList) => {
+            const list = editList.map((item: ITagItem) => {
+                const { name, tagId, keyWords, type } = item;
+                return {
+                    name,
+                    tagId,
+                    keyWords,
+                    type
+                }
+            })
+            setSaveLoading(true);
+            putBatchUpdateTags({
+                tag_list: list
+            }).then(res => {
+                _getBatchUpdateProgress();
+                _getTagsList({
+                    page: 1
+                });
+            }).finally(() => {
+                setSaveLoading(false);
+            });
+        },
+        []
+    )
+
     const columns = useMemo(() => {
         if (pending) {
             return [
@@ -199,7 +240,7 @@ const GoodsAttr: React.FC = props => {
                 },
                 {
                     title: '关键词',
-                    dataIndex: 'description',
+                    dataIndex: 'keyWords',
                     width: 200,
                     align: 'center',
                 },
@@ -222,14 +263,14 @@ const GoodsAttr: React.FC = props => {
                 },
                 {
                     title: '关键词',
-                    dataIndex: 'description',
+                    dataIndex: 'keyWords',
                     width: 200,
                     align: 'center',
                     render: (val: string, record: ITagItem, index: number) => {
                         return (
                             <TextArea
                                 value={val}
-                                onChange={e => editAttr('description', e.target.value, index)}
+                                onChange={e => editAttr('keyWords', e.target.value, index)}
                                 autoSize
                             />
                         );
@@ -250,20 +291,32 @@ const GoodsAttr: React.FC = props => {
                 },
             ] as ColumnsType<ITagItem>;
         }
-
         // attrList
-    }, [pending]);
+    }, [pending, attrList]);
 
     useEffect(() => {
+        _getBatchUpdateProgress();
         _getTagsList();
+        const timer = setInterval(() => {
+            _getBatchUpdateProgress();
+        }, 20 * 1000);
+        return () => {
+            clearInterval(timer);
+        }
     }, []);
 
     return useMemo(() => {
+        // console.log('attrList', attrList);
         return (
             <Container>
                 <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="商品属性配置" key="1">
                         <div className={styles.tableContainer}>
+                            {
+                                pending && (
+                                    <div className={styles.loadingContainer}><LoadingOutlined />系统自动打标签中，请稍等...</div>
+                                )
+                            }
                             <FitTable
                                 bordered
                                 // rowKey="tagId"
@@ -307,6 +360,7 @@ const GoodsAttr: React.FC = props => {
                                     type="primary"
                                     className={styles.btnSave}
                                     onClick={showConfirm}
+                                    loading={saveLoading}
                                 >
                                     保存即应用
                                 </Button>
@@ -320,7 +374,7 @@ const GoodsAttr: React.FC = props => {
                 </Tabs>
             </Container>
         );
-    }, [attrList, columns, page, total, loading, pending]);
+    }, [attrList, columns, page, total, loading, pending, saveLoading]);
 };
 
 export default GoodsAttr;

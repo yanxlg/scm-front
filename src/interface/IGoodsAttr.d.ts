@@ -13,7 +13,7 @@ export declare interface IGetTagsListRequest {
 export declare interface ITagItem {
     name: string;
     tagId?: string;
-    description?: string;
+    keyWords?: string;
     isActive?: string;
     type?: ITagOpsType;
     page?: number;

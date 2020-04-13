@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import { GoodsAttrApiPath } from '@/config/api/GoodsAttrApiPath';
 import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
-import { IGetTagsListRequest } from '@/interface/IGoodsAttr';
+import { IGetTagsListRequest, ITagItem } from '@/interface/IGoodsAttr';
 import { singlePromiseWrap } from '@/utils/utils';
 
 export async function getTagsList(params: IGetTagsListRequest = { page: 1, page_count: 10000 }) {
@@ -45,4 +45,18 @@ export async function setCommoditySkuTag(data: { tag_name: string[]; commodity_s
     return request.post<IResponse<any>>(GoodsAttrApiPath.setCommoditySkuTag, {
         data,
     });
+}
+
+export async function putBatchUpdateTags(data: { tag_list: ITagItem[] }) {
+    return request.put<IResponse<any>>(GoodsAttrApiPath.putBatchUpdateTags, {
+        data
+    });
+}
+
+export async function getBatchUpdateProgress() {
+    return request.get<IResponse<any>>(GoodsAttrApiPath.getBatchUpdateProgress);
+}
+
+export async function getInterceptTagList() {
+    return request.get<IResponse<any>>(GoodsAttrApiPath.getInterceptTagList)
 }

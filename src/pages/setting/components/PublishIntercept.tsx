@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Button } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
-
+import { getInterceptTagList, getTagsList } from '@/services/goods-attr';
 import { IPublishInterceptItem } from '@/interface/IGoodsAttr';
 
 const PublishIntercept: React.FC = props => {
@@ -11,6 +11,16 @@ const PublishIntercept: React.FC = props => {
         { name: '重件', checked: true },
         { name: '违禁品', checked: false },
     ]);
+
+    const _getInterceptTagList = useCallback(
+        async () => {
+            // const [tagList, interceptTagList] = await Promise.all([
+            //     getTagsList({ page: 1, page_count: 10000, is_active: 'ENABLED' }),
+            //     getInterceptTagList()
+            // ])
+        },
+        [],
+    )
 
     const btnSelected = useCallback(
         (index: number) => {
@@ -28,6 +38,13 @@ const PublishIntercept: React.FC = props => {
             );
         },
         [tagList],
+    );
+
+    useEffect(
+        () => {
+            getInterceptTagList();
+        },
+        []
     );
 
     return useMemo(() => {
