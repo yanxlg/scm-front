@@ -427,10 +427,10 @@ const PaneErrTab = () => {
                                                     label: errorDetailOptionMap[4],
                                                     value: 4,
                                                 },
-                                                {
+                                                /*  {
                                                     label: errorDetailOptionMap[12],
                                                     value: 12,
-                                                },
+                                                },*/
                                             ],
                                             onChange: () => {
                                                 onSearch(); // 立即查询
