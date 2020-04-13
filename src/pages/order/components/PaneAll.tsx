@@ -163,11 +163,14 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             parentOrderList: this.getParentOrderData(list),
                         });
                     } else {
-                        this.setState({
-                            childOrderList: this.getChildOrderData(list),
-                        }, () => {
-                            this.bindMouseenter();
-                        });
+                        this.setState(
+                            {
+                                childOrderList: this.getChildOrderData(list),
+                            },
+                            () => {
+                                this.bindMouseenter();
+                            },
+                        );
                     }
                 }
             })
@@ -554,18 +557,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 const id = (e.target as any).parentNode.getAttribute('data-id');
                 [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
                     node.classList.add('hover');
-                })
-            })
+                });
+            });
 
             item.addEventListener('mouseleave', function(e) {
                 // console.log(e.target?.parentNode);
                 const id = (e.target as any).parentNode.getAttribute('data-id');
                 [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
                     node.classList.remove('hover');
-                })
-            })
-        })
-    }
+                });
+            });
+        });
+    };
 
     render() {
         const {
