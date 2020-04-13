@@ -37,14 +37,15 @@ export const transPaginationResponse = <T>({
     ...others
 }: IResponse<{
     total?: number;
+    all_count?: number;
     list?: T[];
     task_info?: T[];
     [key: string]: any;
 }> = EmptyObject) => {
-    const { total = 0, list, task_info, fee, ...extra } = data || {};
+    const { total = 0, all_count = 0, list, task_info, fee, ...extra } = data || {};
     return {
         data: {
-            total,
+            total: total || all_count,
             list: list || task_info || fee || [],
             ...extra,
         },
