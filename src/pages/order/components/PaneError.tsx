@@ -312,7 +312,16 @@ const PaneErrTab = () => {
         },
     ];
 
-    const { dataSource, loading, queryRef, onSearch, total, pageSize, pageNumber } = useList({
+    const {
+        dataSource,
+        loading,
+        queryRef,
+        onSearch,
+        total,
+        pageSize,
+        pageNumber,
+        onChange,
+    } = useList({
         queryList: getErrorOrderList,
         formRef: [formRef, formRef1],
     });
@@ -565,7 +574,7 @@ const PaneErrTab = () => {
                 loading={loading}
                 scroll={scroll}
                 pagination={pagination}
-                onChange={onSearch}
+                onChange={onChange}
             />
         );
     }, [loading]);
