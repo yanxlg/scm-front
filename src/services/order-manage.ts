@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
 import { downloadExcel } from '@/utils/common';
-import { IPadSimilarBody } from '@/interface/IOrder';
+import { IPadSimilarBody, IWarehouseNotShipSearch } from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
 
 export declare interface IFilterParams {
@@ -185,8 +185,8 @@ export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
 }
 
 // 仓库未发货
-export async function getStockNotShipList(data: IFilterParams) {
-    return request.post(OrderApiPath.getStockNotShipList, {
+export async function getWarehouseNotShipList(data: IFilterParams) {
+    return request.post(OrderApiPath.getWarehouseNotShipList, {
         requestType: 'json',
         data,
     });

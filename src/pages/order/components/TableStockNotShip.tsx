@@ -2,7 +2,7 @@ import React from 'react';
 import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
-import { IOrderItem } from './PaneStockNotShip';
+import { IOrderItem } from './_PaneStockNotShip';
 import { FitTable } from 'react-components';
 
 import { utcToLocal } from 'react-components/es/utils/date';
@@ -261,6 +261,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
                 // rowSelection={rowSelection}
                 dataSource={orderList}
                 scroll={{ x: 'max-content' }}
+                columnsSettingRender={true}
                 pagination={false}
             />
         );

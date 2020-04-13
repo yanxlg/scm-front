@@ -28,7 +28,7 @@ export enum OrderApiPath {
     postExportPurchasedNotStock = '/api/v1/orders/exports/5',
 
     // 仓库未发货
-    getStockNotShipList = '/api/v1/orders/list/6',
+    getWarehouseNotShipList = '/api/v1/orders/list/6',
     postExportStockNotShip = '/api/v1/orders/exports/6',
 
     // 错误订单

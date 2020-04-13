@@ -1,20 +1,26 @@
-import React, { RefObject } from 'react';
-import { Button, Pagination, notification, message } from 'antd';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
+import { notification, message, Checkbox } from 'antd';
+import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
-import TableStockNotShip from './TableStockNotShip';
-import { LoadingButton } from 'react-components';
-
+import { defaultOptionItem, channelOptionList, pageSizeOptions } from '@/enums/OrderEnum';
+import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
 import {
-    getStockNotShipList,
-    IFilterParams,
+    getWarehouseNotShipList,
     delChannelOrders,
     postExportStockNotShip,
 } from '@/services/order-manage';
-import { defaultOptionItem, channelOptionList, pageSizeOptions } from '@/enums/OrderEnum';
-import { getCurrentPage } from '@/utils/common';
+import { utcToLocal } from 'react-components/es/utils/date';
+import { getStatusDesc } from '@/utils/transform';
+import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
+import { TableProps } from 'antd/es/table';
 
-const fieldList: FormField[] = [
+import formStyles from 'react-components/es/JsonForm/_form.less';
+
+declare interface IProps {
+    getAllTabCount(): void;
+}
+
+const formFields: FormField[] = [
     {
         type: 'input',
         name: 'order_goods_id',
@@ -55,87 +61,52 @@ const fieldList: FormField[] = [
     },
 ];
 
-export declare interface IOrderItem {
-    [key: string]: any;
-}
+const defaultInitialValues = {
+    channel_source: 100,
+};
 
-declare interface IProps {
-    getAllTabCount(): void;
-}
+const PaneStockNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
+    const searchRef = useRef<JsonFormRef>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(50);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [orderList, setOrderList] = useState<IWarehouseNotShipOrderItem[]>([]);
 
-declare interface IState {
-    page: number;
-    pageCount: number;
-    total: number;
-    loading: boolean;
-    orderList: IOrderItem[];
-}
+    let currentSearchParams: IWarehouseNotShipSearch | null = null;
 
-class PaneStockNotShip extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<JsonFormRef> = React.createRef();
-    private currentSearchParams: IFilterParams | null = null;
-    private initialValues = {
-        channel_source: 100,
-    };
-
-    constructor(props: IProps) {
-        super(props);
-        this.state = {
-            page: 1,
-            pageCount: 50,
-            total: 0,
-            loading: false,
-            orderList: [],
-        };
-    }
-
-    componentDidMount() {
-        // console.log('PaneAll');
-        this.onSearch();
-    }
-
-    onSearch = (baseParams?: IFilterParams) => {
-        const { page, pageCount } = this.state;
-        let params: IFilterParams = {
-            page,
-            page_count: pageCount,
-        };
-        if (this.formRef.current) {
-            params = Object.assign(params, this.formRef.current.getFieldsValue());
-        }
-        if (baseParams) {
-            params = Object.assign(params, baseParams);
-        }
-        // console.log('getValues', this.orderFilterRef.current!.getValues());
-        this.setState({
-            loading: true,
-        });
-        getStockNotShipList(params)
-            .then(res => {
-                this.currentSearchParams = params;
-                // console.log('getProductOrderList', res);
-                const { all_count: total, list } = res.data;
-                const { page, page_count } = params;
-                if (list) {
-                    this.setState({
-                        total,
-                        page: page as number,
-                        pageCount: page_count as number,
-                        orderList: this.getChildOrderData(list),
-                    });
-                }
-            })
-            .finally(() => {
-                this.setState({
-                    loading: false,
+    const onSearch = useCallback(
+        (paginationParams = { page, page_count: pageSize }) => {
+            const params: IWarehouseNotShipSearch = Object.assign(
+                {
+                    page,
+                    page_count: pageSize,
+                },
+                paginationParams,
+                searchRef.current?.getFieldsValue(),
+            );
+            setLoading(true);
+            return getWarehouseNotShipList(params)
+                .then(res => {
+                    currentSearchParams = params;
+                    const { all_count: total, list } = res.data;
+                    // const { page, page_count } = params;
+                    if (list) {
+                        setPage(params.page as number);
+                        setPageSize(params.page_count as number);
+                        setTotal(total);
+                        setOrderList(getChildOrderData(list));
+                    }
+                })
+                .finally(() => {
+                    setLoading(false);
                 });
-            });
-    };
+        },
+        [page, pageSize],
+    );
 
-    // 获取子订单=>采购计划数据
-    private getChildOrderData(list: any[]): IOrderItem[] {
-        // console.log(1111, list);
-        const childOrderList: IOrderItem[] = [];
+    const getChildOrderData = useCallback(list => {
+        const childOrderList: IWarehouseNotShipOrderItem[] = [];
         list.forEach((goodsItem: any) => {
             const { orderGoods, orderInfo } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
@@ -180,69 +151,68 @@ class PaneStockNotShip extends React.PureComponent<IProps, IState> {
         });
         // console.log(1111, childOrderList);
         return childOrderList;
-    }
+    }, []);
 
-    private onChangePage = (page: number) => {
-        this.onSearch({
-            page,
+    const handleClickSearch = useCallback(() => {
+        return onSearch({ page: 1 });
+    }, []);
+
+    const onCheckAllChange = useCallback(
+        (status: boolean) => {
+            setOrderList(
+                orderList.map(item => {
+                    if (item._rowspan) {
+                        return {
+                            ...item,
+                            _checked: status,
+                        };
+                    }
+                    return item;
+                }),
+            );
+        },
+        [orderList],
+    );
+
+    const onSelectedRow = useCallback(
+        (row: IWarehouseNotShipOrderItem) => {
+            setOrderList(
+                orderList.map(item => {
+                    if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                        return {
+                            ...item,
+                            _checked: !row._checked,
+                        };
+                    }
+                    return item;
+                }),
+            );
+        },
+        [orderList],
+    );
+
+    const mergeCell = useCallback((value: string | number, row: IWarehouseNotShipOrderItem) => {
+        return {
+            children: value,
+            props: {
+                rowSpan: row._rowspan || 0,
+            },
+        };
+    }, []);
+
+    const onChange = useCallback(({ current, pageSize }) => {
+        onSearch({
+            pageSize,
+            page: current,
         });
-    };
+    }, []);
 
-    private pageCountChange = (current: number, size: number) => {
-        const { page, pageCount } = this.state;
-        this.onSearch({
-            page: getCurrentPage(size, (page - 1) * pageCount + 1),
-            page_count: size,
-        });
-    };
-
-    private handleClickSearch = () => {
-        this.onSearch({
-            page: 1,
-        });
-    };
-
-    // 全选
-    onCheckAllChange = (status: boolean) => {
-        const { orderList } = this.state;
-        this.setState({
-            orderList: orderList.map(item => {
-                if (item._rowspan) {
-                    return {
-                        ...item,
-                        _checked: status,
-                    };
-                }
-                return item;
-            }),
-        });
-    };
-
-    // 单选
-    onSelectedRow = (row: IOrderItem) => {
-        const { orderList } = this.state;
-        this.setState({
-            orderList: orderList.map(item => {
-                if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
-                    return {
-                        ...item,
-                        _checked: !row._checked,
-                    };
-                }
-                return item;
-            }),
-        });
-    };
-
-    // 获取勾选的orderGoodsId
-    private getOrderGoodsIdList = (): string[] => {
-        const { orderList } = this.state;
+    const getOrderGoodsIdList = useCallback(() => {
         return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
-    };
+    }, [orderList]);
 
-    // 批量操作成功
-    private batchOperateSuccess = (name: string = '', list: string[]) => {
-        this.props.getAllTabCount();
+    const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
+        getAllTabCount();
         notification.success({
             message: `${name}成功`,
             description: (
@@ -253,118 +223,338 @@ class PaneStockNotShip extends React.PureComponent<IProps, IState> {
                 </div>
             ),
         });
-    };
+    }, []);
 
-    // 批量操作失败
-    private batchOperateFail = (
-        name: string = '',
-        list: { order_goods_id: string; result: string }[],
-    ) => {
-        notification.error({
-            message: `${name}失败`,
-            description: (
-                <div>
-                    {list.map((item: any) => (
-                        <div>
-                            {item.order_goods_id}: {item.result.slice(0, 50)}
-                        </div>
-                    ))}
-                </div>
-            ),
-        });
-    };
+    const batchOperateFail = useCallback(
+        (name: string = '', list: { order_goods_id: string; result: string }[]) => {
+            notification.error({
+                message: `${name}失败`,
+                description: (
+                    <div>
+                        {list.map((item: any) => (
+                            <div>
+                                {item.order_goods_id}: {item.result.slice(0, 50)}
+                            </div>
+                        ))}
+                    </div>
+                ),
+            });
+        },
+        [],
+    );
 
-    // 取消渠道订单
-    private delChannelOrders = () => {
-        const list = this.getOrderGoodsIdList();
+    const _delChannelOrders = useCallback(() => {
+        const list = getOrderGoodsIdList();
         if (list.length) {
             return delChannelOrders({
                 order_goods_ids: list,
             }).then(res => {
-                this.onSearch();
+                onSearch();
                 const { success, failed } = res.data;
 
                 if (success!.length) {
-                    this.batchOperateSuccess('取消渠道订单', success);
+                    batchOperateSuccess('取消渠道订单', success);
                 }
                 if (failed!.length) {
-                    this.batchOperateFail('取消渠道订单', failed);
+                    batchOperateFail('取消渠道订单', failed);
                 }
             });
         } else {
             message.error('请选择需要取消的订单');
             return Promise.resolve();
         }
-    };
+    }, []);
 
-    private postExportStockNotShip = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportStockNotShip(params);
-    };
+    const _postExportStockNotShip = useCallback(() => {
+        return postExportStockNotShip(
+            currentSearchParams
+                ? currentSearchParams
+                : {
+                      page: 1,
+                      page_count: 50,
+                  },
+        );
+    }, []);
 
-    render() {
-        const { loading, total, page, pageCount, orderList } = this.state;
+    const search = useMemo(() => {
+        return (
+            <JsonForm
+                ref={searchRef}
+                fieldList={formFields}
+                labelClassName="order-label"
+                initialValues={defaultInitialValues}
+            >
+                <div>
+                    <LoadingButton
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={handleClickSearch}
+                    >
+                        查询
+                    </LoadingButton>
+                    <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
+                        刷新
+                    </LoadingButton>
+                </div>
+            </JsonForm>
+        );
+    }, []);
 
+    const columns = useMemo<TableProps<IWarehouseNotShipOrderItem>['columns']>(() => {
+        return [
+            {
+                fixed: true,
+                key: '_checked',
+                title: () => {
+                    const rowspanList = orderList.filter(item => item._rowspan);
+                    const checkedListLen = rowspanList.filter(item => item._checked).length;
+                    let indeterminate = false,
+                        checked = false;
+                    if (rowspanList.length && rowspanList.length === checkedListLen) {
+                        checked = true;
+                    } else if (checkedListLen) {
+                        indeterminate = true;
+                    }
+                    return (
+                        <Checkbox
+                            indeterminate={indeterminate}
+                            checked={checked}
+                            onChange={e => onCheckAllChange(e.target.checked)}
+                        />
+                    );
+                },
+                dataIndex: '_checked',
+                align: 'center',
+                width: 50,
+                render: (value: boolean, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'createTime',
+                title: '订单时间',
+                dataIndex: 'createTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'orderGoodsId',
+                title: '中台订单子ID',
+                dataIndex: 'orderGoodsId',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'purchasePlanId',
+                title: '计划子项ID',
+                dataIndex: 'purchasePlanId',
+                align: 'center',
+                width: 120,
+                // render: mergeCell
+            },
+            {
+                key: 'productId',
+                title: '中台商品ID',
+                dataIndex: 'productId',
+                align: 'center',
+                width: 120,
+                // render: mergeCell
+            },
+            {
+                key: 'purchaseWaybillNo',
+                title: '采购运单号',
+                dataIndex: 'purchaseWaybillNo',
+                align: 'center',
+                width: 120,
+            },
+            {
+                key: 'purchaseOrderStatus',
+                title: '采购订单状态',
+                dataIndex: 'purchaseOrderStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IWarehouseNotShipOrderItem) => {
+                    return getStatusDesc(purchaseOrderOptionList, value);
+                },
+            },
+            {
+                key: 'purchaseOrderShippingStatus',
+                title: '采购配送状态',
+                dataIndex: 'purchaseOrderShippingStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IWarehouseNotShipOrderItem) => {
+                    return getStatusDesc(purchaseShippingOptionList, value);
+                },
+            },
+            {
+                key: 'storageTime',
+                title: '入库时间',
+                dataIndex: 'storageTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'deliveryCommandTime',
+                title: '发送发货指令时间',
+                dataIndex: 'deliveryCommandTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'cancelTime',
+                title: '取消订单时间',
+                dataIndex: 'cancelTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: '_goodsTotalAmount',
+                title: '商品总金额',
+                dataIndex: '_goodsTotalAmount',
+                align: 'center',
+                width: 120,
+                render: (_: any, row: IWarehouseNotShipOrderItem) => {
+                    // console.log(row);
+                    const { goodsAmount, goodsNumber, freight } = row;
+                    const totalAmount = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                    return {
+                        children: isNaN(totalAmount) ? totalAmount : totalAmount.toFixed(2),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'channelOrderGoodsSn',
+                title: '渠道订单ID',
+                dataIndex: 'channelOrderGoodsSn',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'channelSource',
+                title: '销售渠道',
+                dataIndex: 'channelSource',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'confirmTime',
+                title: '订单确认时间',
+                dataIndex: 'confirmTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+        ];
+    }, [orderList]);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: page,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
+
+    const toolBarRender = useCallback(() => {
+        return [
+            <LoadingButton
+                key="channel_order"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => _delChannelOrders()}
+            >
+                取消渠道订单
+            </LoadingButton>,
+            <LoadingButton
+                key="export"
+                className={formStyles.formBtn}
+                onClick={() => _postExportStockNotShip()}
+            >
+                导出至EXCEL
+            </LoadingButton>,
+        ];
+    }, []);
+
+    useEffect(() => {
+        onSearch();
+    }, []);
+
+    return useMemo(() => {
         return (
             <>
-                <div>
-                    <JsonForm
-                        fieldList={fieldList}
-                        labelClassName="order-label"
-                        ref={this.formRef}
-                        initialValues={this.initialValues}
-                    />
-                    <div className="order-operation">
-                        <Button
-                            type="primary"
-                            className="order-btn"
-                            loading={loading}
-                            onClick={this.handleClickSearch}
-                        >
-                            查询
-                        </Button>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.delChannelOrders}
-                        >
-                            取消渠道订单
-                        </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportStockNotShip}
-                        >
-                            导出数据
-                        </LoadingButton>
-                    </div>
-                    <TableStockNotShip
-                        loading={loading}
-                        orderList={orderList}
-                        onCheckAllChange={this.onCheckAllChange}
-                        onSelectedRow={this.onSelectedRow}
-                    />
-                    <Pagination
-                        className="order-pagination"
-                        total={total}
-                        current={page}
-                        pageSize={pageCount}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
-                    />
-                </div>
+                {search}
+                <FitTable
+                    bordered
+                    rowKey={record => {
+                        return record.purchasePlanId || record.orderGoodsId;
+                    }}
+                    className="order-table"
+                    loading={loading}
+                    columns={columns}
+                    // rowSelection={rowSelection}
+                    dataSource={orderList}
+                    scroll={{ x: 'max-content' }}
+                    columnsSettingRender={true}
+                    pagination={pagination}
+                    onChange={onChange}
+                    toolBarRender={toolBarRender}
+                />
             </>
         );
-    }
-}
+    }, [page, pageSize, total, loading, orderList]);
+};
 
 export default PaneStockNotShip;
