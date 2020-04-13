@@ -49,7 +49,7 @@ export async function setCommoditySkuTag(data: { tag_name: string[]; commodity_s
 
 export async function putBatchUpdateTags(data: { tag_list: ITagItem[] }) {
     return request.put<IResponse<any>>(GoodsAttrApiPath.putBatchUpdateTags, {
-        data
+        data,
     });
 }
 
@@ -58,5 +58,11 @@ export async function getBatchUpdateProgress() {
 }
 
 export async function getInterceptTagList() {
-    return request.get<IResponse<any>>(GoodsAttrApiPath.getInterceptTagList)
+    return request.get<IResponse<any>>(GoodsAttrApiPath.getInterceptTagList);
+}
+
+export async function setInterceptTagList(data: { keywords: string }) {
+    return request.post<IResponse<any>>(GoodsAttrApiPath.setInterceptTagList, {
+        data,
+    });
 }

@@ -1,26 +1,40 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Button } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
-import { getInterceptTagList, getTagsList } from '@/services/goods-attr';
-import { IPublishInterceptItem } from '@/interface/IGoodsAttr';
+import { getInterceptTagList, getTagsList, setInterceptTagList } from '@/services/goods-attr';
+import { IPublishInterceptItem, ITagItem } from '@/interface/IGoodsAttr';
+import { LoadingButton } from 'react-components';
 
 const PublishIntercept: React.FC = props => {
     const [tagList, setTagList] = useState<IPublishInterceptItem[]>([
-        { name: '品牌', checked: true },
-        { name: '大件', checked: false },
-        { name: '重件', checked: true },
-        { name: '违禁品', checked: false },
+        // { name: '品牌', checked: true },
+        // { name: '大件', checked: false },
+        // { name: '重件', checked: true },
+        // { name: '违禁品', checked: false },
     ]);
 
-    const _getInterceptTagList = useCallback(
-        async () => {
-            // const [tagList, interceptTagList] = await Promise.all([
-            //     getTagsList({ page: 1, page_count: 10000, is_active: 'ENABLED' }),
-            //     getInterceptTagList()
-            // ])
-        },
-        [],
-    )
+    const _getInterceptTagList = useCallback(async () => {
+        try {
+            const [tagsResp, interceptTagResp] = await Promise.all([
+                getTagsList({ page: 1, page_count: 10000, is_active: 'ENABLED' }),
+                getInterceptTagList(),
+            ]);
+            const { tags } = tagsResp.data;
+            // setTagList(tags || []);
+            const interceptTags = interceptTagResp.data;
+            if (tags) {
+                setTagList(
+                    tags.map((item: ITagItem) => {
+                        const checked = interceptTags.indexOf(item.name) > -1 ? true : false;
+                        return {
+                            name: item.name,
+                            checked,
+                        };
+                    }),
+                );
+            }
+        } catch (error) {}
+    }, []);
 
     const btnSelected = useCallback(
         (index: number) => {
@@ -40,12 +54,21 @@ const PublishIntercept: React.FC = props => {
         [tagList],
     );
 
-    useEffect(
-        () => {
-            getInterceptTagList();
-        },
-        []
-    );
+    const _setInterceptTagList = useCallback(() => {
+        // console.log('tagList', tagList);
+        return setInterceptTagList({
+            keywords: tagList
+                .filter(item => item.checked)
+                .map(item => item.name)
+                .join(','),
+        }).then(res => {
+            _getInterceptTagList();
+        });
+    }, [tagList]);
+
+    useEffect(() => {
+        _getInterceptTagList();
+    }, []);
 
     return useMemo(() => {
         return (
@@ -60,7 +83,9 @@ const PublishIntercept: React.FC = props => {
                     />
                 ))}
                 <div style={{ marginTop: 10 }}>
-                    <Button type="primary">更改设置</Button>
+                    <LoadingButton type="primary" onClick={_setInterceptTagList}>
+                        更改设置
+                    </LoadingButton>
                 </div>
             </>
         );

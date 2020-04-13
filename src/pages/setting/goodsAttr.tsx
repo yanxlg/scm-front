@@ -42,18 +42,20 @@ const GoodsAttr: React.FC = props => {
 
     const editAttr = useCallback(
         (name, value, index) => {
-            setAttrList(attrList.map((item, i) => {
-                // console.log(index, i);
-                if (i === index) {
-                    const ret: ITagItem = {
-                        ...item,
-                        [name]: value,
-                        type: item.type === 'add' ? 'add' : 'edit',
-                    };
-                    return ret;
-                }
-                return item;
-            }));
+            setAttrList(
+                attrList.map((item, i) => {
+                    // console.log(index, i);
+                    if (i === index) {
+                        const ret: ITagItem = {
+                            ...item,
+                            [name]: value,
+                            type: item.type === 'add' ? 'add' : 'edit',
+                        };
+                        return ret;
+                    }
+                    return item;
+                }),
+            );
         },
         [attrList],
     );
@@ -85,7 +87,7 @@ const GoodsAttr: React.FC = props => {
     const validateList = useCallback((editList): boolean => {
         if (editList.length === 0) {
             message.error('没有任何更改！');
-                return false;
+            return false;
         }
         // console.log('editList', editList);
         for (let i = 0, len = editList.length; i < len; i++) {
@@ -104,9 +106,9 @@ const GoodsAttr: React.FC = props => {
         // console.log('showConfirm', keys);
         // 获取所有编辑过的数据
         const editList: ITagItem[] = [];
-        // const keys = Object.keys(cacheData);
-        if (cacheData[page]) {
-            Object.keys(cacheData)?.forEach(key => {
+        const keys = Object.keys(cacheData);
+        if (keys.length > 0) {
+            keys.forEach(key => {
                 // let list: ITagItem[] = [];
                 let currentPage = Number(key);
                 const list: ITagItem[] = currentPage !== page ? cacheData[key] : attrList;
@@ -161,6 +163,7 @@ const GoodsAttr: React.FC = props => {
     const handleReset = useCallback(() => {
         setPage(1);
         const { pageOneOriginData } = pageDataRef.current;
+        pageDataRef.current.cacheData = {};
         // pageDataRef.current = {
         //     pageOneOriginData
         // }
@@ -193,41 +196,37 @@ const GoodsAttr: React.FC = props => {
         [page],
     );
 
-    const _getBatchUpdateProgress = useCallback(
-        () => {
-            getBatchUpdateProgress().then(res => {
-                // console.log('getBatchUpdateProgress', res);
-                setPending(res.data === 'finish' ? false : true);
-            });
-        },
-        []
-    );
+    const _getBatchUpdateProgress = useCallback(() => {
+        getBatchUpdateProgress().then(res => {
+            // console.log('getBatchUpdateProgress', res);
+            setPending(res.data === 'finish' ? false : true);
+        });
+    }, []);
 
-    const _putBatchUpdateTags = useCallback(
-        (editList) => {
-            const list = editList.map((item: ITagItem) => {
-                const { name, tagId, keyWords, type } = item;
-                return {
-                    name,
-                    tagId,
-                    keyWords,
-                    type
-                }
-            })
-            setSaveLoading(true);
-            putBatchUpdateTags({
-                tag_list: list
-            }).then(res => {
+    const _putBatchUpdateTags = useCallback(editList => {
+        const list = editList.map((item: ITagItem) => {
+            const { name, tagId, keyWords, type } = item;
+            return {
+                name,
+                tagId,
+                keyWords,
+                type,
+            };
+        });
+        setSaveLoading(true);
+        putBatchUpdateTags({
+            tag_list: list,
+        })
+            .then(res => {
                 _getBatchUpdateProgress();
                 _getTagsList({
-                    page: 1
+                    page: 1,
                 });
-            }).finally(() => {
+            })
+            .finally(() => {
                 setSaveLoading(false);
             });
-        },
-        []
-    )
+    }, []);
 
     const columns = useMemo(() => {
         if (pending) {
@@ -302,7 +301,7 @@ const GoodsAttr: React.FC = props => {
         }, 20 * 1000);
         return () => {
             clearInterval(timer);
-        }
+        };
     }, []);
 
     return useMemo(() => {
@@ -312,11 +311,12 @@ const GoodsAttr: React.FC = props => {
                 <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="商品属性配置" key="1">
                         <div className={styles.tableContainer}>
-                            {
-                                pending && (
-                                    <div className={styles.loadingContainer}><LoadingOutlined />系统自动打标签中，请稍等...</div>
-                                )
-                            }
+                            {pending && (
+                                <div className={styles.loadingContainer}>
+                                    <LoadingOutlined />
+                                    系统自动打标签中，请稍等...
+                                </div>
+                            )}
                             <FitTable
                                 bordered
                                 // rowKey="tagId"
