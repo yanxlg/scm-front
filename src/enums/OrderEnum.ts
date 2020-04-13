@@ -445,14 +445,14 @@ export const parentDefaultFieldList: FormField[] = [
 
 export const parentAllFieldList: FormField[] = [
     ...parentDefaultFieldList,
-    {
-        type: 'select',
-        name: 'cancel_type',
-        label: '中台订单取消原因',
-        className: 'order-input',
-        formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...orderCancelOptionList],
-    },
+    // {
+    //     type: 'select',
+    //     name: 'cancel_type',
+    //     label: '中台订单取消原因',
+    //     className: 'order-input',
+    //     formItemClassName: 'order-form-item',
+    //     optionList: [defaultOptionItem, ...orderCancelOptionList],
+    // },
     {
         type: 'input',
         name: 'channel_order_goods_sn',
@@ -491,6 +491,7 @@ export const defaultParentColList = [
 export const parentOptionalColList = [
     { key: 'goodsDetail', name: '商品详情' }, // 2
     { key: 'productShop', name: '渠道店铺名' }, // 2
+    // { key: 'cancelType', name: '中台订单取消原因' }, // 2
     { key: 'confirmTime', name: '订单确认时间' }, // 1
     { key: 'channelSource', name: '销售渠道' }, // 1
     { key: 'currency', name: '货币类型' }, // 1

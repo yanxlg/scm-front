@@ -166,6 +166,14 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
+        // {
+        //     key: 'cancelType',
+        //     title: '中台订单取消原因',
+        //     dataIndex: 'cancelType',
+        //     align: 'center',
+        //     width: 148,
+        //     render: (value: number) => getStatusDesc(orderCancelOptionList, value),
+        // },
         {
             key: 'confirmTime',
             title: '订单确认时间',
@@ -204,21 +212,6 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
-        },
-        {
-            key: 'cancelType',
-            title: '中台订单取消原因',
-            dataIndex: 'cancelType',
-            align: 'center',
-            width: 148,
-            render: (value: number, row: IParentOrderItem) => {
-                return {
-                    children: getStatusDesc(orderCancelOptionList, value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
         },
     ];
 
