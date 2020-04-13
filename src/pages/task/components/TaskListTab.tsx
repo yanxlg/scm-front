@@ -128,7 +128,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ? 5
                     : '6',
         };
-    }, []);
+    }, [loading]);
 
     const viewTaskDetail = useCallback((task_id: number) => {
         history.push(`/task/list/${task_id}`);

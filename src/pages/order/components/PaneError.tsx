@@ -6,7 +6,6 @@ import {
     defaultOptionItem,
     channelOptionList,
     errorTypeOptionList,
-    errorDetailOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
 } from '@/enums/OrderEnum';
@@ -19,7 +18,7 @@ import { FormInstance } from 'antd/es/form';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import SimilarStyleModal from '@/pages/order/components/SimilarStyleModal';
-import { Button, Table } from 'antd';
+import { Button } from 'antd';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -63,7 +62,7 @@ const PaneErrTab = () => {
     const fieldList: FormField[] = useMemo(() => {
         return [
             {
-                type: 'input',
+                type: 'number',
                 name: 'order_goods_id',
                 label: '订单号',
                 className: 'order-input',
@@ -323,7 +322,7 @@ const PaneErrTab = () => {
         },
     ];
 
-    const { dataSource, loading, query, onSearch, total, pageSize, pageNumber } = useList({
+    const { dataSource, loading, queryRef, onSearch, total, pageSize, pageNumber } = useList({
         queryList: getErrorOrderList,
         formRef: [formRef, formRef1],
     });
@@ -336,7 +335,7 @@ const PaneErrTab = () => {
                 abnormal_type: 1,
                 abnormal_detail_type: 2,
             },
-            query,
+            queryRef.current,
         );
         return postExportErrOrder(params);
     }, []);

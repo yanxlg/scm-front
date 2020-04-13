@@ -28,7 +28,7 @@ const CopyLink: React.FC<ICopyLinkProps> = ({ getCopiedLinkQuery }) => {
         setTimeout(() => {
             setCopied(false);
         }, 2000);
-    }, [copied]);
+    }, [copied, getCopiedLinkQuery]);
     return (
         <div className={styles.fixedWidgets}>
             <Popover
