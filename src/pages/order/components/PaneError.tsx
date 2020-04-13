@@ -312,7 +312,16 @@ const PaneErrTab = () => {
         },
     ];
 
-    const { dataSource, loading, queryRef, onSearch, total, pageSize, pageNumber } = useList({
+    const {
+        dataSource,
+        loading,
+        queryRef,
+        onSearch,
+        total,
+        pageSize,
+        pageNumber,
+        onChange,
+    } = useList({
         queryList: getErrorOrderList,
         formRef: [formRef, formRef1],
     });
@@ -427,10 +436,10 @@ const PaneErrTab = () => {
                                                     label: errorDetailOptionMap[4],
                                                     value: 4,
                                                 },
-                                                {
+                                                /*  {
                                                     label: errorDetailOptionMap[12],
                                                     value: 12,
-                                                },
+                                                },*/
                                             ],
                                             onChange: () => {
                                                 onSearch(); // 立即查询
@@ -565,6 +574,7 @@ const PaneErrTab = () => {
                 loading={loading}
                 scroll={scroll}
                 pagination={pagination}
+                onChange={onChange}
             />
         );
     }, [loading]);
