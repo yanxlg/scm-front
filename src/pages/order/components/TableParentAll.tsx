@@ -7,7 +7,11 @@ import { IParentOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from '@/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
+import {
+    orderStatusOptionList,
+    orderShippingOptionList,
+    orderCancelOptionList,
+} from '@/enums/OrderEnum';
 
 declare interface IProps {
     loading: boolean;
@@ -200,6 +204,21 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+        },
+        {
+            key: 'cancelType',
+            title: '中台订单取消原因',
+            dataIndex: 'cancelType',
+            align: 'center',
+            width: 148,
+            render: (value: number, row: IParentOrderItem) => {
+                return {
+                    children: getStatusDesc(orderCancelOptionList, value),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
         },
     ];
 

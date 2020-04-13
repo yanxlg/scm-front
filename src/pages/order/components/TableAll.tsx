@@ -15,6 +15,7 @@ import {
     purchasePayOptionList,
     purchaseShippingOptionList,
     purchaseReserveOptionList,
+    orderCancelOptionList,
 } from '@/enums/OrderEnum';
 
 declare interface IProps {
@@ -78,7 +79,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             title: 'Version ID',
             dataIndex: 'productId',
             align: 'center',
-            width: 120
+            width: 120,
         },
         // 勾选展示
         {
@@ -111,8 +112,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 100,
             render: (value: string) => {
-                return <AutoEnLargeImg src={value} className="order-img-lazy"/>
-            }
+                return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+            },
         },
         // // 待补充
         // {
@@ -135,18 +136,15 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                         const styleInfo = JSON.parse(value);
                         child = (
                             <>
-                                {
-                                    Object.keys(styleInfo).map(key => (
-                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
-                                    ))
-                                }
+                                {Object.keys(styleInfo).map(key => (
+                                    <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                ))}
                             </>
-                        )
-                    }
-                    catch(err) {}
+                        );
+                    } catch (err) {}
                 }
                 return child;
-            }
+            },
         },
         {
             key: 'goodsAmount',
@@ -277,7 +275,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'cancelTime',
             align: 'center',
             width: 146,
-            render: (value: string) => utcToLocal(value, '')
+            render: (value: string) => utcToLocal(value, ''),
         },
         // 勾选展示
         {
@@ -286,7 +284,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'deliveryTime',
             align: 'center',
             width: 146,
-            render: (value: string) =>  utcToLocal(value, ''),
+            render: (value: string) => utcToLocal(value, ''),
         },
         // 勾选展示
         {
@@ -352,10 +350,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: number, row: IChildOrderItem) => {
                 const { reserveStatus } = row;
                 if (reserveStatus === 3 && value === 1) {
-                    return ''
+                    return '';
                 }
-                return getStatusDesc(purchaseOrderOptionList, value)
-            }
+                return getStatusDesc(purchaseOrderOptionList, value);
+            },
         },
         // 勾选展示
         {
@@ -391,7 +389,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: number, row: IChildOrderItem) => {
                 const { purchasePlatformOrderId } = row;
                 return purchasePlatformOrderId ? getStatusDesc(purchasePayOptionList, value) : '';
-            }
+            },
         },
         // 勾选展示
         {
@@ -447,13 +445,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         //     },
         // },
         {
+            key: 'cancelType',
+            title: '中台订单取消原因',
+            dataIndex: 'cancelType',
+            align: 'center',
+            width: 148,
+            render: (value: number) => getStatusDesc(orderCancelOptionList, value),
+        },
+        {
             key: '_logisticsTrack',
             title: '物流轨迹',
             dataIndex: '_logisticsTrack',
             align: 'center',
             width: 120,
             render: (value, row: IChildOrderItem) => {
-                return <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>
+                return <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>;
             },
         },
     ];
@@ -588,7 +594,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     pagination={false}
                     onRow={record => {
                         return {
-                            'data-id': record.orderGoodsId
+                            'data-id': record.orderGoodsId,
                         } as any;
                     }}
                 />

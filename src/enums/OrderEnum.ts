@@ -95,6 +95,11 @@ export const errorDetailOptionList = [
     { name: '6天未标记发货', value: 7 },
 ];
 
+export const orderCancelOptionList = [
+    { name: '渠道端用户取消订单', value: 1 },
+    { name: '中台手动取消渠道单', value: 2 },
+];
+
 export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
 
 export const childDefaultFieldList: FormField[] = [
@@ -280,6 +285,14 @@ export const childAllFieldList: FormField[] = [
         optionList: [defaultOptionItem, { name: '没有', value: 2 }],
     },
     {
+        type: 'select',
+        name: 'cancel_type',
+        label: '中台订单取消原因',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...orderCancelOptionList],
+    },
+    {
         type: 'dateRanger',
         name: ['purchase_time_start', 'purchase_time_end'],
         label: '采购签收时间',
@@ -398,6 +411,7 @@ export const childOptionalColList = [
     { key: 'purchaseCancelReason', name: '采购取消原因' },
     { key: 'purchaseTime', name: '采购签收时间' },
     { key: 'storageTime', name: '采购入库时间' },
+    { key: 'cancelType', name: '中台订单取消原因' },
     { key: '_logisticsTrack', name: '物流轨迹' },
 ];
 
@@ -432,6 +446,14 @@ export const parentDefaultFieldList: FormField[] = [
 export const parentAllFieldList: FormField[] = [
     ...parentDefaultFieldList,
     {
+        type: 'select',
+        name: 'cancel_type',
+        label: '中台订单取消原因',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...orderCancelOptionList],
+    },
+    {
         type: 'input',
         name: 'channel_order_goods_sn',
         label: '销售订单id',
@@ -444,7 +466,7 @@ export const parentAllFieldList: FormField[] = [
         type: 'dateRanger',
         name: ['confirm_time_start', 'confirm_time_end'],
         label: '订单确认时间',
-        className: 'order-date-picker',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
