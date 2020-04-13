@@ -40,16 +40,6 @@ export declare interface IErrorOrderItem {
     purchaseWaybillNo?: string; // 首程运单号
     _rowspan?: number;
 }
-declare interface IState {
-    loading: boolean;
-    exportLoading: boolean;
-    page: number;
-    pageCount: number;
-    total: number;
-    abnormalDetailType: number;
-    orderList: IErrorOrderItem[];
-    abnormalDetailList: number[];
-}
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
