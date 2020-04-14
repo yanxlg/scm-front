@@ -15,6 +15,7 @@ import { queryCategory } from '@/services/task';
 import { TreeNodeNormal } from 'antd/es/tree/Tree';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
+import '@/styles/config.less';
 
 declare interface ReptileConditionProps {
     form: FormInstance;

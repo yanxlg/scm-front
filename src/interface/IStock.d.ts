@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import { Dayjs } from 'dayjs';
 
 export interface IStockOutItem {
     sku: string;
@@ -22,16 +22,16 @@ export interface IStockInItem {
 }
 
 export declare interface IStockINFormData {
-    time_start?: Moment | number;
-    time_end?: Moment | number;
+    time_start?: Dayjs | number;
+    time_end?: Dayjs | number;
     purchase_order_sn?: string;
     inbound_order_sn?: string;
     commodity_id?: string;
 }
 
 export declare interface IStockOUTFormData {
-    time_start?: Moment | number;
-    time_end?: Moment | number;
+    time_start?: Dayjs | number;
+    time_end?: Dayjs | number;
     last_waybill_no?: string;
     outbound_order_sn?: string;
     commodity_id?: string;

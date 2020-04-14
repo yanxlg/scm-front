@@ -1,6 +1,8 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
 import { downloadExcel } from '@/utils/common';
+import { IPadSimilarBody } from '@/interface/IOrder';
+import { transPaginationResponse } from '@/utils/utils';
 
 export declare interface IFilterParams {
     page?: number;
@@ -202,10 +204,12 @@ export async function postExportStockNotShip(data: IFilterParams) {
 
 // 获取异常订单
 export async function getErrorOrderList(data: IErrFilterParams) {
-    return request.post(OrderApiPath.getErrorOrderList, {
-        requestType: 'json',
-        data,
-    });
+    return request
+        .post(OrderApiPath.getErrorOrderList, {
+            requestType: 'json',
+            data,
+        })
+        .then(transPaginationResponse);
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -259,5 +263,11 @@ export async function putConfirmPay(data: IConfirmPayData) {
 export async function getOrderTrack(params: { order_goods_id: string; last_waybill_no: string }) {
     return request.get(OrderApiPath.getOrderTrack, {
         params,
+    });
+}
+
+export async function patSimilarGoods(body: IPadSimilarBody) {
+    return request.post(OrderApiPath.padSimilarGood, {
+        data: body,
     });
 }

@@ -1,11 +1,11 @@
 import React from 'react';
-import { Table, Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
+import { FitTable } from 'react-components';
 
 import GoodsDetailDialog from './GoodsDetailDialog';
 import { IParentOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
 
@@ -24,13 +24,13 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     private allColumns: ColumnProps<IParentOrderItem>[] = [
         {
             key: 'createTime',
-            title: '订单时间',
+            title: '订单生成时间',
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
             render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -39,7 +39,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         },
         {
             key: 'orderId',
-            title: '中台订单父订单ID',
+            title: '父订单ID',
             dataIndex: 'orderId',
             align: 'center',
             width: 120,
@@ -74,7 +74,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'productId',
-            title: '中台商品ID',
+            title: 'Version ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
@@ -170,7 +170,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -278,16 +278,17 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         const columns = this.createColumns();
         return (
             <>
-                <Table
+                <FitTable
                     bordered
-                    key={columns.length}
+                    // key={columns.length}
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
-                    scroll={{ x: 'max-content', y: 600 }}
+                    scroll={{ x: 'max-content' }}
+                    autoFitY={true}
                     pagination={false}
                 />
                 <GoodsDetailDialog

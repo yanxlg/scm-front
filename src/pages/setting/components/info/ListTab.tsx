@@ -1,16 +1,16 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm, LoadingButton } from 'react-components';
+import { FitTable, JsonForm, LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { useList } from '@/utils/hooks';
 import { queryCustomList } from '@/services/setting';
 import { ICustomItem, ICustomListQuery } from '@/interface/ISetting';
-import ProTable from '@/components/ProTable';
 import { ProColumns } from 'react-components/es/ProTable';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getCatagoryList } from '@/services/goods';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import settingStyles from '@/styles/_setting.less';
+import { TableProps } from 'antd/es/table';
 
 interface ListTabProps {
     activeKey: string;
@@ -270,8 +270,18 @@ const ListTab: React.FC<ListTabProps> = ({ activeKey }) => {
                     );
                 },
             },
-        ] as ProColumns<ICustomItem>[];
+        ] as TableProps<ICustomItem>['columns'];
     }, []);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -285,34 +295,21 @@ const ListTab: React.FC<ListTabProps> = ({ activeKey }) => {
                         three_cat_id: '',
                     }}
                 >
-                    <LoadingButton onClick={onSearch} type="primary">
+                    <LoadingButton className={formStyles.formBtn} onClick={onSearch} type="primary">
                         查询
                     </LoadingButton>
                 </JsonForm>
-                <ProTable<ICustomItem>
-                    headerTitle="查询表格"
+                <FitTable<ICustomItem>
                     className={formStyles.formItem}
                     rowKey="countryCode"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
                     bottom={60}
                     minHeight={500}
-                    pagination={{
-                        total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                    }}
-                    tableAlertRender={false}
+                    pagination={pagination}
                     columns={columns}
                     dataSource={dataSource}
                     loading={loading}
                     onChange={onChange}
-                    options={{
-                        density: true,
-                        fullScreen: true,
-                        reload: onReload,
-                        setting: true,
-                    }}
                 />
             </div>
         );

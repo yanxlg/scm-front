@@ -10,11 +10,11 @@ import {
     TaskStatusCode,
     PUTaskRangeType,
     AutoPurchaseTaskType,
-    TaskCreateStatusCode,
-    TaskRangeEnum,
     HotTaskRange,
+    UpdateItemType,
+    PUTaskRangeTypeCode,
 } from '@/enums/StatusEnum';
-import { IBoolean, RequestPagination } from '@/interface/IGlobal';
+import { RequestPagination } from '@/interface/IGlobal';
 
 export type ITaskListQuery = {
     task_id?: string;
@@ -39,6 +39,7 @@ export interface ITaskListItem {
     create_time: number;
     end_time: number;
     execute_count: number;
+    update_type?: PUTaskRangeTypeCode[];
 }
 
 export interface ITaskListExtraData {
@@ -88,7 +89,7 @@ export interface IHotTaskBody {
 
 export interface IPUTaskBody {
     task_name: string;
-    range: PUTaskRangeType;
+    range: UpdateItemType;
     task_start_time: number;
     task_end_time: number;
     task_interval_seconds: number;

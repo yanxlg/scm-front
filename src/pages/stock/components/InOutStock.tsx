@@ -1,11 +1,10 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable } from 'react-components';
-import { goButton, showTotal } from 'react-components/es/FitTable';
-import { message, Pagination } from 'antd';
+import { ProTable, FitTable } from 'react-components';
+import { message } from 'antd';
 import '@/styles/index.less';
 import '@/styles/stock.less';
-import { ColumnProps } from 'antd/es/table';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { ColumnProps, TableProps } from 'antd/es/table';
+import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
@@ -13,11 +12,11 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
-import { SearchOutlined } from '@ant-design/icons/lib';
+import { SearchOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -26,6 +25,11 @@ import classNames from 'classnames';
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
 }
+
+const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
+    x: true,
+    scrollToFirstRowOnChange: true,
+};
 
 const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const formRef = useRef<JsonFormRef>(null);
@@ -190,16 +194,23 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            time_start: convertStartDate(Number(time_start)),
-            time_end: convertEndDate(Number(time_end)),
+            time_start: unixToStartDate(Number(time_start)),
+            time_end: unixToEndDate(Number(time_end)),
             ...extra,
         };
     }, []);
 
-    const { query, loading, pageNumber, pageSize, dataSource, total, onSearch, onChange } = useList<
-        IStockInItem | IStockOutItem,
-        IStockINFormData & RequestPagination
-    >({
+    const {
+        query,
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onSearch,
+        onChange,
+        onReload,
+    } = useList<IStockInItem | IStockOutItem, IStockINFormData & RequestPagination>({
         queryList: type === StockType.In ? queryInList : queryOutList,
         formRef: formRef,
         defaultState: {
@@ -213,7 +224,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             ...query,
             tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
         };
-    }, []);
+    }, [loading]);
 
     const onExport = useCallback(() => {
         const values = formRef.current!.getFieldsValue();
@@ -223,66 +234,67 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         });
     }, []);
 
-    const onPageChange = useCallback((page: number, pageSize?: number) => {
-        onChange({ current: page, pageSize }, {}, {});
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
+
+    const toolBarRender = useCallback(() => {
+        return [
+            <LoadingButton key="export" onClick={onExport} className={formStyles.formBtn}>
+                导出Excel表
+            </LoadingButton>,
+        ];
+    }, []);
+
+    const table = useMemo(() => {
+        return (
+            <FitTable<IStockInItem | IStockOutItem>
+                rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
+                scroll={scroll}
+                bottom={150}
+                minHeight={400}
+                pagination={pagination}
+                toolBarRender={toolBarRender}
+                columns={columns}
+                dataSource={dataSource}
+                loading={loading}
+                onChange={onChange}
+            />
+        );
+    }, [loading]);
+
+    const form = useMemo(() => {
+        return (
+            <JsonForm
+                labelClassName="stock-form-label"
+                ref={formRef}
+                fieldList={fieldList}
+                initialValues={defaultInitialValues}
+                enableCollapse={false}
+            >
+                <div>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
+                        查询
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                        刷新
+                    </LoadingButton>
+                </div>
+            </JsonForm>
+        );
     }, []);
 
     return useMemo(() => {
         return (
             <div>
-                <div className="float-clear">
-                    <JsonForm
-                        labelClassName="stock-form-label"
-                        ref={formRef}
-                        fieldList={fieldList}
-                        initialValues={defaultInitialValues}
-                        enableCollapse={false}
-                    />
-                    <LoadingButton
-                        onClick={onSearch}
-                        type="primary"
-                        className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                        icon={<SearchOutlined />}
-                    >
-                        查询
-                    </LoadingButton>
-                    <LoadingButton
-                        onClick={onExport}
-                        className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                        icon={<Icons type="scm-export" />}
-                    >
-                        导出Excel表
-                    </LoadingButton>
-                    <Pagination
-                        className="float-right"
-                        pageSize={pageSize}
-                        current={pageNumber}
-                        total={total}
-                        pageSizeOptions={defaultPageSizeOptions}
-                        onChange={onPageChange}
-                        onShowSizeChange={onPageChange}
-                        showSizeChanger={true}
-                        showQuickJumper={{
-                            goButton: goButton,
-                        }}
-                        showLessItems={true}
-                        showTotal={showTotal}
-                    />
-                </div>
-                <FitTable<IStockInItem | IStockOutItem>
-                    className={formStyles.formNextCard}
-                    rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
-                    bordered={true}
-                    columns={columns}
-                    dataSource={dataSource}
-                    pagination={false}
-                    loading={loading}
-                    scroll={{
-                        x: true,
-                        scrollToFirstRowOnChange: true,
-                    }}
-                    bottom={130}
-                />
+                {form}
+                {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );

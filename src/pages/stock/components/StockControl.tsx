@@ -1,9 +1,8 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FitTable } from 'react-components';
-import { goButton, showTotal } from 'react-components/es/FitTable';
-import { message, Pagination } from 'antd';
+import { message } from 'antd';
 import '@/styles/index.less';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TableProps } from 'antd/es/table';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { FormInstance } from 'rc-field-form/lib/interface';
@@ -12,15 +11,20 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { AutoEnLargeImg } from 'react-components';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
+import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
-import { IStockRequest, IStockItem } from '@/interface/IStock';
+import { IStockRequest, IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
 import { LoadingButton } from 'react-components';
-import { SearchOutlined } from '@ant-design/icons/lib';
+import { SearchOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
+
+const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
+    x: true,
+    scrollToFirstRowOnChange: true,
+};
 
 const StockControl: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -151,10 +155,17 @@ const StockControl: React.FC = () => {
         };
     }, []);
 
-    const { query, loading, pageNumber, pageSize, dataSource, total, onSearch, onChange } = useList<
-        IStockItem,
-        IStockRequest & RequestPagination
-    >({
+    const {
+        query,
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onSearch,
+        onChange,
+        onReload,
+    } = useList<IStockItem, IStockRequest & RequestPagination>({
         queryList: queryStockList,
         formRef: formRef,
         defaultState: {
@@ -169,11 +180,7 @@ const StockControl: React.FC = () => {
             ...query,
             tabKey: '3',
         };
-    }, []);
-
-    const onPageChange = useCallback((page: number, pageSize?: number) => {
-        onChange({ current: page, pageSize }, {}, {});
-    }, []);
+    }, [loading]);
 
     const onExport = useCallback(() => {
         return formRef.current!.validateFields().then(values => {
@@ -183,71 +190,64 @@ const StockControl: React.FC = () => {
         });
     }, []);
 
+    const toolBarRender = useCallback(() => {
+        return [
+            <LoadingButton key="export" onClick={onExport} className={formStyles.formBtn}>
+                导出Excel表
+            </LoadingButton>,
+        ];
+    }, []);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+        };
+    }, [loading]);
+
+    const table = useMemo(() => {
+        return (
+            <FitTable<IStockItem>
+                rowKey={'in_order'}
+                scroll={scroll}
+                bottom={150}
+                minHeight={400}
+                pagination={pagination}
+                toolBarRender={toolBarRender}
+                columns={columns}
+                dataSource={dataSource}
+                loading={loading}
+                onChange={onChange}
+            />
+        );
+    }, [loading]);
+
+    const form = useMemo(() => {
+        return (
+            <JsonForm
+                className={formStyles.formHelpAbsolute}
+                initialValues={defaultInitialValues}
+                fieldList={fieldsList}
+                ref={formRef}
+                enableCollapse={false}
+            >
+                <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
+                    查询
+                </LoadingButton>
+                <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                    刷新
+                </LoadingButton>
+            </JsonForm>
+        );
+    }, []);
+
     return useMemo(() => {
         return (
             <div>
-                <div className="float-clear">
-                    <JsonForm
-                        className={formStyles.formHelpAbsolute}
-                        initialValues={defaultInitialValues}
-                        fieldList={fieldsList}
-                        ref={formRef}
-                        enableCollapse={false}
-                    >
-                        <React.Fragment>
-                            <LoadingButton
-                                onClick={onSearch}
-                                type="primary"
-                                className={classNames(
-                                    formStyles.formBtn,
-                                    formStyles.verticalMiddle,
-                                )}
-                                icon={<SearchOutlined />}
-                            >
-                                查询
-                            </LoadingButton>
-                            <LoadingButton
-                                onClick={onExport}
-                                className={classNames(
-                                    formStyles.formBtn,
-                                    formStyles.verticalMiddle,
-                                )}
-                                icon={<Icons type="scm-export" />}
-                            >
-                                导出Excel表
-                            </LoadingButton>
-                        </React.Fragment>
-                    </JsonForm>
-                    <Pagination
-                        className="float-right"
-                        pageSize={pageSize}
-                        current={pageNumber}
-                        total={total}
-                        pageSizeOptions={defaultPageSizeOptions}
-                        onChange={onPageChange}
-                        onShowSizeChange={onPageChange}
-                        showSizeChanger={true}
-                        showQuickJumper={{
-                            goButton: goButton,
-                        }}
-                        showLessItems={true}
-                        showTotal={showTotal}
-                    />
-                </div>
-                <FitTable<IStockItem>
-                    className={formStyles.formNextCard}
-                    rowKey="in_order"
-                    bordered={true}
-                    columns={columns}
-                    dataSource={dataSource}
-                    pagination={false}
-                    loading={loading}
-                    scroll={{
-                        x: true,
-                        scrollToFirstRowOnChange: true,
-                    }}
-                    bottom={130}
-                />
+                {form}
+                {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );

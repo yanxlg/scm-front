@@ -4,7 +4,7 @@ import { FitTable } from 'react-components';
 
 import { IOrderItem } from './PanePendingOrder';
 import { ColumnProps } from 'antd/lib/table/Column';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { purchaseOrderOptionList } from '@/enums/OrderEnum';
 
@@ -64,7 +64,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },

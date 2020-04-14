@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Table } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { IPublishItem } from '@/interface/ILocalGoods';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
 

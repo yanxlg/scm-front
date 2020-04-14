@@ -5,7 +5,7 @@ import { ColumnProps } from 'antd/es/table';
 import { IOrderItem } from './PaneStockNotShip';
 import { FitTable } from 'react-components';
 
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
 
@@ -64,7 +64,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -130,7 +130,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -145,7 +145,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -160,7 +160,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
         //     width: 120,
         //     render: (value: string, row: IOrderItem) => {
         //         return {
-        //             children: utcToLocal(value),
+        //             children: utcToLocal(value, ''),
         //             props: {
         //                 rowSpan: row._rowspan || 0,
         //             },
@@ -175,7 +175,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -223,7 +223,7 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },

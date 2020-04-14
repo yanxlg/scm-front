@@ -3,7 +3,7 @@ import { FitTable } from 'react-components';
 
 import { ColumnProps } from 'antd/es/table';
 import { IWaitShipItem } from './PaneWaitShip';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
@@ -29,7 +29,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -43,6 +43,20 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             key: 'purchaseAmount',
             title: '采购价',
             dataIndex: 'purchaseAmount',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'productId',
+            title: '中台商品ID',
+            dataIndex: 'productId',
             align: 'center',
             width: 120,
         },
@@ -76,6 +90,13 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
                 return getStatusDesc(purchaseShippingOptionList, value);
             },
         },
+        // {
+        //     key: 'purchaseWaybillNo',
+        //     title: '采购运单号',
+        //     dataIndex: 'purchaseWaybillNo',
+        //     align: 'center',
+        //     width: 120,
+        // },
         {
             key: 'purchasePlanId',
             title: '计划子项ID',
@@ -97,7 +118,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
     ];

@@ -1,3 +1,4 @@
+@import '~antd/es/style/themes/default';
 @divisionSpacing: 6px;
 @btnSpacing: 12px;
 @inputWidth: 140px;
@@ -67,11 +68,17 @@
     &-pending-date-picker {
         width: 184px;
     }
+    &-all-date-picker {
+        width: 198px;
+    }
     &-error-date-picker {
         width: 184px;
     }
     &-label {
         width: @inputLabel;
+    }
+    &-all-label {
+        width: 112px;
     }
     &-pending-label {
         width: 84px;
@@ -136,6 +143,15 @@
         &-enlarge {
             width: 300px;
             height: 300px;
+        }
+    }
+    &-img-lazy {
+        width: 68px;
+        height: 68px;
+    }
+    &-tr.hover {
+        td {
+            background: @item-hover-bg !important;
         }
     }
 }

@@ -5,7 +5,7 @@ import { AutoEnLargeImg } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
 import { IPayItem } from './PanePay';
 import { putConfirmPay } from '@/services/order-manage';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import QRCode from 'qrcode.react';
 
 declare interface IProps {
@@ -64,7 +64,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             width: 150,
             render: (value: string, row: IPayItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },

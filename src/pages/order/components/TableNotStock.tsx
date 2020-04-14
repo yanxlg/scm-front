@@ -9,7 +9,7 @@ import {
     purchaseShippingOptionList,
     purchasePayOptionList,
 } from '@/enums/OrderEnum';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 declare interface IProps {
     loading: boolean;
@@ -35,7 +35,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderCreateTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'productId',
@@ -96,7 +96,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'platformSendOrderTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'purchaseOrderStatus',
@@ -124,7 +124,7 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'payTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
         },
         {
             key: 'purchaseOrderShippingStatus',
@@ -143,7 +143,14 @@ class TableNotStock extends React.PureComponent<IProps, IState> {
             dataIndex: 'confirmTime',
             align: 'center',
             width: 120,
-            render: (value: string) => utcToLocal(value),
+            render: (value: string) => utcToLocal(value, ''),
+        },
+        {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
         },
         {
             key: 'channelOrderSn',

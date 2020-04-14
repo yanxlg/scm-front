@@ -1,8 +1,7 @@
 import React from 'react';
-import { DatePicker, Button, message } from 'antd';
+import { DatePicker, message } from 'antd';
 import Container from '@/components/Container';
 import { RangeValue } from 'rc-picker/lib/interface';
-import moment from 'moment';
 import VersionTable from './components/VersionTable';
 import { getCurrentPage } from '@/utils/common';
 import {
@@ -11,12 +10,13 @@ import {
     postGoodsOnsale,
     postGoodsIgnoreVersion,
 } from '@/services/goods';
-import { utcToLocal } from '@/utils/date';
-import { transStartDate, transEndDate } from 'react-components/es/JsonForm';
+import { utcToLocal } from 'react-components/es/utils/date';
+import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
 import { LoadingButton } from 'react-components';
 import MerchantListModal from '../components/MerchantListModal';
 
 import '../../../styles/goods-version.less';
+import { Dayjs } from 'dayjs';
 
 const { RangePicker } = DatePicker;
 
@@ -195,13 +195,12 @@ class Version extends React.PureComponent<IVersionProps, IVersionState> {
         return ret;
     }
 
-    // moment.Moment[] DateType
-    private selectedDate = (dates: RangeValue<moment.Moment>) => {
+    private selectedDate = (dates: RangeValue<Dayjs>) => {
         // console.log('selectedDate', dates);
         this.setState(
             {
-                start_time: dates && dates[0] ? (transStartDate(dates[0]) as number) : 0,
-                end_time: dates && dates[1] ? (transEndDate(dates[1]) as number) : 0,
+                start_time: dates && dates[0] ? (startDateToUnix(dates[0] as any) as number) : 0,
+                end_time: dates && dates[1] ? (endDateToUnix(dates[1] as any) as number) : 0,
             },
             () => {
                 this.onSearch({
