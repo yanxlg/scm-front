@@ -3,7 +3,7 @@ import { Table, Input, Modal, Button, Checkbox } from 'antd';
 import { AutoEnLargeImg } from 'react-components';
 
 import { ColumnProps } from 'antd/es/table';
-import { IPayItem } from './PanePay';
+import { IPayItem } from './_PanePay';
 import { putConfirmPay } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import QRCode from 'qrcode.react';

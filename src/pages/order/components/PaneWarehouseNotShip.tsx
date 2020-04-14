@@ -244,25 +244,19 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     );
 
     const _delChannelOrders = useCallback(() => {
-        const list = getOrderGoodsIdList();
-        if (list.length) {
-            return delChannelOrders({
-                order_goods_ids: list,
-            }).then(res => {
-                onSearch();
-                const { success, failed } = res.data;
+        return delChannelOrders({
+            order_goods_ids: getOrderGoodsIdList(),
+        }).then(res => {
+            onSearch();
+            const { success, failed } = res.data;
 
-                if (success!.length) {
-                    batchOperateSuccess('取消渠道订单', success);
-                }
-                if (failed!.length) {
-                    batchOperateFail('取消渠道订单', failed);
-                }
-            });
-        } else {
-            message.error('请选择需要取消的订单');
-            return Promise.resolve();
-        }
+            if (success!.length) {
+                batchOperateSuccess('取消渠道订单', success);
+            }
+            if (failed!.length) {
+                batchOperateFail('取消渠道订单', failed);
+            }
+        });
     }, [getOrderGoodsIdList]);
 
     const _postExportWarehouseNotShip = useCallback(() => {
@@ -509,24 +503,26 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     }, [loading]);
 
     const toolBarRender = useCallback(() => {
+        const list = getOrderGoodsIdList();
         return [
             <LoadingButton
                 key="channel_order"
                 type="primary"
                 className={formStyles.formBtn}
-                onClick={() => _delChannelOrders()}
+                onClick={_delChannelOrders}
+                disabled={list.length ? false : true}
             >
                 取消渠道订单
             </LoadingButton>,
             <LoadingButton
                 key="export"
                 className={formStyles.formBtn}
-                onClick={() => _postExportWarehouseNotShip()}
+                onClick={_postExportWarehouseNotShip}
             >
                 导出至EXCEL
             </LoadingButton>,
         ];
-    }, [_delChannelOrders, _postExportWarehouseNotShip]);
+    }, [getOrderGoodsIdList, _delChannelOrders, _postExportWarehouseNotShip]);
 
     useEffect(() => {
         onSearch();

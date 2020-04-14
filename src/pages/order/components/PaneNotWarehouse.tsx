@@ -6,8 +6,9 @@ import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
 import { INotWarehouseSearch, INotWarehouseOrderItem } from '@/interface/IOrder';
 import {
     getPurchasedNotWarehouseList,
-    delChannelOrders,
     postExportPurchasedNotWarehouse,
+    delPurchaseOrders,
+    delChannelOrders,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -230,24 +231,19 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     );
 
     const _delChannelOrders = useCallback(() => {
-        if (selectedRowKeys.length) {
-            return delChannelOrders({
-                order_goods_ids: selectedRowKeys as string[],
-            }).then(res => {
-                onSearch();
-                const { success, failed } = res.data;
+        return delChannelOrders({
+            order_goods_ids: selectedRowKeys as string[],
+        }).then(res => {
+            onSearch();
+            const { success, failed } = res.data;
 
-                if (success!.length) {
-                    batchOperateSuccess('取消渠道订单', success);
-                }
-                if (failed!.length) {
-                    batchOperateFail('取消渠道订单', failed);
-                }
-            });
-        } else {
-            message.error('请选择需要取消的订单');
-            return Promise.resolve();
-        }
+            if (success!.length) {
+                batchOperateSuccess('取消渠道订单', success);
+            }
+            if (failed!.length) {
+                batchOperateFail('取消渠道订单', failed);
+            }
+        });
     }, [selectedRowKeys]);
 
     const _postExportPurchasedNotWarehouse = useCallback(() => {
@@ -430,24 +426,26 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     }, [loading]);
 
     const toolBarRender = useCallback(() => {
+        const disabled = selectedRowKeys.length === 0 ? true : false;
         return [
             <LoadingButton
                 key="channel_order"
                 type="primary"
+                disabled={disabled}
                 className={formStyles.formBtn}
-                onClick={() => _delChannelOrders()}
+                onClick={_delChannelOrders}
             >
                 取消渠道订单
             </LoadingButton>,
             <LoadingButton
                 key="export"
                 className={formStyles.formBtn}
-                onClick={() => _postExportPurchasedNotWarehouse()}
+                onClick={_postExportPurchasedNotWarehouse}
             >
                 导出至EXCEL
             </LoadingButton>,
         ];
-    }, [_delChannelOrders, _postExportPurchasedNotWarehouse]);
+    }, [selectedRowKeys, _delChannelOrders, _postExportPurchasedNotWarehouse]);
 
     useEffect(() => {
         onSearch();

@@ -1,7 +1,12 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
 import { downloadExcel } from '@/utils/common';
-import { IPadSimilarBody, IWarehouseNotShipSearch, INotWarehouseSearch } from '@/interface/IOrder';
+import {
+    IPadSimilarBody,
+    IWarehouseNotShipSearch,
+    INotWarehouseSearch,
+    IWaitShipSearch,
+} from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
 
 export declare interface IFilterParams {
@@ -58,17 +63,6 @@ export declare interface IPayFilterParams {
     purchase_platform?: number;
     purchase_order_sn?: string;
     purchase_parent_order_sn?: string;
-}
-
-export declare interface IWaitShipFilterParams {
-    page?: number;
-    page_count?: number;
-    order_goods_id?: string;
-    purchase_platform_order_id_list?: string[];
-    order_goods_status?: number;
-    purchase_order_status?: number;
-    platform_order_time_start?: number;
-    platform_order_time_end?: number;
 }
 
 export declare interface IErrFilterParams {
@@ -149,14 +143,14 @@ export async function postExportPay(data: IPayFilterParams) {
 }
 
 // 获取待发货
-export async function getWaitShipList(data: IWaitShipFilterParams) {
+export async function getWaitShipList(data: IWaitShipSearch) {
     return request.post(OrderApiPath.getWaitShipList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportWaitShip(data: IWaitShipFilterParams) {
+export async function postExportWaitShip(data: IWaitShipSearch) {
     return request
         .post(OrderApiPath.postExportWaitShip, {
             data,

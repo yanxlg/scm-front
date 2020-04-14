@@ -1,243 +1,218 @@
-import React, { RefObject } from 'react';
-import { Button, Pagination, message, notification } from 'antd';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
+import { notification, message, Checkbox } from 'antd';
+import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
-import TablePay from './TablePay';
-import { LoadingButton } from 'react-components';
-
+import { defaultOptionItem, channelOptionList, pageSizeOptions } from '@/enums/OrderEnum';
+import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
 import {
-    getPayOrderList,
+    getWarehouseNotShipList,
     delChannelOrders,
-    delPurchaseOrders,
-    postExportPay,
-    IPayFilterParams,
+    postExportWarehouseNotShip,
 } from '@/services/order-manage';
-import { defaultOptionItem, purchasePlatformOptionList, pageSizeOptions } from '@/enums/OrderEnum';
-import { getCurrentPage } from '@/utils/common';
+import { utcToLocal } from 'react-components/es/utils/date';
+import { getStatusDesc } from '@/utils/transform';
+import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
+import { TableProps } from 'antd/es/table';
 
-export declare interface IStyleData {
-    [key: string]: string;
-}
-
-export declare interface ICatagoryData {
-    id: string;
-    name: string;
-}
-
-export declare interface IPayItem {
-    purchase_pay_url: string;
-    purchase_total_amount: string;
-    purchase_parent_order_sn: string;
-    purchase_order_time: string;
-    parent_purchase_pay_status_desc: string;
-    purchase_plan_id: string;
-    purchase_order_sn: string;
-    purchase_order_status: string;
-    purchase_order_status_desc: string;
-    purchase_pay_status: string;
-    purchase_pay_status_desc: string;
-    order_goods_id: string;
-    _rowspan?: number;
-    _checked?: boolean;
-}
-
-// const defaultFieldList: FormField[] = [
-const defaultFieldList: FormField[] = [
-    {
-        type: 'input',
-        name: 'purchase_order_sn',
-        label: '采购子订单ID',
-        className: 'order-input',
-        placeholder: '请输入中台订单ID',
-    },
-    {
-        type: 'input',
-        name: 'purchase_parent_order_sn',
-        label: '采购父订单ID',
-        className: 'order-input',
-        placeholder: '请输入采购父订单ID',
-    },
-    {
-        type: 'select',
-        name: 'purchase_platform',
-        label: '采购渠道',
-        className: 'order-input',
-        optionList: [defaultOptionItem, ...purchasePlatformOptionList],
-    },
-    {
-        type: 'dateRanger',
-        name: ['purchase_order_stime', 'purchase_order_etime'],
-        label: '采购时间',
-        className: 'order-date-picker',
-        formatter: ['start_date', 'end_date'],
-    },
-];
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface IProps {
     getAllTabCount(): void;
 }
 
-declare interface IState {
-    page: number;
-    pageCount: number;
-    total: number;
-    loading: boolean;
-    orderList: IPayItem[];
-}
+const formFields: FormField[] = [
+    {
+        type: 'input',
+        name: 'order_goods_id',
+        label: '中台订单子ID',
+        className: 'order-input',
+        placeholder: '请输入中台订单子ID',
+        formatter: 'numberStrArr',
+    },
+    {
+        type: 'input',
+        name: 'product_id',
+        label: '中台商品ID',
+        className: 'order-input',
+        placeholder: '请输入中台商品ID',
+        formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'purchase_waybill_no',
+        label: '采购运单号',
+        className: 'order-input',
+        placeholder: '请输入采购运单号',
+        formatter: 'strArr',
+    },
+    {
+        type: 'select',
+        name: 'channel_source',
+        label: '销售渠道',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...channelOptionList],
+    },
+    {
+        type: 'dateRanger',
+        name: ['storage_time_start', 'storage_time_end'],
+        label: '入库时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+];
 
-class PanePay extends React.PureComponent<IProps, IState> {
-    private formRef: RefObject<JsonFormRef> = React.createRef();
-    private currentSearchParams: IPayFilterParams | null = null;
-    private initialValues = {
-        purchase_platform: 100,
-    };
+const defaultInitialValues = {
+    channel_source: 100,
+};
 
-    constructor(props: IProps) {
-        super(props);
-        this.state = {
-            page: 1,
-            pageCount: 50,
-            total: 0,
-            loading: false,
-            orderList: [],
-        };
-    }
+const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
+    const searchRef = useRef<JsonFormRef>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(50);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [orderList, setOrderList] = useState<IWarehouseNotShipOrderItem[]>([]);
 
-    componentDidMount() {
-        // console.log('PaneAll');
-        this.onSearch();
-    }
+    let currentSearchParams: IWarehouseNotShipSearch | null = null;
 
-    onSearch = (baseParams?: IPayFilterParams) => {
-        const { page, pageCount } = this.state;
-        let params: IPayFilterParams = {
-            page,
-            page_count: pageCount,
-            ...this.getFieldsValue(),
-        };
-        if (baseParams) {
-            params = Object.assign(params, baseParams);
-        }
-        this.setState({
-            loading: true,
-        });
-        getPayOrderList(params)
-            .then(res => {
-                this.currentSearchParams = params;
-                // console.log('getProductOrderList', res);
-                const { all_count = 0, list = [] } = res.data || {}; // default value
-                // console.log('getPayOrderList', list);
-                this.setState({
-                    total: all_count,
-                    page: params.page as number,
-                    pageCount: params.page_count as number,
-                    orderList: this.getOrderData(list),
+    const onSearch = useCallback(
+        (paginationParams = { page, page_count: pageSize }) => {
+            const params: IWarehouseNotShipSearch = Object.assign(
+                {
+                    page,
+                    page_count: pageSize,
+                },
+                paginationParams,
+                searchRef.current?.getFieldsValue(),
+            );
+            setLoading(true);
+            return getWarehouseNotShipList(params)
+                .then(res => {
+                    currentSearchParams = params;
+                    const { all_count: total, list } = res.data;
+                    // const { page, page_count } = params;
+                    if (list) {
+                        setPage(params.page as number);
+                        setPageSize(params.page_count as number);
+                        setTotal(total);
+                        setOrderList(getChildOrderData(list));
+                    }
+                })
+                .finally(() => {
+                    setLoading(false);
                 });
-            })
-            .finally(() => {
-                this.setState({
-                    loading: false,
+        },
+        [page, pageSize],
+    );
+
+    const getChildOrderData = useCallback(list => {
+        const childOrderList: IWarehouseNotShipOrderItem[] = [];
+        list.forEach((goodsItem: any) => {
+            const { orderGoods, orderInfo } = goodsItem;
+            const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
+            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
+            // console.log(111, orderGoodsPurchasePlan, orderGoods);
+            if (orderGoodsPurchasePlan) {
+                // 生成采购计划
+                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                    const {
+                        createTime: purchaseCreateTime,
+                        lastUpdateTime: purchaseLastUpdateTime,
+                        ...purchaseRest
+                    } = purchaseItem;
+                    const childOrderItem: any = {
+                        ...orderRest,
+                        ...purchaseRest,
+                        purchaseCreateTime,
+                        purchaseLastUpdateTime,
+                        currency,
+                        confirmTime,
+                        channelOrderSn,
+                        channelSource,
+                    };
+                    if (index === 0) {
+                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._checked = false;
+                    }
+                    childOrderList.push(childOrderItem);
                 });
-            });
-    };
-
-    // 获取待支付列表
-    private getOrderData(list: any[]): IPayItem[] {
-        const ret: IPayItem[] = [];
-        list.forEach(item => {
-            const {
-                child_order,
-                purchase_pay_status_desc: parent_purchase_pay_status_desc,
-                ...parentRest
-            } = item;
-            child_order.forEach((childItem: any, index: number) => {
-                const payItem = {
-                    ...parentRest,
-                    ...childItem,
-                    parent_purchase_pay_status_desc,
-                };
-                if (index === 0) {
-                    payItem._rowspan = child_order.length;
-                    payItem._checked = false;
-                }
-                ret.push(payItem);
-            });
+            } else {
+                // 没有生成采购计划
+                childOrderList.push({
+                    currency,
+                    confirmTime,
+                    channelOrderSn,
+                    channelSource,
+                    ...orderRest,
+                    _rowspan: 1,
+                    _checked: false,
+                });
+            }
         });
-        return ret;
-    }
+        // console.log(1111, childOrderList);
+        return childOrderList;
+    }, []);
 
-    // 获取查询数据
-    getFieldsValue = () => {
-        return this.formRef.current!.getFieldsValue();
-    };
+    const handleClickSearch = useCallback(() => {
+        return onSearch({ page: 1 });
+    }, []);
 
-    // 全选
-    onCheckAllChange = (status: boolean) => {
-        const { orderList } = this.state;
-        this.setState({
-            orderList: orderList.map(item => {
-                if (item._rowspan) {
-                    return {
-                        ...item,
-                        _checked: status,
-                    };
-                }
-                return item;
-            }),
+    const onCheckAllChange = useCallback(
+        (status: boolean) => {
+            setOrderList(
+                orderList.map(item => {
+                    if (item._rowspan) {
+                        return {
+                            ...item,
+                            _checked: status,
+                        };
+                    }
+                    return item;
+                }),
+            );
+        },
+        [orderList],
+    );
+
+    const onSelectedRow = useCallback(
+        (row: IWarehouseNotShipOrderItem) => {
+            setOrderList(
+                orderList.map(item => {
+                    if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                        return {
+                            ...item,
+                            _checked: !row._checked,
+                        };
+                    }
+                    return item;
+                }),
+            );
+        },
+        [orderList],
+    );
+
+    const mergeCell = useCallback((value: string | number, row: IWarehouseNotShipOrderItem) => {
+        return {
+            children: value,
+            props: {
+                rowSpan: row._rowspan || 0,
+            },
+        };
+    }, []);
+
+    const onChange = useCallback(({ current, pageSize }) => {
+        onSearch({
+            pageSize,
+            page: current,
         });
-    };
+    }, []);
 
-    // 单选
-    onSelectedRow = (row: IPayItem) => {
-        const { orderList } = this.state;
-        this.setState({
-            orderList: orderList.map(item => {
-                if (
-                    item._rowspan &&
-                    row.purchase_parent_order_sn === item.purchase_parent_order_sn
-                ) {
-                    return {
-                        ...item,
-                        _checked: !row._checked,
-                    };
-                }
-                return item;
-            }),
-        });
-    };
+    const getOrderGoodsIdList = useCallback(() => {
+        return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
+    }, [orderList]);
 
-    private onChangePage = (page: number) => {
-        this.onSearch({
-            page,
-        });
-    };
-
-    private pageCountChange = (current: number, size: number) => {
-        const { page, pageCount } = this.state;
-        this.onSearch({
-            page: getCurrentPage(size, (page - 1) * pageCount + 1),
-            page_count: size,
-        });
-    };
-
-    private getOrderGoodsIdList = () => {
-        const { orderList } = this.state;
-        const parentOrdersSnList = orderList
-            .filter(item => item._checked)
-            .map(item => item.purchase_parent_order_sn);
-        const list = orderList
-            .filter(
-                item =>
-                    parentOrdersSnList.indexOf(item.purchase_parent_order_sn) > -1 &&
-                    item.order_goods_id,
-            )
-            .map(item => item.order_goods_id);
-        return [...new Set(list)];
-    };
-
-    // 批量操作成功
-    private batchOperateSuccess = (name: string = '', list: string[]) => {
-        this.props.getAllTabCount();
+    const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
+        getAllTabCount();
         notification.success({
             message: `${name}成功`,
             description: (
@@ -248,146 +223,334 @@ class PanePay extends React.PureComponent<IProps, IState> {
                 </div>
             ),
         });
-    };
+    }, []);
 
-    // 批量操作失败
-    private batchOperateFail = (
-        name: string = '',
-        list: { order_goods_id: string; result: string }[],
-    ) => {
-        notification.error({
-            message: `${name}失败`,
-            description: (
-                <div>
-                    {list.map((item: any) => (
-                        <div>
-                            {item.order_goods_id}: {item.result.slice(0, 50)}
-                        </div>
-                    ))}
-                </div>
-            ),
+    const batchOperateFail = useCallback(
+        (name: string = '', list: { order_goods_id: string; result: string }[]) => {
+            notification.error({
+                message: `${name}失败`,
+                description: (
+                    <div>
+                        {list.map((item: any) => (
+                            <div>
+                                {item.order_goods_id}: {item.result.slice(0, 50)}
+                            </div>
+                        ))}
+                    </div>
+                ),
+            });
+        },
+        [],
+    );
+
+    const _delChannelOrders = useCallback(() => {
+        return delChannelOrders({
+            order_goods_ids: getOrderGoodsIdList(),
+        }).then(res => {
+            onSearch();
+            const { success, failed } = res.data;
+
+            if (success!.length) {
+                batchOperateSuccess('取消渠道订单', success);
+            }
+            if (failed!.length) {
+                batchOperateFail('取消渠道订单', failed);
+            }
         });
-    };
+    }, [getOrderGoodsIdList]);
 
-    // 取消采购订单
-    private cancelPurchaseOrder = () => {
-        const list = this.getOrderGoodsIdList();
-        if (list.length) {
-            return delPurchaseOrders({
-                order_goods_ids: list,
-            }).then(res => {
-                this.onSearch();
-                const { success, failed } = res.data;
-                if (success!.length) {
-                    this.batchOperateSuccess('取消采购单', success);
-                }
-                if (failed!.length) {
-                    this.batchOperateFail('取消采购单', failed);
-                }
-            });
-        } else {
-            message.error('请选择需要取消的订单！');
-            return Promise.resolve();
-        }
-    };
+    const _postExportWarehouseNotShip = useCallback(() => {
+        return postExportWarehouseNotShip(
+            currentSearchParams
+                ? currentSearchParams
+                : {
+                      page: 1,
+                      page_count: 50,
+                  },
+        );
+    }, []);
 
-    private delChannelOrders = () => {
-        const list = this.getOrderGoodsIdList();
-        if (list.length) {
-            return delChannelOrders({
-                order_goods_ids: list,
-            }).then(res => {
-                this.onSearch();
-                const { success, failed } = res.data;
+    const search = useMemo(() => {
+        return (
+            <JsonForm
+                ref={searchRef}
+                fieldList={formFields}
+                labelClassName="order-label"
+                initialValues={defaultInitialValues}
+            >
+                <div>
+                    <LoadingButton
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={handleClickSearch}
+                    >
+                        查询
+                    </LoadingButton>
+                    <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
+                        刷新
+                    </LoadingButton>
+                </div>
+            </JsonForm>
+        );
+    }, []);
 
-                if (success!.length) {
-                    this.batchOperateSuccess('取消渠道订单', success);
-                }
-                if (failed!.length) {
-                    this.batchOperateFail('取消渠道订单', failed);
-                }
-            });
-        } else {
-            message.error('请选择需要取消的订单');
-            return Promise.resolve();
-        }
-    };
+    const columns = useMemo<TableProps<IWarehouseNotShipOrderItem>['columns']>(() => {
+        return [
+            {
+                fixed: true,
+                key: '_checked',
+                title: () => {
+                    const rowspanList = orderList.filter(item => item._rowspan);
+                    const checkedListLen = rowspanList.filter(item => item._checked).length;
+                    let indeterminate = false,
+                        checked = false;
+                    if (rowspanList.length && rowspanList.length === checkedListLen) {
+                        checked = true;
+                    } else if (checkedListLen) {
+                        indeterminate = true;
+                    }
+                    return (
+                        <Checkbox
+                            indeterminate={indeterminate}
+                            checked={checked}
+                            onChange={e => onCheckAllChange(e.target.checked)}
+                        />
+                    );
+                },
+                dataIndex: '_checked',
+                align: 'center',
+                width: 50,
+                render: (value: boolean, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'createTime',
+                title: '订单时间',
+                dataIndex: 'createTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'orderGoodsId',
+                title: '中台订单子ID',
+                dataIndex: 'orderGoodsId',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'purchasePlanId',
+                title: '计划子项ID',
+                dataIndex: 'purchasePlanId',
+                align: 'center',
+                width: 120,
+                // render: mergeCell
+            },
+            {
+                key: 'productId',
+                title: '中台商品ID',
+                dataIndex: 'productId',
+                align: 'center',
+                width: 120,
+                // render: mergeCell
+            },
+            {
+                key: 'purchaseWaybillNo',
+                title: '采购运单号',
+                dataIndex: 'purchaseWaybillNo',
+                align: 'center',
+                width: 120,
+            },
+            {
+                key: 'purchaseOrderStatus',
+                title: '采购订单状态',
+                dataIndex: 'purchaseOrderStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IWarehouseNotShipOrderItem) => {
+                    return getStatusDesc(purchaseOrderOptionList, value);
+                },
+            },
+            {
+                key: 'purchaseOrderShippingStatus',
+                title: '采购配送状态',
+                dataIndex: 'purchaseOrderShippingStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IWarehouseNotShipOrderItem) => {
+                    return getStatusDesc(purchaseShippingOptionList, value);
+                },
+            },
+            {
+                key: 'storageTime',
+                title: '入库时间',
+                dataIndex: 'storageTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'deliveryCommandTime',
+                title: '发送发货指令时间',
+                dataIndex: 'deliveryCommandTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'cancelTime',
+                title: '取消订单时间',
+                dataIndex: 'cancelTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: '_goodsTotalAmount',
+                title: '商品总金额',
+                dataIndex: '_goodsTotalAmount',
+                align: 'center',
+                width: 120,
+                render: (_: any, row: IWarehouseNotShipOrderItem) => {
+                    // console.log(row);
+                    const { goodsAmount, goodsNumber, freight } = row;
+                    const totalAmount = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                    return {
+                        children: isNaN(totalAmount) ? totalAmount : totalAmount.toFixed(2),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'channelOrderGoodsSn',
+                title: '渠道订单ID',
+                dataIndex: 'channelOrderGoodsSn',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'channelSource',
+                title: '销售渠道',
+                dataIndex: 'channelSource',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'confirmTime',
+                title: '订单确认时间',
+                dataIndex: 'confirmTime',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: utcToLocal(value, ''),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+        ];
+    }, [orderList]);
 
-    postExportPay = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportPay(params);
-    };
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: page,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
 
-    render() {
-        const { loading, orderList, total, page, pageCount } = this.state;
+    const toolBarRender = useCallback(() => {
+        const list = getOrderGoodsIdList();
+        return [
+            <LoadingButton
+                key="channel_order"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={_delChannelOrders}
+                disabled={list.length ? false : true}
+            >
+                取消渠道订单
+            </LoadingButton>,
+            <LoadingButton
+                key="export"
+                className={formStyles.formBtn}
+                onClick={_postExportWarehouseNotShip}
+            >
+                导出至EXCEL
+            </LoadingButton>,
+        ];
+    }, [getOrderGoodsIdList, _delChannelOrders, _postExportWarehouseNotShip]);
+
+    useEffect(() => {
+        onSearch();
+    }, []);
+
+    return useMemo(() => {
         return (
             <>
-                <div>
-                    <JsonForm
-                        labelClassName="order-label"
-                        fieldList={defaultFieldList}
-                        ref={this.formRef}
-                        initialValues={this.initialValues}
-                    />
-                    <div className="order-operation">
-                        <Button
-                            type="primary"
-                            className="order-btn"
-                            loading={loading}
-                            onClick={() => this.onSearch()}
-                        >
-                            查询
-                        </Button>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.cancelPurchaseOrder}
-                        >
-                            取消采购单
-                        </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.delChannelOrders}
-                        >
-                            取消渠道订单
-                        </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportPay}
-                        >
-                            导出数据
-                        </LoadingButton>
-                    </div>
-                    <TablePay
-                        loading={loading}
-                        orderList={orderList}
-                        onCheckAllChange={this.onCheckAllChange}
-                        onSelectedRow={this.onSelectedRow}
-                        onSearch={this.onSearch}
-                    />
-                    <Pagination
-                        className="order-pagination"
-                        total={total}
-                        current={page}
-                        pageSize={pageCount}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
-                    />
-                </div>
+                {search}
+                <FitTable
+                    bordered
+                    rowKey={record => {
+                        return record.purchasePlanId || record.orderGoodsId;
+                    }}
+                    className="order-table"
+                    loading={loading}
+                    columns={columns}
+                    // rowSelection={rowSelection}
+                    dataSource={orderList}
+                    scroll={{ x: 'max-content' }}
+                    columnsSettingRender={true}
+                    pagination={pagination}
+                    onChange={onChange}
+                    toolBarRender={toolBarRender}
+                />
             </>
         );
-    }
-}
+    }, [page, pageSize, total, loading, orderList]);
+};
 
-export default PanePay;
+export default PaneWarehouseNotShip;
