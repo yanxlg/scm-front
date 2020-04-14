@@ -105,7 +105,7 @@ const CookieSetting: React.FC = () => {
                 align: 'center',
                 width: '100px',
                 render: (status: any) => {
-                    return status === '1' ? '有效' : status === '2' ? '过期' : '默认';
+                    return status === '0' ? '有效' : status === '1' ? '过期' : '默认';
                 },
             },
             {

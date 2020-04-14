@@ -251,7 +251,7 @@ const ChannelList: React.FC = props => {
 
     const getCopiedLinkQuery = useCallback(() => {
         return query;
-    }, []);
+    }, [loading]);
 
     const showSkuDialog = useCallback((id: string, merchant_id: string) => {
         skuRef.current!.showModal(id, merchant_id);

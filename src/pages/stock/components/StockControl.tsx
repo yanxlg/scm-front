@@ -180,7 +180,7 @@ const StockControl: React.FC = () => {
             ...query,
             tabKey: '3',
         };
-    }, []);
+    }, [loading]);
 
     const onExport = useCallback(() => {
         return formRef.current!.validateFields().then(values => {

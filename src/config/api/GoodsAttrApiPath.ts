@@ -5,4 +5,8 @@ export enum GoodsAttrApiPath {
     deleteTag = '/api/v1/tags/delete/:name',
     setCommodityTag = '/api/v1/tags/label/commodity',
     setCommoditySkuTag = '/api/v1/tags/label/commodity_sku',
+    putBatchUpdateTags = '/api/v1/tags/batch_update',
+    getBatchUpdateProgress = '/api/v1/tags/batch_update',
+    getInterceptTagList = '/api/v1/goods/onsale_intercept_keywords/list',
+    setInterceptTagList = '/api/v1/goods/onsale_intercept_keywords/save',
 }

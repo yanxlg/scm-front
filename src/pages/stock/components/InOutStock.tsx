@@ -224,7 +224,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             ...query,
             tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
         };
-    }, []);
+    }, [loading]);
 
     const onExport = useCallback(() => {
         const values = formRef.current!.getFieldsValue();
