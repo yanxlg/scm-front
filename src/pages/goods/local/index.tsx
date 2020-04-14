@@ -46,7 +46,7 @@ const formFields: FormField[] = [
         name: 'task_number',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -54,7 +54,7 @@ const formFields: FormField[] = [
         name: 'store_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -62,7 +62,7 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -93,7 +93,7 @@ const formFields: FormField[] = [
         label: '请选择版本状态',
         name: 'product_status',
         className: 'local-search-item-select',
-        formatter: 'joinStr',
+        formatter: 'join',
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,

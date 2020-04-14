@@ -58,7 +58,7 @@ const fieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'form-item',
         placeholder: '请输入采购平台订单ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',

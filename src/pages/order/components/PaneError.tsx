@@ -8,6 +8,7 @@ import {
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
+    failureReasonList,
 } from '@/enums/OrderEnum';
 import { useList, useModal } from 'react-components/es/hooks';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -362,6 +363,7 @@ const PaneErrTab = () => {
                     ref={formRef1}
                     labelClassName="order-error-label"
                     enableCollapse={false}
+                    layout="horizontal"
                     fieldList={[
                         {
                             type: 'hide',
@@ -436,10 +438,10 @@ const PaneErrTab = () => {
                                                     label: errorDetailOptionMap[4],
                                                     value: 4,
                                                 },
-                                                /*  {
+                                                {
                                                     label: errorDetailOptionMap[12],
                                                     value: 12,
-                                                },*/
+                                                },
                                             ],
                                             onChange: () => {
                                                 onSearch(); // 立即查询
@@ -460,6 +462,40 @@ const PaneErrTab = () => {
                                             onChange: () => {
                                                 onSearch(); // 立即查询
                                             },
+                                        };
+                                }
+                            },
+                        },
+                        {
+                            type: 'dynamic',
+                            shouldUpdate: (prevValues: Store, nextValues: Store) => {
+                                return (
+                                    prevValues.abnormal_detail_type !==
+                                    nextValues.abnormal_detail_type
+                                );
+                            },
+                            dynamic: (form: FormInstance) => {
+                                const abnormal_type = form.getFieldValue('abnormal_detail_type');
+                                switch (abnormal_type) {
+                                    case 12:
+                                        return {
+                                            type: 'checkboxGroup',
+                                            name: 'purchase_fail_code',
+                                            label: '失败原因',
+                                            options: failureReasonList.map(({ id, name }) => {
+                                                return {
+                                                    label: name,
+                                                    value: id,
+                                                };
+                                            }),
+                                            onChange: () => {
+                                                onSearch(); // 立即查询
+                                            },
+                                        };
+                                    default:
+                                        return {
+                                            type: 'hide',
+                                            name: 'none',
                                         };
                                 }
                             },

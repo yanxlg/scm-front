@@ -1,4 +1,5 @@
 import { FormField } from 'react-components/es/JsonForm';
+import { transStatusList } from '@/utils/transform';
 
 declare interface optionItem {
     name: string;
@@ -96,6 +97,17 @@ export const errorDetailOptionMap = {
     7: '6天未标记发货',
 };
 
+export const failureReasonMap = {
+    '410031': 'sku已告罄',
+    '41003': '商品已告罄',
+    '46024': '当前未支付订单过多',
+    '40001': '未登录',
+    '1001': '海淘、预售等无法拍单的商品属性',
+    '1002': '任务超时失败',
+};
+
+export const failureReasonList = transStatusList(failureReasonMap);
+
 export type ErrorDetailOptionCode = keyof typeof errorDetailOptionMap;
 
 export const errorDetailOptionList = [
@@ -133,7 +145,7 @@ export const childDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台订单子ID',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -142,7 +154,7 @@ export const childDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     // {
     //     type: 'input',
@@ -172,7 +184,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单ID',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -181,7 +193,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购计划ID',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -190,7 +202,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购运单号',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -199,7 +211,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入尾程运单号',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -208,7 +220,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台商品ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -217,7 +229,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台SKU ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     // {
     //     type: 'select',
@@ -446,7 +458,7 @@ export const parentDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台父订单id',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'select',
@@ -467,7 +479,7 @@ export const parentAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单id',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'dateRanger',

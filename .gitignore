@@ -17,3 +17,6 @@
 .umi
 .umi-production
 .idea
+
+
+**.less.d.ts

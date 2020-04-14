@@ -82,6 +82,7 @@ export declare interface IErrFilterParams {
     order_goods_id?: string;
     abnormal_type?: number;
     abnormal_detail_type?: number;
+    purchase_fail_code?: string[];
 }
 
 interface IConfirmPayData {
@@ -204,10 +205,18 @@ export async function postExportStockNotShip(data: IFilterParams) {
 
 // 获取异常订单
 export async function getErrorOrderList(data: IErrFilterParams) {
+    // 做一层入参处理
+    const { purchase_fail_code, ...extra } = data;
+    const params = {
+        ...extra,
+        purchase_fail_code: purchase_fail_code
+            ? purchase_fail_code.map(code => `'${code}'`).join(',')
+            : undefined,
+    };
     return request
         .post(OrderApiPath.getErrorOrderList, {
             requestType: 'json',
-            data,
+            data: params,
         })
         .then(transPaginationResponse);
 }

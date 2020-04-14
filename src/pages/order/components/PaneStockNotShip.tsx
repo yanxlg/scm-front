@@ -21,7 +21,7 @@ const fieldList: FormField[] = [
         label: '中台订单子ID',
         className: 'order-input',
         placeholder: '请输入中台订单子ID',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -29,7 +29,7 @@ const fieldList: FormField[] = [
         label: '中台商品ID',
         className: 'order-input',
         placeholder: '请输入中台商品ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -37,7 +37,7 @@ const fieldList: FormField[] = [
         label: '采购运单号',
         className: 'order-input',
         placeholder: '请输入采购运单号',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'select',
