@@ -16,11 +16,8 @@ import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
-import { SearchOutlined } from '@ant-design/icons';
-import { Icons } from '@/components/Icon';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import classNames from 'classnames';
 
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理

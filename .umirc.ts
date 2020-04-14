@@ -17,6 +17,9 @@ const config = defineConfig({
     hash: true,
     devtool: dev ? 'source-map' : false,
     antd: {},
+    cssModulesTypescriptLoader: {
+        mode: 'emit',
+    },
     dva: {
         hmr: true,
     },

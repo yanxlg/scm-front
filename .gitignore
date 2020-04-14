@@ -17,3 +17,7 @@
 .umi
 .umi-production
 .idea
+
+# less.d.ts
+/src/styles/*.d.ts
+**.less.d.ts

@@ -36,7 +36,6 @@ import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
-import { Icons } from '@/components/Icon';
 import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components/es/hooks';
 import formStyles from 'react-components/es/JsonForm/_form.less';
