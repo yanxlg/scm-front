@@ -23,13 +23,13 @@ export enum OrderApiPath {
     postExportWaitShip = '/api/v1/orders/exports/4',
 
     // 已采购未入库
-    getPurchasedNotStockList = '/api/v1/orders/list/5',
+    getPurchasedNotWarehouseList = '/api/v1/orders/list/5',
     // 导出已采购未入库
-    postExportPurchasedNotStock = '/api/v1/orders/exports/5',
+    postExportPurchasedNotWarehouse = '/api/v1/orders/exports/5',
 
     // 仓库未发货
     getWarehouseNotShipList = '/api/v1/orders/list/6',
-    postExportStockNotShip = '/api/v1/orders/exports/6',
+    postExportWarehouseNotShip = '/api/v1/orders/exports/6',
 
     // 错误订单
     getErrorOrderList = '/api/v1/orders/list/7',

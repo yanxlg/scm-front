@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, message } from 'antd';
+import { notification, message, Checkbox } from 'antd';
 import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
@@ -31,15 +31,16 @@ const formFields: FormField[] = [
         name: 'order_goods_id',
         label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
         className: 'order-input',
-        formItemClassName: 'form-item',
+        // formItemClassName: 'form-item',
         placeholder: '请输入中台订单ID',
+        // numberStrArr
+        // formatter: 'strArr',
     },
     {
         type: 'input',
         name: 'purchase_platform_order_id_list',
         label: '采购平台订单ID',
         className: 'order-input',
-        formItemClassName: 'form-item',
         placeholder: '请输入采购平台订单ID',
         formatter: 'strArr',
     },
@@ -49,6 +50,15 @@ const formFields: FormField[] = [
         label: '中台商品ID',
         className: 'order-input',
         placeholder: '请输入中台商品ID',
+        // formatter: 'strArr',
+    },
+    {
+        type: 'input',
+        name: 'purchase_waybill_no',
+        label: '采购运单号',
+        className: 'order-input',
+        placeholder: '请输入采购运单号',
+        // formatter: 'strArr',
     },
     {
         type: 'select',
@@ -76,15 +86,7 @@ const formFields: FormField[] = [
         name: ['platform_order_time_start', 'platform_order_time_end'],
         label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
         className: 'order-date-picker',
-        // placeholder: '请选择订单时间',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'dateRanger',
-        name: ['order_create_time_start', 'order_create_time_end'],
-        label: <span>订&nbsp;单&nbsp;时&nbsp;间</span>,
-        className: 'order-date-picker',
-        // placeholder: '请选择订单时间',
+        placeholder: '请选择订单时间',
         formatter: ['start_date', 'end_date'],
     },
 ];

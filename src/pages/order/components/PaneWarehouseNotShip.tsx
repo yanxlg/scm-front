@@ -7,7 +7,7 @@ import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface
 import {
     getWarehouseNotShipList,
     delChannelOrders,
-    postExportStockNotShip,
+    postExportWarehouseNotShip,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -65,7 +65,7 @@ const defaultInitialValues = {
     channel_source: 100,
 };
 
-const PaneStockNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
+const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchRef = useRef<JsonFormRef>(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
@@ -263,10 +263,10 @@ const PaneStockNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             message.error('请选择需要取消的订单');
             return Promise.resolve();
         }
-    }, []);
+    }, [getOrderGoodsIdList]);
 
-    const _postExportStockNotShip = useCallback(() => {
-        return postExportStockNotShip(
+    const _postExportWarehouseNotShip = useCallback(() => {
+        return postExportWarehouseNotShip(
             currentSearchParams
                 ? currentSearchParams
                 : {
@@ -521,12 +521,12 @@ const PaneStockNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             <LoadingButton
                 key="export"
                 className={formStyles.formBtn}
-                onClick={() => _postExportStockNotShip()}
+                onClick={() => _postExportWarehouseNotShip()}
             >
                 导出至EXCEL
             </LoadingButton>,
         ];
-    }, []);
+    }, [_delChannelOrders, _postExportWarehouseNotShip]);
 
     useEffect(() => {
         onSearch();
@@ -557,4 +557,4 @@ const PaneStockNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     }, [page, pageSize, total, loading, orderList]);
 };
 
-export default PaneStockNotShip;
+export default PaneWarehouseNotShip;

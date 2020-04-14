@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
 import { downloadExcel } from '@/utils/common';
-import { IPadSimilarBody, IWarehouseNotShipSearch } from '@/interface/IOrder';
+import { IPadSimilarBody, IWarehouseNotShipSearch, INotWarehouseSearch } from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
 
 export declare interface IFilterParams {
@@ -167,16 +167,16 @@ export async function postExportWaitShip(data: IWaitShipFilterParams) {
 }
 
 // 已采购未入库
-export async function getPurchasedNotStockList(data: IWaitShipFilterParams) {
-    return request.post(OrderApiPath.getPurchasedNotStockList, {
+export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
+    return request.post(OrderApiPath.getPurchasedNotWarehouseList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
+export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
     return request
-        .post(OrderApiPath.postExportPurchasedNotStock, {
+        .post(OrderApiPath.postExportPurchasedNotWarehouse, {
             data,
             responseType: 'blob',
             parseResponse: false,
@@ -185,16 +185,16 @@ export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
 }
 
 // 仓库未发货
-export async function getWarehouseNotShipList(data: IFilterParams) {
+export async function getWarehouseNotShipList(data: IWarehouseNotShipSearch) {
     return request.post(OrderApiPath.getWarehouseNotShipList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportStockNotShip(data: IFilterParams) {
+export async function postExportWarehouseNotShip(data: IWarehouseNotShipSearch) {
     return request
-        .post(OrderApiPath.postExportStockNotShip, {
+        .post(OrderApiPath.postExportWarehouseNotShip, {
             data,
             responseType: 'blob',
             parseResponse: false,
