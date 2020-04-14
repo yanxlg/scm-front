@@ -6,7 +6,7 @@ export const TaskRangeMap = {
     2: '全站',
     3: '指定店铺',
     4: '全部已上架',
-    5: '有销量已上架',
+    5: '有销量在架商品',
     6: '采购',
     7: '商品上架',
     8: '商品下架',
@@ -15,12 +15,14 @@ export const TaskRangeMap = {
     23: '全站',
     22: '指定店铺',
     24: '指定店铺',
-    // 11 :'',
+    31: '商品更新',
+};
+
+export const isGoodsUpdateType = (code: TaskRangeCode) => {
+    return Number(code) === 31;
 };
 
 export type TaskRangeCode = keyof typeof TaskRangeMap;
-
-export const TaskRangeList = transStatusList(TaskRangeMap);
 
 export enum TaskRangeEnum {
     URL = 1,
@@ -122,6 +124,26 @@ export enum TaskIntervalConfigType {
 export enum PUTaskRangeType {
     AllOnShelves = 2,
     HasSales,
+    // HasSalesOn,
+    // NoSalesOn,
+    // HasSalesOff,
+    // NoSalesOff,
+}
+
+export const PUTaskRangeTypeMap = {
+    1: '全部商品',
+    2: '全部已上架商品',
+    3: '有销量的已上架商品',
+    4: '无销量在架商品',
+    5: '有销量下架商品',
+    6: '无销量下架商品',
+};
+
+export type PUTaskRangeTypeCode = keyof typeof PUTaskRangeTypeMap;
+
+export enum UpdateItemType {
+    All = 1,
+    IgnoreImage,
 }
 
 //======================= Hot 任务筛选类型 ======================//

@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { ReactText, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ITaskListItem, ITaskListQuery, ITaskListExtraData } from '@/interface/ITask';
 import { Button, message } from 'antd';
 import {
+    isGoodsUpdateType,
     TaskRangeCode,
     TaskRangeMap,
     TaskStatusCode,
@@ -11,10 +12,11 @@ import {
     TaskTypeEnum,
     TaskTypeList,
     TaskTypeMap,
+    PUTaskRangeTypeMap,
 } from '@/enums/StatusEnum';
-import { convertEndDate, convertStartDate, utcToLocal } from '@/utils/date';
-import { ProColumns } from 'react-components/es/ProTable';
-import { ProTable } from 'react-components';
+import { utcToLocal } from 'react-components/es/utils/date';
+import { unixToEndDate, unixToStartDate } from 'react-components/es/utils/date';
+import { FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { useList } from '@/utils/hooks';
@@ -35,7 +37,7 @@ import {
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
-import { TableProps } from 'antd/es/table';
+import { ColumnType, TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface TaskListTabProps {
@@ -80,8 +82,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             task_status,
             task_name,
             task_type,
-            task_begin_time: convertStartDate(Number(task_begin_time)),
-            task_end_time: convertEndDate(Number(task_end_time)),
+            task_begin_time: unixToStartDate(Number(task_begin_time)),
+            task_end_time: unixToEndDate(Number(task_end_time)),
         };
     }, []);
 
@@ -96,6 +98,8 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         onSearch,
         onReload,
         onChange,
+        selectedRowKeys,
+        setSelectedRowKeys,
     } = useList<ITaskListItem, ITaskListQuery, ITaskListExtraData>({
         queryList: getTaskList,
         formRef: searchRef,
@@ -124,7 +128,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ? 5
                     : '6',
         };
-    }, []);
+    }, [loading]);
 
     const viewTaskDetail = useCallback((task_id: number) => {
         history.push(`/task/list/${task_id}`);
@@ -257,7 +261,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataIndex: 'channel',
                 width: '223px',
                 align: 'center',
-                render: (text: TaskChannelCode) => TaskChannelMap[text] || '——',
+                render: (text: TaskChannelCode) => TaskChannelMap[text] || '--',
             },
             {
                 title: '任务类型',
@@ -271,7 +275,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataIndex: 'task_range',
                 width: '182px',
                 align: 'center',
-                render: (text: TaskRangeCode) => TaskRangeMap[text],
+                render: (text: TaskRangeCode, record) => {
+                    const range = isGoodsUpdateType(text)
+                        ? record.update_type?.map(code => PUTaskRangeTypeMap[code])?.join(';')
+                        : TaskRangeMap[text];
+                    return range || '--';
+                },
             },
             {
                 title: '任务周期',
@@ -301,7 +310,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 align: 'center',
                 render: (dateString: string) => utcToLocal(dateString),
             },
-        ] as ProColumns<ITaskListItem>[];
+        ] as ColumnType<ITaskListItem>[];
     }, []);
 
     const fieldList = useMemo<FormField[]>(() => {
@@ -315,8 +324,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'input',
                     name: 'task_id',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: (
@@ -326,16 +333,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    className: 'input-default input-handler',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                 },
                 {
                     label: '任务状态',
                     type: 'select',
                     name: 'task_status',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -355,15 +358,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '任务名称',
                     type: 'input',
                     name: 'task_name',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: '任务渠道',
                     type: 'select',
                     name: 'channel',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -383,8 +382,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '任务类型',
                     type: 'select',
                     name: 'task_type',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -404,8 +401,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '开始时间',
                     type: 'datePicker',
                     name: 'task_begin_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     formatter: 'start_date',
                     dateEndWith: ['task_end_time'],
                 },
@@ -413,8 +408,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '结束时间',
                     type: 'datePicker',
                     name: 'task_end_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     formatter: 'end_date',
                     dateBeginWith: ['task_begin_time'],
                 },
@@ -429,8 +422,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'input',
                     name: 'task_id',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: (
@@ -440,23 +431,17 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    className: 'input-default input-handler',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                 },
                 {
                     label: '任务名称',
                     type: 'input',
                     name: 'task_name',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                 },
                 {
                     label: '任务渠道',
                     type: 'select',
                     name: 'channel',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -476,8 +461,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '任务类型',
                     type: 'select',
                     name: 'task_type',
-                    className: 'select-default',
-                    formItemClassName: 'form-item',
                     formatter: 'number',
                     optionList: [
                         {
@@ -497,8 +480,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '开始时间',
                     type: 'datePicker',
                     name: 'task_begin_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     dateEndWith: ['task_end_time'],
                     formatter: 'start_date',
                 },
@@ -506,8 +487,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     label: '结束时间',
                     type: 'datePicker',
                     name: 'task_end_time',
-                    className: 'input-default',
-                    formItemClassName: 'form-item',
                     dateBeginWith: ['task_begin_time'],
                     formatter: 'end_date',
                 },
@@ -542,19 +521,25 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         }
     }, [extraData]);
 
-    const deleteTaskList = useCallback(selectedRowKeys => {
+    const deleteTaskList = useCallback(() => {
         return deleteTasks(selectedRowKeys.join(',')).then(() => {
             message.success('任务删除成功!');
             onReload();
         });
+    }, [selectedRowKeys]);
+
+    const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
+        setSelectedRowKeys(selectedKeys as string[]);
     }, []);
 
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectedRowKeysChange,
         };
-    }, []);
+    }, [selectedRowKeys]);
 
     const pagination = useMemo(() => {
         return {
@@ -562,77 +547,65 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             current: pageNumber,
             pageSize: pageSize,
             showSizeChanger: true,
-        };
+            position: ['topRight', 'bottomRight'],
+        } as any;
     }, [loading]);
 
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
-    }, [onReload]);
-
-    const toolBarRender = useCallback((selectedRowKeys = []) => {
+    const toolBarRender = useCallback(() => {
         const size = selectedRowKeys.length;
         return [
             <PopConfirmLoadingButton
                 key="delete"
                 buttonProps={{
                     danger: true,
-                    type: 'link',
-                    className: 'btn-clear btn-group',
                     disabled: size === 0,
                     children: '删除任务',
+                    className: formStyles.formBtn,
                 }}
                 popConfirmProps={{
                     title: '确定要删除选中的任务吗?',
                     okText: '确定',
                     cancelText: '取消',
                     disabled: size === 0,
-                    onConfirm: () => deleteTaskList(selectedRowKeys),
+                    onConfirm: deleteTaskList,
                 }}
             />,
         ];
-    }, []);
+    }, [selectedRowKeys]);
 
     const table = useMemo(() => {
         return (
-            <ProTable<ITaskListItem>
-                className={formStyles.formItem}
-                headerTitle="查询表格"
+            <FitTable<ITaskListItem>
                 rowKey="task_id"
                 rowSelection={rowSelection}
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
-                tableAlertRender={false}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
+                toolBarRender={toolBarRender}
             />
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 
     const search = useMemo(() => {
         return (
             <JsonForm ref={searchRef} fieldList={fieldList} initialValues={formInitialValues}>
-                <LoadingButton
-                    className="form-item"
-                    onClick={onSearch}
-                    type="primary"
-                    icon={<SearchOutlined />}
-                >
-                    查询
-                </LoadingButton>
+                <div>
+                    <LoadingButton onClick={onSearch} className={formStyles.formBtn} type="primary">
+                        查询
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                        刷新
+                    </LoadingButton>
+                </div>
             </JsonForm>
         );
-    }, []);
+    }, [selectedRowKeys]);
+
     return useMemo(() => {
         return (
             <div>
@@ -641,7 +614,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 };
 
 export default TaskListTab;

@@ -3,7 +3,7 @@ import { FitTable } from 'react-components';
 
 import { ColumnProps } from 'antd/es/table';
 import { IWaitShipItem } from './PaneWaitShip';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,

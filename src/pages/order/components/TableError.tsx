@@ -3,7 +3,7 @@ import { Table } from 'antd';
 
 import { ColumnProps } from 'antd/es/table';
 import { IErrorOrderItem } from './PaneError';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { errorTypeOptionList, errorDetailOptionList } from '@/enums/OrderEnum';
 

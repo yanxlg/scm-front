@@ -1,7 +1,16 @@
 import { Request, Response } from 'express';
+import Mock, { Random } from 'mockjs';
+
+const sleep = async (second: number) => {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, second * 1000);
+    });
+};
 
 export default {
-    'get /v1/vova_goods/version': (req: Request, res: Response) => {
+    'get /api/v1/vova_goods/version_list': (req: Request, res: Response) => {
         res.status(200).send({
             message: '',
             code: 200,
@@ -106,6 +115,26 @@ export default {
                     },
                 ],
             },
+        });
+    },
+    'get /v1/vova_goods/sales_log': async (req: Request, res: Response) => {
+        await sleep(3);
+        res.status(200).send({
+            message: '',
+            code: 200,
+            ...Mock.mock({
+                'data|5-10': [
+                    {
+                        reason: '@string',
+                        finish_time: '@date',
+                        status_label: '@increment',
+                        commodity_id: '@increment',
+                        product_id: '@increment',
+                        sale_domain: '@string',
+                        id: '@increment',
+                    },
+                ],
+            }),
         });
     },
 };

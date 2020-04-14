@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Card, Tabs } from 'antd';
 import '@/styles/index.less';
-import '@/styles/form.less';
 import '@/styles/task.less';
 import '@/styles/card.less';
 import { TaskTypeCode, TaskTypeEnum } from '@/enums/StatusEnum';

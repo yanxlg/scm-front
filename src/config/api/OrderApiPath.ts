@@ -46,4 +46,6 @@ export enum OrderApiPath {
     putConfirmPay = '/api/v1/orders/confirm_pay',
     // 获取物流轨迹
     getOrderTrack = '/api/v1/orders/track',
+    // 代拍相似款
+    padSimilarGood = '/api/v1/orders/similar_goods_pat',
 }

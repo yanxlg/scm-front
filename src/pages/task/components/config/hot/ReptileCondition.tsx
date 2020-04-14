@@ -13,6 +13,9 @@ import { FormInstance } from 'antd/es/form';
 import { IPDDCategoryResponse } from '@/interface/ITask';
 import { queryCategory } from '@/services/task';
 import { TreeNodeNormal } from 'antd/es/tree/Tree';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
+import '@/styles/config.less';
 
 declare interface ReptileConditionProps {
     form: FormInstance;
@@ -353,7 +356,7 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                         <Form.Item
                             label="爬虫条件"
                             name="filterType"
-                            className="form-item form-item-inline"
+                            className={formStyles.formItem}
                             rules={[
                                 {
                                     required: true,
@@ -382,7 +385,7 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
     const keywordItem = useMemo(() => {
         return (
             <Form.Item
-                className="form-item form-item-inline form-required-hide"
+                className={classNames(formStyles.formItem, formStyles.formRequiredHide)}
                 validateTrigger={'onBlur'}
                 name="keywords"
                 label="关&ensp;键&ensp;词"
@@ -403,7 +406,11 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                 validateTrigger={'onBlur'}
                 name="category_level_one"
                 label="一级类目"
-                className="form-item form-item-horizon form-item-inline config-hot-category"
+                className={classNames(
+                    formStyles.formItem,
+                    formStyles.formHorizon,
+                    'config-hot-category',
+                )}
                 validateFirst={true}
                 rules={[
                     {
@@ -438,7 +445,12 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                 validateTrigger={'onBlur'}
                 name="category_level_two"
                 label="二级类目"
-                className="form-item form-item-horizon form-item-inline form-required-hide config-hot-category"
+                className={classNames(
+                    formStyles.formItem,
+                    formStyles.formHorizon,
+                    formStyles.formRequiredHide,
+                    'config-hot-category',
+                )}
                 required={true}
                 rules={[
                     {
@@ -472,7 +484,11 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                 name="category_level_three"
                 label="三级类目"
                 required={true}
-                className="form-item form-item-horizon form-item-inline form-required-hide"
+                className={classNames(
+                    formStyles.formItem,
+                    formStyles.formHorizon,
+                    formStyles.formRequiredHide,
+                )}
                 rules={[
                     {
                         validator: checkLastCategory,

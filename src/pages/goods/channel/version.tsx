@@ -3,7 +3,6 @@ import VersionSearch, { IApiParams } from './components/VersionSearch';
 import { Button, Card, Checkbox, message, Spin, Table } from 'antd';
 import '@/styles/product.less';
 import { ColumnType } from 'antd/lib/table/interface';
-import { BindAll } from 'lodash-decorators';
 import {
     activeChannelProductVersion,
     cleanChannelChangedProperties,
@@ -46,7 +45,6 @@ declare interface IVersionState {
     }>;
 }
 
-@BindAll()
 class Version extends React.PureComponent<{}, IVersionState> {
     constructor(props: {}) {
         super(props);

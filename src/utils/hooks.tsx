@@ -150,22 +150,4 @@ function useList<T, Q extends RequestPagination = any, S = any>({
     };
 }
 
-function useModal<T = boolean>() {
-    const [visible, setVisible] = useState<T | false>(false);
-
-    const onClose = useCallback(() => {
-        setVisible(false);
-    }, []);
-
-    const setVisibleProps = useCallback((visibleProps: T) => {
-        setVisible(visibleProps);
-    }, []);
-
-    return {
-        visible,
-        onClose,
-        setVisibleProps,
-    };
-}
-
-export { useModal, useList };
+export { useList };

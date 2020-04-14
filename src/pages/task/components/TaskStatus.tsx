@@ -22,7 +22,9 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
             return (
                 <div>
                     <ClockCircleFilled className={taskStyle.waitIcon} />
-                    {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    <span className={taskStyle.taskStatusText}>
+                        {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    </span>
                 </div>
             );
         }
@@ -30,7 +32,9 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
             return (
                 <div>
                     <CheckCircleFilled className={taskStyle.successIcon} />
-                    {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    <span className={taskStyle.taskStatusText}>
+                        {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    </span>
                 </div>
             );
         }
@@ -38,7 +42,9 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
             return (
                 <div>
                     <CloseCircleFilled className={taskStyle.errorIcon} />
-                    {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    <span className={taskStyle.taskStatusText}>
+                        {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    </span>
                 </div>
             );
         }
@@ -46,7 +52,9 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
             return (
                 <div>
                     <InfoCircleFilled className={taskStyle.warnIcon} />
-                    {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    <span className={taskStyle.taskStatusText}>
+                        {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    </span>
                 </div>
             );
         }
@@ -63,11 +71,19 @@ const TaskStatus: React.FC<TaskStatusProps> = ({ status }) => {
                         status={'normal'}
                         format={() => ''}
                     />
-                    {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    <span className={taskStyle.taskStatusText}>
+                        {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                    </span>
                 </div>
             );
         }
-        return <div>{TaskStatusMap[(status as unknown) as TaskStatusCode]}</div>;
+        return (
+            <div>
+                <span className={taskStyle.taskStatusText}>
+                    {TaskStatusMap[(status as unknown) as TaskStatusCode]}
+                </span>
+            </div>
+        );
     }, [status]);
 };
 
