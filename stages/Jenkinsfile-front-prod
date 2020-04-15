@@ -2,7 +2,7 @@ def docker_login = 'aws ecr get-login --no-include-email --region us-east-1'
 
 pipeline {
     agent {
-        label 'deployer-vova'
+        label 'deployer-scm'
     }
     options {
         timestamps()
@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('docker login') {
             agent {
-                label 'deployer-vova'
+                label 'deployer-scm'
             }
             options {
                 skipDefaultCheckout true
@@ -36,7 +36,7 @@ pipeline {
         }
         stage('Building image') {
             agent {
-                label 'deployer-vova'
+                label 'deployer-scm'
             }
             options {
                 skipDefaultCheckout true
@@ -54,18 +54,18 @@ pipeline {
                         git rev-parse --short HEAD > dist/version; \
                     "
                     sh "${docker_login}"
-                    sh "docker build --no-cache --network=host -f Dockerfile -t 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod .; \
-                        docker push 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod; \
-                        docker tag 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front; \
-                        docker push 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front; \
-                        docker rmi 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod; \
+                    sh "docker build --no-cache --network=host -f Dockerfile -t 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod .; \
+                        docker push 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod; \
+                        docker tag 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front; \
+                        docker push 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front; \
+                        docker rmi 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod; \
                        "
                 }
             }
         }
         stage('restart pod') {
             agent {
-                label 'deployer-vova'
+                label 'deployer-scm'
             }
             options {
                 skipDefaultCheckout true
@@ -75,7 +75,7 @@ pipeline {
                     checkout([ $class: 'GitSCM',
                                branches: [[name: "$refspec"]],
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
-                    sh """export KUBECONFIG=~/.kube/config--vv-eks-service-goods-1; \
+                    sh """export KUBECONFIG=~/.kube/config--vv-eks-service-supplychain-1; \
                           kubectl apply -f stages/manifests/prod/scm-front-prod.yaml; \
                           kubectl get pod -n default | grep 'trigram-scm-front-page-prod' | awk '{print \$1}' \
                               | while read podName; do kubectl get pod \$podName -n default -o yaml \
