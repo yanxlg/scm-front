@@ -11,6 +11,44 @@ export interface IPagination {
     page_count?: number;
 }
 
+export interface IPendingOrderSearch extends IPagination {
+    order_goods_id?: string[];
+    product_id?: string[];
+    sku_id?: string[];
+    channel_source?: number;
+    order_time_start?: number;
+    order_time_end?: number;
+}
+
+export interface IPendingOrderItem {
+    [key: string]: any;
+}
+
+export interface IWaitPaySearch extends IPagination {
+    purchase_order_sn?: string;
+    purchase_parent_order_sn?: string;
+    purchase_platform?: number;
+    purchase_order_stime?: number;
+    purchase_order_etime?: number;
+}
+
+export declare interface IWaitPayOrderItem {
+    purchase_pay_url: string;
+    purchase_total_amount: string;
+    purchase_parent_order_sn: string;
+    purchase_order_time: string;
+    parent_purchase_pay_status_desc: string;
+    purchase_plan_id: string;
+    purchase_order_sn: string;
+    purchase_order_status: string;
+    purchase_order_status_desc: string;
+    purchase_pay_status: string;
+    purchase_pay_status_desc: string;
+    order_goods_id: string;
+    _rowspan?: number;
+    _checked?: boolean;
+}
+
 export interface IWaitShipSearch extends IPagination {
     order_goods_id?: string;
     purchase_platform_order_id_list?: string[];

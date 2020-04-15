@@ -6,6 +6,8 @@ import {
     IWarehouseNotShipSearch,
     INotWarehouseSearch,
     IWaitShipSearch,
+    IWaitPaySearch,
+    IPendingOrderSearch,
 } from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
 
@@ -41,28 +43,6 @@ export declare interface IFilterParams {
     cancel_time_start?: number; // og订单取消时间
     cancel_time_end?: number;
     only_p_order?: number;
-}
-
-export declare interface IPendingFilterParams {
-    page?: number;
-    page_count?: number;
-    order_start_time?: number;
-    order_end_time?: number;
-    order_goods_id?: string[];
-    product_id?: string[];
-    sku_id?: string[];
-    channel_source?: number[];
-    order_goods_status?: number[];
-}
-
-export declare interface IPayFilterParams {
-    page?: number;
-    page_count?: number;
-    purchase_order_stime?: number;
-    purchase_order_etime?: number;
-    purchase_platform?: number;
-    purchase_order_sn?: string;
-    purchase_parent_order_sn?: string;
 }
 
 export declare interface IErrFilterParams {
@@ -107,14 +87,14 @@ export async function postExportAll(data: IFilterParams) {
 }
 
 // 获取待拍单
-export async function getPendingOrderList(data: IPendingFilterParams) {
+export async function getPendingOrderList(data: IPendingOrderSearch) {
     return request.post(OrderApiPath.getPendingOrderList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPendingOrder(data: IPendingFilterParams) {
+export async function postExportPendingOrder(data: IPendingOrderSearch) {
     return request
         .post(OrderApiPath.postExportPendingOrder, {
             data,
@@ -125,14 +105,14 @@ export async function postExportPendingOrder(data: IPendingFilterParams) {
 }
 
 // 获取待支付
-export async function getPayOrderList(data: IPayFilterParams) {
+export async function getPayOrderList(data: IWaitPaySearch) {
     return request.post(OrderApiPath.getPayOrderList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPay(data: IPayFilterParams) {
+export async function postExportPay(data: IWaitPaySearch) {
     return request
         .post(OrderApiPath.postExportPay, {
             data,

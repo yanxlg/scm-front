@@ -2,7 +2,7 @@ import React from 'react';
 import { Tabs } from 'antd';
 import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
-import PanePay from './components/_PanePay';
+import PanePay from './components/PanePay';
 import PaneWaitShip from './components/PaneWaitShip';
 import PaneError from './components/PaneError';
 import PaneNotWarehouse from './components/PaneNotWarehouse';
@@ -72,7 +72,7 @@ class Order extends React.PureComponent<{}, IOrderState> {
         return (
             <Container>
                 <div className="order-wrap">
-                    <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="4">
+                    <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <PaneAll getAllTabCount={this.getAllTabCount} />
                         </TabPane>

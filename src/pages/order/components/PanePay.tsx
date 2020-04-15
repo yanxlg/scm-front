@@ -1,18 +1,19 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, message, Checkbox } from 'antd';
-import { JsonForm, LoadingButton, FitTable } from 'react-components';
+import { notification, Checkbox, Button } from 'antd';
+import { JsonForm, LoadingButton, FitTable, AutoEnLargeImg } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList, pageSizeOptions } from '@/enums/OrderEnum';
-import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
+import { IWaitPaySearch, IWaitPayOrderItem } from '@/interface/IOrder';
 import {
-    getWarehouseNotShipList,
+    getPayOrderList,
     delChannelOrders,
-    postExportWarehouseNotShip,
+    postExportPay,
+    putConfirmPay,
+    delPurchaseOrders,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { getStatusDesc } from '@/utils/transform';
-import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
+import { defaultOptionItem, purchasePlatformOptionList } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
+import QRCode from 'qrcode.react';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 
@@ -23,46 +24,36 @@ declare interface IProps {
 const formFields: FormField[] = [
     {
         type: 'input',
-        name: 'order_goods_id',
-        label: '中台订单子ID',
+        name: 'purchase_parent_order_sn',
+        label: '采购父订单ID',
         className: 'order-input',
-        placeholder: '请输入中台订单子ID',
-        formatter: 'numberStrArr',
+        placeholder: '请输入采购父订单ID',
     },
     {
         type: 'input',
-        name: 'product_id',
-        label: '中台商品ID',
+        name: 'purchase_order_sn',
+        label: '采购子订单ID',
         className: 'order-input',
-        placeholder: '请输入中台商品ID',
-        formatter: 'strArr',
-    },
-    {
-        type: 'input',
-        name: 'purchase_waybill_no',
-        label: '采购运单号',
-        className: 'order-input',
-        placeholder: '请输入采购运单号',
-        formatter: 'strArr',
+        placeholder: '请输入中台订单ID',
     },
     {
         type: 'select',
-        name: 'channel_source',
-        label: '销售渠道',
+        name: 'purchase_platform',
+        label: '采购渠道',
         className: 'order-input',
-        optionList: [defaultOptionItem, ...channelOptionList],
+        optionList: [defaultOptionItem, ...purchasePlatformOptionList],
     },
     {
         type: 'dateRanger',
-        name: ['storage_time_start', 'storage_time_end'],
-        label: '入库时间',
+        name: ['purchase_order_stime', 'purchase_order_etime'],
+        label: '采购时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
 ];
 
 const defaultInitialValues = {
-    channel_source: 100,
+    purchase_platform: 100,
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
@@ -71,13 +62,27 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [pageSize, setPageSize] = useState(50);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [orderList, setOrderList] = useState<IWarehouseNotShipOrderItem[]>([]);
+    const [orderList, setOrderList] = useState<IWaitPayOrderItem[]>([]);
 
-    let currentSearchParams: IWarehouseNotShipSearch | null = null;
+    let currentSearchParams: IWaitPaySearch | null = null;
+
+    const selectedOrderGoodsIdList = useMemo(() => {
+        const parentOrdersSnList = orderList
+            .filter(item => item._checked)
+            .map(item => item.purchase_parent_order_sn);
+        const list = orderList
+            .filter(
+                item =>
+                    parentOrdersSnList.indexOf(item.purchase_parent_order_sn) > -1 &&
+                    item.order_goods_id,
+            )
+            .map(item => item.order_goods_id);
+        return [...new Set(list)];
+    }, [orderList]);
 
     const onSearch = useCallback(
         (paginationParams = { page, page_count: pageSize }) => {
-            const params: IWarehouseNotShipSearch = Object.assign(
+            const params: IWaitPaySearch = Object.assign(
                 {
                     page,
                     page_count: pageSize,
@@ -86,7 +91,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 searchRef.current?.getFieldsValue(),
             );
             setLoading(true);
-            return getWarehouseNotShipList(params)
+            return getPayOrderList(params)
                 .then(res => {
                     currentSearchParams = params;
                     const { all_count: total, list } = res.data;
@@ -95,7 +100,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         setPage(params.page as number);
                         setPageSize(params.page_count as number);
                         setTotal(total);
-                        setOrderList(getChildOrderData(list));
+                        setOrderList(getOrderList(list));
                     }
                 })
                 .finally(() => {
@@ -105,52 +110,28 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         [page, pageSize],
     );
 
-    const getChildOrderData = useCallback(list => {
-        const childOrderList: IWarehouseNotShipOrderItem[] = [];
-        list.forEach((goodsItem: any) => {
-            const { orderGoods, orderInfo } = goodsItem;
-            const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
-            // console.log(111, orderGoodsPurchasePlan, orderGoods);
-            if (orderGoodsPurchasePlan) {
-                // 生成采购计划
-                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
-                    const {
-                        createTime: purchaseCreateTime,
-                        lastUpdateTime: purchaseLastUpdateTime,
-                        ...purchaseRest
-                    } = purchaseItem;
-                    const childOrderItem: any = {
-                        ...orderRest,
-                        ...purchaseRest,
-                        purchaseCreateTime,
-                        purchaseLastUpdateTime,
-                        currency,
-                        confirmTime,
-                        channelOrderSn,
-                        channelSource,
-                    };
-                    if (index === 0) {
-                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
-                        childOrderItem._checked = false;
-                    }
-                    childOrderList.push(childOrderItem);
-                });
-            } else {
-                // 没有生成采购计划
-                childOrderList.push({
-                    currency,
-                    confirmTime,
-                    channelOrderSn,
-                    channelSource,
-                    ...orderRest,
-                    _rowspan: 1,
-                    _checked: false,
-                });
-            }
+    const getOrderList = useCallback(list => {
+        const ret: IWaitPayOrderItem[] = [];
+        list.forEach((item: any) => {
+            const {
+                child_order,
+                purchase_pay_status_desc: parent_purchase_pay_status_desc,
+                ...parentRest
+            } = item;
+            child_order.forEach((childItem: any, index: number) => {
+                const payItem = {
+                    ...parentRest,
+                    ...childItem,
+                    parent_purchase_pay_status_desc,
+                };
+                if (index === 0) {
+                    payItem._rowspan = child_order.length;
+                    payItem._checked = false;
+                }
+                ret.push(payItem);
+            });
         });
-        // console.log(1111, childOrderList);
-        return childOrderList;
+        return ret;
     }, []);
 
     const handleClickSearch = useCallback(() => {
@@ -175,10 +156,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     );
 
     const onSelectedRow = useCallback(
-        (row: IWarehouseNotShipOrderItem) => {
+        (row: IWaitPayOrderItem) => {
             setOrderList(
                 orderList.map(item => {
-                    if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                    if (
+                        item._rowspan &&
+                        row.purchase_parent_order_sn === item.purchase_parent_order_sn
+                    ) {
                         return {
                             ...item,
                             _checked: !row._checked,
@@ -191,7 +175,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         [orderList],
     );
 
-    const mergeCell = useCallback((value: string | number, row: IWarehouseNotShipOrderItem) => {
+    const mergeCell = useCallback((value: string | number, row: IWaitPayOrderItem) => {
         return {
             children: value,
             props: {
@@ -206,10 +190,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             page: current,
         });
     }, []);
-
-    const getOrderGoodsIdList = useCallback(() => {
-        return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
-    }, [orderList]);
 
     const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
         getAllTabCount();
@@ -243,9 +223,24 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         [],
     );
 
+    const _cancelPurchaseOrder = useCallback(() => {
+        return delPurchaseOrders({
+            order_goods_ids: selectedOrderGoodsIdList,
+        }).then(res => {
+            onSearch();
+            const { success, failed } = res.data;
+            if (success!.length) {
+                batchOperateSuccess('取消采购单', success);
+            }
+            if (failed!.length) {
+                batchOperateFail('取消采购单', failed);
+            }
+        });
+    }, [selectedOrderGoodsIdList]);
+
     const _delChannelOrders = useCallback(() => {
         return delChannelOrders({
-            order_goods_ids: getOrderGoodsIdList(),
+            order_goods_ids: selectedOrderGoodsIdList,
         }).then(res => {
             onSearch();
             const { success, failed } = res.data;
@@ -257,10 +252,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 batchOperateFail('取消渠道订单', failed);
             }
         });
-    }, [getOrderGoodsIdList]);
+    }, [selectedOrderGoodsIdList]);
 
-    const _postExportWarehouseNotShip = useCallback(() => {
-        return postExportWarehouseNotShip(
+    const _postExportPay = useCallback(() => {
+        return postExportPay(
             currentSearchParams
                 ? currentSearchParams
                 : {
@@ -269,6 +264,22 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                   },
         );
     }, []);
+
+    const _confirmPay = useCallback(
+        (id: string) => {
+            const planIdList = orderList
+                .filter(item => item.purchase_parent_order_sn === id)
+                .map(item => item.purchase_plan_id);
+            putConfirmPay({
+                purchase_platform_parent_order_id: id,
+                purchase_plan_id: planIdList,
+            }).then(() => {
+                // console.log('putConfirmPay', res);
+                onSearch();
+            });
+        },
+        [orderList],
+    );
 
     const search = useMemo(() => {
         return (
@@ -294,7 +305,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         );
     }, []);
 
-    const columns = useMemo<TableProps<IWarehouseNotShipOrderItem>['columns']>(() => {
+    const columns = useMemo<TableProps<IWaitPayOrderItem>['columns']>(() => {
         return [
             {
                 fixed: true,
@@ -320,7 +331,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 dataIndex: '_checked',
                 align: 'center',
                 width: 50,
-                render: (value: boolean, row: IWarehouseNotShipOrderItem) => {
+                render: (value: boolean, row: IWaitPayOrderItem) => {
                     return {
                         children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
                         props: {
@@ -330,12 +341,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 },
             },
             {
-                key: 'createTime',
-                title: '订单时间',
-                dataIndex: 'createTime',
+                key: 'purchase_order_time',
+                title: '采购订单生成时间',
+                dataIndex: 'purchase_order_time',
                 align: 'center',
-                width: 120,
-                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                width: 150,
+                render: (value: string, row: IWaitPayOrderItem) => {
                     return {
                         children: utcToLocal(value, ''),
                         props: {
@@ -345,149 +356,104 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 },
             },
             {
-                key: 'orderGoodsId',
-                title: '中台订单子ID',
-                dataIndex: 'orderGoodsId',
+                key: 'purchase_parent_order_sn',
+                title: '采购父订单号',
+                dataIndex: 'purchase_parent_order_sn',
+                align: 'center',
+                width: 150,
+                render: mergeCell,
+            },
+            {
+                key: 'purchase_pay_url',
+                title: '支付二维码',
+                dataIndex: 'purchase_pay_url',
+                align: 'center',
+                width: 140,
+                render: (value: string, row: IWaitPayOrderItem) => {
+                    const { purchase_parent_order_sn, parent_purchase_pay_status_desc } = row;
+                    return {
+                        children:
+                            parent_purchase_pay_status_desc !== '已支付' ? (
+                                <div>
+                                    <AutoEnLargeImg
+                                        enlargeContent={
+                                            <QRCode
+                                                value={value}
+                                                size={300}
+                                                className="order-qr-enlarge"
+                                            />
+                                        }
+                                    >
+                                        <QRCode
+                                            value={value}
+                                            size={40}
+                                            className="order-qr-small"
+                                        />
+                                    </AutoEnLargeImg>
+                                    <div>
+                                        <Button
+                                            ghost={true}
+                                            size="small"
+                                            type="primary"
+                                            style={{ marginTop: 6 }}
+                                            onClick={() => _confirmPay(purchase_parent_order_sn)}
+                                        >
+                                            确认支付
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                parent_purchase_pay_status_desc
+                            ),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                key: 'purchase_pay_status_desc',
+                title: '采购支付状态',
+                dataIndex: 'purchase_pay_status_desc',
                 align: 'center',
                 width: 120,
                 render: mergeCell,
             },
             {
-                key: 'purchasePlanId',
+                key: 'purchase_total_amount',
+                title: '采购价',
+                dataIndex: 'purchase_total_amount',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'purchase_order_sn',
+                title: '采购子订单号',
+                dataIndex: 'purchase_order_sn',
+                align: 'center',
+                width: 140,
+            },
+            {
+                key: 'purchase_plan_id',
                 title: '计划子项ID',
-                dataIndex: 'purchasePlanId',
-                align: 'center',
-                width: 120,
-                // render: mergeCell
-            },
-            {
-                key: 'productId',
-                title: '中台商品ID',
-                dataIndex: 'productId',
-                align: 'center',
-                width: 120,
-                // render: mergeCell
-            },
-            {
-                key: 'purchaseWaybillNo',
-                title: '采购运单号',
-                dataIndex: 'purchaseWaybillNo',
+                dataIndex: 'purchase_plan_id',
                 align: 'center',
                 width: 120,
             },
             {
-                key: 'purchaseOrderStatus',
+                key: 'purchase_order_status_desc',
                 title: '采购订单状态',
-                dataIndex: 'purchaseOrderStatus',
+                dataIndex: 'purchase_order_status_desc',
                 align: 'center',
                 width: 120,
-                render: (value: number, row: IWarehouseNotShipOrderItem) => {
-                    return getStatusDesc(purchaseOrderOptionList, value);
-                },
             },
             {
-                key: 'purchaseOrderShippingStatus',
-                title: '采购配送状态',
-                dataIndex: 'purchaseOrderShippingStatus',
+                key: 'purchase_pay_status_desc',
+                title: '采购子订单支付状态',
+                dataIndex: 'purchase_pay_status_desc',
                 align: 'center',
-                width: 120,
-                render: (value: number, row: IWarehouseNotShipOrderItem) => {
-                    return getStatusDesc(purchaseShippingOptionList, value);
-                },
-            },
-            {
-                key: 'storageTime',
-                title: '入库时间',
-                dataIndex: 'storageTime',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IWarehouseNotShipOrderItem) => {
-                    return {
-                        children: utcToLocal(value, ''),
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                key: 'deliveryCommandTime',
-                title: '发送发货指令时间',
-                dataIndex: 'deliveryCommandTime',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IWarehouseNotShipOrderItem) => {
-                    return {
-                        children: utcToLocal(value, ''),
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                key: 'cancelTime',
-                title: '取消订单时间',
-                dataIndex: 'cancelTime',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IWarehouseNotShipOrderItem) => {
-                    return {
-                        children: utcToLocal(value, ''),
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                key: '_goodsTotalAmount',
-                title: '商品总金额',
-                dataIndex: '_goodsTotalAmount',
-                align: 'center',
-                width: 120,
-                render: (_: any, row: IWarehouseNotShipOrderItem) => {
-                    // console.log(row);
-                    const { goodsAmount, goodsNumber, freight } = row;
-                    const totalAmount = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
-                    return {
-                        children: isNaN(totalAmount) ? totalAmount : totalAmount.toFixed(2),
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                key: 'channelOrderGoodsSn',
-                title: '渠道订单ID',
-                dataIndex: 'channelOrderGoodsSn',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'channelSource',
-                title: '销售渠道',
-                dataIndex: 'channelSource',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'confirmTime',
-                title: '订单确认时间',
-                dataIndex: 'confirmTime',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IWarehouseNotShipOrderItem) => {
-                    return {
-                        children: utcToLocal(value, ''),
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
+                width: 160,
             },
         ];
     }, [orderList]);
@@ -503,26 +469,31 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     }, [loading]);
 
     const toolBarRender = useCallback(() => {
-        const list = getOrderGoodsIdList();
+        const disabled = selectedOrderGoodsIdList.length === 0 ? true : false;
         return [
+            <LoadingButton
+                key="purchase_order"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={_cancelPurchaseOrder}
+                disabled={disabled}
+            >
+                取消采购单
+            </LoadingButton>,
             <LoadingButton
                 key="channel_order"
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={_delChannelOrders}
-                disabled={list.length ? false : true}
+                disabled={disabled}
             >
                 取消渠道订单
             </LoadingButton>,
-            <LoadingButton
-                key="export"
-                className={formStyles.formBtn}
-                onClick={_postExportWarehouseNotShip}
-            >
+            <LoadingButton key="export" className={formStyles.formBtn} onClick={_postExportPay}>
                 导出至EXCEL
             </LoadingButton>,
         ];
-    }, [getOrderGoodsIdList, _delChannelOrders, _postExportWarehouseNotShip]);
+    }, [selectedOrderGoodsIdList, _cancelPurchaseOrder, _delChannelOrders, _postExportPay]);
 
     useEffect(() => {
         onSearch();
@@ -534,9 +505,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 {search}
                 <FitTable
                     bordered
-                    rowKey={record => {
-                        return record.purchasePlanId || record.orderGoodsId;
-                    }}
+                    rowKey="purchase_plan_id"
                     className="order-table"
                     loading={loading}
                     columns={columns}

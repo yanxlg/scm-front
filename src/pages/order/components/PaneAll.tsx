@@ -163,11 +163,14 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             parentOrderList: this.getParentOrderData(list),
                         });
                     } else {
-                        this.setState({
-                            childOrderList: this.getChildOrderData(list),
-                        }, () => {
-                            this.bindMouseenter();
-                        });
+                        this.setState(
+                            {
+                                childOrderList: this.getChildOrderData(list),
+                            },
+                            () => {
+                                this.bindMouseenter();
+                            },
+                        );
                     }
                 }
             })
@@ -321,12 +324,12 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         );
     };
 
-    private changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
-        });
-    };
+    // private changeShowColStatus = () => {
+    //     const { showColStatus } = this.state;
+    //     this.setState({
+    //         showColStatus: !showColStatus,
+    //     });
+    // };
 
     private changeSelectedColList = (list: string[]) => {
         const { showParentStatus } = this.state;
@@ -554,18 +557,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 const id = (e.target as any).parentNode.getAttribute('data-id');
                 [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
                     node.classList.add('hover');
-                })
-            })
+                });
+            });
 
             item.addEventListener('mouseleave', function(e) {
                 // console.log(e.target?.parentNode);
                 const id = (e.target as any).parentNode.getAttribute('data-id');
                 [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
                     node.classList.remove('hover');
-                })
-            })
-        })
-    }
+                });
+            });
+        });
+    };
 
     render() {
         const {
@@ -641,18 +644,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件
                         </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
+                        {/* <Button className="order-btn" onClick={this.changeShowColStatus}>
                             {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
+                        </Button> */}
                     </div>
-                    {showColStatus ? (
+                    {/* {showColStatus ? (
                         <OptionalColumn
                             ref={this.optionalRef}
                             optionalColList={childOptionalColList}
                             selectedColKeyList={selectedColKeyList}
                             changeSelectedColList={this.changeSelectedColList}
                         />
-                    ) : null}
+                    ) : null} */}
                     {!showParentStatus ? (
                         <TableAll
                             loading={loading}
