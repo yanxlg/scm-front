@@ -209,10 +209,14 @@ declare interface SimilarStyleModalProps {
 const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProps) => {
     const [loading, setLoading] = useState(false);
     const [info, setInfo] = useState<ISimilarInfoResponse>(EmptyObject);
+    const [submitting, setSubmitting] = useState(false);
+    const [form] = Form.useForm();
+
     useEffect(() => {
         // 获取当前状态
         if (visible) {
             setInfo(EmptyObject);
+            form.resetFields();
             setLoading(true);
             querySimilarInfo(visible)
                 .then(({ data }) => {
@@ -229,21 +233,23 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                 });
         }
     }, [visible]);
-    const [form] = Form.useForm();
+
     const onOKey = useCallback(() => {
         form.validateFields().then(values => {
-            const { type, list, order_goods_id, origin_purchase_plan_id, ...extra } = values;
+            const { type, list, ...extra } = values;
+            setSubmitting(true);
             patSimilarGoods({
                 ...extra,
                 ...visible,
-                ...(type === 1
-                    ? {
-                          order_goods_id,
-                          origin_purchase_plan_id,
-                      }
-                    : JSON.parse(list)),
+                ...(type === 1 ? {} : JSON.parse(list)),
                 type,
-            } as IPadSimilarBody).then(() => {});
+            } as IPadSimilarBody)
+                .then(() => {
+                    message.success('代拍成功');
+                })
+                .finally(() => {
+                    setSubmitting(false);
+                });
         });
     }, [visible]);
     return useMemo(() => {
@@ -264,6 +270,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                 okText="拍单"
                 onOk={onOKey}
                 destroyOnClose={true}
+                confirmLoading={submitting}
             >
                 <Spin spinning={loading}>
                     {status === void 0 ? null : (
@@ -305,7 +312,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                 </Spin>
             </Modal>
         );
-    }, [visible, loading]);
+    }, [visible, loading, submitting]);
 };
 
 export default SimilarStyleModal;
