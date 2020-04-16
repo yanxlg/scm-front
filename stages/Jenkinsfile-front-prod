@@ -1,9 +1,7 @@
 def docker_login = 'aws ecr get-login --no-include-email --region us-east-1'
 
 pipeline {
-    agent {
-        label 'deployer-scm'
-    }
+    agent none
     options {
         timestamps()
         disableConcurrentBuilds()
