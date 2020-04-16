@@ -217,8 +217,13 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         validateTrigger={'onBlur'}
                         name="ranges"
                         label="商品条件"
-                        required={true}
                         className={formStyles.formItem}
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择商品条件',
+                            },
+                        ]}
                     >
                         <Checkbox.Group>
                             <Checkbox value={PUTaskRangeType.AllOnShelves}>全部已上架商品</Checkbox>
