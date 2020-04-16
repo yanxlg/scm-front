@@ -73,7 +73,9 @@ const convertFormData = (values: IFormData) => {
         task_start_time: dateToUnix(task_start_time),
         task_end_time: dateToUnix(task_end_time),
         task_interval_seconds:
-            taskIntervalType === TaskIntervalConfigType.second ? second : day * 60 * 60 * 24,
+            taskIntervalType === TaskIntervalConfigType.second
+                ? Number(second)
+                : day * 60 * 60 * 24,
     };
 };
 
@@ -190,7 +192,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        ranges: [PUTaskRangeType.HasSalesOn],
+                        ranges: [PUTaskRangeType.AllOnShelves],
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
                         update_item: UpdateItemType.All,
@@ -219,10 +221,13 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         className={formStyles.formItem}
                     >
                         <Checkbox.Group>
+                            <Checkbox value={PUTaskRangeType.AllOnShelves}>全部已上架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.NoSalesOff}>全部未上架商品</Checkbox>
+                            {/*
                             <Checkbox value={PUTaskRangeType.HasSalesOn}>有销量在架商品</Checkbox>
                             <Checkbox value={PUTaskRangeType.NoSalesOn}>无销量在架商品</Checkbox>
                             <Checkbox value={PUTaskRangeType.HasSalesOff}>有销量下架商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.NoSalesOff}>无销量下架商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.NoSalesOff}>无销量下架商品</Checkbox>*/}
                         </Checkbox.Group>
                     </Form.Item>
                     <Form.Item
