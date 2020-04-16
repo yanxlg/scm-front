@@ -2,6 +2,8 @@
 
 export type ITagStatus = 'ENABLED' | 'DISABLED';
 
+export type ITagOpsType = 'add' | 'edit' | 'delete'; // | 'add-delete';
+
 export declare interface IGetTagsListRequest {
     page?: number;
     page_count?: number;
@@ -10,7 +12,14 @@ export declare interface IGetTagsListRequest {
 
 export declare interface ITagItem {
     name: string;
-    tagId: string;
-    isActive: ITagStatus;
-    _loading?: boolean;
+    tagId?: string;
+    keyWords?: string;
+    isActive?: string;
+    type?: ITagOpsType;
+    page?: number;
+}
+
+export declare interface IPublishInterceptItem {
+    name: string;
+    checked: boolean;
 }
