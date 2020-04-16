@@ -3,7 +3,7 @@ import Container from '@/components/Container';
 import { JsonForm, LoadingButton } from 'react-components';
 import { FormField } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { useInterval, useWaterFall } from 'react-components/es/hooks';
+import { useInterval, useWaterFall } from 'react-components';
 import { Card, Col, Row, Progress } from 'antd';
 import { AutoSizer, List as VList, InfiniteLoader } from 'react-virtualized';
 import dayjs, { Dayjs } from 'dayjs';

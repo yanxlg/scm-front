@@ -16,6 +16,7 @@ import similarStyles from './_similar.less';
 import taskStyles from '@/styles/_task.less';
 import styles from '@/styles/_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { failureReasonMap } from '@/enums/OrderEnum';
 
 const SimilarGoods = (props: ISimilarInfoResponse['purchaseInfo']) => {
     const { productImageUrl, productName, productId, commoditySkuId, productSkuStyle } = props;
@@ -272,7 +273,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                                     <CloseCircleFilled
                                         className={classNames('1111', taskStyles.errorIcon)}
                                     />
-                                    拍单失败-失败原因
+                                    拍单失败-{failureReasonMap[purchaseInfo?.purchaseFailCode]}
                                 </div>
                             ) : status === 1 || status === 5 ? (
                                 <div className={similarStyles.title}>

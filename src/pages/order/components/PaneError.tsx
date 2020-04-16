@@ -564,7 +564,7 @@ const PaneErrTab = () => {
             const orderList: IErrorOrderItem[] = [];
             dataSource.forEach((goodsItem: any) => {
                 const { orderGoods, orderInfo } = goodsItem;
-                const {
+                let {
                     createTime,
                     orderGoodsId,
                     channelOrderGoodsSn,
@@ -576,6 +576,12 @@ const PaneErrTab = () => {
                 } = orderGoods;
                 const { confirmTime } = orderInfo;
                 if (orderGoodsPurchasePlan) {
+                    // 拍单失败需要过滤purchaseOrderStatus === 7
+                    if (Number(abnormalDetailType) === 12) {
+                        orderGoodsPurchasePlan = orderGoodsPurchasePlan.filter(
+                            (item: any) => item.purchaseOrderStatus === 7,
+                        );
+                    }
                     // 生成采购计划
                     orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
                         const {

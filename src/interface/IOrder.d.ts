@@ -1,3 +1,5 @@
+import { failureReasonCode } from '@/enums/OrderEnum';
+
 export interface IPadSimilarBody {
     platform: 'pdd';
     goods_id: string;
@@ -25,6 +27,7 @@ export interface ISimilarInfoResponse {
         goodsId: string;
         skuId: string;
         productSkuStyle: string;
+        purchaseFailCode: failureReasonCode;
     };
     originOrderInfo: {
         skuImageUrl: string;
