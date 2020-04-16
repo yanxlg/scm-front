@@ -1,8 +1,10 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
 import { downloadExcel } from '@/utils/common';
-import { IPadSimilarBody } from '@/interface/IOrder';
+import { IPadSimilarBody, ISimilarInfoResponse } from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
+import { IResponse } from '@/interface/IGlobal';
+import { api } from 'react-components';
 
 export declare interface IFilterParams {
     page?: number;
@@ -203,22 +205,20 @@ export async function postExportStockNotShip(data: IFilterParams) {
         .then(downloadExcel);
 }
 
-// 获取异常订单
-export async function getErrorOrderList(data: IErrFilterParams) {
-    // 做一层入参处理
-    const { purchase_fail_code, ...extra } = data;
-    const params = {
-        ...extra,
-        purchase_fail_code: purchase_fail_code
-            ? purchase_fail_code.map(code => `'${code}'`).join(',')
-            : undefined,
-    };
+export function getErrorOrderList(data: IErrFilterParams) {
+    return api
+        .post(OrderApiPath.getErrorOrderList, {
+            requestType: 'json',
+            data: data,
+        })
+        .then(transPaginationResponse);
+    /*
     return request
         .post(OrderApiPath.getErrorOrderList, {
             requestType: 'json',
-            data: params,
+            data: data,
         })
-        .then(transPaginationResponse);
+        .then(transPaginationResponse);*/
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -278,5 +278,14 @@ export async function getOrderTrack(params: { order_goods_id: string; last_waybi
 export async function patSimilarGoods(body: IPadSimilarBody) {
     return request.post(OrderApiPath.padSimilarGood, {
         data: body,
+    });
+}
+
+export async function querySimilarInfo(query: {
+    order_goods_id: string;
+    purchase_plan_id: string;
+}) {
+    return request.get<IResponse<ISimilarInfoResponse>>(OrderApiPath.querySimilarInfo, {
+        params: query,
     });
 }

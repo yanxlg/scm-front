@@ -48,4 +48,6 @@ export enum OrderApiPath {
     getOrderTrack = '/api/v1/orders/track',
     // 代拍相似款
     padSimilarGood = '/api/v1/orders/similar_goods_pat',
+
+    querySimilarInfo = '/api/v1/orders/similar_goods_info',
 }

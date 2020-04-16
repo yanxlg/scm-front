@@ -107,6 +107,7 @@ export const failureReasonMap = {
 };
 
 export const failureReasonList = transStatusList(failureReasonMap);
+export type failureReasonCode = keyof typeof failureReasonMap;
 
 export type ErrorDetailOptionCode = keyof typeof errorDetailOptionMap;
 

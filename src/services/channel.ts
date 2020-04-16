@@ -1,4 +1,4 @@
-import request, { errorHandlerFactory } from '@/utils/request';
+import request from '@/utils/request';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import {
     IChannelProductListBody,
@@ -112,7 +112,7 @@ export async function queryChannelChangedProperties() {
 export async function updateChannelShelveState(data: IChannelShelveStateBody) {
     return request.put<IResponse<null>>(ChannelApiPath.UpdateShelveState, {
         data,
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 

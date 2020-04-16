@@ -9,8 +9,10 @@ import {
     errorDetailOptionMap,
     ErrorDetailOptionCode,
     failureReasonList,
+    failureReasonMap,
+    failureReasonCode,
 } from '@/enums/OrderEnum';
-import { useList, useModal } from 'react-components/es/hooks';
+import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -18,7 +20,7 @@ import { Store } from 'rc-field-form/lib/interface';
 import { FormInstance } from 'antd/es/form';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
-import SimilarStyleModal from '@/pages/order/components/SimilarStyleModal';
+import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
 
 export declare interface IErrorOrderItem {
@@ -39,6 +41,8 @@ export declare interface IErrorOrderItem {
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
     purchaseWaybillNo?: string; // 首程运单号
+    purchaseFailCode?: failureReasonCode;
+    similarGoodsStatus?: number;
     _rowspan?: number;
 }
 
@@ -48,7 +52,10 @@ const PaneErrTab = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
 
-    const { visible, setVisibleProps, onClose } = useModal<string>();
+    const { visible, setVisibleProps, onClose } = useModal<{
+        order_goods_id: string;
+        purchase_plan_id: string;
+    }>();
 
     const fieldList: FormField[] = useMemo(() => {
         return [
@@ -176,22 +183,58 @@ const PaneErrTab = () => {
             title: '异常详情',
             dataIndex: 'abnormalDetailType',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: ErrorDetailOptionCode, row: IErrorOrderItem) => {
+                const reason =
+                    failureReasonMap[(row.purchaseFailCode as unknown) as failureReasonCode];
+                const reasonStr = reason ? `（${reason}）` : '';
+                // 0代拍，1爬取中，2爬取成功，3爬取失败
+                const status = Number(row.similarGoodsStatus);
                 return {
                     children: (
                         <div>
                             {errorDetailOptionMap[value]}
+                            <div>{reasonStr}</div>
                             {value === 12 ? (
                                 <div>
-                                    <Button
-                                        type="link"
-                                        onClick={() =>
-                                            setVisibleProps(row.purchasePlanId as string)
-                                        }
-                                    >
-                                        相似款代拍
-                                    </Button>
+                                    {status === 0 ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() =>
+                                                setVisibleProps({
+                                                    order_goods_id: row.orderGoodsId,
+                                                    purchase_plan_id: row.purchasePlanId as string,
+                                                })
+                                            }
+                                        >
+                                            相似款代拍
+                                        </Button>
+                                    ) : status === 1 || status === 5 ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() =>
+                                                setVisibleProps({
+                                                    order_goods_id: row.orderGoodsId,
+                                                    purchase_plan_id: row.purchasePlanId as string,
+                                                })
+                                            }
+                                        >
+                                            代拍详情-爬取中
+                                        </Button>
+                                    ) : status === 3 ? (
+                                        <Button
+                                            type="link"
+                                            danger={true}
+                                            onClick={() =>
+                                                setVisibleProps({
+                                                    order_goods_id: row.orderGoodsId,
+                                                    purchase_plan_id: row.purchasePlanId as string,
+                                                })
+                                            }
+                                        >
+                                            代拍详情-爬取失败
+                                        </Button>
+                                    ) : null}
                                 </div>
                             ) : null}
                         </div>
@@ -322,6 +365,7 @@ const PaneErrTab = () => {
         pageSize,
         pageNumber,
         onChange,
+        onReload,
     } = useList({
         queryList: getErrorOrderList,
         formRef: [formRef, formRef1],
@@ -482,6 +526,7 @@ const PaneErrTab = () => {
                                             type: 'checkboxGroup',
                                             name: 'purchase_fail_code',
                                             label: '失败原因',
+                                            formatter: 'join',
                                             options: failureReasonList.map(({ id, name }) => {
                                                 return {
                                                     label: name,
@@ -540,6 +585,8 @@ const PaneErrTab = () => {
                             payTime,
                             purchaseWaybillNo,
                             platformSendOrderTime,
+                            purchaseFailCode,
+                            similarGoodsStatus,
                         } = purchaseItem;
                         const childOrderItem: IErrorOrderItem = {
                             createTime, // 订单时间
@@ -559,6 +606,8 @@ const PaneErrTab = () => {
                             platformOrderTime, // 拍单时间
                             payTime, // 支付时间
                             purchaseWaybillNo, // 首程运单号
+                            purchaseFailCode,
+                            similarGoodsStatus,
                         };
                         if (index === 0) {
                             childOrderItem._rowspan = orderGoodsPurchasePlan.length;
@@ -616,7 +665,7 @@ const PaneErrTab = () => {
     }, [loading]);
 
     const similarModal = useMemo(() => {
-        return <SimilarStyleModal visible={visible} onClose={onClose} />;
+        return <SimilarStyleModal visible={visible} onClose={onClose} onReload={onReload} />;
     }, [visible]);
 
     return useMemo(() => {
