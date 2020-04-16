@@ -123,11 +123,10 @@ export enum TaskIntervalConfigType {
 //======================= 定时更新任务商品范围 ======================//
 export enum PUTaskRangeType {
     AllOnShelves = 2,
-    HasSales,
-    // HasSalesOn,
-    // NoSalesOn,
-    // HasSalesOff,
-    // NoSalesOff,
+    HasSalesOn,
+    NoSalesOn,
+    HasSalesOff,
+    NoSalesOff,
 }
 
 export const PUTaskRangeTypeMap = {
