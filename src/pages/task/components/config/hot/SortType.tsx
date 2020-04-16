@@ -46,10 +46,7 @@ const SortType: React.FC<SortTypeProps> = ({ form, listSort, merchantSort, sortL
                                         validateTrigger={'onBlur'}
                                         name="sort_type"
                                         label="排序类型"
-                                        className={classNames(
-                                            formStyles.formItem,
-                                            formStyles.formInline,
-                                        )}
+                                        className={formStyles.formItem}
                                         rules={[
                                             {
                                                 required: true,

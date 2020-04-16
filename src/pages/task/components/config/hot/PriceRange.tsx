@@ -40,7 +40,6 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                     label="价格区间(￥)"
                     required={true}
                     className={classNames(
-                        formStyles.formInline,
                         formStyles.flexInline,
                         formStyles.formRequiredHide,
                         formStyles.formItemClean,
