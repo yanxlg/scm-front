@@ -68,7 +68,6 @@ const PaneErrTab = () => {
                 label: '订单号',
                 className: 'order-input',
                 placeholder: '请输入订单号',
-                formatter: 'number',
             },
             {
                 type: 'select',
