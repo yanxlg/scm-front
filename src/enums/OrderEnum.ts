@@ -388,7 +388,7 @@ export const defaultColChildList = [
     'orderGoodsStatus', // 订单状态
     'orderGoodsShippingStatusShow', // 配送状态
     'orderGoodsId', // 子订单ID
-    'productId', // Product ID
+    'productId', // Version ID
     'productImage', // SKU图片
     // 'a1',                             // 商品名称 - 待确认
     'productStyle', // 商品规格

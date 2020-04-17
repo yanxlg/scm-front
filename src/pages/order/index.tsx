@@ -5,8 +5,8 @@ import PanePendingOrder from './components/PanePendingOrder';
 import PanePay from './components/PanePay';
 import PaneWaitShip from './components/PaneWaitShip';
 import PaneError from './components/PaneError';
-import PaneNotStock from './components/PaneNotStock';
-import PaneStockNotShip from './components/PaneStockNotShip';
+import PaneNotWarehouse from './components/PaneNotWarehouse';
+import PaneWarehouseNotShip from './components/PaneWarehouseNotShip';
 import Container from '@/components/Container';
 
 import { getAllTabCount } from '@/services/order-manage';
@@ -93,12 +93,12 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         </TabPane>
                         <TabPane tab={`已采购未入库（${penddingPurchaseListCount}）`} key="5">
                             <div className="order-tab-content">
-                                <PaneNotStock getAllTabCount={this.getAllTabCount} />
+                                <PaneNotWarehouse getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`仓库未发货（${penddingWarehousingListCount}）`} key="6">
                             <div className="order-tab-content">
-                                <PaneStockNotShip getAllTabCount={this.getAllTabCount} />
+                                <PaneWarehouseNotShip getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`异常订单`} key="7">

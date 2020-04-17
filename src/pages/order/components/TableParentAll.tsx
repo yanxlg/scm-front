@@ -158,6 +158,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     </a>
                 );
             },
+            defaultHide: true,
         },
         {
             key: 'productShop',
@@ -165,6 +166,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'productShop',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         {
             key: 'confirmTime',
@@ -180,6 +182,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     },
                 };
             },
+            defaultHide: true,
         },
         {
             key: 'channelSource',
@@ -188,6 +191,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
         {
             key: 'currency',
@@ -196,6 +200,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
         {
             key: 'orderAmount',
@@ -204,6 +209,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
     ];
 
@@ -214,23 +220,6 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             goodsDetail: null,
         };
     }
-
-    private createColumns = (): ColumnProps<IParentOrderItem>[] => {
-        const { colList } = this.props;
-        // console.log(111, colList);
-        // const allColumns: ColumnProps<IParentOrderItem>[]  = [];
-        return colList.map(key => {
-            const i = this.allColumns.findIndex(item => item.key === key);
-            // console.log('key', key, i);
-            // if (i === -1) {
-            //     console.log('colList没找到', key);
-            // } else {
-            //     return this.allColumns[i];
-            // }
-            return this.allColumns[i];
-        });
-        // return allColumns;
-    };
 
     // 合并单元格
     private mergeCell(value: string | number, row: IParentOrderItem) {
@@ -279,7 +268,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     render() {
         const { loading, orderList, visible, onCancel, onOKey } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
-        const columns = this.createColumns();
+        // const columns = this.createColumns();
         return (
             <>
                 <FitTable
@@ -288,12 +277,13 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
-                    columns={columns}
+                    columns={this.allColumns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
                     pagination={false}
+                    columnsSettingRender={true}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}

@@ -249,24 +249,31 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const parentOrderList: IParentOrderItem[] = [];
         list.forEach(item => {
             const { orderGoods, ...parentRest } = item;
-            orderGoods.forEach((goodsItem: any, index: number) => {
-                const {
-                    // orderId,
-                    createTime: goodsCreateTime,
-                    lastUpdateTime: goodsLastUpdateTime,
-                    ...goodsRest
-                } = goodsItem;
-                const parentOrderItem: any = {
-                    goodsCreateTime,
-                    goodsLastUpdateTime,
+            if (orderGoods) {
+                orderGoods.forEach((goodsItem: any, index: number) => {
+                    const {
+                        // orderId,
+                        createTime: goodsCreateTime,
+                        lastUpdateTime: goodsLastUpdateTime,
+                        ...goodsRest
+                    } = goodsItem;
+                    const parentOrderItem: any = {
+                        goodsCreateTime,
+                        goodsLastUpdateTime,
+                        ...parentRest,
+                        ...goodsRest,
+                    };
+                    if (index === 0) {
+                        parentOrderItem._rowspan = orderGoods.length;
+                    }
+                    parentOrderList.push(parentOrderItem);
+                });
+            } else {
+                parentOrderList.push({
                     ...parentRest,
-                    ...goodsRest,
-                };
-                if (index === 0) {
-                    parentOrderItem._rowspan = orderGoods.length;
-                }
-                parentOrderList.push(parentOrderItem);
-            });
+                    _rowspan: 1,
+                });
+            }
         });
         return parentOrderList;
     }
@@ -328,12 +335,12 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         );
     };
 
-    private changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
-        });
-    };
+    // private changeShowColStatus = () => {
+    //     const { showColStatus } = this.state;
+    //     this.setState({
+    //         showColStatus: !showColStatus,
+    //     });
+    // };
 
     private changeSelectedColList = (list: string[]) => {
         const { showParentStatus } = this.state;
@@ -654,18 +661,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件
                         </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
+                        {/* <Button className="order-btn" onClick={this.changeShowColStatus}>
                             {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
+                        </Button> */}
                     </div>
-                    {showColStatus ? (
+                    {/* {showColStatus ? (
                         <OptionalColumn
                             ref={this.optionalRef}
                             optionalColList={childOptionalColList}
                             selectedColKeyList={selectedColKeyList}
                             changeSelectedColList={this.changeSelectedColList}
                         />
-                    ) : null}
+                    ) : null} */}
                     {!showParentStatus ? (
                         <TableAll
                             loading={loading}
