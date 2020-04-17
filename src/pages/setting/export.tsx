@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Container from '@/components/Container';
 import { JsonForm, LoadingButton } from 'react-components';
-import { FormField } from 'react-components/es/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { useInterval, useWaterFall } from 'react-components';
-import { Card, Col, Row, Progress, message, Modal, Spin } from 'antd';
+import { Card, Col, Row, Progress, message, Modal, Spin, Button } from 'antd';
 import { AutoSizer, List as VList, InfiniteLoader } from 'react-virtualized';
 import dayjs, { Dayjs } from 'dayjs';
 import exportStyles from '@/styles/_export.less';
@@ -14,21 +14,31 @@ import debounce from 'lodash/debounce';
 import { deleteExport, queryDownloadList, retryExport, updateExport } from '@/services/setting';
 import { IFileItem } from '@/interface/ISetting';
 import { ExportFileStatus } from '@/enums/SettingEnum';
+import { downloadFile } from '@/services/global';
 
 const fieldList: FormField[] = [
     {
         type: 'input',
         label: '文件名称',
-        name: 'file_name',
+        name: 'filename',
     },
     {
         type: 'select',
         label: '文件类型',
-        name: 'file_type',
+        name: 'module',
+        formatter: 'number',
+        placeholder: '全部',
+        optionList: [
+            { value: '', name: '全部' },
+            { value: 1, name: '渠道商品库' },
+            { value: 2, name: '本地商品库' },
+            { value: 3, name: '订单管理' },
+            { value: 4, name: '出入库管理' },
+        ],
     },
     {
         type: 'dateRanger',
-        name: ['time_start', 'time_end'],
+        name: ['start_time', 'end_time'],
         label: '导出时间',
         formatter: ['start_date', 'end_date'],
     },
@@ -40,33 +50,40 @@ declare interface IWaterFallItem {
 }
 
 const Export = () => {
-    const {
-        hasMoreRef,
-        onSearch,
-        loading,
-        onNext,
-        total,
-        increment,
-        dataSourceRef,
-        setTotal,
-    } = useWaterFall<IFileItem, any>({
+    const formRef = useRef<JsonFormRef>(null);
+
+    const { onSearch, loading, onNext, total, dataSourceRef, dataSource } = useWaterFall<
+        IFileItem,
+        any
+    >({
         queryPromise: queryDownloadList,
+        formRef: formRef,
         autoQuery: true,
-        dependenceKey: 'id',
     });
 
+    const totalRef = useRef(0);
+    useMemo(() => {
+        totalRef.current = total;
+    }, [total]);
+
     const [update, setUpdate] = useState(0);
+
+    let startRef = useRef(0); // 缓存位置
+
+    let stopRef = useRef(0); // 缓存位置
 
     const { start, stop } = useInterval();
     const loadedRowsMap = useMemo<{ [key: number]: 1 }>(() => {
         return {};
     }, []);
 
-    const waterFallAllData = useRef<IWaterFallItem[]>([]);
-
     const currentDate = useRef<Dayjs>(); // 保存最新日期
 
+    const waterFallAllData = useRef<IWaterFallItem[]>([]);
+
     const generateWaterFallList = useCallback((list: IFileItem[]) => {
+        waterFallAllData.current = [];
+        currentDate.current = undefined;
         list.map(item => {
             const { create_time } = item;
             const time = dayjs.utc(create_time, 's').local();
@@ -97,8 +114,8 @@ const Export = () => {
     }, []);
 
     useMemo(() => {
-        generateWaterFallList(increment);
-    }, [increment]);
+        generateWaterFallList(dataSourceRef.current); // 数据发生改变则更新
+    }, [dataSource]);
 
     const isRowLoaded = useCallback(({ index }) => !!loadedRowsMap[index], []);
 
@@ -106,7 +123,15 @@ const Export = () => {
         // clear
         waterFallAllData.current = [];
         currentDate.current = undefined;
+        dataSourceRef.current = [];
         return onSearch();
+    }, []);
+
+    const updateList = useCallback(dataSet => {
+        dataSourceRef.current = dataSet;
+        generateWaterFallList(dataSet);
+        updateShowItems();
+        setUpdate(Date.now());
     }, []);
 
     const reTry = useCallback((id: string) => {
@@ -114,6 +139,19 @@ const Export = () => {
         return retryExport(id).then(
             () => {
                 message.success('重新导出任务创建成功');
+                // 更新当亲item状态
+                const dataSet = dataSourceRef.current.map(item => {
+                    if (item.id === id) {
+                        return Object.assign({}, item, {
+                            percent: '0',
+                            status: ExportFileStatus.Ready,
+                        });
+                    } else {
+                        return item;
+                    }
+                });
+                updateList(dataSet);
+                updateShowItems();
             },
             () => {
                 message.error('重新导出失败，请重试');
@@ -134,14 +172,8 @@ const Export = () => {
                         message.success('删除成功');
                         // 本地数据将其删除，重排
                         const dataSet = dataSourceRef.current.filter(({ id: _id }) => id !== _id);
-                        // rm {id} file
-                        waterFallAllData.current = [];
-                        currentDate.current = undefined;
-                        generateWaterFallList(dataSet);
-                        dataSourceRef.current = dataSet;
-                        // update
-                        setTotal(dataSet.length);
-                        setUpdate(Date.now());
+                        totalRef.current -= 1;
+                        updateList(dataSet);
                     },
                     () => {
                         message.error('删除失败');
@@ -156,92 +188,117 @@ const Export = () => {
             const item = waterFallAllData.current[index];
             if (item.type === 'time') {
                 return (
-                    <Row key={item.data} style={style}>
-                        <div className={exportStyles.exportDate}>{item.data}</div>
-                    </Row>
+                    <div key={item.data} style={style}>
+                        <Row key={item.data}>
+                            <div className={exportStyles.exportDate}>{item.data}</div>
+                        </Row>
+                    </div>
                 );
             } else {
                 return (
-                    <Row key={JSON.stringify(item.data)} style={style} gutter={[50, 0]}>
-                        {item.data.map(
-                            ({ id, filename, percent = '0', status, filesize }: IFileItem) => {
-                                return (
-                                    <Col key={id} span={12}>
-                                        <Card className={exportStyles.exportCard}>
-                                            <CloseOutlined
-                                                className={exportStyles.exportClose}
-                                                onClick={() => deleteFile(id)}
-                                            />
-                                            <Row
-                                                align="middle"
-                                                className={exportStyles.exportCardContent}
-                                                gutter={[20, 0]}
-                                            >
-                                                <Col>
-                                                    <div className={exportStyles.exportIconWrap}>
-                                                        <Icons
-                                                            type={'scm-biaoge'}
-                                                            className={exportStyles.exportIcon}
-                                                        />
-                                                    </div>
-                                                </Col>
-                                                <Col flex={1}>
-                                                    <div>{filename}</div>
-                                                    {status === ExportFileStatus.Ready ||
-                                                    status === ExportFileStatus.Going ? (
-                                                        <div>
-                                                            <Progress
-                                                                className={
-                                                                    exportStyles.exportProgress
-                                                                }
-                                                                percent={Number(percent)}
-                                                                status="active"
-                                                                format={percent => (
-                                                                    <span
-                                                                        className={
-                                                                            exportStyles.exportProgressLabel
-                                                                        }
-                                                                    >
-                                                                        {percent + '% 导出中'}
-                                                                    </span>
-                                                                )}
+                    <div key={JSON.stringify(item.data)} style={style}>
+                        <Row gutter={[50, 0]}>
+                            {item.data.map(
+                                ({
+                                    id,
+                                    filename,
+                                    percent = '0',
+                                    status,
+                                    filesize = '0',
+                                    object_url,
+                                }: IFileItem) => {
+                                    return (
+                                        <Col key={id} span={12}>
+                                            <Card className={exportStyles.exportCard}>
+                                                <CloseOutlined
+                                                    className={exportStyles.exportClose}
+                                                    onClick={() => deleteFile(id)}
+                                                />
+                                                <Row
+                                                    align="middle"
+                                                    className={exportStyles.exportCardContent}
+                                                    gutter={[20, 0]}
+                                                >
+                                                    <Col>
+                                                        <div
+                                                            className={exportStyles.exportIconWrap}
+                                                        >
+                                                            <Icons
+                                                                type={'scm-biaoge'}
+                                                                className={exportStyles.exportIcon}
                                                             />
                                                         </div>
-                                                    ) : status === ExportFileStatus.Success ? (
-                                                        <div className={exportStyles.exportSize}>
-                                                            {filesize}
-                                                            <LoadingButton
-                                                                type="primary"
-                                                                className={
-                                                                    exportStyles.exportAction
-                                                                }
-                                                                onClick={() => {}}
+                                                    </Col>
+                                                    <Col flex={1}>
+                                                        <div>{filename}</div>
+                                                        {status === ExportFileStatus.Ready ||
+                                                        status === ExportFileStatus.Going ? (
+                                                            <div>
+                                                                <Progress
+                                                                    className={
+                                                                        exportStyles.exportProgress
+                                                                    }
+                                                                    percent={Number(percent)}
+                                                                    status="active"
+                                                                    format={percent => (
+                                                                        <span
+                                                                            className={
+                                                                                exportStyles.exportProgressLabel
+                                                                            }
+                                                                        >
+                                                                            {percent + '% 导出中'}
+                                                                        </span>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                        ) : status === ExportFileStatus.Success ? (
+                                                            <div
+                                                                className={exportStyles.exportSize}
                                                             >
-                                                                下载到本地
-                                                            </LoadingButton>
-                                                        </div>
-                                                    ) : status === ExportFileStatus.Failure ? (
-                                                        <div className={exportStyles.exportSize}>
-                                                            导出失败
-                                                            <LoadingButton
-                                                                type="primary"
-                                                                className={
-                                                                    exportStyles.exportAction
-                                                                }
-                                                                onClick={() => reTry(id)}
+                                                                {Number(filesize) / 1024 / 1024}M
+                                                                <Button
+                                                                    type="primary"
+                                                                    className={
+                                                                        exportStyles.exportAction
+                                                                    }
+                                                                    onClick={() =>
+                                                                        downloadFile(object_url)
+                                                                    }
+                                                                >
+                                                                    下载到本地
+                                                                </Button>
+                                                            </div>
+                                                        ) : status === ExportFileStatus.Failure ? (
+                                                            <div
+                                                                className={exportStyles.exportSize}
                                                             >
-                                                                重试
-                                                            </LoadingButton>
-                                                        </div>
-                                                    ) : null}
-                                                </Col>
-                                            </Row>
-                                        </Card>
-                                    </Col>
-                                );
-                            },
-                        )}
-                    </Row>
+                                                                <span
+                                                                    className={
+                                                                        exportStyles.exportErrorText
+                                                                    }
+                                                                >
+                                                                    导出失败
+                                                                </span>
+                                                                <LoadingButton
+                                                                    type="primary"
+                                                                    className={
+                                                                        exportStyles.exportAction
+                                                                    }
+                                                                    onClick={() => reTry(id)}
+                                                                >
+                                                                    重试
+                                                                </LoadingButton>
+                                                            </div>
+                                                        ) : null}
+                                                    </Col>
+                                                </Row>
+                                            </Card>
+                                        </Col>
+                                    );
+                                },
+                            )}
+                        </Row>
+                    </div>
                 );
             }
         },
@@ -272,14 +329,8 @@ const Export = () => {
                         return item;
                     }
                 });
-                // rm {id} file
-                waterFallAllData.current = [];
-                currentDate.current = undefined;
-                generateWaterFallList(dataSet);
-                dataSourceRef.current = dataSet;
-                // update
-                setTotal(dataSet.length);
-                setUpdate(Date.now());
+                updateList(dataSet);
+                updateShowItems();
             });
         }
     }, []);
@@ -296,33 +347,20 @@ const Export = () => {
         return stop;
     }, []);
 
-    const handleInfiniteOnLoad = useCallback(
-        ({ startIndex, stopIndex }) => {
-            showItems.current = [];
-            for (let i = startIndex; i <= stopIndex; i++) {
-                loadedRowsMap[i] = 1;
+    const updateShowItems = useCallback(() => {
+        showItems.current = [];
+        for (let i = startRef.current; i <= stopRef.current; i++) {
+            // 更新showItems
+            const item = waterFallAllData.current[i];
+            if (item && item.type === 'card') {
+                showItems.current.push(...item.data);
             }
-            for (let i = Math.max(0, stopIndex - 8); i <= stopIndex; i++) {
-                // 更新showItems
-                const item = waterFallAllData.current[i];
-                if (item.type === 'card') {
-                    showItems.current.push(...item.data);
-                }
-            }
-            onScrollEnd();
+        }
+    }, []);
 
-            if (startIndex === 0 || loading || !hasMoreRef.current) {
-                return Promise.resolve();
-            }
-            const rowCount = waterFallAllData.current.length - 1;
-            if (stopIndex === rowCount) {
-                return onNext();
-            } else {
-                return Promise.resolve();
-            }
-        },
-        [loading],
-    );
+    const handleInfiniteOnLoad = useCallback(({ startIndex, stopIndex }) => {
+        return Promise.resolve();
+    }, []);
 
     const getRowHeight = useCallback(({ index }) => {
         const item = waterFallAllData.current[index];
@@ -330,9 +368,34 @@ const Export = () => {
         return 65; // 获取高度
     }, []);
 
+    const onRowsRequiredRender = useCallback(
+        ({
+            startIndex,
+            stopIndex,
+            overscanStopIndex,
+        }: {
+            overscanStartIndex: number;
+            overscanStopIndex: number;
+            startIndex: number;
+            stopIndex: number;
+        }) => {
+            if (stopIndex === overscanStopIndex && stopIndex !== 0) {
+                onNext();
+            }
+            showItems.current = [];
+            startRef.current = startIndex;
+            stopRef.current = stopIndex;
+            updateShowItems();
+            onScrollEnd();
+        },
+        [],
+    );
+
+    const form = useMemo(() => <JsonForm fieldList={fieldList} ref={formRef} />, []);
+
     return (
         <Container>
-            <JsonForm fieldList={fieldList} />
+            {form}
             <div>
                 <LoadingButton
                     type="primary"
@@ -341,7 +404,7 @@ const Export = () => {
                 >
                     查询
                 </LoadingButton>
-                <div className={exportStyles.exportTotal}>共{total}条</div>
+                <div className={exportStyles.exportTotal}>共{totalRef.current}条</div>
             </div>
             <Spin spinning={loading}>
                 <div style={{ marginTop: 20, height: 600 }}>
@@ -361,7 +424,10 @@ const Export = () => {
                                             rowHeight={getRowHeight}
                                             overscanRowCount={8}
                                             tabIndex={null}
-                                            onRowsRendered={onRowsRendered}
+                                            onRowsRendered={info => {
+                                                onRowsRequiredRender(info);
+                                                onRowsRendered(info);
+                                            }}
                                             rowCount={waterFallAllData.current.length}
                                             rowRenderer={renderItem}
                                             width={width}

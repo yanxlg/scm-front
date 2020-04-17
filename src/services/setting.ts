@@ -65,6 +65,7 @@ export function queryDownloadList({
     id,
     filename,
     status,
+    ...extra
 }: {
     size?: number;
     id?: string;
@@ -77,6 +78,7 @@ export function queryDownloadList({
             id,
             filename,
             status,
+            ...extra,
         },
     });
 }

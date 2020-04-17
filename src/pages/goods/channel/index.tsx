@@ -1,5 +1,4 @@
 import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
-import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
