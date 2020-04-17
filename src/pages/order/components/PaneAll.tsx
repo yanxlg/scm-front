@@ -245,24 +245,31 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const parentOrderList: IParentOrderItem[] = [];
         list.forEach(item => {
             const { orderGoods, ...parentRest } = item;
-            orderGoods.forEach((goodsItem: any, index: number) => {
-                const {
-                    // orderId,
-                    createTime: goodsCreateTime,
-                    lastUpdateTime: goodsLastUpdateTime,
-                    ...goodsRest
-                } = goodsItem;
-                const parentOrderItem: any = {
-                    goodsCreateTime,
-                    goodsLastUpdateTime,
+            if (orderGoods) {
+                orderGoods.forEach((goodsItem: any, index: number) => {
+                    const {
+                        // orderId,
+                        createTime: goodsCreateTime,
+                        lastUpdateTime: goodsLastUpdateTime,
+                        ...goodsRest
+                    } = goodsItem;
+                    const parentOrderItem: any = {
+                        goodsCreateTime,
+                        goodsLastUpdateTime,
+                        ...parentRest,
+                        ...goodsRest,
+                    };
+                    if (index === 0) {
+                        parentOrderItem._rowspan = orderGoods.length;
+                    }
+                    parentOrderList.push(parentOrderItem);
+                });
+            } else {
+                parentOrderList.push({
                     ...parentRest,
-                    ...goodsRest,
-                };
-                if (index === 0) {
-                    parentOrderItem._rowspan = orderGoods.length;
-                }
-                parentOrderList.push(parentOrderItem);
-            });
+                    _rowspan: 1,
+                });
+            }
         });
         return parentOrderList;
     }
