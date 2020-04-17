@@ -65,6 +65,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                 .then(() => {
                     message.success('代拍成功');
                     onClose();
+                    onReload();
                 })
                 .finally(() => {
                     setSubmitting(false);
@@ -91,6 +92,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                 destroyOnClose={true}
                 confirmLoading={submitting}
                 className={similarStyles.modal}
+                footer={status === 1 || status === 5 || status === void 0 ? null : undefined}
             >
                 <Spin spinning={loading}>
                     <div className={similarStyles.modalContent}>
