@@ -27,6 +27,7 @@ const baseGroupList = [
     // { key: '', name: '商品属性标签' },
     // { key: 'cancelType', name: '中台订单取消原因' }, // 带补充
     { key: '_logisticsTrack', name: '物流轨迹' },
+    { key: 'cancelType', name: '子订单取消类型' },
 ];
 
 const saleGroupList = [
@@ -59,6 +60,7 @@ const purchaseGroupList = [
     { key: 'purchaseCancelReason', name: '采购取消原因' },
     { key: 'purchaseTime', name: '采购签收时间' },
     { key: 'storageTime', name: '采购入库时间' },
+    { key: 'purchaseCancelType', name: '采购计划取消类型' },
 ];
 
 const baseAllKeyList = baseGroupList.map(item => item.key);
