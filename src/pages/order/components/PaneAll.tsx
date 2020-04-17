@@ -218,7 +218,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         channelSource,
                     };
                     if (index === 0) {
-                        childOrderItem._rowspan = Math.min(orderGoodsPurchasePlan.length, 10);
+                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
                         childOrderItem._checked = false;
                     }
                     childOrderList.push(childOrderItem);

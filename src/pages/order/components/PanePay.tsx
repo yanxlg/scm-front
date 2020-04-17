@@ -306,8 +306,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         );
     }, []);
 
-    // const getOrderList =
-
     const columns = useMemo<TableProps<IWaitPayOrderItem>['columns']>(() => {
         return [
             {
