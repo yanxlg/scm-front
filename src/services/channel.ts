@@ -116,14 +116,10 @@ export async function updateChannelShelveState(data: IChannelShelveStateBody) {
     });
 }
 
-export async function exportChannelProductList(data: IChannelProductListBody & RequestPagination) {
-    return request
-        .post(ChannelApiPath.ExportProductList, {
-            data: transPaginationRequest(data),
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function exportChannelProductList(data: IChannelProductListBody) {
+    return request.post(ChannelApiPath.ExportProductList, {
+        data: { ...data },
+    });
 }
 
 // 查询国家运费

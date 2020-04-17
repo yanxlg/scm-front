@@ -13,6 +13,7 @@ import {
     updateChannelShelveState,
     queryChannelCategory,
     queryShopList,
+    exportChannelProductList,
 } from '@/services/channel';
 import {
     ProductStatusMap,
@@ -39,6 +40,7 @@ import { isEmptyObject } from '@/utils/utils';
 import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
 
 const salesVolumeList = [
     {
@@ -246,6 +248,15 @@ const ChannelList: React.FC = props => {
     }, []);
     const closeExcelDialog = useCallback(() => {
         setExportDialog(false);
+    }, []);
+
+    const onExportOKey = useCallback((extra: any) => {
+        // export
+        const values = searchRef.current!.getFieldsValue();
+        return exportChannelProductList({
+            ...values,
+            ...extra,
+        });
     }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
@@ -660,11 +671,11 @@ const ChannelList: React.FC = props => {
             <Container>
                 {search}
                 {table}
-                <ExcelDialog
+                <Export
                     visible={exportDialog}
-                    total={total}
-                    form={searchRef}
                     onCancel={closeExcelDialog}
+                    columns={columns as any}
+                    onOKey={onExportOKey}
                 />
                 <SkuEditModal ref={skuRef} />
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />

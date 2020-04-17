@@ -28,6 +28,9 @@ const ExcelDialog: React.FC<IExcelDialogProps> = ({ visible, onCancel, total, fo
             pageSize: exportNum,
             ...values,
         })
+            .then(() => {
+                message.success('已发送导出任务!');
+            })
             .catch(err => {
                 message.error('导出表格失败！');
             })

@@ -12,6 +12,7 @@ import {
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { api } from 'react-components';
 
 export async function queryCustomList(query: ICustomListQuery) {
     const params = transPaginationRequest(query);
@@ -56,5 +57,53 @@ export async function queryCookies() {
 export async function saveCookie(data: ICookieBody) {
     return request.post(SettingApiPath.UpdateCookie, {
         data: data,
+    });
+}
+
+export function queryDownloadList({
+    size,
+    id,
+    filename,
+    status,
+}: {
+    size?: number;
+    id?: string;
+    filename?: string;
+    status?: number;
+}) {
+    return api.post(SettingApiPath.ExportList, {
+        data: {
+            page_size: size,
+            id,
+            filename,
+            status,
+        },
+    });
+}
+
+export function retryExport(id: string) {
+    return request.get(SettingApiPath.RetryExport, {
+        params: {
+            id,
+        },
+        skipResponseInterceptors: true,
+    });
+}
+
+export function deleteExport(id: string) {
+    return request.get(SettingApiPath.DeleteExport, {
+        params: {
+            id: id,
+        },
+        skipResponseInterceptors: true,
+    });
+}
+
+export function updateExport(id: string) {
+    return request.get(SettingApiPath.UpdateExport, {
+        params: {
+            id: id,
+        },
+        skipResponseInterceptors: true,
     });
 }

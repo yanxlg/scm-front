@@ -30,51 +30,15 @@ export function queryOutList(data: IStockOUTFormData & RequestPagination) {
 }
 
 export function exportInList(data: IStockINFormData) {
-    return request
-        .post(StockApiPathEnum.ExportInList, {
-            data: data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(StockApiPathEnum.ExportInList, {
+        data: data,
+    });
 }
 
 export function exportOutList(data: IStockOUTFormData) {
-    return request
-        .post(StockApiPathEnum.ExportOutList, {
-            data: data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(StockApiPathEnum.ExportOutList, {
+        data: data,
+    });
 }
 
 export function queryStockList(data: IStockRequest & RequestPagination) {
