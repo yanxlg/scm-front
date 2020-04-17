@@ -8,9 +8,11 @@ import {
     IWaitShipSearch,
     IWaitPaySearch,
     IPendingOrderSearch,
+    ISimilarInfoResponse,
 } from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
 import { api } from 'react-components';
+import { IResponse } from '@/interface/IGlobal';
 
 export declare interface IFilterParams {
     page?: number;
@@ -226,5 +228,14 @@ export async function getOrderTrack(params: { order_goods_id: string; last_waybi
 export async function patSimilarGoods(body: IPadSimilarBody) {
     return request.post(OrderApiPath.padSimilarGood, {
         data: body,
+    });
+}
+
+export async function querySimilarInfo(query: {
+    order_goods_id: string;
+    purchase_plan_id: string;
+}) {
+    return request.get<IResponse<ISimilarInfoResponse>>(OrderApiPath.querySimilarInfo, {
+        params: query,
     });
 }
