@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Row, Col, Checkbox } from 'antd';
 import { CheckboxValueType } from 'antd/es/checkbox/Group';
 
@@ -61,32 +61,146 @@ const purchaseGroupList = [
     { key: 'storageTime', name: '采购入库时间' },
 ];
 
+const baseAllKeyList = baseGroupList.map(item => item.key);
+const saleAllKeyList = saleGroupList.map(item => item.key);
+const purchaseAllKeyList = purchaseGroupList.map(item => item.key);
+
 interface IProps {
     value: Array<CheckboxValueType>;
     onChange: (checkedValue: Array<CheckboxValueType>) => void;
 }
 
 const AllColumnsSetting: React.FC<IProps> = ({ value, onChange }) => {
-    console.log('AllColumnsSetting', value, onChange);
+    console.log('AllColumnsSetting', value);
+    const [baseList, setBaseList] = useState(
+        value.filter(key => baseAllKeyList.indexOf(key as string) > -1),
+    );
+    const [saleList, setSaleList] = useState(
+        value.filter(key => saleAllKeyList.indexOf(key as string) > -1),
+    );
+    const [purchaseList, setPurchaseList] = useState(
+        value.filter(key => purchaseAllKeyList.indexOf(key as string) > -1),
+    );
+    // const [baseCheckedAll, setBaseCheckedAll] = useState(false);
+
+    const changeBaseList = useCallback(
+        val => {
+            // console.log('changeBaseList', val);
+            setBaseList(val);
+            onChange([...val, ...saleList, ...purchaseList]);
+        },
+        [saleList, purchaseList],
+    );
+
+    const handleClickBaseAll = useCallback(
+        e => {
+            const { checked } = e.target;
+            setBaseList(checked ? [...baseAllKeyList] : []);
+            onChange([...(checked ? baseAllKeyList : []), ...saleList, ...purchaseList]);
+        },
+        [saleList, purchaseList],
+    );
+
+    const changeSaleList = useCallback(
+        val => {
+            // console.log('changeBaseList', val);
+            setSaleList(val);
+            onChange([...baseList, ...val, ...purchaseList]);
+        },
+        [baseList, purchaseList],
+    );
+
+    const handleClickSaleAll = useCallback(
+        e => {
+            const { checked } = e.target;
+            setSaleList(checked ? [...saleAllKeyList] : []);
+            onChange([...baseList, ...(checked ? saleAllKeyList : []), ...purchaseList]);
+        },
+        [baseList, purchaseList],
+    );
+
+    const changePurchaseList = useCallback(
+        val => {
+            // console.log('changeBaseList', val);
+            setPurchaseList(val);
+            onChange([...baseList, ...saleList, ...val]);
+        },
+        [baseList, saleList],
+    );
+
+    const handleClickPurchaseAll = useCallback(
+        e => {
+            const { checked } = e.target;
+            setPurchaseList(checked ? [...purchaseAllKeyList] : []);
+            onChange([...baseList, ...saleList, ...(checked ? purchaseAllKeyList : [])]);
+        },
+        [baseList, saleList],
+    );
+
     return useMemo(() => {
         return (
             <>
-                <div>
+                <div style={{ marginBottom: 15 }}>
                     <Checkbox
-                    // indeterminate={this.state.indeterminate}
-                    // onChange={this.onCheckAllChange}
-                    // checked={this.state.checkAll}
+                        onChange={handleClickBaseAll}
+                        checked={baseList.length === baseAllKeyList.length}
+                        indeterminate={!!baseList.length && baseList.length < baseAllKeyList.length}
                     >
-                        基本信息
+                        <strong>基本信息</strong>
                     </Checkbox>
                 </div>
-                {/* value={columnsShowList} */}
-                <Checkbox.Group onChange={onChange}>
+                <Checkbox.Group value={baseList} onChange={changeBaseList}>
                     <Row gutter={[0, 5]}>
                         {baseGroupList.map(item => {
                             const { key, name } = item;
                             return (
-                                <Col span={4} key={key}>
+                                <Col span={6} key={key}>
+                                    <Checkbox value={key}>{name}</Checkbox>
+                                </Col>
+                            );
+                        })}
+                    </Row>
+                </Checkbox.Group>
+
+                <div style={{ margin: '25px 0 15px' }}>
+                    <Checkbox
+                        onChange={handleClickSaleAll}
+                        checked={saleList.length === saleAllKeyList.length}
+                        indeterminate={!!saleList.length && saleList.length < saleAllKeyList.length}
+                    >
+                        <strong>销售渠道信息</strong>
+                    </Checkbox>
+                </div>
+                <Checkbox.Group value={saleList} onChange={changeSaleList}>
+                    <Row gutter={[0, 5]}>
+                        {saleGroupList.map(item => {
+                            const { key, name } = item;
+                            return (
+                                <Col span={6} key={key}>
+                                    <Checkbox value={key}>{name}</Checkbox>
+                                </Col>
+                            );
+                        })}
+                    </Row>
+                </Checkbox.Group>
+
+                <div style={{ margin: '25px 0 15px' }}>
+                    <Checkbox
+                        onChange={handleClickPurchaseAll}
+                        checked={purchaseList.length === purchaseAllKeyList.length}
+                        indeterminate={
+                            !!purchaseList.length && purchaseList.length < purchaseAllKeyList.length
+                        }
+                    >
+                        <strong>采购渠道信息</strong>
+                    </Checkbox>
+                </div>
+                <Checkbox.Group value={purchaseList} onChange={changePurchaseList}>
+                    <Row gutter={[0, 5]}>
+                        {purchaseGroupList.map(item => {
+                            const { key, name } = item;
+                            return (
+                                <Col span={6} key={key}>
                                     <Checkbox value={key}>{name}</Checkbox>
                                 </Col>
                             );
@@ -95,7 +209,7 @@ const AllColumnsSetting: React.FC<IProps> = ({ value, onChange }) => {
                 </Checkbox.Group>
             </>
         );
-    }, [value]);
+    }, [value, baseList, saleList, purchaseList]);
 };
 
 export default AllColumnsSetting;

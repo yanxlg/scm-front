@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, message } from 'antd';
+import { notification } from 'antd';
 import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
@@ -16,7 +16,6 @@ import {
     purchaseOrderOptionList,
     purchaseShippingOptionList,
     orderStatusOptionList,
-    purchasePayOptionList,
 } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
@@ -363,7 +362,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 render: (value: string) => utcToLocal(value, ''),
             },
         ];
-    }, [orderList]);
+    }, []);
 
     const pagination = useMemo(() => {
         return {

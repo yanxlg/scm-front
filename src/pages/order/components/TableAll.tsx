@@ -5,7 +5,6 @@ import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
-import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
@@ -35,6 +34,44 @@ declare interface IState {
 
 class OrderTableAll extends React.PureComponent<IProps, IState> {
     private allColumns: ColumnProps<IChildOrderItem>[] = [
+        {
+            fixed: true,
+            key: '_checked',
+            title: () => {
+                const { orderList, onCheckAllChange } = this.props;
+                const rowspanList = orderList.filter(item => item._rowspan);
+                const checkedListLen = rowspanList.filter(item => item._checked).length;
+                let indeterminate = false,
+                    checked = false;
+                if (rowspanList.length && rowspanList.length === checkedListLen) {
+                    checked = true;
+                } else if (checkedListLen) {
+                    indeterminate = true;
+                }
+                return (
+                    <Checkbox
+                        indeterminate={indeterminate}
+                        checked={checked}
+                        onChange={e => onCheckAllChange(e.target.checked)}
+                    />
+                );
+            },
+            dataIndex: '_checked',
+            align: 'center',
+            width: 50,
+            className: 'colspan-cell',
+            render: (value: boolean, row: IChildOrderItem) => {
+                return {
+                    children: (
+                        <Checkbox checked={value} onChange={() => this.props.onSelectedRow(row)} />
+                    ),
+                    props: {
+                        rowSpan: row._rowspan || 0,
+                    },
+                };
+            },
+            hideInSetting: true,
+        },
         {
             key: 'createTime',
             title: '订单生成时间',
@@ -66,6 +103,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderId',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         {
             key: 'orderGoodsId',
@@ -88,6 +126,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'skuId',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         // 勾选展示 - 待确认
         // {
@@ -186,6 +225,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'currency',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -194,6 +234,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseAmount',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         {
             key: 'purchaseNumber',
@@ -276,6 +317,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 146,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -285,6 +327,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 146,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -294,6 +337,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 146,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         {
             key: 'lastWaybillNo',
@@ -310,6 +354,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         {
             key: 'purchasePlanId',
@@ -363,6 +408,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 146,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -371,6 +417,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchasePlatformParentOrderId',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -379,6 +426,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchasePlatformOrderId',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         {
             key: 'purchaseOrderPayStatus',
@@ -399,6 +447,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IChildOrderItem) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -407,6 +456,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -415,6 +465,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseCancelReason',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -424,6 +475,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -433,6 +485,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
         // {
         //     key: 'purchaseOrderShippingStatus',
@@ -466,51 +519,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         };
     }
 
-    private createColumns = (): ColumnProps<IChildOrderItem>[] => {
-        const { colList, orderList, onCheckAllChange, onSelectedRow } = this.props;
-        const rowspanList = orderList.filter(item => item._rowspan);
-        const checkedListLen = rowspanList.filter(item => item._checked).length;
-        let indeterminate = false,
-            checked = false;
-        if (rowspanList.length && rowspanList.length === checkedListLen) {
-            checked = true;
-        } else if (checkedListLen) {
-            indeterminate = true;
-        }
-        // console.log(111, colList);
-        const allColumns: ColumnProps<IChildOrderItem>[] = [
-            {
-                fixed: true,
-                key: '_checked',
-                title: () => (
-                    <Checkbox
-                        indeterminate={indeterminate}
-                        checked={checked}
-                        onChange={e => onCheckAllChange(e.target.checked)}
-                    />
-                ),
-                dataIndex: '_checked',
-                align: 'center',
-                width: 50,
-                className: 'colspan-cell',
-                render: (value: boolean, row: IChildOrderItem) => {
-                    return {
-                        children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
-            },
-        ];
-        this.allColumns.forEach(item => {
-            if (colList.indexOf(item.key as string) > -1) {
-                allColumns.push(item);
-            }
-        });
-        return allColumns;
-    };
-
     private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
         // console.log('showLogisticsTrack', purchaseWaybillNo);
         this.setState({
@@ -533,39 +541,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    // 获取商品详情
-    private getOrderGoodsDetail = (productId: string, skuId: string) => {
-        this.setState({
-            detailDialogStatus: true,
-        });
-        getOrderGoodsDetail(productId).then(res => {
-            const { sku_info, product_id, goods_img, title } = res.data;
-            if (sku_info) {
-                const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
-                const goodsDetail: IGoodsDetail = {
-                    product_id,
-                    goods_img,
-                    title,
-                };
-                if (i > -1) {
-                    const { sku_style, sku_sn, sku_img } = sku_info[i];
-                    Object.assign(goodsDetail, {
-                        sku_sn,
-                        sku_img,
-                        sku_style,
-                    });
-                }
-                this.setState({
-                    goodsDetail,
-                });
-            }
-        });
-    };
-
     render() {
         const { loading, orderList } = this.props;
         const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
-        const columns = this.createColumns();
+        // const columns = this.createColumns();
         return (
             <>
                 <FitTable
@@ -578,7 +557,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     className="order-table"
                     rowClassName="order-tr"
                     loading={loading}
-                    columns={columns}
+                    columns={this.allColumns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}

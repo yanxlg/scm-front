@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, message, Checkbox } from 'antd';
+import { notification } from 'antd';
 import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
@@ -7,7 +7,6 @@ import { INotWarehouseSearch, INotWarehouseOrderItem } from '@/interface/IOrder'
 import {
     getPurchasedNotWarehouseList,
     postExportPurchasedNotWarehouse,
-    delPurchaseOrders,
     delChannelOrders,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
@@ -289,6 +288,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 dataIndex: 'orderGoodsId',
                 align: 'center',
                 width: 120,
+                hideInSetting: true,
             },
             {
                 key: 'orderCreateTime',
@@ -413,7 +413,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
         ];
-    }, [orderList]);
+    }, []);
 
     const pagination = useMemo(() => {
         return {

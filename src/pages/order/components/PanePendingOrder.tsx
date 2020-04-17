@@ -7,7 +7,6 @@ import {
     getPendingOrderList,
     delChannelOrders,
     postExportPendingOrder,
-    putConfirmPay,
     postOrdersPlace,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
@@ -69,6 +68,7 @@ const defaultInitialValues = {
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchRef = useRef<JsonFormRef>(null);
+    const orderListRef = useRef<IPendingOrderItem[]>([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
     const [total, setTotal] = useState(0);
@@ -80,6 +80,11 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const selectedOrderGoodsIdList = useMemo(() => {
         return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
     }, [orderList]);
+
+    const _setOrderList = useCallback(list => {
+        orderListRef.current = list;
+        setOrderList(list);
+    }, []);
 
     const onSearch = useCallback(
         (paginationParams = { page, page_count: pageSize }) => {
@@ -101,7 +106,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         setPage(params.page as number);
                         setPageSize(params.page_count as number);
                         setTotal(total);
-                        setOrderList(getOrderList(list));
+                        _setOrderList(getOrderList(list));
                     }
                 })
                 .finally(() => {
@@ -164,39 +169,33 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         return onSearch({ page: 1 });
     }, []);
 
-    const onCheckAllChange = useCallback(
-        (status: boolean) => {
-            setOrderList(
-                orderList.map(item => {
-                    if (item._rowspan) {
-                        return {
-                            ...item,
-                            _checked: status,
-                        };
-                    }
-                    return item;
-                }),
-            );
-        },
-        [orderList],
-    );
+    const onCheckAllChange = useCallback((status: boolean) => {
+        _setOrderList(
+            orderListRef.current.map(item => {
+                if (item._rowspan) {
+                    return {
+                        ...item,
+                        _checked: status,
+                    };
+                }
+                return item;
+            }),
+        );
+    }, []);
 
-    const onSelectedRow = useCallback(
-        (row: IPendingOrderItem) => {
-            setOrderList(
-                orderList.map(item => {
-                    if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
-                        return {
-                            ...item,
-                            _checked: !row._checked,
-                        };
-                    }
-                    return item;
-                }),
-            );
-        },
-        [orderList],
-    );
+    const onSelectedRow = useCallback((row: IPendingOrderItem) => {
+        _setOrderList(
+            orderListRef.current.map(item => {
+                if (item._rowspan && row.orderGoodsId === item.orderGoodsId) {
+                    return {
+                        ...item,
+                        _checked: !row._checked,
+                    };
+                }
+                return item;
+            }),
+        );
+    }, []);
 
     const mergeCell = useCallback((value: string | number, row: IPendingOrderItem) => {
         return {
@@ -288,22 +287,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         );
     }, []);
 
-    const _confirmPay = useCallback(
-        (id: string) => {
-            const planIdList = orderList
-                .filter(item => item.purchase_parent_order_sn === id)
-                .map(item => item.purchase_plan_id);
-            putConfirmPay({
-                purchase_platform_parent_order_id: id,
-                purchase_plan_id: planIdList,
-            }).then(() => {
-                // console.log('putConfirmPay', res);
-                onSearch();
-            });
-        },
-        [orderList],
-    );
-
     const search = useMemo(() => {
         return (
             <JsonForm
@@ -334,7 +317,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 fixed: true,
                 key: '_checked',
                 title: () => {
-                    const rowspanList = orderList.filter(item => item._rowspan);
+                    const rowspanList = orderListRef.current.filter(item => item._rowspan);
                     const checkedListLen = rowspanList.filter(item => item._checked).length;
                     let indeterminate = false,
                         checked = false;
@@ -362,6 +345,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         },
                     };
                 },
+                hideInSetting: true,
             },
             {
                 fixed: true,
@@ -473,7 +457,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
         ];
-    }, [orderList]);
+    }, []);
 
     const pagination = useMemo(() => {
         return {
