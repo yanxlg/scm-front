@@ -90,6 +90,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         purchase_order_pay_status: 100,
         purchase_order_status: 100,
         reserve_status: 100,
+        order_goods_cancel_type: 100,
+        purchase_plan_cancel_type: 100,
     };
 
     private endFieldItem: FormField = {
@@ -205,6 +207,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     const {
                         createTime: purchaseCreateTime,
                         lastUpdateTime: purchaseLastUpdateTime,
+                        cancelType: purchaseCancelType,
                         ...purchaseRest
                     } = purchaseItem;
                     const childOrderItem: any = {
@@ -212,6 +215,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         ...purchaseRest,
                         purchaseCreateTime,
                         purchaseLastUpdateTime,
+                        purchaseCancelType,
                         currency,
                         confirmTime,
                         channelOrderSn,

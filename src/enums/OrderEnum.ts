@@ -115,6 +115,20 @@ export const errorDetailOptionList = [
     { name: '6天未标记发货', value: 7 },
 ];
 
+export const childrenOrderCancelOptionList = [
+    { name: '渠道自动取消', value: 1 },
+    { name: '中台手动取消', value: 2 },
+    { name: '异常取消', value: 3 },
+];
+
+export const purchasePlanCancelOptionList = [
+    { name: '渠道自动取消', value: 1 },
+    { name: '中台手动取消', value: 2 },
+    { name: '异常取消', value: 3 },
+    { name: '商家取消', value: 4 },
+    { name: '误杀取消', value: 5 },
+];
+
 export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
 
 export const childDefaultFieldList: FormField[] = [
@@ -298,6 +312,22 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, { name: '没有', value: 2 }],
+    },
+    {
+        type: 'select',
+        name: 'order_goods_cancel_type',
+        label: '子订单取消类型',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...childrenOrderCancelOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_plan_cancel_type',
+        label: '采购计划取消类型',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchasePlanCancelOptionList],
     },
     {
         type: 'dateRanger',

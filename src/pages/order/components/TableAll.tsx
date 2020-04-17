@@ -14,6 +14,8 @@ import {
     purchasePayOptionList,
     purchaseShippingOptionList,
     purchaseReserveOptionList,
+    childrenOrderCancelOptionList,
+    purchasePlanCancelOptionList,
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 
@@ -497,6 +499,26 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         //         return getStatusDesc(purchaseShippingOptionList, value);
         //     },
         // },
+        // 勾选展示
+        {
+            key: 'cancelType',
+            title: '子订单取消类型',
+            dataIndex: 'cancelType',
+            align: 'center',
+            width: 140,
+            render: (value: number) => getStatusDesc(childrenOrderCancelOptionList, value),
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'purchaseCancelType',
+            title: '采购计划取消类型',
+            dataIndex: 'purchaseCancelType',
+            align: 'center',
+            width: 146,
+            render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
+            defaultHide: true,
+        },
         {
             key: '_logisticsTrack',
             title: '物流轨迹',
