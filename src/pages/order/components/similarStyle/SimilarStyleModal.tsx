@@ -5,7 +5,6 @@ import { patSimilarGoods, querySimilarInfo } from '@/services/order-manage';
 import { IPadSimilarBody, ISimilarInfoResponse } from '@/interface/IOrder';
 import { EmptyObject } from '@/config/global';
 import { LoadingOutlined, CloseCircleFilled } from '@ant-design/icons';
-import classNames from 'classnames';
 import similarStyles from './_similar.less';
 import taskStyles from '@/styles/_task.less';
 import { failureReasonMap } from '@/enums/OrderEnum';
@@ -65,6 +64,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
             } as IPadSimilarBody)
                 .then(() => {
                     message.success('代拍成功');
+                    onClose();
                 })
                 .finally(() => {
                     setSubmitting(false);

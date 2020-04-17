@@ -5,6 +5,8 @@ import { Col, Form, Input, Radio, Row, Select } from 'antd';
 import HistoryTable from './HistoryTable';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { Store } from 'rc-field-form/es/interface';
+import classNames from 'classnames';
+import similarStyles from './_similar.less';
 
 const StyleForm = ({ form, list }: { form: FormInstance; list: IHistorySimilar[] }) => {
     return useMemo(() => {
@@ -18,7 +20,22 @@ const StyleForm = ({ form, list }: { form: FormInstance; list: IHistorySimilar[]
                     platform: 'pdd',
                 }}
             >
-                <Form.Item name="type" className={formStyles.formItem}>
+                <Form.Item
+                    name="type"
+                    className={classNames(formStyles.formItem, similarStyles.typeError)}
+                    validateTrigger={'onChange'}
+                    rules={[
+                        {
+                            validator: () => {
+                                const { type, list } = form.getFieldsValue(['type', 'list']);
+                                if (type === 2 && !list) {
+                                    return Promise.reject('请选择历史代拍商品');
+                                }
+                                return Promise.resolve();
+                            },
+                        },
+                    ]}
+                >
                     <Radio.Group>
                         <Radio value={1}>输入代拍商品信息</Radio>
                         <Radio value={2}>选择历史代拍商品</Radio>
@@ -50,6 +67,20 @@ const StyleForm = ({ form, list }: { form: FormInstance; list: IHistorySimilar[]
                                         label="Goods ID"
                                         name="goods_id"
                                         className={formStyles.formItem}
+                                        rules={[
+                                            {
+                                                validator: () => {
+                                                    const { type, goods_id } = form.getFieldsValue([
+                                                        'type',
+                                                        'goods_id',
+                                                    ]);
+                                                    if (type === 1 && !goods_id) {
+                                                        return Promise.reject('请输入Goods ID');
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
                                     >
                                         <Input />
                                     </Form.Item>
@@ -59,6 +90,20 @@ const StyleForm = ({ form, list }: { form: FormInstance; list: IHistorySimilar[]
                                         label="SKU ID"
                                         name="sku_id"
                                         className={formStyles.formItem}
+                                        rules={[
+                                            {
+                                                validator: () => {
+                                                    const { type, sku_id } = form.getFieldsValue([
+                                                        'type',
+                                                        'sku_id',
+                                                    ]);
+                                                    if (type === 1 && !sku_id) {
+                                                        return Promise.reject('请输入SKU ID');
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
                                     >
                                         <Input />
                                     </Form.Item>
