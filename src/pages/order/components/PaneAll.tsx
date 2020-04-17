@@ -29,6 +29,7 @@ import {
     pageSizeOptions,
 } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
+import Export from '@/components/Export';
 
 export declare interface IPurchaseStatus {
     status: number;
@@ -76,6 +77,8 @@ declare interface IState {
     colChildList: string[];
     colParentList: string[];
     childOptionalColList: IOptionalColItem[];
+
+    exportModal: boolean;
 }
 
 class PaneAll extends React.PureComponent<IProps, IState> {
@@ -121,6 +124,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             // 表格展示的列
             colChildList: defaultColChildList,
             colParentList: defaultParentColList,
+            exportModal: false,
         };
     }
 
@@ -538,14 +542,11 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     };
 
     // 导出excel
-    private postExportAll = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportAll(params);
+    private postExportAll = (value: any) => {
+        return postExportAll({
+            ...this.currentSearchParams,
+            ...value,
+        });
     };
 
     // 绑定事件，处理hover问题
@@ -570,6 +571,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         });
     };
 
+    private closeExport = () => {
+        this.setState({
+            exportModal: false,
+        });
+    };
+
+    private showExport = () => {
+        this.setState({
+            exportModal: true,
+        });
+    };
+
     render() {
         const {
             page,
@@ -586,6 +599,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             childOptionalColList,
             colChildList,
             colParentList,
+            exportModal,
         } = this.state;
 
         return (
@@ -634,13 +648,9 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                                 取消渠道订单
                             </LoadingButton>
                         ) : null}
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportAll}
-                        >
+                        <Button type="primary" className="order-btn" onClick={this.showExport}>
                             导出数据
-                        </LoadingButton>
+                        </Button>
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件
                         </Button>
@@ -663,12 +673,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             orderList={childOrderList}
                             onCheckAllChange={this.onCheckAllChange}
                             onSelectedRow={this.onSelectedRow}
+                            visible={exportModal}
+                            onOKey={this.postExportAll}
+                            onCancel={this.closeExport}
                         />
                     ) : (
                         <TableParentAll
                             loading={loading}
                             colList={colParentList}
                             orderList={parentOrderList}
+                            visible={exportModal}
+                            onOKey={this.postExportAll}
+                            onCancel={this.closeExport}
                         />
                     )}
                     <div style={{ textAlign: 'right' }}>

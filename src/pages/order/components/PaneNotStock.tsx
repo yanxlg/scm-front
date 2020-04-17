@@ -124,6 +124,7 @@ declare interface IState {
     loading: boolean;
     orderList: IOrderItem[];
     selectedRowKeys: string[];
+    visible: boolean;
 }
 
 class PaneNotStock extends React.PureComponent<IProps, IState> {
@@ -144,6 +145,7 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
             loading: false,
             orderList: [],
             selectedRowKeys: [],
+            visible: false,
         };
     }
 
@@ -322,18 +324,24 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
         }
     };
 
-    private postExportPurchasedNotStock = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportPurchasedNotStock(params);
+    private postExportPurchasedNotStock = (values: any) => {
+        return postExportPurchasedNotStock({
+            ...this.currentSearchParams,
+            ...values,
+        });
     };
-
+    private showExport = () => {
+        this.setState({
+            visible: true,
+        });
+    };
+    private onCancel = () => {
+        this.setState({
+            visible: false,
+        });
+    };
     render() {
-        const { loading, page, pageCount, total, orderList, selectedRowKeys } = this.state;
+        const { loading, page, pageCount, total, orderList, selectedRowKeys, visible } = this.state;
 
         return (
             <>
@@ -360,19 +368,18 @@ class PaneNotStock extends React.PureComponent<IProps, IState> {
                         >
                             取消渠道订单
                         </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportPurchasedNotStock}
-                        >
+                        <Button type="primary" className="order-btn" onClick={this.showExport}>
                             导出数据
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <TableNotStock
                         loading={loading}
                         orderList={orderList}
                         selectedRowKeys={selectedRowKeys}
                         changeSelectedRowKeys={this.changeSelectedRowKeys}
+                        visible={visible}
+                        onCancel={this.onCancel}
+                        onOKey={this.postExportPurchasedNotStock}
                     />
                     <Pagination
                         className="order-pagination"

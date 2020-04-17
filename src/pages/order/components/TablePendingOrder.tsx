@@ -7,12 +7,16 @@ import { ColumnProps } from 'antd/lib/table/Column';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { purchaseOrderOptionList } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
     orderList: IOrderItem[];
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IOrderItem): void;
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {}
@@ -233,7 +237,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
     }
 
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey } = this.props;
         // const width = this.columns.reduce((total, current) => total + (current.width as number), 0);
         // console.log('render', 111111);
         return (
@@ -249,18 +253,26 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             //     scroll={{ x: width || 'max-content', y: 600 }}
             //     pagination={false}
             // />
-            <FitTable
-                bordered
-                rowKey="purchasePlanId"
-                className="order-table"
-                loading={loading}
-                columns={this.columns}
-                dataSource={orderList}
-                scroll={{ x: 'max-content' }}
-                bottom={20}
-                minHeight={500}
-                pagination={false}
-            />
+            <>
+                <FitTable
+                    bordered={true}
+                    rowKey="purchasePlanId"
+                    className="order-table"
+                    loading={loading}
+                    columns={this.columns}
+                    dataSource={orderList}
+                    scroll={{ x: 'max-content' }}
+                    bottom={20}
+                    minHeight={500}
+                    pagination={false}
+                />
+                <Export
+                    columns={this.columns}
+                    visible={visible}
+                    onCancel={onCancel}
+                    onOKey={onOKey}
+                />
+            </>
         );
     }
 }

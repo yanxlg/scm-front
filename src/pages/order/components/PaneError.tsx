@@ -22,6 +22,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
+import Export from '@/components/Export';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -56,6 +57,8 @@ const PaneErrTab = () => {
         order_goods_id: string;
         purchase_plan_id: string;
     }>();
+
+    const { visible: exportModal, setVisibleProps: setExportModal } = useModal<boolean>();
 
     const fieldList: FormField[] = useMemo(() => {
         return [
@@ -371,17 +374,13 @@ const PaneErrTab = () => {
         formRef: [formRef, formRef1],
     });
 
-    const onExport = useCallback(() => {
-        const params = Object.assign(
-            {
-                page: 1,
-                page_count: 50,
-                abnormal_type: 1,
-                abnormal_detail_type: 2,
-            },
-            queryRef.current,
-        );
-        return postExportErrOrder(params);
+    const onExport = useCallback((values: any) => {
+        return postExportErrOrder({
+            abnormal_type: 1,
+            abnormal_detail_type: 2,
+            ...queryRef.current,
+            ...values,
+        });
     }, []);
 
     const formComponent = useMemo(() => {
@@ -399,9 +398,9 @@ const PaneErrTab = () => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onExport}>
+                    <Button className={formStyles.formBtn} onClick={() => setExportModal(true)}>
                         导出数据
-                    </LoadingButton>
+                    </Button>
                 </JsonForm>
                 <JsonForm
                     ref={formRef1}
@@ -670,6 +669,17 @@ const PaneErrTab = () => {
         );
     }, [loading]);
 
+    const exportModalComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns}
+                visible={exportModal}
+                onOKey={onExport}
+                onCancel={() => setExportModal(false)}
+            />
+        );
+    }, [exportModal]);
+
     const similarModal = useMemo(() => {
         return <SimilarStyleModal visible={visible} onClose={onClose} onReload={onReload} />;
     }, [visible]);
@@ -680,9 +690,10 @@ const PaneErrTab = () => {
                 {formComponent}
                 {table}
                 {similarModal}
+                {exportModalComponent}
             </div>
         );
-    }, [loading, visible]);
+    }, [loading, visible, exportModal]);
 };
 
 export default PaneErrTab;

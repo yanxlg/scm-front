@@ -12,48 +12,58 @@ declare interface ExportProps {
 const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: ExportProps) => {
     const _columns = useMemo(() => {
         return columns.filter(item => {
-            return item.dataIndex && item.dataIndex !== 'operation';
+            return (
+                item.dataIndex &&
+                item.dataIndex !== 'operation' &&
+                !/_checked/.test(String(item.dataIndex))
+            );
         });
-    }, []);
+    }, [columns]);
 
     const [form] = Form.useForm();
     const [checkedAll, setCheckedAll] = useState(false);
     const [indeterminate, setIndeterminate] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const normalize = useCallback((value, prevValue, prevValues) => {
-        const length = value.length;
-        if (length === 0) {
-            setCheckedAll(false);
-            setIndeterminate(false);
-        }
-        if (length === _columns.length) {
-            setCheckedAll(true);
-            setIndeterminate(false);
-        }
-        if (length < _columns.length) {
-            setCheckedAll(false);
-            setIndeterminate(true);
-        }
-        return value;
-    }, []);
+    const normalize = useCallback(
+        (value, prevValue, prevValues) => {
+            const length = value.length;
+            if (length === 0) {
+                setCheckedAll(false);
+                setIndeterminate(false);
+            }
+            if (length === _columns.length) {
+                setCheckedAll(true);
+                setIndeterminate(false);
+            }
+            if (length < _columns.length) {
+                setCheckedAll(false);
+                setIndeterminate(true);
+            }
+            return value;
+        },
+        [columns],
+    );
 
-    const onChange = useCallback((e: CheckboxChangeEvent) => {
-        const checked = e.target.checked;
-        if (checked) {
-            form.setFieldsValue({
-                fields: _columns.map(item => item.dataIndex),
-            });
-            setCheckedAll(true);
-            setIndeterminate(false);
-        } else {
-            form.setFieldsValue({
-                fields: [],
-            });
-            setCheckedAll(false);
-            setIndeterminate(false);
-        }
-    }, []);
+    const onChange = useCallback(
+        (e: CheckboxChangeEvent) => {
+            const checked = e.target.checked;
+            if (checked) {
+                form.setFieldsValue({
+                    fields: _columns.map(item => item.dataIndex),
+                });
+                setCheckedAll(true);
+                setIndeterminate(false);
+            } else {
+                form.setFieldsValue({
+                    fields: [],
+                });
+                setCheckedAll(false);
+                setIndeterminate(false);
+            }
+        },
+        [columns],
+    );
 
     const OKey = useCallback(() => {
         form.validateFields().then(values => {

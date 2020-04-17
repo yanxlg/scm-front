@@ -16,6 +16,7 @@ import {
     purchaseShippingOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
@@ -23,6 +24,9 @@ declare interface IProps {
     orderList: IChildOrderItem[];
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IChildOrderItem): void;
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {
@@ -562,7 +566,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     };
 
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey } = this.props;
         const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
         const columns = this.createColumns();
         return (
@@ -600,6 +604,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     lastWaybillNo={currentOrder ? currentOrder.lastWaybillNo || '' : ''}
                     hideTrackDetail={this.hideTrackDetail}
                 />
+                <Export columns={columns} visible={visible} onOKey={onOKey} onCancel={onCancel} />
             </>
         );
     }

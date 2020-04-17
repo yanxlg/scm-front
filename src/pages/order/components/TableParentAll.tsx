@@ -8,11 +8,15 @@ import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
     colList: string[];
     orderList: IParentOrderItem[];
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {
@@ -273,13 +277,13 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     };
 
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
         const columns = this.createColumns();
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     // key={columns.length}
                     rowKey="orderGoodsId"
                     className="order-table"
@@ -296,6 +300,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
                 />
+                <Export columns={columns} visible={visible} onOKey={onOKey} onCancel={onCancel} />
             </>
         );
     }

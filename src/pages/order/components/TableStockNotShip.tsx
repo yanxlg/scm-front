@@ -8,12 +8,16 @@ import { FitTable } from 'react-components';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
     orderList: IOrderItem[];
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IOrderItem): void;
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {}
@@ -247,22 +251,30 @@ class TableStockNotShip extends React.PureComponent<IProps, IState> {
     }
 
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey } = this.props;
 
         return (
-            <FitTable
-                bordered
-                rowKey={record => {
-                    return record.purchasePlanId || record.orderGoodsId;
-                }}
-                className="order-table"
-                loading={loading}
-                columns={this.columns}
-                // rowSelection={rowSelection}
-                dataSource={orderList}
-                scroll={{ x: 'max-content' }}
-                pagination={false}
-            />
+            <>
+                <FitTable
+                    bordered={true}
+                    rowKey={record => {
+                        return record.purchasePlanId || record.orderGoodsId;
+                    }}
+                    className="order-table"
+                    loading={loading}
+                    columns={this.columns}
+                    // rowSelection={rowSelection}
+                    dataSource={orderList}
+                    scroll={{ x: 'max-content' }}
+                    pagination={false}
+                />
+                <Export
+                    columns={this.columns}
+                    visible={visible}
+                    onCancel={onCancel}
+                    onOKey={onOKey}
+                />
+            </>
         );
     }
 }

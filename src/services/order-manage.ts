@@ -124,13 +124,9 @@ export async function getPendingOrderList(data: IPendingFilterParams) {
 }
 
 export async function postExportPendingOrder(data: IPendingFilterParams) {
-    return request
-        .post(OrderApiPath.postExportPendingOrder, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportPendingOrder, {
+        data,
+    });
 }
 
 // 获取待支付
@@ -142,13 +138,9 @@ export async function getPayOrderList(data: IPayFilterParams) {
 }
 
 export async function postExportPay(data: IPayFilterParams) {
-    return request
-        .post(OrderApiPath.postExportPay, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportPay, {
+        data,
+    });
 }
 
 // 获取待发货
@@ -160,13 +152,9 @@ export async function getWaitShipList(data: IWaitShipFilterParams) {
 }
 
 export async function postExportWaitShip(data: IWaitShipFilterParams) {
-    return request
-        .post(OrderApiPath.postExportWaitShip, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportWaitShip, {
+        data,
+    });
 }
 
 // 已采购未入库
@@ -178,13 +166,9 @@ export async function getPurchasedNotStockList(data: IWaitShipFilterParams) {
 }
 
 export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
-    return request
-        .post(OrderApiPath.postExportPurchasedNotStock, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportPurchasedNotStock, {
+        data,
+    });
 }
 
 // 仓库未发货
@@ -196,13 +180,9 @@ export async function getStockNotShipList(data: IFilterParams) {
 }
 
 export async function postExportStockNotShip(data: IFilterParams) {
-    return request
-        .post(OrderApiPath.postExportStockNotShip, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportStockNotShip, {
+        data,
+    });
 }
 
 export function getErrorOrderList(data: IErrFilterParams) {
@@ -222,13 +202,9 @@ export function getErrorOrderList(data: IErrFilterParams) {
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
-    return request
-        .post(OrderApiPath.postExportErrOrder, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportErrOrder, {
+        data,
+    });
 }
 
 // 获取商品详情

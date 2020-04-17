@@ -10,12 +10,16 @@ import {
     purchaseOrderOptionList,
     purchaseShippingOptionList,
 } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
     selectedRowKeys: string[];
     orderList: IWaitShipItem[];
     changeSelectedRowKeys(keys: string[]): void;
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {}
@@ -133,7 +137,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
     };
 
     render() {
-        const { loading, orderList, selectedRowKeys } = this.props;
+        const { loading, orderList, selectedRowKeys, visible, onCancel, onOKey } = this.props;
         const rowSelection = {
             fixed: true,
             columnWidth: 60,
@@ -141,17 +145,25 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             onChange: this.onSelectChange,
         };
         return (
-            <FitTable
-                bordered
-                rowKey="orderGoodsId"
-                className="order-table"
-                loading={loading}
-                columns={this.columns}
-                rowSelection={rowSelection}
-                dataSource={orderList}
-                scroll={{ x: 'max-content' }}
-                pagination={false}
-            />
+            <>
+                <FitTable
+                    bordered={true}
+                    rowKey="orderGoodsId"
+                    className="order-table"
+                    loading={loading}
+                    columns={this.columns}
+                    rowSelection={rowSelection}
+                    dataSource={orderList}
+                    scroll={{ x: 'max-content' }}
+                    pagination={false}
+                />
+                <Export
+                    columns={this.columns}
+                    visible={visible}
+                    onCancel={onCancel}
+                    onOKey={onOKey}
+                />
+            </>
         );
     }
 }

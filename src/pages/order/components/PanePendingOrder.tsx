@@ -94,6 +94,7 @@ declare interface IState {
     loading: boolean;
     // selectedRowKeys: string[];
     orderList: IOrderItem[];
+    visible: boolean;
 }
 
 class PanePendingOrder extends React.PureComponent<IProps, IState> {
@@ -112,6 +113,7 @@ class PanePendingOrder extends React.PureComponent<IProps, IState> {
             total: 0,
             loading: false,
             orderList: [],
+            visible: false,
             // selectedRowKeys: []
         };
     }
@@ -323,18 +325,24 @@ class PanePendingOrder extends React.PureComponent<IProps, IState> {
         }
     };
 
-    postExportPendingOrder = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportPendingOrder(params);
+    postExportPendingOrder = (values: any) => {
+        return postExportPendingOrder({
+            ...this.currentSearchParams,
+            ...values,
+        });
     };
-
+    private onCancel = () => {
+        this.setState({
+            visible: false,
+        });
+    };
+    private showExport = () => {
+        this.setState({
+            visible: true,
+        });
+    };
     render() {
-        const { loading, orderList, total, page, pageCount } = this.state;
+        const { loading, orderList, total, page, pageCount, visible } = this.state;
 
         return (
             <>
@@ -368,19 +376,18 @@ class PanePendingOrder extends React.PureComponent<IProps, IState> {
                         >
                             取消渠道订单
                         </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={() => this.postExportPendingOrder()}
-                        >
+                        <Button type="primary" className="order-btn" onClick={this.showExport}>
                             导出数据
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <TablePendingOrder
                         loading={loading}
                         orderList={orderList}
                         onCheckAllChange={this.onCheckAllChange}
                         onSelectedRow={this.onSelectedRow}
+                        visible={visible}
+                        onCancel={this.onCancel}
+                        onOKey={this.postExportPendingOrder}
                     />
                     <Pagination
                         className="order-pagination"

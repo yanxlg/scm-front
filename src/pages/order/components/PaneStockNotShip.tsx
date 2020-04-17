@@ -69,6 +69,7 @@ declare interface IState {
     total: number;
     loading: boolean;
     orderList: IOrderItem[];
+    visible: boolean;
 }
 
 class PaneStockNotShip extends React.PureComponent<IProps, IState> {
@@ -86,6 +87,7 @@ class PaneStockNotShip extends React.PureComponent<IProps, IState> {
             total: 0,
             loading: false,
             orderList: [],
+            visible: false,
         };
     }
 
@@ -297,18 +299,26 @@ class PaneStockNotShip extends React.PureComponent<IProps, IState> {
         }
     };
 
-    private postExportStockNotShip = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportStockNotShip(params);
+    private postExportStockNotShip = (values: any) => {
+        return postExportStockNotShip({
+            ...this.currentSearchParams,
+            ...values,
+        });
+    };
+
+    private showExport = () => {
+        this.setState({
+            visible: true,
+        });
+    };
+    private onCancel = () => {
+        this.setState({
+            visible: false,
+        });
     };
 
     render() {
-        const { loading, total, page, pageCount, orderList } = this.state;
+        const { loading, total, page, pageCount, orderList, visible } = this.state;
 
         return (
             <>
@@ -335,19 +345,18 @@ class PaneStockNotShip extends React.PureComponent<IProps, IState> {
                         >
                             取消渠道订单
                         </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportStockNotShip}
-                        >
+                        <Button type="primary" className="order-btn" onClick={this.showExport}>
                             导出数据
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <TableStockNotShip
                         loading={loading}
                         orderList={orderList}
                         onCheckAllChange={this.onCheckAllChange}
                         onSelectedRow={this.onSelectedRow}
+                        visible={visible}
+                        onCancel={this.onCancel}
+                        onOKey={this.postExportStockNotShip}
                     />
                     <Pagination
                         className="order-pagination"

@@ -83,6 +83,7 @@ declare interface IState {
     total: number;
     loading: boolean;
     orderList: IPayItem[];
+    visible: boolean;
 }
 
 class PanePay extends React.PureComponent<IProps, IState> {
@@ -100,6 +101,7 @@ class PanePay extends React.PureComponent<IProps, IState> {
             total: 0,
             loading: false,
             orderList: [],
+            visible: false,
         };
     }
 
@@ -313,18 +315,25 @@ class PanePay extends React.PureComponent<IProps, IState> {
         }
     };
 
-    postExportPay = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportPay(params);
+    postExportPay = (values: any) => {
+        return postExportPay({
+            ...this.currentSearchParams,
+            ...values,
+        });
     };
 
+    private showExport = () => {
+        this.setState({
+            visible: true,
+        });
+    };
+    private onCancel = () => {
+        this.setState({
+            visible: false,
+        });
+    };
     render() {
-        const { loading, orderList, total, page, pageCount } = this.state;
+        const { loading, orderList, total, page, pageCount, visible } = this.state;
         return (
             <>
                 <div>
@@ -357,13 +366,9 @@ class PanePay extends React.PureComponent<IProps, IState> {
                         >
                             取消渠道订单
                         </LoadingButton>
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportPay}
-                        >
+                        <Button type="primary" className="order-btn" onClick={this.showExport}>
                             导出数据
-                        </LoadingButton>
+                        </Button>
                     </div>
                     <TablePay
                         loading={loading}
@@ -371,6 +376,9 @@ class PanePay extends React.PureComponent<IProps, IState> {
                         onCheckAllChange={this.onCheckAllChange}
                         onSelectedRow={this.onSelectedRow}
                         onSearch={this.onSearch}
+                        visible={visible}
+                        onCancel={this.onCancel}
+                        onOKey={this.postExportPay}
                     />
                     <Pagination
                         className="order-pagination"

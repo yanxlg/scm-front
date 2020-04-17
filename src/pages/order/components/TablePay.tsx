@@ -7,6 +7,7 @@ import { IPayItem } from './PanePay';
 import { putConfirmPay } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import QRCode from 'qrcode.react';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
@@ -14,6 +15,9 @@ declare interface IProps {
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IPayItem): void;
     onSearch(): void;
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {}
@@ -228,20 +232,28 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
     };
 
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey } = this.props;
         // const columns = this.createColumns()
 
         return (
-            <Table
-                bordered={true}
-                rowKey="purchase_plan_id"
-                className="order-table"
-                loading={loading}
-                columns={this.columns}
-                dataSource={orderList}
-                scroll={{ x: 'max-content', y: 600 }}
-                pagination={false}
-            />
+            <>
+                <Table
+                    bordered={true}
+                    rowKey="purchase_plan_id"
+                    className="order-table"
+                    loading={loading}
+                    columns={this.columns}
+                    dataSource={orderList}
+                    scroll={{ x: 'max-content', y: 600 }}
+                    pagination={false}
+                />
+                <Export
+                    columns={this.columns}
+                    visible={visible}
+                    onCancel={onCancel}
+                    onOKey={onOKey}
+                />
+            </>
         );
     }
 }

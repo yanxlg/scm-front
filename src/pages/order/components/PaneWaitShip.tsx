@@ -124,6 +124,7 @@ declare interface IState {
     loading: boolean;
     orderList: IWaitShipItem[];
     selectedRowKeys: string[];
+    visible: boolean;
 }
 
 declare interface IProps {
@@ -147,6 +148,7 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
             loading: false,
             orderList: [],
             selectedRowKeys: [],
+            visible: false,
         };
     }
 
@@ -339,18 +341,25 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
         }
     };
 
-    private postExportWaitShip = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportWaitShip(params);
+    private postExportWaitShip = (values: any) => {
+        return postExportWaitShip({
+            ...this.currentSearchParams,
+            ...values,
+        });
     };
 
+    private showExport = () => {
+        this.setState({
+            visible: true,
+        });
+    };
+    private onCancel = () => {
+        this.setState({
+            visible: false,
+        });
+    };
     render() {
-        const { loading, orderList, total, page, pageCount, selectedRowKeys } = this.state;
+        const { loading, orderList, total, page, pageCount, selectedRowKeys, visible } = this.state;
         return (
             <div>
                 <JsonForm
@@ -377,19 +386,18 @@ class PaneWaitShip extends React.PureComponent<IProps, IState> {
                     >
                         取消渠道订单
                     </LoadingButton>
-                    <LoadingButton
-                        type="primary"
-                        className="order-btn"
-                        onClick={this.postExportWaitShip}
-                    >
+                    <Button type="primary" className="order-btn" onClick={this.showExport}>
                         导出数据
-                    </LoadingButton>
+                    </Button>
                 </div>
                 <TableWaitShip
                     loading={loading}
                     orderList={orderList}
                     selectedRowKeys={selectedRowKeys}
                     changeSelectedRowKeys={this.changeSelectedRowKeys}
+                    onCancel={this.onCancel}
+                    visible={visible}
+                    onOKey={this.postExportWaitShip}
                 />
                 <Pagination
                     className="order-pagination"
