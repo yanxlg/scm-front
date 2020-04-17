@@ -125,7 +125,7 @@ const PaneErrTab = () => {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -140,7 +140,7 @@ const PaneErrTab = () => {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -253,7 +253,7 @@ const PaneErrTab = () => {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -268,7 +268,7 @@ const PaneErrTab = () => {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -283,7 +283,7 @@ const PaneErrTab = () => {
             width: 120,
             render: (value: string, row: IErrorOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -297,7 +297,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -307,7 +307,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -317,7 +317,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -327,7 +327,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -337,7 +337,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {

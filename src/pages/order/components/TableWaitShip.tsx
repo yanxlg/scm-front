@@ -29,7 +29,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
         {
@@ -118,7 +118,7 @@ class TablePendingOrder extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: string) => {
-                return utcToLocal(value);
+                return utcToLocal(value, '');
             },
         },
     ];
