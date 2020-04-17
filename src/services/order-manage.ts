@@ -1,7 +1,14 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
 import { downloadExcel } from '@/utils/common';
-import { IPadSimilarBody } from '@/interface/IOrder';
+import {
+    IPadSimilarBody,
+    IWarehouseNotShipSearch,
+    INotWarehouseSearch,
+    IWaitShipSearch,
+    IWaitPaySearch,
+    IPendingOrderSearch,
+} from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
 
 export declare interface IFilterParams {
@@ -36,39 +43,6 @@ export declare interface IFilterParams {
     cancel_time_start?: number; // og订单取消时间
     cancel_time_end?: number;
     only_p_order?: number;
-}
-
-export declare interface IPendingFilterParams {
-    page?: number;
-    page_count?: number;
-    order_start_time?: number;
-    order_end_time?: number;
-    order_goods_id?: string[];
-    product_id?: string[];
-    sku_id?: string[];
-    channel_source?: number[];
-    order_goods_status?: number[];
-}
-
-export declare interface IPayFilterParams {
-    page?: number;
-    page_count?: number;
-    purchase_order_stime?: number;
-    purchase_order_etime?: number;
-    purchase_platform?: number;
-    purchase_order_sn?: string;
-    purchase_parent_order_sn?: string;
-}
-
-export declare interface IWaitShipFilterParams {
-    page?: number;
-    page_count?: number;
-    order_goods_id?: string;
-    purchase_platform_order_id_list?: string[];
-    order_goods_status?: number;
-    purchase_order_status?: number;
-    platform_order_time_start?: number;
-    platform_order_time_end?: number;
 }
 
 export declare interface IErrFilterParams {
@@ -113,14 +87,14 @@ export async function postExportAll(data: IFilterParams) {
 }
 
 // 获取待拍单
-export async function getPendingOrderList(data: IPendingFilterParams) {
+export async function getPendingOrderList(data: IPendingOrderSearch) {
     return request.post(OrderApiPath.getPendingOrderList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPendingOrder(data: IPendingFilterParams) {
+export async function postExportPendingOrder(data: IPendingOrderSearch) {
     return request
         .post(OrderApiPath.postExportPendingOrder, {
             data,
@@ -131,14 +105,14 @@ export async function postExportPendingOrder(data: IPendingFilterParams) {
 }
 
 // 获取待支付
-export async function getPayOrderList(data: IPayFilterParams) {
+export async function getPayOrderList(data: IWaitPaySearch) {
     return request.post(OrderApiPath.getPayOrderList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPay(data: IPayFilterParams) {
+export async function postExportPay(data: IWaitPaySearch) {
     return request
         .post(OrderApiPath.postExportPay, {
             data,
@@ -149,14 +123,14 @@ export async function postExportPay(data: IPayFilterParams) {
 }
 
 // 获取待发货
-export async function getWaitShipList(data: IWaitShipFilterParams) {
+export async function getWaitShipList(data: IWaitShipSearch) {
     return request.post(OrderApiPath.getWaitShipList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportWaitShip(data: IWaitShipFilterParams) {
+export async function postExportWaitShip(data: IWaitShipSearch) {
     return request
         .post(OrderApiPath.postExportWaitShip, {
             data,
@@ -167,16 +141,16 @@ export async function postExportWaitShip(data: IWaitShipFilterParams) {
 }
 
 // 已采购未入库
-export async function getPurchasedNotStockList(data: IWaitShipFilterParams) {
-    return request.post(OrderApiPath.getPurchasedNotStockList, {
+export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
+    return request.post(OrderApiPath.getPurchasedNotWarehouseList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
+export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
     return request
-        .post(OrderApiPath.postExportPurchasedNotStock, {
+        .post(OrderApiPath.postExportPurchasedNotWarehouse, {
             data,
             responseType: 'blob',
             parseResponse: false,
@@ -185,16 +159,16 @@ export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
 }
 
 // 仓库未发货
-export async function getStockNotShipList(data: IFilterParams) {
-    return request.post(OrderApiPath.getStockNotShipList, {
+export async function getWarehouseNotShipList(data: IWarehouseNotShipSearch) {
+    return request.post(OrderApiPath.getWarehouseNotShipList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportStockNotShip(data: IFilterParams) {
+export async function postExportWarehouseNotShip(data: IWarehouseNotShipSearch) {
     return request
-        .post(OrderApiPath.postExportStockNotShip, {
+        .post(OrderApiPath.postExportWarehouseNotShip, {
             data,
             responseType: 'blob',
             parseResponse: false,

@@ -218,7 +218,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         channelSource,
                     };
                     if (index === 0) {
-                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._rowspan = Math.min(orderGoodsPurchasePlan.length, 10);
                         childOrderItem._checked = false;
                     }
                     childOrderList.push(childOrderItem);
@@ -324,12 +324,12 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         );
     };
 
-    private changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
-        });
-    };
+    // private changeShowColStatus = () => {
+    //     const { showColStatus } = this.state;
+    //     this.setState({
+    //         showColStatus: !showColStatus,
+    //     });
+    // };
 
     private changeSelectedColList = (list: string[]) => {
         const { showParentStatus } = this.state;
@@ -644,18 +644,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件
                         </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
+                        {/* <Button className="order-btn" onClick={this.changeShowColStatus}>
                             {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
+                        </Button> */}
                     </div>
-                    {showColStatus ? (
+                    {/* {showColStatus ? (
                         <OptionalColumn
                             ref={this.optionalRef}
                             optionalColList={childOptionalColList}
                             selectedColKeyList={selectedColKeyList}
                             changeSelectedColList={this.changeSelectedColList}
                         />
-                    ) : null}
+                    ) : null} */}
                     {!showParentStatus ? (
                         <TableAll
                             loading={loading}
