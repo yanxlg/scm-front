@@ -70,7 +70,7 @@ const formFields: FormField[] = [
         name: 'title',
         placeholder: '请输入商品名称',
         className: 'local-search-item-input',
-        // formatter: 'strArr',
+        // formatter: 'str_arr',
     },
     {
         type: 'select',

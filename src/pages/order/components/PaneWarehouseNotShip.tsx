@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, Checkbox } from 'antd';
-import { JsonForm, LoadingButton, FitTable } from 'react-components';
+import { notification, Checkbox, Button } from 'antd';
+import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
 import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
@@ -15,6 +15,7 @@ import { purchaseOrderOptionList, purchaseShippingOptionList } from '@/enums/Ord
 import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -27,7 +28,7 @@ const formFields: FormField[] = [
         label: '中台订单子ID',
         className: 'order-input',
         placeholder: '请输入中台订单子ID',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -35,7 +36,7 @@ const formFields: FormField[] = [
         label: '中台商品ID',
         className: 'order-input',
         placeholder: '请输入中台商品ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -43,7 +44,7 @@ const formFields: FormField[] = [
         label: '采购运单号',
         className: 'order-input',
         placeholder: '请输入采购运单号',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'select',
@@ -259,15 +260,11 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, [getOrderGoodsIdList]);
 
-    const _postExportWarehouseNotShip = useCallback(() => {
-        return postExportWarehouseNotShip(
-            currentSearchParams
-                ? currentSearchParams
-                : {
-                      page: 1,
-                      page_count: 50,
-                  },
-        );
+    const _postExportWarehouseNotShip = useCallback((values: any) => {
+        return postExportWarehouseNotShip({
+            ...currentSearchParams,
+            ...values,
+        });
     }, []);
 
     const search = useMemo(() => {
@@ -503,6 +500,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         } as any;
     }, [loading]);
 
+    const { visible, setVisibleProps, onClose } = useModal<boolean>();
+
     const toolBarRender = useCallback(() => {
         const list = getOrderGoodsIdList();
         return [
@@ -515,15 +514,15 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消渠道订单
             </LoadingButton>,
-            <LoadingButton
+            <Button
                 key="export"
                 className={formStyles.formBtn}
-                onClick={_postExportWarehouseNotShip}
+                onClick={() => setVisibleProps(true)}
             >
                 导出至EXCEL
-            </LoadingButton>,
+            </Button>,
         ];
-    }, [getOrderGoodsIdList, _delChannelOrders, _postExportWarehouseNotShip]);
+    }, [getOrderGoodsIdList, _delChannelOrders]);
 
     useEffect(() => {
         onSearch();
@@ -534,7 +533,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             <>
                 {search}
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}
@@ -549,9 +548,15 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     onChange={onChange}
                     toolBarRender={toolBarRender}
                 />
+                <Export
+                    columns={columns as any}
+                    visible={visible}
+                    onOKey={_postExportWarehouseNotShip}
+                    onCancel={onClose}
+                />
             </>
         );
-    }, [page, pageSize, total, loading, orderList]);
+    }, [page, pageSize, total, loading, orderList, visible]);
 };
 
 export default PaneWarehouseNotShip;

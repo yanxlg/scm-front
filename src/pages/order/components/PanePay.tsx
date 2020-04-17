@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { notification, Checkbox, Button } from 'antd';
-import { JsonForm, LoadingButton, AutoEnLargeImg, FitTable } from 'react-components';
+import { JsonForm, LoadingButton, AutoEnLargeImg, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { IWaitPaySearch, IWaitPayOrderItem } from '@/interface/IOrder';
 import {
@@ -16,6 +16,7 @@ import { TableProps } from 'antd/es/table';
 import QRCode from 'qrcode.react';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -255,15 +256,11 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, [selectedOrderGoodsIdList]);
 
-    const _postExportPay = useCallback(() => {
-        return postExportPay(
-            currentSearchParams
-                ? currentSearchParams
-                : {
-                      page: 1,
-                      page_count: 50,
-                  },
-        );
+    const _postExportPay = useCallback((values: any) => {
+        return postExportPay({
+            ...currentSearchParams,
+            ...values,
+        });
     }, []);
 
     const _confirmPay = useCallback(
@@ -470,6 +467,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         } as any;
     }, [loading]);
 
+    const { visible, onClose, setVisibleProps } = useModal<boolean>();
+
     const toolBarRender = useCallback(() => {
         const disabled = selectedOrderGoodsIdList.length === 0 ? true : false;
         return [
@@ -491,11 +490,15 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消渠道订单
             </LoadingButton>,
-            <LoadingButton key="export" className={formStyles.formBtn} onClick={_postExportPay}>
+            <Button
+                key="export"
+                className={formStyles.formBtn}
+                onClick={() => setVisibleProps(true)}
+            >
                 导出至EXCEL
-            </LoadingButton>,
+            </Button>,
         ];
-    }, [selectedOrderGoodsIdList, _cancelPurchaseOrder, _delChannelOrders, _postExportPay]);
+    }, [selectedOrderGoodsIdList, _cancelPurchaseOrder, _delChannelOrders]);
 
     useEffect(() => {
         onSearch();
@@ -506,7 +509,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             <>
                 {search}
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="purchase_plan_id"
                     className="order-table"
                     loading={loading}
@@ -519,9 +522,15 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     onChange={onChange}
                     toolBarRender={toolBarRender}
                 />
+                <Export
+                    columns={columns as any}
+                    visible={visible}
+                    onOKey={_postExportPay}
+                    onCancel={onClose}
+                />
             </>
         );
-    }, [page, pageSize, total, loading, orderList]);
+    }, [page, pageSize, total, loading, orderList, visible]);
 };
 
 export default PaneWarehouseNotShip;

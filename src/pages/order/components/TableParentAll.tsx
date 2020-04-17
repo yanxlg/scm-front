@@ -290,7 +290,12 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
                 />
-                <Export columns={columns} visible={visible} onOKey={onOKey} onCancel={onCancel} />
+                <Export
+                    columns={this.allColumns}
+                    visible={visible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
+                />
             </>
         );
     }

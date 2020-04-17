@@ -1,7 +1,8 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { ColumnType } from 'antd/es/table';
-import { Checkbox, Form, Input, message, Modal } from 'antd';
+import { Checkbox, Form, Input, message, Modal, Row, Col } from 'antd';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface ExportProps {
     columns: ColumnType<any>[];
@@ -93,16 +94,16 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
             onOk={OKey}
             confirmLoading={loading}
         >
-            <Form layout="horizontal" form={form}>
+            <Form layout="horizontal" form={form} className={formStyles.formHelpAbsolute}>
                 <Form.Item
+                    className={formStyles.formItem}
                     label="文件名称"
                     name="filename"
                     rules={[{ required: true, message: '请输入文件名称' }]}
                 >
-                    <Input />
+                    <Input className={formStyles.formItemDefault} />
                 </Form.Item>
-                <div>
-                    导出字段:
+                <Form.Item label="导出字段" className={formStyles.formItem}>
                     <Checkbox
                         indeterminate={indeterminate}
                         checked={checkedAll}
@@ -110,23 +111,27 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
                     >
                         全选
                     </Checkbox>
-                </div>
-                <Form.Item
-                    name="fields"
-                    normalize={normalize}
-                    label={''}
-                    rules={[{ required: true, message: '请选择导出字段' }]}
-                >
-                    <Checkbox.Group>
-                        {_columns.map(item => {
-                            return (
-                                <Checkbox key={item.dataIndex as string} value={item.dataIndex}>
-                                    {item.title}
-                                </Checkbox>
-                            );
-                        })}
-                    </Checkbox.Group>
                 </Form.Item>
+                <div style={{ maxHeight: 200, overflow: 'auto' }}>
+                    <Form.Item
+                        name="fields"
+                        normalize={normalize}
+                        label={''}
+                        rules={[{ required: true, message: '请选择导出字段' }]}
+                    >
+                        <Checkbox.Group>
+                            <Row gutter={[0, 10]}>
+                                {_columns.map(item => {
+                                    return (
+                                        <Col key={item.dataIndex as string} span={4}>
+                                            <Checkbox value={item.dataIndex}>{item.title}</Checkbox>
+                                        </Col>
+                                    );
+                                })}
+                            </Row>
+                        </Checkbox.Group>
+                    </Form.Item>
+                </div>
             </Form>
         </Modal>
     );

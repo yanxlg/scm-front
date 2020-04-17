@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification } from 'antd';
-import { JsonForm, LoadingButton, FitTable } from 'react-components';
+import { Button, notification } from 'antd';
+import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
 import { IWaitShipSearch, IWaitShipOrderItem } from '@/interface/IOrder';
@@ -20,6 +20,7 @@ import {
 import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -39,7 +40,7 @@ const formFields: FormField[] = [
         label: '采购平台订单ID',
         className: 'order-input',
         placeholder: '请输入采购平台订单ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -242,15 +243,11 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, [selectedRowKeys]);
 
-    const _postExportWaitShip = useCallback(() => {
-        return postExportWaitShip(
-            currentSearchParams
-                ? currentSearchParams
-                : {
-                      page: 1,
-                      page_count: 50,
-                  },
-        );
+    const _postExportWaitShip = useCallback((values: any) => {
+        return postExportWaitShip({
+            ...currentSearchParams,
+            ...values,
+        });
     }, []);
 
     const search = useMemo(() => {
@@ -374,6 +371,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         } as any;
     }, [loading]);
 
+    const { visible, setVisibleProps, onClose } = useModal<boolean>();
+
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0 ? true : false;
         return [
@@ -395,13 +394,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消渠道订单
             </LoadingButton>,
-            <LoadingButton
+            <Button
                 key="export"
                 className={formStyles.formBtn}
-                onClick={() => _postExportWaitShip()}
+                onClick={() => setVisibleProps(true)}
             >
                 导出至EXCEL
-            </LoadingButton>,
+            </Button>,
         ];
     }, [selectedRowKeys, _cancelPurchaseOrder, _delChannelOrders, _postExportWaitShip]);
 
@@ -414,7 +413,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             <>
                 {search}
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
@@ -433,9 +432,15 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     onChange={onChange}
                     toolBarRender={toolBarRender}
                 />
+                <Export
+                    columns={columns as any}
+                    visible={visible}
+                    onOKey={_postExportWaitShip}
+                    onCancel={onClose}
+                />
             </>
         );
-    }, [page, pageSize, total, loading, orderList, selectedRowKeys]);
+    }, [page, pageSize, total, loading, orderList, selectedRowKeys, visible]);
 };
 
 export default PaneWarehouseNotShip;

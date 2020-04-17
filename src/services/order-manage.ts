@@ -10,6 +10,7 @@ import {
     IPendingOrderSearch,
 } from '@/interface/IOrder';
 import { transPaginationResponse } from '@/utils/utils';
+import { api } from 'react-components';
 
 export declare interface IFilterParams {
     page?: number;
@@ -77,13 +78,9 @@ export async function getAllOrderList(data: IFilterParams) {
 }
 
 export async function postExportAll(data: IFilterParams) {
-    return request
-        .post(OrderApiPath.postExportAll, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportAll, {
+        data,
+    });
 }
 
 // 获取待拍单
@@ -95,13 +92,9 @@ export async function getPendingOrderList(data: IPendingOrderSearch) {
 }
 
 export async function postExportPendingOrder(data: IPendingOrderSearch) {
-    return request
-        .post(OrderApiPath.postExportPendingOrder, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportPendingOrder, {
+        data,
+    });
 }
 
 // 获取待支付
@@ -113,13 +106,9 @@ export async function getPayOrderList(data: IWaitPaySearch) {
 }
 
 export async function postExportPay(data: IWaitPaySearch) {
-    return request
-        .post(OrderApiPath.postExportPay, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportPay, {
+        data,
+    });
 }
 
 // 获取待发货
@@ -131,13 +120,9 @@ export async function getWaitShipList(data: IWaitShipSearch) {
 }
 
 export async function postExportWaitShip(data: IWaitShipSearch) {
-    return request
-        .post(OrderApiPath.postExportWaitShip, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportWaitShip, {
+        data,
+    });
 }
 
 // 已采购未入库
@@ -149,13 +134,9 @@ export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
 }
 
 export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
-    return request
-        .post(OrderApiPath.postExportPurchasedNotWarehouse, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportPurchasedNotWarehouse, {
+        data,
+    });
 }
 
 // 仓库未发货
@@ -167,23 +148,25 @@ export async function getWarehouseNotShipList(data: IWarehouseNotShipSearch) {
 }
 
 export async function postExportWarehouseNotShip(data: IWarehouseNotShipSearch) {
-    return request
-        .post(OrderApiPath.postExportWarehouseNotShip, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportWarehouseNotShip, {
+        data,
+    });
 }
 
-// 获取异常订单
-export async function getErrorOrderList(data: IErrFilterParams) {
+export function getErrorOrderList(data: IErrFilterParams) {
+    return api
+        .post(OrderApiPath.getErrorOrderList, {
+            requestType: 'json',
+            data: data,
+        })
+        .then(transPaginationResponse);
+    /*
     return request
         .post(OrderApiPath.getErrorOrderList, {
             requestType: 'json',
-            data,
+            data: data,
         })
-        .then(transPaginationResponse);
+        .then(transPaginationResponse);*/
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
