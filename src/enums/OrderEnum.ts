@@ -129,13 +129,13 @@ export const errorDetailOptionList = [
 ];
 
 export const childrenOrderCancelOptionList = [
-    { name: '渠道自动取消', value: 1 },
+    { name: '自动取消', value: 1 },
     { name: '中台手动取消', value: 2 },
     { name: '异常取消', value: 3 },
 ];
 
 export const purchasePlanCancelOptionList = [
-    { name: '渠道自动取消', value: 1 },
+    { name: '自动取消', value: 1 },
     { name: '中台手动取消', value: 2 },
     { name: '异常取消', value: 3 },
     { name: '商家取消', value: 4 },
@@ -337,7 +337,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'purchase_plan_cancel_type',
-        label: '采购计划取消类型',
+        label: '采购单取消类型',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchasePlanCancelOptionList],

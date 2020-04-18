@@ -516,7 +516,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // 勾选展示
         {
             key: 'purchaseCancelType',
-            title: '采购计划取消类型',
+            title: '采购单取消类型',
             dataIndex: 'purchaseCancelType',
             align: 'center',
             width: 146,
