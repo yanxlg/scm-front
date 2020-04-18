@@ -255,7 +255,13 @@ const Export = () => {
                                                             <div
                                                                 className={exportStyles.exportSize}
                                                             >
-                                                                {Number(filesize) / 1024 / 1024}M
+                                                                {Math.floor(
+                                                                    (Number(filesize) /
+                                                                        1024 /
+                                                                        1024) *
+                                                                        10000,
+                                                                ) / 10000}
+                                                                M
                                                                 <Button
                                                                     type="primary"
                                                                     className={
