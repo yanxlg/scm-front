@@ -3,6 +3,7 @@ import { ColumnType } from 'antd/es/table';
 import { Checkbox, Form, Input, message, Modal, Row, Col } from 'antd';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { history } from '@@/core/history';
 
 declare interface ExportProps {
     columns: ColumnType<any>[];
@@ -74,6 +75,7 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
                     () => {
                         message.success('导出任务发送成功');
                         onCancel();
+                        history.push('/setting/export');
                     },
                     () => {
                         message.error('导出失败');
