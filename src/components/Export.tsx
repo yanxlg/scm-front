@@ -27,6 +27,15 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
     const [indeterminate, setIndeterminate] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const getItemValue = useCallback((column: ColumnType<any>) => {
+        const { dataIndex } = column;
+        return typeof dataIndex === 'string'
+            ? dataIndex
+            : Array.isArray(dataIndex)
+            ? dataIndex[dataIndex.length - 1]
+            : dataIndex;
+    }, []);
+
     const normalize = useCallback(
         (value, prevValue, prevValues) => {
             const length = value.length;
@@ -52,7 +61,7 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
             const checked = e.target.checked;
             if (checked) {
                 form.setFieldsValue({
-                    fields: _columns.map(item => item.dataIndex),
+                    fields: _columns.map(item => getItemValue(item)),
                 });
                 setCheckedAll(true);
                 setIndeterminate(false);
@@ -126,7 +135,9 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
                                 {_columns.map(item => {
                                     return (
                                         <Col key={item.dataIndex as string} span={4}>
-                                            <Checkbox value={item.dataIndex}>{item.title}</Checkbox>
+                                            <Checkbox value={getItemValue(item)}>
+                                                {item.title}
+                                            </Checkbox>
                                         </Col>
                                     );
                                 })}
