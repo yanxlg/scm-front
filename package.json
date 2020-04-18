@@ -23,7 +23,7 @@
         "@ant-design/pro-layout": "^5.0.9",
         "@ant-design/icons": "^4.0.5",
         "dayjs": "^1.8.23",
-        "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.5-alpha.11"
+        "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.5-alpha.46"
     },
     "devDependencies": {
         "@types/react-lazyload": "^2.6.0",

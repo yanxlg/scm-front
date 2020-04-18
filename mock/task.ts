@@ -26,9 +26,10 @@ const list = Mock.mock({
     ],
 });
 export default {
-    'GET /api/v1/task/exec_log': (req: Request, res: Response) => {
+    'GET /v1/task/exec_log': async (req: Request, res: Response) => {
+        await sleep(10);
         const { page, page_number } = req.query;
-        res.status(200).send({
+        res.status(401).send({
             code: 200,
             message: 'By mock.js',
             data: {

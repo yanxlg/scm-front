@@ -7,16 +7,16 @@ import { IParentOrderItem, IGoodsDetail } from './PaneAll';
 import { getOrderGoodsDetail } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import {
-    orderStatusOptionList,
-    orderShippingOptionList,
-    orderCancelOptionList,
-} from '@/enums/OrderEnum';
+import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
 
 declare interface IProps {
     loading: boolean;
     colList: string[];
     orderList: IParentOrderItem[];
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {
@@ -158,6 +158,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     </a>
                 );
             },
+            defaultHide: true,
         },
         {
             key: 'productShop',
@@ -165,15 +166,8 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'productShop',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
-        // {
-        //     key: 'cancelType',
-        //     title: '中台订单取消原因',
-        //     dataIndex: 'cancelType',
-        //     align: 'center',
-        //     width: 148,
-        //     render: (value: number) => getStatusDesc(orderCancelOptionList, value),
-        // },
         {
             key: 'confirmTime',
             title: '订单确认时间',
@@ -188,6 +182,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     },
                 };
             },
+            defaultHide: true,
         },
         {
             key: 'channelSource',
@@ -196,6 +191,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
         {
             key: 'currency',
@@ -204,6 +200,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
         {
             key: 'orderAmount',
@@ -212,6 +209,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
     ];
 
@@ -222,23 +220,6 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             goodsDetail: null,
         };
     }
-
-    private createColumns = (): ColumnProps<IParentOrderItem>[] => {
-        const { colList } = this.props;
-        // console.log(111, colList);
-        // const allColumns: ColumnProps<IParentOrderItem>[]  = [];
-        return colList.map(key => {
-            const i = this.allColumns.findIndex(item => item.key === key);
-            // console.log('key', key, i);
-            // if (i === -1) {
-            //     console.log('colList没找到', key);
-            // } else {
-            //     return this.allColumns[i];
-            // }
-            return this.allColumns[i];
-        });
-        // return allColumns;
-    };
 
     // 合并单元格
     private mergeCell(value: string | number, row: IParentOrderItem) {
@@ -285,28 +266,35 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     };
 
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
-        const columns = this.createColumns();
+        // const columns = this.createColumns();
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     // key={columns.length}
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
-                    columns={columns}
+                    columns={this.allColumns}
                     // rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
                     pagination={false}
+                    columnsSettingRender={true}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
+                />
+                <Export
+                    columns={this.allColumns}
+                    visible={visible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
                 />
             </>
         );

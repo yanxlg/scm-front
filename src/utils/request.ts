@@ -2,6 +2,7 @@
  * request 网络请求工具
  * 更详细的 api 文档: https://github.com/umijs/umi-request
  */
+/*
 import { message, notification } from 'antd';
 import { extend, RequestOptionsInit, ResponseError } from 'umi-request';
 import { history } from 'umi';
@@ -44,9 +45,9 @@ export const apiCodeMessage = {
     success: 200,
 };
 
-/**
+/!**
  * 异常处理程序
- */
+ *!/
 
 export function errorHandlerFactory(skipError: boolean = false) {
     const errorHandler = (error: {
@@ -101,9 +102,9 @@ export function errorHandlerFactory(skipError: boolean = false) {
     return errorHandler;
 }
 
-/**
+/!**
  * 配置request请求时的默认参数
- */
+ *!/
 const request = extend({
     errorHandler: errorHandlerFactory(), // 默认错误处理
     credentials: 'include', // 默认请求是否带上cookie
@@ -177,6 +178,25 @@ request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
             data: formatRequestData(data),
             params: formatRequestData(params),
         },
+    };
+});
+
+export default request;
+*/
+
+import User from '@/storage/User';
+import { request } from 'react-components';
+import { RequestOptionsInit } from 'umi-request';
+
+request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
+    if (User.token) {
+        options.headers = Object.assign({}, options.headers, {
+            'X-Token': User.token,
+        });
+    }
+    return {
+        url,
+        options,
     };
 });
 

@@ -7,4 +7,8 @@ export enum SettingApiPath {
     UpdateCustom = '/api/v1/customs/put',
     QueryCookie = '/api/v1/spider/account/list',
     UpdateCookie = '/api/v1/spider/account/update',
+    ExportList = '/api/v1/download/list',
+    RetryExport = '/api/v1/download/repeat',
+    DeleteExport = '/api/v1/download/delete',
+    UpdateExport = '/api/v1/download/detail',
 }
