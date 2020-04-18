@@ -172,13 +172,9 @@ export function getErrorOrderList(data: IErrFilterParams) {
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
-    return request
-        .post(OrderApiPath.postExportErrOrder, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportErrOrder, {
+        data,
+    });
 }
 
 // 获取商品详情
