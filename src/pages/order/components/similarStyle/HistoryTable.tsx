@@ -13,12 +13,13 @@ const HistoryTable = ({ list }: { list: IHistorySimilar[] }) => {
                 dataIndex: 'productId',
                 width: '130px',
                 align: 'center',
-                render: (id: string, item: IHistorySimilar) => {
+                render: (id: string, item: IHistorySimilar, index: number) => {
                     return (
                         <Radio
                             value={JSON.stringify({
                                 product_id: item.productId,
                                 commodity_sku_id: item.commoditySkuId,
+                                index: index,
                             })}
                         />
                     );
