@@ -16,6 +16,7 @@ const { TextArea } = Input;
 declare interface IState {
     visible: boolean;
     loading: boolean;
+    commodity_id: string;
     page: number;
     total: number;
     id: string;
@@ -115,6 +116,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             loading: false,
             id: '',
             merchant_id: '',
+            commodity_id: '',
             page: 1,
             total: 0,
             skuList: [],
@@ -123,11 +125,12 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         };
     }
 
-    showModal = (id: string, merchant_id: string) => {
+    showModal = (id: string, merchant_id: string, commodity_id: string) => {
         this.setState(
             {
                 id,
                 merchant_id,
+                commodity_id,
                 visible: true,
             },
             () => {
@@ -209,7 +212,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
 
     private handleOk = () => {
         // console.log('handleOk', this.state.editList);
-        const { editList, merchant_id } = this.state;
+        const { editList, merchant_id, commodity_id } = this.state;
         for (let i = 0; i < editList.length; i++) {
             const { sku, adjustment_price, adjustment_reason } = editList[i];
             if (!adjustment_price || !adjustment_reason) {
@@ -219,6 +222,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         editSkuPrice({
             sku_list: editList,
             merchant_id: merchant_id,
+            commodity_id: commodity_id,
         }).then(res => {
             // console.log('editSkuPrice', res);
             message.success(res.data.execute_status);
