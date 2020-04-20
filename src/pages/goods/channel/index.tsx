@@ -253,8 +253,8 @@ const ChannelList: React.FC = props => {
         return query;
     }, [loading]);
 
-    const showSkuDialog = useCallback((id: string, merchant_id: string) => {
-        skuRef.current!.showModal(id, merchant_id);
+    const showSkuDialog = useCallback((id: string, merchant_id: string, commodity_id: string) => {
+        skuRef.current!.showModal(id, merchant_id, commodity_id);
     }, []);
 
     const showCountryShipFee = useCallback((product_id: string, merchant_id: string) => {
@@ -529,7 +529,9 @@ const ChannelList: React.FC = props => {
                             <div>{value}</div>
                             <Button
                                 type="link"
-                                onClick={() => showSkuDialog(row.id, row.merchant_id)}
+                                onClick={() =>
+                                    showSkuDialog(row.id, row.merchant_id, row.commodity_id)
+                                }
                             >
                                 查看sku详情
                             </Button>
