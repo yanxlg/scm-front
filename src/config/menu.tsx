@@ -81,6 +81,10 @@ export default [
                 name: '账户管理',
             },
             {
+                path: '/setting/export',
+                name: '导出管理',
+            },
+            {
                 path: '/setting/goodsAttr',
                 name: '商品属性',
             },

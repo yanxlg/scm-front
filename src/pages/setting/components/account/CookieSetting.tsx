@@ -1,8 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useDataSet } from 'react-components/es/hooks';
 import { ICookieItem } from '@/interface/ISetting';
 import { Form, Button, Input } from 'antd';
-import { FitTable, LoadingButton } from 'react-components';
+import { FitTable, LoadingButton, useDataSet } from 'react-components';
 import { queryCookies, saveCookie } from '@/services/setting';
 import settingStyles from '@/styles/_setting.less';
 import { ColumnType } from 'antd/es/table/interface';
@@ -105,7 +104,7 @@ const CookieSetting: React.FC = () => {
                 align: 'center',
                 width: '100px',
                 render: (status: any) => {
-                    return status === '1' ? '有效' : status === '2' ? '过期' : '默认';
+                    return status === '0' ? '有效' : status === '1' ? '过期' : '默认';
                 },
             },
             {

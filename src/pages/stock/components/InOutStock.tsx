@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { ProTable, FitTable } from 'react-components';
-import { message } from 'antd';
+import { ProTable, FitTable, useModal } from 'react-components';
+import { Button, message } from 'antd';
 import '@/styles/index.less';
 import '@/styles/stock.less';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -16,11 +16,9 @@ import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
-import { SearchOutlined } from '@ant-design/icons';
-import { Icons } from '@/components/Icon';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import classNames from 'classnames';
+import Export from '@/components/Export';
 
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
@@ -224,15 +222,28 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             ...query,
             tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
         };
-    }, []);
+    }, [loading]);
 
-    const onExport = useCallback(() => {
+    const onExport = useCallback((extra: any) => {
         const values = formRef.current!.getFieldsValue();
         const exportService = type === StockType.In ? exportInList : exportOutList;
-        return exportService(values).catch(() => {
-            message.error('导出失败!');
-        });
+        return exportService({ ...values, ...extra });
     }, []);
+
+    const { visible: exportModal, onClose: closeExportModal, setVisibleProps } = useModal<
+        boolean
+    >();
+
+    const exportComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns}
+                visible={exportModal}
+                onOKey={onExport}
+                onCancel={closeExportModal}
+            />
+        );
+    }, [exportModal]);
 
     const pagination = useMemo(() => {
         return {
@@ -246,9 +257,13 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <LoadingButton key="export" onClick={onExport} className={formStyles.formBtn}>
+            <Button
+                key="export"
+                onClick={() => setVisibleProps(true)}
+                className={formStyles.formBtn}
+            >
                 导出Excel表
-            </LoadingButton>,
+            </Button>,
         ];
     }, []);
 
@@ -296,9 +311,10 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 {form}
                 {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
+                {exportComponent}
             </div>
         );
-    }, [loading]);
+    }, [loading, exportModal]);
 };
 
 export { InOutStock };

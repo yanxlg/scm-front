@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable } from 'react-components';
-import { message } from 'antd';
+import { FitTable, useModal } from 'react-components';
+import { Button, message } from 'antd';
 import '@/styles/index.less';
 import { ColumnProps, TableProps } from 'antd/es/table';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -16,10 +16,8 @@ import { useList } from '@/utils/hooks';
 import { IStockRequest, IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import { RequestPagination } from '@/interface/IGlobal';
 import { LoadingButton } from 'react-components';
-import { SearchOutlined } from '@ant-design/icons';
-import { Icons } from '@/components/Icon';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import classNames from 'classnames';
+import Export from '@/components/Export';
 
 const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
     x: true,
@@ -180,21 +178,32 @@ const StockControl: React.FC = () => {
             ...query,
             tabKey: '3',
         };
+    }, [loading]);
+
+    const { visible: exportModal, onClose: closeExportModal, setVisibleProps } = useModal<
+        boolean
+    >();
+
+    const onExport = useCallback((value: any) => {
+        return formRef.current!.validateFields().then(values => {
+            return exportStockList({
+                ...values,
+                ...value,
+            });
+        });
     }, []);
 
-    const onExport = useCallback(() => {
-        return formRef.current!.validateFields().then(values => {
-            return exportStockList(values).catch(() => {
-                message.error('导出失败!');
-            });
+    const showExport = useCallback(() => {
+        formRef.current!.validateFields().then(values => {
+            setVisibleProps(true);
         });
     }, []);
 
     const toolBarRender = useCallback(() => {
         return [
-            <LoadingButton key="export" onClick={onExport} className={formStyles.formBtn}>
+            <Button key="export" onClick={showExport} className={formStyles.formBtn}>
                 导出Excel表
-            </LoadingButton>,
+            </Button>,
         ];
     }, []);
 
@@ -204,7 +213,8 @@ const StockControl: React.FC = () => {
             current: pageNumber,
             pageSize: pageSize,
             showSizeChanger: true,
-        };
+            position: ['topRight', 'bottomRight'],
+        } as any;
     }, [loading]);
 
     const table = useMemo(() => {
@@ -243,15 +253,27 @@ const StockControl: React.FC = () => {
         );
     }, []);
 
+    const exportComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns}
+                visible={exportModal}
+                onOKey={onExport}
+                onCancel={closeExportModal}
+            />
+        );
+    }, [exportModal]);
+
     return useMemo(() => {
         return (
             <div>
                 {form}
                 {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
+                {exportComponent}
             </div>
         );
-    }, [loading]);
+    }, [loading, exportModal]);
 };
 
 export { StockControl };

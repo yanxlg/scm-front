@@ -11,6 +11,8 @@ import {
     PUTaskRangeType,
     AutoPurchaseTaskType,
     HotTaskRange,
+    UpdateItemType,
+    PUTaskRangeTypeCode,
 } from '@/enums/StatusEnum';
 import { RequestPagination } from '@/interface/IGlobal';
 
@@ -37,6 +39,7 @@ export interface ITaskListItem {
     create_time: number;
     end_time: number;
     execute_count: number;
+    update_type?: PUTaskRangeTypeCode[];
 }
 
 export interface ITaskListExtraData {
@@ -86,7 +89,7 @@ export interface IHotTaskBody {
 
 export interface IPUTaskBody {
     task_name: string;
-    range: string;
+    range: UpdateItemType;
     task_start_time: number;
     task_end_time: number;
     task_interval_seconds: number;

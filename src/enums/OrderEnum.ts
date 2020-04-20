@@ -1,4 +1,5 @@
 import { FormField } from 'react-components/es/JsonForm';
+import { transStatusList } from '@/utils/transform';
 
 declare interface optionItem {
     name: string;
@@ -78,6 +79,38 @@ export const errorTypeOptionList = [
     { name: '其他', value: 4 },
 ];
 
+export const errorDetailOptionMap = {
+    // 仓库异常
+    11: '24小时未拍单',
+    5: '72小时未入库',
+    6: '48小时未出库',
+    // 采购异常
+    2: '拍单失败超24小时',
+    3: '12小时未支付',
+    4: '48小时未发货',
+    12: '拍单失败',
+    // 尾程异常
+    8: '7天未揽收',
+    9: '14天未揽收',
+    10: '30天未妥投',
+    // 其他异常
+    7: '6天未标记发货',
+};
+
+export const failureReasonMap = {
+    '410031': 'sku已告罄',
+    '41003': '商品已告罄',
+    '46024': '当前未支付订单过多',
+    '40001': '未登录',
+    '1001': '海淘、预售等无法拍单的商品属性',
+    '1002': '任务超时失败',
+};
+
+export const failureReasonList = transStatusList(failureReasonMap);
+export type failureReasonCode = keyof typeof failureReasonMap;
+
+export type ErrorDetailOptionCode = keyof typeof errorDetailOptionMap;
+
 export const errorDetailOptionList = [
     // 仓库异常
     { name: '24小时未拍单', value: 11 },
@@ -95,25 +128,39 @@ export const errorDetailOptionList = [
     { name: '6天未标记发货', value: 7 },
 ];
 
+export const childrenOrderCancelOptionList = [
+    { name: '自动取消', value: 1 },
+    { name: '中台手动取消', value: 2 },
+    { name: '异常取消', value: 3 },
+];
+
+export const purchasePlanCancelOptionList = [
+    { name: '自动取消', value: 1 },
+    { name: '中台手动取消', value: 2 },
+    { name: '异常取消', value: 3 },
+    { name: '商家取消', value: 4 },
+    { name: '误杀取消', value: 5 },
+];
+
 export const purchasePlatformOptionList = [{ name: 'PDD', value: 1 }];
 
 export const childDefaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
-        label: '订单时间',
-        className: 'order-date-picker',
+        label: '订单生成时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'input',
         name: 'order_goods_id',
-        label: '中台订单子ID',
+        label: '子订单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入中台订单子ID',
-        formatter: 'numberStrArr',
+        placeholder: '请输入子订单ID',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -122,7 +169,7 @@ export const childDefaultFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     // {
     //     type: 'input',
@@ -148,47 +195,47 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'input',
         name: 'order_id',
-        label: '中台父订单ID',
+        label: '父订单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入中台父订单ID',
-        formatter: 'numberStrArr',
+        placeholder: '请输入父订单ID',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
         name: 'purchase_plan_id',
-        label: '采购计划 ID',
+        label: '采购计划ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入采购计划ID',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
         name: 'purchase_waybill_no',
-        label: '采购运单号',
+        label: '采购运单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入采购运单号',
-        formatter: 'strArr',
+        placeholder: '请输入采购运单ID',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
         name: 'last_waybill_no',
-        label: '尾程运单号',
+        label: '销售尾程运单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入尾程运单号',
-        formatter: 'strArr',
+        placeholder: '请输入销售尾程运单ID',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
         name: 'product_id',
-        label: '中台商品ID',
+        label: 'Version ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入中台商品ID',
-        formatter: 'strArr',
+        placeholder: '请输入Version ID',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -197,7 +244,7 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入中台SKU ID',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     // {
     //     type: 'select',
@@ -213,7 +260,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'reserve_status',
-        label: '库存预定状态',
+        label: '仓库库存预定状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchaseReserveOptionList],
@@ -258,7 +305,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'order_goods_status',
-        label: '中台订单状态',
+        label: '订单状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...orderStatusOptionList],
@@ -266,7 +313,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'order_goods_shipping_status',
-        label: '订单配送状态',
+        label: '配送状态',
         className: 'order-input',
         formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...orderShippingOptionList],
@@ -280,18 +327,34 @@ export const childAllFieldList: FormField[] = [
         optionList: [defaultOptionItem, { name: '没有', value: 2 }],
     },
     {
+        type: 'select',
+        name: 'order_goods_cancel_type',
+        label: '子订单取消类型',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...childrenOrderCancelOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_plan_cancel_type',
+        label: '采购单取消类型',
+        className: 'order-input',
+        formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem, ...purchasePlanCancelOptionList],
+    },
+    {
         type: 'dateRanger',
         name: ['purchase_time_start', 'purchase_time_end'],
-        label: '采购完成时间',
-        className: 'order-date-picker',
+        label: '采购签收时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
         name: ['delivery_time_start', 'delivery_time_end'],
-        label: '出库时间',
-        className: 'order-date-picker',
+        label: '销售订单出库时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
@@ -299,48 +362,48 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['collect_time_start', 'collect_time_end'],
-        label: '揽收时间',
-        className: 'order-date-picker',
+        label: '销售订单揽收时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
         name: ['receive_time_start', 'receive_time_end'],
-        label: '收货时间',
-        className: 'order-date-picker',
+        label: '妥投时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
         name: ['pay_time_start', 'pay_time_end'],
-        label: '支付时间',
-        className: 'order-date-picker',
+        label: '采购支付时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
         name: ['storage_time_start', 'storage_time_end'],
-        label: '入库时间',
-        className: 'order-date-picker',
+        label: '采购入库时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
         name: ['confirm_time_start', 'confirm_time_end'],
-        label: '订单确认时间',
-        className: 'order-date-picker',
+        label: '销售订单确认时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
         name: ['cancel_time_start', 'cancel_time_end'],
-        label: 'og订单取消时间',
-        className: 'order-date-picker',
+        label: '销售订单取消时间',
+        className: 'order-all-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
@@ -351,70 +414,61 @@ export const childAllFieldList: FormField[] = [
 
 // 未勾选仅展示父订单ID
 export const defaultColChildList = [
-    'createTime', // 订单时间
-    'orderGoodsId', // 中台订单子ID
-    'goodsDetail', // 商品详情
-    'skuId', // sku id
-    // 'channelOrderGoodsSn', // Product_sn
-    // 'channel_order_status',         // 渠道订单状态
-    // 'channel_delivery_status',      // 渠道发货状态
-    'orderGoodsStatus', // 中台订单状态
-    'orderGoodsShippingStatus', // 中台订单配送状态
-    'productId', // 中台商品ID
-    'purchasePlanId', // 计划子项ID
+    'createTime', // 订单生成时间
+    'orderGoodsStatus', // 订单状态
+    'orderGoodsShippingStatusShow', // 配送状态
+    'orderGoodsId', // 子订单ID
+    'productId', // Version ID
+    'productImage', // SKU图片
+    // 'a1',                             // 商品名称 - 待确认
+    'productStyle', // 商品规格
+    'goodsNumber', // 销售商品数量
+    'freight', // 销售商品运费
+    '_goodsTotalAmount', // 销售商品总金额
+    'purchaseNumber', // 采购商品数量
+    '_purchaseTotalAmount', // 采购商品总金额
+    'channelSource', // 销售渠道
+    // 'a2',                             // 销售渠道Goods ID
+    'confirmTime', // 销售订单确认时间
+    'channelOrderGoodsSn', // 渠道订单ID
+    'lastWaybillNo', // 销售尾程运单ID
+    'purchasePlanId', // 采购计划ID
+    'reserveStatus', // 仓库库存预定状态
     'purchasePlatform', // 采购平台
-    'reserveStatus', // 库存预定状态
     'purchaseOrderStatus', // 采购订单状态
     'purchaseOrderPayStatus', // 采购支付状态
-    'purchaseOrderShippingStatus', // 采购配送状态
-    // 'purchaseCreateTime', // 采购生成时间
-    'purchasePlatformOrderId', // 采购订单号
-    'purchaseWaybillNo', // 采购运单号
-    '_logisticsTrack', // 物流轨迹
 ];
 
 export const childOptionalColList = [
-    { key: 'purchaseNumber', name: '采购数量' }, // 2
-    { key: 'purchaseAmount', name: '采购单价' }, // 2
-    { key: 'purchaseCancelReason', name: '采购取消原因' }, // 2
-    // { key: 'purchaseCreateTime', name: '采购时间' }, // 2
-    { key: 'payTime', name: '支付时间' }, // 2
-    // orderInfo
-    { key: 'confirmTime', name: '订单确认时间' }, // 1
-    { key: 'purchaseTime', name: '采购完成时间' }, // 1
-    { key: 'storageTime', name: '入库时间' }, // 1
-    { key: 'deliveryTime', name: '出库时间' }, // 1
-    { key: 'collectTime', name: '揽收时间' }, // 1
-    { key: 'receiveTime', name: '收货时间' }, // 1
-    { key: 'cancelTime', name: '订单取消时间' }, // 1
-    { key: 'channelOrderGoodsSn', name: '渠道订单ID' }, // 1
-    { key: 'goodsAmount', name: '价格' }, // 1
-    // { key: 'a4', name: '运费' },
-    { key: 'goodsNumber', name: '商品数量' }, // 1
-    { key: 'freight', name: '商品运费' }, // 1
-    { key: '_goodsTotalAmount', name: '商品总金额' }, // 1
-    // { key: 'a6', name: '取消订单时间' },
-    { key: 'channelSource', name: '销售渠道' }, // 1
-    { key: 'orderId', name: '中台父订单ID' }, // 1
-    // orderInfo
-    { key: 'currency', name: '货币类型' }, // 1
-    // { key: 'a10', name: '发货剩余时间' },
-    { key: 'productShop', name: '渠道店铺名' }, // 1
-    { key: 'lastWaybillNo', name: '尾程运单号' }, // 1
-    // { key: 'a14', name: '渠道订单状态' },
-    // { key: 'a15', name: '父订单ID' },
-    // { key: 'a16', name: '子订单ID' },
-    // { key: 'orderGoodsId', name: '中台子订单ID' }, // 1
-    // { key: 'a18', name: '一级类目' },
-    // { key: 'a19', name: '二级类目' },
-    // { key: 'a20', name: '三级类目' },
+    { key: 'orderId', name: '父订单ID' },
+    { key: 'skuId', name: '中台SKU ID' },
+    { key: 'goodsAmount', name: '销售商品单价' },
+    { key: 'currency', name: '销售金额货币' },
+    { key: 'purchaseAmount', name: '采购商品单价' },
+    // { key: '', name: '商品属性标签' },               // 待补充
+    // { key: 'productShop', name: '销售店铺名称' },    // 待补充
+    // { key: '', name: '销售渠道二级分类' },           // 待补充
+    { key: 'cancelTime', name: '销售订单取消时间' },
+    { key: 'deliveryTime', name: '销售订单出库时间' },
+    { key: 'collectTime', name: '销售订单揽收时间' },
+    { key: 'receiveTime', name: '妥投时间' },
+    // { key: 'productShop', name: '采购店铺名称' },     // 待补充
+    { key: 'purchaseCreateTime', name: '采购订单生成时间' },
+    { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
+    { key: 'purchasePlatformOrderId', name: '采购订单ID' },
+    { key: 'payTime', name: '采购支付时间' },
+    { key: 'purchaseWaybillNo', name: '采购运单ID' },
+    { key: 'purchaseCancelReason', name: '采购取消原因' },
+    { key: 'purchaseTime', name: '采购签收时间' },
+    { key: 'storageTime', name: '采购入库时间' },
+    { key: '_logisticsTrack', name: '物流轨迹' },
 ];
 
 export const parentDefaultFieldList: FormField[] = [
     {
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
-        label: '订单时间',
+        label: '订单生成时间',
         className: 'order-date-picker',
         formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
@@ -422,11 +476,11 @@ export const parentDefaultFieldList: FormField[] = [
     {
         type: 'input',
         name: 'order_id',
-        label: '中台父订单id',
+        label: '父订单ID',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        placeholder: '请输入中台父订单id',
-        formatter: 'numberStrArr',
+        placeholder: '请输入父订单ID',
+        formatter: 'number_str_arr',
     },
     {
         type: 'select',
@@ -447,7 +501,7 @@ export const parentAllFieldList: FormField[] = [
         className: 'order-input',
         formItemClassName: 'order-form-item',
         placeholder: '请输入销售订单id',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'dateRanger',

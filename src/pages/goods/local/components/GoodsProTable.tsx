@@ -1,27 +1,23 @@
 import React, { RefObject } from 'react';
 import { Button } from 'antd';
 // import ProTable from '@/components/ProTable';
-import { ProTable, FitTable } from 'react-components';
+import { ProTable } from 'react-components';
 import { PaginationConfig } from 'antd/es/pagination';
 import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
 import { AutoEnLargeImg } from 'react-components';
 import ShelvesDialog from './ShelvesDialog';
-import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
+import ImgEditDialog from './ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
-import { ColumnsType } from 'antd/es/table';
-import {
-    ISearchPageParams,
-    IPublishItem,
-    ICatagoryItem,
-    IGoodsEditItem,
-    IGoodsAndSkuItem,
-} from '@/interface/ILocalGoods';
+
+import { IRowDataItem, IPageData } from '../index';
+import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
+import Export from '@/components/Export';
 
 const pageSizeOptions = ['50', '100', '500', '1000'];
 
@@ -31,35 +27,38 @@ declare interface IProps {
     pageSize: number;
     total: number;
     selectedRowKeys: string[];
-    goodsList: IGoodsAndSkuItem[];
+    goodsList: IRowDataItem[];
     allCatagoryList: ICatagoryItem[];
-    onSearch(pageData?: ISearchPageParams, isRefresh?: boolean): void;
+    onSearch(pageData?: IPageData, isRefresh?: boolean): void;
     changeSelectedRowKeys(keys: string[]): void;
     setProductTags(productId: string, tags: string[]): void;
-    toolBarRender: JSX.Element[];
+
+    // 导出弹窗
+    exportVisible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {
     goodsEditDialogStatus: boolean;
     shelvesDialogStatus: boolean;
     skuDialogStatus: boolean;
-    currentRowData: IGoodsAndSkuItem | null;
+    currentEditGoods: IRowDataItem | null;
+    originEditGoods: IRowDataItem | null;
     publishStatusList: IPublishItem[];
-    currentEditGoods: IGoodsEditItem | null;
-    originEditGoods: IGoodsEditItem | null;
 }
 
 class GoodsProTable extends React.PureComponent<IProps, IState> {
     private skuDialogRef: RefObject<SkuDialog> = React.createRef();
     private goodsMergeRef: RefObject<GoodsMergeDialog> = React.createRef();
-    private columns: ColumnsType<IGoodsAndSkuItem> = [
+    private columns = [
         {
             fixed: 'left',
             key: '_operation',
             title: '操作',
             align: 'center',
             width: 156,
-            render: (value, row: IGoodsAndSkuItem) => {
+            render: (value, row: IRowDataItem) => {
                 return (
                     <>
                         <div>
@@ -71,7 +70,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                             </Button>
                         </div>
                         <div style={{ marginTop: -6 }}>
-                            <Link to={`/goods/local/${row.commodity_id}`}>
+                            <Link to={`/goods/local/version?id=${row.commodity_id}`}>
                                 <Button type="link">查看更多版本</Button>
                             </Link>
                         </div>
@@ -92,7 +91,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'product_id',
             align: 'center',
             width: 120,
-            render: (value: string, row: IGoodsAndSkuItem) => {
+            render: (value: string, row: IRowDataItem) => {
                 return <div className={row.hasnew_version ? 'red' : ''}>{value}</div>;
             },
         },
@@ -102,7 +101,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'product_sn',
             align: 'center',
             width: 140,
-            render: (value: string, row: IGoodsAndSkuItem) => {
+            render: (value: string, row: IRowDataItem) => {
                 const _value = value !== '0' ? value : '';
                 return (
                     <>
@@ -142,7 +141,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'goods_img',
             align: 'center',
             width: 120,
-            render: (value: string, row: IGoodsAndSkuItem) => {
+            render: (value: string, row: IRowDataItem) => {
                 return <AutoEnLargeImg src={value} className="goods-local-img" />;
             },
         },
@@ -152,7 +151,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'title',
             align: 'center',
             width: 200,
-            render: (value: string, row: IGoodsAndSkuItem) => {
+            render: (value: string, row: IRowDataItem) => {
                 return <div className="text">{value}</div>;
             },
         },
@@ -162,7 +161,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'tags',
             align: 'center',
             width: 200,
-            render: (value: string[], row: IGoodsAndSkuItem) => {
+            render: (value: string[], row: IRowDataItem) => {
                 const { commodity_id, product_id } = row;
                 return (
                     <div>
@@ -193,7 +192,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'first_catagory',
             align: 'center',
             width: 120,
-            render: (value: ICatagoryItem, row: IGoodsAndSkuItem) => {
+            render: (value: ICatagoryItem, row: IRowDataItem) => {
                 const { second_catagory, third_catagory } = row;
                 return <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>;
             },
@@ -204,7 +203,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'sku_number',
             align: 'center',
             width: 140,
-            render: (value: number, row: IGoodsAndSkuItem) => {
+            render: (value: number, row: IRowDataItem) => {
                 return (
                     <>
                         <div>{value}</div>
@@ -225,7 +224,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             title: '爬虫价格(￥)',
             dataIndex: 'price_min',
             align: 'center',
-            render: (value: number, row: IGoodsAndSkuItem) => {
+            render: (value: number, row: IRowDataItem) => {
                 const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
                 return (
                     <div>
@@ -292,7 +291,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'publish_status',
             align: 'center',
             width: 160,
-            render: (value: IPublishItem[], row: IGoodsAndSkuItem, index: number) => {
+            render: (value: IPublishItem[], row: IRowDataItem, index: number) => {
                 const channelInfo: { [key: string]: IPublishItem } = {};
                 value?.forEach(item => {
                     const { publishChannel, publishStore } = item;
@@ -353,7 +352,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             dataIndex: 'worm_goodsinfo_link',
             align: 'center',
             width: 200,
-            render: (value: string, row: IGoodsAndSkuItem) => {
+            render: (value: string, row: IRowDataItem) => {
                 return (
                     <a href={value} target="_blank">
                         {value}
@@ -361,12 +360,11 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 );
             },
         },
-    ];
+    ] as ProColumns<IRowDataItem>[];
     constructor(props: IProps) {
         super(props);
         this.state = {
             currentEditGoods: null,
-            currentRowData: null,
             goodsEditDialogStatus: false,
             shelvesDialogStatus: false,
             skuDialogStatus: false,
@@ -410,34 +408,12 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
     };
 
     // 编辑商品-弹框
-    toggleEditGoodsDialog = (status: boolean, rowData?: IGoodsAndSkuItem) => {
-        let currentEditGoods: IGoodsEditItem | null = null;
-        if (rowData) {
-            const {
-                product_id,
-                title,
-                description,
-                first_catagory,
-                second_catagory,
-                third_catagory,
-                goods_img,
-                sku_image,
-            } = rowData;
-            currentEditGoods = {
-                product_id,
-                title,
-                description,
-                first_catagory,
-                second_catagory,
-                third_catagory,
-                goods_img,
-                sku_image,
-            };
-        }
+    toggleEditGoodsDialog = (status: boolean, rowData?: IRowDataItem) => {
+        // console.log('toggleEditGoodsDialog', rowData);
         this.setState({
             goodsEditDialogStatus: status,
-            currentEditGoods: currentEditGoods ? { ...currentEditGoods } : null,
-            originEditGoods: currentEditGoods ? { ...currentEditGoods } : null,
+            currentEditGoods: rowData ? { ...rowData } : null,
+            originEditGoods: rowData ? { ...rowData } : null,
         });
     };
 
@@ -447,7 +423,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         // 'title' | 'description'
         this.setState({
             currentEditGoods: {
-                ...(currentEditGoods as IGoodsEditItem),
+                ...(currentEditGoods as IRowDataItem),
                 [type]: text,
             },
         });
@@ -459,7 +435,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         if (type === 'first_catagory') {
             this.setState({
                 currentEditGoods: {
-                    ...(currentEditGoods as IGoodsEditItem),
+                    ...(currentEditGoods as IRowDataItem),
                     first_catagory: {
                         id,
                     },
@@ -470,7 +446,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         } else if (type === 'second_catagory') {
             this.setState({
                 currentEditGoods: {
-                    ...(currentEditGoods as IGoodsEditItem),
+                    ...(currentEditGoods as IRowDataItem),
                     second_catagory: { id },
                     third_catagory: {},
                 },
@@ -478,7 +454,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         } else {
             this.setState({
                 currentEditGoods: {
-                    ...(currentEditGoods as IGoodsEditItem),
+                    ...(currentEditGoods as IRowDataItem),
                     third_catagory: { id },
                 },
             });
@@ -490,7 +466,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         const { currentEditGoods } = this.state;
         this.setState({
             currentEditGoods: {
-                ...(currentEditGoods as IGoodsEditItem),
+                ...(currentEditGoods as IRowDataItem),
                 sku_image: imgList,
             },
         });
@@ -500,15 +476,15 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
     resetGoodsData = () => {
         const { originEditGoods } = this.state;
         this.setState({
-            currentEditGoods: { ...(originEditGoods as IGoodsEditItem) },
+            currentEditGoods: { ...(originEditGoods as IRowDataItem) },
         });
     };
 
-    private showSkuDialog = (rowData: IGoodsAndSkuItem) => {
+    private showSkuDialog = (rowData: IRowDataItem) => {
         this.setState(
             {
                 skuDialogStatus: true,
-                currentRowData: rowData,
+                currentEditGoods: rowData,
             },
             () => {
                 this.skuDialogRef.current!.getSkuList(rowData.product_id, { page: 1 });
@@ -519,11 +495,11 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
     private hideSkuDialog = () => {
         this.setState({
             skuDialogStatus: false,
-            currentRowData: null,
+            currentEditGoods: null,
         });
     };
 
-    private showMergeDialog = (row: IGoodsAndSkuItem) => {
+    private showMergeDialog = (row: IRowDataItem) => {
         const { commodity_id, product_sn } = row;
         this.goodsMergeRef.current?.showModal(commodity_id, product_sn);
     };
@@ -566,7 +542,9 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             goodsList,
             loading,
             allCatagoryList,
-            toolBarRender,
+            exportVisible,
+            onCancel,
+            onOKey,
         } = this.props;
         const {
             goodsEditDialogStatus,
@@ -575,11 +553,11 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             originEditGoods,
             currentEditGoods,
             publishStatusList,
-            currentRowData,
         } = this.state;
         return (
             <>
-                {/* <ProTable<IGoodsAndSkuItem>
+                <ProTable<IRowDataItem>
+                    // optimize={false}
                     headerTitle="本地产品库列表"
                     rowKey="product_id"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
@@ -598,6 +576,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         showSizeChanger: true,
                         pageSizeOptions: pageSizeOptions,
                     }}
+                    // toolBarRender={false}
                     tableAlertRender={false}
                     columns={this.columns}
                     dataSource={goodsList}
@@ -609,33 +588,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                         reload: this.onReload,
                         setting: true,
                     }}
-                /> */}
-                <FitTable<IGoodsAndSkuItem>
-                    rowKey="product_id"
-                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                    bottom={60}
-                    rowSelection={{
-                        fixed: true,
-                        columnWidth: 60,
-                        selectedRowKeys: selectedRowKeys,
-                        onChange: this.onSelectChange,
-                    }}
-                    pagination={
-                        {
-                            total: total,
-                            current: currentPage,
-                            pageSize: pageSize,
-                            showSizeChanger: true,
-                            // pageSizeOptions: pageSizeOptions,
-                            position: ['topRight', 'bottomRight'],
-                        } as any
-                    }
-                    columns={this.columns}
-                    dataSource={goodsList}
-                    loading={loading}
-                    onChange={this.onChangeProTable}
-                    columnsSettingRender={true}
-                    toolBarRender={() => toolBarRender}
                 />
                 <ShelvesDialog
                     visible={shelvesDialogStatus}
@@ -658,10 +610,16 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 <SkuDialog
                     visible={skuDialogStatus}
                     ref={this.skuDialogRef}
-                    currentRowData={currentRowData}
+                    currentRowData={currentEditGoods}
                     hideSkuDialog={this.hideSkuDialog}
                 />
                 <GoodsMergeDialog onReload={this.onReload} ref={this.goodsMergeRef} />
+                <Export
+                    columns={this.columns as any}
+                    visible={exportVisible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
+                />
             </>
         );
     }

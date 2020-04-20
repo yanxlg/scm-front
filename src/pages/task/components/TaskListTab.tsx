@@ -2,6 +2,7 @@ import React, { ReactText, useCallback, useEffect, useMemo, useRef } from 'react
 import { ITaskListItem, ITaskListQuery, ITaskListExtraData } from '@/interface/ITask';
 import { Button, message } from 'antd';
 import {
+    isGoodsUpdateType,
     TaskRangeCode,
     TaskRangeMap,
     TaskStatusCode,
@@ -11,6 +12,7 @@ import {
     TaskTypeEnum,
     TaskTypeList,
     TaskTypeMap,
+    PUTaskRangeTypeMap,
 } from '@/enums/StatusEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { unixToEndDate, unixToStartDate } from 'react-components/es/utils/date';
@@ -126,7 +128,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ? 5
                     : '6',
         };
-    }, []);
+    }, [loading]);
 
     const viewTaskDetail = useCallback((task_id: number) => {
         history.push(`/task/list/${task_id}`);
@@ -273,7 +275,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 dataIndex: 'task_range',
                 width: '182px',
                 align: 'center',
-                render: (text: TaskRangeCode) => TaskRangeMap[text] || '--',
+                render: (text: TaskRangeCode, record) => {
+                    const range = isGoodsUpdateType(text)
+                        ? record.update_type?.map(code => PUTaskRangeTypeMap[code])?.join(';')
+                        : TaskRangeMap[text];
+                    return range || '--';
+                },
             },
             {
                 title: '任务周期',
@@ -326,7 +333,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    formatter: 'number',
                 },
                 {
                     label: '任务状态',
@@ -424,7 +430,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    formatter: 'number',
                 },
                 {
                     label: '任务名称',

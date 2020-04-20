@@ -1,11 +1,11 @@
 import React, { RefObject } from 'react';
 import { message, Button } from 'antd';
-import ExcelDialog from './components/ExcelDialog';
-import { JsonFormRef, FormField } from 'react-components/lib/JsonForm';
-import { JsonForm, LoadingButton } from 'react-components';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { JsonForm } from 'react-components';
 import Container from '@/components/Container';
 import GoodsProTable from './components/GoodsProTable';
 import MerchantListModal from '../components/MerchantListModal';
+
 import {
     getGoodsList,
     postGoodsExports,
@@ -20,12 +20,7 @@ import {
 import { RouteComponentProps } from 'react-router';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import {
-    ISearchPageParams,
-    IGoodsList,
-    ICatagoryItem,
-    IGoodsAndSkuItem,
-} from '@/interface/ILocalGoods';
+import { IGoodsList, ISkuItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import {
     defaultOption,
     inventoryStatusList,
@@ -35,7 +30,12 @@ import {
 import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
-import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
+
+export declare interface IPageData {
+    page?: number;
+    page_count?: number;
+}
 
 const getCatagoryListPromise = getCatagoryList();
 
@@ -46,7 +46,7 @@ const formFields: FormField[] = [
         name: 'task_number',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -54,7 +54,7 @@ const formFields: FormField[] = [
         name: 'store_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -62,7 +62,7 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -70,7 +70,7 @@ const formFields: FormField[] = [
         name: 'title',
         placeholder: '请输入商品名称',
         className: 'local-search-item-input',
-        // formatter: 'strArr',
+        // formatter: 'str_arr',
     },
     {
         type: 'select',
@@ -93,7 +93,7 @@ const formFields: FormField[] = [
         label: '请选择版本状态',
         name: 'product_status',
         className: 'local-search-item-select',
-        formatter: 'joinStr',
+        formatter: 'join',
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,
@@ -208,15 +208,18 @@ const formFields: FormField[] = [
     },
 ];
 
+export type IRowDataItem = IGoodsList & ISkuItem;
+
 declare interface IIndexState {
     excelDialogStataus: boolean;
     merchantDialogStatus: boolean;
     // 按钮加载中状态
     searchLoading: boolean;
+    deleteLoading: boolean;
     page: number;
     page_count: number;
     allCount: number;
-    goodsList: IGoodsAndSkuItem[];
+    goodsList: IRowDataItem[];
     selectedRowKeys: string[];
     allCatagoryList: ICatagoryItem[];
     onsaleType: 'default' | 'all';
@@ -238,6 +241,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         this.state = {
             excelDialogStataus: false,
             merchantDialogStatus: false,
+            deleteLoading: false,
             searchLoading: false,
             page,
             page_count,
@@ -300,7 +304,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
         });
     };
 
-    private onSearch = (searchData?: ISearchPageParams, isRefresh?: boolean) => {
+    private onSearch = (searchData?: IPageData, isRefresh?: boolean) => {
         const { page, page_count } = this.state;
         let params: IFilterParams = {
             page,
@@ -338,15 +342,13 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     private handleClickSearch = () => {
-        return this.formRef.current!.validateFields().then(values => {
-            return this.onSearch({
+        // console.log(this.formRef.current?.getFieldsValue());
+        this.formRef.current?.validateFields().then(values => {
+            // console.log('handleClickSearch', values);
+            this.onSearch({
                 page: 1,
             });
         });
-    };
-
-    private onReload = () => {
-        return this.onSearch({}, true);
     };
 
     private getCatagoryList = () => {
@@ -359,7 +361,7 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 处理表格数据
-    private handleRowData(list: IGoodsList[]): IGoodsAndSkuItem[] {
+    private handleRowData(list: IGoodsList[]): IRowDataItem[] {
         return list.map(item => {
             const { sku_info } = item;
             if (sku_info.length > 0) {
@@ -375,7 +377,10 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     // 删除
     getGoodsDelete = () => {
         const { selectedRowKeys, goodsList } = this.state;
-        return getGoodsDelete({
+        this.setState({
+            deleteLoading: true,
+        });
+        getGoodsDelete({
             commodity_ids: [
                 ...new Set(
                     selectedRowKeys.map(productId => {
@@ -384,29 +389,35 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                     }),
                 ),
             ],
-        }).then(res => {
-            this.onSearch();
-            const { success, failed } = res.data;
-            let str = '';
-            if (success.length) {
-                str += `删除成功${success.join('、')}。`;
-            } else if (failed.length) {
-                str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
-            }
-            message.info(str);
-        });
+        })
+            .then(res => {
+                this.setState({
+                    deleteLoading: false,
+                });
+                this.onSearch();
+                const { success, failed } = res.data;
+                let str = '';
+                if (success.length) {
+                    str += `删除成功${success.join('、')}。`;
+                } else if (failed.length) {
+                    str += `删除失败${failed.map((item: any) => item.id).join('、')}。`;
+                }
+                message.info(str);
+            })
+            .finally(() => {
+                this.setState({
+                    deleteLoading: false,
+                });
+            });
     };
 
     // 获取下载表格数据
-    private getExcelData = (count: number) => {
+    private getExcelData = (value: any) => {
         return postGoodsExports(
             Object.assign({}, this.searchFilter, {
-                page: count + 1,
-                page_count: 10000,
+                ...value,
             }),
-        ).finally(() => {
-            this.toggleExcelDialog(false);
-        });
+        );
     };
 
     // 显示下载弹框
@@ -498,43 +509,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
             excelDialogStataus,
             merchantDialogStatus,
             selectedRowKeys,
+            deleteLoading,
             searchLoading,
             allCatagoryList,
         } = this.state;
 
         const disabled = selectedRowKeys.length === 0;
-
-        const toolBarRender = [
-            <Button
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={this.handleClickOnsale}
-                disabled={disabled}
-            >
-                一键上架
-            </Button>,
-            <Button
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={this.handleClickAllOnsale}
-            >
-                查询商品一键上架
-            </Button>,
-            <LoadingButton
-                className={formStyles.formBtn}
-                onClick={this.getGoodsDelete}
-                disabled={disabled}
-            >
-                删除
-            </LoadingButton>,
-            <Button
-                disabled={allCount === 0}
-                className={formStyles.formBtn}
-                onClick={() => this.toggleExcelDialog(true)}
-            >
-                导出至Excel
-            </Button>,
-        ];
 
         return (
             <Container>
@@ -546,21 +526,47 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         fieldList={formFields}
                     >
                         <div>
-                            <LoadingButton
+                            <Button
                                 type="primary"
-                                className={formStyles.formBtn}
+                                loading={searchLoading}
                                 onClick={this.handleClickSearch}
                             >
                                 查询
-                            </LoadingButton>
-                            <LoadingButton className={formStyles.formBtn} onClick={this.onReload}>
-                                刷新
-                            </LoadingButton>
+                            </Button>
                         </div>
                     </JsonForm>
-                    {/* <div style={{ margin: '0 0 16px 0' }}>
-                        
-                    </div> */}
+                    <div style={{ margin: '0 0 16px 0' }}>
+                        <Button
+                            type="primary"
+                            className="local-search-item-btn"
+                            onClick={this.handleClickOnsale}
+                            disabled={disabled}
+                        >
+                            一键上架
+                        </Button>
+                        <Button
+                            type="primary"
+                            className="local-search-all-btn"
+                            onClick={this.handleClickAllOnsale}
+                        >
+                            查询商品一键上架
+                        </Button>
+                        <Button
+                            className="local-search-item-btn"
+                            loading={deleteLoading}
+                            onClick={this.getGoodsDelete}
+                            disabled={disabled}
+                        >
+                            删除
+                        </Button>
+                        <Button
+                            disabled={allCount === 0}
+                            className="local-search-item-btn"
+                            onClick={() => this.toggleExcelDialog(true)}
+                        >
+                            导出至Excel
+                        </Button>
+                    </div>
                     <GoodsProTable
                         loading={searchLoading}
                         currentPage={page}
@@ -572,13 +578,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         onSearch={this.onSearch}
                         changeSelectedRowKeys={this.changeSelectedRowKeys}
                         setProductTags={this.setProductTags}
-                        toolBarRender={toolBarRender}
-                    />
-                    <ExcelDialog
-                        visible={excelDialogStataus}
-                        allCount={allCount}
-                        getExcelData={this.getExcelData}
-                        toggleExcelDialog={this.toggleExcelDialog}
+                        exportVisible={excelDialogStataus}
+                        onCancel={() => this.toggleExcelDialog(false)}
+                        onOKey={this.getExcelData}
                     />
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
                     <MerchantListModal

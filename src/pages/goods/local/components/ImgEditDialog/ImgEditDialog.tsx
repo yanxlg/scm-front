@@ -230,19 +230,19 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
     };
 
     // RcFile
-    // private beforeUpload = (file: RcFile) => {
-    //     // console.log('beforeUpload', file);
-    //     if (file.type !== 'image/jpeg') {
-    //         message.error('导入失败！图片格式错误');
-    //         return false;
-    //     }
-    //     const isLt = file.size / 1024 / 1024 <= 0.1;
-    //     if (!isLt) {
-    //         message.error('导入失败！图片大于100k');
-    //         return false;
-    //     }
-    //     return true;
-    // };
+    private beforeUpload = (file: RcFile) => {
+        // console.log('beforeUpload', file);
+        // if (file.type !== 'image/jpeg') {
+        //     message.error('导入失败！图片格式错误');
+        //     return false;
+        // }
+        // const isLt = file.size / 1024 / 1024 <= 0.1;
+        // if (!isLt) {
+        //     message.error('导入失败！图片大于100k');
+        //     return false;
+        // }
+        return false;
+    };
 
     // UploadChangeParam
     private uploadImg = (info: any) => {
@@ -257,7 +257,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 },
                 () => {
                     // 检验图片规格
-                    const file = info.file.originFileObj;
+                    const file = info.file;
                     if (file.type !== 'image/jpeg') {
                         message.error('导入失败！图片格式错误', 1.5).then(
                             () => {
@@ -488,7 +488,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             <Upload
                                 className="item"
                                 showUploadList={false}
-                                // beforeUpload={this.beforeUpload}
+                                beforeUpload={this.beforeUpload}
                                 onChange={this.uploadImg}
                             >
                                 <div className="add">

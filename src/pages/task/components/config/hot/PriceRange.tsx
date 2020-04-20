@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
 import { RichInput } from 'react-components';
 import { FormInstance } from 'antd/es/form';
-import { isNull } from 'react-components/es/JsonForm';
+import { isNull } from 'react-components/es/utils/formatter';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 
@@ -40,7 +40,6 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                     label="价格区间(￥)"
                     required={true}
                     className={classNames(
-                        formStyles.formInline,
                         formStyles.flexInline,
                         formStyles.formRequiredHide,
                         formStyles.formItemClean,
