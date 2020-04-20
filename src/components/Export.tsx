@@ -106,12 +106,7 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
             confirmLoading={loading}
         >
             <Form layout="horizontal" form={form} className={formStyles.formHelpAbsolute}>
-                <Form.Item
-                    className={formStyles.formItem}
-                    label="文件名称"
-                    name="filename"
-                    rules={[{ required: true, message: '请输入文件名称' }]}
-                >
+                <Form.Item className={formStyles.formItem} label="文件名称" name="filename">
                     <Input className={formStyles.formItemDefault} />
                 </Form.Item>
                 <Form.Item label="导出字段" className={formStyles.formItem}>
