@@ -41,7 +41,11 @@ export async function setCommodityTag(data: { tag_name: string[]; commodity_id: 
     });
 }
 
-export async function setCommoditySkuTag(data: { tag_name: string[]; commodity_sku_id: string }) {
+export async function setCommoditySkuTag(data: {
+    tag_name: string[];
+    commodity_sku_id: string;
+    commodity_id: string;
+}) {
     return request.post<IResponse<any>>(GoodsAttrApiPath.setCommoditySkuTag, {
         data,
     });

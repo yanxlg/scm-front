@@ -1,8 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useDataSet } from 'react-components/es/hooks';
 import { ICookieItem } from '@/interface/ISetting';
 import { Form, Button, Input } from 'antd';
-import { FitTable, LoadingButton } from 'react-components';
+import { FitTable, LoadingButton, useDataSet } from 'react-components';
 import { queryCookies, saveCookie } from '@/services/setting';
 import settingStyles from '@/styles/_setting.less';
 import { ColumnType } from 'antd/es/table/interface';

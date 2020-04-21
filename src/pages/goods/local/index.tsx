@@ -1,6 +1,5 @@
 import React, { RefObject } from 'react';
 import { message, Button } from 'antd';
-import ExcelDialog from './components/ExcelDialog';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import Container from '@/components/Container';
@@ -31,6 +30,7 @@ import {
 import { EmptyObject } from '@/config/global';
 
 import '../../../styles/goods-local.less';
+import Export from '@/components/Export';
 
 export declare interface IPageData {
     page?: number;
@@ -46,7 +46,7 @@ const formFields: FormField[] = [
         name: 'task_number',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'numberStrArr',
+        formatter: 'number_str_arr',
     },
     {
         type: 'input',
@@ -54,7 +54,7 @@ const formFields: FormField[] = [
         name: 'store_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -62,7 +62,7 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         placeholder: '多个逗号隔开',
         className: 'local-search-item-input',
-        formatter: 'strArr',
+        formatter: 'str_arr',
     },
     {
         type: 'input',
@@ -70,7 +70,7 @@ const formFields: FormField[] = [
         name: 'title',
         placeholder: '请输入商品名称',
         className: 'local-search-item-input',
-        // formatter: 'strArr',
+        // formatter: 'str_arr',
     },
     {
         type: 'select',
@@ -93,7 +93,7 @@ const formFields: FormField[] = [
         label: '请选择版本状态',
         name: 'product_status',
         className: 'local-search-item-select',
-        formatter: 'joinStr',
+        formatter: 'join',
         placeholder: '请选择版本状态',
         mode: 'multiple',
         maxTagCount: 2,
@@ -412,15 +412,12 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
     };
 
     // 获取下载表格数据
-    private getExcelData = (count: number) => {
+    private getExcelData = (value: any) => {
         return postGoodsExports(
             Object.assign({}, this.searchFilter, {
-                page: count + 1,
-                page_count: 10000,
+                ...value,
             }),
-        ).finally(() => {
-            this.toggleExcelDialog(false);
-        });
+        );
     };
 
     // 显示下载弹框
@@ -581,12 +578,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         onSearch={this.onSearch}
                         changeSelectedRowKeys={this.changeSelectedRowKeys}
                         setProductTags={this.setProductTags}
-                    />
-                    <ExcelDialog
-                        visible={excelDialogStataus}
-                        allCount={allCount}
-                        getExcelData={this.getExcelData}
-                        toggleExcelDialog={this.toggleExcelDialog}
+                        exportVisible={excelDialogStataus}
+                        onCancel={() => this.toggleExcelDialog(false)}
+                        onOKey={this.getExcelData}
                     />
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
                     <MerchantListModal

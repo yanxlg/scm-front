@@ -69,3 +69,18 @@ export interface ICookieBody {
     account_id: string;
     cookie: string;
 }
+
+export interface IFileItem {
+    id: string;
+    object_url: string;
+    filename: string;
+    module: string;
+    status: string;
+    params: string;
+    fields: string;
+    percent: string;
+    username: string;
+    create_time: string;
+    last_update_time: string;
+    filesize: string;
+}
