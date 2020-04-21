@@ -192,7 +192,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                     layout="horizontal"
                     autoComplete={'off'}
                     initialValues={{
-                        ranges: [PUTaskRangeType.AllOnShelves],
+                        ranges: [PUTaskRangeType.HasSales],
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
                         update_item: UpdateItemType.All,
@@ -226,7 +226,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         ]}
                     >
                         <Checkbox.Group>
-                            <Checkbox value={PUTaskRangeType.AllOnShelves}>有销量商品</Checkbox>
+                            <Checkbox value={PUTaskRangeType.HasSales}>有销量商品</Checkbox>
                             <Checkbox value={PUTaskRangeType.AllOnShelves}>在架商品</Checkbox>
                             <Checkbox value={PUTaskRangeType.NoSalesOff}>未在架商品</Checkbox>
                             {/*
