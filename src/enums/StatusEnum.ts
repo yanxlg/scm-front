@@ -127,15 +127,17 @@ export enum PUTaskRangeType {
     NoSalesOn,
     HasSalesOff,
     NoSalesOff,
+    HasSales,
 }
 
 export const PUTaskRangeTypeMap = {
     1: '全部商品',
-    2: '全部已上架商品',
+    2: '在架商品',
     3: '有销量的已上架商品',
     4: '无销量在架商品',
     5: '有销量下架商品',
-    6: '全部未上架商品',
+    6: '未在架商品',
+    7: '有销量商品',
 };
 
 export type PUTaskRangeTypeCode = keyof typeof PUTaskRangeTypeMap;
