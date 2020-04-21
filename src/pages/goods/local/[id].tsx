@@ -15,6 +15,7 @@ const Version: React.FC<RouteComponentProps<{ id: string }>> = ({
     match
 }) => {
     const commodityId = match.params.id;
+    
     const { releasedGoods, getReleasedGoodsInfo } = useReleasedGoods(commodityId);
     
     // const [] = useState();

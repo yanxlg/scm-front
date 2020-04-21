@@ -1,7 +1,12 @@
 import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
 import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
-import { IGoodsList, ICatagoryItem, IGoodsVersionItem } from '@/interface/ILocalGoods';
+import {
+    IGoodsList,
+    ICatagoryItem,
+    IGoodsVersionItem,
+    IGoodsLockItem,
+} from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ICountryItem } from '@/interface/ISetting';
 import { singlePromiseWrap } from '@/utils/utils';
@@ -159,20 +164,23 @@ function convertCategory(data: ICatagoryItem[]): IOptionItem[] {
 
 // 获取所有
 export const getCatagoryList = singlePromiseWrap(() => {
-    return request.get(LocalApiPath.getCatagoryList).then(res => {
+    return request.get(LocalApiPath.getCatagoryList).then((res: any) => {
         const { data } = res;
         return {
             list: data,
             convertList: convertCategory(data),
         };
     });
-})
+});
 
 // 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {
-    return request.get<IResponse<IPaginationResponse<IGoodsVersionItem>>>(LocalApiPath.getGoodsVersion, {
-        params: params,
-    });
+    return request.get<IResponse<IPaginationResponse<IGoodsVersionItem>>>(
+        LocalApiPath.getGoodsVersion,
+        {
+            params: params,
+        },
+    );
 }
 
 // 下载商品版本excel
@@ -185,7 +193,7 @@ export async function postGoodsVersionExport(data: IGoodsVersionParams) {
             responseType: 'blob',
             parseResponse: false,
         })
-        .then(response => {
+        .then((response: any) => {
             const disposition = response.headers.get('content-disposition');
             const fileName = decodeURI(
                 disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
@@ -255,16 +263,21 @@ export async function putGoodsMergeAdd(data: { product_sn: string; commodity_ids
 // 获取所有
 export async function getGoodsStatusList() {
     return request.get(LocalApiPath.getGoodsStatusList).then((res: any) => {
-        // console.log('getGoodsStatusList', res);
-        // // const { data } = res;
-        // // return {
-        // //     list: data,
-        // //     convertList: convertCategory(data),
-        // // };
-        // return res
         return res.data.result.map((item: any) => ({
             name: item.msg,
             value: item.code,
         }));
+    });
+}
+
+// 查询商品锁
+export async function getGoodsLock(id: string) {
+    return request.get(LocalApiPath.getGoodsLock.replace(':commodity_id', id));
+}
+
+// 商品字段加解锁
+export async function setGoodsLock(id: string, data: IGoodsLockItem) {
+    return request.post(LocalApiPath.setGoodsLock.replace(':commodity_id', id), {
+        data,
     });
 }

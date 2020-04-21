@@ -160,3 +160,12 @@ export interface IGoodsEditItem {
     goods_img: string;
     sku_image: string[];
 }
+
+export interface IGoodsLockItem {
+    image_is_lock?: boolean;
+    description_is_lock?: boolean;
+    title_is_lock?: boolean;
+    sku_is_lock?: boolean;
+    category_is_lock?: boolean;
+    price_threshold?: number;
+}

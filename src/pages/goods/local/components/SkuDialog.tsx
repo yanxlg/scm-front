@@ -161,7 +161,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
 
     private setCommoditySkuTag = (commodity_sku_id: string, item: string, tags: string[]) => {
         // console.log('commodity_sku_id', commodity_sku_id);
-        const { commodity_id } = this.props.currentRowData;
+        const commodity_id = this.props.currentRowData!.commodity_id as string;
         const index = tags.indexOf(item);
         let list: string[] = [];
         if (index > -1) {

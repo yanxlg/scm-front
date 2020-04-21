@@ -7,7 +7,7 @@ import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
 import { AutoEnLargeImg } from 'react-components';
 import ShelvesDialog from './ShelvesDialog';
-import ImgEditDialog from './ImgEditDialog';
+import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
@@ -70,7 +70,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                             </Button>
                         </div>
                         <div style={{ marginTop: -6 }}>
-                            <Link to={`/goods/local/version?id=${row.commodity_id}`}>
+                            <Link to={`/goods/local/${row.commodity_id}`}>
                                 <Button type="link">查看更多版本</Button>
                             </Link>
                         </div>
