@@ -18,5 +18,4 @@
 .umi-production
 .idea
 
-# less.d.ts
 **.less.d.ts

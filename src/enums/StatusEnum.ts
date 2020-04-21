@@ -123,11 +123,10 @@ export enum TaskIntervalConfigType {
 //======================= 定时更新任务商品范围 ======================//
 export enum PUTaskRangeType {
     AllOnShelves = 2,
-    HasSales,
-    // HasSalesOn,
-    // NoSalesOn,
-    // HasSalesOff,
-    // NoSalesOff,
+    HasSalesOn,
+    NoSalesOn,
+    HasSalesOff,
+    NoSalesOff,
 }
 
 export const PUTaskRangeTypeMap = {
@@ -136,7 +135,7 @@ export const PUTaskRangeTypeMap = {
     3: '有销量的已上架商品',
     4: '无销量在架商品',
     5: '有销量下架商品',
-    6: '无销量下架商品',
+    6: '全部未上架商品',
 };
 
 export type PUTaskRangeTypeCode = keyof typeof PUTaskRangeTypeMap;
