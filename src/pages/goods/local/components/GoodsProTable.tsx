@@ -17,6 +17,7 @@ import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
+import Export from '@/components/Export';
 
 const pageSizeOptions = ['50', '100', '500', '1000'];
 
@@ -31,6 +32,11 @@ declare interface IProps {
     onSearch(pageData?: IPageData, isRefresh?: boolean): void;
     changeSelectedRowKeys(keys: string[]): void;
     setProductTags(productId: string, tags: string[]): void;
+
+    // 导出弹窗
+    exportVisible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {
@@ -536,6 +542,9 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             goodsList,
             loading,
             allCatagoryList,
+            exportVisible,
+            onCancel,
+            onOKey,
         } = this.props;
         const {
             goodsEditDialogStatus,
@@ -605,6 +614,12 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     hideSkuDialog={this.hideSkuDialog}
                 />
                 <GoodsMergeDialog onReload={this.onReload} ref={this.goodsMergeRef} />
+                <Export
+                    columns={this.columns as any}
+                    visible={exportVisible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
+                />
             </>
         );
     }

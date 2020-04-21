@@ -1,0 +1,65 @@
+@import '~antd/es/style/themes/default';
+
+.export {
+    &-card {
+        margin-top: 15px;
+        :global .ant-card-body {
+            padding: 0 !important;
+        }
+        &-content {
+            height: 129px;
+            padding: 0 24px;
+        }
+    }
+    &-date {
+        margin-top: 34px;
+    }
+    &-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 40px;
+        &-wrap {
+            width: 80px;
+            height: 80px;
+            background: #f4f4f4;
+            text-align: center;
+            padding-top: 20px;
+        }
+    }
+    &-progress {
+        width: 140px;
+        margin-top: 30px;
+        &-label {
+            color: @primary-color;
+        }
+    }
+    &-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        cursor: pointer;
+    }
+    &-size {
+        margin-top: 30px;
+    }
+    &-error {
+        margin-top: 30px;
+        color: @error-color;
+        &-icon {
+            color: @error-color!important;
+        }
+        &-text {
+            color: @error-color!important;
+        }
+    }
+    &-action {
+        position: absolute !important;
+        right: 20px !important;
+        bottom: -5px;
+        width: 102px;
+    }
+    &-total {
+        position: absolute;
+        right: 20px;
+    }
+}

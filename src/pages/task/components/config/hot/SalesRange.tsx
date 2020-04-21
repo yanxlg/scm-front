@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Form } from 'antd';
 import { RichInput } from 'react-components';
-import { isNull } from 'react-components/es/JsonForm';
+import { isNull } from 'react-components/es/utils/formatter';
 import { FormInstance } from 'antd/es/form';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';

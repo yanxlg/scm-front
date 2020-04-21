@@ -333,7 +333,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    formatter: 'number',
                 },
                 {
                     label: '任务状态',
@@ -431,7 +430,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     ),
                     type: 'number',
                     name: 'task_sn',
-                    formatter: 'number',
                 },
                 {
                     label: '任务名称',

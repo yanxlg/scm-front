@@ -90,28 +90,9 @@ export async function getGoodsList(params: IFilterParams) {
 }
 
 export async function postGoodsExports(data: IFilterParams) {
-    return request
-        .post(LocalApiPath.postGoodsExports, {
-            // requestType: 'form',
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(LocalApiPath.postGoodsExports, {
+        data,
+    });
 }
 
 export async function putGoodsPicEdit(data: IImgEditData) {

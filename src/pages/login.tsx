@@ -3,10 +3,10 @@ import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
 import { userLogin } from '@/services/user';
-import { getPageQuery } from '@/utils/request';
 import { history } from 'umi';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { getPageQuery } from '@/utils/utils';
 
 declare interface ILoginState {
     remember: boolean;

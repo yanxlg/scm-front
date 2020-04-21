@@ -1,4 +1,4 @@
-import request, { errorHandlerFactory } from '@/utils/request';
+import request from '@/utils/request';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import {
     IChannelProductListBody,
@@ -112,18 +112,14 @@ export async function queryChannelChangedProperties() {
 export async function updateChannelShelveState(data: IChannelShelveStateBody) {
     return request.put<IResponse<null>>(ChannelApiPath.UpdateShelveState, {
         data,
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 
-export async function exportChannelProductList(data: IChannelProductListBody & RequestPagination) {
-    return request
-        .post(ChannelApiPath.ExportProductList, {
-            data: transPaginationRequest(data),
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function exportChannelProductList(data: IChannelProductListBody) {
+    return request.post(ChannelApiPath.ExportProductList, {
+        data: { ...data },
+    });
 }
 
 // 查询国家运费
