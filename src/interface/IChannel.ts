@@ -242,6 +242,7 @@ export interface IEditSkuItem {
 export interface IEditSkuBody {
     sku_list: IEditSkuItem[];
     merchant_id: string;
+    commodity_id: string;
 }
 
 export interface IEditSkuResponse {
