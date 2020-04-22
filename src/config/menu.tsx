@@ -102,4 +102,15 @@ export default [
             },
         ],
     },
+    {
+        path: '/purchase',
+        name: '订单管理',
+        icon: <Icons type="scm-purchase" className="menu-icon" />,
+        children: [
+            {
+                path: '/purchase/abnormal',
+                name: '仓库异常处理',
+            },
+        ],
+    },
 ];
