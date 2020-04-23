@@ -6,9 +6,10 @@ import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 // import { UploadChangeParam } from 'antd/lib/upload';
 
 import { postGoodsPicUpload } from '@/services/goods';
-import { IRowDataItem } from '../index';
 import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
-import { ICatagoryItem } from '@/interface/ILocalGoods';
+import { ICatagoryItem, IGoodsEditItem } from '@/interface/ILocalGoods';
+
+import './ImgEditDialog.less';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -22,8 +23,8 @@ declare interface IPageData {
 declare interface ImgEditDialogProps {
     visible: boolean;
     allCatagoryList: ICatagoryItem[];
-    currentEditGoods: IRowDataItem | null;
-    originEditGoods: IRowDataItem | null;
+    currentEditGoods: IGoodsEditItem | null;
+    originEditGoods: IGoodsEditItem | null;
     onSearch(params?: IPageData, isRefresh?: boolean): void;
     toggleEditGoodsDialog(status: boolean): void;
     getCurrentCatagory(firstId: string, secondId?: string): ICatagoryItem[];
@@ -39,6 +40,7 @@ declare interface IAddImgItem extends IGoodsEditImgItem {
 
 declare interface ImgEditDialogState {
     loading: boolean;
+    confirmLoading: boolean;
     addImgList: IAddImgItem[];
 }
 
@@ -49,6 +51,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         super(props);
         this.state = {
             loading: false,
+            confirmLoading: false,
             addImgList: [],
         };
     }
@@ -63,15 +66,24 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             if (data && !data.description) {
                 return message.error('描述不能为空');
             }
-            putGoodsEdit(data as IGoodsEditData).then(res => {
-                // console.log('putGoodsEdit', res);
-                toggleEditGoodsDialog(false);
-                // 刷新页面
-                onSearch({}, true);
-                this.setState({
-                    addImgList: [],
-                });
+            this.setState({
+                confirmLoading: true,
             });
+            putGoodsEdit(data as IGoodsEditData)
+                .then(res => {
+                    // console.log('putGoodsEdit', res);
+                    toggleEditGoodsDialog(false);
+                    // 刷新页面
+                    onSearch({}, true);
+                    this.setState({
+                        addImgList: [],
+                    });
+                })
+                .finally(() => {
+                    this.setState({
+                        confirmLoading: false,
+                    });
+                });
         } else {
             message.info('没有任何更改');
         }
@@ -221,16 +233,6 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     // RcFile
     private beforeUpload = (file: RcFile) => {
-        // console.log('beforeUpload', file);
-        // if (file.type !== 'image/jpeg') {
-        //     message.error('导入失败！图片格式错误');
-        //     return false;
-        // }
-        // const isLt = file.size / 1024 / 1024 <= 0.1;
-        // if (!isLt) {
-        //     message.error('导入失败！图片大于100k');
-        //     return false;
-        // }
         return false;
     };
 
@@ -323,7 +325,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             changeGoodsCatagory,
             resetGoodsData,
         } = this.props;
-        const { loading } = this.state;
+        const { loading, confirmLoading } = this.state;
         if (!currentEditGoods) {
             return null;
         }
@@ -355,6 +357,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 okText="保存"
                 visible={visible}
                 width={950}
+                confirmLoading={confirmLoading}
                 onOk={this.handleOk}
                 onCancel={this.handleCancel}
                 maskClosable={false}
@@ -366,11 +369,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     overflow: 'auto',
                 }}
             >
-                <div className="goods-local-edit-item">
+                <div className="goods-edit-item">
                     <div className="label">Product ID</div>
                     <div>{product_id}</div>
                 </div>
-                <div className="goods-local-edit-item">
+                <div className="goods-edit-item">
                     <div className="label">商品标题</div>
                     <TextArea
                         className="textarea"
@@ -381,7 +384,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         }}
                     />
                 </div>
-                <div className="goods-local-edit-item">
+                <div className="goods-edit-item">
                     <div className="label">商品描述</div>
                     <TextArea
                         className="textarea"
@@ -392,7 +395,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         }}
                     />
                 </div>
-                <div className="goods-local-edit-item">
+                <div className="goods-edit-item">
                     <div className="label">一级类目</div>
                     <Select
                         className="select"
@@ -432,10 +435,10 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         ))}
                     </Select>
                 </div>
-                <div className="goods-local-edit-item">
+                <div className="goods-edit-item">
                     <div className="label">图片编辑</div>
                 </div>
-                <div className="goods-local-edit-img">
+                <div className="goods-edit-img">
                     <div className="first">
                         <p>主图</p>
                         <div className="img-box">
