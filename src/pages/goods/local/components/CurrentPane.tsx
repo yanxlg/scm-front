@@ -154,7 +154,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     const handleShowSku = useCallback(record => {
         const {
             tags,
-            productId,
+            product_id,
             goods_img,
             title,
             worm_goodsinfo_link,
@@ -166,7 +166,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         showSkuDialog({
             commodity_id: commodityId,
             tags,
-            product_id: productId,
+            product_id: product_id,
             goods_img,
             title,
             worm_goodsinfo_link,
