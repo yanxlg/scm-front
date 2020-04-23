@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { Button, Tag } from 'antd';
-import { FitTable, AutoEnLargeImg } from 'react-components';
+import { Button } from 'antd';
+import { FitTable, AutoEnLargeImg, LoadingButton } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsLock, setGoodsLock, getGoodsCurrentList, setGoodsMix } from '@/services/goods';
 import {
@@ -15,7 +15,6 @@ import SkuDialog from './SkuDialog';
 import useEditDialog from '../hooks/useEditDialog';
 import useSkuDialog from '../hooks/useSkuDialog';
 import Lock from './Lock';
-import classnames from 'classnames';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_version.less';
@@ -283,7 +282,6 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     );
 
     const handleSave = useCallback(() => {
-        console.log('handleSave', applyList);
         let release_product_id = '';
         let new_product_id = '';
         goodsList.forEach(item => {
@@ -294,7 +292,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 new_product_id = item.product_id;
             }
         });
-        setGoodsMix({
+        return setGoodsMix({
             release_product_id,
             new_product_id,
             field: applyList,
@@ -302,11 +300,11 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         }).then(res => {
             setApplyList([]);
             _getGoodsLock();
+            _getGoodsCurrentList();
         });
     }, [applyList, goodsList]);
 
     const handleReset = useCallback(() => {
-        // console.log('handleReset');
         setApplyList([]);
         updateApplyToTable('all', true);
     }, [updateApplyToTable]);
@@ -649,14 +647,14 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                     >
                         重置
                     </Button>
-                    <Button
+                    <LoadingButton
                         type="primary"
                         className={formStyles.formBtn}
                         onClick={handleSave}
                         disabled={disabled}
                     >
                         保存
-                    </Button>
+                    </LoadingButton>
                 </div>
                 <ImgEditDialog
                     visible={goodsEditStatus}
