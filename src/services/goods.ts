@@ -271,13 +271,30 @@ export async function getGoodsStatusList() {
 }
 
 // 查询商品锁
-export async function getGoodsLock(id: string) {
+export function getGoodsLock(id: string) {
     return request.get(LocalApiPath.getGoodsLock.replace(':commodity_id', id));
 }
 
 // 商品字段加解锁
-export async function setGoodsLock(id: string, data: IGoodsLockItem) {
+export function setGoodsLock(id: string, data: IGoodsLockItem) {
     return request.post(LocalApiPath.setGoodsLock.replace(':commodity_id', id), {
+        data,
+    });
+}
+
+// 查询当前版本列表
+export function getGoodsCurrentList(id: string) {
+    return request.get(LocalApiPath.getGoodsCurrentList.replace(':commodity_id', id));
+}
+
+// 设置商品融合
+export function setGoodsMix(data: {
+    release_product_id: string;
+    new_product_id: string;
+    field: string[];
+    commodity_id: string;
+}) {
+    return request.post(LocalApiPath.setGoodsMix, {
         data,
     });
 }

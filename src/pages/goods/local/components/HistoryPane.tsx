@@ -1,12 +1,13 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { Pagination, Button } from 'antd';
+import { Button } from 'antd';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsVersion } from '@/services/goods';
 import { IGoodsVersionAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import usePagination from '../hooks/usePagination';
-import VersionParentDialog from './VersionParentDialog';
+import useSkuDialog from '../hooks/useSkuDialog';
+import SkuDialog from './SkuDialog';
 
 import styles from '../_version.less';
 
@@ -16,52 +17,90 @@ interface IProps {
 
 const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
     const [loading, setLoading] = useState(false);
-    const [parentDialogStatus, setParentDialogStatus] = useState(false);
     const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
-    const [productId, setProductId] = useState('');
 
     const { page, setPage, pageSize, setPageSize, total, setTotal } = usePagination();
+    const {
+        skuStatus,
+        currentSkuGoods,
+        skuDialogRef,
+        showSkuDialog,
+        hideSkuDialog,
+    } = useSkuDialog();
 
-    const showParentDialog = useCallback(productId => {
-        setParentDialogStatus(true);
-        setProductId(commodityId);
-    }, []);
-
-    const hideParentDialog = useCallback(() => {
-        setParentDialogStatus(false);
-    }, []);
-
-    const getCurrentList = useCallback(() => {
-        setLoading(true);
-        getGoodsVersion({
-            page: 1,
-            page_count: 50,
-            commodity_id: commodityId,
-        })
-            .then(res => {
-                // console.log('getCurrentList', res);
-                const { list } = res.data;
-                setGoodsList(
-                    list.map(item => {
-                        const { sku_info, update_time, ...rest } = item;
-                        const _update_time = utcToLocal(update_time);
-                        if (sku_info?.length > 0) {
+    const _getGoodsVersion = useCallback(
+        (params = { page, page_count: pageSize }) => {
+            setLoading(true);
+            getGoodsVersion({
+                ...params,
+                commodity_id: commodityId,
+            })
+                .then(res => {
+                    // console.log('_getGoodsVersion', res);
+                    const { list, all_count } = res.data;
+                    setPage(params.page);
+                    setPageSize(params.page_count);
+                    setTotal(all_count as number);
+                    setGoodsList(
+                        list.map(item => {
+                            const { sku_info, update_time } = item;
+                            const _update_time = utcToLocal(update_time);
+                            if (sku_info?.length > 0) {
+                                return {
+                                    _update_time,
+                                    ...item,
+                                    ...sku_info[0],
+                                };
+                            }
                             return {
                                 _update_time,
                                 ...item,
-                                ...sku_info[0],
                             };
-                        }
-                        return {
-                            _update_time,
-                            ...item,
-                        };
-                    }),
-                );
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+                        }),
+                    );
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [page, pageSize],
+    );
+
+    const onChange = useCallback(({ current, pageSize }) => {
+        _getGoodsVersion({
+            page: current,
+            page_count: pageSize,
+        });
+    }, []);
+
+    const handleShowSku = useCallback(record => {
+        const {
+            tags,
+            product_id,
+            goods_img,
+            title,
+            worm_goodsinfo_link,
+            worm_goods_id,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+        } = record;
+        showSkuDialog({
+            commodity_id: commodityId,
+            tags,
+            product_id,
+            goods_img,
+            title,
+            worm_goodsinfo_link,
+            worm_goods_id,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+        });
+    }, []);
+
+    useEffect(() => {
+        _getGoodsVersion();
     }, []);
 
     const columns = useMemo<ColumnType<IGoodsVersionAndSkuItem>[]>(() => {
@@ -71,16 +110,6 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'product_id',
                 width: 140,
                 align: 'center',
-                render: (val: string) => {
-                    return (
-                        <>
-                            {val}
-                            <Button type="link" onClick={() => showParentDialog(val)}>
-                                查看父版本
-                            </Button>
-                        </>
-                    );
-                },
             },
             {
                 title: '版本状态',
@@ -141,12 +170,37 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'sku_number',
                 width: 120,
                 align: 'center',
+                render: (value: number, row: IGoodsVersionAndSkuItem) => {
+                    return (
+                        <>
+                            <div>{value}</div>
+                            <Button
+                                type="link"
+                                className={styles.link}
+                                onClick={() => handleShowSku(row)}
+                            >
+                                查看sku信息
+                            </Button>
+                        </>
+                    );
+                },
             },
             {
                 title: '爬虫价格(￥)',
-                dataIndex: '',
+                dataIndex: 'price_min',
                 width: 120,
                 align: 'center',
+                render: (_: string, row: IGoodsVersionAndSkuItem) => {
+                    const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                    return (
+                        <>
+                            {price_min}~{price_max}
+                            <div>
+                                (含运费{shipping_fee_min}~{shipping_fee_max})
+                            </div>
+                        </>
+                    );
+                },
             },
             {
                 title: '销量',
@@ -163,9 +217,15 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
         ];
     }, []);
 
-    useEffect(() => {
-        getCurrentList();
-    }, []);
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: page,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -176,28 +236,20 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                     loading={loading}
                     columns={columns}
                     dataSource={goodsList}
-                    scroll={{ x: 'max-content', y: 400 }}
-                    pagination={false}
+                    scroll={{ x: 'max-content' }}
+                    columnsSettingRender={true}
+                    pagination={pagination}
+                    onChange={onChange}
                 />
-                <div className={styles.paginationWrapper}>
-                    <Pagination
-                        showQuickJumper
-                        showSizeChanger
-                        current={page}
-                        pageSize={pageSize}
-                        total={total}
-                        pageSizeOptions={['50', '100', '500', '1000']}
-                        showTotal={total => `共 ${total} 条`}
-                    />
-                </div>
-                <VersionParentDialog
-                    visible={parentDialogStatus}
-                    hideModal={hideParentDialog}
-                    productId={productId}
+                <SkuDialog
+                    visible={skuStatus}
+                    ref={skuDialogRef}
+                    currentSkuInfo={currentSkuGoods}
+                    hideSkuDialog={hideSkuDialog}
                 />
             </>
         );
-    }, [loading, goodsList, parentDialogStatus]);
+    }, [loading, goodsList, skuStatus, currentSkuGoods]);
 };
 
 export default HistoryPane;

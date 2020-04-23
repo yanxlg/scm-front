@@ -20,4 +20,6 @@ export enum LocalApiPath {
     getGoodsStatusList = '/api/v1/status/product',
     getGoodsLock = '/api/v1/goods/:commodity_id/get_lock',
     setGoodsLock = '/api/v1/goods/:commodity_id/lock',
+    getGoodsCurrentList = '/api/v1/goods/mix/:commodity_id/list',
+    setGoodsMix = '/api/v1/goods/mix',
 }

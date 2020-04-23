@@ -67,21 +67,23 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 return message.error('描述不能为空');
             }
             this.setState({
-                confirmLoading: true
+                confirmLoading: true,
             });
-            putGoodsEdit(data as IGoodsEditData).then(res => {
-                // console.log('putGoodsEdit', res);
-                toggleEditGoodsDialog(false);
-                // 刷新页面
-                onSearch({}, true);
-                this.setState({
-                    addImgList: [],
+            putGoodsEdit(data as IGoodsEditData)
+                .then(res => {
+                    // console.log('putGoodsEdit', res);
+                    toggleEditGoodsDialog(false);
+                    // 刷新页面
+                    onSearch({}, true);
+                    this.setState({
+                        addImgList: [],
+                    });
+                })
+                .finally(() => {
+                    this.setState({
+                        confirmLoading: false,
+                    });
                 });
-            }).finally(() => {
-                this.setState({
-                    confirmLoading: false
-                });
-            });
         } else {
             message.info('没有任何更改');
         }
@@ -231,16 +233,6 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     // RcFile
     private beforeUpload = (file: RcFile) => {
-        // console.log('beforeUpload', file);
-        // if (file.type !== 'image/jpeg') {
-        //     message.error('导入失败！图片格式错误');
-        //     return false;
-        // }
-        // const isLt = file.size / 1024 / 1024 <= 0.1;
-        // if (!isLt) {
-        //     message.error('导入失败！图片大于100k');
-        //     return false;
-        // }
         return false;
     };
 

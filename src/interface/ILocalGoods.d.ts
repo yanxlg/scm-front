@@ -132,6 +132,10 @@ export interface IGoodsVersionItem {
     worm_goods_id: string;
     worm_goodsinfo_link: string;
     worm_task_id: string;
+    price_min: string;
+    price_max: string;
+    shipping_fee_min: string;
+    shipping_fee_max: string;
     commodity_id?: string;
     _update_time?: string;
 }
@@ -168,4 +172,21 @@ export interface IGoodsLockItem {
     sku_is_lock?: boolean;
     category_is_lock?: boolean;
     price_threshold?: number;
+}
+
+export interface ISkuInfo {
+    tags: string[];
+    commodity_id: string;
+    product_id: string;
+    goods_img: string;
+    title: string;
+    worm_goodsinfo_link: string;
+    worm_goods_id: string;
+    first_catagory: ICatagoryItem;
+    second_catagory: ICatagoryItem;
+    third_catagory: ICatagoryItem;
+}
+
+export interface ICurrentGoodsItem {
+    [key: string]: any;
 }

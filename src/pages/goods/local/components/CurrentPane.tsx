@@ -1,16 +1,23 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { Button } from 'antd';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { Button, Tag } from 'antd';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
-import { getGoodsVersion, getGoodsLock, setGoodsLock } from '@/services/goods';
-import { IGoodsVersionAndSkuItem, IOnsaleItem, IGoodsLockItem } from '@/interface/ILocalGoods';
+import { getGoodsLock, setGoodsLock, getGoodsCurrentList, setGoodsMix } from '@/services/goods';
+import {
+    IOnsaleItem,
+    IGoodsLockItem,
+    ICurrentGoodsItem,
+    IPublishItem,
+} from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import useEditDialog from '../hooks/useEditDialog';
 import useSkuDialog from '../hooks/useSkuDialog';
 import Lock from './Lock';
+import classnames from 'classnames';
 
+import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_version.less';
 
 interface IProps {
@@ -18,8 +25,9 @@ interface IProps {
 }
 
 const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
+    const currentProductRef = useRef<any>();
     const [loading, setLoading] = useState(false);
-    const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
+    const [goodsList, setGoodsList] = useState<ICurrentGoodsItem[]>([]);
     const {
         goodsEditStatus,
         // setGoodsEditStatus,
@@ -49,36 +57,54 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         sku_is_lock: false,
         category_is_lock: false,
     });
+    const [applyList, setApplyList] = useState<string[]>([]);
 
-    const getCurrentList = useCallback(() => {
-        setLoading(true);
-        getGoodsVersion({
-            page: 1,
-            page_count: 50,
+    const conversionData = useCallback(record => {
+        const { sku_info, update_time } = record;
+        const _update_time = utcToLocal(update_time);
+        if (sku_info?.length > 0) {
+            return {
+                _update_time,
+                commodity_id: commodityId,
+                ...record,
+                ...sku_info[0],
+            };
+        }
+        return {
+            _update_time,
             commodity_id: commodityId,
-        })
+            ...record,
+        };
+    }, []);
+
+    const _getGoodsCurrentList = useCallback(() => {
+        setLoading(true);
+        getGoodsCurrentList(commodityId)
             .then(res => {
-                // console.log('getCurrentList', res);
-                const { list } = res.data;
-                setGoodsList(
-                    list.map((item: any) => {
-                        const { sku_info, update_time, ...rest } = item;
-                        const _update_time = utcToLocal(update_time);
-                        if (sku_info?.length > 0) {
-                            return {
-                                _update_time,
-                                commodity_id: commodityId,
-                                ...item,
-                                ...sku_info[0],
-                            };
-                        }
-                        return {
-                            _update_time,
-                            commodity_id: commodityId,
-                            ...item,
-                        };
-                    }),
-                );
+                const { crawlerProduct, parentProduct, currentProduct } = res.data;
+                const list: ICurrentGoodsItem[] = [];
+                const _currentProduct = conversionData({
+                    ...currentProduct,
+                    _type: 'current',
+                });
+                currentProductRef.current = { ..._currentProduct };
+                !Array.isArray(crawlerProduct) &&
+                    list.push(
+                        conversionData({
+                            ...crawlerProduct,
+                            _type: 'new',
+                        }),
+                    );
+                !Array.isArray(currentProduct) && list.push(_currentProduct);
+                !Array.isArray(parentProduct) &&
+                    list.push(
+                        conversionData({
+                            ...currentProduct,
+                            _type: 'old',
+                        }),
+                    );
+
+                setGoodsList(list);
             })
             .finally(() => {
                 setLoading(false);
@@ -86,7 +112,6 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     }, []);
     const _getGoodsLock = useCallback(() => {
         getGoodsLock(commodityId).then(res => {
-            // console.log('getGoodsLock', res);
             const {
                 categoryIsLock,
                 descriptionIsLock,
@@ -104,37 +129,230 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         });
     }, []);
     const _setGoodsLock = useCallback(
-        (key, status) => {
-            setGoodsLock(commodityId, {
-                [key]: status,
-            }).then(res => {
-                // console.log('_setGoodsLock', res);
+        (key: keyof IGoodsLockItem, status) => {
+            // image_is_lock
+            // sku_is_lock
+            const data: IGoodsLockItem = {};
+            // [key]: status,
+            if (key === 'image_is_lock' || key === 'sku_is_lock') {
+                data.image_is_lock = status;
+                data.sku_is_lock = status;
+            } else {
+                data[key] = status;
+            }
+            setGoodsLock(commodityId, data).then(res => {
                 setLockInfo({
                     ...lockInfo,
-                    [key]: status,
+                    ...data,
                 });
-                getCurrentList();
+                _getGoodsCurrentList();
             });
         },
         [lockInfo],
     );
 
-    const columns = useMemo<ColumnType<IGoodsVersionAndSkuItem>[]>(() => {
-        const { image_is_lock } = lockInfo;
-        // console.log(111111, image_is_lock);
+    const handleShowSku = useCallback(record => {
+        const {
+            tags,
+            productId,
+            goods_img,
+            title,
+            worm_goodsinfo_link,
+            worm_goods_id,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+        } = record;
+        showSkuDialog({
+            commodity_id: commodityId,
+            tags,
+            product_id: productId,
+            goods_img,
+            title,
+            worm_goodsinfo_link,
+            worm_goods_id,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+        });
+    }, []);
+
+    const updateApplyToTable = useCallback(
+        (field, currentStatus) => {
+            setGoodsList(
+                goodsList.map(item => {
+                    const { _type } = item;
+                    if (_type === 'current') {
+                        switch (field) {
+                            case 'all':
+                                if (currentStatus) {
+                                    return {
+                                        ...currentProductRef.current,
+                                    };
+                                } else {
+                                    return {
+                                        ...goodsList[0],
+                                        _type: 'current',
+                                    };
+                                }
+                            case 'category':
+                                if (currentStatus) {
+                                    return {
+                                        ...item,
+                                        first_catagory: currentProductRef.current.first_catagory,
+                                        second_catagory: currentProductRef.current.second_catagory,
+                                        third_catagory: currentProductRef.current.third_catagory,
+                                    };
+                                } else {
+                                    return {
+                                        ...item,
+                                        first_catagory: goodsList[0].first_catagory,
+                                        second_catagory: goodsList[0].second_catagory,
+                                        third_catagory: goodsList[0].third_catagory,
+                                    };
+                                }
+                            case 'price':
+                                if (currentStatus) {
+                                    return {
+                                        ...item,
+                                        price_min: currentProductRef.current.price_min,
+                                        price_max: currentProductRef.current.price_max,
+                                        shipping_fee_min:
+                                            currentProductRef.current.shipping_fee_min,
+                                        shipping_fee_max:
+                                            currentProductRef.current.shipping_fee_max,
+                                    };
+                                } else {
+                                    return {
+                                        ...item,
+                                        price_min: goodsList[0].price_min,
+                                        price_max: goodsList[0].price_max,
+                                        shipping_fee_min: goodsList[0].shipping_fee_min,
+                                        shipping_fee_max: goodsList[0].shipping_fee_max,
+                                    };
+                                }
+                            default:
+                                if (currentStatus) {
+                                    return {
+                                        ...item,
+                                        [field]: currentProductRef.current[field],
+                                    };
+                                } else {
+                                    return {
+                                        ...item,
+                                        [field]: goodsList[0][field],
+                                    };
+                                }
+                        }
+                    }
+                    return item;
+                }),
+            );
+        },
+        [goodsList],
+    );
+
+    const applyField = useCallback(
+        (field, currentStatus) => {
+            if (field === 'all') {
+                if (currentStatus) {
+                    setApplyList([]);
+                } else {
+                    setApplyList([
+                        'goods_img',
+                        'title',
+                        'description',
+                        'category',
+                        'sku_number',
+                        'price',
+                    ]);
+                }
+            } else {
+                if (currentStatus) {
+                    const list = [...applyList];
+                    const i = list.findIndex(item => item === field);
+                    list.splice(i, 1);
+                    setApplyList(list);
+                } else {
+                    setApplyList([...applyList, field]);
+                }
+            }
+            updateApplyToTable(field, currentStatus);
+        },
+        [applyList, updateApplyToTable],
+    );
+
+    const handleSave = useCallback(() => {
+        console.log('handleSave', applyList);
+        let release_product_id = '';
+        let new_product_id = '';
+        goodsList.forEach(item => {
+            const { _type } = item;
+            if (_type === 'current') {
+                release_product_id = item.product_id;
+            } else if (_type === 'new') {
+                new_product_id = item.product_id;
+            }
+        });
+        setGoodsMix({
+            release_product_id,
+            new_product_id,
+            field: applyList,
+            commodity_id: commodityId,
+        }).then(res => {
+            setApplyList([]);
+            _getGoodsLock();
+        });
+    }, [applyList, goodsList]);
+
+    const handleReset = useCallback(() => {
+        // console.log('handleReset');
+        setApplyList([]);
+        updateApplyToTable('all', true);
+    }, [updateApplyToTable]);
+
+    const columns = useMemo<ColumnType<ICurrentGoodsItem>[]>(() => {
+        const {
+            image_is_lock,
+            description_is_lock,
+            title_is_lock,
+            sku_is_lock,
+            category_is_lock,
+        } = lockInfo;
         return [
             {
                 fixed: 'left',
-                title: '操作',
-                // dataIndex: 'goods_status',
-                width: 120,
+                title: '类型',
+                dataIndex: '_type',
+                width: 140,
                 align: 'center',
-                render: (_, row: IGoodsVersionAndSkuItem) => {
+                render: (val: string, row: ICurrentGoodsItem) => {
+                    const isAllApply = applyList.length === 6;
                     return (
                         <>
-                            <Button type="link" onClick={() => toggleEditGoodsDialog(true, row)}>
-                                编辑
-                            </Button>
+                            {val === 'new' && (
+                                <div>
+                                    <div className={styles.new}>爬虫版本</div>
+                                    <Button
+                                        type="link"
+                                        onClick={() => applyField('all', isAllApply)}
+                                    >
+                                        {isAllApply ? '全部取消应用' : '全部应用'}
+                                    </Button>
+                                </div>
+                            )}
+                            {val === 'current' && (
+                                <div>
+                                    <div className={styles.current}>当前版本</div>
+                                    <Button
+                                        type="link"
+                                        onClick={() => toggleEditGoodsDialog(true, row)}
+                                    >
+                                        编辑
+                                    </Button>
+                                </div>
+                            )}
+                            {val === 'old' && '上一版本'}
                         </>
                     );
                 },
@@ -153,11 +371,11 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
             },
             {
                 title: '上架渠道',
-                dataIndex: 'onsale_info',
+                dataIndex: 'publish_status',
                 align: 'center',
                 width: 120,
-                render: (value: IOnsaleItem[]) => {
-                    return [...new Set(value.map(item => item.onsale_channel))].map(channel => (
+                render: (value: IPublishItem[]) => {
+                    return [...new Set(value.map(item => item.publishChannel))].map(channel => (
                         <div key={channel}>{channel}</div>
                     ));
                 },
@@ -167,7 +385,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'inventory_status',
                 align: 'center',
                 width: 120,
-                render: (val: string) => (val == '1' ? '可销售' : '不可销售'),
+                render: (val: number) => (val == 1 ? '可销售' : '不可销售'),
             },
             {
                 title: () => (
@@ -181,76 +399,212 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'goods_img',
                 align: 'center',
                 width: 120,
-                render: (val: string) => <AutoEnLargeImg src={val} className={styles.goodsImg} />,
+                render: (val: string, row: ICurrentGoodsItem) => {
+                    const { _type } = row;
+                    const isCrawlerProduct = _type === 'new';
+                    const isApply = applyList.indexOf('goods_img') > -1;
+                    const applyText = isApply ? '取消应用' : '应用';
+                    return isCrawlerProduct ? (
+                        <>
+                            <div className={styles.cellBox}>
+                                <AutoEnLargeImg src={val} className={styles.goodsImg} />
+                            </div>
+                            <Button
+                                type="link"
+                                className={styles.applyBtn}
+                                onClick={() => applyField('goods_img', isApply)}
+                            >
+                                {applyText}
+                            </Button>
+                        </>
+                    ) : (
+                        <AutoEnLargeImg src={val} className={styles.goodsImg} />
+                    );
+                },
             },
             {
                 title: () => (
                     <>
                         商品名称
-                        <Lock isLock={lockInfo.title_is_lock} className={styles.icon} />
+                        <span onClick={() => _setGoodsLock('title_is_lock', !title_is_lock)}>
+                            <Lock isLock={title_is_lock} className={styles.icon} />
+                        </span>
                     </>
                 ),
                 dataIndex: 'title',
                 width: 160,
                 align: 'center',
+                render: (val, row: ICurrentGoodsItem) => {
+                    const { _type } = row;
+                    const isCrawlerProduct = _type === 'new';
+                    const isApply = applyList.indexOf('title') > -1;
+                    const applyText = isApply ? '取消应用' : '应用';
+                    return isCrawlerProduct ? (
+                        <>
+                            <div className={styles.cellBox}>{val}</div>
+                            <Button
+                                type="link"
+                                className={styles.applyBtn}
+                                onClick={() => applyField('title', isApply)}
+                            >
+                                {applyText}
+                            </Button>
+                        </>
+                    ) : (
+                        val
+                    );
+                },
             },
             {
                 title: () => (
                     <>
                         商品描述
-                        <Lock isLock={lockInfo.description_is_lock} className={styles.icon} />
+                        <span
+                            onClick={() =>
+                                _setGoodsLock('description_is_lock', !description_is_lock)
+                            }
+                        >
+                            <Lock isLock={description_is_lock} className={styles.icon} />
+                        </span>
                     </>
                 ),
                 dataIndex: 'description',
-                width: 200,
+                width: 240,
                 align: 'center',
+                render: (val, row: ICurrentGoodsItem) => {
+                    const { _type } = row;
+                    const isCrawlerProduct = _type === 'new';
+                    const isApply = applyList.indexOf('description') > -1;
+                    const applyText = isApply ? '取消应用' : '应用';
+                    return isCrawlerProduct ? (
+                        <>
+                            <div className={styles.cellBox}>{val}</div>
+                            <Button
+                                type="link"
+                                className={styles.applyBtn}
+                                onClick={() => applyField('description', isApply)}
+                            >
+                                {applyText}
+                            </Button>
+                        </>
+                    ) : (
+                        val
+                    );
+                },
             },
             {
                 title: () => (
                     <>
                         商品分类
-                        <Lock isLock={lockInfo.category_is_lock} className={styles.icon} />
+                        <span onClick={() => _setGoodsLock('category_is_lock', !category_is_lock)}>
+                            <Lock isLock={category_is_lock} className={styles.icon} />
+                        </span>
                     </>
                 ),
                 dataIndex: 'first_catagory',
                 align: 'center',
                 width: 160,
-                render: (_, row: IGoodsVersionAndSkuItem) => {
-                    const { first_catagory, second_catagory, third_catagory } = row;
-                    return `${first_catagory.name || ''}-${second_catagory.name ||
+                render: (_, row: ICurrentGoodsItem) => {
+                    const { first_catagory, second_catagory, third_catagory, _type } = row;
+                    const val = `${first_catagory.name || ''}-${second_catagory.name ||
                         ''}-${third_catagory.name || ''}`;
+                    const isCrawlerProduct = _type === 'new';
+                    const isApply = applyList.indexOf('category') > -1;
+                    const applyText = isApply ? '取消应用' : '应用';
+                    return isCrawlerProduct ? (
+                        <>
+                            <div className={styles.cellBox}>{val}</div>
+                            <Button
+                                type="link"
+                                className={styles.applyBtn}
+                                onClick={() => applyField('category', isApply)}
+                            >
+                                {applyText}
+                            </Button>
+                        </>
+                    ) : (
+                        val
+                    );
                 },
             },
             {
                 title: () => (
                     <>
                         sku数量
-                        <Lock isLock={lockInfo.sku_is_lock} className={styles.icon} />
+                        <span onClick={() => _setGoodsLock('sku_is_lock', !sku_is_lock)}>
+                            <Lock isLock={sku_is_lock} className={styles.icon} />
+                        </span>
                     </>
                 ),
                 dataIndex: 'sku_number',
                 width: 120,
                 align: 'center',
-                render: (value: number, row: IGoodsVersionAndSkuItem) => {
-                    return (
+                render: (value: number, row: ICurrentGoodsItem) => {
+                    const { _type } = row;
+                    const isCrawlerProduct = _type === 'new';
+                    const isApply = applyList.indexOf('sku_number') > -1;
+                    const applyText = isApply ? '取消应用' : '应用';
+                    const node = (
                         <>
                             <div>{value}</div>
                             <Button
                                 type="link"
                                 className={styles.link}
-                                onClick={() => showSkuDialog(row)}
+                                onClick={() => handleShowSku(row)}
                             >
                                 查看sku信息
                             </Button>
                         </>
                     );
+                    return isCrawlerProduct ? (
+                        <>
+                            <div className={styles.cellBox}>{node}</div>
+                            <Button
+                                type="link"
+                                className={styles.applyBtn}
+                                onClick={() => applyField('sku_number', isApply)}
+                            >
+                                {applyText}
+                            </Button>
+                        </>
+                    ) : (
+                        node
+                    );
                 },
             },
             {
                 title: '爬虫价格(￥)',
-                dataIndex: '',
+                dataIndex: 'price_min',
                 width: 120,
                 align: 'center',
+                render: (_: string, row: ICurrentGoodsItem) => {
+                    const { price_min, price_max, shipping_fee_min, shipping_fee_max, _type } = row;
+                    const isCrawlerProduct = _type === 'new';
+                    const isApply = applyList.indexOf('price') > -1;
+                    const applyText = isApply ? '取消应用' : '应用';
+                    const node = (
+                        <>
+                            {price_min}~{price_max}
+                            <div>
+                                (含运费{shipping_fee_min}~{shipping_fee_max})
+                            </div>
+                        </>
+                    );
+                    return isCrawlerProduct ? (
+                        <>
+                            <div className={styles.cellBox}>{node}</div>
+                            <Button
+                                type="link"
+                                className={styles.applyBtn}
+                                onClick={() => applyField('price', isApply)}
+                            >
+                                {applyText}
+                            </Button>
+                        </>
+                    ) : (
+                        node
+                    );
+                },
             },
             {
                 title: '销量',
@@ -265,14 +619,15 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 align: 'center',
             },
         ];
-    }, [lockInfo]);
+    }, [lockInfo, applyList, applyField]);
 
     useEffect(() => {
         _getGoodsLock();
-        getCurrentList();
+        _getGoodsCurrentList();
     }, []);
 
     return useMemo(() => {
+        const disabled = applyList.length === 0;
         return (
             <>
                 <FitTable
@@ -282,9 +637,27 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                     columns={columns}
                     dataSource={goodsList}
                     scroll={{ x: 'max-content' }}
-                    autoFitY={true}
+                    // columnsSettingRender={true}
                     pagination={false}
                 />
+
+                <div className={styles.btnContainer}>
+                    <Button
+                        className={formStyles.formBtn}
+                        onClick={handleReset}
+                        disabled={disabled}
+                    >
+                        重置
+                    </Button>
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={handleSave}
+                        disabled={disabled}
+                    >
+                        保存
+                    </Button>
+                </div>
                 <ImgEditDialog
                     visible={goodsEditStatus}
                     originEditGoods={originEditGoods}
@@ -296,12 +669,12 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                     changeGoodsCatagory={changeGoodsCatagory}
                     changeGoodsImg={changeGoodsImg}
                     resetGoodsData={resetGoodsData}
-                    onSearch={getCurrentList}
+                    onSearch={_getGoodsCurrentList}
                 />
                 <SkuDialog
                     visible={skuStatus}
                     ref={skuDialogRef}
-                    currentRowData={currentSkuGoods}
+                    currentSkuInfo={currentSkuGoods}
                     hideSkuDialog={hideSkuDialog}
                 />
             </>
@@ -314,6 +687,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         skuStatus,
         currentSkuGoods,
         columns,
+        applyList,
     ]);
 };
 
