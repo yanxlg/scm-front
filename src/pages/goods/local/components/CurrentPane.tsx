@@ -98,7 +98,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 !Array.isArray(parentProduct) &&
                     list.push(
                         conversionData({
-                            ...currentProduct,
+                            ...parentProduct,
                             _type: 'old',
                         }),
                     );
