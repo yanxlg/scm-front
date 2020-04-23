@@ -137,3 +137,7 @@ export interface ISimilarInfoResponse {
     };
     historySimilarGoodsInfo: Array<IHistorySimilar>;
 }
+
+export interface IChannelSourceResponse {
+    [key: string]: string;
+}

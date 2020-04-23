@@ -9,8 +9,9 @@ import {
     IWaitPaySearch,
     IPendingOrderSearch,
     ISimilarInfoResponse,
+    IChannelSourceResponse,
 } from '@/interface/IOrder';
-import { transPaginationResponse } from '@/utils/utils';
+import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
 import { IResponse } from '@/interface/IGlobal';
 
@@ -235,3 +236,7 @@ export async function querySimilarInfo(query: {
         params: query,
     });
 }
+
+export const queryChannelSource = singlePromiseWrap(() => {
+    return request.get<IResponse<IChannelSourceResponse>>(OrderApiPath.queryChannelSource);
+});
