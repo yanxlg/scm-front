@@ -22,28 +22,40 @@ export default function() {
         [allCatagoryList],
     );
 
-    const toggleEditGoodsDialog = useCallback(
-        (status: boolean, rowData?: any) => {
-            let currentEditGoods: IGoodsEditItem | null = null
-            if (rowData) {
-                const { product_id, title, description, first_catagory, second_catagory, third_catagory, goods_img, sku_image } = rowData;
-                currentEditGoods = {
-                    product_id, 
-                    title, 
-                    description, 
-                    first_catagory, 
-                    second_catagory, 
-                    third_catagory, 
-                    goods_img, 
-                    sku_image
-                }
+    const toggleEditGoodsDialog = useCallback((status: boolean, rowData?: any) => {
+        let currentEditGoods: IGoodsEditItem | null = null;
+        if (rowData) {
+            const {
+                product_id,
+                title,
+                description,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                goods_img,
+                sku_image,
+            } = rowData;
+            const list = [...sku_image];
+            const index = list.findIndex(item => item === goods_img);
+            if (index > -1) {
+                list.splice(index, 1);
+                list.unshift(goods_img);
+            }
+            currentEditGoods = {
+                product_id,
+                title,
+                description,
+                first_catagory,
+                second_catagory,
+                third_catagory,
+                goods_img,
+                sku_image: list,
             };
-            setGoodsEditStatus(status);
-            setCurrentEditGoods(currentEditGoods ? { ...currentEditGoods } : null);
-            setOriginEditGoods(currentEditGoods ? { ...currentEditGoods } : null);
-        },
-        []
-    );
+        }
+        setGoodsEditStatus(status);
+        setCurrentEditGoods(currentEditGoods ? { ...currentEditGoods } : null);
+        setOriginEditGoods(currentEditGoods ? { ...currentEditGoods } : null);
+    }, []);
 
     // 编辑title和description
     const changeGoodsText = useCallback(
@@ -51,9 +63,9 @@ export default function() {
             setCurrentEditGoods({
                 ...(currentEditGoods as IGoodsEditItem),
                 [type]: text,
-            })
+            });
         },
-        [currentEditGoods]
+        [currentEditGoods],
     );
 
     // 编辑类目
@@ -68,7 +80,6 @@ export default function() {
                     second_catagory: {},
                     third_catagory: {},
                 });
-                
             } else if (type === 'second_catagory') {
                 setCurrentEditGoods({
                     ...(currentEditGoods as IGoodsEditItem),
@@ -82,7 +93,7 @@ export default function() {
                 });
             }
         },
-        [currentEditGoods]
+        [currentEditGoods],
     );
 
     // 编辑图片
@@ -97,24 +108,18 @@ export default function() {
     );
 
     // 重置编辑弹框
-    const resetGoodsData = useCallback(
-        () => {
-            setCurrentEditGoods({
-                ...(originEditGoods as IGoodsEditItem)
-            })
-        },
-        [originEditGoods],
-    )
+    const resetGoodsData = useCallback(() => {
+        setCurrentEditGoods({
+            ...(originEditGoods as IGoodsEditItem),
+        });
+    }, [originEditGoods]);
 
-    useEffect(
-        () => {
-            getCatagoryList().then(res => {
-                // console.log('getCatagoryList', res);
-                setAllCatagoryList(res.list);
-            });
-        },
-        []
-    );
+    useEffect(() => {
+        getCatagoryList().then(res => {
+            // console.log('getCatagoryList', res);
+            setAllCatagoryList(res.list);
+        });
+    }, []);
 
     return {
         goodsEditStatus,
@@ -130,6 +135,6 @@ export default function() {
         changeGoodsText,
         changeGoodsCatagory,
         changeGoodsImg,
-        resetGoodsData
-    }
+        resetGoodsData,
+    };
 }
