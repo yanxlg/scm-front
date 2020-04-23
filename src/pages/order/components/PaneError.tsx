@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, FitTable, LoadingButton } from 'react-components';
-import { getErrorOrderList, postExportErrOrder } from '@/services/order-manage';
+import { getErrorOrderList, postExportErrOrder, queryChannelSource } from '@/services/order-manage';
 import {
     defaultOptionItem,
     channelOptionList,
@@ -74,7 +74,15 @@ const PaneErrTab = () => {
                 name: 'channel_source',
                 label: '销售渠道',
                 className: 'order-input',
-                optionList: [defaultOptionItem, ...channelOptionList],
+                // optionList: [defaultOptionItem, ...channelOptionList],
+                syncDefaultOption: defaultOptionItem,
+                optionList: () =>
+                    queryChannelSource().then(({ data = {} }) => {
+                        return Object.keys(data).map(key => ({
+                            name: data[key],
+                            value: Number(key),
+                        }));
+                    }),
             },
             {
                 type: 'select',
