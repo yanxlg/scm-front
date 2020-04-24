@@ -72,6 +72,21 @@ export default [
         icon: <Icons type="scm-io" className="menu-icon" />,
     },
     {
+        path: '/purchase',
+        name: '采购管理',
+        icon: <Icons type="scm-setting" className="menu-icon" />,
+        children: [
+            {
+                path: '/purchase/list',
+                name: '采购单列表',
+            },
+            {
+                path: '/purchase/return',
+                name: '采购退货',
+            },
+        ],
+    },
+    {
         path: '/setting',
         name: '基本设置',
         icon: <Icons type="scm-setting" className="menu-icon" />,
