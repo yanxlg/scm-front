@@ -31,9 +31,9 @@ const list = Mock.mock({
 });
 
 export default {
-    'GET /v1/pruchase/abnormal/all': async (req: Request, res: Response) => {
-        // await sleep(1);
-        const { page, page_count } = req.query;
+    'POST /v1/pruchase/abnormal/all': async (req: Request, res: Response) => {
+        await sleep(1);
+        const { page, page_count } = req.body;
         // console.log(page, page_count);
         res.status(200).send({
             code: 200,

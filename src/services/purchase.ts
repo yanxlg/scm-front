@@ -4,9 +4,9 @@ import { IPurchaseAbnormalRes } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
 import { transPaginationResponse } from '@/utils/utils';
 
-export function getAbnormalAllList(params: any = { page: 1, page_number: 50 }) {
+export function getAbnormalAllList(data: any = { page: 1, page_number: 50 }) {
     // <IResponse<IPurchaseAbnormalRes>>
-    return api.get(PurchaseApiPath.getAbnormalAllList, {
-        params,
+    return api.post(PurchaseApiPath.getAbnormalAllList, {
+        data,
     }); //.then(transPaginationResponse);;
 }

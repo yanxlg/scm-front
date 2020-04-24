@@ -1,13 +1,10 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { Button } from 'antd';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
 import { IPurchaseAbnormalRes } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
-import RelatedPurchaseModal from './RelatedPurchaseModal';
-import AbnormalModal from './AbnormalModal';
 import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
 
 import styles from '../_abnormal.less';
@@ -46,10 +43,8 @@ const fieldList: FormField[] = [
     },
 ]
 
-const PaneAbnormalAll: React.FC = props => {
+const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
-    const [relatedPurchaseStatus, setRelatedPurchaseStatus] = useState(false);
-    const [abnormalStatus, setAbnormalStatus] = useState(false);
     const { 
         loading,
         pageNumber,
@@ -62,29 +57,10 @@ const PaneAbnormalAll: React.FC = props => {
     } = useList<IPurchaseAbnormalRes>({
         queryList: getAbnormalAllList,
         formRef: formRef,
+        extraQuery: {
+            waybill_exception_status: 3
+        }
     });
-
-    const showRelatedPurchase = () => {
-        setRelatedPurchaseStatus(true);
-    }
-
-    const hideRelatedPurchase = useCallback(
-        () => {
-            setRelatedPurchaseStatus(false);
-        },
-        [],
-    );
-    
-    const showAbnormal = () => {
-        setAbnormalStatus(true);
-    }
-
-    const hideAbnormal = useCallback(
-        () => {
-            setAbnormalStatus(false);
-        },
-        [],
-    );
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalRes>[]>(() => {
         return [
@@ -145,25 +121,7 @@ const PaneAbnormalAll: React.FC = props => {
                 align: 'center',
                 width: 150,
                 render: (val) => utcToLocal(val)
-            },
-            {
-                title: '操作',
-                dataIndex: 'a8',
-                align: 'center',
-                width: 150,
-                render: (_) => {
-                    return (
-                        <>
-                            <div>
-                                <Button type="link" onClick={() => showRelatedPurchase()}>关联采购单</Button>
-                            </div>
-                            <div>
-                                <Button type="link" onClick={() => showAbnormal()}>异常处理</Button>
-                            </div>
-                        </>
-                    )
-                }
-            },
+            }
         ];
     }, []);
 
@@ -213,17 +171,9 @@ const PaneAbnormalAll: React.FC = props => {
                     onChange={onChange}
                     // toolBarRender={toolBarRender}
                 />
-                <RelatedPurchaseModal
-                    visible={relatedPurchaseStatus}
-                    onCancel={hideRelatedPurchase}
-                />
-                <AbnormalModal
-                    visible={abnormalStatus}
-                    onCancel={hideAbnormal}
-                />
             </>
         );
-    }, [dataSource, loading, relatedPurchaseStatus, abnormalStatus]);
+    }, [dataSource, loading]);
 };
 
-export default PaneAbnormalAll;
+export default PaneAbnormalEnd;

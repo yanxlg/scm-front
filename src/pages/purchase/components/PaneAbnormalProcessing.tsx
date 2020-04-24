@@ -1,18 +1,16 @@
 import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { Button } from 'antd';
+import { Button, Checkbox } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
 import { IPurchaseAbnormalRes } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
-import RelatedPurchaseModal from './RelatedPurchaseModal';
-import AbnormalModal from './AbnormalModal';
 import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
+import DetailModal from './DetailModal';
 
 import styles from '../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { utcToLocal } from 'react-components/es/utils/date';
 
 const fieldList: FormField[] = [
     {
@@ -46,10 +44,23 @@ const fieldList: FormField[] = [
     },
 ]
 
-const PaneAbnormalAll: React.FC = props => {
-    const formRef = useRef<JsonFormRef>(null);
-    const [relatedPurchaseStatus, setRelatedPurchaseStatus] = useState(false);
-    const [abnormalStatus, setAbnormalStatus] = useState(false);
+const fieldCheckboxList: FormField[] = [
+    {
+        type: 'checkbox',
+        name: 'time_out',
+        label: '24小时未处理',
+        formItemClassName: '',
+        formatter: (val: boolean) => val ? 1 : 0
+        // onChange: (name, form) => {
+        //     this.changeParentOrder(form.getFieldValue(name));
+        // },
+    },
+];
+
+const PaneAbnormalProcessing: React.FC = props => {
+    const formRef1 = useRef<JsonFormRef>(null);
+    const formRef2 = useRef<JsonFormRef>(null);
+    const [detailStatus, setDetailStatus] = useState(false);
     const { 
         loading,
         pageNumber,
@@ -61,27 +72,19 @@ const PaneAbnormalAll: React.FC = props => {
         dataSource 
     } = useList<IPurchaseAbnormalRes>({
         queryList: getAbnormalAllList,
-        formRef: formRef,
+        formRef: [formRef1, formRef2],
+        extraQuery: {
+            waybill_exception_status: 2
+        }
     });
 
-    const showRelatedPurchase = () => {
-        setRelatedPurchaseStatus(true);
+    const showDetail = () => {
+        setDetailStatus(true);
     }
 
-    const hideRelatedPurchase = useCallback(
+    const hideDetail = useCallback(
         () => {
-            setRelatedPurchaseStatus(false);
-        },
-        [],
-    );
-    
-    const showAbnormal = () => {
-        setAbnormalStatus(true);
-    }
-
-    const hideAbnormal = useCallback(
-        () => {
-            setAbnormalStatus(false);
+            setDetailStatus(false);
         },
         [],
     );
@@ -140,28 +143,12 @@ const PaneAbnormalAll: React.FC = props => {
                 width: 150,
             },
             {
-                title: '完结时间',
-                dataIndex: 'time',
-                align: 'center',
-                width: 150,
-                render: (val) => utcToLocal(val)
-            },
-            {
                 title: '操作',
                 dataIndex: 'a8',
                 align: 'center',
                 width: 150,
                 render: (_) => {
-                    return (
-                        <>
-                            <div>
-                                <Button type="link" onClick={() => showRelatedPurchase()}>关联采购单</Button>
-                            </div>
-                            <div>
-                                <Button type="link" onClick={() => showAbnormal()}>异常处理</Button>
-                            </div>
-                        </>
-                    )
+                    return <Button type="link" onClick={() => showDetail()}>查看详情</Button>
                 }
             },
         ];
@@ -177,6 +164,18 @@ const PaneAbnormalAll: React.FC = props => {
         } as any;
     }, [loading]);
 
+    const toolBarRender = useCallback(() => {
+        return [
+            <JsonForm
+                containerClassName=""
+                enableCollapse={false}
+                fieldList={fieldCheckboxList}
+                ref={formRef2}
+            >
+            </JsonForm>
+        ]
+    }, [])
+
     return useMemo(() => {
         // console.log('dataSource', dataSource);
         return (
@@ -184,7 +183,7 @@ const PaneAbnormalAll: React.FC = props => {
                 <JsonForm
                     // labelClassName="order-error-label"
                     fieldList={fieldList}
-                    ref={formRef}
+                    ref={formRef1}
                     initialValues={{
                         waybill_exception_type: 100
                     }}
@@ -211,19 +210,15 @@ const PaneAbnormalAll: React.FC = props => {
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
-                    // toolBarRender={toolBarRender}
+                    toolBarRender={toolBarRender}
                 />
-                <RelatedPurchaseModal
-                    visible={relatedPurchaseStatus}
-                    onCancel={hideRelatedPurchase}
-                />
-                <AbnormalModal
-                    visible={abnormalStatus}
-                    onCancel={hideAbnormal}
+                <DetailModal
+                    visible={detailStatus}
+                    onCancel={hideDetail}
                 />
             </>
         );
-    }, [dataSource, loading, relatedPurchaseStatus, abnormalStatus]);
+    }, [dataSource, loading, detailStatus]);
 };
 
-export default PaneAbnormalAll;
+export default PaneAbnormalProcessing;

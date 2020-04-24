@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { Button } from 'antd';
+import { Button, Checkbox } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
@@ -46,8 +46,22 @@ const fieldList: FormField[] = [
     },
 ]
 
-const PaneAbnormalAll: React.FC = props => {
-    const formRef = useRef<JsonFormRef>(null);
+const fieldCheckboxList: FormField[] = [
+    {
+        type: 'checkbox',
+        name: 'time_out',
+        label: '24小时未处理',
+        formItemClassName: '',
+        formatter: (val: boolean) => val ? 1 : 0
+        // onChange: (name, form) => {
+        //     this.changeParentOrder(form.getFieldValue(name));
+        // },
+    },
+];
+
+const PaneAbnormalPending: React.FC = props => {
+    const formRef1 = useRef<JsonFormRef>(null);
+    const formRef2 = useRef<JsonFormRef>(null);
     const [relatedPurchaseStatus, setRelatedPurchaseStatus] = useState(false);
     const [abnormalStatus, setAbnormalStatus] = useState(false);
     const { 
@@ -61,7 +75,10 @@ const PaneAbnormalAll: React.FC = props => {
         dataSource 
     } = useList<IPurchaseAbnormalRes>({
         queryList: getAbnormalAllList,
-        formRef: formRef,
+        formRef: [formRef1, formRef2],
+        extraQuery: {
+            waybill_exception_status: 1
+        }
     });
 
     const showRelatedPurchase = () => {
@@ -139,13 +156,13 @@ const PaneAbnormalAll: React.FC = props => {
                 align: 'center',
                 width: 150,
             },
-            {
-                title: '完结时间',
-                dataIndex: 'time',
-                align: 'center',
-                width: 150,
-                render: (val) => utcToLocal(val)
-            },
+            // {
+            //     title: '完结时间',
+            //     dataIndex: 'time',
+            //     align: 'center',
+            //     width: 150,
+            //     render: (val) => utcToLocal(val)
+            // },
             {
                 title: '操作',
                 dataIndex: 'a8',
@@ -177,6 +194,18 @@ const PaneAbnormalAll: React.FC = props => {
         } as any;
     }, [loading]);
 
+    const toolBarRender = useCallback(() => {
+        return [
+            <JsonForm
+                containerClassName=""
+                enableCollapse={false}
+                fieldList={fieldCheckboxList}
+                ref={formRef2}
+            >
+            </JsonForm>
+        ]
+    }, [])
+
     return useMemo(() => {
         // console.log('dataSource', dataSource);
         return (
@@ -184,7 +213,7 @@ const PaneAbnormalAll: React.FC = props => {
                 <JsonForm
                     // labelClassName="order-error-label"
                     fieldList={fieldList}
-                    ref={formRef}
+                    ref={formRef1}
                     initialValues={{
                         waybill_exception_type: 100
                     }}
@@ -211,7 +240,7 @@ const PaneAbnormalAll: React.FC = props => {
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
-                    // toolBarRender={toolBarRender}
+                    toolBarRender={toolBarRender}
                 />
                 <RelatedPurchaseModal
                     visible={relatedPurchaseStatus}
@@ -226,4 +255,4 @@ const PaneAbnormalAll: React.FC = props => {
     }, [dataSource, loading, relatedPurchaseStatus, abnormalStatus]);
 };
 
-export default PaneAbnormalAll;
+export default PaneAbnormalPending;
