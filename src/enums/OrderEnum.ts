@@ -1,5 +1,6 @@
 import { FormField } from 'react-components/es/JsonForm';
 import { transStatusList } from '@/utils/transform';
+import { queryChannelSource } from '@/services/order-manage';
 
 declare interface optionItem {
     name: string;
@@ -185,7 +186,15 @@ export const childDefaultFieldList: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...channelOptionList],
+        // optionList: [defaultOptionItem, ...channelOptionList],
+        syncDefaultOption: defaultOptionItem,
+        optionList: () =>
+            queryChannelSource().then(({ data = {} }) => {
+                return Object.keys(data).map(key => ({
+                    name: data[key],
+                    value: Number(key),
+                }));
+            }),
     },
 ];
 
@@ -488,7 +497,15 @@ export const parentDefaultFieldList: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem, ...channelOptionList],
+        // optionList: [defaultOptionItem, ...channelOptionList],
+        syncDefaultOption: defaultOptionItem,
+        optionList: () =>
+            queryChannelSource().then(({ data = {} }) => {
+                return Object.keys(data).map(key => ({
+                    name: data[key],
+                    value: Number(key),
+                }));
+            }),
     },
 ];
 
