@@ -8,6 +8,9 @@ import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
 import { queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
+import ConnectModal from './connectModal';
+import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
+import ReturnModal from './returnModal';
 
 const fieldList: FormField[] = [
     {
@@ -159,6 +162,9 @@ const AllList = () => {
             <>
                 {searchForm}
                 {table}
+                {/*{<ConnectModal visible="1111" onCancel={() => {}} />}*/}
+                {/*<ReturnModal visible="111" onCancel={() => {}} />*/}
+                {/*<PurchaseDetailModal visible="1111" onCancel={() => {}} />*/}
             </>
         );
     }, []);

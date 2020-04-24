@@ -8,6 +8,7 @@ import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
 import { queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
+import CreateReturnOrderModal from '@/pages/purchase/components/return/createReturnOrderModal';
 
 const fieldList: FormField[] = [
     {
@@ -152,6 +153,7 @@ const AllList = () => {
             <>
                 {searchForm}
                 {table}
+                <CreateReturnOrderModal visible="111" onCancel={() => {}} />
             </>
         );
     }, []);

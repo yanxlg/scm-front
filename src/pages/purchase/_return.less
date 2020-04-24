@@ -1,0 +1,44 @@
+.steps {
+    :global(.ant-steps-item-icon) {
+        border-radius: 100% !important;
+        background-color: #000000 !important;
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 12px !important;
+        border: none !important;
+
+        :global(.ant-steps-icon) {
+            color: #ffffff !important;
+            font-size: 12px !important;
+        }
+    }
+    :global(.ant-steps-item-wait) {
+        :global(.ant-steps-item-icon) {
+            background: rgba(9, 9, 9, 1) !important;
+            opacity: 0.3 !important;
+        }
+    }
+    :global(.ant-steps-item-tail) {
+        &:after {
+            background-color: #1c1c1c !important;
+            z-index: 100;
+            position: relative;
+            transition: height 300ms ease;
+        }
+        &:before {
+            position: absolute;
+            content: '';
+            width: 1px;
+            background-color: #b5b5b5 !important;
+            top: 30px;
+            bottom: 6px;
+        }
+    }
+    :global(.ant-steps-item-active) {
+        :global(.ant-steps-item-tail) {
+            &:after {
+                height: 50% !important;
+            }
+        }
+    }
+}
