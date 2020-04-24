@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { FitTable, AutoEnLargeImg, LoadingButton } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsLock, setGoodsLock, getGoodsCurrentList, setGoodsMix } from '@/services/goods';
@@ -79,7 +79,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     const _getGoodsCurrentList = useCallback(() => {
         setLoading(true);
         getGoodsCurrentList(commodityId)
-            .then(res => {
+            .then((res: any) => {
                 const { crawlerProduct, parentProduct, currentProduct } = res.data;
                 const list: ICurrentGoodsItem[] = [];
                 const _currentProduct = conversionData({
@@ -110,7 +110,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
             });
     }, []);
     const _getGoodsLock = useCallback(() => {
-        getGoodsLock(commodityId).then(res => {
+        getGoodsLock(commodityId).then((res: any) => {
             const {
                 categoryIsLock,
                 descriptionIsLock,
@@ -139,7 +139,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
             } else {
                 data[key] = status;
             }
-            setGoodsLock(commodityId, data).then(res => {
+            setGoodsLock(commodityId, data).then(() => {
                 setLockInfo({
                     ...lockInfo,
                     ...data,
@@ -180,18 +180,20 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         (field, currentStatus) => {
             setGoodsList(
                 goodsList.map(item => {
-                    const { _type } = item;
+                    const { _type, origin } = item;
                     if (_type === 'current') {
                         switch (field) {
                             case 'all':
                                 if (currentStatus) {
                                     return {
                                         ...currentProductRef.current,
+                                        origin,
                                     };
                                 } else {
                                     return {
                                         ...goodsList[0],
                                         _type: 'current',
+                                        origin,
                                     };
                                 }
                             case 'category':
@@ -284,24 +286,32 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     const handleSave = useCallback(() => {
         let release_product_id = '';
         let new_product_id = '';
+        let release_origin = '';
+        let new_origin = '';
         goodsList.forEach(item => {
             const { _type } = item;
             if (_type === 'current') {
                 release_product_id = item.product_id;
+                release_origin = item.origin;
             } else if (_type === 'new') {
                 new_product_id = item.product_id;
+                new_origin = item.origin;
             }
         });
-        return setGoodsMix({
-            release_product_id,
-            new_product_id,
-            field: applyList,
-            commodity_id: commodityId,
-        }).then(res => {
-            setApplyList([]);
-            _getGoodsLock();
-            _getGoodsCurrentList();
-        });
+        if (release_origin === 'MID_STAGE' && new_origin === 'CRAWLER') {
+            return setGoodsMix({
+                release_product_id,
+                new_product_id,
+                field: applyList,
+                commodity_id: commodityId,
+            }).then(() => {
+                setApplyList([]);
+                _getGoodsLock();
+                _getGoodsCurrentList();
+            });
+        }
+        message.error('不符合融合版本');
+        return Promise.resolve();
     }, [applyList, goodsList]);
 
     const handleReset = useCallback(() => {
