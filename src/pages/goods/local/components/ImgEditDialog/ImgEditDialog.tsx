@@ -148,6 +148,29 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         return false;
     };
 
+    // 判断图片是否编辑
+    private isChangeImg = () => {
+        const { currentEditGoods, originEditGoods } = this.props;
+        if (currentEditGoods && originEditGoods) {
+            const {
+                sku_image,
+            } = currentEditGoods;
+            const {
+                sku_image: orginSkuImage,
+            } = originEditGoods;
+            if (sku_image.length !== orginSkuImage.length) {
+                return true;
+            } else {
+                for (let i = 0; i < sku_image.length; i++) {
+                    if (sku_image[i] !== orginSkuImage[i]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
     // 获取商品编辑数据
     private getGoodsEditData = () => {
         const { currentEditGoods, originEditGoods } = this.props;
@@ -163,11 +186,12 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 third_catagory,
             } = currentEditGoods;
             const { sku_image: orginSkuImage } = originEditGoods;
-            return {
+            return Object.assign({
                 product_id,
                 title,
                 description,
                 cat_id: Number(third_catagory.id || second_catagory.id || first_catagory.id),
+            }, this.isChangeImg() ? {
                 imgs: sku_image.map((item, index) => {
                     let ret: any = {};
                     if (orginSkuImage.indexOf(item) > -1) {
@@ -191,7 +215,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     ret.is_default = index === 0 ? 1 : 0;
                     return ret;
                 }),
-            };
+            } : {});
         }
     };
 

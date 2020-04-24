@@ -76,7 +76,7 @@ export declare interface IGoodsEditData {
     title: string;
     description: string;
     cat_id: number;
-    imgs: IGoodsEditImgItem[];
+    imgs?: IGoodsEditImgItem[];
 }
 
 export declare interface ISkuParams {

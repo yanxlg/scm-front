@@ -425,7 +425,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 rowData.sku_image = list;
             }
         }
-
         this.setState({
             goodsEditDialogStatus: status,
             currentEditGoods: rowData ? { ...rowData } : null,
