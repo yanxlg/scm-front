@@ -156,10 +156,17 @@ export const queryShopList = singlePromiseWrap(() => {
     return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
 });
 
-export async function queryOnOffLog(product_ids: string) {
+export async function queryOnOffLog({
+    merchant_id,
+    product_ids,
+}: {
+    product_ids: string;
+    merchant_id: string;
+}) {
     return request.post<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
         data: {
             product_ids,
+            merchant_id,
         },
     });
 }
