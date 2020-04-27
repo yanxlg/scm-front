@@ -701,7 +701,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     <div style={{ textAlign: 'right' }}>
                         <Pagination
                             className="order-pagination"
-                            size="small"
+                            // size="small"
                             total={total}
                             current={page}
                             pageSize={pageCount}
