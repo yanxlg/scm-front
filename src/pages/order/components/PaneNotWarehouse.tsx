@@ -202,7 +202,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
 
     const onChange = useCallback(({ current, pageSize }) => {
         onSearch({
-            pageSize,
+            page_count: pageSize,
             page: current,
         });
     }, []);
