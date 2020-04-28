@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
-import { IPurchaseAbnormalRes } from '@/interface/IPurchase';
+import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
@@ -23,10 +23,7 @@ const fieldList: FormField[] = [
         type: 'select',
         name: 'waybill_exception_type',
         label: '异常类型',
-        optionList: [
-            defaultOptionItem,
-            ...waybillExceptionTypeList
-        ],
+        optionList: [defaultOptionItem, ...waybillExceptionTypeList],
     },
     {
         type: 'input',
@@ -41,11 +38,11 @@ const fieldList: FormField[] = [
         label: '运单号',
         placeholder: '请输入运单号',
     },
-]
+];
 
 const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
-    const { 
+    const {
         loading,
         pageNumber,
         pageSize,
@@ -53,75 +50,75 @@ const PaneAbnormalEnd: React.FC = props => {
         onSearch,
         onReload,
         onChange,
-        dataSource 
-    } = useList<IPurchaseAbnormalRes>({
+        dataSource,
+    } = useList<IPurchaseAbnormalItem>({
         queryList: getAbnormalAllList,
         formRef: formRef,
         extraQuery: {
-            waybill_exception_status: 3
-        }
+            waybill_exception_status: 3,
+        },
     });
 
-    const columns = useMemo<ColumnProps<IPurchaseAbnormalRes>[]>(() => {
+    const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
                 title: '异常单ID',
-                dataIndex: 'a1',
+                dataIndex: 'waybillExceptionSn',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常类型',
-                dataIndex: 'a2',
+                dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常单状态',
-                dataIndex: 'a3',
+                dataIndex: 'waybillExceptionStatus',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常图片',
-                dataIndex: 'image',
+                dataIndex: 'goodsImageUrl',
                 align: 'center',
                 width: 120,
-                render: (value: string, row: IPurchaseAbnormalRes) => {
+                render: (value: string, row: IPurchaseAbnormalItem) => {
                     return <AutoEnLargeImg src={value} className={styles.imgCell} />;
                 },
             },
             {
                 title: '异常数量',
-                dataIndex: 'a4',
+                dataIndex: 'quantity',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常描述',
-                dataIndex: 'a5',
+                dataIndex: 'waybillExceptionDescription',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '采购单ID',
-                dataIndex: 'a6',
+                dataIndex: 'purchaseOrderId',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '运单号',
-                dataIndex: 'a7',
+                dataIndex: 'waybillNo',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '完结时间',
-                dataIndex: 'time',
+                dataIndex: 'finishedTime',
                 align: 'center',
                 width: 150,
-                render: (val) => utcToLocal(val)
-            }
+                render: val => utcToLocal(val),
+            },
         ];
     }, []);
 
@@ -144,7 +141,7 @@ const PaneAbnormalEnd: React.FC = props => {
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
-                        waybill_exception_type: 100
+                        waybill_exception_type: 100,
                     }}
                 >
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>

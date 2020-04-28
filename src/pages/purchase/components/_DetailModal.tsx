@@ -9,11 +9,7 @@ interface IProps {
     onCancel(): void;
 }
 
-const DetailModal: React.FC<IProps> = ({
-    visible,
-    onCancel
-}) => {
-
+const DetailModal: React.FC<IProps> = ({ visible, onCancel }) => {
     return useMemo(() => {
         return (
             <Modal
@@ -26,18 +22,17 @@ const DetailModal: React.FC<IProps> = ({
             >
                 <div className={styles.iconSection}>
                     <div className={styles.iconBox}>
-                        <Icons type="scm-tuikuan" className={styles.icon1}/>
+                        <Icons type="scm-tuikuan" className={styles.icon1} />
                         <div>退款中</div>
                     </div>
                     <div className={styles.iconBox}>
-                        <Icons type="scm-tuihuo" className={styles.icon2}/>
+                        <Icons type="scm-tuihuo" className={styles.icon2} />
                         <div>拒收中</div>
                     </div>
                     <div className={styles.iconBox}>
-                        <Icons type="scm-fahuo" className={styles.icon3}/>
+                        <Icons type="scm-fahuo" className={styles.icon3} />
                         <div>补发中</div>
                     </div>
-                    
                 </div>
                 <div className={styles.descItem}>
                     <div className={styles.label}>拒收数量</div>
@@ -57,7 +52,9 @@ const DetailModal: React.FC<IProps> = ({
                 </div>
                 <div className={styles.descItem}>
                     <div className={styles.label}>详细地址</div>
-                    <p className={styles.text}>对司法考试大家发贺卡收到就回复了卡是几点话费啦都快放假啊坏掉了饭卡觉得很烦</p>
+                    <p className={styles.text}>
+                        对司法考试大家发贺卡收到就回复了卡是几点话费啦都快放假啊坏掉了饭卡觉得很烦
+                    </p>
                 </div>
                 <div className={styles.descItem}>
                     <div className={styles.label}>邮政编码</div>
@@ -69,11 +66,13 @@ const DetailModal: React.FC<IProps> = ({
                 </div>
                 <div className={styles.descItem}>
                     <div className={styles.label}>备注</div>
-                    <p className={styles.text}>吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦</p>
+                    <p className={styles.text}>
+                        吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦吧啦
+                    </p>
                 </div>
             </Modal>
-        )
+        );
     }, [visible]);
-}
+};
 
 export default DetailModal;

@@ -3,11 +3,11 @@ import { Button, Checkbox } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
-import { IPurchaseAbnormalRes } from '@/interface/IPurchase';
+import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
-import DetailModal from './DetailModal';
+import DetailModal from './_DetailModal';
 
 import styles from '../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -24,10 +24,7 @@ const fieldList: FormField[] = [
         type: 'select',
         name: 'waybill_exception_type',
         label: '异常类型',
-        optionList: [
-            defaultOptionItem,
-            ...waybillExceptionTypeList
-        ],
+        optionList: [defaultOptionItem, ...waybillExceptionTypeList],
     },
     {
         type: 'input',
@@ -42,26 +39,17 @@ const fieldList: FormField[] = [
         label: '运单号',
         placeholder: '请输入运单号',
     },
-]
-
-const fieldCheckboxList: FormField[] = [
-    {
-        type: 'checkbox',
-        name: 'time_out',
-        label: '24小时未处理',
-        formItemClassName: '',
-        formatter: (val: boolean) => val ? 1 : 0
-        // onChange: (name, form) => {
-        //     this.changeParentOrder(form.getFieldValue(name));
-        // },
-    },
 ];
 
-const PaneAbnormalProcessing: React.FC = props => {
+interface IProps {
+    execingCount: number;
+}
+
+const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
     const formRef1 = useRef<JsonFormRef>(null);
     const formRef2 = useRef<JsonFormRef>(null);
     const [detailStatus, setDetailStatus] = useState(false);
-    const { 
+    const {
         loading,
         pageNumber,
         pageSize,
@@ -69,87 +57,88 @@ const PaneAbnormalProcessing: React.FC = props => {
         onSearch,
         onReload,
         onChange,
-        dataSource 
-    } = useList<IPurchaseAbnormalRes>({
+        dataSource,
+    } = useList<IPurchaseAbnormalItem>({
         queryList: getAbnormalAllList,
         formRef: [formRef1, formRef2],
         extraQuery: {
-            waybill_exception_status: 2
-        }
+            waybill_exception_status: 2,
+        },
     });
 
     const showDetail = () => {
         setDetailStatus(true);
-    }
+    };
 
-    const hideDetail = useCallback(
-        () => {
-            setDetailStatus(false);
-        },
-        [],
-    );
+    const hideDetail = useCallback(() => {
+        setDetailStatus(false);
+    }, []);
 
-    const columns = useMemo<ColumnProps<IPurchaseAbnormalRes>[]>(() => {
+    const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
                 title: '异常单ID',
-                dataIndex: 'a1',
+                dataIndex: 'waybillExceptionSn',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常类型',
-                dataIndex: 'a2',
+                dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常单状态',
-                dataIndex: 'a3',
+                dataIndex: 'waybillExceptionStatus',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常图片',
-                dataIndex: 'image',
+                dataIndex: 'goodsImageUrl',
                 align: 'center',
                 width: 120,
-                render: (value: string, row: IPurchaseAbnormalRes) => {
+                render: (value: string, row: IPurchaseAbnormalItem) => {
                     return <AutoEnLargeImg src={value} className={styles.imgCell} />;
                 },
             },
             {
                 title: '异常数量',
-                dataIndex: 'a4',
+                dataIndex: 'quantity',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '异常描述',
-                dataIndex: 'a5',
+                dataIndex: 'waybillExceptionDescription',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '采购单ID',
-                dataIndex: 'a6',
+                dataIndex: 'purchaseOrderId',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '运单号',
-                dataIndex: 'a7',
+                dataIndex: 'waybillNo',
                 align: 'center',
                 width: 150,
             },
             {
                 title: '操作',
-                dataIndex: 'a8',
+                dataIndex: '_operate',
                 align: 'center',
                 width: 150,
-                render: (_) => {
-                    return <Button type="link" onClick={() => showDetail()}>查看详情</Button>
-                }
+                render: _ => {
+                    return (
+                        <Button type="link" onClick={() => showDetail()}>
+                            查看详情
+                        </Button>
+                    );
+                },
             },
         ];
     }, []);
@@ -164,6 +153,18 @@ const PaneAbnormalProcessing: React.FC = props => {
         } as any;
     }, [loading]);
 
+    const fieldCheckboxList = useMemo<FormField[]>(() => {
+        return [
+            {
+                type: 'checkbox',
+                name: 'time_out',
+                label: `24小时未处理（${execingCount}）`,
+                formItemClassName: '',
+                formatter: (val: boolean) => (val ? 24 : undefined),
+            },
+        ];
+    }, [execingCount]);
+
     const toolBarRender = useCallback(() => {
         return [
             <JsonForm
@@ -171,10 +172,9 @@ const PaneAbnormalProcessing: React.FC = props => {
                 enableCollapse={false}
                 fieldList={fieldCheckboxList}
                 ref={formRef2}
-            >
-            </JsonForm>
-        ]
-    }, [])
+            ></JsonForm>,
+        ];
+    }, [fieldCheckboxList]);
 
     return useMemo(() => {
         // console.log('dataSource', dataSource);
@@ -185,7 +185,7 @@ const PaneAbnormalProcessing: React.FC = props => {
                     fieldList={fieldList}
                     ref={formRef1}
                     initialValues={{
-                        waybill_exception_type: 100
+                        waybill_exception_type: 100,
                     }}
                 >
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
@@ -212,10 +212,7 @@ const PaneAbnormalProcessing: React.FC = props => {
                     onChange={onChange}
                     toolBarRender={toolBarRender}
                 />
-                <DetailModal
-                    visible={detailStatus}
-                    onCancel={hideDetail}
-                />
+                <DetailModal visible={detailStatus} onCancel={hideDetail} />
             </>
         );
     }, [dataSource, loading, detailStatus]);
