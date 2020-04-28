@@ -11,8 +11,8 @@ export interface IPurchaseAbnormalItem {
     quantity: number; // 异常数量
     packagImageUrl: string; // 包裹图片
     goodsImageUrl: string; // 商品图片
-    platformUid: string;
-    purchasePlatform: string;
+    // platformUid: string;
+    // purchasePlatform: string;
 }
 
 export interface IPurchaseAbnormalReq {
@@ -49,8 +49,6 @@ export interface IDiscardAbnormalOrderReq {
 }
 
 export interface IApplyPurchaseRefundReq {
-    purchase_order_goods_sn: string;
-    platform_uid: string;
-    purchase_platform: string;
-    remarks: string;
+    purchase_order_goods_id: string;
+    remark: string;
 }

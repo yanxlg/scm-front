@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef } from 'react';
+import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
@@ -6,10 +7,11 @@ import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
+import { utcToLocal } from 'react-components/es/utils/date';
+import Export from '@/components/Export';
 
 import styles from '../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { utcToLocal } from 'react-components/es/utils/date';
 
 const fieldList: FormField[] = [
     {
@@ -42,6 +44,7 @@ const fieldList: FormField[] = [
 
 const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
+    const [exportStatus, setExportStatus] = useState(false);
     const {
         loading,
         pageNumber,
@@ -58,6 +61,17 @@ const PaneAbnormalEnd: React.FC = props => {
             waybill_exception_status: 3,
         },
     });
+
+    const onExport = useCallback((values: any) => {
+        console.log('onExport', values);
+        // return postExportErrOrder({
+        //     abnormal_type: 1,
+        //     abnormal_detail_type: 2,
+        //     ...queryRef.current,
+        //     ...values,
+        // });
+        return Promise.resolve();
+    }, []);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
@@ -132,6 +146,17 @@ const PaneAbnormalEnd: React.FC = props => {
         } as any;
     }, [loading]);
 
+    const exportModalComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns}
+                visible={exportStatus}
+                onOKey={onExport}
+                onCancel={() => setExportStatus(false)}
+            />
+        );
+    }, [exportStatus]);
+
     return useMemo(() => {
         // console.log('dataSource', dataSource);
         return (
@@ -150,9 +175,9 @@ const PaneAbnormalEnd: React.FC = props => {
                     <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    {/* <Button className={formStyles.formBtn} onClick={() => setExportModal(true)}>
-                        导出数据
-                    </Button> */}
+                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
+                        导出
+                    </Button>
                 </JsonForm>
                 <FitTable
                     bordered={true}
@@ -168,9 +193,10 @@ const PaneAbnormalEnd: React.FC = props => {
                     onChange={onChange}
                     // toolBarRender={toolBarRender}
                 />
+                {exportModalComponent}
             </>
         );
-    }, [dataSource, loading]);
+    }, [dataSource, loading, exportModalComponent]);
 };
 
 export default PaneAbnormalEnd;

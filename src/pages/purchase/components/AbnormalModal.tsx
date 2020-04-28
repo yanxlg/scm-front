@@ -26,8 +26,6 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
         waybillExceptionType,
         waybillExceptionSn,
         purchaseOrderGoodsId,
-        platformUid,
-        purchasePlatform,
     } = currentRecord as IPurchaseAbnormalItem;
     const [form] = Form.useForm();
     const [checkedList, setCheckedList] = useState<string[]>([]);
@@ -50,10 +48,8 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                 checkedList.map(val => {
                     if (val === '1') {
                         return applyPurchaseRefund({
-                            purchase_order_goods_sn: purchaseOrderGoodsId,
-                            platform_uid: platformUid,
-                            purchase_platform: purchasePlatform,
-                            remarks,
+                            purchase_order_goods_id: purchaseOrderGoodsId,
+                            remark: remarks,
                         });
                     } else if (val === '2') {
                         return setRejectAbnormalOrder({
