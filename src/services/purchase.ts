@@ -43,9 +43,14 @@ export function applyPurchaseRefund(data: IApplyPurchaseRefundReq) {
     });
 }
 
-// getExceptionCount
 export function getExceptionCount(params = { exec_more_time: 24 }) {
     return request.get(PurchaseApiPath.getExceptionCount, {
         params,
+    });
+}
+
+export function downloadExcel(data: any) {
+    return request.post(PurchaseApiPath.downloadExcel, {
+        data,
     });
 }

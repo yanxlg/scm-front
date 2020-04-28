@@ -3,12 +3,21 @@ import { Modal, Input, message, Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList, setDiscardAbnormalOrder } from '@/services/purchase';
-import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
+import {
+    IPurchaseAbnormalItem,
+    IWaybillExceptionTypeKey,
+    IWaybillExceptionStatusKey,
+} from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import RelatedPurchaseModal from './RelatedPurchaseModal';
 import AbnormalModal from './AbnormalModal';
-import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
+import {
+    waybillExceptionTypeList,
+    defaultOptionItem,
+    waybillExceptionTypeMap,
+    waybillExceptionStatusMap,
+} from '@/enums/PurchaseEnum';
 import TextArea from 'antd/lib/input/TextArea';
 // import { utcToLocal } from 'react-components/es/utils/date';
 import { QuestionCircleOutlined } from '@ant-design/icons';
@@ -154,12 +163,14 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
+                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
             },
             {
                 title: '异常单状态',
                 dataIndex: 'waybillExceptionStatus',
                 align: 'center',
                 width: 150,
+                render: (val: IWaybillExceptionStatusKey) => waybillExceptionStatusMap[val],
             },
             {
                 title: '异常图片',
@@ -184,7 +195,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
             },
             {
                 title: '采购单ID',
-                dataIndex: 'purchaseOrderId',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
             },

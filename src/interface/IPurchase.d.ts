@@ -1,7 +1,25 @@
+export interface IWaybillExceptionType {
+    '101': string;
+    '102': string;
+    '103': string;
+    '104': string;
+    '105': string;
+}
+
+export type IWaybillExceptionTypeKey = keyof IWaybillExceptionType;
+
+export interface IWaybillExceptionStatus {
+    1: '待处理';
+    2: '处理中';
+    3: '已完结';
+}
+
+export type IWaybillExceptionStatusKey = keyof IWaybillExceptionStatus;
+
 export interface IPurchaseAbnormalItem {
     waybillExceptionSn: string; // 异常订单编号
-    waybillExceptionType: string; // 异常类型 101扫码失败，102拒收 103多发货 104货不对版 105货品不合规
-    waybillExceptionStatus: number; // 异常单状态 1:待处理 2:处理中 3:已完结
+    waybillExceptionType: IWaybillExceptionTypeKey; // 异常类型 101扫码失败，102拒收 103多发货 104货不对版 105货品不合规
+    waybillExceptionStatus: IWaybillExceptionStatusKey; // 异常单状态 1:待处理 2:处理中 3:已完结
     waybillExceptionDescription: string; // 异常描述
     waybillNo: string; // 物流运单号
     shippingName: string; // 物流商名称
@@ -28,6 +46,8 @@ export interface ICorrelateWaybillReq {
     purchase_waybill_no: string;
     goods_number: number;
     remark: string;
+    waybill_exception_sn: string;
+    request_type: 'WAYBILL_EXCEPTION';
 }
 
 export interface IRejectAbnormalOrderReq {

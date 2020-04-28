@@ -2,13 +2,22 @@ import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
 import { Button, Modal, Input, message } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder } from '@/services/purchase';
-import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
+import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
+import {
+    IPurchaseAbnormalItem,
+    IWaybillExceptionTypeKey,
+    IWaybillExceptionStatusKey,
+} from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import RelatedPurchaseModal from './RelatedPurchaseModal';
 import AbnormalModal from './AbnormalModal';
-import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
+import {
+    waybillExceptionTypeList,
+    defaultOptionItem,
+    waybillExceptionTypeMap,
+    waybillExceptionStatusMap,
+} from '@/enums/PurchaseEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import TextArea from 'antd/lib/input/TextArea';
@@ -85,11 +94,11 @@ const PaneAbnormalAll: React.FC = props => {
     }, []);
 
     // 显示关联采购单
-    const hasRelatedPurchase = useCallback((waybillExceptionType: string) => {
+    const hasRelatedPurchase = useCallback((waybillExceptionType: IWaybillExceptionTypeKey) => {
         return ['101', '103'].indexOf(waybillExceptionType) > -1;
     }, []);
 
-    const hasExceptionHandle = useCallback((waybillExceptionType: string) => {
+    const hasExceptionHandle = useCallback((waybillExceptionType: IWaybillExceptionTypeKey) => {
         return ['102', '104', '105'].indexOf(waybillExceptionType) > -1;
     }, []);
 
@@ -124,13 +133,12 @@ const PaneAbnormalAll: React.FC = props => {
 
     const onExport = useCallback((values: any) => {
         console.log('onExport', values);
-        // return postExportErrOrder({
-        //     abnormal_type: 1,
-        //     abnormal_detail_type: 2,
-        //     ...queryRef.current,
-        //     ...values,
-        // });
-        return Promise.resolve();
+        return downloadExcel({
+            query: formRef.current?.getFieldsValue(),
+            module: 5,
+            ...values,
+        });
+        // return Promise.reject();
     }, []);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
@@ -146,12 +154,14 @@ const PaneAbnormalAll: React.FC = props => {
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
+                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
             },
             {
                 title: '异常单状态',
                 dataIndex: 'waybillExceptionStatus',
                 align: 'center',
                 width: 150,
+                render: (val: IWaybillExceptionStatusKey) => waybillExceptionStatusMap[val],
             },
             {
                 title: '异常图片',
@@ -176,7 +186,7 @@ const PaneAbnormalAll: React.FC = props => {
             },
             {
                 title: '采购单ID',
-                dataIndex: 'purchaseOrderId',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
             },
@@ -237,7 +247,7 @@ const PaneAbnormalAll: React.FC = props => {
     const exportModalComponent = useMemo(() => {
         return (
             <Export
-                columns={columns}
+                columns={columns.filter((item: any) => item.dataIndex[0] !== '_')}
                 visible={exportStatus}
                 onOKey={onExport}
                 onCancel={() => setExportStatus(false)}

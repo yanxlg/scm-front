@@ -28,7 +28,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
         purchaseOrderGoodsId,
     } = currentRecord as IPurchaseAbnormalItem;
     const [form] = Form.useForm();
-    const [checkedList, setCheckedList] = useState<string[]>([]);
+    const [checkedList, setCheckedList] = useState<number[]>([]);
 
     const handleOk = useCallback(() => {
         form.validateFields().then(vals => {
@@ -46,12 +46,12 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
             } = vals;
             const allRequest = Promise.all(
                 checkedList.map(val => {
-                    if (val === '1') {
+                    if (val === 1) {
                         return applyPurchaseRefund({
                             purchase_order_goods_id: purchaseOrderGoodsId,
                             remark: remarks,
                         });
-                    } else if (val === '2') {
+                    } else if (val === 2) {
                         return setRejectAbnormalOrder({
                             waybill_exception_sn: waybillExceptionSn,
                             abnormal_operate_type: '拒收',
@@ -63,12 +63,14 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             zip_code,
                             remarks,
                         });
-                    } else if (val === '3') {
+                    } else if (val === 3) {
                         return setCorrelateWaybill({
                             purchase_order_goods_id: purchaseOrderGoodsId,
                             purchase_waybill_no,
                             goods_number,
                             remark: remarks,
+                            waybill_exception_sn: waybillExceptionSn,
+                            request_type: 'WAYBILL_EXCEPTION',
                         });
                     }
                 }),
@@ -107,25 +109,25 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                     <div className={styles.title}>请选择需要的操作</div>
                     <Checkbox.Group value={checkedList} onChange={handleCheckboxChange}>
                         {waybillExceptionType === '102' ? (
-                            <Checkbox value="1" className={styles.checkbox}>
+                            <Checkbox value={1} className={styles.checkbox}>
                                 退款
                             </Checkbox>
                         ) : (
                             <>
-                                <Checkbox value="1" className={styles.checkbox}>
+                                <Checkbox value={1} className={styles.checkbox}>
                                     退款
                                 </Checkbox>
-                                <Checkbox value="2" className={styles.checkbox}>
+                                <Checkbox value={2} className={styles.checkbox}>
                                     拒收
                                 </Checkbox>
-                                <Checkbox value="3" className={styles.checkbox}>
+                                <Checkbox value={3} className={styles.checkbox}>
                                     补发
                                 </Checkbox>
                             </>
                         )}
                     </Checkbox.Group>
                     {// 拒收
-                    checkedList.indexOf('2') > -1 && (
+                    checkedList.indexOf(2) > -1 && (
                         <div className={styles.sectionBox}>
                             <Form.Item
                                 name="reject_count"
@@ -186,7 +188,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                         </div>
                     )}
                     {// 补发
-                    checkedList.indexOf('3') > -1 && (
+                    checkedList.indexOf(3) > -1 && (
                         <div className={styles.sectionBox}>
                             <Form.Item
                                 name="purchase_waybill_no"

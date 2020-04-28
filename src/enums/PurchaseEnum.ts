@@ -8,7 +8,13 @@ export const waybillExceptionTypeMap = {
     102: '拒收',
     103: '多发货',
     104: '货不对版',
-    105: '货品不合规'
+    105: '货品不合规',
 };
 
 export const waybillExceptionTypeList = transOptionList(waybillExceptionTypeMap, true);
+
+export const waybillExceptionStatusMap = {
+    1: '待处理',
+    2: '处理中',
+    3: '已完结',
+};

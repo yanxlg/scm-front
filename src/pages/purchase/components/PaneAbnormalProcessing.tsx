@@ -3,10 +3,19 @@ import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
 import { getAbnormalAllList } from '@/services/purchase';
-import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
+import {
+    IPurchaseAbnormalItem,
+    IWaybillExceptionTypeKey,
+    IWaybillExceptionStatusKey,
+} from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
-import { waybillExceptionTypeList, defaultOptionItem } from '@/enums/PurchaseEnum';
+import {
+    waybillExceptionTypeList,
+    defaultOptionItem,
+    waybillExceptionTypeMap,
+    waybillExceptionStatusMap,
+} from '@/enums/PurchaseEnum';
 import DetailModal from './DetailModal';
 import Export from '@/components/Export';
 
@@ -100,12 +109,14 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
+                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
             },
             {
                 title: '异常单状态',
                 dataIndex: 'waybillExceptionStatus',
                 align: 'center',
                 width: 150,
+                render: (val: IWaybillExceptionStatusKey) => waybillExceptionStatusMap[val],
             },
             {
                 title: '异常图片',
@@ -130,7 +141,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
             },
             {
                 title: '采购单ID',
-                dataIndex: 'purchaseOrderId',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
             },

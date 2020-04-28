@@ -7,4 +7,5 @@ export enum PurchaseApiPath {
     setDiscardAbnormalOrder = '/api/v1/purchase/discard_abnormal_order',
     applyPurchaseRefund = '/api/v1/purchase/refund',
     getExceptionCount = '/api/v1/purchase/waybill_exception/count',
+    downloadExcel = '/api/v1/download/create',
 }
