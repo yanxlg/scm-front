@@ -46,7 +46,7 @@ export default [
                 name: '本地产品库',
             },
             {
-                path: '/goods/local/version',
+                path: '/goods/local/:id',
                 name: '商品版本',
                 hideInMenu: true,
             },
@@ -70,6 +70,25 @@ export default [
         path: '/stock',
         name: '出入库管理',
         icon: <Icons type="scm-io" className="menu-icon" />,
+    },
+    {
+        path: '/purchase',
+        name: '采购管理',
+        icon: <Icons type="scm-purchase" className="menu-icon" />,
+        children: [
+            {
+                path: '/purchase/list',
+                name: '采购单列表',
+            },
+            {
+                path: '/purchase/return',
+                name: '采购退货',
+            },
+            {
+                path: '/purchase/abnormal',
+                name: '仓库异常处理',
+            },
+        ],
     },
     {
         path: '/setting',
@@ -99,17 +118,6 @@ export default [
             {
                 path: '/setting/info',
                 name: '重要报关信息映射',
-            },
-        ],
-    },
-    {
-        path: '/purchase',
-        name: '订单管理',
-        icon: <Icons type="scm-purchase" className="menu-icon" />,
-        children: [
-            {
-                path: '/purchase/abnormal',
-                name: '仓库异常处理',
             },
         ],
     },
