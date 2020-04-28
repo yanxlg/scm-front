@@ -1,68 +1,117 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, useList } from 'react-components';
+import { AutoEnLargeImg, FitTable, JsonForm, LoadingButton, useList } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { queryPurchaseList } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { exportReturnList, queryPurchaseList, queryReturnList } from '@/services/purchase';
+import { IPurchaseItem, IReturnItem } from '@/interface/IPurchase';
+import {
+    PurchaseReturnCode,
+    PurchaseReturnMap,
+    PurchaseReturnType,
+} from '@/config/dictionaries/Purchase';
+import { FormInstance } from 'antd/es/form';
+import styles from '@/pages/purchase/_return.less';
+import Export from '@/components/Export';
 
 const fieldList: FormField[] = [
     {
         label: '出入库单号',
         type: 'input',
-        name: 'id',
+        name: 'refer_waybill_no',
     },
     {
         label: '商品名称',
         type: 'input',
-        name: 'gongyingshag',
+        name: 'product_name',
     },
     {
         label: '采购单ID',
         type: 'input',
-        name: 'order',
+        name: 'purchase_order_goods_id',
     },
     {
         label: '供应商订单号',
         type: 'input',
-        name: 'name',
+        name: 'purchase_order_goods_sn',
     },
     {
         label: '运单号',
         type: 'input',
-        name: 'name',
-    },
-];
-
-const fieldList1: FormField[] = [
-    {
-        label: '72小时无状态更新',
-        type: 'checkbox',
-        name: 'id',
-        formItemClassName: '',
+        name: 'waybill_no',
     },
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const PendingSigned = () => {
+    const [showExport, setShowExport] = useState(false);
+
+    const showExportFn = useCallback(() => {
+        setShowExport(true);
+    }, []);
+
+    const closeExportFn = useCallback(() => {
+        setShowExport(false);
+    }, []);
+
+    const onExport = useCallback((data: any) => {
+        return exportReturnList(data).request();
+    }, []);
+
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
+
+    const {
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onChange,
+        onSearch,
+        onReload,
+    } = useList<IReturnItem>({
+        queryList: queryReturnList,
+        formRef: [formRef, formRef1],
+        extraQuery: {
+            purchase_return_status: PurchaseReturnType.PendingReceived,
+        },
+    });
+
+    const fieldList1: FormField[] = useMemo(() => {
+        return [
+            {
+                type: 'checkboxGroup',
+                name: 'time_type',
+                formItemClassName: '',
+                options: [
+                    {
+                        label: '72小时无状态更新',
+                        value: 72,
+                    },
+                ],
+                onChange: (name: string, form: FormInstance) => {
+                    onSearch();
+                },
+            },
+        ];
+    }, []);
 
     const searchForm = useMemo(() => {
         return (
             <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
                 <div>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
-                    </Button>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
                         刷新
-                    </Button>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    </LoadingButton>
+                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>
@@ -70,71 +119,88 @@ const PendingSigned = () => {
         );
     }, []);
 
-    const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList<IPurchaseItem>({
-        queryList: queryPurchaseList,
-        formRef: [formRef, formRef1],
-    });
-
     const columns = useMemo(() => {
         return [
             {
                 title: '出入库单号',
-                dataIndex: 'operation',
+                dataIndex: 'referWaybillNo',
                 align: 'center',
-                fixed: 'left',
                 width: '150px',
             },
             {
                 title: '出入库类型',
-                width: '100px',
-                fixed: 'left',
-                dataIndex: 'task_id',
+                width: '150px',
                 align: 'center',
+                dataIndex: 'outboundType',
+                render: () => {
+                    return '退货出库';
+                },
             },
             {
                 title: '退货状态',
                 width: '200px',
-                fixed: 'left',
-                dataIndex: 'task_sn',
+                dataIndex: 'purchaseReturnStatus',
                 align: 'center',
+                render: (_: PurchaseReturnCode) => PurchaseReturnMap[_],
             },
             {
                 title: '商品信息',
-                dataIndex: 'task_name',
+                dataIndex: 'product_info',
                 width: '178px',
                 align: 'center',
+                render: (_, item: IReturnItem) => {
+                    const { productImageUrl, purchasePlatformGoodsName, productSkuStyle } = item;
+                    let skus: any[] = [];
+                    try {
+                        const sku = JSON.parse(productSkuStyle);
+                        for (let key of sku) {
+                            skus.push(
+                                <div key={key}>
+                                    {key}:{sku[key]}
+                                </div>,
+                            );
+                        }
+                    } catch (e) {}
+                    return (
+                        <div>
+                            <AutoEnLargeImg src={productImageUrl} className={styles.image} />
+                            {purchasePlatformGoodsName}
+                            {skus}
+                        </div>
+                    );
+                },
             },
             {
                 title: '退货数量',
-                dataIndex: 'status',
+                dataIndex: 'returnNumber',
                 width: '130px',
                 align: 'center',
             },
             {
                 title: '采购单ID',
-                dataIndex: 'channel',
+                dataIndex: 'purchaseOrderGoodsId',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '供应商',
-                dataIndex: 'task_type',
+                dataIndex: 'productPddMerchantName',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '供应商订单号',
-                dataIndex: 'task_range',
+                dataIndex: 'purchaseOrderGoodsSn',
                 width: '182px',
                 align: 'center',
             },
             {
                 title: '运单号',
-                dataIndex: 'execute_count',
+                dataIndex: 'waybillNo',
                 width: '223px',
                 align: 'center',
             },
-        ] as ColumnType<IPurchaseItem>[];
+        ] as ColumnType<IReturnItem>[];
     }, []);
 
     const pagination = useMemo(() => {
@@ -162,7 +228,7 @@ const PendingSigned = () => {
     const table = useMemo(() => {
         return (
             <FitTable
-                rowKey="task_id"
+                rowKey="purchaseOrderGoodsReturnId"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
@@ -174,16 +240,22 @@ const PendingSigned = () => {
                 toolBarRender={toolBarRender}
             />
         );
-    }, []);
+    }, [loading]);
 
     return useMemo(() => {
         return (
             <>
                 {searchForm}
                 {table}
+                <Export
+                    columns={columns}
+                    visible={showExport}
+                    onOKey={onExport}
+                    onCancel={closeExportFn}
+                />
             </>
         );
-    }, []);
+    }, [loading, showExport]);
 };
 
 export default PendingSigned;

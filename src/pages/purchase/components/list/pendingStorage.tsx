@@ -1,6 +1,12 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, PopConfirmLoadingButton, useList } from 'react-components';
+import {
+    FitTable,
+    JsonForm,
+    LoadingButton,
+    PopConfirmLoadingButton,
+    useList,
+} from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -13,7 +19,7 @@ const fieldList: FormField[] = [
     {
         label: '采购单id',
         type: 'input',
-        name: 'id',
+        name: 'purchase_order_goods_id',
     },
     {
         label: '供应商',
@@ -28,7 +34,7 @@ const fieldList: FormField[] = [
     {
         label: '商品名称',
         type: 'input',
-        name: 'name',
+        name: 'purchase_goods_name',
     },
 ];
 
@@ -47,16 +53,33 @@ const PendingStorage = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
 
+    const {
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onChange,
+        onSearch,
+        onReload,
+    } = useList<IPurchaseItem>({
+        queryList: queryPurchaseList,
+        formRef: [formRef, formRef1],
+        extraQuery: {
+            type: 3,
+        },
+    });
+
     const searchForm = useMemo(() => {
         return (
             <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
                 <div>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
-                    </Button>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
                         刷新
-                    </Button>
+                    </LoadingButton>
                     <Button type="primary" className={formStyles.formBtn}>
                         导出
                     </Button>
@@ -64,11 +87,6 @@ const PendingStorage = () => {
             </JsonForm>
         );
     }, []);
-
-    const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList<IPurchaseItem>({
-        queryList: queryPurchaseList,
-        formRef: [formRef, formRef1],
-    });
 
     const columns = useMemo(() => {
         return [
@@ -175,7 +193,7 @@ const PendingStorage = () => {
                 toolBarRender={toolBarRender}
             />
         );
-    }, []);
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -184,7 +202,7 @@ const PendingStorage = () => {
                 {table}
             </>
         );
-    }, []);
+    }, [loading]);
 };
 
 export default PendingStorage;

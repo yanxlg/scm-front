@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, useList } from 'react-components';
+import { FitTable, JsonForm, LoadingButton, useList } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -16,7 +16,7 @@ const fieldList: FormField[] = [
     {
         label: '采购单id',
         type: 'input',
-        name: 'id',
+        name: 'purchase_order_goods_id',
     },
     {
         label: '供应商',
@@ -31,7 +31,7 @@ const fieldList: FormField[] = [
     {
         label: '商品名称',
         type: 'input',
-        name: 'name',
+        name: 'purchase_goods_name',
     },
 ];
 
@@ -40,16 +40,33 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 const AllList = () => {
     const formRef = useRef<JsonFormRef>(null);
 
+    const {
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onChange,
+        onSearch,
+        onReload,
+    } = useList<IPurchaseItem>({
+        queryList: queryPurchaseList,
+        formRef: formRef,
+        extraQuery: {
+            type: 0,
+        },
+    });
+
     const searchForm = useMemo(() => {
         return (
             <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
                 <div>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
-                    </Button>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
                         刷新
-                    </Button>
+                    </LoadingButton>
                     <Button type="primary" className={formStyles.formBtn}>
                         导出
                     </Button>
@@ -58,32 +75,24 @@ const AllList = () => {
         );
     }, []);
 
-    const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList<IPurchaseItem>({
-        queryList: queryPurchaseList,
-        formRef: formRef,
-    });
-
     const columns = useMemo(() => {
         return [
             {
                 title: '采购单ID',
-                dataIndex: 'operation',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
-                fixed: 'left',
                 width: '150px',
             },
             {
                 title: '采购单状态',
                 width: '100px',
-                fixed: 'left',
-                dataIndex: 'task_id',
+                dataIndex: 'purchaseOrderStatus',
                 align: 'center',
             },
             {
                 title: '采购金额',
                 width: '200px',
-                fixed: 'left',
-                dataIndex: 'task_sn',
+                dataIndex: 'purchaseTotalAmount',
                 align: 'center',
             },
             {
@@ -94,37 +103,37 @@ const AllList = () => {
             },
             {
                 title: '供应商',
-                dataIndex: 'status',
+                dataIndex: 'purchasePlatform',
                 width: '130px',
                 align: 'center',
             },
             {
                 title: '供应商订单号',
-                dataIndex: 'channel',
+                dataIndex: ['storageExpressInfo', 'purchaseTrackingNumber'],
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '采购计划',
-                dataIndex: 'task_type',
                 width: '223px',
                 align: 'center',
+                render: () => <Button>查看详情</Button>,
             },
             {
                 title: '运单号',
-                dataIndex: 'task_range',
+                dataIndex: ['storageExpressInfo', 'purchaseTrackingNumber'],
                 width: '182px',
                 align: 'center',
             },
             {
                 title: '出入库单号',
-                dataIndex: 'execute_count',
+                dataIndex: ['storageExpressInfo', 'referWaybillNo'],
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '出入库类型',
-                dataIndex: 'create_time',
+                dataIndex: ['storageExpressInfo', 'type'],
                 width: '223px',
                 align: 'center',
             },
@@ -155,7 +164,7 @@ const AllList = () => {
                 onChange={onChange}
             />
         );
-    }, []);
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -167,7 +176,7 @@ const AllList = () => {
                 {/*<PurchaseDetailModal visible="1111" onCancel={() => {}} />*/}
             </>
         );
-    }, []);
+    }, [loading]);
 };
 
 export default AllList;

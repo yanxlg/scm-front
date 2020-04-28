@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, useList } from 'react-components';
+import { FitTable, JsonForm, LoadingButton, useList } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -13,7 +13,7 @@ const fieldList: FormField[] = [
     {
         label: '采购单id',
         type: 'input',
-        name: 'id',
+        name: 'purchase_order_goods_id',
     },
     {
         label: '供应商',
@@ -28,7 +28,7 @@ const fieldList: FormField[] = [
     {
         label: '商品名称',
         type: 'input',
-        name: 'name',
+        name: 'purchase_goods_name',
     },
 ];
 
@@ -36,17 +36,33 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 
 const PendingSigned = () => {
     const formRef = useRef<JsonFormRef>(null);
+    const {
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onChange,
+        onSearch,
+        onReload,
+    } = useList<IPurchaseItem>({
+        queryList: queryPurchaseList,
+        formRef: formRef,
+        extraQuery: {
+            type: 2,
+        },
+    });
 
     const searchForm = useMemo(() => {
         return (
             <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
                 <div>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
-                    </Button>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
                         刷新
-                    </Button>
+                    </LoadingButton>
                     <Button type="primary" className={formStyles.formBtn}>
                         导出
                     </Button>
@@ -54,11 +70,6 @@ const PendingSigned = () => {
             </JsonForm>
         );
     }, []);
-
-    const { loading, pageNumber, pageSize, dataSource, total, onChange } = useList<IPurchaseItem>({
-        queryList: queryPurchaseList,
-        formRef: formRef,
-    });
 
     const columns = useMemo(() => {
         return [
@@ -152,7 +163,7 @@ const PendingSigned = () => {
                 onChange={onChange}
             />
         );
-    }, []);
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -161,7 +172,7 @@ const PendingSigned = () => {
                 {table}
             </>
         );
-    }, []);
+    }, [loading]);
 };
 
 export default PendingSigned;
