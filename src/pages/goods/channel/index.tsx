@@ -177,7 +177,10 @@ const ChannelList: React.FC = props => {
 
     const skuRef = useRef<SkuDialog>(null);
 
-    const { visible, onClose, setVisibleProps } = useModal<string>();
+    const { visible, onClose, setVisibleProps } = useModal<{
+        product_ids: string;
+        merchant_id: string;
+    }>();
 
     const {
         pageSize: page_size,
@@ -395,7 +398,10 @@ const ChannelList: React.FC = props => {
     );
 
     const showLog = useCallback((record: IChannelProductListItem) => {
-        setVisibleProps(record.product_id);
+        setVisibleProps({
+            product_ids: record.product_id,
+            merchant_id: record.merchant_id,
+        });
     }, []);
 
     const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {

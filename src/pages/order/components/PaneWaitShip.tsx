@@ -9,6 +9,7 @@ import {
     delPurchaseOrders,
     delChannelOrders,
     postExportWaitShip,
+    queryChannelSource,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -54,7 +55,15 @@ const formFields: FormField[] = [
         name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        optionList: [defaultOptionItem, ...channelOptionList],
+        // optionList: [defaultOptionItem, ...channelOptionList],
+        syncDefaultOption: defaultOptionItem,
+        optionList: () =>
+            queryChannelSource().then(({ data = {} }) => {
+                return Object.keys(data).map(key => ({
+                    name: data[key],
+                    value: Number(key),
+                }));
+            }),
     },
     {
         type: 'select',
@@ -175,7 +184,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
 
     const onChange = useCallback(({ current, pageSize }) => {
         onSearch({
-            pageSize,
+            page_count: pageSize,
             page: current,
         });
     }, []);

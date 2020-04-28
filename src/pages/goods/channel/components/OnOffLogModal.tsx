@@ -9,7 +9,12 @@ import { FitTable } from 'react-components';
 import { utcToLocal } from 'react-components/es/utils/date';
 
 declare interface OnOffLogModalProps {
-    visible: string | false;
+    visible:
+        | {
+              product_ids: string;
+              merchant_id: string;
+          }
+        | false;
     onClose: () => void;
 }
 
