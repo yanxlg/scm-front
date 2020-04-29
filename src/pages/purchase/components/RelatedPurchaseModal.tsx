@@ -16,39 +16,62 @@ interface IProps {
     onRefresh(): void;
 }
 
-const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }) => {
+const RelatedPurchaseModal: React.FC<IProps> = ({ 
+    visible,
+    onCancel,
+    onRefresh
+}) => {
+    if (!visible) {
+        return null;
+    }
     const [form] = Form.useForm();
     const [purchaseOrderGoodsId, setPurchaseOrderGoodsId] = useState('');
     const [relatedType, setRelatedType] = useState('default');
-    const [goodsDetail, setGoodsDetail] = useState({
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const [ goodsDetail, setGoodsDetail ] = useState({
         purchaseGoodsName: 'test',
-        productImageUrl:
-            'https://qqadapt.qpic.cn/txdocpic/0/caabe673030baa81e311c50bdbfc4c7f/0?w=1280&h=590',
-        productSkuStyle: 'xxx',
+        productImageUrl: 'https://qqadapt.qpic.cn/txdocpic/0/caabe673030baa81e311c50bdbfc4c7f/0?w=1280&h=590',
+        productSkuStyle: 'xxx'
     });
 
-    // const getPurchaseGoodsInfo =
+    // const getPurchaseGoodsInfo = 
     const handleSearch = useCallback(() => {
         return getPurchaseGoodsInfo(form.getFieldValue('purchase_order_goods_id'))
             .then(res => {
-                console.log('getPurchaseGoodsInfo', res);
+                // console.log('getPurchaseGoodsInfo', res);
+                const {
+                    purchaseGoodsName,
+                    productImageUrl,
+                    productSkuStyle
+                } = res.data;
                 setRelatedType('ok');
-            })
-            .catch(() => {
+                setGoodsDetail({
+                    purchaseGoodsName,
+                    productImageUrl,
+                    productSkuStyle
+                })
+            }).catch(() => {
                 setRelatedType('err');
             });
     }, []);
 
     const handleOk = useCallback(() => {
-        form.validateFields().then(({ goods_number, ...rest }) => {
+        form.validateFields().then(({
+            goods_number,
+            ...rest
+        }) => {
             // console.log('handleOk', vals);as ICorrelateWaybillReq
+            setConfirmLoading(true);
             setCorrelateWaybill({
                 ...rest,
                 goods_number: goods_number + '',
-                request_type: 'PURCHASE_ORDER',
+                request_type: 'PURCHASE_ORDER'
             } as ICorrelateWaybillReq).then(() => {
                 onCancel();
                 onRefresh();
+                setConfirmLoading(false);
+            }).catch(() => {
+                setConfirmLoading(false);
             });
         });
     }, []);
@@ -70,6 +93,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                 okButtonProps={{
                     disabled,
                 }}
+                confirmLoading={confirmLoading}
             >
                 <Form form={form}>
                     <div className={styles.relatedBox}>
@@ -83,10 +107,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                         required={false}
                                         rules={rules}
                                     >
-                                        <Input
-                                            onChange={e => setPurchaseOrderGoodsId(e.target.value)}
-                                            placeholder="请输入采购单ID"
-                                        />
+                                        <Input onChange={e => setPurchaseOrderGoodsId(e.target.value)} placeholder="请输入采购单ID" />
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
@@ -120,17 +141,22 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                     )}
                                 ></div>
                             </div>
-                            {relatedType === 'err' && (
-                                <p className={styles.red}>未查询到此采购单ID</p>
-                            )}
-                            {relatedType === 'ok' && (
-                                <div className={styles.goodsInfo}>
-                                    <img src={productImageUrl} className={styles.img} />
-                                    <div className={styles.desc}>
-                                        <div className={styles.name}>{purchaseGoodsName}</div>
+                            {
+                                relatedType === 'err' && (
+                                    <p className={styles.red}>未查询到此采购单ID</p>
+                                )
+                            }
+                            {
+                                relatedType === 'ok' && (
+                                    <div className={styles.goodsInfo}>
+                                        <img src={productImageUrl} className={styles.img} />
+                                        <div className={styles.desc}>
+                                            <div className={styles.name}>{purchaseGoodsName}</div>
+                                            <div>{productSkuStyle}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )
+                            }
                         </div>
                         {/* className={styles.stepTwo} */}
                         <div className={disabled ? styles.disabled : ''}>
@@ -160,6 +186,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                     >
                                         <InputNumber
                                             disabled={disabled}
+                                            precision={0}
                                             placeholder="请输入数量"
                                             className={styles.inputNumber}
                                         />
@@ -179,7 +206,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                 </Form>
             </Modal>
         );
-    }, [visible, relatedType, purchaseOrderGoodsId, goodsDetail]);
+    }, [visible, relatedType, purchaseOrderGoodsId, goodsDetail, confirmLoading]);
 };
 
 export default RelatedPurchaseModal;

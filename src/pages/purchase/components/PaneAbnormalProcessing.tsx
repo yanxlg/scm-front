@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
 import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList } from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -60,6 +60,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
     const formRef2 = useRef<JsonFormRef>(null);
     const [detailStatus, setDetailStatus] = useState(false);
     const [exportStatus, setExportStatus] = useState(false);
+    const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const {
         loading,
         pageNumber,
@@ -77,8 +78,9 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         },
     });
 
-    const showDetail = () => {
+    const showDetail = (row: IPurchaseAbnormalItem) => {
         setDetailStatus(true);
+        setCurrentRecord(row);
     };
 
     const hideDetail = useCallback(() => {
@@ -86,14 +88,15 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
     }, []);
 
     const onExport = useCallback((values: any) => {
-        console.log('onExport', values);
-        // return postExportErrOrder({
-        //     abnormal_type: 1,
-        //     abnormal_detail_type: 2,
-        //     ...queryRef.current,
-        //     ...values,
-        // });
-        return Promise.resolve();
+        return downloadExcel({
+            query: {
+                ...formRef1.current?.getFieldsValue(),
+                ...formRef2.current?.getFieldsValue(),
+                waybill_exception_status: 2,
+            },
+            module: 5,
+            ...values,
+        });
     }, []);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
@@ -156,9 +159,9 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                 dataIndex: '_operate',
                 align: 'center',
                 width: 150,
-                render: _ => {
+                render: (_, row) => {
                     return (
-                        <Button type="link" onClick={() => showDetail()}>
+                        <Button type="link" onClick={() => showDetail(row)}>
                             查看详情
                         </Button>
                     );
@@ -203,7 +206,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
     const exportModalComponent = useMemo(() => {
         return (
             <Export
-                columns={columns}
+                columns={columns.filter((item: any) => item.dataIndex[0] !== '_')}
                 visible={exportStatus}
                 onOKey={onExport}
                 onCancel={() => setExportStatus(false)}
@@ -247,7 +250,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                     onChange={onChange}
                     toolBarRender={toolBarRender}
                 />
-                <DetailModal visible={detailStatus} onCancel={hideDetail} />
+                <DetailModal currentRecord={currentRecord} visible={detailStatus} onCancel={hideDetail} />
                 {exportModalComponent}
             </>
         );
