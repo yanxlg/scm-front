@@ -129,10 +129,11 @@ export function applyReturn(purchase_order_goods_id: string) {
         data: {
             purchase_order_goods_id,
         },
-};
+    });
+}
 
 export function setPurchaseException(data: any) {
     return request.post(PurchaseApiPath.setPurchaseException, {
-        data
+        data,
     });
 }
