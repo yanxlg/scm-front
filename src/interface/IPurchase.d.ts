@@ -31,6 +31,7 @@ export interface IPurchaseAbnormalItem {
     goodsImageUrl: string; // 商品图片
     // platformUid: string;
     // purchasePlatform: string;
+    remark: string;
 }
 
 export interface IPurchaseAbnormalReq {

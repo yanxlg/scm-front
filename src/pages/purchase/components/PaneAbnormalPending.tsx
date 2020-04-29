@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react'
 import { Modal, Input, message, Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder } from '@/services/purchase';
+import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -57,9 +57,10 @@ const fieldList: FormField[] = [
 
 interface IProps {
     penddingCount: number;
+    getExceptionCount(): void;
 }
 
-const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
+const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCount }) => {
     const formRef1 = useRef<JsonFormRef>(null);
     const formRef2 = useRef<JsonFormRef>(null);
     const textareaRef = useRef<TextArea>(null);
@@ -83,6 +84,11 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
             waybill_exception_status: 1,
         },
     });
+
+    const onRefresh = useCallback(() => {
+        getExceptionCount();
+        onReload();
+    }, []);
 
     const showRelatedPurchase = () => {
         setRelatedPurchaseStatus(true);
@@ -140,14 +146,15 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
     }, []);
 
     const onExport = useCallback((values: any) => {
-        console.log('onExport', values);
-        // return postExportErrOrder({
-        //     abnormal_type: 1,
-        //     abnormal_detail_type: 2,
-        //     ...queryRef.current,
-        //     ...values,
-        // });
-        return Promise.resolve();
+        return downloadExcel({
+            query: {
+                ...formRef1.current?.getFieldsValue(),
+                ...formRef2.current?.getFieldsValue(),
+                waybill_exception_status: 1,
+            },
+            module: 5,
+            ...values,
+        });
     }, []);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
@@ -272,7 +279,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
     const exportModalComponent = useMemo(() => {
         return (
             <Export
-                columns={columns}
+                columns={columns.filter((item: any) => item.dataIndex[0] !== '_')}
                 visible={exportStatus}
                 onOKey={onExport}
                 onCancel={() => setExportStatus(false)}
@@ -319,12 +326,13 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount }) => {
                 <RelatedPurchaseModal
                     visible={relatedPurchaseStatus}
                     onCancel={hideRelatedPurchase}
+                    onRefresh={onRefresh}
                 />
                 <AbnormalModal
                     currentRecord={currentRecord}
                     visible={abnormalStatus}
                     onCancel={hideAbnormal}
-                    onReload={onReload}
+                    onRefresh={onRefresh}
                 />
                 {exportModalComponent}
             </>

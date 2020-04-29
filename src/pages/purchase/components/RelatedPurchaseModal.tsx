@@ -17,9 +17,13 @@ interface IProps {
 }
 
 const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }) => {
+    if (!visible) {
+        return null;
+    }
     const [form] = Form.useForm();
     const [purchaseOrderGoodsId, setPurchaseOrderGoodsId] = useState('');
     const [relatedType, setRelatedType] = useState('default');
+    const [confirmLoading, setConfirmLoading] = useState(false);
     const [goodsDetail, setGoodsDetail] = useState({
         purchaseGoodsName: 'test',
         productImageUrl:
@@ -31,8 +35,14 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
     const handleSearch = useCallback(() => {
         return getPurchaseGoodsInfo(form.getFieldValue('purchase_order_goods_id'))
             .then(res => {
-                console.log('getPurchaseGoodsInfo', res);
+                // console.log('getPurchaseGoodsInfo', res);
+                const { purchaseGoodsName, productImageUrl, productSkuStyle } = res.data;
                 setRelatedType('ok');
+                setGoodsDetail({
+                    purchaseGoodsName,
+                    productImageUrl,
+                    productSkuStyle,
+                });
             })
             .catch(() => {
                 setRelatedType('err');
@@ -42,14 +52,20 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
     const handleOk = useCallback(() => {
         form.validateFields().then(({ goods_number, ...rest }) => {
             // console.log('handleOk', vals);as ICorrelateWaybillReq
+            setConfirmLoading(true);
             setCorrelateWaybill({
                 ...rest,
                 goods_number: goods_number + '',
                 request_type: 'PURCHASE_ORDER',
-            } as ICorrelateWaybillReq).then(() => {
-                onCancel();
-                onRefresh();
-            });
+            } as ICorrelateWaybillReq)
+                .then(() => {
+                    onCancel();
+                    onRefresh();
+                    setConfirmLoading(false);
+                })
+                .catch(() => {
+                    setConfirmLoading(false);
+                });
         });
     }, []);
 
@@ -70,6 +86,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                 okButtonProps={{
                     disabled,
                 }}
+                confirmLoading={confirmLoading}
             >
                 <Form form={form}>
                     <div className={styles.relatedBox}>
@@ -128,6 +145,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                     <img src={productImageUrl} className={styles.img} />
                                     <div className={styles.desc}>
                                         <div className={styles.name}>{purchaseGoodsName}</div>
+                                        <div>{productSkuStyle}</div>
                                     </div>
                                 </div>
                             )}
@@ -160,6 +178,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                     >
                                         <InputNumber
                                             disabled={disabled}
+                                            precision={0}
                                             placeholder="请输入数量"
                                             className={styles.inputNumber}
                                         />
@@ -179,7 +198,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                 </Form>
             </Modal>
         );
-    }, [visible, relatedType, purchaseOrderGoodsId, goodsDetail]);
+    }, [visible, relatedType, purchaseOrderGoodsId, goodsDetail, confirmLoading]);
 };
 
 export default RelatedPurchaseModal;

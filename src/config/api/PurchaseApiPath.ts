@@ -21,4 +21,5 @@ export enum PurchaseApiPath {
     ApplyReturn = '/api/v1/purchase/refund',
     QueryReturnInfo = '/api/v1/purchase/refund_info',
     AddWaybill = '/api/v1/purchase/waybill',
+    setPurchaseException = '/api/v1/purchase/exception/exec',
 }

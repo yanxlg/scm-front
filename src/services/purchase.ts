@@ -147,3 +147,9 @@ export function addWaybill(data: any) {
         data: data,
     });
 }
+
+export function setPurchaseException(data: any) {
+    return request.post(PurchaseApiPath.setPurchaseException, {
+        data,
+    });
+}

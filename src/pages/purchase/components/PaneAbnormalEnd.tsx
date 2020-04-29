@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList } from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionStatusKey,
@@ -18,6 +18,7 @@ import {
 } from '@/enums/PurchaseEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import Export from '@/components/Export';
+import DetailModal from './DetailModal';
 
 import styles from '../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -54,6 +55,8 @@ const fieldList: FormField[] = [
 const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
     const [exportStatus, setExportStatus] = useState(false);
+    const [detailStatus, setDetailStatus] = useState(false);
+    const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const {
         loading,
         pageNumber,
@@ -71,15 +74,24 @@ const PaneAbnormalEnd: React.FC = props => {
         },
     });
 
+    const showDetail = (row: IPurchaseAbnormalItem) => {
+        setDetailStatus(true);
+        setCurrentRecord(row);
+    };
+
+    const hideDetail = useCallback(() => {
+        setDetailStatus(false);
+    }, []);
+
     const onExport = useCallback((values: any) => {
-        console.log('onExport', values);
-        // return postExportErrOrder({
-        //     abnormal_type: 1,
-        //     abnormal_detail_type: 2,
-        //     ...queryRef.current,
-        //     ...values,
-        // });
-        return Promise.resolve();
+        return downloadExcel({
+            query: {
+                ...formRef.current?.getFieldsValue(),
+                waybill_exception_status: 3,
+            },
+            module: 5,
+            ...values,
+        });
     }, []);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
@@ -144,6 +156,19 @@ const PaneAbnormalEnd: React.FC = props => {
                 width: 150,
                 render: val => utcToLocal(val),
             },
+            {
+                title: '操作',
+                dataIndex: '_operate',
+                align: 'center',
+                width: 150,
+                render: (_, row) => {
+                    return (
+                        <Button type="link" onClick={() => showDetail(row)}>
+                            查看详情
+                        </Button>
+                    );
+                },
+            },
         ];
     }, []);
 
@@ -160,7 +185,7 @@ const PaneAbnormalEnd: React.FC = props => {
     const exportModalComponent = useMemo(() => {
         return (
             <Export
-                columns={columns}
+                columns={columns.filter((item: any) => item.dataIndex[0] !== '_')}
                 visible={exportStatus}
                 onOKey={onExport}
                 onCancel={() => setExportStatus(false)}
@@ -204,10 +229,15 @@ const PaneAbnormalEnd: React.FC = props => {
                     onChange={onChange}
                     // toolBarRender={toolBarRender}
                 />
+                <DetailModal
+                    visible={detailStatus}
+                    onCancel={hideDetail}
+                    currentRecord={currentRecord}
+                />
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, exportModalComponent]);
+    }, [dataSource, loading, exportModalComponent, detailStatus, currentRecord]);
 };
 
 export default PaneAbnormalEnd;
