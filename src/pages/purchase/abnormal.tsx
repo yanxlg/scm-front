@@ -50,7 +50,7 @@ const Purchase: React.FC = props => {
                         />
                     </TabPane>
                     <TabPane tab={`待处理（${allPenddingCount}）`} key="2">
-                        <PaneAbnormalPending penddingCount={penddingCount} />
+                        <PaneAbnormalPending penddingCount={penddingCount} getExceptionCount={getExceptionCount}/>
                     </TabPane>
                     <TabPane tab={`处理中（${allExecingCount}）`} key="3">
                         <PaneAbnormalProcessing execingCount={execingCount} />

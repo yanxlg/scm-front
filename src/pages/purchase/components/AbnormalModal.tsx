@@ -2,9 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { Modal, Form, Checkbox, InputNumber, Input, message } from 'antd';
 import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 import {
-    setRejectAbnormalOrder,
-    setCorrelateWaybill,
-    applyPurchaseRefund,
+    setPurchaseException
 } from '@/services/purchase';
 
 import styles from '../_abnormal.less';
@@ -15,10 +13,10 @@ interface IProps {
     visible: boolean;
     currentRecord: IPurchaseAbnormalItem | null;
     onCancel(): void;
-    onReload(): void;
+    onRefresh(): void;
 }
 
-const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onReload }) => {
+const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onRefresh }) => {
     if (!visible) {
         return null;
     }
@@ -32,55 +30,31 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
     const [confirmLoading, setConfirmLoading] = useState(false);
 
     const handleOk = useCallback(async () => {
-        const vals = await form.validateFields();
         const {
             reject_count,
-            receive_name,
-            receive_tel,
-            receive_address,
-            receive_address_detail,
-            zip_code,
-            purchase_waybill_no,
-            goods_number,
-            remarks,
-        } = vals;
-        const allRequest = Promise.all(
-            checkedList.map(val => {
-                if (val === 1) {
-                    return applyPurchaseRefund({
-                        purchase_order_goods_id: purchaseOrderGoodsId,
-                        remark: remarks,
-                    });
-                } else if (val === 2) {
-                    return setRejectAbnormalOrder({
-                        waybill_exception_sn: waybillExceptionSn,
-                        abnormal_operate_type: '拒收',
-                        reject_count: reject_count + '',
-                        receive_name,
-                        receive_tel,
-                        receive_address,
-                        receive_address_detail,
-                        zip_code,
-                        remarks,
-                    });
-                } else if (val === 3) {
-                    return setCorrelateWaybill({
-                        purchase_order_goods_id: purchaseOrderGoodsId,
-                        purchase_waybill_no,
-                        goods_number: goods_number + '',
-                        remark: remarks,
-                        request_type: 'PURCHASE_ORDER',
-                    });
-                }
-            }),
-        );
+            in_storage_count,
+            ...rest
+        } = await form.validateFields();
         setConfirmLoading(true);
-        return allRequest.then(() => {
-            // console.log('allRequest');
+        return setPurchaseException({
+            ...rest,
+            reject_count: (reject_count || '') + '',
+            in_storage_count: (in_storage_count || '') + '',
+            purchase_order_goods_id: purchaseOrderGoodsId,
+            waybill_exception_sn: waybillExceptionSn,
+            exec_type: checkedList
+        }).then((res: any) => {
+            for (const key in res.data) {
+                const val = res.data[key];
+                if (!Array.isArray(val) && val?.type === 'failed') {
+                    setConfirmLoading(false);
+                    return message.error(val.res);
+                }
+            }
             message.success('操作成功');
             setConfirmLoading(false);
             onCancel();
-            onReload();
+            onRefresh();
         }).catch(() => {
             setConfirmLoading(false);
         });
@@ -140,6 +114,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                                 required={false}
                             >
                                 <InputNumber
+                                    precision={0}
                                     className={styles.inputNumber}
                                     placeholder="请输入数量"
                                 />
@@ -194,7 +169,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                     checkedList.indexOf(3) > -1 && (
                         <div className={styles.sectionBox}>
                             <Form.Item
-                                name="purchase_waybill_no"
+                                name="waybill_no"
                                 className={styles.itemBox}
                                 label={<span className={styles.label}>运单号</span>}
                                 rules={rules}
@@ -203,13 +178,14 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                                 <Input className={styles.inputNumber} placeholder="关联运单号" />
                             </Form.Item>
                             <Form.Item
-                                name="goods_number"
+                                name="in_storage_count"
                                 className={styles.itemBox}
                                 label={<span className={styles.label}>入库数量</span>}
                                 rules={rules}
                                 required={false}
                             >
                                 <InputNumber
+                                    precision={0}
                                     className={styles.inputNumber}
                                     placeholder="请输入数量"
                                 />

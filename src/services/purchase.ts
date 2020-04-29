@@ -115,3 +115,9 @@ export const exportReturnList = (data: any) => {
 export function getPurchaseGoodsInfo(id: string) {
     return request.get(PurchaseApiPath.getPurchaseGoodsInfo.replace(':id', id));
 };
+
+export function setPurchaseException(data: any) {
+    return request.post(PurchaseApiPath.setPurchaseException, {
+        data
+    });
+}

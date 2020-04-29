@@ -22,6 +22,7 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import TextArea from 'antd/lib/input/TextArea';
 import Export from '@/components/Export';
+import DetailModal from './DetailModal';
 
 import styles from '../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -68,6 +69,7 @@ const PaneAbnormalAll: React.FC<IProps> = ({
     const [abnormalStatus, setAbnormalStatus] = useState(false);
     const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const [exportStatus, setExportStatus] = useState(false);
+    const [ detailStatus, setDetailStatus] = useState(false);
     const {
         loading,
         pageNumber,
@@ -81,6 +83,23 @@ const PaneAbnormalAll: React.FC<IProps> = ({
         queryList: getAbnormalAllList,
         formRef: formRef,
     });
+
+    const onRefresh = useCallback(
+        () => {
+            getExceptionCount();
+            onReload();
+        },
+        [],
+    )
+
+    const showDetail = (record: IPurchaseAbnormalItem) => {
+        setDetailStatus(true);
+        setCurrentRecord(record);
+    };
+
+    const hideDetail = useCallback(() => {
+        setDetailStatus(false);
+    }, []);
 
     const showRelatedPurchase = (record: IPurchaseAbnormalItem) => {
         setRelatedPurchaseStatus(true);
@@ -140,13 +159,12 @@ const PaneAbnormalAll: React.FC<IProps> = ({
     }, []);
 
     const onExport = useCallback((values: any) => {
-        console.log('onExport', values);
+        // console.log('onExport', values);
         return downloadExcel({
             query: formRef.current?.getFieldsValue(),
             module: 5,
             ...values,
         });
-        // return Promise.reject();
     }, []);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
@@ -217,25 +235,31 @@ const PaneAbnormalAll: React.FC<IProps> = ({
                 align: 'center',
                 width: 150,
                 render: (_, row: IPurchaseAbnormalItem) => {
-                    const { waybillExceptionType } = row;
+                    const { waybillExceptionType, waybillExceptionStatus } = row;
                     return (
-                        <>
-                            <div>
-                                <a onClick={() => showDiscardModal(row)}>废弃</a>
-                            </div>
-                            {hasRelatedPurchase(waybillExceptionType) && (
+                        waybillExceptionStatus === 1 ? (
+                            <>
                                 <div>
-                                    <a onClick={() => showRelatedPurchase(row)}>关联采购单</a>
+                                    <a onClick={() => showDiscardModal(row)}>废弃</a>
                                 </div>
-                            )}
-                            {hasExceptionHandle(waybillExceptionType) && (
-                                <div>
-                                    <a type="link" onClick={() => showAbnormal(row)}>
-                                        异常处理
-                                    </a>
-                                </div>
-                            )}
-                        </>
+                                {hasRelatedPurchase(waybillExceptionType) && (
+                                    <div>
+                                        <a onClick={() => showRelatedPurchase(row)}>关联采购单</a>
+                                    </div>
+                                )}
+                                {hasExceptionHandle(waybillExceptionType) && (
+                                    <div>
+                                        <a type="link" onClick={() => showAbnormal(row)}>
+                                            异常处理
+                                        </a>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <a onClick={() => showDetail(row)}>
+                                查看详情
+                            </a>
+                        )
                     );
                 },
             },
@@ -302,13 +326,18 @@ const PaneAbnormalAll: React.FC<IProps> = ({
                 <RelatedPurchaseModal
                     visible={relatedPurchaseStatus}
                     onCancel={hideRelatedPurchase}
-                    onRefresh={onReload}
+                    onRefresh={onRefresh}
                 />
                 <AbnormalModal
                     currentRecord={currentRecord}
                     visible={abnormalStatus}
                     onCancel={hideAbnormal}
-                    onReload={onReload}
+                    onRefresh={onRefresh}
+                />
+                <DetailModal 
+                    visible={detailStatus} 
+                    onCancel={hideDetail}
+                    currentRecord={currentRecord}
                 />
                 {exportModalComponent}
             </>
@@ -320,6 +349,7 @@ const PaneAbnormalAll: React.FC<IProps> = ({
         abnormalStatus,
         currentRecord,
         exportModalComponent,
+        detailStatus
     ]);
 };
 
