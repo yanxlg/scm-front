@@ -26,6 +26,8 @@ const PendingSigned = () => {
     const showExportFn = useCallback(() => {
         setShowExport(true);
     }, []);
+    const formRef = useRef<JsonFormRef>(null);
+    const formRef1 = useRef<JsonFormRef>(null);
 
     const closeExportFn = useCallback(() => {
         setShowExport(false);
@@ -36,12 +38,11 @@ const PendingSigned = () => {
             ...data,
             query: {
                 purchase_return_status: PurchaseReturnType.PendingReceived,
+                ...formRef.current!.getFieldsValue(),
+                ...formRef1.current!.getFieldsValue(),
             },
         }).request();
     }, []);
-
-    const formRef = useRef<JsonFormRef>(null);
-    const formRef1 = useRef<JsonFormRef>(null);
 
     const {
         loading,
@@ -75,6 +76,7 @@ const PendingSigned = () => {
                 onChange: (name: string, form: FormInstance) => {
                     onSearch();
                 },
+                formatter: 'join',
             },
         ];
     }, []);

@@ -18,4 +18,5 @@ export enum PurchaseApiPath {
     Export = '/api/v1/download/create',
     QueryPurchasePlainList = '/api/v1/purchase/plan_list',
     getPurchaseGoodsInfo = '/api/v1/purchase/purchase_info/:id',
+    ApplyReturn = '/api/v1/purchase/refund',
 }

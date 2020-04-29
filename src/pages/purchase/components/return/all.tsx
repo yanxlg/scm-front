@@ -19,7 +19,11 @@ import CreateReturnOrderModal from '@/pages/purchase/components/return/createRet
 import { PlusOutlined } from '@ant-design/icons';
 import { EmptyObject } from '@/config/global';
 import styles from '@/pages/purchase/_return.less';
-import { PurchaseReturnCode, PurchaseReturnMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseReturnCode,
+    PurchaseReturnMap,
+    PurchaseReturnType,
+} from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 
 export const fieldList: FormField[] = [
@@ -72,7 +76,12 @@ const AllList: React.FC<AllListProps> = () => {
     }, []);
 
     const onExport = useCallback((data: any) => {
-        return exportReturnList(data).request();
+        return exportReturnList({
+            ...data,
+            query: {
+                ...formRef.current!.getFieldsValue(),
+            },
+        }).request();
     }, []);
 
     const {

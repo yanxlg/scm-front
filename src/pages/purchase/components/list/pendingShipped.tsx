@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     AutoEnLargeImg,
@@ -9,15 +9,18 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button } from 'antd';
+import { Button, message, Modal } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { queryPurchaseList } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { applyReturn, cancelReturnOrder, queryPurchaseList } from '@/services/purchase';
+import { IPurchaseItem, IReturnItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
+import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import ConnectModal from './connectModal';
 
 const fieldList: FormField[] = [
     {
@@ -97,8 +100,52 @@ const PendingShipped = () => {
         );
     }, []);
 
+    const applyReturnService = useCallback((item: IPurchaseItem) => {
+        Modal.confirm({
+            title: '申请退款',
+            content: '是否确认申请退款？',
+            icon: <ExclamationCircleOutlined />,
+            okText: '确定',
+            cancelText: '取消',
+            onOk: () => {
+                return applyReturn(item.purchaseOrderGoodsId)
+                    .request()
+                    .then(() => {
+                        message.success('申请成功！');
+                        onReload();
+                    });
+            },
+        });
+    }, []);
+
+    const [connect, setConnect] = useState<string | false>(false);
+    const showConnect = useCallback((item: IPurchaseItem) => {
+        setConnect(item.purchaseOrderGoodsId);
+    }, []);
+    const closeConnect = useCallback(() => {
+        setConnect(false);
+    }, []);
+
     const columns = useMemo(() => {
         return [
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                fixed: 'left',
+                width: '100px',
+                render: (_, item) => {
+                    return (
+                        <>
+                            <Button type="link" onClick={() => showConnect(item)}>
+                                关联运单号
+                            </Button>
+                            <Button type="link" onClick={() => applyReturnService(item)}>
+                                申请退款
+                            </Button>
+                        </>
+                    );
+                },
+            },
             {
                 title: '采购单ID',
                 dataIndex: 'purchaseOrderGoodsId',
@@ -115,12 +162,12 @@ const PendingShipped = () => {
             },
             {
                 title: '采购单状态',
-                width: '100px',
+                width: '140px',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
-                render: (value, row) => {
+                render: (value: PurchaseCode, row) => {
                     return {
-                        children: value,
+                        children: PurchaseMap[value],
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -162,8 +209,8 @@ const PendingShipped = () => {
                     const children = (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            {purchaseProductName}
-                            {skus}
+                            <div>{purchaseProductName}</div>
+                            <div>{skus}</div>
                         </div>
                     );
                     return {
@@ -176,7 +223,7 @@ const PendingShipped = () => {
             },
             {
                 title: '供应商',
-                dataIndex: 'purchasePlatform',
+                dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
                 render: (value, row) => {
@@ -289,9 +336,10 @@ const PendingShipped = () => {
                 {searchForm}
                 {table}
                 <PurchaseDetailModal visible={visible} onCancel={onClose} />
+                <ConnectModal visible={connect} onCancel={closeConnect} />
             </>
         );
-    }, [loading, visible]);
+    }, [loading, visible, connect]);
 };
 
 export default PendingShipped;

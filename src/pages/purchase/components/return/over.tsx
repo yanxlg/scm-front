@@ -39,6 +39,8 @@ const Over = () => {
             ...data,
             query: {
                 purchase_return_status: PurchaseReturnType.Over,
+                ...formRef.current!.getFieldsValue(),
+                ...formRef1.current!.getFieldsValue(),
             },
         }).request();
     }, []);
@@ -93,6 +95,7 @@ const Over = () => {
                 onChange: (name: string, form: FormInstance) => {
                     onSearch();
                 },
+                formatter: 'join',
             },
         ];
     }, []);

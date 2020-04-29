@@ -68,11 +68,9 @@ export const queryPurchaseList = (data: any) => {
 };
 
 export const queryReturnList = (data: any) => {
-    const { time_type, ...extra } = data;
     return api.post(PurchaseApiPath.QueryReturnList, {
         data: {
-            ...extra,
-            time_type: time_type ? time_type[0] : undefined,
+            ...data,
         },
     });
 };
@@ -124,4 +122,12 @@ export const queryPurchasePlainList = (data: any) => {
 };
 export function getPurchaseGoodsInfo(id: string) {
     return request.get(PurchaseApiPath.getPurchaseGoodsInfo.replace(':id', id));
+}
+
+export function applyReturn(purchase_order_goods_id: string) {
+    return api.post(PurchaseApiPath.ApplyReturn, {
+        data: {
+            purchase_order_goods_id,
+        },
+    });
 }

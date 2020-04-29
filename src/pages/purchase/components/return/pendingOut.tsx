@@ -49,6 +49,8 @@ const PendingOut = () => {
             ...data,
             query: {
                 purchase_return_status: PurchaseReturnType.PendingOut,
+                ...formRef.current!.getFieldsValue(),
+                ...formRef1.current!.getFieldsValue(),
             },
         }).request();
     }, []);
@@ -87,6 +89,7 @@ const PendingOut = () => {
                 onChange: (name: string, form: FormInstance) => {
                     onSearch();
                 },
+                formatter: 'join',
             },
         ];
     }, []);

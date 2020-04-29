@@ -18,6 +18,7 @@ import { IPurchaseItem } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
+import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 
 const fieldList: FormField[] = [
     {
@@ -111,12 +112,12 @@ const Return = () => {
             },
             {
                 title: '采购单状态',
-                width: '100px',
+                width: '140px',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
-                render: (value, row) => {
+                render: (value: PurchaseCode, row) => {
                     return {
-                        children: value,
+                        children: PurchaseMap[value],
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -158,8 +159,8 @@ const Return = () => {
                     const children = (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            {purchaseProductName}
-                            {skus}
+                            <div>{purchaseProductName}</div>
+                            <div>{skus}</div>
                         </div>
                     );
                     return {
@@ -172,7 +173,7 @@ const Return = () => {
             },
             {
                 title: '供应商',
-                dataIndex: 'purchasePlatform',
+                dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
                 render: (value, row) => {
