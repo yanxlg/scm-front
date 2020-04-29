@@ -1,6 +1,13 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, LoadingButton, useList } from 'react-components';
+import {
+    AutoEnLargeImg,
+    FitTable,
+    JsonForm,
+    LoadingButton,
+    useList,
+    useModal,
+} from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -8,6 +15,9 @@ import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
 import { queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
+import styles from '@/pages/purchase/_list.less';
+import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
+import { colSpanDataSource } from '@/pages/purchase/components/list/all';
 
 const fieldList: FormField[] = [
     {
@@ -46,6 +56,11 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 const PendingShipped = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
+    const { visible, setVisibleProps, onClose } = useModal<string>();
+
+    const showDetailModal = useCallback((purchaseOrderGoodsId: string) => {
+        setVisibleProps(purchaseOrderGoodsId);
+    }, []);
 
     const {
         loading,
@@ -86,64 +101,142 @@ const PendingShipped = () => {
         return [
             {
                 title: '采购单ID',
-                dataIndex: 'operation',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
-                fixed: 'left',
                 width: '150px',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购单状态',
                 width: '100px',
-                fixed: 'left',
-                dataIndex: 'task_id',
+                dataIndex: 'purchaseOrderStatus',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购金额',
                 width: '200px',
-                fixed: 'left',
-                dataIndex: 'task_sn',
+                dataIndex: 'purchaseTotalAmount',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '商品信息',
-                dataIndex: 'task_name',
+                dataIndex: 'product_info',
                 width: '178px',
                 align: 'center',
+                render: (_, item) => {
+                    const { productImageUrl, purchaseProductName, productSkuStyle } = item;
+                    let skus: any[] = [];
+                    try {
+                        const sku = JSON.parse(productSkuStyle);
+                        for (let key of sku) {
+                            skus.push(
+                                <div key={key}>
+                                    {key}:{sku[key]}
+                                </div>,
+                            );
+                        }
+                    } catch (e) {}
+                    const children = (
+                        <div>
+                            <AutoEnLargeImg src={productImageUrl} className={styles.image} />
+                            {purchaseProductName}
+                            {skus}
+                        </div>
+                    );
+                    return {
+                        children: children,
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '供应商',
-                dataIndex: 'status',
+                dataIndex: 'purchasePlatform',
                 width: '130px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '供应商订单号',
-                dataIndex: 'channel',
+                dataIndex: 'purchaseOrderGoodsSn',
                 width: '223px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购计划',
-                dataIndex: 'task_type',
                 width: '223px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: (
+                            <Button
+                                type="link"
+                                onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
+                            >
+                                查看详情
+                            </Button>
+                        ),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '运单号',
-                dataIndex: 'task_range',
+                dataIndex: 'purchaseTrackingNumber',
                 width: '182px',
                 align: 'center',
             },
             {
                 title: '出入库单号',
-                dataIndex: 'execute_count',
+                dataIndex: 'referWaybillNo',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '出入库类型',
-                dataIndex: 'create_time',
+                dataIndex: 'type',
                 width: '223px',
                 align: 'center',
             },
@@ -173,6 +266,7 @@ const PendingShipped = () => {
     }, []);
 
     const table = useMemo(() => {
+        const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
                 rowKey="task_id"
@@ -181,7 +275,7 @@ const PendingShipped = () => {
                 minHeight={500}
                 pagination={pagination}
                 columns={columns}
-                dataSource={dataSource}
+                dataSource={dataSet}
                 loading={loading}
                 onChange={onChange}
                 toolBarRender={toolBarRender}
@@ -194,9 +288,10 @@ const PendingShipped = () => {
             <>
                 {searchForm}
                 {table}
+                <PurchaseDetailModal visible={visible} onCancel={onClose} />
             </>
         );
-    }, [loading]);
+    }, [loading, visible]);
 };
 
 export default PendingShipped;

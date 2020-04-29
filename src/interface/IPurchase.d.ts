@@ -1,19 +1,28 @@
 export declare interface IPurchaseItem {
-    purchase_goods_id: number;
+    purchaseOrderGoodsId: string;
     purchaseOrderStatus: number;
-    purchase_total_amount: string;
-    plan_purchase_total_amount: string;
-    purchase_product_info: string;
-    supply_merchant_name: string;
-    supply_goods_sn: string;
-    supply_parent_goods_sn: string;
-    refund_amount: string;
-    refund_status: string;
-    storage_express_info: {
-        refer_waybill_no: string;
-        purchase_tracking_number: string;
+    purchaseTotalAmount: string;
+    planPurchaseTotalAmount: string;
+    purchaseProductName: string;
+    purchasePlatform: string;
+    purchaseMerchantName: string;
+    purchaseOrderGoodsSn: string;
+    purchaseOrderSn: string;
+    refundAmount: string;
+    refundStatus: string;
+    purchaseGoodsNumber: string;
+    storageExpressInfo: Array<{
+        referWaybillNo: string;
+        purchaseTrackingNumber: string;
         type: string;
-    };
+    }>;
+    productImageUrl: string;
+    productSkuStyle: string;
+
+    referWaybillNo?: string; // flat
+    purchaseTrackingNumber?: string; // flat
+    type?: string; // flat
+    rowSpan?: number;
 }
 
 export declare interface IReturnItem {
@@ -58,4 +67,22 @@ export declare interface IPurchaseStatics {
     wait_recieve_total?: number;
     some_in_total?: number;
     purchase_refund_total?: number;
+}
+
+export declare interface IPurchasePlain {
+    purchasePlanId: string;
+    orderGoodsId: string;
+    purchasePlatformOrderId: string;
+    commoditySkuId: string;
+    purchaseNumber: string;
+    payTime: string;
+    platformSendOrderTime: string;
+    platformOrderTime: string;
+    platformShippingTime: string;
+    reserveStatus: 1 | 2 | 3 | 4;
+    purchaseOrderStatus: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+    purchaseFailReason: string;
+    purchaseCancelStatus: 1 | 2;
+    purchaseCancelReason: string;
+    purchaseOrderPayStatus: 1 | 2 | 3 | 4 | 5 | 6;
 }

@@ -1,6 +1,13 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, LoadingButton, useList } from 'react-components';
+import {
+    AutoEnLargeImg,
+    FitTable,
+    JsonForm,
+    LoadingButton,
+    useList,
+    useModal,
+} from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -8,9 +15,8 @@ import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
 import { queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
-import ConnectModal from './connectModal';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
-import ReturnModal from './returnModal';
+import styles from '@/pages/purchase/_list.less';
 
 const fieldList: FormField[] = [
     {
@@ -37,8 +43,34 @@ const fieldList: FormField[] = [
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
+export function colSpanDataSource(dataSource: IPurchaseItem[]) {
+    let list: IPurchaseItem[] = [];
+    dataSource.forEach(source => {
+        const { storageExpressInfo = [] } = source;
+        if (storageExpressInfo && storageExpressInfo.length > 0) {
+            storageExpressInfo.map((info, index) => {
+                list.push({
+                    ...source,
+                    ...info,
+                    rowSpan: index === 0 ? storageExpressInfo.length : 0,
+                });
+            });
+        } else {
+            list.push({
+                ...source,
+                rowSpan: 1,
+            });
+        }
+    });
+    return list;
+}
+
 const AllList = () => {
     const formRef = useRef<JsonFormRef>(null);
+    const { visible, setVisibleProps, onClose } = useModal<string>();
+    const showDetailModal = useCallback((purchaseOrderGoodsId: string) => {
+        setVisibleProps(purchaseOrderGoodsId);
+    }, []);
 
     const {
         loading,
@@ -82,58 +114,139 @@ const AllList = () => {
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购单状态',
                 width: '100px',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购金额',
                 width: '200px',
                 dataIndex: 'purchaseTotalAmount',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '商品信息',
-                dataIndex: 'task_name',
+                dataIndex: 'product_info',
                 width: '178px',
                 align: 'center',
+                render: (_, item) => {
+                    const { productImageUrl, purchaseProductName, productSkuStyle } = item;
+                    let skus: any[] = [];
+                    try {
+                        const sku = JSON.parse(productSkuStyle);
+                        for (let key of sku) {
+                            skus.push(
+                                <div key={key}>
+                                    {key}:{sku[key]}
+                                </div>,
+                            );
+                        }
+                    } catch (e) {}
+                    const children = (
+                        <div>
+                            <AutoEnLargeImg src={productImageUrl} className={styles.image} />
+                            {purchaseProductName}
+                            {skus}
+                        </div>
+                    );
+                    return {
+                        children: children,
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '供应商',
                 dataIndex: 'purchasePlatform',
                 width: '130px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '供应商订单号',
-                dataIndex: ['storageExpressInfo', 'purchaseTrackingNumber'],
+                dataIndex: 'purchaseOrderGoodsSn',
                 width: '223px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购计划',
                 width: '223px',
                 align: 'center',
-                render: () => <Button>查看详情</Button>,
+                render: (value, row) => {
+                    return {
+                        children: (
+                            <Button
+                                type="link"
+                                onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
+                            >
+                                查看详情
+                            </Button>
+                        ),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '运单号',
-                dataIndex: ['storageExpressInfo', 'purchaseTrackingNumber'],
+                dataIndex: 'purchaseTrackingNumber',
                 width: '182px',
                 align: 'center',
             },
             {
                 title: '出入库单号',
-                dataIndex: ['storageExpressInfo', 'referWaybillNo'],
+                dataIndex: 'referWaybillNo',
                 width: '223px',
                 align: 'center',
             },
             {
                 title: '出入库类型',
-                dataIndex: ['storageExpressInfo', 'type'],
+                dataIndex: 'type',
                 width: '223px',
                 align: 'center',
             },
@@ -151,6 +264,8 @@ const AllList = () => {
     }, [loading]);
 
     const table = useMemo(() => {
+        // 处理合并单元格
+        const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
                 rowKey="task_id"
@@ -159,7 +274,7 @@ const AllList = () => {
                 minHeight={500}
                 pagination={pagination}
                 columns={columns}
-                dataSource={dataSource}
+                dataSource={dataSet}
                 loading={loading}
                 onChange={onChange}
             />
@@ -173,10 +288,10 @@ const AllList = () => {
                 {table}
                 {/*{<ConnectModal visible="1111" onCancel={() => {}} />}*/}
                 {/*<ReturnModal visible="111" onCancel={() => {}} />*/}
-                {/*<PurchaseDetailModal visible="1111" onCancel={() => {}} />*/}
+                <PurchaseDetailModal visible={visible} onCancel={onClose} />
             </>
         );
-    }, [loading]);
+    }, [loading, visible]);
 };
 
 export default AllList;

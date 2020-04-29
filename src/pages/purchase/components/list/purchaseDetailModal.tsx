@@ -1,8 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Modal, Table } from 'antd';
 import { ColumnsType } from 'antd/lib/table/interface';
+import { useDataSet } from 'react-components';
+import { queryPurchasePlainList } from '@/services/purchase';
+import { IPurchasePlain } from '@/interface/IPurchase';
 
-const columns: ColumnsType<any> = [
+const columns: ColumnsType<IPurchasePlain> = [
     {
         title: '采购计划ID',
         dataIndex: 'operation',
@@ -53,6 +56,27 @@ declare interface IPurchaseDetailProps {
 }
 
 const PurchaseDetailModal: React.FC<IPurchaseDetailProps> = ({ visible, onCancel }) => {
+    const { loading, dataSet, setLoading } = useDataSet<IPurchasePlain>();
+    useEffect(() => {
+        const api = queryPurchasePlainList({
+            purchase_order_goods_id: visible,
+        });
+        if (visible) {
+            setLoading(true);
+            api.request()
+                .then(({ data }) => {
+                    console.log(data);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+        return () => {
+            setLoading(false);
+            api.cancel();
+        };
+    }, [visible]);
+
     return useMemo(() => {
         return (
             <Modal
@@ -62,10 +86,15 @@ const PurchaseDetailModal: React.FC<IPurchaseDetailProps> = ({ visible, onCancel
                 onCancel={onCancel}
                 footer={null}
             >
-                <Table columns={columns} pagination={false} />
+                <Table
+                    columns={columns}
+                    pagination={false}
+                    dataSource={dataSet}
+                    loading={loading}
+                />
             </Modal>
         );
-    }, []);
+    }, [visible, loading]);
 };
 
 export default PurchaseDetailModal;
