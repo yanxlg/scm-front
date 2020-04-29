@@ -74,7 +74,7 @@ export default [
     {
         path: '/purchase',
         name: '采购管理',
-        icon: <Icons type="scm-setting" className="menu-icon" />,
+        icon: <Icons type="scm-purchase" className="menu-icon" />,
         children: [
             {
                 path: '/purchase/list',
@@ -83,6 +83,10 @@ export default [
             {
                 path: '/purchase/return',
                 name: '采购退货',
+            },
+            {
+                path: '/purchase/abnormal',
+                name: '仓库异常处理',
             },
         ],
     },
