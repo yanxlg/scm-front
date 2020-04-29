@@ -238,9 +238,9 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                                         <div>
                                             <div
                                                 className={styles.modalTitle}
-                                                title={goods?.purchaseProductName}
+                                                title={goods?.purchaseGoodsName}
                                             >
-                                                {goods?.purchaseProductName}
+                                                {goods?.purchaseGoodsName}
                                             </div>
                                             <div className={styles.modalSkus}>{skuComponent}</div>
                                         </div>

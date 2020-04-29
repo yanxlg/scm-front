@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     AutoEnLargeImg,
@@ -9,16 +9,18 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button } from 'antd';
+import { Button, message, Modal } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { queryPurchaseList } from '@/services/purchase';
+import { applyReturn, queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
 import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import ConnectModal from '@/pages/purchase/components/list/connectModal';
 
 const fieldList: FormField[] = [
     {
@@ -34,7 +36,7 @@ const fieldList: FormField[] = [
     {
         label: '供应商订单号',
         type: 'input',
-        name: 'order',
+        name: 'purchase_order_goods_sn',
     },
     {
         label: '商品名称',
@@ -88,8 +90,58 @@ const PendingSigned = () => {
         );
     }, []);
 
+    const applyReturnService = useCallback((item: IPurchaseItem) => {
+        Modal.confirm({
+            title: '申请退款',
+            content: '是否确认申请退款？',
+            icon: <ExclamationCircleOutlined />,
+            okText: '确定',
+            cancelText: '取消',
+            onOk: () => {
+                return applyReturn(Number(item.purchaseOrderGoodsId))
+                    .request()
+                    .then(() => {
+                        message.success('申请成功！');
+                        onReload();
+                    });
+            },
+        });
+    }, []);
+
+    const [connect, setConnect] = useState<string | false>(false);
+    const showConnect = useCallback((item: IPurchaseItem) => {
+        setConnect(item.purchaseOrderGoodsId);
+    }, []);
+    const closeConnect = useCallback(() => {
+        setConnect(false);
+    }, []);
+
     const columns = useMemo(() => {
         return [
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                fixed: 'left',
+                width: '150px',
+                align: 'center',
+                render: (_, item) => {
+                    return {
+                        children: (
+                            <>
+                                <Button type="link" onClick={() => showConnect(item)}>
+                                    关联运单号
+                                </Button>
+                                <Button type="link" onClick={() => applyReturnService(item)}>
+                                    申请退款
+                                </Button>
+                            </>
+                        ),
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
+                },
+            },
             {
                 title: '采购单ID',
                 dataIndex: 'purchaseOrderGoodsId',
@@ -138,11 +190,16 @@ const PendingSigned = () => {
                 width: '178px',
                 align: 'center',
                 render: (_, item) => {
-                    const { productImageUrl, purchaseProductName, productSkuStyle } = item;
+                    const {
+                        productImageUrl,
+                        purchaseGoodsName,
+                        productSkuStyle,
+                        purchaseGoodsNumber = 0,
+                    } = item;
                     let skus: any[] = [];
                     try {
                         const sku = JSON.parse(productSkuStyle);
-                        for (let key of sku) {
+                        for (let key in sku) {
                             skus.push(
                                 <div key={key}>
                                     {key}:{sku[key]}
@@ -153,8 +210,9 @@ const PendingSigned = () => {
                     const children = (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchaseProductName}</div>
+                            <div>{purchaseGoodsName}</div>
                             <div>{skus}</div>
+                            <div>数量：x{purchaseGoodsNumber}</div>
                         </div>
                     );
                     return {
@@ -248,7 +306,7 @@ const PendingSigned = () => {
         const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
-                rowKey="task_id"
+                rowKey="purchaseOrderGoodsId"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
@@ -267,9 +325,10 @@ const PendingSigned = () => {
                 {searchForm}
                 {table}
                 <PurchaseDetailModal visible={visible} onCancel={onClose} />
+                <ConnectModal visible={connect} onCancel={closeConnect} />
             </>
         );
-    }, [loading, visible]);
+    }, [loading, visible, connect]);
 };
 
 export default PendingSigned;

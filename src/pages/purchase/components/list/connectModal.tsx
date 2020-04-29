@@ -34,16 +34,18 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
             setSubmitting(true);
             setCorrelateWaybill(({
                 purchase_order_goods_id: visible as string,
+                request_type: 'PURCHASE_ORDER',
                 ...values,
             } as unknown) as any)
                 .then(() => {
                     message.success('关联成功');
+                    onCancel();
                 })
                 .finally(() => {
                     setSubmitting(false);
                 });
         });
-    }, []);
+    }, [visible]);
 
     return useMemo(() => {
         return (
@@ -57,6 +59,7 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
                 destroyOnClose={true}
             >
                 <JsonForm
+                    containerClassName={''}
                     fieldList={fieldList}
                     layout="horizontal"
                     ref={formRef}

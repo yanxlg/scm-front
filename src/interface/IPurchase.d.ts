@@ -78,7 +78,7 @@ export declare interface IPurchaseItem {
     purchaseOrderStatus: number;
     purchaseTotalAmount: string;
     planPurchaseTotalAmount: string;
-    purchaseProductName: string;
+    purchaseGoodsName: string;
     purchasePlatform: string;
     purchaseMerchantName: string;
     purchaseOrderGoodsSn: string;
@@ -113,6 +113,13 @@ export declare interface IReturnItem {
     productPddMerchantName: string;
     purchaseOrderGoodsReturnId: string;
     productSkuStyle: string;
+    receiverTel: string;
+    receiverProvince: string;
+    receiverCity: string;
+    receiverStreet: string;
+    receiverAddress: string;
+    receiverName: string;
+    receiverCode: string;
 }
 
 export declare interface IReturnStatics {
@@ -160,4 +167,22 @@ export declare interface IPurchasePlain {
     purchaseCancelStatus: 1 | 2;
     purchaseCancelReason: string;
     purchaseOrderPayStatus: 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+export declare interface IReturnInfo {
+    purchaseRefundId: string;
+    purchaseOrderId: string;
+    purchaseOrderGoodsId: string;
+    afterSalesId: string;
+    purchaseRefundType: string;
+    refundAmount: string;
+    purchaseOrderSn: string;
+    purchaseAccountId: string;
+    shippingId: string;
+    shippingName: string;
+    trackingNumber: string;
+    purchaseRefundStatus: string;
+    receiverAddress: string;
+    receiverName: string;
+    receiverTel: string;
 }

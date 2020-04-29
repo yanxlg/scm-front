@@ -11,6 +11,8 @@ import {
     IAddressConfig,
     IPurchaseStatics,
     IReturnStatics,
+    IReturnInfo,
+    IReturnItem,
 } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
 import { IPurchaseItem, IPurchasePlain } from '@/interface/IPurchase';
@@ -68,7 +70,7 @@ export const queryPurchaseList = (data: any) => {
 };
 
 export const queryReturnList = (data: any) => {
-    return api.post(PurchaseApiPath.QueryReturnList, {
+    return api.post<IResponse<IPaginationResponse<IReturnItem>>>(PurchaseApiPath.QueryReturnList, {
         data: {
             ...data,
         },
@@ -124,10 +126,24 @@ export function getPurchaseGoodsInfo(id: string) {
     return request.get(PurchaseApiPath.getPurchaseGoodsInfo.replace(':id', id));
 }
 
-export function applyReturn(purchase_order_goods_id: string) {
+export function applyReturn(purchase_order_goods_id: number) {
     return api.post(PurchaseApiPath.ApplyReturn, {
         data: {
             purchase_order_goods_id,
         },
+    });
+}
+
+export function queryReturnInfo(purchase_order_goods_id: string) {
+    return api.get<IResponse<IReturnInfo>>(PurchaseApiPath.QueryReturnInfo, {
+        params: {
+            purchase_order_goods_id,
+        },
+    });
+}
+
+export function addWaybill(data: any) {
+    return api.post(PurchaseApiPath.AddWaybill, {
+        data: data,
     });
 }

@@ -4,38 +4,41 @@ import { ColumnsType } from 'antd/lib/table/interface';
 import { useDataSet } from 'react-components';
 import { queryPurchasePlainList } from '@/services/purchase';
 import { IPurchasePlain } from '@/interface/IPurchase';
+import { EmptyObject } from '@/config/global';
+
+const reserveStatusMap = {
+    1: '未预定',
+    2: '预定失败',
+    3: '预定成功',
+    4: '预定已释放',
+};
 
 const columns: ColumnsType<IPurchasePlain> = [
     {
         title: '采购计划ID',
-        dataIndex: 'operation',
+        dataIndex: 'purchasePlanId',
         align: 'center',
-        fixed: 'left',
         width: '150px',
     },
     {
         title: '采购计划生成时间',
         width: '100px',
-        fixed: 'left',
-        dataIndex: 'task_id',
         align: 'center',
     },
     {
         title: '入库数量',
         width: '100px',
-        fixed: 'left',
-        dataIndex: 'task_id',
         align: 'center',
+        render: () => '--',
     },
     {
-        title: '自订单ID',
+        title: '子订单ID',
         width: '100px',
-        fixed: 'left',
-        dataIndex: 'task_id',
+        dataIndex: 'orderGoodsId',
         align: 'center',
     },
     {
-        title: '自订单状态',
+        title: '子订单状态',
         width: '100px',
         fixed: 'left',
         dataIndex: 'task_id',
@@ -45,8 +48,11 @@ const columns: ColumnsType<IPurchasePlain> = [
         title: '预定状态',
         width: '100px',
         fixed: 'left',
-        dataIndex: 'task_id',
+        dataIndex: 'reserveStatus', //1：未预定 2：预定失败 3：预定成功 4：预定已释放
         align: 'center',
+        render: (_: keyof typeof reserveStatusMap) => {
+            return reserveStatusMap[_];
+        },
     },
 ];
 
@@ -56,16 +62,17 @@ declare interface IPurchaseDetailProps {
 }
 
 const PurchaseDetailModal: React.FC<IPurchaseDetailProps> = ({ visible, onCancel }) => {
-    const { loading, dataSet, setLoading } = useDataSet<IPurchasePlain>();
+    const { loading, dataSet, setLoading, setDataSet } = useDataSet<IPurchasePlain>();
     useEffect(() => {
         const api = queryPurchasePlainList({
             purchase_order_goods_id: visible,
         });
         if (visible) {
             setLoading(true);
+            setDataSet([]);
             api.request()
-                .then(({ data }) => {
-                    console.log(data);
+                .then(({ data: { list = [] } = EmptyObject }) => {
+                    setDataSet(list);
                 })
                 .finally(() => {
                     setLoading(false);
@@ -82,15 +89,17 @@ const PurchaseDetailModal: React.FC<IPurchaseDetailProps> = ({ visible, onCancel
             <Modal
                 visible={!!visible}
                 title="采购计划详情"
-                width={700}
+                width={900}
                 onCancel={onCancel}
                 footer={null}
+                destroyOnClose={true}
             >
                 <Table
                     columns={columns}
                     pagination={false}
                     dataSource={dataSet}
                     loading={loading}
+                    scroll={{ y: 500 }}
                 />
             </Modal>
         );

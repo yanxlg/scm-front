@@ -36,7 +36,7 @@ const fieldList: FormField[] = [
     {
         label: '供应商订单号',
         type: 'input',
-        name: 'order',
+        name: 'purchase_order_goods_sn',
     },
     {
         label: '商品名称',
@@ -51,6 +51,7 @@ const fieldList1: FormField[] = [
         type: 'checkbox',
         name: 'id',
         formItemClassName: '',
+        formatter: 'join',
     },
 ];
 
@@ -108,7 +109,7 @@ const PendingShipped = () => {
             okText: '确定',
             cancelText: '取消',
             onOk: () => {
-                return applyReturn(item.purchaseOrderGoodsId)
+                return applyReturn(Number(item.purchaseOrderGoodsId))
                     .request()
                     .then(() => {
                         message.success('申请成功！');
@@ -132,7 +133,8 @@ const PendingShipped = () => {
                 title: '操作',
                 dataIndex: 'operation',
                 fixed: 'left',
-                width: '100px',
+                width: '150px',
+                align: 'center',
                 render: (_, item) => {
                     return (
                         <>
@@ -151,14 +153,6 @@ const PendingShipped = () => {
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
-                render: (value, row) => {
-                    return {
-                        children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
             },
             {
                 title: '采购单状态',
@@ -166,12 +160,7 @@ const PendingShipped = () => {
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
                 render: (value: PurchaseCode, row) => {
-                    return {
-                        children: PurchaseMap[value],
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
+                    return PurchaseMap[value];
                 },
             },
             {
@@ -179,14 +168,6 @@ const PendingShipped = () => {
                 width: '200px',
                 dataIndex: 'purchaseTotalAmount',
                 align: 'center',
-                render: (value, row) => {
-                    return {
-                        children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
             },
             {
                 title: '商品信息',
@@ -194,11 +175,16 @@ const PendingShipped = () => {
                 width: '178px',
                 align: 'center',
                 render: (_, item) => {
-                    const { productImageUrl, purchaseProductName, productSkuStyle } = item;
+                    const {
+                        productImageUrl,
+                        purchaseGoodsName,
+                        productSkuStyle,
+                        purchaseGoodsNumber = 0,
+                    } = item;
                     let skus: any[] = [];
                     try {
                         const sku = JSON.parse(productSkuStyle);
-                        for (let key of sku) {
+                        for (let key in sku) {
                             skus.push(
                                 <div key={key}>
                                     {key}:{sku[key]}
@@ -206,19 +192,14 @@ const PendingShipped = () => {
                             );
                         }
                     } catch (e) {}
-                    const children = (
+                    return (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchaseProductName}</div>
+                            <div>{purchaseGoodsName}</div>
                             <div>{skus}</div>
+                            <div>数量：x{purchaseGoodsNumber}</div>
                         </div>
                     );
-                    return {
-                        children: children,
-                        props: {
-                            rowSpan: item.rowSpan || 0,
-                        },
-                    };
                 },
             },
             {
@@ -226,66 +207,27 @@ const PendingShipped = () => {
                 dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
-                render: (value, row) => {
-                    return {
-                        children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
             },
             {
                 title: '供应商订单号',
                 dataIndex: 'purchaseOrderGoodsSn',
                 width: '223px',
                 align: 'center',
-                render: (value, row) => {
-                    return {
-                        children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
             },
             {
                 title: '采购计划',
                 width: '223px',
                 align: 'center',
                 render: (value, row) => {
-                    return {
-                        children: (
-                            <Button
-                                type="link"
-                                onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
-                            >
-                                查看详情
-                            </Button>
-                        ),
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
+                    return (
+                        <Button
+                            type="link"
+                            onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
+                        >
+                            查看详情
+                        </Button>
+                    );
                 },
-            },
-            {
-                title: '运单号',
-                dataIndex: 'purchaseTrackingNumber',
-                width: '182px',
-                align: 'center',
-            },
-            {
-                title: '出入库单号',
-                dataIndex: 'referWaybillNo',
-                width: '223px',
-                align: 'center',
-            },
-            {
-                title: '出入库类型',
-                dataIndex: 'type',
-                width: '223px',
-                align: 'center',
             },
         ] as ColumnType<IPurchaseItem>[];
     }, []);
@@ -313,16 +255,15 @@ const PendingShipped = () => {
     }, []);
 
     const table = useMemo(() => {
-        const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
-                rowKey="task_id"
+                rowKey="purchaseOrderGoodsId"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 pagination={pagination}
                 columns={columns}
-                dataSource={dataSet}
+                dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
                 toolBarRender={toolBarRender}

@@ -33,7 +33,7 @@ const fieldList: FormField[] = [
     {
         label: '供应商订单号',
         type: 'input',
-        name: 'order',
+        name: 'purchase_order_goods_sn',
     },
     {
         label: '商品名称',
@@ -158,11 +158,16 @@ const AllList = () => {
                 width: '178px',
                 align: 'center',
                 render: (_, item) => {
-                    const { productImageUrl, purchaseProductName, productSkuStyle } = item;
+                    const {
+                        productImageUrl,
+                        purchaseGoodsName,
+                        productSkuStyle,
+                        purchaseGoodsNumber = 0,
+                    } = item;
                     let skus: any[] = [];
                     try {
                         const sku = JSON.parse(productSkuStyle);
-                        for (let key of sku) {
+                        for (let key in sku) {
                             skus.push(
                                 <div key={key}>
                                     {key}:{sku[key]}
@@ -173,8 +178,9 @@ const AllList = () => {
                     const children = (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchaseProductName}</div>
+                            <div>{purchaseGoodsName}</div>
                             <div>{skus}</div>
+                            <div>数量：x{purchaseGoodsNumber}</div>
                         </div>
                     );
                     return {
@@ -269,7 +275,7 @@ const AllList = () => {
         const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
-                rowKey="task_id"
+                rowKey="purchaseOrderGoodsId"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
@@ -287,8 +293,6 @@ const AllList = () => {
             <>
                 {searchForm}
                 {table}
-                {/*{<ConnectModal visible="1111" onCancel={() => {}} />}*/}
-                {/*<ReturnModal visible="111" onCancel={() => {}} />*/}
                 <PurchaseDetailModal visible={visible} onCancel={onClose} />
             </>
         );

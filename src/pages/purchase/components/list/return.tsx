@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     AutoEnLargeImg,
@@ -19,6 +19,7 @@ import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetail
 import styles from '@/pages/purchase/_list.less';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
 import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import ReturnModal from './returnModal';
 
 const fieldList: FormField[] = [
     {
@@ -39,7 +40,7 @@ const fieldList: FormField[] = [
     {
         label: '供应商订单号',
         type: 'input',
-        name: 'order',
+        name: 'purchase_order_goods_sn',
     },
     {
         label: '商品名称',
@@ -49,6 +50,16 @@ const fieldList: FormField[] = [
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
+
+//(0：待处理，1：退款申请中，2：退款申请成功，3：退款驳回，4：等待商家退款:5：退款成功)
+const refundStatusMap = {
+    0: '待处理',
+    1: '退款申请中',
+    2: '退款申请成功',
+    3: '退款驳回',
+    4: '等待商家退款',
+    5: '退款成功',
+};
 
 const Return = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -94,6 +105,14 @@ const Return = () => {
         );
     }, []);
 
+    const [returnModal, setReturnModal] = useState<false | string>(false);
+    const showReturnModal = useCallback((item: IPurchaseItem) => {
+        setReturnModal(item.purchaseOrderGoodsId);
+    }, []);
+    const closeReturnModal = useCallback(() => {
+        setReturnModal(false);
+    }, []);
+
     const columns = useMemo(() => {
         return [
             {
@@ -104,20 +123,6 @@ const Return = () => {
                 render: (value, row) => {
                     return {
                         children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                title: '采购单状态',
-                width: '140px',
-                dataIndex: 'purchaseOrderStatus',
-                align: 'center',
-                render: (value: PurchaseCode, row) => {
-                    return {
-                        children: PurchaseMap[value],
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -139,16 +144,58 @@ const Return = () => {
                 },
             },
             {
+                title: '实际退款金额',
+                width: '200px',
+                dataIndex: 'refundAmount',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '退款状态',
+                width: '200px',
+                dataIndex: 'refundStatus', //(0：待处理，1：退款申请中，2：退款申请成功，3：退款驳回，4：等待商家退款:5：退款成功)
+                align: 'center',
+                render: (value: keyof typeof refundStatusMap, row) => {
+                    return {
+                        children: (
+                            <div>
+                                {refundStatusMap[value]}
+                                {String(value) === '2' ? (
+                                    <Button type="link" onClick={() => showReturnModal(row)}>
+                                        填写运单号
+                                    </Button>
+                                ) : null}
+                            </div>
+                        ),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
                 title: '商品信息',
                 dataIndex: 'product_info',
                 width: '178px',
                 align: 'center',
                 render: (_, item) => {
-                    const { productImageUrl, purchaseProductName, productSkuStyle } = item;
+                    const {
+                        productImageUrl,
+                        purchaseGoodsName,
+                        productSkuStyle,
+                        purchaseGoodsNumber = 0,
+                    } = item;
                     let skus: any[] = [];
                     try {
                         const sku = JSON.parse(productSkuStyle);
-                        for (let key of sku) {
+                        for (let key in sku) {
                             skus.push(
                                 <div key={key}>
                                     {key}:{sku[key]}
@@ -159,8 +206,9 @@ const Return = () => {
                     const children = (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchaseProductName}</div>
+                            <div>{purchaseGoodsName}</div>
                             <div>{skus}</div>
+                            <div>数量：x{purchaseGoodsNumber}</div>
                         </div>
                     );
                     return {
@@ -193,26 +241,6 @@ const Return = () => {
                 render: (value, row) => {
                     return {
                         children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
-            },
-            {
-                title: '采购计划',
-                width: '223px',
-                align: 'center',
-                render: (value, row) => {
-                    return {
-                        children: (
-                            <Button
-                                type="link"
-                                onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
-                            >
-                                查看详情
-                            </Button>
-                        ),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -254,7 +282,7 @@ const Return = () => {
         const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
-                rowKey="task_id"
+                rowKey="purchaseOrderGoodsId"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
@@ -273,9 +301,10 @@ const Return = () => {
                 {searchForm}
                 {table}
                 <PurchaseDetailModal visible={visible} onCancel={onClose} />
+                <ReturnModal visible={returnModal} onCancel={closeReturnModal} />
             </>
         );
-    }, [loading, visible]);
+    }, [loading, visible, returnModal]);
 };
 
 export default Return;

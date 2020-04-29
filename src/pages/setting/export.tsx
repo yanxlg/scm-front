@@ -86,7 +86,7 @@ const Export = () => {
         currentDate.current = undefined;
         list.map(item => {
             const { create_time } = item;
-            const time = dayjs.utc(create_time, 's').local();
+            const time = dayjs.utc(Number(create_time) * 1000);
             if (currentDate.current && time.isSame(currentDate.current, 'd')) {
                 const lastItem = waterFallAllData.current[waterFallAllData.current.length - 1];
                 const lastLength = lastItem.data.length;
