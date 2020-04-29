@@ -187,6 +187,15 @@ const Over = () => {
                 dataIndex: 'waybillNo',
                 width: '223px',
                 align: 'center',
+                render: (_, item: IReturnItem) => {
+                    const { purchaseReturnStatus } = item;
+                    return (
+                        <div>
+                            {_}
+                            {purchaseReturnStatus === '6' ? <div>已签收</div> : null}
+                        </div>
+                    );
+                },
             },
         ] as ColumnType<IReturnItem>[];
     }, []);
