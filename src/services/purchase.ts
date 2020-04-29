@@ -1,10 +1,17 @@
 import { api } from 'react-components';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
-import { IAddressConfig, IPurchaseStatics, IReturnStatics } from '@/interface/IPurchase';
+import {
+    IAddressConfig,
+    IPurchaseItem,
+    IPurchasePlain,
+    IPurchaseStatics,
+    IReturnStatics,
+} from '@/interface/IPurchase';
 import { IResponse } from '@/interface/IGlobal';
+import { IPaginationResponse } from 'react-components/lib/hooks/useList';
 
 export const queryPurchaseList = (data: any) => {
-    return api.post(PurchaseApiPath.QueryList, {
+    return api.post<IResponse<IPaginationResponse<IPurchaseItem>>>(PurchaseApiPath.QueryList, {
         data: {
             ...data,
         },
@@ -54,4 +61,15 @@ export const exportReturnList = (data: any) => {
             ...data,
         },
     });
+};
+
+export const queryPurchasePlainList = (data: any) => {
+    return api.post<IResponse<IPaginationResponse<IPurchasePlain>>>(
+        PurchaseApiPath.QueryPurchasePlainList,
+        {
+            data: {
+                ...data,
+            },
+        },
+    );
 };

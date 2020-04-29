@@ -22,7 +22,7 @@ import styles from '@/pages/purchase/_return.less';
 import { PurchaseReturnCode, PurchaseReturnMap } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 
-const fieldList: FormField[] = [
+export const fieldList: FormField[] = [
     {
         label: '出入库单号',
         type: 'input',
@@ -139,11 +139,16 @@ const AllList: React.FC<AllListProps> = () => {
                 width: '178px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
-                    const { productImageUrl, purchasePlatformGoodsName, productSkuStyle } = item;
+                    let {
+                        productImageUrl,
+                        purchasePlatformGoodsName,
+                        productSkuStyle,
+                        returnNumber = 0,
+                    } = item;
                     let skus: any[] = [];
                     try {
                         const sku = JSON.parse(productSkuStyle);
-                        for (let key of sku) {
+                        for (let key in sku) {
                             skus.push(
                                 <div key={key}>
                                     {key}:{sku[key]}
@@ -154,8 +159,9 @@ const AllList: React.FC<AllListProps> = () => {
                     return (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            {purchasePlatformGoodsName}
-                            {skus}
+                            <div>{purchasePlatformGoodsName}</div>
+                            <div>{skus}</div>
+                            <div>数量：x{returnNumber}</div>
                         </div>
                     );
                 },
@@ -165,6 +171,10 @@ const AllList: React.FC<AllListProps> = () => {
                 dataIndex: 'returnNumber',
                 width: '130px',
                 align: 'center',
+                render: (_, item: IReturnItem) => {
+                    const { returnNumber = 0, realReturnNumber = 0 } = item;
+                    return `${realReturnNumber}/${returnNumber}`;
+                },
             },
             {
                 title: '采购单ID',
