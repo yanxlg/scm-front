@@ -1,4 +1,13 @@
+/**
+ * 订单api地址枚举
+ */
 export enum PurchaseApiPath {
+    getAbnormalAllList = '/api/v1/purchase/waybill_exception',
+    setCorrelateWaybill = '/api/v1/purchase/correlate_waybill',
+    setDiscardAbnormalOrder = '/api/v1/purchase/discard_abnormal_order',
+    applyPurchaseRefund = '/api/v1/purchase/refund',
+    getExceptionCount = '/api/v1/purchase/waybill_exception/count',
+    downloadExcel = '/api/v1/download/create',
     QueryList = '/api/v1/purchase/purchase_list',
     QueryReturnList = '/api/v1/purchase/purchase_return_list',
     QueryReturnStatic = '/api/v1/purchase/purchase_return_count',
@@ -7,4 +16,5 @@ export enum PurchaseApiPath {
     CancelReturn = '/api/v1/purchase/cancel_purchase_return',
     QueryPurchaseStatic = '/api/v1/purchase/purchase_count',
     Export = '/api/v1/download/create',
+    getPurchaseGoodsInfo = '/api/v1/purchase/purchase_info/:id'
 }
