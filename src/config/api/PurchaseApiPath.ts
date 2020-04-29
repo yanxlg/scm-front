@@ -16,4 +16,5 @@ export enum PurchaseApiPath {
     CancelReturn = '/api/v1/purchase/cancel_purchase_return',
     QueryPurchaseStatic = '/api/v1/purchase/purchase_count',
     Export = '/api/v1/download/create',
+    getPurchaseGoodsInfo = '/api/v1/purchase/purchase_info/:id'
 }

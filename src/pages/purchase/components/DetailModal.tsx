@@ -27,7 +27,7 @@ const DetailModal: React.FC<IProps> = ({ visible, onCancel }) => {
                     </div>
                     <div className={styles.iconBox}>
                         <Icons type="scm-tuihuo" className={styles.icon2} />
-                        <div>拒收中</div>
+                        <div>拒收</div>
                     </div>
                     <div className={styles.iconBox}>
                         <Icons type="scm-fahuo" className={styles.icon3} />

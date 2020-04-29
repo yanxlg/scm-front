@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { Modal, Form, Input, Row, Col, InputNumber } from 'antd';
 import { LoadingButton } from 'react-components';
 import classnames from 'classnames';
-import { setCorrelateWaybill } from '@/services/purchase';
+import { setCorrelateWaybill, getPurchaseGoodsInfo } from '@/services/purchase';
 import { ICorrelateWaybillReq } from '@/interface/IPurchase';
 
 import styles from '../_abnormal.less';
@@ -13,16 +13,48 @@ const rules = [{ required: true, message: '请输入！' }];
 interface IProps {
     visible: boolean;
     onCancel(): void;
+    onRefresh(): void;
 }
 
-const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel }) => {
+const RelatedPurchaseModal: React.FC<IProps> = ({ 
+    visible,
+    onCancel,
+    onRefresh
+}) => {
     const [form] = Form.useForm();
-    const [canRelated, setCanRelated] = useState(true);
+    const [purchaseOrderGoodsId, setPurchaseOrderGoodsId] = useState('');
+    const [relatedType, setRelatedType] = useState('default');
+    const [ goodsDetail, setGoodsDetail ] = useState({
+        purchaseGoodsName: 'test',
+        productImageUrl: 'https://qqadapt.qpic.cn/txdocpic/0/caabe673030baa81e311c50bdbfc4c7f/0?w=1280&h=590',
+        productSkuStyle: 'xxx'
+    });
+
+    // const getPurchaseGoodsInfo = 
+    const handleSearch = useCallback(() => {
+        return getPurchaseGoodsInfo(form.getFieldValue('purchase_order_goods_id'))
+            .then(res => {
+                console.log('getPurchaseGoodsInfo', res);
+                setRelatedType('ok');
+            }).catch(() => {
+                setRelatedType('err');
+            });
+    }, []);
 
     const handleOk = useCallback(() => {
-        form.validateFields().then(vals => {
-            console.log('handleOk', vals);
-            setCorrelateWaybill(vals as ICorrelateWaybillReq).then((res: any) => {});
+        form.validateFields().then(({
+            goods_number,
+            ...rest
+        }) => {
+            // console.log('handleOk', vals);as ICorrelateWaybillReq
+            setCorrelateWaybill({
+                ...rest,
+                goods_number: goods_number + '',
+                request_type: 'PURCHASE_ORDER'
+            } as ICorrelateWaybillReq).then(() => {
+                onCancel();
+                onRefresh();
+            });
         });
     }, []);
 
@@ -31,7 +63,8 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel }) => {
     }, []);
 
     return useMemo(() => {
-        const disabled = !canRelated;
+        const disabled = relatedType !== 'ok';
+        const { purchaseGoodsName, productImageUrl, productSkuStyle } = goodsDetail;
         return (
             <Modal
                 title="关联采购单"
@@ -55,14 +88,15 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel }) => {
                                         required={false}
                                         rules={rules}
                                     >
-                                        <Input placeholder="请输入采购单ID" />
+                                        <Input onChange={e => setPurchaseOrderGoodsId(e.target.value)} placeholder="请输入采购单ID" />
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <LoadingButton
                                         type="primary"
+                                        disabled={!purchaseOrderGoodsId}
                                         className={formStyles.formBtn}
-                                        onClick={() => Promise.resolve()}
+                                        onClick={handleSearch}
                                     >
                                         查询
                                     </LoadingButton>
@@ -88,6 +122,21 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel }) => {
                                     )}
                                 ></div>
                             </div>
+                            {
+                                relatedType === 'err' && (
+                                    <p className={styles.red}>未查询到此采购单ID</p>
+                                )
+                            }
+                            {
+                                relatedType === 'ok' && (
+                                    <div className={styles.goodsInfo}>
+                                        <img src={productImageUrl} className={styles.img} />
+                                        <div className={styles.desc}>
+                                            <div className={styles.name}>{purchaseGoodsName}</div>
+                                        </div>
+                                    </div>
+                                )
+                            }
                         </div>
                         {/* className={styles.stepTwo} */}
                         <div className={disabled ? styles.disabled : ''}>
@@ -136,7 +185,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel }) => {
                 </Form>
             </Modal>
         );
-    }, [visible, canRelated]);
+    }, [visible, relatedType, purchaseOrderGoodsId, goodsDetail]);
 };
 
 export default RelatedPurchaseModal;

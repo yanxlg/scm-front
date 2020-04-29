@@ -45,7 +45,9 @@ const Purchase: React.FC = props => {
             <Container>
                 <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="全部" key="1">
-                        <PaneAbnormalAll />
+                        <PaneAbnormalAll
+                            getExceptionCount={getExceptionCount}
+                        />
                     </TabPane>
                     <TabPane tab={`待处理（${allPenddingCount}）`} key="2">
                         <PaneAbnormalPending penddingCount={penddingCount} />

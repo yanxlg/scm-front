@@ -29,58 +29,60 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
     } = currentRecord as IPurchaseAbnormalItem;
     const [form] = Form.useForm();
     const [checkedList, setCheckedList] = useState<number[]>([]);
+    const [confirmLoading, setConfirmLoading] = useState(false);
 
-    const handleOk = useCallback(() => {
-        form.validateFields().then(vals => {
-            // console.log('handleOk', vals);
-            const {
-                reject_count,
-                receive_name,
-                receive_tel,
-                receive_address,
-                receive_address_detail,
-                zip_code,
-                purchase_waybill_no,
-                goods_number,
-                remarks,
-            } = vals;
-            const allRequest = Promise.all(
-                checkedList.map(val => {
-                    if (val === 1) {
-                        return applyPurchaseRefund({
-                            purchase_order_goods_id: purchaseOrderGoodsId,
-                            remark: remarks,
-                        });
-                    } else if (val === 2) {
-                        return setRejectAbnormalOrder({
-                            waybill_exception_sn: waybillExceptionSn,
-                            abnormal_operate_type: '拒收',
-                            reject_count: reject_count + '',
-                            receive_name,
-                            receive_tel,
-                            receive_address,
-                            receive_address_detail,
-                            zip_code,
-                            remarks,
-                        });
-                    } else if (val === 3) {
-                        return setCorrelateWaybill({
-                            purchase_order_goods_id: purchaseOrderGoodsId,
-                            purchase_waybill_no,
-                            goods_number,
-                            remark: remarks,
-                            waybill_exception_sn: waybillExceptionSn,
-                            request_type: 'WAYBILL_EXCEPTION',
-                        });
-                    }
-                }),
-            );
-            allRequest.then(() => {
-                // console.log('allRequest');
-                message.success('操作成功');
-                onCancel();
-                onReload();
-            });
+    const handleOk = useCallback(async () => {
+        const vals = await form.validateFields();
+        const {
+            reject_count,
+            receive_name,
+            receive_tel,
+            receive_address,
+            receive_address_detail,
+            zip_code,
+            purchase_waybill_no,
+            goods_number,
+            remarks,
+        } = vals;
+        const allRequest = Promise.all(
+            checkedList.map(val => {
+                if (val === 1) {
+                    return applyPurchaseRefund({
+                        purchase_order_goods_id: purchaseOrderGoodsId,
+                        remark: remarks,
+                    });
+                } else if (val === 2) {
+                    return setRejectAbnormalOrder({
+                        waybill_exception_sn: waybillExceptionSn,
+                        abnormal_operate_type: '拒收',
+                        reject_count: reject_count + '',
+                        receive_name,
+                        receive_tel,
+                        receive_address,
+                        receive_address_detail,
+                        zip_code,
+                        remarks,
+                    });
+                } else if (val === 3) {
+                    return setCorrelateWaybill({
+                        purchase_order_goods_id: purchaseOrderGoodsId,
+                        purchase_waybill_no,
+                        goods_number: goods_number + '',
+                        remark: remarks,
+                        request_type: 'PURCHASE_ORDER',
+                    });
+                }
+            }),
+        );
+        setConfirmLoading(true);
+        return allRequest.then(() => {
+            // console.log('allRequest');
+            message.success('操作成功');
+            setConfirmLoading(false);
+            onCancel();
+            onReload();
+        }).catch(() => {
+            setConfirmLoading(false);
         });
     }, [checkedList]);
 
@@ -101,6 +103,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                 visible={visible}
                 onOk={handleOk}
                 onCancel={handleCancel}
+                confirmLoading={confirmLoading}
                 okButtonProps={{
                     disabled: checkedList.length === 0,
                 }}
@@ -228,7 +231,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                 </Form>
             </Modal>
         );
-    }, [visible, checkedList]);
+    }, [visible, checkedList, confirmLoading]);
 };
 
 export default AbnormalModal;

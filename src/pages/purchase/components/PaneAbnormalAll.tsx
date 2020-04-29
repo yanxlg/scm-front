@@ -55,7 +55,13 @@ const fieldList: FormField[] = [
     },
 ];
 
-const PaneAbnormalAll: React.FC = props => {
+interface IProps {
+    getExceptionCount(): void;
+}
+
+const PaneAbnormalAll: React.FC<IProps> = ({
+    getExceptionCount
+}) => {
     const formRef = useRef<JsonFormRef>(null);
     const textareaRef = useRef<TextArea>(null);
     const [relatedPurchaseStatus, setRelatedPurchaseStatus] = useState(false);
@@ -76,8 +82,9 @@ const PaneAbnormalAll: React.FC = props => {
         formRef: formRef,
     });
 
-    const showRelatedPurchase = () => {
+    const showRelatedPurchase = (record: IPurchaseAbnormalItem) => {
         setRelatedPurchaseStatus(true);
+        setCurrentRecord(record);
     };
 
     const hideRelatedPurchase = useCallback(() => {
@@ -125,6 +132,7 @@ const PaneAbnormalAll: React.FC = props => {
                     abnormal_operate_type: '废弃',
                     remarks,
                 }).then(() => {
+                    getExceptionCount();
                     onReload();
                 });
             },
@@ -217,7 +225,7 @@ const PaneAbnormalAll: React.FC = props => {
                             </div>
                             {hasRelatedPurchase(waybillExceptionType) && (
                                 <div>
-                                    <a onClick={() => showRelatedPurchase()}>关联采购单</a>
+                                    <a onClick={() => showRelatedPurchase(row)}>关联采购单</a>
                                 </div>
                             )}
                             {hasExceptionHandle(waybillExceptionType) && (
@@ -294,6 +302,7 @@ const PaneAbnormalAll: React.FC = props => {
                 <RelatedPurchaseModal
                     visible={relatedPurchaseStatus}
                     onCancel={hideRelatedPurchase}
+                    onRefresh={onReload}
                 />
                 <AbnormalModal
                     currentRecord={currentRecord}

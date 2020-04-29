@@ -44,10 +44,10 @@ export interface IPurchaseAbnormalReq {
 export interface ICorrelateWaybillReq {
     purchase_order_goods_id: string;
     purchase_waybill_no: string;
-    goods_number: number;
+    goods_number: string;
     remark: string;
-    waybill_exception_sn: string;
-    request_type: 'WAYBILL_EXCEPTION';
+    // waybill_exception_sn: string;
+    request_type: 'PURCHASE_ORDER';
 }
 
 export interface IRejectAbnormalOrderReq {
