@@ -2,20 +2,21 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { Button, DatePicker, Radio } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 
-import styles from '../_order.less';
+// import styles from '../_order.less';
+import btnStyles from '@/styles/_btn.less';
 
 const { RangePicker } = DatePicker;
 const timeFormat = 'YYYY-MM-DD';
 
 interface IProps {
-
+    dates: [Dayjs, Dayjs];
+    setDates(dates: [Dayjs, Dayjs]): void;
 }
 
 const DateRange: React.FC<IProps> = ({
-
+    dates,
+    setDates
 }) => {
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([ dayjs(), dayjs() ]);
-
     const isToday = useMemo(() => {
         // console.log('isToday', dates);
         const [ startDate, endDate ] = dates;
@@ -110,41 +111,35 @@ const DateRange: React.FC<IProps> = ({
 
     return useMemo(() => {
         return (
-            <>
-                <div>
-                    日期：
-                    <Button
-                        className={styles.btn}
-                        type={isToday ? 'primary' : 'default'}  
-                        onClick={handleToday}
-                    >今日</Button>
-                    <Button 
-                        className={styles.btn}
-                        type={isYesterday ? 'primary' : 'default'}  
-                        onClick={handleYesterday}
-                    >昨日</Button>
-                    <Button 
-                        className={styles.btn}
-                        type={isThreeToday ? 'primary' : 'default'}  
-                        onClick={handleThreeDay}
-                    >近三日</Button>
-                    <Button 
-                        className={styles.btn}
-                        type={isSevenToday ? 'primary' : 'default'}  
-                        onClick={handleSevenDay}
-                    >近七日</Button>
-                    <RangePicker
-                        allowClear={false}
-                        value={dates}
-                        disabledDate={disabledDate}
-                        onChange={handleRangePicker}
-                    />
-                </div>
-                <Radio.Group defaultValue="a" buttonStyle="solid">
-                    <Radio.Button value="a">订单量</Radio.Button>
-                    <Radio.Button value="b">GMV($)</Radio.Button>
-                </Radio.Group>
-            </>
+            <div>
+                日期：
+                <Button
+                    className={btnStyles.btnGutter}
+                    type={isToday ? 'primary' : 'default'}  
+                    onClick={handleToday}
+                >今日</Button>
+                <Button 
+                    className={btnStyles.btnGutter}
+                    type={isYesterday ? 'primary' : 'default'}  
+                    onClick={handleYesterday}
+                >昨日</Button>
+                <Button 
+                    className={btnStyles.btnGutter}
+                    type={isThreeToday ? 'primary' : 'default'}  
+                    onClick={handleThreeDay}
+                >近三日</Button>
+                <Button 
+                    className={btnStyles.btnGutter}
+                    type={isSevenToday ? 'primary' : 'default'}  
+                    onClick={handleSevenDay}
+                >近七日</Button>
+                <RangePicker
+                    allowClear={false}
+                    value={dates}
+                    disabledDate={disabledDate}
+                    onChange={handleRangePicker}
+                />
+            </div>
         )
     }, [dates]);
 }
