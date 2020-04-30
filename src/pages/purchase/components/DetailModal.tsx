@@ -12,17 +12,16 @@ interface IProps {
 }
 
 const DetailModal: React.FC<IProps> = ({ visible, onCancel, currentRecord }) => {
-    if (!visible) {
-        return null;
-    }
-
-    const { remark } = currentRecord as IPurchaseAbnormalItem;
+    const { remark } = (currentRecord as IPurchaseAbnormalItem) || {};
     let info: any = {};
     try {
         info = JSON.parse(remark);
     } catch (err) {}
-    console.log(111111, info);
+    // console.log(111111, info);
     return useMemo(() => {
+        if (!visible) {
+            return null;
+        }
         const {
             abnormal_operate_type,
             reject_count,

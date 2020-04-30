@@ -17,18 +17,14 @@ interface IProps {
 }
 
 const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }) => {
-    if (!visible) {
-        return null;
-    }
     const [form] = Form.useForm();
     const [purchaseOrderGoodsId, setPurchaseOrderGoodsId] = useState('');
     const [relatedType, setRelatedType] = useState('default');
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [goodsDetail, setGoodsDetail] = useState({
-        purchaseGoodsName: 'test',
-        productImageUrl:
-            'https://qqadapt.qpic.cn/txdocpic/0/caabe673030baa81e311c50bdbfc4c7f/0?w=1280&h=590',
-        productSkuStyle: 'xxx',
+        purchaseGoodsName: '',
+        productImageUrl: '',
+        productSkuStyle: '',
     });
 
     // const getPurchaseGoodsInfo =
@@ -74,6 +70,9 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
     }, []);
 
     return useMemo(() => {
+        if (!visible) {
+            return null;
+        }
         const disabled = relatedType !== 'ok';
         const { purchaseGoodsName, productImageUrl, productSkuStyle } = goodsDetail;
         return (

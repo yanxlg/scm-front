@@ -15,14 +15,8 @@ interface IProps {
 }
 
 const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onRefresh }) => {
-    if (!visible) {
-        return null;
-    }
-    const {
-        waybillExceptionType,
-        waybillExceptionSn,
-        purchaseOrderGoodsId,
-    } = currentRecord as IPurchaseAbnormalItem;
+    const { waybillExceptionType, waybillExceptionSn, purchaseOrderGoodsId } =
+        (currentRecord as IPurchaseAbnormalItem) || {};
     const [form] = Form.useForm();
     const [checkedList, setCheckedList] = useState<number[]>([]);
     const [confirmLoading, setConfirmLoading] = useState(false);
@@ -66,6 +60,9 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
     }, []);
 
     return useMemo(() => {
+        if (!visible) {
+            return null;
+        }
         return (
             <Modal
                 title="异常处理"
