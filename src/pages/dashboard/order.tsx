@@ -1,8 +1,9 @@
-import React, { useMemo, useRef } from 'react';
-import { Row, Col } from 'antd';
+import React, { useMemo, useRef, useCallback } from 'react';
+import { Row, Col, Radio, Button } from 'antd';
 import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import OrderFunnel from './components/OrderFunnel';
+// import OrderFunnel from './components/OrderFunnel';
+import DateRange from './components/DateRange';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
@@ -26,7 +27,6 @@ const formFields: FormField[] = [
 
 const OrderAnalysis: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
-
     return useMemo(() => {
         return (
             <div className={styles.container}>
@@ -49,15 +49,18 @@ const OrderAnalysis: React.FC = props => {
                                 className={formStyles.formBtn}
                                 onClick={() => Promise.resolve()}
                             >
-                                导出
+                                刷新
                             </LoadingButton>
                         </div>
                     </JsonForm>
                 </div>
                 <div className={styles.chartSection}>
+                    <div className={styles.operationBox}>
+                        <DateRange />
+                    </div>
                     <Row>
                         <Col span={14}>
-                            <OrderFunnel />
+                            {/* <OrderFunnel /> */}
                         </Col>
                         <Col span={10}></Col>
                     </Row>
