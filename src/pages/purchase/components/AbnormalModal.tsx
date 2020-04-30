@@ -1,9 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Modal, Form, Checkbox, InputNumber, Input, message } from 'antd';
 import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
-import {
-    setPurchaseException
-} from '@/services/purchase';
+import { setPurchaseException } from '@/services/purchase';
 
 import styles from '../_abnormal.less';
 
@@ -17,24 +15,14 @@ interface IProps {
 }
 
 const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onRefresh }) => {
-    if (!visible) {
-        return null;
-    }
-    const {
-        waybillExceptionType,
-        waybillExceptionSn,
-        purchaseOrderGoodsId,
-    } = currentRecord as IPurchaseAbnormalItem;
+    const { waybillExceptionType, waybillExceptionSn, purchaseOrderGoodsId } =
+        (currentRecord as IPurchaseAbnormalItem) || {};
     const [form] = Form.useForm();
     const [checkedList, setCheckedList] = useState<number[]>([]);
     const [confirmLoading, setConfirmLoading] = useState(false);
 
     const handleOk = useCallback(async () => {
-        const {
-            reject_count,
-            in_storage_count,
-            ...rest
-        } = await form.validateFields();
+        const { reject_count, in_storage_count, ...rest } = await form.validateFields();
         setConfirmLoading(true);
         return setPurchaseException({
             ...rest,
@@ -42,22 +30,24 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
             in_storage_count: (in_storage_count || '') + '',
             purchase_order_goods_id: purchaseOrderGoodsId,
             waybill_exception_sn: waybillExceptionSn,
-            exec_type: checkedList
-        }).then((res: any) => {
-            for (const key in res.data) {
-                const val = res.data[key];
-                if (!Array.isArray(val) && val?.type === 'failed') {
-                    setConfirmLoading(false);
-                    return message.error(val.res);
+            exec_type: checkedList,
+        })
+            .then((res: any) => {
+                for (const key in res.data) {
+                    const val = res.data[key];
+                    if (!Array.isArray(val) && val?.type === 'failed') {
+                        setConfirmLoading(false);
+                        return message.error(val.res);
+                    }
                 }
-            }
-            message.success('操作成功');
-            setConfirmLoading(false);
-            onCancel();
-            onRefresh();
-        }).catch(() => {
-            setConfirmLoading(false);
-        });
+                message.success('操作成功');
+                setConfirmLoading(false);
+                onCancel();
+                onRefresh();
+            })
+            .catch(() => {
+                setConfirmLoading(false);
+            });
     }, [checkedList]);
 
     const handleCancel = useCallback(() => {
@@ -70,6 +60,9 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
     }, []);
 
     return useMemo(() => {
+        if (!visible) {
+            return null;
+        }
         return (
             <Modal
                 title="异常处理"
