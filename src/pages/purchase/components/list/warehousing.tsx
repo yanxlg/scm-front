@@ -13,7 +13,7 @@ import { Button, message, Modal } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { applyReturn, queryPurchaseList } from '@/services/purchase';
+import { applyReturn, exportPurchaseList, queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
 import styles from '@/pages/purchase/_list.less';
@@ -21,6 +21,7 @@ import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetail
 import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import Export from '@/components/Export';
 
 const fieldList: FormField[] = [
     {
@@ -72,6 +73,25 @@ const Warehousing = () => {
         },
     });
 
+    const [showExport, setShowExport] = useState(false);
+
+    const showExportFn = useCallback(() => {
+        setShowExport(true);
+    }, []);
+
+    const closeExportFn = useCallback(() => {
+        setShowExport(false);
+    }, []);
+
+    const onExport = useCallback((data: any) => {
+        return exportPurchaseList({
+            ...data,
+            query: {
+                ...formRef.current!.getFieldsValue(),
+            },
+        }).request();
+    }, []);
+
     const searchForm = useMemo(() => {
         return (
             <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
@@ -82,7 +102,7 @@ const Warehousing = () => {
                     <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
-                    <Button type="primary" className={formStyles.formBtn}>
+                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>
@@ -340,9 +360,15 @@ const Warehousing = () => {
                 {table}
                 <PurchaseDetailModal visible={visible} onCancel={onClose} />
                 <ConnectModal visible={connect} onCancel={closeConnect} />
+                <Export
+                    columns={columns}
+                    visible={showExport}
+                    onOKey={onExport}
+                    onCancel={closeExportFn}
+                />
             </>
         );
-    }, [loading, visible, connect]);
+    }, [loading, visible, connect, showExport]);
 };
 
 export default Warehousing;

@@ -112,6 +112,15 @@ export const exportReturnList = (data: any) => {
     });
 };
 
+export const exportPurchaseList = (data: any) => {
+    return api.post(PurchaseApiPath.Export, {
+        data: {
+            module: 7,
+            ...data,
+        },
+    });
+};
+
 export const queryPurchasePlainList = (data: any) => {
     return api.post<IResponse<IPaginationResponse<IPurchasePlain>>>(
         PurchaseApiPath.QueryPurchasePlainList,
