@@ -23,7 +23,7 @@ const GoodsInfo: React.FC<IProps> = ({ releasedGoods }) => {
             } = releasedGoods;
             return (
                 <div className={styles.infoWrapper}>
-                    <img className={styles.mainImg}  src={goods_img} />
+                    <img className={styles.mainImg} src={goods_img} />
                     <div className={styles.goodsInfo}>
                         <p>
                             <span className={styles.item}>中台商品ID：{product_id}</span>
@@ -37,16 +37,20 @@ const GoodsInfo: React.FC<IProps> = ({ releasedGoods }) => {
                             </a>
                         </p>
                         <p>
-                            <span className={styles.item}>一级分类：{first_catagory.name || ''}</span>
-                            <span className={styles.item}>二级分类：{second_catagory.name || ''}</span>
+                            <span className={styles.item}>
+                                一级分类：{first_catagory.name || ''}
+                            </span>
+                            <span className={styles.item}>
+                                二级分类：{second_catagory.name || ''}
+                            </span>
                             <span>三级分类：{third_catagory.name || ''}</span>
                         </p>
                     </div>
                 </div>
-            )
+            );
         }
         return null;
-    }, [releasedGoods])
-}
+    }, [releasedGoods]);
+};
 
 export default GoodsInfo;

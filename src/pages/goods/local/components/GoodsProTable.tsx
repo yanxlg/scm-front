@@ -63,16 +63,14 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 return (
                     <>
                         <div>
-                            {
-                                goods_status !== 'FROZEN' && (
-                                    <Button
-                                        type="link"
-                                        onClick={() => this.toggleEditGoodsDialog(true, row)}
-                                    >
-                                        编辑商品
-                                    </Button>
-                                )
-                            }
+                            {goods_status !== 'FROZEN' && (
+                                <Button
+                                    type="link"
+                                    onClick={() => this.toggleEditGoodsDialog(true, row)}
+                                >
+                                    编辑商品
+                                </Button>
+                            )}
                         </div>
                         <div style={{ marginTop: -6 }}>
                             <Link to={`/goods/local/${row.commodity_id}`}>
