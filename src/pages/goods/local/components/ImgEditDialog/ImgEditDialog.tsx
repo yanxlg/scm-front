@@ -1,15 +1,19 @@
 import React, { ChangeEvent } from 'react';
-import { Modal, Input, Select, Upload, message, Popconfirm } from 'antd';
+import { Modal, Input, Select, Upload, message, Popconfirm, Row, Col, Button } from 'antd';
 import { RcFile } from 'antd/lib/upload';
 import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
 // import { UploadChangeParam } from 'antd/lib/upload';
 
-import { postGoodsPicUpload } from '@/services/goods';
+import { exportAllSkuImages, postGoodsPicUpload } from '@/services/goods';
 import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
 import { ICatagoryItem, IGoodsEditItem } from '@/interface/ILocalGoods';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 import './ImgEditDialog.less';
+import { Icons } from '@/components/Icon';
+import { history } from '@@/core/history';
+import { LoadingButton } from 'react-components';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -342,6 +346,15 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
         }
     };
 
+    private exportAllImages = () => {
+        const { currentEditGoods } = this.props;
+        const { product_id } = currentEditGoods!;
+        return exportAllSkuImages(product_id).then(() => {
+            // jump
+            history.push('/setting/export');
+        });
+    };
+
     render() {
         const {
             visible,
@@ -401,7 +414,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     <div>{product_id}</div>
                 </div>
                 <div className="goods-edit-item">
-                    <div className="label">商品标题</div>
+                    <div className="label">商品标题：</div>
                     <TextArea
                         className="textarea"
                         autoSize={true}
@@ -412,7 +425,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     />
                 </div>
                 <div className="goods-edit-item">
-                    <div className="label">商品描述</div>
+                    <div className="label">商品描述：</div>
                     <TextArea
                         className="textarea"
                         autoSize={true}
@@ -423,7 +436,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     />
                 </div>
                 <div className="goods-edit-item">
-                    <div className="label">一级类目</div>
+                    <div className="label">一级类目：</div>
                     <Select
                         className="select"
                         value={first_catagory.id}
@@ -435,7 +448,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             </Option>
                         ))}
                     </Select>
-                    <div className="label">二级类目</div>
+                    <div className="label">二级类目：</div>
                     <Select
                         className="select"
                         value={second_catagory.id || ''}
@@ -448,7 +461,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             </Option>
                         ))}
                     </Select>
-                    <div className="label">三级类目</div>
+                    <div className="label">三级类目：</div>
                     <Select
                         className="select"
                         value={third_catagory.id || ''}
@@ -462,34 +475,29 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         ))}
                     </Select>
                 </div>
-                <div className="goods-edit-item">
-                    <div className="label">图片编辑</div>
-                </div>
-                <div className="goods-edit-img">
-                    <div className="first">
-                        <p>主图</p>
-                        <div className="img-box">
-                            <img
-                                src={sku_image[0]}
-                                onDragStart={() => this.dragstart(sku_image[0])}
-                                onDragOver={this.dragover}
-                                onDrop={() => this.drop(sku_image[0])}
-                            />
+                <div className={formStyles.flex}>
+                    <div>
+                        <div className="goods-edit-item">
+                            <div className="label">商品图片：</div>
                         </div>
                     </div>
-                    <div className="secondary">
-                        <p>副图</p>
-                        <div className="list">
-                            {sku_image.slice(1).map(item => {
-                                return (
-                                    <div key={item} className="img-box item">
-                                        <img
-                                            src={item}
-                                            onDragStart={() => this.dragstart(item)}
-                                            onDragOver={this.dragover}
-                                            onDrop={() => this.drop(item)}
-                                        />
-                                        {/* {
+                    <div className={formStyles.flex1}>
+                        <div className="goods-edit-img">
+                            <div className="secondary">
+                                <div className="list">
+                                    {sku_image.map((item, index) => {
+                                        return (
+                                            <div key={item} className="img-box item">
+                                                <img
+                                                    src={item}
+                                                    onDragStart={() => this.dragstart(item)}
+                                                    onDragOver={this.dragover}
+                                                    onDrop={() => this.drop(item)}
+                                                />
+                                                {index === 0 ? (
+                                                    <div className="goods-edit-img-label">主图</div>
+                                                ) : null}
+                                                {/* {
                                             goods_img !== item ? (
                                                 <Popconfirm
                                                     title="确定删除吗?"
@@ -501,29 +509,25 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                                 </Popconfirm>
                                             ) : null
                                         } */}
-                                    </div>
-                                );
-                            })}
-                            <Upload
-                                className="item"
-                                showUploadList={false}
-                                beforeUpload={this.beforeUpload}
-                                onChange={this.uploadImg}
-                            >
-                                <div className="add">
-                                    <div className="inner">
-                                        {loading ? (
-                                            <LoadingOutlined className="add-icon" />
-                                        ) : (
-                                            <PlusOutlined className="add-icon" />
-                                        )}
-                                    </div>
-                                    <div className="desc">图片为低于100k的jpg格式</div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            </Upload>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div className="goods-edit-img-btns">
+                    <Button className="goods-edit-img-btn" onClick={() => {}}>
+                        <Icons type="scm-upload" />
+                        批量上传
+                    </Button>
+                    <LoadingButton className="goods-edit-img-btn" onClick={this.exportAllImages}>
+                        <Icons type="scm-download" />
+                        下载图片
+                    </LoadingButton>
+                </div>
+                <div className="goods-edit-img-desc">*仅支持ZIP文件</div>
             </Modal>
         );
     }

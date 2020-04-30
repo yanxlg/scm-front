@@ -34,6 +34,7 @@ const fieldList: FormField[] = [
             { value: 2, name: '本地商品库' },
             { value: 3, name: '订单管理' },
             { value: 4, name: '出入库管理' },
+            { value: 8, name: '商品编辑-图片下载' },
         ],
     },
     {
