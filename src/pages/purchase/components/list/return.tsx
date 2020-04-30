@@ -65,12 +65,6 @@ const refundStatusMap = {
 const Return = () => {
     const formRef = useRef<JsonFormRef>(null);
 
-    const { visible, setVisibleProps, onClose } = useModal<string>();
-
-    const showDetailModal = useCallback((purchaseOrderGoodsId: string) => {
-        setVisibleProps(purchaseOrderGoodsId);
-    }, []);
-
     const {
         loading,
         pageNumber,
@@ -103,6 +97,7 @@ const Return = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 6,
             },
         }).request();
     }, []);
@@ -320,7 +315,6 @@ const Return = () => {
             <>
                 {searchForm}
                 {table}
-                <PurchaseDetailModal visible={visible} onCancel={onClose} />
                 <ReturnModal visible={returnModal} onCancel={closeReturnModal} />
                 <Export
                     columns={columns}
@@ -330,7 +324,7 @@ const Return = () => {
                 />
             </>
         );
-    }, [loading, visible, returnModal, showExport]);
+    }, [loading, returnModal, showExport]);
 };
 
 export default Return;

@@ -88,6 +88,7 @@ const Warehousing = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 4,
             },
         }).request();
     }, []);

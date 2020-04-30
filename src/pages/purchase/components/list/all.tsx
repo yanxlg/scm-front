@@ -106,6 +106,7 @@ const AllList = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 0,
             },
         }).request();
     }, []);

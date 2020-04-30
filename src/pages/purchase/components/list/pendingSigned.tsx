@@ -88,6 +88,7 @@ const PendingSigned = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 2,
             },
         }).request();
     }, []);

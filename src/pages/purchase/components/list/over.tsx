@@ -88,6 +88,7 @@ const Over = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 5,
             },
         }).request();
     }, []);

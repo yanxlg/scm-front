@@ -104,6 +104,7 @@ const PendingShipped = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 1,
             },
         }).request();
     }, []);

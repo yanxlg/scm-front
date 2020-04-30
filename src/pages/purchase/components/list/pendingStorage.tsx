@@ -100,6 +100,7 @@ const PendingStorage = () => {
             ...data,
             query: {
                 ...formRef.current!.getFieldsValue(),
+                type: 3,
             },
         }).request();
     }, []);
