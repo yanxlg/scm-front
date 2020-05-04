@@ -11,4 +11,7 @@ export enum SettingApiPath {
     RetryExport = '/api/v1/download/repeat',
     DeleteExport = '/api/v1/download/delete',
     UpdateExport = '/api/v1/download/detail',
+    QueryPriceStrategy = '/api/v1/price_strategy/detail',
+    UpdatePriceStrategy = '/api/v1/price_strategy/store',
+    QueryPriceStrategyHistory = '/api/v1/price_strategy/history',
 }
