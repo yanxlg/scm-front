@@ -309,8 +309,8 @@ export function exportAllSkuImages(product_id: string) {
     });
 }
 
-export async function uploadGoodsPic(data: any) {
-    return request.post(LocalApiPath.uploadGoodsPic, {
+export async function uploadGoodsPic(data: any, product_id: string) {
+    return request.post(LocalApiPath.uploadGoodsPic.replace(':product_id', product_id), {
         data,
         skipResponseInterceptors: true,
     });

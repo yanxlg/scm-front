@@ -272,9 +272,10 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 uploading: true,
             });
             const formData = new FormData();
-            //.originFileObj;
+            const { currentEditGoods } = this.props;
+            const { product_id } = currentEditGoods!;
             formData.append('file', file);
-            uploadGoodsPic(formData)
+            uploadGoodsPic(formData, product_id)
                 .then(() => {
                     message.success('上传成功!');
                 })
@@ -357,7 +358,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     <div className="label">Product ID</div>
                     <div>{product_id}</div>
                 </div>
-                <div className="goods-edit-item">
+                <div className="goods-edit-item goods-edit-item-top">
                     <div className="label">商品标题：</div>
                     <TextArea
                         className="textarea"
@@ -368,7 +369,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         }}
                     />
                 </div>
-                <div className="goods-edit-item">
+                <div className="goods-edit-item goods-edit-item-top">
                     <div className="label">商品描述：</div>
                     <TextArea
                         className="textarea"
@@ -379,7 +380,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         }}
                     />
                 </div>
-                <div className="goods-edit-item">
+                <div className="goods-edit-item goods-edit-item-center">
                     <div className="label">一级类目：</div>
                     <Select
                         className="select"
@@ -419,12 +420,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         ))}
                     </Select>
                 </div>
-                <div className={formStyles.flex}>
-                    <div>
-                        <div className="goods-edit-item">
-                            <div className="label">商品图片：</div>
-                        </div>
-                    </div>
+                <div className={'goods-edit-item goods-edit-item-top'}>
+                    <div className="label">商品图片：</div>
                     <div className={formStyles.flex1}>
                         <div className="goods-edit-img">
                             <div className="secondary">
