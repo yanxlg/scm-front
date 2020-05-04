@@ -298,3 +298,20 @@ export function setGoodsMix(data: {
         data,
     });
 }
+
+export function exportAllSkuImages(product_id: string) {
+    return request.post(LocalApiPath.exportAllSkuImages, {
+        data: {
+            module: 8,
+            filename: product_id,
+            query: { product_id },
+        },
+    });
+}
+
+export async function uploadGoodsPic(data: any) {
+    return request.post(LocalApiPath.uploadGoodsPic, {
+        data,
+        skipResponseInterceptors: true,
+    });
+}
