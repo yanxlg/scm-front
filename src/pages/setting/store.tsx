@@ -1,30 +1,331 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Tabs } from 'antd';
-import StoreForm from '@/pages/setting/components/StoreForm';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { JsonForm, LoadingButton, RichInput, useModal } from 'react-components';
+import { queryShopFilterList } from '@/services/global';
+import Container from '@/components/Container';
+import { queryPriceStrategy, updatePriceStrategy } from '@/services/setting';
+import { JsonFormRef } from 'react-components/es/JsonForm';
+import { Button, Form, Input, message, Select, Spin } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import styles from '@/styles/_store.less';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
+import { IPriceStrategy } from '@/interface/ISetting';
+import PriceStrategyModal from './components/PriceStrategyModal';
 
-const { TabPane } = Tabs;
+const Store = () => {
+    const formRef = useRef<JsonFormRef>(null);
+    const [hasData, setHasData] = useState(false);
+    const [editFormInstance] = Form.useForm();
+    const [loading, setLoading] = useState(false);
+    const [cacheData, setCacheData] = useState<IPriceStrategy | null>(null);
 
-const Store: React.FC = (props: {}) => {
-    const [activeKey, setActiveKey] = useState('1');
-    const onChange = useCallback((activeKey: string) => setActiveKey(activeKey), []);
+    const [edit, setEdit] = useState(false);
+
+    const { visible, setVisibleProps, onClose } = useModal<string>();
+
+    const showHistory = useCallback(() => {
+        formRef.current!.validateFields().then(values => {
+            setVisibleProps(values['merchant_id']);
+        });
+    }, []);
+
+    const queryDetail = useCallback(() => {
+        return formRef.current!.validateFields().then(values => {
+            setLoading(true);
+            return queryPriceStrategy(values['merchant_id'])
+                .then(({ data }) => {
+                    if (data) {
+                        setHasData(true);
+                        setCacheData(data);
+                        // form reset
+                        editFormInstance.setFieldsValue(data);
+                    } else {
+                        setCacheData(null);
+                        setHasData(false);
+                        editFormInstance.resetFields();
+                    }
+                })
+                .catch(() => {
+                    setCacheData(null);
+                    setHasData(false);
+                    editFormInstance.resetFields();
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        });
+    }, []);
+
+    const initPriceStrategy = useCallback(() => {
+        formRef.current!.validateFields().then(() => {
+            setHasData(true);
+            setEdit(true);
+        });
+    }, []);
+
+    const clearEdit = useCallback(() => {
+        if (cacheData) {
+            editFormInstance.setFieldsValue(cacheData);
+            setEdit(false);
+        } else {
+            editFormInstance.resetFields();
+            setEdit(false);
+            setHasData(false);
+        }
+    }, [cacheData]);
+
+    const startEdit = useCallback(() => {
+        setEdit(true);
+    }, []);
+
+    const savePriceStrategy = useCallback(() => {
+        const { merchant_id } = formRef.current!.getFieldsValue();
+        return editFormInstance.validateFields().then((values: any) => {
+            return updatePriceStrategy({
+                merchant_id,
+                ...values,
+            }).then(() => {
+                message.success('保存成功');
+                setEdit(false);
+                setCacheData(values);
+            });
+        });
+    }, []);
+
+    const form = useMemo(() => {
+        return (
+            <JsonForm
+                ref={formRef}
+                className={formStyles.formHelpAbsolute}
+                fieldList={[
+                    {
+                        type: 'select',
+                        label: '渠道',
+                        name: 'channel',
+                        placeholder: '请选择渠道',
+                        optionList: () => queryShopFilterList(),
+                        onChange: (name, form) => {
+                            form.resetFields(['merchant_id']);
+                        },
+                        rules: [
+                            {
+                                required: true,
+                                message: '请选择渠道',
+                            },
+                        ],
+                    },
+                    {
+                        type: 'select',
+                        label: '店铺名',
+                        name: 'merchant_id',
+                        placeholder: '请选择店铺',
+                        optionListDependence: {
+                            name: 'channel',
+                            key: 'children',
+                        },
+                        optionList: () => queryShopFilterList(),
+                        rules: [
+                            {
+                                required: true,
+                                message: '请选择渠道',
+                            },
+                        ],
+                        onChange: () => {
+                            queryDetail();
+                        },
+                    },
+                ]}
+            >
+                {cacheData ? (
+                    <>
+                        <LoadingButton
+                            onClick={queryDetail}
+                            className={classNames(styles.refresh, formStyles.formBtn)}
+                        >
+                            刷新
+                        </LoadingButton>
+                        <Button
+                            type="link"
+                            className={classNames(formStyles.formBtn, styles.right)}
+                            onClick={showHistory}
+                        >
+                            查看历史记录
+                        </Button>
+                    </>
+                ) : null}
+            </JsonForm>
+        );
+    }, [cacheData, loading]);
+
+    const editForm = useMemo(() => {
+        const disabled = !edit;
+        return (
+            <Spin spinning={loading}>
+                {hasData ? (
+                    <Form
+                        form={editFormInstance}
+                        layout="horizontal"
+                        className={classNames(formStyles.formHelpAbsolute, styles.disable)}
+                    >
+                        <div className={classNames(styles.title, formStyles.formItem)}>
+                            价格判断公式
+                        </div>
+                        <div>
+                            <Form.Item
+                                label="采购的爬虫价"
+                                name="purchase_crawler_price_condition"
+                                colon={false}
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请选择关系运算符',
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    placeholder="<="
+                                    className={styles.select}
+                                    disabled={disabled}
+                                >
+                                    <Select.Option value={1} children="<" />
+                                    <Select.Option value={2} children="=" />
+                                    <Select.Option value={3} children=">" />
+                                    <Select.Option value={4} children="<=" />
+                                    <Select.Option value={5} children=">=" />
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                label="销售的爬虫价"
+                                name="sale_crawler_price_value"
+                                colon={false}
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请输入销售爬虫价',
+                                    },
+                                ]}
+                            >
+                                <RichInput
+                                    richType="number"
+                                    className={styles.select}
+                                    addonAfter="%"
+                                    disabled={disabled}
+                                />
+                            </Form.Item>
+                        </div>
+                        <Form.Item
+                            label=""
+                            name="middle_condition"
+                            colon={false}
+                            className={formStyles.formItem}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请选择关系运算符',
+                                },
+                            ]}
+                        >
+                            <Select placeholder="且" className={styles.select} disabled={disabled}>
+                                <Select.Option value={1} children="且" />
+                                <Select.Option value={2} children="或" />
+                            </Select>
+                        </Form.Item>
+                        <div>
+                            <Form.Item
+                                label="采购的爬虫价-销售的爬虫价"
+                                name="purchase_minus_sale_crawler_price_condition"
+                                colon={false}
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请选择关系运算符',
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    placeholder="<="
+                                    className={styles.select}
+                                    disabled={disabled}
+                                >
+                                    <Select.Option value={1} children="<" />
+                                    <Select.Option value={2} children="=" />
+                                    <Select.Option value={3} children=">" />
+                                    <Select.Option value={4} children="<=" />
+                                    <Select.Option value={5} children=">=" />
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                label="固定金额"
+                                name="fix_price_value"
+                                colon={false}
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请输入固定金额',
+                                    },
+                                ]}
+                            >
+                                <RichInput
+                                    richType="number"
+                                    className={styles.select}
+                                    addonBefore="$"
+                                    disabled={disabled}
+                                />
+                            </Form.Item>
+                        </div>
+                        {edit ? (
+                            <div className={formStyles.formItem}>
+                                <LoadingButton
+                                    type="primary"
+                                    className={formStyles.formBtn}
+                                    onClick={savePriceStrategy}
+                                >
+                                    保存
+                                </LoadingButton>
+                                <Button className={formStyles.formBtn} onClick={clearEdit}>
+                                    取消编辑
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className={formStyles.formItem}>
+                                <Button
+                                    type="primary"
+                                    className={formStyles.formBtn}
+                                    onClick={startEdit}
+                                >
+                                    编辑
+                                </Button>
+                            </div>
+                        )}
+                    </Form>
+                ) : (
+                    <Button
+                        type="primary"
+                        ghost={true}
+                        size="small"
+                        onClick={initPriceStrategy}
+                        icon={<PlusOutlined />}
+                    >
+                        添加价格判断公式
+                    </Button>
+                )}
+            </Spin>
+        );
+    }, [hasData, loading, edit, cacheData]);
+
     return useMemo(() => {
         return (
-            <Tabs
-                className="tabs-margin-none"
-                onChange={onChange}
-                activeKey={activeKey}
-                type="card"
-                children={[
-                    <TabPane tab="VOVA" key="1">
-                        <StoreForm />
-                    </TabPane>,
-                    <TabPane tab="FD" key="2">
-                        <StoreForm />
-                    </TabPane>,
-                ]}
-            />
+            <Container>
+                {form}
+                {editForm}
+                <PriceStrategyModal onClose={onClose} visible={visible} />
+            </Container>
         );
-    }, [activeKey, props]);
+    }, [hasData, loading, edit, cacheData, visible]);
 };
 
 export default Store;

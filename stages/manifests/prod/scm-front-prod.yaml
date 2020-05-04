@@ -35,7 +35,7 @@ data:
         access_log  /var/log/nginx/access.log  apache_format;
         sendfile        on;
         #tcp_nopush     on;
-        keepalive_timeout  65;
+        keepalive_timeout  120;
         gzip on;
         gzip_http_version 1.0;
         gzip_proxied any;
@@ -231,6 +231,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-1980996e
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "120"
 spec:
   selector:
     name: trigram-scm-front-page-prod

@@ -95,3 +95,31 @@ export interface IFileItem {
     last_update_time: string;
     filesize: string;
 }
+
+export interface IPriceStrategy {
+    purchase_crawler_price_condition: string; // 1---<，2---=，3--->，4---<=，5--->=
+    sale_crawler_price_value: string;
+    middle_condition: string; //1且，2或
+    purchase_minus_sale_crawler_price_condition: string; // 1---<，2---=，3--->，4---<=，5--->=
+    fix_price_value: string;
+}
+
+export interface IPriceStrategyItem {
+    before_strategy_content: {
+        purchase_crawler_price_condition: number;
+        sale_crawler_price_value: number;
+        middle_condition: number;
+        purchase_minus_sale_crawler_price_condition: number;
+        fix_price_value: number;
+    };
+    end_strategy_content: {
+        purchase_crawler_price_condition: number;
+        sale_crawler_price_value: number;
+        middle_condition: number;
+        purchase_minus_sale_crawler_price_condition: number;
+        fix_price_value: number;
+    };
+    strategy_type: '1';
+    operator: string;
+    updated_time: string;
+}
