@@ -13,7 +13,7 @@ import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { exportPurchaseList, exportReturnList, queryPurchaseList } from '@/services/purchase';
+import { exportPurchaseList, queryPurchaseList } from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
@@ -27,9 +27,14 @@ const fieldList: FormField[] = [
         name: 'purchase_order_goods_id',
     },
     {
-        label: '供应商',
+        label: '采购平台',
         type: 'input',
-        name: 'gongyingshag',
+        name: 'purchase_platform',
+    },
+    {
+        label: '采购店铺',
+        type: 'input',
+        name: 'purchase_merchant_name',
     },
     {
         label: '供应商订单号',
@@ -213,7 +218,21 @@ const AllList = () => {
                 },
             },
             {
-                title: '供应商',
+                title: '采购平台',
+                dataIndex: 'purchasePlatform',
+                width: '130px',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '采购店铺',
                 dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
@@ -274,9 +293,13 @@ const AllList = () => {
             },
             {
                 title: '出入库类型',
-                dataIndex: 'type',
+                dataIndex: 'boundType',
                 width: '223px',
                 align: 'center',
+                render: _ => {
+                    const code = String(_);
+                    return code === '0' ? '入库' : code === '1' ? '出库' : '';
+                },
             },
         ] as ColumnType<IPurchaseItem>[];
     }, []);
