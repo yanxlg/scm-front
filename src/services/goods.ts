@@ -308,3 +308,10 @@ export function exportAllSkuImages(product_id: string) {
         },
     });
 }
+
+export async function uploadGoodsPic(data: any) {
+    return request.post(LocalApiPath.uploadGoodsPic, {
+        data,
+        skipResponseInterceptors: true,
+    });
+}

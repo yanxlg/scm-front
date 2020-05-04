@@ -5,7 +5,7 @@ import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 
 // import { UploadChangeParam } from 'antd/lib/upload';
 
-import { exportAllSkuImages, postGoodsPicUpload } from '@/services/goods';
+import { exportAllSkuImages, postGoodsPicUpload, uploadGoodsPic } from '@/services/goods';
 import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
 import { ICatagoryItem, IGoodsEditItem } from '@/interface/ILocalGoods';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -14,6 +14,7 @@ import './ImgEditDialog.less';
 import { Icons } from '@/components/Icon';
 import { history } from '@@/core/history';
 import { LoadingButton } from 'react-components';
+import classNames from 'classnames';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -46,6 +47,7 @@ declare interface ImgEditDialogState {
     loading: boolean;
     confirmLoading: boolean;
     addImgList: IAddImgItem[];
+    uploading: boolean;
 }
 
 class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialogState> {
@@ -57,6 +59,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             loading: false,
             confirmLoading: false,
             addImgList: [],
+            uploading: false,
         };
     }
 
@@ -264,86 +267,27 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     // RcFile
     private beforeUpload = (file: RcFile) => {
-        return false;
-    };
-
-    // UploadChangeParam
-    private uploadImg = (info: any) => {
-        const { loading, addImgList } = this.state;
-        const { currentEditGoods, changeGoodsImg } = this.props;
-        if (!loading && currentEditGoods) {
-            const { sku_image, product_id } = currentEditGoods;
-
-            this.setState(
-                {
-                    loading: true,
-                },
-                () => {
-                    // 检验图片规格
-                    const file = info.file;
-                    if (file.type !== 'image/jpeg') {
-                        message.error('导入失败！图片格式错误', 1.5).then(
-                            () => {
-                                this.setState({
-                                    loading: false,
-                                });
-                            },
-                            () => {},
-                        );
-                        return false;
-                    }
-                    const isLt = file.size / 1024 / 1024 <= 0.1;
-                    if (!isLt) {
-                        message.error('导入失败！图片大于100k', 1.5).then(
-                            () => {
-                                this.setState({
-                                    loading: false,
-                                });
-                            },
-                            () => {},
-                        );
-                        return false;
-                    }
-                    const formData = new FormData();
-                    //.originFileObj;
-                    formData.append('file', file);
-                    // 获取图片的原始宽高
-                    const _URL = window.URL || window.webkitURL;
-                    const img = new Image();
-                    const fileUrl = _URL.createObjectURL(file);
-                    img.onload = () => {
-                        postGoodsPicUpload(formData)
-                            .then(res => {
-                                message.success('图片上传成功');
-                                this.setState({
-                                    loading: false,
-                                    addImgList: [
-                                        ...addImgList,
-                                        {
-                                            fileUrl,
-                                            url: res.data.url,
-                                            type: 'new',
-                                            alt: product_id,
-                                            width: img.width,
-                                            height: img.height,
-                                        },
-                                    ],
-                                });
-                                changeGoodsImg([...sku_image, fileUrl]);
-                                // console.log('postGoodsPicUpload', res);
-                            })
-                            .catch(err => {
-                                // console.log('postGoodsPicUpload', err);
-                                message.error('图片上传失败！');
-                                this.setState({
-                                    loading: false,
-                                });
-                            });
-                    };
-                    img.src = fileUrl;
-                },
-            );
+        if (file) {
+            this.setState({
+                uploading: true,
+            });
+            const formData = new FormData();
+            //.originFileObj;
+            formData.append('file', file);
+            uploadGoodsPic(formData)
+                .then(() => {
+                    message.success('上传成功!');
+                })
+                .catch(e => {
+                    message.success('上传失败，请重试!');
+                })
+                .finally(() => {
+                    this.setState({
+                        uploading: false,
+                    });
+                });
         }
+        return false;
     };
 
     private exportAllImages = () => {
@@ -365,7 +309,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             changeGoodsCatagory,
             resetGoodsData,
         } = this.props;
-        const { loading, confirmLoading } = this.state;
+        const { loading, confirmLoading, uploading } = this.state;
         if (!currentEditGoods) {
             return null;
         }
@@ -518,12 +462,21 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     </div>
                 </div>
                 <div className="goods-edit-img-btns">
-                    <Button className="goods-edit-img-btn" onClick={() => {}}>
-                        <Icons type="scm-upload" />
-                        批量上传
-                    </Button>
-                    <LoadingButton className="goods-edit-img-btn" onClick={this.exportAllImages}>
-                        <Icons type="scm-download" />
+                    <Upload
+                        accept="*.zip,application/zip"
+                        showUploadList={false}
+                        beforeUpload={this.beforeUpload}
+                        className={classNames(formStyles.inlineBlock, 'goods-edit-img-btn')}
+                    >
+                        <Button loading={uploading} icon={<Icons type="scm-upload" />}>
+                            批量上传
+                        </Button>
+                    </Upload>
+                    <LoadingButton
+                        icon={<Icons type="scm-download" />}
+                        className="goods-edit-img-btn"
+                        onClick={this.exportAllImages}
+                    >
                         下载图片
                     </LoadingButton>
                 </div>
