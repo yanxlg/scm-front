@@ -30,9 +30,14 @@ const fieldList: FormField[] = [
         name: 'purchase_order_goods_id',
     },
     {
-        label: '供应商',
+        label: '采购平台',
         type: 'input',
-        name: 'gongyingshag',
+        name: 'purchase_platform',
+    },
+    {
+        label: '采购店铺',
+        type: 'input',
+        name: 'purchase_merchant_name',
     },
     {
         label: '供应商订单号',
@@ -245,7 +250,21 @@ const Over = () => {
                 },
             },
             {
-                title: '供应商',
+                title: '采购平台',
+                dataIndex: 'purchasePlatform',
+                width: '130px',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '采购店铺',
                 dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
@@ -306,9 +325,13 @@ const Over = () => {
             },
             {
                 title: '出入库类型',
-                dataIndex: 'type',
+                dataIndex: 'boundType',
                 width: '223px',
                 align: 'center',
+                render: _ => {
+                    const code = String(_);
+                    return code === '0' ? '入库' : code === '1' ? '出库' : '';
+                },
             },
         ] as ColumnType<IPurchaseItem>[];
     }, []);

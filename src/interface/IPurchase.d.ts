@@ -91,12 +91,14 @@ export declare interface IPurchaseItem {
         referWaybillNo: string;
         purchaseTrackingNumber: string;
         type: string;
+        waybillNumber: string;
     }>;
     productImageUrl: string;
     productSkuStyle: string;
 
     referWaybillNo?: string; // flat
     purchaseTrackingNumber?: string; // flat
+    waybillNumber?: string;
     type?: string; // flat
     rowSpan?: number;
 }
