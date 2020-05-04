@@ -279,7 +279,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     message.success('上传成功!');
                 })
                 .catch(e => {
-                    message.success('上传失败，请重试!');
+                    message.error('上传失败，请重试!');
                 })
                 .finally(() => {
                     this.setState({
