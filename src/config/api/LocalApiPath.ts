@@ -23,5 +23,5 @@ export enum LocalApiPath {
     getGoodsCurrentList = '/api/v1/goods/mix/:commodity_id/list',
     setGoodsMix = '/api/v1/goods/mix',
     exportAllSkuImages = '/api/v1/download/create',
-    uploadGoodsPic = '/api/v1/goods/pic/upload',
+    uploadGoodsPic = '/api/v1/goods/upload/product_pic_zip/:product_id',
 }
