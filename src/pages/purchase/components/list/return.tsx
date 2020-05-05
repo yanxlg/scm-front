@@ -32,6 +32,7 @@ const fieldList: FormField[] = [
         label: '退款状态',
         type: 'select',
         name: 'purchase_refund_status',
+        defaultValue: '',
         optionList: [
             {
                 name: '全部',
@@ -200,7 +201,7 @@ const Return = () => {
                 align: 'center',
                 render: (value, row) => {
                     return {
-                        children: value,
+                        children: row.purchaseTotalAmount,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -210,7 +211,7 @@ const Return = () => {
             {
                 title: '退款状态',
                 width: '200px',
-                dataIndex: 'refundStatus', //(0：待处理，1：退款申请中，2：退款申请成功，3：退款驳回，4：等待商家退款:5：退款成功)
+                dataIndex: 'purchaseRefundStatus', //(0：待处理，1：退款申请中，2：退款申请成功，3：退款驳回，4：等待商家退款:5：退款成功)
                 align: 'center',
                 render: (value: keyof typeof refundStatusMap, row) => {
                     return {
