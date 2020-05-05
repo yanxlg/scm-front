@@ -92,6 +92,7 @@ export declare interface IPurchaseItem {
         purchaseTrackingNumber: string;
         type: string;
         waybillNumber: string;
+        boundStatus: string;
     }>;
     productImageUrl: string;
     productSkuStyle: string;
@@ -101,6 +102,7 @@ export declare interface IPurchaseItem {
     waybillNumber?: string;
     type?: string; // flat
     rowSpan?: number;
+    boundStatus?: string;
 }
 
 export declare interface IReturnItem {

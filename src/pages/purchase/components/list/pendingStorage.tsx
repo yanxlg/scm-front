@@ -23,6 +23,7 @@ import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
+import { FormInstance } from 'antd/es/form';
 
 const fieldList: FormField[] = [
     {
@@ -52,16 +53,6 @@ const fieldList: FormField[] = [
     },
 ];
 
-const fieldList1: FormField[] = [
-    {
-        label: '24小时无状态更新',
-        type: 'checkbox',
-        name: 'update_time',
-        formItemClassName: '',
-        formatter: 'join',
-    },
-];
-
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const PendingStorage = () => {
@@ -71,6 +62,26 @@ const PendingStorage = () => {
 
     const showDetailModal = useCallback((purchaseOrderGoodsId: string) => {
         setVisibleProps(purchaseOrderGoodsId);
+    }, []);
+
+    const fieldList1: FormField[] = useMemo(() => {
+        return [
+            {
+                type: 'checkboxGroup',
+                name: 'update_time',
+                formItemClassName: '',
+                options: [
+                    {
+                        label: '24小时无状态更新',
+                        value: 24,
+                    },
+                ],
+                onChange: (name: string, form: FormInstance) => {
+                    onSearch();
+                },
+                formatter: 'join',
+            },
+        ];
     }, []);
 
     const {
@@ -328,6 +339,15 @@ const PendingStorage = () => {
                 dataIndex: 'purchaseTrackingNumber',
                 width: '182px',
                 align: 'center',
+                render: (_, row) => {
+                    const code = String(row.boundStatus);
+                    return _ ? (
+                        <>
+                            <div>{_}</div>
+                            <div>{code === '1' ? '未入库' : code === '10' ? '已入库' : ''}</div>
+                        </>
+                    ) : null;
+                },
             },
             {
                 title: '出入库单号',
