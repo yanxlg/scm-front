@@ -27,6 +27,7 @@ import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from './connectModal';
 import Export from '@/components/Export';
+import { FormInstance } from 'antd/es/form';
 
 const fieldList: FormField[] = [
     {
@@ -56,22 +57,32 @@ const fieldList: FormField[] = [
     },
 ];
 
-const fieldList1: FormField[] = [
-    {
-        label: '48小时无状态更新',
-        type: 'checkbox',
-        name: 'update_time',
-        formItemClassName: '',
-        formatter: 'join',
-    },
-];
-
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const PendingShipped = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const { visible, setVisibleProps, onClose } = useModal<string>();
+
+    const fieldList1: FormField[] = useMemo(() => {
+        return [
+            {
+                type: 'checkboxGroup',
+                name: 'update_time',
+                formItemClassName: '',
+                options: [
+                    {
+                        label: '48小时无状态更新',
+                        value: 48,
+                    },
+                ],
+                onChange: (name: string, form: FormInstance) => {
+                    onSearch();
+                },
+                formatter: 'join',
+            },
+        ];
+    }, []);
 
     const showDetailModal = useCallback((purchaseOrderGoodsId: string) => {
         setVisibleProps(purchaseOrderGoodsId);
