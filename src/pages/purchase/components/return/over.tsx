@@ -16,41 +16,12 @@ import {
 } from '@/config/dictionaries/Purchase';
 import styles from '@/pages/purchase/_return.less';
 import Export from '@/components/Export';
-
-const fieldList: FormField[] = [
-    {
-        label: '出入库单号',
-        type: 'input',
-        name: 'refer_waybill_no',
-    },
-    {
-        label: '商品名称',
-        type: 'input',
-        name: 'product_name',
-    },
-    {
-        label: '采购单ID',
-        type: 'input',
-        name: 'purchase_order_goods_id',
-    },
-    {
-        label: '供应商订单号',
-        type: 'input',
-        name: 'purchase_order_goods_sn',
-    },
-    {
-        label: '运单号',
-        type: 'input',
-        name: 'waybill_no',
-    },
-];
+import { fieldList } from '@/pages/purchase/components/return/all';
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const Over = () => {
     const formRef = useRef<JsonFormRef>(null);
-    const formRef1 = useRef<JsonFormRef>(null);
-
     const [showExport, setShowExport] = useState(false);
 
     const showExportFn = useCallback(() => {
@@ -62,7 +33,13 @@ const Over = () => {
     }, []);
 
     const onExport = useCallback((data: any) => {
-        return exportReturnList(data).request();
+        return exportReturnList({
+            ...data,
+            query: {
+                purchase_return_status: PurchaseReturnType.Over,
+                ...formRef.current!.getFieldsValue(),
+            },
+        }).request();
     }, []);
 
     const {
@@ -76,7 +53,7 @@ const Over = () => {
         onReload,
     } = useList<IReturnItem>({
         queryList: queryReturnList,
-        formRef: [formRef, formRef1],
+        formRef: [formRef],
         extraQuery: {
             purchase_return_status: PurchaseReturnType.Over,
         },
@@ -98,25 +75,6 @@ const Over = () => {
                 </div>
             </JsonForm>
         );
-    }, []);
-
-    const fieldList1: FormField[] = useMemo(() => {
-        return [
-            {
-                type: 'checkboxGroup',
-                name: 'time_type',
-                formItemClassName: '',
-                options: [
-                    {
-                        label: '72小时无状态更新',
-                        value: 72,
-                    },
-                ],
-                onChange: (name: string, form: FormInstance) => {
-                    onSearch();
-                },
-            },
-        ];
     }, []);
 
     const columns = useMemo(() => {
@@ -145,15 +103,20 @@ const Over = () => {
             },
             {
                 title: '商品信息',
-                dataIndex: 'product_info',
+                dataIndex: 'productInfo',
                 width: '178px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
-                    const { productImageUrl, purchasePlatformGoodsName, productSkuStyle } = item;
+                    const {
+                        productImageUrl,
+                        purchasePlatformGoodsName,
+                        productSkuStyle,
+                        returnNumber = 0,
+                    } = item;
                     let skus: any[] = [];
                     try {
                         const sku = JSON.parse(productSkuStyle);
-                        for (let key of sku) {
+                        for (let key in sku) {
                             skus.push(
                                 <div key={key}>
                                     {key}:{sku[key]}
@@ -164,8 +127,9 @@ const Over = () => {
                     return (
                         <div>
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            {purchasePlatformGoodsName}
-                            {skus}
+                            <div>{purchasePlatformGoodsName}</div>
+                            <div>{skus}</div>
+                            <div>数量：x{returnNumber}</div>
                         </div>
                     );
                 },
@@ -175,6 +139,10 @@ const Over = () => {
                 dataIndex: 'returnNumber',
                 width: '130px',
                 align: 'center',
+                render: (_, item: IReturnItem) => {
+                    const { returnNumber = 0, realReturnNumber = 0 } = item;
+                    return `${realReturnNumber}/${returnNumber}`;
+                },
             },
             {
                 title: '采购单ID',
@@ -199,6 +167,15 @@ const Over = () => {
                 dataIndex: 'waybillNo',
                 width: '223px',
                 align: 'center',
+                render: (_, item: IReturnItem) => {
+                    const { purchaseReturnStatus } = item;
+                    return (
+                        <div>
+                            {_}
+                            {purchaseReturnStatus === '6' ? <div>已签收</div> : null}
+                        </div>
+                    );
+                },
             },
         ] as ColumnType<IReturnItem>[];
     }, []);
@@ -213,18 +190,6 @@ const Over = () => {
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <JsonForm
-                containerClassName=""
-                key="extra-form"
-                fieldList={fieldList1}
-                ref={formRef1}
-                enableCollapse={false}
-            />,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
             <FitTable
@@ -237,7 +202,6 @@ const Over = () => {
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                toolBarRender={toolBarRender}
             />
         );
     }, [loading]);

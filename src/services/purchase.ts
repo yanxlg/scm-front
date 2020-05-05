@@ -1,6 +1,6 @@
 import { api } from 'react-components';
 import request from '@/utils/request';
-import { IPaginationResponse, IResponse, IRequestPagination1 } from '@/interface/IGlobal';
+import { IResponse, IRequestPagination1 } from '@/interface/IGlobal';
 import {
     IPurchaseAbnormalItem,
     IPurchaseAbnormalReq,
@@ -8,13 +8,15 @@ import {
     IDiscardAbnormalOrderReq,
     ICorrelateWaybillReq,
     IApplyPurchaseRefundReq,
-    IAddressConfig, 
-    IPurchaseStatics, 
-    IReturnStatics
+    IAddressConfig,
+    IPurchaseStatics,
+    IReturnStatics,
+    IReturnInfo,
+    IReturnItem,
 } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
-import { transPaginationResponse } from '@/utils/utils';
-
+import { IPurchaseItem, IPurchasePlain } from '@/interface/IPurchase';
+import { IPaginationResponse } from 'react-components/lib/hooks/useList';
 
 export function getAbnormalAllList(data: IPurchaseAbnormalReq & IRequestPagination1) {
     // <IResponse<IPurchaseAbnormalItem>>
@@ -60,7 +62,7 @@ export function downloadExcel(data: any) {
 }
 
 export const queryPurchaseList = (data: any) => {
-    return api.post(PurchaseApiPath.QueryList, {
+    return api.post<IResponse<IPaginationResponse<IPurchaseItem>>>(PurchaseApiPath.QueryList, {
         data: {
             ...data,
         },
@@ -68,11 +70,9 @@ export const queryPurchaseList = (data: any) => {
 };
 
 export const queryReturnList = (data: any) => {
-    const { time_type, ...extra } = data;
-    return api.post(PurchaseApiPath.QueryReturnList, {
+    return api.post<IResponse<IPaginationResponse<IReturnItem>>>(PurchaseApiPath.QueryReturnList, {
         data: {
-            ...extra,
-            time_type: time_type ? time_type[0] : undefined,
+            ...data,
         },
     });
 };
@@ -112,12 +112,53 @@ export const exportReturnList = (data: any) => {
     });
 };
 
+export const exportPurchaseList = (data: any) => {
+    return api.post(PurchaseApiPath.Export, {
+        data: {
+            module: 7,
+            ...data,
+        },
+    });
+};
+
+export const queryPurchasePlainList = (data: any) => {
+    return api.post<IResponse<IPaginationResponse<IPurchasePlain>>>(
+        PurchaseApiPath.QueryPurchasePlainList,
+        {
+            data: {
+                ...data,
+            },
+        },
+    );
+};
 export function getPurchaseGoodsInfo(id: string) {
     return request.get(PurchaseApiPath.getPurchaseGoodsInfo.replace(':id', id));
-};
+}
+
+export function applyReturn(purchase_order_goods_id: string) {
+    return api.post(PurchaseApiPath.ApplyReturn, {
+        data: {
+            purchase_order_goods_id,
+        },
+    });
+}
+
+export function queryReturnInfo(purchase_order_goods_id: string) {
+    return api.get<IResponse<IReturnInfo>>(PurchaseApiPath.QueryReturnInfo, {
+        params: {
+            purchase_order_goods_id,
+        },
+    });
+}
+
+export function addWaybill(data: any) {
+    return api.post(PurchaseApiPath.AddWaybill, {
+        data: data,
+    });
+}
 
 export function setPurchaseException(data: any) {
     return request.post(PurchaseApiPath.setPurchaseException, {
-        data
+        data,
     });
 }

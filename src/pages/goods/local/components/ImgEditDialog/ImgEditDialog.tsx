@@ -152,12 +152,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
     private isChangeImg = () => {
         const { currentEditGoods, originEditGoods } = this.props;
         if (currentEditGoods && originEditGoods) {
-            const {
-                sku_image,
-            } = currentEditGoods;
-            const {
-                sku_image: orginSkuImage,
-            } = originEditGoods;
+            const { sku_image } = currentEditGoods;
+            const { sku_image: orginSkuImage } = originEditGoods;
             if (sku_image.length !== orginSkuImage.length) {
                 return true;
             } else {
@@ -169,7 +165,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             }
             return false;
         }
-    }
+    };
 
     // 获取商品编辑数据
     private getGoodsEditData = () => {
@@ -186,36 +182,43 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                 third_catagory,
             } = currentEditGoods;
             const { sku_image: orginSkuImage } = originEditGoods;
-            return Object.assign({
-                product_id,
-                title,
-                description,
-                cat_id: Number(third_catagory.id || second_catagory.id || first_catagory.id),
-            }, this.isChangeImg() ? {
-                imgs: sku_image.map((item, index) => {
-                    let ret: any = {};
-                    if (orginSkuImage.indexOf(item) > -1) {
-                        ret = {
-                            type: 'old',
-                            url: item,
-                            position: index + 1,
-                        };
-                    } else {
-                        const i = addImgList.findIndex(addItem => addItem.fileUrl === item);
-                        const { url, type, alt, width, height } = addImgList[i];
-                        ret = {
-                            type,
-                            url,
-                            position: index + 1,
-                            alt,
-                            width,
-                            height,
-                        };
-                    }
-                    ret.is_default = index === 0 ? 1 : 0;
-                    return ret;
-                }),
-            } : {});
+            return Object.assign(
+                {
+                    product_id,
+                    title,
+                    description,
+                    cat_id: Number(third_catagory.id || second_catagory.id || first_catagory.id),
+                },
+                this.isChangeImg()
+                    ? {
+                          imgs: sku_image.map((item, index) => {
+                              let ret: any = {};
+                              if (orginSkuImage.indexOf(item) > -1) {
+                                  ret = {
+                                      type: 'old',
+                                      url: item,
+                                      position: index + 1,
+                                  };
+                              } else {
+                                  const i = addImgList.findIndex(
+                                      addItem => addItem.fileUrl === item,
+                                  );
+                                  const { url, type, alt, width, height } = addImgList[i];
+                                  ret = {
+                                      type,
+                                      url,
+                                      position: index + 1,
+                                      alt,
+                                      width,
+                                      height,
+                                  };
+                              }
+                              ret.is_default = index === 0 ? 1 : 0;
+                              return ret;
+                          }),
+                      }
+                    : {},
+            );
         }
     };
 

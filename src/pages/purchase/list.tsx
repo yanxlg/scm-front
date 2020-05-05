@@ -75,7 +75,7 @@ const List = () => {
                 />
             </Container>
         );
-    }, []);
+    }, [statics]);
 };
 
 export default List;

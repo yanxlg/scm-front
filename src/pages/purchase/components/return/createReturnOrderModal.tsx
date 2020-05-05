@@ -1,11 +1,14 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Button, message, Modal, Steps } from 'antd';
-import { JsonForm, LoadingButton } from 'react-components';
+import { Button, Col, message, Modal, Row, Steps } from 'antd';
+import { AutoEnLargeImg, JsonForm, LoadingButton } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '@/pages/purchase/_return.less';
-import { IAddressItem } from '@/interface/IPurchase';
+import { IAddressItem, IPurchaseItem } from '@/interface/IPurchase';
 import { addReturn, queryPurchaseList } from '@/services/purchase';
+import { EmptyObject } from '@/config/global';
+import classNames from 'classnames';
+import similarStyles from '@/pages/order/components/similarStyle/_similar.less';
 
 declare interface ICreateReturnOrderModalProps {
     visible: boolean;
@@ -14,7 +17,12 @@ declare interface ICreateReturnOrderModalProps {
 }
 
 const fieldList: FormField[] = [
-    { label: '采购单ID', type: 'number', name: 'purchase_order_goods_id', formatter: 'number' },
+    {
+        label: '采购单ID',
+        type: 'number',
+        name: 'purchase_order_goods_id',
+        rules: [{ required: true, message: '请填写采购单ID' }],
+    },
 ];
 
 const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
@@ -24,11 +32,14 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
 }) => {
     const form1 = useRef<JsonFormRef>(null);
     const form2 = useRef<JsonFormRef>(null);
-    const [goods, setGoods] = useState(false);
+    const [goods, setGoods] = useState<IPurchaseItem>();
     const [current, setCurrent] = useState(0);
+    const [submitting, setSubmitting] = useState(false);
 
     useMemo(() => {
         if (visible) {
+            setGoods(undefined);
+            setCurrent(0);
             form1.current?.resetFields();
             form2.current?.resetFields();
         }
@@ -42,9 +53,20 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 purchase_order_goods_id: purchase_order_goods_id,
             })
                 .request()
-                .then(() => {
-                    setGoods(true);
-                    setCurrent(1);
+                .then(({ data: { list = [] } = EmptyObject }) => {
+                    const item = list[0];
+                    if (item) {
+                        setGoods({
+                            ...item,
+                        });
+                        setCurrent(1);
+                        form2.current!.setFieldsValue({
+                            return_number: item.purchaseGoodsNumber,
+                            receiver_name: item.platformUid,
+                        });
+                    } else {
+                        message.error('查询不到相关采购单');
+                    }
                 });
         });
     }, []);
@@ -87,7 +109,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                         validator: (_, value) => {
                             return value.length === 3
                                 ? Promise.resolve()
-                                : Promise.reject('请选择收货地址');
+                                : Promise.reject('请选择到区');
                         },
                     },
                 ],
@@ -129,6 +151,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 address: [receiver_province, receiver_city, receiver_street],
                 ...extra
             } = values;
+            setSubmitting(true);
             addReturn({
                 ...extra,
                 receiver_province,
@@ -139,9 +162,32 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 .then(() => {
                     message.success('创建成功！');
                     onCancel();
+                })
+                .finally(() => {
+                    setSubmitting(false);
                 });
         });
     }, []);
+
+    const skuComponent = useMemo(() => {
+        if (goods) {
+            let skus: any[] = [];
+            const { productSkuStyle } = goods;
+            try {
+                const sku = JSON.parse(productSkuStyle);
+                for (let key in sku) {
+                    skus.push(
+                        <div key={key} className={styles.modalSku}>
+                            {key}:{sku[key]}
+                        </div>,
+                    );
+                }
+            } catch (e) {}
+            return skus;
+        } else {
+            return null;
+        }
+    }, [goods]);
 
     return useMemo(() => {
         return (
@@ -151,6 +197,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 onCancel={onCancel}
                 width={900}
                 onOk={onSubmit}
+                confirmLoading={submitting}
             >
                 <Steps
                     direction="vertical"
@@ -164,7 +211,12 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                         icon={1}
                         description={
                             <div>
-                                <JsonForm ref={form1} fieldList={fieldList} enableCollapse={false}>
+                                <JsonForm
+                                    ref={form1}
+                                    fieldList={fieldList}
+                                    enableCollapse={false}
+                                    className={formStyles.formHelpAbsolute}
+                                >
                                     <LoadingButton
                                         type="primary"
                                         className={formStyles.formBtn}
@@ -174,9 +226,24 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                                     </LoadingButton>
                                 </JsonForm>
                                 {goods ? (
-                                    <div>
-                                        <div>title</div>
-                                        <div>content</div>
+                                    <div
+                                        className={classNames(formStyles.flex, formStyles.flexRow)}
+                                    >
+                                        <div>
+                                            <AutoEnLargeImg
+                                                src={goods?.productImageUrl}
+                                                className={styles.modalImage}
+                                            />
+                                        </div>
+                                        <div>
+                                            <div
+                                                className={styles.modalTitle}
+                                                title={goods?.purchaseGoodsName}
+                                            >
+                                                {goods?.purchaseGoodsName}
+                                            </div>
+                                            <div className={styles.modalSkus}>{skuComponent}</div>
+                                        </div>
                                     </div>
                                 ) : null}
                             </div>
@@ -198,7 +265,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 </Steps>
             </Modal>
         );
-    }, [goods, current, visible, addressDataSet]);
+    }, [goods, current, visible, addressDataSet, submitting]);
 };
 
 export default CreateReturnOrderModal;

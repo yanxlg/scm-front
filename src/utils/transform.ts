@@ -24,7 +24,10 @@ export function getStatusDesc(
     return '';
 }
 
-export function transOptionList(statusMap: { [key: number]: string; [key: string]: string }, isNumberKey: boolean = false) {
+export function transOptionList(
+    statusMap: { [key: number]: string; [key: string]: string },
+    isNumberKey: boolean = false,
+) {
     let statusList = [];
     for (let key in statusMap) {
         if (statusMap.hasOwnProperty(key)) {
