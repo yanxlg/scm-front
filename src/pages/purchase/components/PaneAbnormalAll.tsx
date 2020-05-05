@@ -193,12 +193,12 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                     return <AutoEnLargeImg src={value} className={styles.imgCell} />;
                 },
             },
-            {
-                title: '异常数量',
-                dataIndex: 'quantity',
-                align: 'center',
-                width: 150,
-            },
+            // {
+            //     title: '异常数量',
+            //     dataIndex: 'quantity',
+            //     align: 'center',
+            //     width: 150,
+            // },
             {
                 title: '异常描述',
                 dataIndex: 'waybillExceptionDescription',
@@ -293,10 +293,10 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
+                    <Button type="primary" className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
                         导出
                     </Button>
                 </JsonForm>
