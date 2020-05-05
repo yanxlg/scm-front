@@ -75,6 +75,7 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
         }
         const disabled = relatedType !== 'ok';
         const { purchaseGoodsName, productImageUrl, productSkuStyle } = goodsDetail;
+        const _productSkuStyle = productSkuStyle ? JSON.parse(productSkuStyle) : productSkuStyle;
         return (
             <Modal
                 title="关联采购单"
@@ -144,7 +145,15 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                     <img src={productImageUrl} className={styles.img} />
                                     <div className={styles.desc}>
                                         <div className={styles.name}>{purchaseGoodsName}</div>
-                                        <div>{productSkuStyle}</div>
+                                        <div>
+                                            {
+                                                _productSkuStyle ? (
+                                                    Object.keys(_productSkuStyle).map(key => (
+                                                        <div key={key} className={styles.styleItem}>{key}: {_productSkuStyle[key]}</div>
+                                                    ))
+                                                ) : ''
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             )}
