@@ -124,7 +124,7 @@ const Warehousing = () => {
             okText: '确定',
             cancelText: '取消',
             onOk: () => {
-                return applyReturn(Number(item.purchaseOrderGoodsId))
+                return applyReturn(item.purchaseOrderGoodsId)
                     .request()
                     .then(() => {
                         message.success('申请成功！');
