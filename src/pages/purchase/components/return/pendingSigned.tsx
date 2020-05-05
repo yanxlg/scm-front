@@ -125,7 +125,7 @@ const PendingSigned = () => {
             },
             {
                 title: '商品信息',
-                dataIndex: 'product_info',
+                dataIndex: 'productInfo',
                 width: '178px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {

@@ -22,8 +22,6 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 
 const Over = () => {
     const formRef = useRef<JsonFormRef>(null);
-    const formRef1 = useRef<JsonFormRef>(null);
-
     const [showExport, setShowExport] = useState(false);
 
     const showExportFn = useCallback(() => {
@@ -40,7 +38,6 @@ const Over = () => {
             query: {
                 purchase_return_status: PurchaseReturnType.Over,
                 ...formRef.current!.getFieldsValue(),
-                ...formRef1.current!.getFieldsValue(),
             },
         }).request();
     }, []);
@@ -56,7 +53,7 @@ const Over = () => {
         onReload,
     } = useList<IReturnItem>({
         queryList: queryReturnList,
-        formRef: [formRef, formRef1],
+        formRef: [formRef],
         extraQuery: {
             purchase_return_status: PurchaseReturnType.Over,
         },
@@ -78,26 +75,6 @@ const Over = () => {
                 </div>
             </JsonForm>
         );
-    }, []);
-
-    const fieldList1: FormField[] = useMemo(() => {
-        return [
-            {
-                type: 'checkboxGroup',
-                name: 'time_type',
-                formItemClassName: '',
-                options: [
-                    {
-                        label: '72小时无状态更新',
-                        value: 72,
-                    },
-                ],
-                onChange: (name: string, form: FormInstance) => {
-                    onSearch();
-                },
-                formatter: 'join',
-            },
-        ];
     }, []);
 
     const columns = useMemo(() => {
@@ -126,7 +103,7 @@ const Over = () => {
             },
             {
                 title: '商品信息',
-                dataIndex: 'product_info',
+                dataIndex: 'productInfo',
                 width: '178px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
@@ -213,18 +190,6 @@ const Over = () => {
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <JsonForm
-                containerClassName=""
-                key="extra-form"
-                fieldList={fieldList1}
-                ref={formRef1}
-                enableCollapse={false}
-            />,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
             <FitTable
@@ -237,7 +202,6 @@ const Over = () => {
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                toolBarRender={toolBarRender}
             />
         );
     }, [loading]);
