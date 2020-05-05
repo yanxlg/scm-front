@@ -188,12 +188,12 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     return <AutoEnLargeImg src={value} className={styles.imgCell} />;
                 },
             },
-            {
-                title: '异常数量',
-                dataIndex: 'quantity',
-                align: 'center',
-                width: 150,
-            },
+            // {
+            //     title: '异常数量',
+            //     dataIndex: 'quantity',
+            //     align: 'center',
+            //     width: 150,
+            // },
             {
                 title: '异常描述',
                 dataIndex: 'waybillExceptionDescription',
@@ -247,7 +247,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
         return [
             {
                 type: 'checkbox',
-                name: 'time_out',
+                name: 'exec_more_time',
                 label: `24小时未处理（${penddingCount}）`,
                 formItemClassName: '',
                 formatter: (val: boolean) => (val ? 24 : undefined),
@@ -302,10 +302,10 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
+                    <Button type="primary" className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
                         导出
                     </Button>
                 </JsonForm>
