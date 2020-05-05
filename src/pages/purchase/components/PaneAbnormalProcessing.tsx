@@ -188,6 +188,9 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                 label: `24小时未处理（${execingCount}）`,
                 formItemClassName: '',
                 formatter: (val: boolean) => (val ? 24 : undefined),
+                onChange: () => {
+                    onSearch();
+                },
             },
         ];
     }, [execingCount]);
@@ -195,6 +198,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
     const toolBarRender = useCallback(() => {
         return [
             <JsonForm
+                key="2"
                 containerClassName=""
                 enableCollapse={false}
                 fieldList={fieldCheckboxList}
@@ -232,14 +236,18 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button type="primary" className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={() => setExportStatus(true)}
+                    >
                         导出
                     </Button>
                 </JsonForm>
                 <FitTable
-                    bordered={true}
-                    rowKey="purchase_plan_id"
-                    className="order-table"
+                    bordered
+                    rowKey="waybillExceptionSn"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}

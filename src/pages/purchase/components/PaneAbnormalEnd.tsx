@@ -211,14 +211,18 @@ const PaneAbnormalEnd: React.FC = props => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button type="primary" className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={() => setExportStatus(true)}
+                    >
                         导出
                     </Button>
                 </JsonForm>
                 <FitTable
-                    bordered={true}
-                    rowKey="purchase_plan_id"
-                    className="order-table"
+                    bordered
+                    rowKey="waybillExceptionSn"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}
