@@ -171,7 +171,7 @@ const AllList = () => {
                 align: 'center',
                 render: (value, row) => {
                     return {
-                        children: value,
+                        children: value ? `¥${value}` : value,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
