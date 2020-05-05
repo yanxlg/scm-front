@@ -80,9 +80,10 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IGoodsSkuItem) => {
+                const min = row.price === void 0 ? 0 : -Number(row.price);
                 return (
                     <InputNumber
-                        min={0}
+                        min={min}
                         precision={2}
                         defaultValue={value ? Number(value) : undefined}
                         style={{ width: '100%' }}
