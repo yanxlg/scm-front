@@ -213,7 +213,7 @@ const Return = () => {
                 width: '200px',
                 dataIndex: 'purchaseRefundStatus', //(0：待处理，1：退款申请中，2：退款申请成功，3：退款驳回，4：等待商家退款:5：退款成功)
                 align: 'center',
-                render: (value: keyof typeof refundStatusMap, row) => {
+                render: (value: keyof typeof refundStatusMap = 0, row) => {
                     return {
                         children: (
                             <div>
@@ -329,7 +329,7 @@ const Return = () => {
                 dataIndex: 'boundType',
                 width: '223px',
                 align: 'center',
-                render: _ => {
+                render: (_ = 0) => {
                     const code = String(_);
                     return code === '0' ? '入库' : code === '1' ? '出库' : '';
                 },
