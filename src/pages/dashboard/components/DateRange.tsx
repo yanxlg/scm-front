@@ -35,19 +35,19 @@ const DateRange: React.FC<IProps> = ({
     }, [dates]);
     const isThreeToday = useMemo(() => {
         const [ startDate, endDate ] = dates;
-        const todayStr = dayjs().format(timeFormat);
+        const yesterdayStr = dayjs().add(-1, 'day').format(timeFormat);
         const threeDayStr = dayjs().add(-3, 'day').format(timeFormat);
         const startDateStr = startDate.format(timeFormat);
         const endDateStr = endDate.format(timeFormat);
-        return startDateStr === threeDayStr && endDateStr === todayStr;
+        return startDateStr === threeDayStr && endDateStr === yesterdayStr;
     }, [dates]);
     const isSevenToday = useMemo(() => {
         const [ startDate, endDate ] = dates;
-        const todayStr = dayjs().format(timeFormat);
+        const yesterdayStr = dayjs().add(-1, 'day').format(timeFormat);
         const sevenDayStr = dayjs().add(-7, 'day').format(timeFormat);
         const startDateStr = startDate.format(timeFormat);
         const endDateStr = endDate.format(timeFormat);
-        return startDateStr === sevenDayStr && endDateStr === todayStr;
+        return startDateStr === sevenDayStr && endDateStr === yesterdayStr;
     }, [dates]);
 
     const disabledDate = useCallback(
@@ -91,8 +91,8 @@ const DateRange: React.FC<IProps> = ({
         () => {
             if (!isThreeToday) {
                 // console.log('handleThreeDay');
-                const threeDay = dayjs().add(-3, 'day');
-                setDates([threeDay, dayjs()]);
+                // const threeDay = dayjs().add(-3, 'day');
+                setDates([dayjs().add(-3, 'day'), dayjs().add(-1, 'day')]);
             }
         },
         [isThreeToday]
@@ -102,8 +102,8 @@ const DateRange: React.FC<IProps> = ({
         () => {
             if (!isSevenToday) {
                 // console.log('handleSevenDay');
-                const sevenDay = dayjs().add(-7, 'day');
-                setDates([sevenDay, dayjs()]);
+                // const sevenDay = dayjs().add(-7, 'day');
+                setDates([dayjs().add(-7, 'day'), dayjs().add(-1, 'day')]);
             }
         },
         [isSevenToday]

@@ -2,12 +2,13 @@ import React, { useMemo, useRef, useCallback, useEffect, useState } from 'react'
 import { Row, Col, Radio, Button, Table } from 'antd';
 import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-// import OrderFunnel from './components/OrderFunnel';
+import OrderFunnel from './components/OrderFunnel';
 import DateRange from './components/DateRange';
 import { ColumnsType } from 'antd/es/table';
 import { getOrderDashboardData, getPlatformAndStore } from '@/services/dashboard';
 import dayjs, { Dayjs } from 'dayjs';
 import { IOrderDashboardReq, IOrderDashboardRes } from '@/interface/IDashboard';
+import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
@@ -77,6 +78,8 @@ const columns: ColumnsType<IOrderItem> = [
     },
 ];
 
+const timeFormat = 'YYYY-MM-DD';
+
 interface IOrderItem {
     label: string;
     count: number;
@@ -106,8 +109,8 @@ const OrderAnalysis: React.FC = props => {
             console.log(searchRef.current?.getFieldsValue(), dates, statisticsType, );
             return getOrderDashboardData({
                 ...searchRef.current?.getFieldsValue(),
-                statistics_start_time: dates[0].unix(),
-                statistics_end_time: dates[1].unix(),
+                statistics_start_time: startDateToUnix(dates[0]),
+                statistics_end_time: dayjs().format(timeFormat) === dates[1].format(timeFormat) ? dayjs().unix() : endDateToUnix(dates[1]),
                 statistics_type: statisticsType
             } as IOrderDashboardReq)
                 .then(res => {
@@ -258,12 +261,12 @@ const OrderAnalysis: React.FC = props => {
                         <DateRange dates={dates} setDates={setDates}/>
                         <Radio.Group value={statisticsType} onChange={e => setStatisticsType(e.target.value)} buttonStyle="solid">
                             <Radio.Button value="0">订单量</Radio.Button>
-                            {/* <Radio.Button value="1">GMV($)</Radio.Button> */}
+                            <Radio.Button value="1">GMV($)</Radio.Button>
                         </Radio.Group>
                     </div>
                     <Row style={{marginTop: 30}}>
-                        <Col span={16}>
-                            {/* <OrderFunnel orderInfo={orderInfo}/> */}
+                        <Col span={18}>
+                            <OrderFunnel orderInfo={orderInfo} loading={loading} startDate={dates[0]} />
                             <Table
                                 bordered
                                 rowKey="label"
@@ -299,7 +302,7 @@ const OrderAnalysis: React.FC = props => {
                                 }}
                             />
                         </Col>
-                        <Col span={8}></Col>
+                        <Col span={6}></Col>
                     </Row>
                 </div>
             </div>

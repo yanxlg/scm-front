@@ -14,10 +14,10 @@ export default [
         name: 'DashBoard',
         icon: <DashboardOutlined className="menu-icon" />,
         children: [
-            // {
-            //     path: '/dashboard/overview',
-            //     name: '数据概览',
-            // },
+            {
+                path: '/dashboard/overview',
+                name: '数据概览',
+            },
             {
                 path: '/dashboard/order',
                 name: '订单分析',
