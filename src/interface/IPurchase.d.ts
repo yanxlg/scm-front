@@ -1,0 +1,137 @@
+export interface IWaybillExceptionType {
+    '101': string;
+    '102': string;
+    '103': string;
+    '104': string;
+    '105': string;
+}
+
+export type IWaybillExceptionTypeKey = keyof IWaybillExceptionType;
+
+export interface IWaybillExceptionStatus {
+    1: '待处理';
+    2: '处理中';
+    3: '已完结';
+}
+
+export type IWaybillExceptionStatusKey = keyof IWaybillExceptionStatus;
+
+export interface IPurchaseAbnormalItem {
+    waybillExceptionSn: string; // 异常订单编号
+    waybillExceptionType: IWaybillExceptionTypeKey; // 异常类型 101扫码失败，102拒收 103多发货 104货不对版 105货品不合规
+    waybillExceptionStatus: IWaybillExceptionStatusKey; // 异常单状态 1:待处理 2:处理中 3:已完结
+    waybillExceptionDescription: string; // 异常描述
+    waybillNo: string; // 物流运单号
+    shippingName: string; // 物流商名称
+    finishedTime: string; // 完结时间
+    purchaseOrderGoodsId: string; // 采购单id
+    referWaybillNo: string; // 入库单号
+    quantity: number; // 异常数量
+    packagImageUrl: string; // 包裹图片
+    goodsImageUrl: string; // 商品图片
+    // platformUid: string;
+    // purchasePlatform: string;
+    remark: string;
+}
+
+export interface IPurchaseAbnormalReq {
+    waybill_exception_sn?: string[];
+    waybill_exception_type?: number;
+    purchase_order_id?: string[];
+    waybill_no?: string;
+    waybill_exception_status?: number;
+}
+
+export interface ICorrelateWaybillReq {
+    purchase_order_goods_id: string;
+    purchase_waybill_no: string;
+    goods_number: string;
+    remark: string;
+    // waybill_exception_sn: string;
+    request_type: 'PURCHASE_ORDER';
+}
+
+export interface IRejectAbnormalOrderReq {
+    waybill_exception_sn: string;
+    abnormal_operate_type: '拒收';
+    reject_count: string;
+    receive_name: string;
+    receive_tel: string;
+    receive_address: string;
+    receive_address_detail: string;
+    zip_code: string;
+    remarks: string;
+}
+
+export interface IDiscardAbnormalOrderReq {
+    waybill_exception_sn: string;
+    abnormal_operate_type: '废弃';
+    remarks: string;
+}
+
+export interface IApplyPurchaseRefundReq {
+    purchase_order_goods_id: string;
+    remark: string;
+}
+
+export declare interface IPurchaseItem {
+    purchase_goods_id: number;
+    purchaseOrderStatus: number;
+    purchase_total_amount: string;
+    plan_purchase_total_amount: string;
+    purchase_product_info: string;
+    supply_merchant_name: string;
+    supply_goods_sn: string;
+    supply_parent_goods_sn: string;
+    refund_amount: string;
+    refund_status: string;
+    storage_express_info: {
+        refer_waybill_no: string;
+        purchase_tracking_number: string;
+        type: string;
+    };
+}
+
+export declare interface IReturnItem {
+    purchaseReturnStatus: string;
+    returnNumber: string;
+    realReturnNumber: string;
+    purchaseOrderGoodsId: string;
+    referWaybillNo: string;
+    purchaseOrderGoodsSn: string;
+    waybillNo: string;
+    productImageUrl: string;
+    purchasePlatformGoodsName: string;
+    productPddMerchantName: string;
+    purchaseOrderGoodsReturnId: string;
+    productSkuStyle: string;
+}
+
+export declare interface IReturnStatics {
+    total?: number;
+    wait_outbound_total?: number;
+    wait_delivery_total?: number;
+    finished_total?: number;
+}
+
+export declare interface IAddressItem {
+    label: string;
+    value: string;
+    children?: IAddressItem[];
+}
+
+export declare interface IAddressConfig {
+    children: IAddressItem[];
+    label: string;
+    value: string;
+}
+
+export declare interface IPurchaseStatics {
+    all_total?: number;
+    finish_total?: number;
+    wait_in_total?: number;
+    wait_send_total?: number;
+    wait_recieve_total?: number;
+    some_in_total?: number;
+    purchase_refund_total?: number;
+}
