@@ -55,7 +55,7 @@ const fieldList: FormField[] = [
 const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
     const [exportStatus, setExportStatus] = useState(false);
-    const [ detailStatus, setDetailStatus] = useState(false);
+    const [detailStatus, setDetailStatus] = useState(false);
     const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const {
         loading,
@@ -87,7 +87,7 @@ const PaneAbnormalEnd: React.FC = props => {
         return downloadExcel({
             query: {
                 ...formRef.current?.getFieldsValue(),
-                waybill_exception_status: 3
+                waybill_exception_status: 3,
             },
             module: 5,
             ...values,
@@ -145,7 +145,7 @@ const PaneAbnormalEnd: React.FC = props => {
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },
@@ -229,8 +229,8 @@ const PaneAbnormalEnd: React.FC = props => {
                     onChange={onChange}
                     // toolBarRender={toolBarRender}
                 />
-                <DetailModal 
-                    visible={detailStatus} 
+                <DetailModal
+                    visible={detailStatus}
                     onCancel={hideDetail}
                     currentRecord={currentRecord}
                 />

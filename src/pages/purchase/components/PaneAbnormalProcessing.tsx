@@ -150,7 +150,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },
@@ -250,7 +250,11 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                     onChange={onChange}
                     toolBarRender={toolBarRender}
                 />
-                <DetailModal currentRecord={currentRecord} visible={detailStatus} onCancel={hideDetail} />
+                <DetailModal
+                    currentRecord={currentRecord}
+                    visible={detailStatus}
+                    onCancel={hideDetail}
+                />
                 {exportModalComponent}
             </>
         );

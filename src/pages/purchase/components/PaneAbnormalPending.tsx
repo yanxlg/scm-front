@@ -85,13 +85,10 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
         },
     });
 
-    const onRefresh = useCallback(
-        () => {
-            getExceptionCount();
-            onReload();
-        },
-        [],
-    )
+    const onRefresh = useCallback(() => {
+        getExceptionCount();
+        onReload();
+    }, []);
 
     const showRelatedPurchase = () => {
         setRelatedPurchaseStatus(true);
@@ -211,7 +208,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },
