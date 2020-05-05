@@ -161,6 +161,10 @@ const columns: ColumnsType<object> = [
 
 const timeFormat = 'YYYY-MM-DD';
 
+function formatTwodecimal(num: number) {
+    return Number((num * 100).toFixed(2));
+}
+
 const Overview: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
 
@@ -173,19 +177,19 @@ const Overview: React.FC = props => {
         tradeAmount: '0',
         orderNum: 0,
         actualGrossProfit: '0',
-        actualGrossProfitRatio: '0',
+        actualGrossProfitRatio: 0,
         expectedGrossProfit: '0',
-        expectedGrossProfitRatio: '0',
+        expectedGrossProfitRatio: 0,
         storageBacklogCost: '0',
-        storageBacklogCostRatio: '0',
+        storageBacklogCostRatio: 0,
         actualPurchaseCost: '0',
-        actualPurchaseCostRatio: '0',
+        actualPurchaseCostRatio: 0,
         saledGoodsNum: '0',
-        saledGoodsNumRatio: '0',
+        saledGoodsNumRatio: 0,
         onsaleGoodsNum: '0',
-        onsaleGoodsNumRatio: '0',
+        onsaleGoodsNumRatio: 0,
         pinRate: '0',
-        pinRateRatio: '0',
+        pinRateRatio: 0,
     });
 
     const _getDashboardTradeData = useCallback(() => {
@@ -228,19 +232,19 @@ const Overview: React.FC = props => {
                     tradeAmount,
                     orderNum,
                     actualGrossProfit,
-                    actualGrossProfitRatio,
+                    actualGrossProfitRatio: formatTwodecimal(Number(actualGrossProfitRatio)),
                     expectedGrossProfit,
-                    expectedGrossProfitRatio,
+                    expectedGrossProfitRatio: formatTwodecimal(Number(expectedGrossProfitRatio)),
                     storageBacklogCost,
-                    storageBacklogCostRatio,
+                    storageBacklogCostRatio: formatTwodecimal(Number(storageBacklogCostRatio)),
                     actualPurchaseCost,
-                    actualPurchaseCostRatio,
+                    actualPurchaseCostRatio: formatTwodecimal(Number(actualPurchaseCostRatio)),
                     saledGoodsNum,
-                    saledGoodsNumRatio,
+                    saledGoodsNumRatio: formatTwodecimal(Number(saledGoodsNumRatio)),
                     onsaleGoodsNum,
-                    onsaleGoodsNumRatio,
+                    onsaleGoodsNumRatio: formatTwodecimal(Number(onsaleGoodsNumRatio)),
                     pinRate,
-                    pinRateRatio,
+                    pinRateRatio: formatTwodecimal(Number(pinRateRatio)),
                 });
                 setDetailList(detail);
             })
@@ -361,7 +365,7 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(actualGrossProfitRatio) >= 0 ? (
+                                            {actualGrossProfitRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {actualGrossProfitRatio}% <CaretUpOutlined />
                                                 </span>
@@ -383,13 +387,13 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(expectedGrossProfitRatio) >= 0 ? (
+                                            {expectedGrossProfitRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {expectedGrossProfitRatio}% <CaretUpOutlined />
                                                 </span>
                                             ) : (
                                                 <span className={styles.decrease}>
-                                                    {expectedGrossProfitRatio}%{' '}
+                                                    {expectedGrossProfitRatio}%
                                                     <CaretDownOutlined />
                                                 </span>
                                             )}
@@ -406,7 +410,7 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(storageBacklogCostRatio) >= 0 ? (
+                                            {storageBacklogCostRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {storageBacklogCostRatio}% <CaretUpOutlined />
                                                 </span>
@@ -428,7 +432,7 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(actualPurchaseCostRatio) >= 0 ? (
+                                            {actualPurchaseCostRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {actualPurchaseCostRatio}% <CaretUpOutlined />
                                                 </span>
@@ -452,7 +456,7 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(saledGoodsNumRatio) >= 0 ? (
+                                            {saledGoodsNumRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {saledGoodsNumRatio}% <CaretUpOutlined />
                                                 </span>
@@ -475,7 +479,7 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(onsaleGoodsNumRatio) >= 0 ? (
+                                            {onsaleGoodsNumRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {onsaleGoodsNumRatio}% <CaretUpOutlined />
                                                 </span>
@@ -498,7 +502,7 @@ const Overview: React.FC = props => {
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {Number(pinRateRatio) >= 0 ? (
+                                            {pinRateRatio >= 0 ? (
                                                 <span className={styles.increase}>
                                                     {pinRateRatio}% <CaretUpOutlined />
                                                 </span>
