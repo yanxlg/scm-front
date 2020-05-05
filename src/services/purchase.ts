@@ -135,7 +135,7 @@ export function getPurchaseGoodsInfo(id: string) {
     return request.get(PurchaseApiPath.getPurchaseGoodsInfo.replace(':id', id));
 }
 
-export function applyReturn(purchase_order_goods_id: number) {
+export function applyReturn(purchase_order_goods_id: string) {
     return api.post(PurchaseApiPath.ApplyReturn, {
         data: {
             purchase_order_goods_id,

@@ -32,6 +32,36 @@ const fieldList: FormField[] = [
         label: '退款状态',
         type: 'select',
         name: 'name',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            {
+                name: '待处理',
+                value: 0,
+            },
+            {
+                name: '退款申请中',
+                value: 1,
+            },
+            {
+                name: '退款申请成功',
+                value: 2,
+            },
+            {
+                name: '退款驳回',
+                value: 3,
+            },
+            {
+                name: '等待商家退款',
+                value: 4,
+            },
+            {
+                name: '退款成功',
+                value: 5,
+            },
+        ],
     },
     {
         label: '采购平台',
