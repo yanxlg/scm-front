@@ -328,7 +328,7 @@ const Over = () => {
                 dataIndex: 'boundType',
                 width: '223px',
                 align: 'center',
-                render: _ => {
+                render: (_ = 0) => {
                     const code = String(_);
                     return code === '0' ? '入库' : code === '1' ? '出库' : '';
                 },

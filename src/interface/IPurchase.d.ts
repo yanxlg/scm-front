@@ -85,7 +85,7 @@ export declare interface IPurchaseItem {
     purchaseOrderGoodsSn: string;
     purchaseOrderSn: string;
     refundAmount: string;
-    refundStatus: string;
+    purchaseRefundStatus: string;
     purchaseGoodsNumber: string;
     storageExpressInfo: Array<{
         referWaybillNo: string;
