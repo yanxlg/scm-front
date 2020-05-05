@@ -31,7 +31,7 @@ const fieldList: FormField[] = [
     {
         label: '退款状态',
         type: 'select',
-        name: 'name',
+        name: 'purchase_refund_status',
         optionList: [
             {
                 name: '全部',
