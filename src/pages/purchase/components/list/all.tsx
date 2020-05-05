@@ -281,9 +281,18 @@ const AllList = () => {
             },
             {
                 title: '运单号',
-                dataIndex: 'purchaseTrackingNumber',
+                dataIndex: 'purchaseWaybillNo',
                 width: '182px',
                 align: 'center',
+                render: (_, row) => {
+                    const code = String(row.boundStatus);
+                    return _ ? (
+                        <>
+                            <div>{_}</div>
+                            <div>{code === '1' ? '未入库' : code === '10' ? '已入库' : ''}</div>
+                        </>
+                    ) : null;
+                },
             },
             {
                 title: '出入库单号',

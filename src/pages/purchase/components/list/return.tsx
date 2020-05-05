@@ -314,7 +314,7 @@ const Return = () => {
             },
             {
                 title: '运单号',
-                dataIndex: 'purchaseTrackingNumber',
+                dataIndex: 'purchaseWaybillNo',
                 width: '182px',
                 align: 'center',
                 render: (_, row) => {
