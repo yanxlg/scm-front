@@ -210,6 +210,9 @@ const PendingShipped = () => {
                 width: '200px',
                 dataIndex: 'purchaseTotalAmount',
                 align: 'center',
+                render: value => {
+                    return value ? `¥${value}` : value;
+                },
             },
             {
                 title: '商品信息',

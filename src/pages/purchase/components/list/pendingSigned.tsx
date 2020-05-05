@@ -22,6 +22,7 @@ import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
+import { FormInstance } from 'antd/es/form';
 
 const fieldList: FormField[] = [
     {
@@ -55,12 +56,12 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 
 const PendingSigned = () => {
     const formRef = useRef<JsonFormRef>(null);
+    const formRef1 = useRef<JsonFormRef>(null);
     const { visible, setVisibleProps, onClose } = useModal<string>();
 
     const showDetailModal = useCallback((purchaseOrderGoodsId: string) => {
         setVisibleProps(purchaseOrderGoodsId);
     }, []);
-
     const {
         loading,
         pageNumber,
@@ -72,11 +73,31 @@ const PendingSigned = () => {
         onReload,
     } = useList<IPurchaseItem>({
         queryList: queryPurchaseList,
-        formRef: formRef,
+        formRef: [formRef, formRef1],
         extraQuery: {
             type: 2,
         },
     });
+
+    const fieldList1: FormField[] = useMemo(() => {
+        return [
+            {
+                type: 'checkboxGroup',
+                name: 'update_time',
+                formItemClassName: '',
+                options: [
+                    {
+                        label: '72小时无状态更新',
+                        value: 72,
+                    },
+                ],
+                onChange: (name: string, form: FormInstance) => {
+                    onSearch();
+                },
+                formatter: 'join',
+            },
+        ];
+    }, []);
 
     const [showExport, setShowExport] = useState(false);
 
@@ -96,6 +117,18 @@ const PendingSigned = () => {
                 type: 2,
             },
         }).request();
+    }, []);
+
+    const toolBarRender = useCallback(() => {
+        return [
+            <JsonForm
+                containerClassName=""
+                key="extra-form"
+                fieldList={fieldList1}
+                ref={formRef1}
+                enableCollapse={false}
+            />,
+        ];
     }, []);
 
     const searchForm = useMemo(() => {
@@ -203,7 +236,7 @@ const PendingSigned = () => {
                 align: 'center',
                 render: (value, row) => {
                     return {
-                        children: value,
+                        children: value ? `¥${value}` : value,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -368,6 +401,7 @@ const PendingSigned = () => {
                 dataSource={dataSet}
                 loading={loading}
                 onChange={onChange}
+                toolBarRender={toolBarRender}
             />
         );
     }, [loading]);
