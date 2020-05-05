@@ -146,13 +146,13 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                     <div className={styles.desc}>
                                         <div className={styles.name}>{purchaseGoodsName}</div>
                                         <div>
-                                            {
-                                                _productSkuStyle ? (
-                                                    Object.keys(_productSkuStyle).map(key => (
-                                                        <div key={key} className={styles.styleItem}>{key}: {_productSkuStyle[key]}</div>
-                                                    ))
-                                                ) : ''
-                                            }
+                                            {_productSkuStyle
+                                                ? Object.keys(_productSkuStyle).map(key => (
+                                                      <div key={key} className={styles.styleItem}>
+                                                          {key}: {_productSkuStyle[key]}
+                                                      </div>
+                                                  ))
+                                                : ''}
                                         </div>
                                     </div>
                                 </div>
