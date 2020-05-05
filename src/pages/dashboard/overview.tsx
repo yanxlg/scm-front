@@ -247,7 +247,7 @@ const Overview: React.FC = props => {
             .finally(() => {
                 setLoading(false);
             });
-    }, []);
+    }, [dates]);
 
     useEffect(() => {
         _getDashboardTradeData();

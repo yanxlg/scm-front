@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback, useEffect, useState } from 'react';
-import { Row, Col, Radio } from 'antd';
+import { Row, Col, Radio, Button } from 'antd';
 import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import OrderFunnel from './components/OrderFunnel';
@@ -8,6 +8,8 @@ import { getOrderDashboardData, getPlatformAndStore } from '@/services/dashboard
 import dayjs, { Dayjs } from 'dayjs';
 import { IOrderDashboardReq, IOrderDashboardRes } from '@/interface/IDashboard';
 import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
+import { getAllTabCount } from '@/services/order-manage';
+import { Link } from 'umi';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
@@ -45,12 +47,21 @@ const formFields: FormField[] = [
 
 const timeFormat = 'YYYY-MM-DD';
 
+interface ICatagoryOrderItem {
+    penddingOrderCount: number;
+    penddingPayCount: number;
+}
+
 const OrderAnalysis: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const [loading, setLoading] = useState(false);
     const [statisticsType, setStatisticsType] = useState('0');
     const [dates, setDates] = useState<[Dayjs, Dayjs]>([dayjs(), dayjs()]);
     const [orderInfo, setOrderInfo] = useState<IOrderDashboardRes>({});
+    const [catagoryOrderCount, setCatagoryOrderCount] = useState<ICatagoryOrderItem>({
+        penddingOrderCount: 0,
+        penddingPayCount: 0
+    });
 
     const _getOrderDashboardData = useCallback(() => {
         setLoading(true);
@@ -70,14 +81,36 @@ const OrderAnalysis: React.FC = props => {
             .finally(() => {
                 setLoading(false);
             });
-    }, [statisticsType]);
+    }, [statisticsType, dates]);
+
+    const _getAllTabCount = useCallback(
+        () => {
+            getAllTabCount(2).then(res => {
+                // console.log('getAllTabCount', res);
+                const { 
+                    penddingOrderCount,
+                    penddingPayCount
+                } = res.data;
+                setCatagoryOrderCount({
+                    penddingOrderCount,
+                    penddingPayCount
+                });    
+            });
+        },
+        []
+    )
 
     useEffect(() => {
+        _getAllTabCount();
         _getOrderDashboardData();
         getPlatformAndStore();
     }, []);
 
     return useMemo(() => {
+        const {
+            penddingOrderCount,
+            penddingPayCount
+        } = catagoryOrderCount;
         return (
             <div className={styles.container}>
                 <div className={styles.formSection}>
@@ -128,12 +161,33 @@ const OrderAnalysis: React.FC = props => {
                                 statisticsType={statisticsType}
                             />
                         </Col>
-                        <Col span={6}></Col>
+                        <Col span={6}>
+                            <div className={styles.jumpSection}>
+                                <div className={styles.title}>
+                                    待处理订单数量：{penddingOrderCount + penddingPayCount}单
+                                </div>
+                                <div className={styles.item}>
+                                    <div>剩余待拍单</div>
+                                    <div>{penddingOrderCount}单</div>
+                                    <Link to="/order?type=2">
+                                        <Button type="primary">去拍单</Button>
+                                    </Link>
+                                </div>
+                                <div className={styles.item}>
+                                    <div>待发货订单</div>
+                                    <div>{penddingPayCount}单</div>
+                                    <Link to="/order?type=3">
+                                        <Button type="primary">去支付</Button>
+                                    </Link>
+                                </div>
+                            </div>
+                            
+                        </Col>
                     </Row>
                 </div>
             </div>
         );
-    }, [loading, statisticsType, orderInfo, dates, statisticsType]);
+    }, [loading, statisticsType, orderInfo, dates, statisticsType, catagoryOrderCount]);
 };
 
 export default OrderAnalysis;
