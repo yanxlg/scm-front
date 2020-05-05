@@ -199,7 +199,7 @@ const Overview: React.FC = props => {
                     : endDateToUnix(dates[1]),
         } as IDashboardOverviewReq)
             .then(res => {
-                console.log('getDashboardTradeData', res);
+                // console.log('getDashboardTradeData', res);
                 const {
                     totalTradeAmount,
                     totalOrderNum,

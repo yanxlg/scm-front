@@ -1,7 +1,11 @@
 import React, { useMemo, useEffect, useCallback, useRef } from 'react';
-import echarts, { ECharts } from 'echarts';
+import { ECharts } from 'echarts';
 import { IOrderDashboardRes } from '@/interface/IDashboard';
 import dayjs, { Dayjs } from 'dayjs';
+import echarts from 'echarts/lib/echarts';
+import 'echarts/lib/chart/funnel';
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
 
 interface IProps {
     loading: boolean;

@@ -60,12 +60,12 @@ const OrderAnalysis: React.FC = props => {
     const [orderInfo, setOrderInfo] = useState<IOrderDashboardRes>({});
     const [catagoryOrderCount, setCatagoryOrderCount] = useState<ICatagoryOrderItem>({
         penddingOrderCount: 0,
-        penddingPayCount: 0
+        penddingPayCount: 0,
     });
 
     const _getOrderDashboardData = useCallback(() => {
         setLoading(true);
-        console.log(searchRef.current?.getFieldsValue(), dates, statisticsType);
+        // console.log(searchRef.current?.getFieldsValue(), dates, statisticsType);
         return getOrderDashboardData({
             ...searchRef.current?.getFieldsValue(),
             statistics_start_time: startDateToUnix(dates[0]),
@@ -83,22 +83,16 @@ const OrderAnalysis: React.FC = props => {
             });
     }, [statisticsType, dates]);
 
-    const _getAllTabCount = useCallback(
-        () => {
-            getAllTabCount(2).then(res => {
-                // console.log('getAllTabCount', res);
-                const { 
-                    penddingOrderCount,
-                    penddingPayCount
-                } = res.data;
-                setCatagoryOrderCount({
-                    penddingOrderCount,
-                    penddingPayCount
-                });    
+    const _getAllTabCount = useCallback(() => {
+        getAllTabCount(2).then(res => {
+            // console.log('getAllTabCount', res);
+            const { penddingOrderCount, penddingPayCount } = res.data;
+            setCatagoryOrderCount({
+                penddingOrderCount,
+                penddingPayCount,
             });
-        },
-        []
-    )
+        });
+    }, []);
 
     useEffect(() => {
         _getAllTabCount();
@@ -107,10 +101,7 @@ const OrderAnalysis: React.FC = props => {
     }, []);
 
     return useMemo(() => {
-        const {
-            penddingOrderCount,
-            penddingPayCount
-        } = catagoryOrderCount;
+        const { penddingOrderCount, penddingPayCount } = catagoryOrderCount;
         return (
             <div className={styles.container}>
                 <div className={styles.formSection}>
@@ -181,7 +172,6 @@ const OrderAnalysis: React.FC = props => {
                                     </Link>
                                 </div>
                             </div>
-                            
                         </Col>
                     </Row>
                 </div>
