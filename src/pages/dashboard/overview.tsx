@@ -48,114 +48,114 @@ const formFields: FormField[] = [
 ];
 
 // : ColumnsType<any>[]
-const columns: ColumnsType<object> = [  
+const columns: ColumnsType<object> = [
     {
         width: 120,
         title: '日期',
         dataIndex: 'statisticsDayStr',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '销售渠道',
         dataIndex: 'channelPlatform',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '销售店铺',
         dataIndex: 'channelShop',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '采购渠道',
         dataIndex: 'purchasePlatform',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '交易额',
         dataIndex: 'tradeAmount',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '订单量',
         dataIndex: 'orderNum',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '实际毛利',
         dataIndex: 'actualGrossProfit',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '实际采购成本',
         dataIndex: 'actualPurchaseCost',
-        align: 'center'
-    },    
+        align: 'center',
+    },
     {
         width: 120,
         title: '实际物流成本',
         dataIndex: 'actualLogisticsCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '预期毛利',
         dataIndex: 'expectedGrossProfit',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '预估采购成本',
         dataIndex: 'expectedPurchaseCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '预估物流成本',
         dataIndex: 'expectedLogisticsCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '仓储成本',
         dataIndex: 'storageCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '预估退款成本',
         dataIndex: 'expectedRefundCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 230,
         title: '其他成本（丢件漏件、不良品）',
         dataIndex: 'otherCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '仓库积压成本',
         dataIndex: 'storageBacklogCost',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '在架商品数',
         dataIndex: 'onsaleGoodsNum',
-        align: 'center'
+        align: 'center',
     },
     {
         width: 120,
         title: '有销量商品数',
         dataIndex: 'saledGoodsNum',
-        align: 'center'
+        align: 'center',
     },
 ];
 
@@ -165,7 +165,7 @@ const Overview: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
 
     const [loading, setLoading] = useState(false);
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([ dayjs(), dayjs() ]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([dayjs(), dayjs()]);
     const [detailList, setDetailList] = useState<IOverviewDetailItem[]>([]);
     const [overviewInfo, setOverviewInfo] = useState<IOverviewInfo>({
         totalTradeAmount: '0',
@@ -184,18 +184,21 @@ const Overview: React.FC = props => {
         saledGoodsNumRatio: '0',
         onsaleGoodsNum: '0',
         onsaleGoodsNumRatio: '0',
-        pinRate: '0',    
+        pinRate: '0',
         pinRateRatio: '0',
     });
 
-    const _getDashboardTradeData = useCallback(
-        () => {
-            setLoading(true);
-            getDashboardTradeData({
-                ...searchRef.current?.getFieldsValue(),
-                statistics_start_time: startDateToUnix(dates[0]),
-                statistics_end_time: dayjs().format(timeFormat) === dates[1].format(timeFormat) ? dayjs().unix() : endDateToUnix(dates[1]),
-            } as IDashboardOverviewReq).then(res => {
+    const _getDashboardTradeData = useCallback(() => {
+        setLoading(true);
+        return getDashboardTradeData({
+            ...searchRef.current?.getFieldsValue(),
+            statistics_start_time: startDateToUnix(dates[0]),
+            statistics_end_time:
+                dayjs().format(timeFormat) === dates[1].format(timeFormat)
+                    ? dayjs().unix()
+                    : endDateToUnix(dates[1]),
+        } as IDashboardOverviewReq)
+            .then(res => {
                 console.log('getDashboardTradeData', res);
                 const {
                     totalTradeAmount,
@@ -214,10 +217,10 @@ const Overview: React.FC = props => {
                     saledGoodsNumRatio,
                     onsaleGoodsNum,
                     onsaleGoodsNumRatio,
-                    pinRate,            
+                    pinRate,
                     pinRateRatio,
 
-                    detail
+                    detail,
                 } = res.data;
                 setOverviewInfo({
                     totalTradeAmount,
@@ -236,23 +239,19 @@ const Overview: React.FC = props => {
                     saledGoodsNumRatio,
                     onsaleGoodsNum,
                     onsaleGoodsNumRatio,
-                    pinRate,            
+                    pinRate,
                     pinRateRatio,
                 });
                 setDetailList(detail);
-            }).finally(() => {
+            })
+            .finally(() => {
                 setLoading(false);
             });
-        },
-        []
-    );
+    }, []);
 
-    useEffect(
-        () => {
-            _getDashboardTradeData();
-        },
-        []
-    );
+    useEffect(() => {
+        _getDashboardTradeData();
+    }, []);
 
     return useMemo(() => {
         const {
@@ -272,7 +271,7 @@ const Overview: React.FC = props => {
             saledGoodsNumRatio,
             onsaleGoodsNum,
             onsaleGoodsNumRatio,
-            pinRate,            
+            pinRate,
             pinRateRatio,
         } = overviewInfo;
         return (
@@ -284,20 +283,20 @@ const Overview: React.FC = props => {
                         // labelClassName="order-label"
                         initialValues={{
                             platform: '',
-                            store: ''
+                            store: '',
                         }}
                     >
                         <div>
                             <LoadingButton
                                 type="primary"
                                 className={formStyles.formBtn}
-                                onClick={() => Promise.resolve()}
+                                onClick={() => _getDashboardTradeData()}
                             >
                                 查询
                             </LoadingButton>
                             <LoadingButton
                                 className={formStyles.formBtn}
-                                onClick={() => Promise.resolve()}
+                                onClick={() => _getDashboardTradeData()}
                             >
                                 刷新
                             </LoadingButton>
@@ -311,205 +310,195 @@ const Overview: React.FC = props => {
                             <div>累计订单量: {formatThousands(totalOrderNum)}</div>
                         </div>
                         <div className={styles.dateSection}>
-                            <DateRange dates={dates} setDates={setDates}/>
+                            <DateRange dates={dates} setDates={setDates} />
                         </div>
                         <div className={styles.periodSection}>
                             <Row className={styles.summaryBox}>
-                                <Col span={12} className={classNames(styles.summaryItem, styles.first)}>
-                                    <Statistic 
-                                        className={styles.statistic} 
-                                        title="交易额" 
+                                <Col
+                                    span={12}
+                                    className={classNames(styles.summaryItem, styles.first)}
+                                >
+                                    <Statistic
+                                        className={styles.statistic}
+                                        title="交易额"
                                         value={tradeAmount}
                                         valueStyle={{
                                             fontSize: '44px',
-                                            color: '#3AA0FE' 
+                                            color: '#3AA0FE',
                                         }}
                                     />
                                 </Col>
                                 <Col span={12} className={styles.summaryItem}>
-                                    <Statistic 
-                                        className={styles.statistic} 
-                                        title="订单量" 
+                                    <Statistic
+                                        className={styles.statistic}
+                                        title="订单量"
                                         value={orderNum}
                                         valueStyle={{
                                             fontSize: '44px',
-                                            color: '#333' 
-                                        }} 
+                                            color: '#333',
+                                        }}
                                     />
                                 </Col>
                             </Row>
                             <div className={styles.variousBox}>
                                 <Row>
                                     <Col span={6}>
-                                        <Statistic 
-                                            title="实际毛利" 
+                                        <Statistic
+                                            title="实际毛利"
                                             value={actualGrossProfit}
                                             valueStyle={{
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(actualGrossProfitRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {actualGrossProfitRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {actualGrossProfitRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(actualGrossProfitRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {actualGrossProfitRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {actualGrossProfitRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                     <Col span={6}>
-                                        <Statistic 
-                                            title="预期毛利" 
+                                        <Statistic
+                                            title="预期毛利"
                                             value={expectedGrossProfit}
                                             valueStyle={{
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(expectedGrossProfitRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {expectedGrossProfitRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {expectedGrossProfitRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(expectedGrossProfitRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {expectedGrossProfitRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {expectedGrossProfitRatio}%{' '}
+                                                    <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                     <Col span={6}>
-                                        <Statistic 
-                                            title="仓库积压成本" 
+                                        <Statistic
+                                            title="仓库积压成本"
                                             value={storageBacklogCost}
                                             valueStyle={{
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(storageBacklogCostRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {storageBacklogCostRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {storageBacklogCostRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(storageBacklogCostRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {storageBacklogCostRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {storageBacklogCostRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                     <Col span={6}>
-                                        <Statistic 
-                                            title="实际采购成本" 
+                                        <Statistic
+                                            title="实际采购成本"
                                             value={actualPurchaseCost}
                                             valueStyle={{
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(actualPurchaseCostRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {actualPurchaseCostRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {actualPurchaseCostRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(actualPurchaseCostRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {actualPurchaseCostRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {actualPurchaseCostRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                 </Row>
                                 <Row className={styles.secondLine}>
                                     <Col span={6}>
-                                        <Statistic 
-                                            title="有销量的商品数" 
+                                        <Statistic
+                                            title="有销量的商品数"
                                             value={saledGoodsNum}
                                             valueStyle={{
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(saledGoodsNumRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {saledGoodsNumRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {saledGoodsNumRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(saledGoodsNumRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                     <Col span={6}>
-                                        <Statistic 
-                                            title="在架商品数" 
+                                        <Statistic
+                                            title="在架商品数"
                                             value={onsaleGoodsNum}
                                             valueStyle={{
                                                 // fontSize: '44px',
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(onsaleGoodsNumRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {onsaleGoodsNumRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {onsaleGoodsNumRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(onsaleGoodsNumRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {onsaleGoodsNumRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {onsaleGoodsNumRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                     <Col span={6}>
-                                        <Statistic 
+                                        <Statistic
                                             title="动销率"
                                             suffix="%"
                                             value={pinRate}
                                             valueStyle={{
                                                 fontWeight: 'bold',
-                                                color: '#333' 
-                                            }} 
+                                                color: '#333',
+                                            }}
                                         />
                                         <div className={styles.affix}>
                                             环比
-                                            {
-                                                Number(pinRateRatio) >=0 ? (
-                                                    <span className={ styles.increase }>
-                                                        {pinRateRatio}% <CaretUpOutlined />
-                                                    </span>
-                                                ) : (
-                                                    <span className={ styles.decrease }>
-                                                        {pinRateRatio}% <CaretDownOutlined />
-                                                    </span>
-                                                )
-                                            }
+                                            {Number(pinRateRatio) >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {pinRateRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {pinRateRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
                                         </div>
                                     </Col>
                                 </Row>

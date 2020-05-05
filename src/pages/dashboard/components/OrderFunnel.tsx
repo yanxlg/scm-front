@@ -5,42 +5,37 @@ import dayjs, { Dayjs } from 'dayjs';
 
 interface IProps {
     loading: boolean;
-    startDate: Dayjs,
+    startDate: Dayjs;
+    statisticsType: string;
     orderInfo: IOrderDashboardRes;
-};
+}
 
-const labelFormatter = (percentage: string, name: string) => `${name} ${percentage}%`
+const labelFormatter = (percentage: string, name: string) => `${name} ${percentage}%`;
 
-const OrderFunnel: React.FC<IProps> = ({
-    loading,
-    orderInfo,
-    startDate
-}) => {
+const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisticsType }) => {
     const chartRef = useRef<ECharts | null>(null);
 
-    const getUpdateTime = useCallback(
-        () => {
-            
-            const threeDayStart = dayjs().add(-3, 'day')
-                .hour(0)
-                .minute(0)
-                .second(0)
-                .unix();
-            console.log(111111, startDate.unix(), threeDayStart);
-            if ( startDate.unix() >= threeDayStart) {
-                return `${dayjs().format('YYYY-MM-DD hh')}:00`
-            } else {
-                return dayjs().format('YYYY-MM-DD') + ' 00:00';
-            }
-        },
-        [startDate],
-    )
+    const getUpdateTime = useCallback(() => {
+        const threeDayStart = dayjs()
+            .add(-3, 'day')
+            .hour(0)
+            .minute(0)
+            .second(0)
+            .unix();
+        // console.log(111111, startDate.unix(), threeDayStart);
+        if (startDate.unix() >= threeDayStart) {
+            return `${dayjs().format('YYYY-MM-DD hh')}:00`;
+        } else {
+            return dayjs().format('YYYY-MM-DD') + ' 00:00';
+        }
+    }, [startDate]);
 
     const renderChart = useCallback(
-        (orderInfo) => {
+        orderInfo => {
             if (Object.keys(orderInfo).length === 0) {
-                return 
-            };
+                return;
+            }
+            const suffix = statisticsType === '0' ? '单' : '';
             const {
                 // 需采购
                 mustPurchaseOrderCount,
@@ -70,18 +65,27 @@ const OrderFunnel: React.FC<IProps> = ({
                 purchaseReceivedPercentage,
                 stockReceiveOrderCount,
                 stockReceivedPercentage,
-    
-                
+
                 cancelOrderPercentage,
                 purchaseAndStockPercentage,
                 purchaseOrderPercentage,
                 reserveStockPercentage,
-                
-    
+
                 purchaseOutStorageOrderPercentage,
                 stockOutStorageOrderPercentage,
             } = orderInfo;
-            
+
+            // 计算漏斗图占的区域大小
+            const _reserveOverstockCount = Number(reserveOverstockCount);
+            const _mustPurchaseOrderCount = Number(mustPurchaseOrderCount);
+            // console.log(111111, _reserveOverstockCount, _mustPurchaseOrderCount);
+            const leftRatio =
+                _reserveOverstockCount / (_reserveOverstockCount + _mustPurchaseOrderCount);
+            // const rightRatio = 1 - leftRatio;
+            const leftWidth = (70 * leftRatio).toFixed(2) + '%';
+            const rightWidth = (70 * (1 - leftRatio)).toFixed(2) + '%';
+            const rightOffset = (15 + 70 * leftRatio).toFixed(2) + '%';
+
             // 绘制图表
             chartRef.current?.setOption({
                 title: {
@@ -89,31 +93,25 @@ const OrderFunnel: React.FC<IProps> = ({
                     left: 'center',
                     top: 'bottom',
                 },
-                // legend: {
-                //     orient: 'vertical',
-                //     left: 'left',
-                //     data: ['产品A', '产品B', '产品C', '产品D', '产品E']
-                // },
                 tooltip: {
                     trigger: 'item',
-                    // formatter: '{a} <br/>{b} : {c}%',
                 },
-                xAxis: { show: false, type: 'value' },
-                yAxis: { show: false, type: 'value' },
-                grid: {
-                    borderWidth: 0.5,
-    
-                    containLabel: true,
-                    left: '20%',
-                    // right: 20,
-                    top: '22%',
-                    bottom: '29%',
-                },
+                // xAxis: { show: false, type: 'value' },
+                // yAxis: { show: false, type: 'value' },
+                // grid: {
+                //     borderWidth: 0.5,
+                //     containLabel: true,
+                //     left: '20%',
+                //     // right: 20,
+                //     top: '22%',
+                //     bottom: '29%',
+                // },
                 series: [
                     {
                         name: '',
                         type: 'funnel',
-                        width: '35%',
+                        // width: '35%',
+                        width: leftWidth,
                         height: '80%',
                         left: '15%',
                         top: '10%',
@@ -133,26 +131,20 @@ const OrderFunnel: React.FC<IProps> = ({
                             opacity: 0,
                         },
                         tooltip: {
-                            show: false
+                            show: false,
                         },
                         data: [
-                            {  
+                            {
                                 name: '需采购',
                                 value: reserveOverstockCount,
                                 label: {
-                                    show: false
+                                    show: false,
                                 },
                                 labelLine: {
-                                    show: false
-                                }
+                                    show: false,
+                                },
                             },
-                            ...[
-                                '已拍单',
-                                '已支付',
-                                '已发货',
-                                '已签收',
-                                '已入库',
-                            ].map(name => ({
+                            ...['已拍单', '已支付', '已发货', '已签收', '已入库'].map(name => ({
                                 value: reserveOverstockCount,
                                 name: name,
                                 itemStyle: {
@@ -172,33 +164,35 @@ const OrderFunnel: React.FC<IProps> = ({
                                     },
                                 },
                             })),
-                            { 
+                            {
                                 name: '需采购--已出库',
-                                value: stockOutStorageCount, 
+                                value: stockOutStorageCount,
                                 percentage: stockOutStoragePercentage,
                                 label: {
                                     // rich: {
                                     //     div: {}
                                     // },
                                     // width: 100,
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '预定积压库存\r\n--出库率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '预定积压库存\r\n--出库率'),
+                                },
                             },
-                            {  
-                                name: '已收货', 
+                            {
+                                name: '已收货',
                                 value: stockReceiveOrderCount,
                                 percentage: stockReceivedPercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '预定积压库存\r\n--收货率')
-                                }
-                                
-                            },          
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '预定积压库存\r\n--收货率'),
+                                },
+                            },
                         ],
                     },
                     {
                         name: '对比漏斗图',
                         type: 'funnel',
-                        width: '35%',
+                        // width: '35%',
+                        width: leftWidth,
                         height: '80%',
                         left: '15%',
                         top: '10%',
@@ -208,30 +202,24 @@ const OrderFunnel: React.FC<IProps> = ({
                             position: 'insideRight',
                         },
                         tooltip: {
-                            show: false
+                            show: false,
                             // formatter: () => {}
                         },
                         itemStyle: {
                             color: '#63DAAB',
                         },
                         data: [
-                            {  
+                            {
                                 name: '需采购',
                                 value: reserveOverstockCount,
                                 label: {
                                     formatter: (item: any) => {
                                         const { value } = item;
-                                        return `预定积压库存${value}单`;
+                                        return `预定积压库存${value}${suffix}`;
                                     },
-                                }
+                                },
                             },
-                            ...[
-                                '已拍单',
-                                '已支付',
-                                '已发货',
-                                '已签收',
-                                '已入库',
-                            ].map(name => ({
+                            ...['已拍单', '已支付', '已发货', '已签收', '已入库'].map(name => ({
                                 value: reserveOverstockCount,
                                 name: name,
                                 itemStyle: {
@@ -251,39 +239,41 @@ const OrderFunnel: React.FC<IProps> = ({
                                     },
                                 },
                             })),
-                            { 
+                            {
                                 name: '需采购--已出库',
-                                value: stockOutStorageCount, 
+                                value: stockOutStorageCount,
                                 percentage: stockOutStoragePercentage,
                                 label: {
                                     formatter: (item: any) => {
                                         const { value } = item;
-                                        return `预定积压库存--已出库${value}单`;
+                                        return `预定积压库存--已出库${value}${suffix}`;
                                     },
-                                }
+                                },
                             },
-                            {  
-                                name: '已收货', 
+                            {
+                                name: '已收货',
                                 value: stockReceiveOrderCount,
                                 percentage: stockReceivedPercentage,
                                 label: {
                                     formatter: (item: any) => {
                                         const { value } = item;
-                                        return `预定积压库存--已收货${value}单`;
+                                        return `预定积压库存--已收货${value}${suffix}`;
                                     },
-                                }
+                                },
                                 // label: {
                                 //     formatter: ({ data }: any) => labelFormatter(data.percentage, '拍单率')
                                 // }
-                            },          
+                            },
                         ],
                     },
                     {
                         name: '漏斗图',
                         type: 'funnel',
-                        width: '35%',
+                        // width: '35%',
+                        width: rightWidth,
                         height: '80%',
-                        left: '50%',
+                        // left: '50%',
+                        left: rightOffset,
                         top: '10%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
@@ -302,83 +292,92 @@ const OrderFunnel: React.FC<IProps> = ({
                             opacity: 0,
                         },
                         tooltip: {
-                            show: false
+                            show: false,
                         },
                         data: [
-                            {  
-                                name: '需采购', 
+                            {
+                                name: '需采购',
                                 value: mustPurchaseOrderCount,
                                 label: {
-                                    show: false
+                                    show: false,
                                 },
                                 labelLine: {
-                                    show: false
-                                }
+                                    show: false,
+                                },
                             },
-                            {  
+                            {
                                 name: '已拍单',
                                 value: auctionsOrderCount,
                                 percentage: auctionsPercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '拍单率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '拍单率'),
+                                },
                             },
-                            {  
-                                name: '已支付', 
+                            {
+                                name: '已支付',
                                 value: payOrderCount,
                                 percentage: payPercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '支付率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '支付率'),
+                                },
                             },
-                            {  
+                            {
                                 name: '已发货',
                                 value: shippedOrderCount,
                                 percentage: shippedPercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '发货率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '发货率'),
+                                },
                             },
-                            {  
+                            {
                                 name: '已签收',
-                                value: signedOrderCount, 
+                                value: signedOrderCount,
                                 percentage: signedPercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '签收率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '签收率'),
+                                },
                             },
-                            { 
-                                name: '已入库', 
+                            {
+                                name: '已入库',
                                 value: inStorageCount,
                                 percentage: inStoragePercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '入库率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '入库率'),
+                                },
                             },
                             {
                                 name: '需采购--已出库',
-                                value: purchaseOutStorageCount, 
+                                value: purchaseOutStorageCount,
                                 percentage: purchaseOutStoragePercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '出库率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '出库率'),
+                                },
                             },
-                            { 
+                            {
                                 name: '已收货',
-                                value: purchaseReceiveOrderCount, 
+                                value: purchaseReceiveOrderCount,
                                 percentage: purchaseReceivedPercentage,
                                 label: {
-                                    formatter: ({ data }: any) => labelFormatter(data.percentage, '收货率')
-                                }
+                                    formatter: ({ data }: any) =>
+                                        labelFormatter(data.percentage, '收货率'),
+                                },
                             },
                         ],
                     },
                     {
                         name: '',
                         type: 'funnel',
-                        width: '35%',
+                        // width: '35%',
+                        width: rightWidth,
                         height: '80%',
-                        left: '50%',
+                        // left: '50%',
+                        left: rightOffset,
                         top: '10%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
@@ -386,7 +385,7 @@ const OrderFunnel: React.FC<IProps> = ({
                             position: 'insideLeft',
                             formatter: (item: any) => {
                                 const { value, name } = item;
-                                return `${name}${value}单`;
+                                return name + value + suffix;
                             },
                         },
                         itemStyle: {
@@ -396,7 +395,7 @@ const OrderFunnel: React.FC<IProps> = ({
                         //     show: false
                         // },
                         data: [
-                            {  
+                            {
                                 name: '需采购',
                                 value: mustPurchaseOrderCount,
                                 cancelOrderPercentage,
@@ -412,7 +411,7 @@ const OrderFunnel: React.FC<IProps> = ({
                                             cancelOrderPercentage,
                                             purchaseAndStockPercentage,
                                             purchaseOrderPercentage,
-                                            reserveStockPercentage
+                                            reserveStockPercentage,
                                         } = data;
                                         return `
                                             <div style="margin-bottom: 10px;">已生成的销售订单</div>
@@ -420,46 +419,46 @@ const OrderFunnel: React.FC<IProps> = ({
                                             <div>需采购和预定积压库存的订单占比: ${purchaseAndStockPercentage}%</div>
                                             <div>仅预定积压库存的订单占比: ${reserveStockPercentage}%</div>
                                             <div>已取消订单: ${cancelOrderPercentage}%</div>
-                                        `
-                                    }
-                                }
+                                        `;
+                                    },
+                                },
                             },
-                            {  
+                            {
                                 name: '已拍单',
                                 value: auctionsOrderCount,
                                 tooltip: {
-                                    formatter: () => {}
+                                    formatter: () => {},
                                 },
                             },
-                            {  
+                            {
                                 name: '已支付',
                                 value: payOrderCount,
                                 tooltip: {
-                                    formatter: () => {}
+                                    formatter: () => {},
                                 },
                             },
-                            {  
+                            {
                                 name: '已发货',
                                 value: shippedOrderCount,
                                 tooltip: {
-                                    formatter: () => {}
+                                    formatter: () => {},
                                 },
                             },
-                            {  
+                            {
                                 name: '已签收',
                                 value: signedOrderCount,
                                 tooltip: {
-                                    formatter: () => {}
+                                    formatter: () => {},
                                 },
                             },
-                            {  
+                            {
                                 name: '已入库',
                                 value: inStorageCount,
                                 tooltip: {
-                                    formatter: () => {}
+                                    formatter: () => {},
                                 },
                             },
-                            {  
+                            {
                                 name: '需采购--已出库',
                                 value: purchaseOutStorageCount,
                                 purchaseOutStorageOrderPercentage,
@@ -469,21 +468,21 @@ const OrderFunnel: React.FC<IProps> = ({
                                         // console.log(111111, item);
                                         const {
                                             purchaseOutStorageOrderPercentage,
-                                            stockOutStorageOrderPercentage
+                                            stockOutStorageOrderPercentage,
                                         } = data;
                                         return `
                                             <div style="margin-bottom: 10px">订单已出库</div>
                                             <div>需采购订单占比: ${purchaseOutStorageOrderPercentage}%</div>
                                             <div>仅预定积压库存的订单占比: ${stockOutStorageOrderPercentage}%</div>
-                                        `
-                                    }
-                                }
+                                        `;
+                                    },
+                                },
                             },
-                            {  
+                            {
                                 name: '已收货',
                                 value: purchaseReceiveOrderCount,
                                 tooltip: {
-                                    formatter: () => {}
+                                    formatter: () => {},
                                 },
                             },
                         ],
@@ -527,11 +526,14 @@ const OrderFunnel: React.FC<IProps> = ({
                 ] as any,
             });
         },
-        [getUpdateTime]
+        [getUpdateTime, statisticsType],
     );
 
     useEffect(() => {
-        !chartRef.current && (chartRef.current = echarts.init(document.getElementById('order-funnel') as HTMLDivElement));
+        !chartRef.current &&
+            (chartRef.current = echarts.init(
+                document.getElementById('order-funnel') as HTMLDivElement,
+            ));
         if (loading) {
             chartRef.current.showLoading();
         } else {
@@ -541,7 +543,7 @@ const OrderFunnel: React.FC<IProps> = ({
     }, [orderInfo, loading]);
 
     return useMemo(() => {
-        return <div id="order-funnel" style={{ height: 450 }}></div>;
+        return <div id="order-funnel" style={{ height: 550 }}></div>;
     }, []);
 };
 
