@@ -208,7 +208,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },

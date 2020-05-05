@@ -145,7 +145,7 @@ const PaneAbnormalEnd: React.FC = props => {
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },

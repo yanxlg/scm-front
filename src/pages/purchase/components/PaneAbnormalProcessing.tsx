@@ -150,7 +150,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },

@@ -213,7 +213,7 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
             },
             {
                 title: '运单号',
-                dataIndex: 'waybillNo',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },
