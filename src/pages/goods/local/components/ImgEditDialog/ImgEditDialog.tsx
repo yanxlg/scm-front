@@ -277,7 +277,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             formData.append('file', file);
             uploadGoodsPic(formData, product_id)
                 .then(() => {
-                    message.success('上传成功!');
+                    message.success('上传成功，服务端处理中，请稍后刷新!');
                 })
                 .catch(e => {
                     message.error('上传失败，请重试!');

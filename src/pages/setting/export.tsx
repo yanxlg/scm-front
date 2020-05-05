@@ -210,6 +210,7 @@ const Export = () => {
                                     status,
                                     filesize = '0',
                                     object_url,
+                                    module,
                                 }: IFileItem) => {
                                     return (
                                         <Col key={id} span={12}>
@@ -228,7 +229,11 @@ const Export = () => {
                                                             className={exportStyles.exportIconWrap}
                                                         >
                                                             <Icons
-                                                                type={'scm-biaoge'}
+                                                                type={
+                                                                    module === '8'
+                                                                        ? 'scm-zip'
+                                                                        : 'scm-xls'
+                                                                }
                                                                 className={exportStyles.exportIcon}
                                                             />
                                                         </div>
