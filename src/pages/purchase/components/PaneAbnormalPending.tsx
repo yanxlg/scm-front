@@ -251,6 +251,9 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 label: `24小时未处理（${penddingCount}）`,
                 formItemClassName: '',
                 formatter: (val: boolean) => (val ? 24 : undefined),
+                onChange: () => {
+                    onSearch();
+                },
             },
         ];
     }, [penddingCount]);
@@ -268,6 +271,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
     const toolBarRender = useCallback(() => {
         return [
             <JsonForm
+                key="1"
                 containerClassName=""
                 enableCollapse={false}
                 fieldList={fieldCheckboxList}
@@ -314,9 +318,9 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     </Button>
                 </JsonForm>
                 <FitTable
-                    bordered={true}
-                    rowKey="purchase_plan_id"
-                    className="order-table"
+                    bordered
+                    rowKey="waybillExceptionSn"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}
