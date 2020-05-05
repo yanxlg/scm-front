@@ -140,7 +140,7 @@ const AllList: React.FC<AllListProps> = () => {
             },
             {
                 title: '商品信息',
-                dataIndex: 'product_info',
+                dataIndex: 'productInfo',
                 width: '178px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
@@ -198,6 +198,21 @@ const AllList: React.FC<AllListProps> = () => {
                 dataIndex: 'purchaseOrderGoodsSn',
                 width: '182px',
                 align: 'center',
+            },
+            {
+                title: '运单号',
+                dataIndex: 'waybillNo',
+                width: '223px',
+                align: 'center',
+                render: (_, item: IReturnItem) => {
+                    const { purchaseReturnStatus } = item;
+                    return (
+                        <div>
+                            {_}
+                            {purchaseReturnStatus === '6' ? <div>已签收</div> : null}
+                        </div>
+                    );
+                },
             },
         ] as ColumnType<IReturnItem>[];
     }, []);

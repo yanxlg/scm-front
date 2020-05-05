@@ -1,25 +1,13 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import {
-    AutoEnLargeImg,
-    FitTable,
-    JsonForm,
-    LoadingButton,
-    PopConfirmLoadingButton,
-    useList,
-} from 'react-components';
+import { AutoEnLargeImg, FitTable, JsonForm, LoadingButton, useList } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { Button, message, Modal } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import {
-    cancelReturnOrder,
-    exportReturnList,
-    queryPurchaseList,
-    queryReturnList,
-} from '@/services/purchase';
-import { IPurchaseItem, IReturnItem } from '@/interface/IPurchase';
+import { cancelReturnOrder, exportReturnList, queryReturnList } from '@/services/purchase';
+import { IReturnItem } from '@/interface/IPurchase';
 import {
     PurchaseReturnCode,
     PurchaseReturnMap,
@@ -96,7 +84,7 @@ const PendingOut = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList.slice(0, 3)} ref={formRef} enableCollapse={false}>
+            <JsonForm fieldList={fieldList.slice(0, 4)} ref={formRef} enableCollapse={false}>
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         搜索
@@ -164,7 +152,7 @@ const PendingOut = () => {
             },
             {
                 title: '商品信息',
-                dataIndex: 'product_info',
+                dataIndex: 'productInfo',
                 width: '178px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
