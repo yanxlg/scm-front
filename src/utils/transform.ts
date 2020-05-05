@@ -38,6 +38,7 @@ export function transOptionList(statusMap: { [key: number]: string; [key: string
 }
 
 export function formatThousands(num: string | number, str = ',') {
-    const reg=/\d{1,3}(?=(\d{3})+$)/g;   
-    return (num + '').replace(reg, '$&,');
+    const reg = /\d{1,3}(?=(\d{3})+$)/g;
+    const numStr = num + '';
+    return numStr ? numStr.replace(reg, '$&,') : '';
 }

@@ -306,8 +306,16 @@ const Overview: React.FC = props => {
                 <Spin spinning={loading}>
                     <div className={styles.chartSection}>
                         <div className={styles.totalSection}>
-                            <div>累计交易额: {formatThousands(totalTradeAmount)}</div>
-                            <div>累计订单量: {formatThousands(totalOrderNum)}</div>
+                            <div>
+                                累计交易额:{' '}
+                                {totalTradeAmount
+                                    ? formatThousands(totalTradeAmount)
+                                    : totalTradeAmount}
+                            </div>
+                            <div>
+                                累计订单量:{' '}
+                                {totalOrderNum ? formatThousands(totalOrderNum) : totalOrderNum}
+                            </div>
                         </div>
                         <div className={styles.dateSection}>
                             <DateRange dates={dates} setDates={setDates} />
