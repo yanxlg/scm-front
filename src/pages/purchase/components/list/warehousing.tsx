@@ -255,8 +255,9 @@ const Warehousing = () => {
                 width: '130px',
                 align: 'center',
                 render: (value, row) => {
+                    const { waybillNumber = 0, purchaseGoodsNumber = 0 } = row;
                     return {
-                        children: `${row.waybillNumber}/${row.purchaseGoodsNumber}`,
+                        children: `${waybillNumber}/${purchaseGoodsNumber}`,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
