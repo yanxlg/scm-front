@@ -185,7 +185,7 @@ const Warehousing = () => {
             {
                 title: '采购单状态',
                 width: '140px',
-                dataIndex: 'purchaseOrderStatus',
+                dataIndex: 'purchaseGoodsStatus',
                 align: 'center',
                 render: (value: PurchaseCode, row) => {
                     return {

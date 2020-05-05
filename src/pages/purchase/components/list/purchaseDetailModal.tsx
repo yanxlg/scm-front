@@ -5,6 +5,7 @@ import { useDataSet } from 'react-components';
 import { queryPurchasePlainList } from '@/services/purchase';
 import { IPurchasePlain } from '@/interface/IPurchase';
 import { EmptyObject } from '@/config/global';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const reserveStatusMap = {
     1: '未预定',
@@ -22,15 +23,17 @@ const columns: ColumnsType<IPurchasePlain> = [
     },
     {
         title: '采购计划生成时间',
-        width: '100px',
+        width: '120px',
         align: 'center',
+        dataIndex: 'createTime',
+        render: _ => utcToLocal(_),
     },
-    {
+    /*    {
         title: '入库数量',
         width: '100px',
         align: 'center',
         render: () => '--',
-    },
+    },*/
     {
         title: '子订单ID',
         width: '100px',
@@ -41,8 +44,12 @@ const columns: ColumnsType<IPurchasePlain> = [
         title: '子订单状态',
         width: '100px',
         fixed: 'left',
-        dataIndex: 'task_id',
+        dataIndex: ['orderGoods', 'orderGoodsStatus'],
         align: 'center',
+        render: _ => {
+            const code = String(_);
+            return code === '1' ? '确认' : code === '2' ? '取消' : '';
+        },
     },
     {
         title: '预定状态',
