@@ -220,6 +220,10 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                 return message.info(`请完善${sku}修改信息`);
             }
         }
+        if (!editList || editList.length === 0) {
+            message.warn(`请修改后再保存`);
+            return;
+        }
         editSkuPrice({
             sku_list: editList,
             merchant_id: merchant_id,

@@ -17,8 +17,8 @@ export type PurchaseReturnCode = keyof typeof PurchaseReturnMap;
 
 export const PurchaseMap = {
     '0': '全部',
-    '1': '代发货',
-    '2': '代签收',
+    '1': '待发货',
+    '2': '待签收',
     '3': '等待入库',
     '4': '部分入库',
     '5': '已完结',
