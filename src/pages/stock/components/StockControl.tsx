@@ -35,6 +35,12 @@ const StockControl: React.FC = () => {
                 align: 'center',
             },
             {
+                title: '中台商品ID',
+                width: '180px',
+                dataIndex: ['sku_item', 'commodityId'],
+                align: 'center',
+            },
+            {
                 title: '商品子SKU',
                 width: '180px',
                 dataIndex: 'sku',
@@ -94,6 +100,13 @@ const StockControl: React.FC = () => {
     }, []);
     const fieldsList = useMemo<FormField[]>(() => {
         return [
+            {
+                type: 'dateRanger',
+                label: '仓库库存更新时间',
+                name: ['last_update_time_start', 'last_update_time_end'],
+                className: 'stock-form-picker',
+                formatter: ['start_date', 'end_date'],
+            },
             {
                 type: 'input',
                 label: '中台商品ID',

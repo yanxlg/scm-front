@@ -10,6 +10,8 @@ import {
     IStockRequest,
     IStockItem,
 } from '@/interface/IStock';
+import { IPurchaseItem } from '@/interface/IPurchase';
+import { EmptyObject } from '@/config/global';
 
 export function queryInList(data: IStockINFormData & RequestPagination) {
     return request.post<IResponse<IPaginationResponse<IStockInItem>>>(
@@ -21,12 +23,36 @@ export function queryInList(data: IStockINFormData & RequestPagination) {
 }
 
 export function queryOutList(data: IStockOUTFormData & RequestPagination) {
-    return request.post<IResponse<IPaginationResponse<IStockOutItem>>>(
-        StockApiPathEnum.QueryOutList,
-        {
+    return request
+        .post<IResponse<IPaginationResponse<IStockOutItem>>>(StockApiPathEnum.QueryOutList, {
             data: transPaginationRequest(data),
-        },
-    );
+        })
+        .then(({ data: { list = [], ...extra } }) => {
+            let _list: IStockOutItem[] = [];
+            list.forEach(source => {
+                const { orderGoods = [] } = source;
+                if (orderGoods && orderGoods.length > 0) {
+                    orderGoods.map((info, index) => {
+                        _list.push({
+                            ...source,
+                            ...info,
+                            rowSpan: index === 0 ? orderGoods.length : 0,
+                        });
+                    });
+                } else {
+                    _list.push({
+                        ...source,
+                        rowSpan: 1,
+                    });
+                }
+            });
+            return {
+                data: {
+                    list: _list,
+                    ...extra,
+                },
+            };
+        });
 }
 
 export function exportInList(data: IStockINFormData) {

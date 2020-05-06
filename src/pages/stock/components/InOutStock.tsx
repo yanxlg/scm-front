@@ -12,7 +12,7 @@ import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize } from '@/config/global';
+import { carrierList, defaultPageNumber, defaultPageSize } from '@/config/global';
 import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
@@ -81,42 +81,168 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         }
         return [
             {
-                title: '中台商品ID',
+                title: '参考运单号',
+                width: '150px',
+                dataIndex: 'referWaybillNo',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '目的国',
+                width: '150px',
+                dataIndex: ['orderAddress', 'country'],
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '收货地址',
                 width: '150px',
                 dataIndex: 'commodity_id',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: <Button type="link">查看地址</Button>,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '出库单状态',
+                width: '150px',
+                dataIndex: 'orderGoodsShippingStatus',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '尾程运单ID',
+                width: '150px',
+                dataIndex: 'lastWaybillNo',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '物流商',
+                width: '150px',
+                dataIndex: 'carrierName',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '渠道订单ID',
+                width: '150px',
+                dataIndex: 'channelOrderGoodsSn',
+                align: 'center',
+            },
+            {
+                title: '中台订单ID',
+                width: '150px',
+                dataIndex: 'orderGoodsId',
+                align: 'center',
+            },
+            {
+                title: '中台商品ID',
+                width: '150px',
+                dataIndex: 'commodityId',
+                align: 'center',
+            },
+            {
+                title: '商品SKU ID',
+                width: '150px',
+                dataIndex: 'skuId',
+                align: 'center',
+            },
+            {
+                title: '商品图片',
+                width: '150px',
+                dataIndex: 'productImage',
+                align: 'center',
+            },
+            {
+                title: '出库数',
+                width: '150px',
+                dataIndex: 'goodsNumber',
+                align: 'center',
+            },
+            {
+                title: '揽收重量（g）',
+                width: '150px',
+                dataIndex: 'totalWeight',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '出库时间',
                 width: '150px',
-                dataIndex: 'outboundTime',
+                dataIndex: 'deliveryTime',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
-                title: '出库单号',
-                width: '180px',
-                dataIndex: 'outboundOrderSn',
+                title: '发送发货指令时间',
+                width: '150px',
+                dataIndex: 'deliveryCommandTime',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
-            {
-                title: '计划出库数量',
-                width: '100px',
-                dataIndex: 'planedQuantity',
-                align: 'center',
-            },
-            {
-                title: '实际出库数量',
-                width: '100px',
-                dataIndex: 'quantity',
-                align: 'center',
-            },
-            {
-                title: '尾程运单号',
-                width: '180px',
-                dataIndex: 'lastWaybillNo',
-                align: 'center',
-            },
-        ];
+        ] as ColumnProps<IStockOutItem>[];
     }, []);
 
     const fieldList = useMemo<FormField[]>(() => {
@@ -162,19 +288,72 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 formatter: ['start_date', 'end_date'],
             },
             {
-                type: 'input',
-                label: '出库订单号',
-                name: 'outbound_order_sn',
+                type: 'select',
+                label: '入库单状态',
+                name: 'order_goods_shipping_status',
+                className: 'stock-form-picker',
+                formatter: 'number',
+                defaultValue: '',
+                optionList: [
+                    {
+                        name: '全部',
+                        value: '',
+                    },
+                    {
+                        name: '出库中',
+                        value: 5,
+                    },
+                    {
+                        name: '出库成功',
+                        value: 8,
+                    },
+                    {
+                        name: '已取消',
+                        value: 7,
+                    },
+                    {
+                        name: '出库异常',
+                        value: 6,
+                    },
+                ],
             },
             {
                 type: 'input',
-                label: '尾程运单号',
+                label: '渠道订单ID',
+                name: 'channel_order_goods_sn',
+            },
+            {
+                type: 'input',
+                label: '中台订单ID',
+                name: 'order_goods_id',
+            },
+            {
+                type: 'select',
+                label: '物流商',
+                name: 'carrier_id',
+                defaultValue: '',
+                optionList: [
+                    {
+                        name: '全部',
+                        value: '',
+                    },
+                    ...carrierList,
+                ],
+            },
+            {
+                type: 'input',
+                label: '尾程运单ID',
                 name: 'last_waybill_no',
             },
             {
                 type: 'input',
                 label: '中台商品ID',
                 name: 'commodity_id',
+            },
+            {
+                type: 'input',
+                label: '商品SKU ID',
+                name: 'sku_id',
             },
         ];
     }, []);

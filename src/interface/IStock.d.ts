@@ -1,13 +1,40 @@
 import { Dayjs } from 'dayjs';
 
 export interface IStockOutItem {
-    sku: string;
-    outboundOrderSn: string;
-    planedQuantity: number;
-    quantity: number;
-    outboundTime: string;
+    referWaybillNo: string;
+    orderAddress: {
+        consignee: string;
+        country: string;
+        province: string;
+        city: string;
+        address1: string;
+        address2: string;
+        zipCode: string;
+        tel: string;
+    };
+    orderGoodsShippingStatus: string;
     lastWaybillNo: string;
-    commodity_id: string;
+    carrierName: string;
+    orderGoods: Array<{
+        channelOrderGoodsSn: string;
+        orderGoodsId: string;
+        commodityId: string;
+        skuId: string;
+        productImage: string;
+        goodsNumber: string;
+    }>;
+    deliveryTime: string;
+    totalWeight: string;
+    weightUnit: string;
+    deliveryCommandTime: string;
+
+    channelOrderGoodsSn?: string;
+    orderGoodsId?: string;
+    commodityId?: string;
+    skuId?: string;
+    productImage?: string;
+    goodsNumber?: string;
+    rowSpan?: number;
 }
 
 export interface IStockInItem {
