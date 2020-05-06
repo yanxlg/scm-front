@@ -243,7 +243,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         // console.log('changePrice', val, rowData);
         const { editList } = this.state;
         const i = editList.findIndex(item => item.sku === rowData.sku_name);
-        const valStr = val ? val + '' : '';
+        const valStr = val !== void 0 ? val + '' : '';
         if (i > -1) {
             this.setState({
                 editList: editList.map((item, index: number) => {
