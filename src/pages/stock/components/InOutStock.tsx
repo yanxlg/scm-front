@@ -150,7 +150,14 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 type: 'dateRanger',
                 label: <span>出库&emsp;时间</span>,
-                name: ['time_start', 'time_end'],
+                name: ['delivery_time_start', 'delivery_time_end'],
+                className: 'stock-form-picker',
+                formatter: ['start_date', 'end_date'],
+            },
+            {
+                type: 'dateRanger',
+                label: '发送出库指令时间',
+                name: ['delivery_command_time_end', 'order_goods_shipping_status'],
                 className: 'stock-form-picker',
                 formatter: ['start_date', 'end_date'],
             },
