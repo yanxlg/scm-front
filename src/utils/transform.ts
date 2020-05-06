@@ -47,5 +47,5 @@ export function formatThousands(num: string | number, str = ',') {
 }
 
 export function formatTwodecimal(num: number | string) {
-    return Number((Number(num) * 100).toFixed(2));
+    return Number((Number(num || 0) * 100).toFixed(2));
 }

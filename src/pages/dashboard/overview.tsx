@@ -188,66 +188,84 @@ const Overview: React.FC = props => {
         pinRateRatio: 0,
     });
 
-    const _getDashboardTradeData = useCallback(() => {
-        setLoading(true);
-        return getDashboardTradeData({
-            ...searchRef.current?.getFieldsValue(),
-            statistics_start_time: startDateToUnix(dates[0]),
-            statistics_end_time:
-                dayjs().format(timeFormat) === dates[1].format(timeFormat)
-                    ? dayjs().unix()
-                    : endDateToUnix(dates[1]),
-        } as IDashboardOverviewReq)
-            .then(res => {
-                // console.log('getDashboardTradeData', res);
-                const {
-                    totalTradeAmount,
-                    totalOrderNum,
-                    tradeAmount,
-                    orderNum,
-                    actualGrossProfit,
-                    actualGrossProfitRatio,
-                    expectedGrossProfit,
-                    expectedGrossProfitRatio,
-                    storageBacklogCost,
-                    storageBacklogCostRatio,
-                    actualPurchaseCost,
-                    actualPurchaseCostRatio,
-                    saledGoodsNum,
-                    saledGoodsNumRatio,
-                    onsaleGoodsNum,
-                    onsaleGoodsNumRatio,
-                    pinRate,
-                    pinRateRatio,
+    const _getDashboardTradeData = useCallback(
+        (params = {}) => {
+            setLoading(true);
+            return getDashboardTradeData({
+                ...searchRef.current?.getFieldsValue(),
+                statistics_start_time: startDateToUnix(dates[0]),
+                statistics_end_time:
+                    dayjs().format(timeFormat) === dates[1].format(timeFormat)
+                        ? dayjs().unix()
+                        : endDateToUnix(dates[1]),
+                ...params,
+            } as IDashboardOverviewReq)
+                .then(res => {
+                    // console.log('getDashboardTradeData', res);
+                    const {
+                        totalTradeAmount,
+                        totalOrderNum,
+                        tradeAmount,
+                        orderNum,
+                        actualGrossProfit,
+                        actualGrossProfitRatio,
+                        expectedGrossProfit,
+                        expectedGrossProfitRatio,
+                        storageBacklogCost,
+                        storageBacklogCostRatio,
+                        actualPurchaseCost,
+                        actualPurchaseCostRatio,
+                        saledGoodsNum,
+                        saledGoodsNumRatio,
+                        onsaleGoodsNum,
+                        onsaleGoodsNumRatio,
+                        pinRate,
+                        pinRateRatio,
 
-                    detail,
-                } = res.data;
-                setOverviewInfo({
-                    totalTradeAmount,
-                    totalOrderNum,
-                    tradeAmount,
-                    orderNum,
-                    actualGrossProfit,
-                    actualGrossProfitRatio: formatTwodecimal(actualGrossProfitRatio),
-                    expectedGrossProfit,
-                    expectedGrossProfitRatio: formatTwodecimal(expectedGrossProfitRatio),
-                    storageBacklogCost,
-                    storageBacklogCostRatio: formatTwodecimal(storageBacklogCostRatio),
-                    actualPurchaseCost,
-                    actualPurchaseCostRatio: formatTwodecimal(actualPurchaseCostRatio),
-                    saledGoodsNum,
-                    saledGoodsNumRatio: formatTwodecimal(saledGoodsNumRatio),
-                    onsaleGoodsNum,
-                    onsaleGoodsNumRatio: formatTwodecimal(onsaleGoodsNumRatio),
-                    pinRate,
-                    pinRateRatio: formatTwodecimal(pinRateRatio),
+                        detail,
+                    } = res.data;
+                    setOverviewInfo({
+                        totalTradeAmount,
+                        totalOrderNum,
+                        tradeAmount,
+                        orderNum,
+                        actualGrossProfit,
+                        actualGrossProfitRatio: formatTwodecimal(actualGrossProfitRatio),
+                        expectedGrossProfit,
+                        expectedGrossProfitRatio: formatTwodecimal(expectedGrossProfitRatio),
+                        storageBacklogCost,
+                        storageBacklogCostRatio: formatTwodecimal(storageBacklogCostRatio),
+                        actualPurchaseCost,
+                        actualPurchaseCostRatio: formatTwodecimal(actualPurchaseCostRatio),
+                        saledGoodsNum,
+                        saledGoodsNumRatio: formatTwodecimal(saledGoodsNumRatio),
+                        onsaleGoodsNum,
+                        onsaleGoodsNumRatio: formatTwodecimal(onsaleGoodsNumRatio),
+                        pinRate,
+                        pinRateRatio: formatTwodecimal(pinRateRatio),
+                    });
+                    setDetailList(detail);
+                })
+                .finally(() => {
+                    setLoading(false);
                 });
-                setDetailList(detail);
-            })
-            .finally(() => {
-                setLoading(false);
+        },
+        [dates],
+    );
+
+    const handleChangeDates = useCallback(
+        currentDates => {
+            setDates(currentDates);
+            _getDashboardTradeData({
+                statistics_start_time: startDateToUnix(currentDates[0]),
+                statistics_end_time:
+                    dayjs().format(timeFormat) === currentDates[1].format(timeFormat)
+                        ? dayjs().unix()
+                        : endDateToUnix(currentDates[1]),
             });
-    }, [dates]);
+        },
+        [_getDashboardTradeData],
+    );
 
     useEffect(() => {
         _getDashboardTradeData();
@@ -318,7 +336,7 @@ const Overview: React.FC = props => {
                             </div>
                         </div>
                         <div className={styles.dateSection}>
-                            <DateRange dates={dates} setDates={setDates} />
+                            <DateRange dates={dates} setDates={handleChangeDates} />
                         </div>
                         <div className={styles.periodSection}>
                             <Row className={styles.summaryBox}>

@@ -39,6 +39,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
     const renderChart = useCallback(
         orderInfo => {
             if (Object.keys(orderInfo).length === 0) {
+                chartRef.current?.clear();
                 return;
             }
             const suffix = statisticsType === '0' ? '单' : '';
@@ -139,6 +140,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         tooltip: {
                             show: false,
                         },
+                        sort: 'none',
                         data: [
                             {
                                 name: '需采购',
@@ -214,6 +216,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         itemStyle: {
                             color: '#63DAAB',
                         },
+                        sort: 'none',
                         data: [
                             {
                                 name: '需采购',
@@ -283,6 +286,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         top: '10%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
+                        sort: 'none',
                         label: {
                             position: 'rightTop',
                             color: '#333',
@@ -387,6 +391,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         top: '10%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
+                        sort: 'none',
                         label: {
                             position: 'insideLeft',
                             formatter: (item: any) => {
