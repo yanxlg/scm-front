@@ -14,5 +14,7 @@ module.exports = {
         'declaration-bang-space-before': null,
         'color-hex-length': null,
         'declaration-block-trailing-semicolon': null,
+        'no-descending-specificity': null,
+        'block-opening-brace-space-before': null,
     },
 };

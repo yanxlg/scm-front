@@ -24,15 +24,24 @@ export function getStatusDesc(
     return '';
 }
 
-export function transOptionList(statusMap: { [key: number]: string; [key: string]: string }) {
+export function transOptionList(
+    statusMap: { [key: number]: string; [key: string]: string },
+    isNumberKey: boolean = false,
+) {
     let statusList = [];
     for (let key in statusMap) {
         if (statusMap.hasOwnProperty(key)) {
             statusList.push({
-                value: key,
+                value: isNumberKey ? Number(key) : key,
                 name: statusMap[key],
             });
         }
     }
     return statusList;
+}
+
+export function formatThousands(num: string | number, str = ',') {
+    const reg = /\d{1,3}(?=(\d{3})+$)/g;
+    const numStr = num + '';
+    return numStr ? numStr.replace(reg, '$&,') : '';
 }

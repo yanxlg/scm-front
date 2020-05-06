@@ -43,6 +43,7 @@ data:
         gzip_buffers     4 8k;
         gzip_types       text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript image/x-icon application/javascript;
         gzip_vary on;
+        client_max_body_size 20m;
         include /etc/nginx/conf.d/*.conf;
     }
   trigram-scm-front-page.conf: |
