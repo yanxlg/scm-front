@@ -73,7 +73,7 @@ pipeline {
                     checkout([ $class: 'GitSCM',
                                branches: [[name: "$refspec"]],
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
-                    sh """export KUBECONFIG=~/.kube/config--vv-eks-service-supplychain-1; \
+                    sh """export KUBECONFIG=~/.kube/config--scm-cluster; \
                           kubectl apply -f stages/manifests/pre/scm-front-pre.yaml; \
                           kubectl get pod -n default | grep 'trigram-scm-front-page-pre' | awk '{print \$1}' \
                               | while read podName; do kubectl get pod \$podName -n default -o yaml \
