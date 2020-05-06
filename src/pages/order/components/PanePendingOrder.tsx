@@ -503,7 +503,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 className={formStyles.formBtn}
                 onClick={() => setVisibleProps(true)}
             >
-                导出至EXCEL
+                导出
             </Button>,
         ];
     }, [selectedOrderGoodsIdList, _postOrdersPlace, _delChannelOrders, _postExportPendingOrder]);

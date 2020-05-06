@@ -163,13 +163,6 @@ export function getErrorOrderList(data: IErrFilterParams) {
             data: data,
         })
         .then(transPaginationResponse);
-    /*
-    return request
-        .post(OrderApiPath.getErrorOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);*/
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -240,3 +233,12 @@ export async function querySimilarInfo(query: {
 export const queryChannelSource = singlePromiseWrap(() => {
     return request.get<IResponse<IChannelSourceResponse>>(OrderApiPath.queryChannelSource);
 });
+
+export function getReviewOrderList(data: any) {
+    return api
+        .post(OrderApiPath.getWaitShipList, {
+            requestType: 'json',
+            data: data,
+        })
+        .then(transPaginationResponse);
+}

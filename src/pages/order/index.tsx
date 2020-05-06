@@ -8,7 +8,7 @@ import PaneError from './components/PaneError';
 import PaneNotWarehouse from './components/PaneNotWarehouse';
 import PaneWarehouseNotShip from './components/PaneWarehouseNotShip';
 import Container from '@/components/Container';
-// import { Location } from "history";
+import PanePendingReview from './components/PanePendingReview';
 
 import { getAllTabCount } from '@/services/order-manage';
 
@@ -45,7 +45,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             errorOrderCount: 0,
         };
         // console.log(11111, this.props);
-        this.defaultActiveKey = this.props.location?.query?.type || '1';
+        this.defaultActiveKey = this.props.location?.query?.type || '8';
     }
 
     componentDidMount() {
@@ -83,6 +83,11 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                     <Tabs onChange={this.selectedTab} type="card" defaultActiveKey={this.defaultActiveKey}>
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <PaneAll getAllTabCount={this.getAllTabCount} />
+                        </TabPane>
+                        <TabPane tab={`待审核（xxx）`} key="8">
+                            <div className="order-tab-content">
+                                <PanePendingReview getAllTabCount={this.getAllTabCount} />
+                            </div>
                         </TabPane>
                         <TabPane tab={`待拍单（${penddingOrderCount}）`} key="2">
                             <div className="order-tab-content">
