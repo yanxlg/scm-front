@@ -4,7 +4,7 @@ import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 // import OrderFunnel from './components/OrderFunnel';
 import DateRange from './components/DateRange';
-import { formatThousands } from '@/utils/transform';
+import { formatThousands, formatTwodecimal } from '@/utils/transform';
 import { getDashboardTradeData, getPlatformAndStore } from '@/services/dashboard';
 import { ColumnsType } from 'antd/es/table';
 import dayjs, { Dayjs } from 'dayjs';
@@ -161,10 +161,6 @@ const columns: ColumnsType<object> = [
 
 const timeFormat = 'YYYY-MM-DD';
 
-function formatTwodecimal(num: number) {
-    return Number((num * 100).toFixed(2));
-}
-
 const Overview: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
 
@@ -232,19 +228,19 @@ const Overview: React.FC = props => {
                     tradeAmount,
                     orderNum,
                     actualGrossProfit,
-                    actualGrossProfitRatio: formatTwodecimal(Number(actualGrossProfitRatio)),
+                    actualGrossProfitRatio: formatTwodecimal(actualGrossProfitRatio),
                     expectedGrossProfit,
-                    expectedGrossProfitRatio: formatTwodecimal(Number(expectedGrossProfitRatio)),
+                    expectedGrossProfitRatio: formatTwodecimal(expectedGrossProfitRatio),
                     storageBacklogCost,
-                    storageBacklogCostRatio: formatTwodecimal(Number(storageBacklogCostRatio)),
+                    storageBacklogCostRatio: formatTwodecimal(storageBacklogCostRatio),
                     actualPurchaseCost,
-                    actualPurchaseCostRatio: formatTwodecimal(Number(actualPurchaseCostRatio)),
+                    actualPurchaseCostRatio: formatTwodecimal(actualPurchaseCostRatio),
                     saledGoodsNum,
-                    saledGoodsNumRatio: formatTwodecimal(Number(saledGoodsNumRatio)),
+                    saledGoodsNumRatio: formatTwodecimal(saledGoodsNumRatio),
                     onsaleGoodsNum,
-                    onsaleGoodsNumRatio: formatTwodecimal(Number(onsaleGoodsNumRatio)),
+                    onsaleGoodsNumRatio: formatTwodecimal(onsaleGoodsNumRatio),
                     pinRate,
-                    pinRateRatio: formatTwodecimal(Number(pinRateRatio)),
+                    pinRateRatio: formatTwodecimal(pinRateRatio),
                 });
                 setDetailList(detail);
             })
