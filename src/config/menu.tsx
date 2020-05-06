@@ -10,6 +10,21 @@ export default [
         icon: <DashboardOutlined className="menu-icon" />,
     },
     {
+        path: '/dashboard',
+        name: 'DashBoard',
+        icon: <DashboardOutlined className="menu-icon" />,
+        children: [
+            {
+                path: '/dashboard/overview',
+                name: '数据概览',
+            },
+            {
+                path: '/dashboard/order',
+                name: '订单分析',
+            },
+        ],
+    },
+    {
         path: '/task',
         name: '任务中心',
         icon: <Icons type="scm-task" className="menu-icon" />,

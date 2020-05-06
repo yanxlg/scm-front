@@ -39,3 +39,9 @@ export function transOptionList(
     }
     return statusList;
 }
+
+export function formatThousands(num: string | number, str = ',') {
+    const reg = /\d{1,3}(?=(\d{3})+$)/g;
+    const numStr = num + '';
+    return numStr ? numStr.replace(reg, '$&,') : '';
+}
