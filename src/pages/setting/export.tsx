@@ -34,6 +34,9 @@ const fieldList: FormField[] = [
             { value: 2, name: '本地商品库' },
             { value: 3, name: '订单管理' },
             { value: 4, name: '出入库管理' },
+            { value: 5, name: '采购管理-仓库异常' },
+            { value: 6, name: '采购退货列表' },
+            { value: 7, name: '采购单导出' },
         ],
     },
     {
@@ -86,7 +89,7 @@ const Export = () => {
         currentDate.current = undefined;
         list.map(item => {
             const { create_time } = item;
-            const time = dayjs.utc(create_time, 's').local();
+            const time = dayjs.utc(Number(create_time) * 1000);
             if (currentDate.current && time.isSame(currentDate.current, 'd')) {
                 const lastItem = waterFallAllData.current[waterFallAllData.current.length - 1];
                 const lastLength = lastItem.data.length;

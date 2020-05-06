@@ -10,6 +10,21 @@ export default [
         icon: <DashboardOutlined className="menu-icon" />,
     },
     {
+        path: '/dashboard',
+        name: 'DashBoard',
+        icon: <DashboardOutlined className="menu-icon" />,
+        children: [
+            {
+                path: '/dashboard/overview',
+                name: '数据概览',
+            },
+            {
+                path: '/dashboard/order',
+                name: '订单分析',
+            },
+        ],
+    },
+    {
         path: '/task',
         name: '任务中心',
         icon: <Icons type="scm-task" className="menu-icon" />,
@@ -70,6 +85,25 @@ export default [
         path: '/stock',
         name: '出入库管理',
         icon: <Icons type="scm-io" className="menu-icon" />,
+    },
+    {
+        path: '/purchase',
+        name: '采购管理',
+        icon: <Icons type="scm-purchase" className="menu-icon" />,
+        children: [
+            {
+                path: '/purchase/list',
+                name: '采购单列表',
+            },
+            {
+                path: '/purchase/return',
+                name: '采购退货',
+            },
+            {
+                path: '/purchase/abnormal',
+                name: '仓库异常处理',
+            },
+        ],
     },
     {
         path: '/setting',
