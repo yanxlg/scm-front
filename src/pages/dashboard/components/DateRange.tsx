@@ -102,6 +102,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             <div>
                 日期：
                 <Button
+                    ghost={isToday}
                     className={btnStyles.btnGutter}
                     type={isToday ? 'primary' : 'default'}
                     onClick={handleToday}
@@ -109,6 +110,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                     今日
                 </Button>
                 <Button
+                    ghost={isYesterday}
                     className={btnStyles.btnGutter}
                     type={isYesterday ? 'primary' : 'default'}
                     onClick={handleYesterday}
@@ -116,6 +118,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                     昨日
                 </Button>
                 <Button
+                    ghost={isThreeToday}
                     className={btnStyles.btnGutter}
                     type={isThreeToday ? 'primary' : 'default'}
                     onClick={handleThreeDay}
@@ -123,6 +126,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                     近三日
                 </Button>
                 <Button
+                    ghost={isSevenToday}
                     className={btnStyles.btnGutter}
                     type={isSevenToday ? 'primary' : 'default'}
                     onClick={handleSevenDay}
