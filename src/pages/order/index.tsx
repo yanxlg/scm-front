@@ -80,7 +80,11 @@ class Order extends React.PureComponent<IProps, IOrderState> {
         return (
             <Container>
                 <div className="order-wrap">
-                    <Tabs onChange={this.selectedTab} type="card" defaultActiveKey={this.defaultActiveKey}>
+                    <Tabs
+                        onChange={this.selectedTab}
+                        type="card"
+                        defaultActiveKey={this.defaultActiveKey}
+                    >
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <PaneAll getAllTabCount={this.getAllTabCount} />
                         </TabPane>

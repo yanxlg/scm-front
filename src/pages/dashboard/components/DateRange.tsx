@@ -60,13 +60,10 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
         return currentDate.valueOf() > dayjs().valueOf();
     }, []);
 
-    const handleRangePicker = useCallback(
-        values => {
-            // console.log(args);
-            setDates(values);
-        },
-        [setDates],
-    );
+    const handleRangePicker = useCallback(values => {
+        // console.log(args);
+        setDates(values);
+    }, []);
 
     const handleToday = useCallback(() => {
         if (!isToday) {
@@ -74,7 +71,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             const today = dayjs();
             setDates([today, today]);
         }
-    }, [isToday, setDates]);
+    }, [isToday]);
 
     const handleYesterday = useCallback(() => {
         if (!isYesterday) {
@@ -82,7 +79,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             const yesterday = dayjs().add(-1, 'day');
             setDates([yesterday, yesterday]);
         }
-    }, [isYesterday, setDates]);
+    }, [isYesterday]);
 
     const handleThreeDay = useCallback(() => {
         if (!isThreeToday) {
@@ -90,7 +87,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             // const threeDay = dayjs().add(-3, 'day');
             setDates([dayjs().add(-3, 'day'), dayjs().add(-1, 'day')]);
         }
-    }, [isThreeToday, setDates]);
+    }, [isThreeToday]);
 
     const handleSevenDay = useCallback(() => {
         if (!isSevenToday) {
@@ -98,7 +95,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             // const sevenDay = dayjs().add(-7, 'day');
             setDates([dayjs().add(-7, 'day'), dayjs().add(-1, 'day')]);
         }
-    }, [isSevenToday, setDates]);
+    }, [isSevenToday]);
 
     return useMemo(() => {
         return (
@@ -140,7 +137,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                 />
             </div>
         );
-    }, [dates, setDates]);
+    }, [dates]);
 };
 
 export default DateRange;

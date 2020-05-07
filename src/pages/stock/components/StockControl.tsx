@@ -29,41 +29,34 @@ const StockControl: React.FC = () => {
     const columns = useMemo<ColumnProps<IStockItem>[]>(() => {
         return [
             {
+                title: '商品SKU ID',
+                width: '180px',
+                dataIndex: 'sku',
+                align: 'center',
+            },
+            {
                 title: '中台商品ID',
                 width: '180px',
                 dataIndex: ['sku_item', 'commodityId'],
                 align: 'center',
             },
             {
-                title: '商品子SKU',
-                width: '180px',
-                dataIndex: 'sku',
-                align: 'center',
-            },
-            {
-                title: 'SKU对应图片',
-                width: '130px',
-                dataIndex: ['sku_item', 'imageUrl'],
-                align: 'center',
-                render: (value: string) => <AutoEnLargeImg src={value} className="stock-img" />,
-            },
-            {
-                title: '商品主图',
+                title: '商品图片',
                 width: '130px',
                 dataIndex: ['sku_item', 'mainImageUrl'],
                 align: 'center',
                 render: (value: string) => <AutoEnLargeImg src={value} className="stock-img" />,
             },
             {
-                title: 'size',
-                width: '128px',
-                dataIndex: ['sku_item', 'size'],
+                title: '商品属性',
+                width: '130px',
+                dataIndex: ['sku_item', 'mainImageUrl'],
                 align: 'center',
             },
             {
-                title: 'color',
-                width: '128px',
-                dataIndex: ['sku_item', 'color'],
+                title: '可销售库存',
+                width: '100px',
+                dataIndex: 'can_sale_inventory',
                 align: 'center',
             },
             {
@@ -78,16 +71,17 @@ const StockControl: React.FC = () => {
                 dataIndex: 'bookedInventory',
                 align: 'center',
             },
-            {
-                title: '可销售库存',
-                width: '100px',
-                dataIndex: 'can_sale_inventory',
-                align: 'center',
-            },
+
             {
                 title: '仓库库存',
                 width: '100px',
                 dataIndex: 'warehousingInventory',
+                align: 'center',
+            },
+            {
+                title: '仓库库存更新时间',
+                width: '150px',
+                dataIndex: 'lastUpdateTime',
                 align: 'center',
             },
         ];
@@ -95,42 +89,20 @@ const StockControl: React.FC = () => {
     const fieldsList = useMemo<FormField[]>(() => {
         return [
             {
-                type: 'input',
-                label: '中台商品ID',
-                name: 'commodity_id',
-                rules: [
-                    (form: FormInstance) => {
-                        return {
-                            validator: (rule, value) => {
-                                const sku_id = form.getFieldValue('commodity_sku_id');
-                                if (sku_id || value) {
-                                    return Promise.resolve();
-                                } else {
-                                    return Promise.reject('必须输入一个筛选条件');
-                                }
-                            },
-                        };
-                    },
-                ],
+                type: 'dateRanger',
+                label: '仓库库存更新时间',
+                name: ['last_update_time_start', 'last_update_time_end'],
+                formatter: ['start_date', 'end_date'],
             },
             {
                 type: 'input',
-                label: 'commodity_sku_id',
+                label: '中台商品ID',
+                name: 'commodity_id',
+            },
+            {
+                type: 'input',
+                label: '商品SKU ID',
                 name: 'commodity_sku_id',
-                rules: [
-                    (form: FormInstance) => {
-                        return {
-                            validator: (rule, value) => {
-                                const commodity_id = form.getFieldValue('commodity_id');
-                                if (commodity_id || value) {
-                                    return Promise.resolve();
-                                } else {
-                                    return Promise.reject('必须输入一个筛选条件');
-                                }
-                            },
-                        };
-                    },
-                ],
             },
         ];
     }, []);
@@ -170,7 +142,6 @@ const StockControl: React.FC = () => {
             pageSize: page_size,
             pageNumber: page_number,
         },
-        autoQuery: false,
     });
 
     const getCopiedLinkQuery = useCallback(() => {
