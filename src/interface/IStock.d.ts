@@ -38,14 +38,21 @@ export interface IStockOutItem {
 }
 
 export interface IStockInItem {
-    sku: string;
-    inboundOrderSn: string;
-    planedQuantity: number;
-    quantity: number;
-    inboundTime: string;
-    firstWaybillNo: string;
-    purchaseOrderSn: string;
-    commodity_id: string;
+    referWaybillNo: string;
+    createTime: string;
+    commodityId: string;
+    commoditySkuId: string;
+    purchaseSkuId: string;
+    productImageUrl: string;
+    productGoodsName: string;
+    boundStatus: number;
+    purchaseWaybillNo: string;
+    purchaseShippingName: string;
+    purchaseOrderGoodsId: string;
+    purchaseGoodsNumber: string;
+    waybillNumber: number;
+    inboundWeight: string;
+    inWarehouseTime: string;
 }
 
 export declare interface IStockINFormData {

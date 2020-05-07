@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { ProTable, FitTable, useModal } from 'react-components';
+import { ProTable, FitTable, useModal, useList } from 'react-components';
 import { Button, message } from 'antd';
 import '@/styles/index.less';
 import '@/styles/stock.less';
@@ -13,7 +13,6 @@ import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
 import { carrierList, defaultPageNumber, defaultPageSize } from '@/config/global';
-import { useList } from '@/utils/hooks';
 import { LoadingButton } from 'react-components';
 import { RequestPagination } from '@/interface/IGlobal';
 import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
@@ -32,52 +31,88 @@ const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
 const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const formRef = useRef<JsonFormRef>(null);
 
-    const columns = useMemo<ColumnProps<IStockInItem | IStockOutItem>[]>(() => {
+    const columns = useMemo(() => {
         if (type === StockType.In) {
             return [
+                {
+                    title: '入库单ID',
+                    width: '150px',
+                    dataIndex: 'referWaybillNo',
+                    align: 'center',
+                },
+                {
+                    title: '创建时间',
+                    width: '150px',
+                    dataIndex: 'createTime',
+                    align: 'center',
+                },
+                {
+                    title: '中台商品ID',
+                    width: '150px',
+                    dataIndex: 'commodityId',
+                    align: 'center',
+                },
+                {
+                    title: '商品SKU ID',
+                    width: '150px',
+                    dataIndex: 'commoditySkuId',
+                    align: 'center',
+                },
+                {
+                    title: '商品主图',
+                    width: '150px',
+                    dataIndex: 'productImageUrl',
+                    align: 'center',
+                },
+                {
+                    title: '入库单状态',
+                    width: '150px',
+                    dataIndex: 'boundStatus',
+                    align: 'center',
+                },
+                {
+                    title: '采购运单ID',
+                    width: '150px',
+                    dataIndex: 'purchaseWaybillNo',
+                    align: 'center',
+                },
+                {
+                    title: '物流商',
+                    width: '150px',
+                    dataIndex: 'purchaseShippingName',
+                    align: 'center',
+                },
+                {
+                    title: '采购订单ID',
+                    width: '150px',
+                    dataIndex: 'purchaseOrderGoodsId',
+                    align: 'center',
+                },
+                {
+                    title: '预报商品数',
+                    width: '150px',
+                    dataIndex: 'purchaseGoodsNumber',
+                    align: 'center',
+                },
+                {
+                    title: '实际入库数',
+                    width: '150px',
+                    dataIndex: 'waybillNumber',
+                    align: 'center',
+                },
+                {
+                    title: '商品重量（g）',
+                    width: '150px',
+                    dataIndex: 'inboundWeight',
+                    align: 'center',
+                },
                 {
                     title: '入库时间',
                     width: '150px',
                     dataIndex: 'inboundTime',
                     align: 'center',
                 },
-                {
-                    title: '入库订单号',
-                    width: '180px',
-                    dataIndex: 'inboundOrderSn',
-                    align: 'center',
-                },
-                {
-                    title: '采购订单号',
-                    width: '180px',
-                    dataIndex: 'purchaseOrderSn',
-                    align: 'center',
-                },
-                {
-                    title: '首程运单号',
-                    width: '180px',
-                    dataIndex: 'firstWaybillNo',
-                    align: 'center',
-                },
-                {
-                    title: '计划入库数量',
-                    width: '100px',
-                    dataIndex: 'planedQuantity',
-                    align: 'center',
-                },
-                {
-                    title: '实际入库数量',
-                    width: '100px',
-                    dataIndex: 'quantity',
-                    align: 'center',
-                },
-                {
-                    title: '中台商品ID',
-                    width: '150px',
-                    dataIndex: 'commodity_id',
-                    align: 'center',
-                },
-            ];
+            ] as ColumnProps<IStockInItem>[];
         }
         return [
             {
@@ -250,25 +285,60 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             return [
                 {
                     type: 'dateRanger',
+                    label: '创建时间',
+                    name: ['create_start_time', 'create_end_time'],
+                    className: 'stock-form-picker',
+                    formatter: ['start_date', 'end_date'],
+                },
+                {
+                    type: 'dateRanger',
                     label: <span>入库&emsp;时间</span>,
-                    name: ['time_start', 'time_end'],
+                    name: ['in_warehouse_start_time', 'in_warehouse_end_time'],
                     className: 'stock-form-picker',
                     formatter: ['start_date', 'end_date'],
                 },
                 {
                     type: 'input',
-                    label: '入库订单号',
-                    name: 'inbound_order_sn',
+                    label: '入库单状态',
+                    name: 'bound_status',
                 },
                 {
                     type: 'input',
-                    label: '采购订单号',
-                    name: 'purchase_order_sn',
+                    label: '采购订单ID',
+                    name: 'purchase_order_goods_id',
+                },
+                {
+                    type: 'input',
+                    label: '入库单ID',
+                    name: 'refer_waybill_no',
+                },
+                {
+                    type: 'input',
+                    label: '物流商',
+                    name: 'purchase_shipping_name',
+                    defaultValue: '',
+                    optionList: [
+                        {
+                            name: '全部',
+                            value: '',
+                        },
+                        ...carrierList,
+                    ],
+                },
+                {
+                    type: 'input',
+                    label: '采购运单ID',
+                    name: 'purchase_waybill_no',
                 },
                 {
                     type: 'input',
                     label: '中台商品ID',
                     name: 'commodity_id',
+                },
+                {
+                    type: 'input',
+                    label: '商品SKU ID',
+                    name: 'commodity_sku_id',
                 },
             ];
         }
@@ -394,7 +464,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         onSearch,
         onChange,
         onReload,
-    } = useList<IStockInItem | IStockOutItem, IStockINFormData & RequestPagination>({
+    } = useList<IStockInItem | IStockOutItem>({
         queryList: type === StockType.In ? queryInList : queryOutList,
         formRef: formRef,
         defaultState: {
@@ -455,15 +525,15 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
 
     const table = useMemo(() => {
         return (
-            <FitTable<IStockInItem | IStockOutItem>
+            <FitTable
                 rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
                 toolBarRender={toolBarRender}
-                columns={columns}
-                dataSource={dataSource}
+                columns={columns as ColumnProps<any>[]}
+                dataSource={dataSource as any[]}
                 loading={loading}
                 onChange={onChange}
             />

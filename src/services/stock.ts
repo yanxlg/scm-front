@@ -1,7 +1,5 @@
 import request from '@/utils/request';
 import { StockApiPathEnum } from '@/config/api/StockApiPathEnum';
-import { IPaginationResponse, IResponse, RequestPagination } from '@/interface/IGlobal';
-import { transPaginationRequest } from '@/utils/utils';
 import {
     IStockINFormData,
     IStockInItem,
@@ -10,24 +8,22 @@ import {
     IStockRequest,
     IStockItem,
 } from '@/interface/IStock';
-import { IPurchaseItem } from '@/interface/IPurchase';
-import { EmptyObject } from '@/config/global';
+import { IPaginationResponse, IResponse } from 'react-components/es/hooks/useList';
+import { IRequestPagination1 } from '@/interface/IGlobal';
+import { api } from 'react-components';
 
-export function queryInList(data: IStockINFormData & RequestPagination) {
-    return request.post<IResponse<IPaginationResponse<IStockInItem>>>(
-        StockApiPathEnum.QueryInList,
-        {
-            data: transPaginationRequest(data),
-        },
-    );
+export function queryInList(data: IStockINFormData & IRequestPagination1) {
+    return api.post<IResponse<IPaginationResponse<IStockInItem>>>(StockApiPathEnum.QueryInList, {
+        data: data,
+    });
 }
 
-export function queryOutList(data: IStockOUTFormData & RequestPagination) {
-    return request
+export function queryOutList(data: IStockOUTFormData & IRequestPagination1) {
+    return api
         .post<IResponse<IPaginationResponse<IStockOutItem>>>(StockApiPathEnum.QueryOutList, {
-            data: transPaginationRequest(data),
+            data: data,
         })
-        .then(({ data: { list = [], ...extra } }) => {
+        .then(({ data: { list = [], ...extra }, ...others }) => {
             let _list: IStockOutItem[] = [];
             list.forEach(source => {
                 const { orderGoods = [] } = source;
@@ -51,6 +47,7 @@ export function queryOutList(data: IStockOUTFormData & RequestPagination) {
                     list: _list,
                     ...extra,
                 },
+                ...others,
             };
         });
 }
@@ -67,11 +64,11 @@ export function exportOutList(data: IStockOUTFormData) {
     });
 }
 
-export function queryStockList(data: IStockRequest & RequestPagination) {
+export function queryStockList(data: IStockRequest & IRequestPagination1) {
     return request.post<IResponse<IPaginationResponse<IStockItem>>>(
         StockApiPathEnum.QueryStockList,
         {
-            data: transPaginationRequest(data),
+            data: data,
         },
     );
 }
