@@ -29,6 +29,7 @@ import {
     pageSizeOptions,
 } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
+import Export from '@/components/Export';
 
 export declare interface IPurchaseStatus {
     status: number;
@@ -76,6 +77,8 @@ declare interface IState {
     colChildList: string[];
     colParentList: string[];
     childOptionalColList: IOptionalColItem[];
+
+    exportModal: boolean;
 }
 
 class PaneAll extends React.PureComponent<IProps, IState> {
@@ -90,6 +93,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         purchase_order_pay_status: 100,
         purchase_order_status: 100,
         reserve_status: 100,
+        order_goods_cancel_type: 100,
+        purchase_plan_cancel_type: 100,
     };
 
     private endFieldItem: FormField = {
@@ -121,6 +126,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             // 表格展示的列
             colChildList: defaultColChildList,
             colParentList: defaultParentColList,
+            exportModal: false,
         };
     }
 
@@ -205,6 +211,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     const {
                         createTime: purchaseCreateTime,
                         lastUpdateTime: purchaseLastUpdateTime,
+                        cancelType: purchaseCancelType,
                         ...purchaseRest
                     } = purchaseItem;
                     const childOrderItem: any = {
@@ -212,6 +219,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         ...purchaseRest,
                         purchaseCreateTime,
                         purchaseLastUpdateTime,
+                        purchaseCancelType,
                         currency,
                         confirmTime,
                         channelOrderSn,
@@ -245,24 +253,31 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const parentOrderList: IParentOrderItem[] = [];
         list.forEach(item => {
             const { orderGoods, ...parentRest } = item;
-            orderGoods.forEach((goodsItem: any, index: number) => {
-                const {
-                    // orderId,
-                    createTime: goodsCreateTime,
-                    lastUpdateTime: goodsLastUpdateTime,
-                    ...goodsRest
-                } = goodsItem;
-                const parentOrderItem: any = {
-                    goodsCreateTime,
-                    goodsLastUpdateTime,
+            if (orderGoods) {
+                orderGoods.forEach((goodsItem: any, index: number) => {
+                    const {
+                        // orderId,
+                        createTime: goodsCreateTime,
+                        lastUpdateTime: goodsLastUpdateTime,
+                        ...goodsRest
+                    } = goodsItem;
+                    const parentOrderItem: any = {
+                        goodsCreateTime,
+                        goodsLastUpdateTime,
+                        ...parentRest,
+                        ...goodsRest,
+                    };
+                    if (index === 0) {
+                        parentOrderItem._rowspan = orderGoods.length;
+                    }
+                    parentOrderList.push(parentOrderItem);
+                });
+            } else {
+                parentOrderList.push({
                     ...parentRest,
-                    ...goodsRest,
-                };
-                if (index === 0) {
-                    parentOrderItem._rowspan = orderGoods.length;
-                }
-                parentOrderList.push(parentOrderItem);
-            });
+                    _rowspan: 1,
+                });
+            }
         });
         return parentOrderList;
     }
@@ -324,12 +339,12 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         );
     };
 
-    private changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
-        });
-    };
+    // private changeShowColStatus = () => {
+    //     const { showColStatus } = this.state;
+    //     this.setState({
+    //         showColStatus: !showColStatus,
+    //     });
+    // };
 
     private changeSelectedColList = (list: string[]) => {
         const { showParentStatus } = this.state;
@@ -538,14 +553,11 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     };
 
     // 导出excel
-    private postExportAll = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportAll(params);
+    private postExportAll = (value: any) => {
+        return postExportAll({
+            ...this.currentSearchParams,
+            ...value,
+        });
     };
 
     // 绑定事件，处理hover问题
@@ -570,6 +582,18 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         });
     };
 
+    private closeExport = () => {
+        this.setState({
+            exportModal: false,
+        });
+    };
+
+    private showExport = () => {
+        this.setState({
+            exportModal: true,
+        });
+    };
+
     render() {
         const {
             page,
@@ -586,6 +610,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             childOptionalColList,
             colChildList,
             colParentList,
+            exportModal,
         } = this.state;
 
         return (
@@ -634,28 +659,24 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                                 取消渠道订单
                             </LoadingButton>
                         ) : null}
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportAll}
-                        >
+                        <Button type="primary" className="order-btn" onClick={this.showExport}>
                             导出数据
-                        </LoadingButton>
+                        </Button>
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件
                         </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
+                        {/* <Button className="order-btn" onClick={this.changeShowColStatus}>
                             {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
+                        </Button> */}
                     </div>
-                    {showColStatus ? (
+                    {/* {showColStatus ? (
                         <OptionalColumn
                             ref={this.optionalRef}
                             optionalColList={childOptionalColList}
                             selectedColKeyList={selectedColKeyList}
                             changeSelectedColList={this.changeSelectedColList}
                         />
-                    ) : null}
+                    ) : null} */}
                     {!showParentStatus ? (
                         <TableAll
                             loading={loading}
@@ -663,18 +684,24 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             orderList={childOrderList}
                             onCheckAllChange={this.onCheckAllChange}
                             onSelectedRow={this.onSelectedRow}
+                            visible={exportModal}
+                            onOKey={this.postExportAll}
+                            onCancel={this.closeExport}
                         />
                     ) : (
                         <TableParentAll
                             loading={loading}
                             colList={colParentList}
                             orderList={parentOrderList}
+                            visible={exportModal}
+                            onOKey={this.postExportAll}
+                            onCancel={this.closeExport}
                         />
                     )}
                     <div style={{ textAlign: 'right' }}>
                         <Pagination
                             className="order-pagination"
-                            size="small"
+                            // size="small"
                             total={total}
                             current={page}
                             pageSize={pageCount}

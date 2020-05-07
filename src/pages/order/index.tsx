@@ -5,15 +5,20 @@ import PanePendingOrder from './components/PanePendingOrder';
 import PanePay from './components/PanePay';
 import PaneWaitShip from './components/PaneWaitShip';
 import PaneError from './components/PaneError';
-import PaneNotStock from './components/PaneNotStock';
-import PaneStockNotShip from './components/PaneStockNotShip';
+import PaneNotWarehouse from './components/PaneNotWarehouse';
+import PaneWarehouseNotShip from './components/PaneWarehouseNotShip';
 import Container from '@/components/Container';
+// import { Location } from "history";
 
 import { getAllTabCount } from '@/services/order-manage';
 
 import '@/styles/order.less';
 
 const { TabPane } = Tabs;
+
+interface IProps {
+    location: any;
+}
 
 declare interface IOrderState {
     allListCount: number;
@@ -25,9 +30,10 @@ declare interface IOrderState {
     errorOrderCount: number;
 }
 
-class Order extends React.PureComponent<{}, IOrderState> {
+class Order extends React.PureComponent<IProps, IOrderState> {
     private type: number = 2;
-    constructor(props: {}) {
+    private defaultActiveKey: string = '1';
+    constructor(props: IProps) {
         super(props);
         this.state = {
             allListCount: 0,
@@ -38,6 +44,8 @@ class Order extends React.PureComponent<{}, IOrderState> {
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
         };
+        // console.log(11111, this.props);
+        this.defaultActiveKey = this.props.location?.query?.type || '1';
     }
 
     componentDidMount() {
@@ -72,7 +80,11 @@ class Order extends React.PureComponent<{}, IOrderState> {
         return (
             <Container>
                 <div className="order-wrap">
-                    <Tabs onChange={this.selectedTab} type="card" defaultActiveKey="1">
+                    <Tabs
+                        onChange={this.selectedTab}
+                        type="card"
+                        defaultActiveKey={this.defaultActiveKey}
+                    >
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <PaneAll getAllTabCount={this.getAllTabCount} />
                         </TabPane>
@@ -93,12 +105,12 @@ class Order extends React.PureComponent<{}, IOrderState> {
                         </TabPane>
                         <TabPane tab={`已采购未入库（${penddingPurchaseListCount}）`} key="5">
                             <div className="order-tab-content">
-                                <PaneNotStock getAllTabCount={this.getAllTabCount} />
+                                <PaneNotWarehouse getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`仓库未发货（${penddingWarehousingListCount}）`} key="6">
                             <div className="order-tab-content">
-                                <PaneStockNotShip getAllTabCount={this.getAllTabCount} />
+                                <PaneWarehouseNotShip getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`异常订单`} key="7">

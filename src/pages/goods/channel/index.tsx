@@ -1,5 +1,4 @@
 import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
-import ExcelDialog from './components/ExcelDialog';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
@@ -13,6 +12,7 @@ import {
     updateChannelShelveState,
     queryChannelCategory,
     queryShopList,
+    exportChannelProductList,
 } from '@/services/channel';
 import {
     ProductStatusMap,
@@ -36,10 +36,10 @@ import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
-import { Icons } from '@/components/Icon';
 import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
-import { useModal } from 'react-components/es/hooks';
+import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
 
 const salesVolumeList = [
     {
@@ -177,7 +177,10 @@ const ChannelList: React.FC = props => {
 
     const skuRef = useRef<SkuDialog>(null);
 
-    const { visible, onClose, setVisibleProps } = useModal<string>();
+    const { visible, onClose, setVisibleProps } = useModal<{
+        product_ids: string;
+        merchant_id: string;
+    }>();
 
     const {
         pageSize: page_size,
@@ -249,12 +252,21 @@ const ChannelList: React.FC = props => {
         setExportDialog(false);
     }, []);
 
+    const onExportOKey = useCallback((extra: any) => {
+        // export
+        const values = searchRef.current!.getFieldsValue();
+        return exportChannelProductList({
+            ...values,
+            ...extra,
+        });
+    }, []);
+
     const getCopiedLinkQuery = useCallback(() => {
         return query;
     }, [loading]);
 
-    const showSkuDialog = useCallback((id: string, merchant_id: string) => {
-        skuRef.current!.showModal(id, merchant_id);
+    const showSkuDialog = useCallback((id: string, merchant_id: string, commodity_id: string) => {
+        skuRef.current!.showModal(id, merchant_id, commodity_id);
     }, []);
 
     const showCountryShipFee = useCallback((product_id: string, merchant_id: string) => {
@@ -386,7 +398,10 @@ const ChannelList: React.FC = props => {
     );
 
     const showLog = useCallback((record: IChannelProductListItem) => {
-        setVisibleProps(record.product_id);
+        setVisibleProps({
+            product_ids: record.product_id,
+            merchant_id: record.merchant_id,
+        });
     }, []);
 
     const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
@@ -529,7 +544,9 @@ const ChannelList: React.FC = props => {
                             <div>{value}</div>
                             <Button
                                 type="link"
-                                onClick={() => showSkuDialog(row.id, row.merchant_id)}
+                                onClick={() =>
+                                    showSkuDialog(row.id, row.merchant_id, row.commodity_id)
+                                }
                             >
                                 查看sku详情
                             </Button>
@@ -661,11 +678,11 @@ const ChannelList: React.FC = props => {
             <Container>
                 {search}
                 {table}
-                <ExcelDialog
+                <Export
                     visible={exportDialog}
-                    total={total}
-                    form={searchRef}
                     onCancel={closeExcelDialog}
+                    columns={columns as any}
+                    onOKey={onExportOKey}
                 />
                 <SkuEditModal ref={skuRef} />
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />

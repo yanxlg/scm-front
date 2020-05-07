@@ -54,6 +54,17 @@ export declare interface ICountryItem {
     name: string;
 }
 
+export declare interface IAttrItem {
+    key: string;
+    name: string;
+    description: string;
+}
+
+export declare interface IPublishInterceptItem {
+    name: string;
+    checked: boolean;
+}
+
 export interface ICookieItem {
     account_id: string;
     phone: string;
@@ -68,4 +79,19 @@ export interface ICookieResponse {
 export interface ICookieBody {
     account_id: string;
     cookie: string;
+}
+
+export interface IFileItem {
+    id: string;
+    object_url: string;
+    filename: string;
+    module: string;
+    status: string;
+    params: string;
+    fields: string;
+    percent: string;
+    username: string;
+    create_time: string;
+    last_update_time: string;
+    filesize: string;
 }

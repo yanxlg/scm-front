@@ -17,6 +17,9 @@ const config = defineConfig({
     hash: true,
     devtool: dev ? 'source-map' : false,
     antd: {},
+    cssModulesTypescriptLoader: {
+        mode: 'emit',
+    },
     dva: {
         hmr: true,
     },
@@ -65,28 +68,15 @@ const config = defineConfig({
             'babel-plugin-import',
             {
                 libraryName: 'react-components',
-                libraryDirectory: 'es',
                 camel2DashComponentName: false,
+                customName: (name: string) => {
+                    if (/^use/.test(name)) {
+                        return `react-components/es/hooks/${name}`;
+                    }
+                    return `react-components/es/${name}`;
+                },
             },
             'react-components',
-        ],
-        [
-            'babel-plugin-import',
-            {
-                libraryName: 'react-components/es/hooks',
-                libraryDirectory: '',
-                camel2DashComponentName: false, // default: true
-            },
-            'react-components/es/hooks',
-        ],
-        [
-            'babel-plugin-import',
-            {
-                libraryName: 'react-components/lib/hooks',
-                libraryDirectory: '',
-                camel2DashComponentName: false, // default: true
-            },
-            'react-components/lib/hooks',
         ],
     ],
     cssLoader: {
@@ -121,8 +111,8 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            // target: 'https://scm-api-t.vova.com.hk/',
-            target: 'http://192.168.120.17:3026',
+            target: 'https://scm-api-t.vova.com.hk/',
+            // target: 'http://192.168.120.17:3026',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },
         },

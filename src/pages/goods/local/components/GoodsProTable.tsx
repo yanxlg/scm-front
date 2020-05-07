@@ -7,7 +7,7 @@ import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
 import { AutoEnLargeImg } from 'react-components';
 import ShelvesDialog from './ShelvesDialog';
-import ImgEditDialog from './ImgEditDialog';
+import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
 import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
@@ -17,6 +17,7 @@ import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
+import Export from '@/components/Export';
 
 const pageSizeOptions = ['50', '100', '500', '1000'];
 
@@ -31,6 +32,11 @@ declare interface IProps {
     onSearch(pageData?: IPageData, isRefresh?: boolean): void;
     changeSelectedRowKeys(keys: string[]): void;
     setProductTags(productId: string, tags: string[]): void;
+
+    // 导出弹窗
+    exportVisible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
 }
 
 declare interface IState {
@@ -53,18 +59,21 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 156,
             render: (value, row: IRowDataItem) => {
+                const { goods_status } = row;
                 return (
                     <>
                         <div>
-                            <Button
-                                type="link"
-                                onClick={() => this.toggleEditGoodsDialog(true, row)}
-                            >
-                                编辑商品
-                            </Button>
+                            {goods_status !== 'FROZEN' && (
+                                <Button
+                                    type="link"
+                                    onClick={() => this.toggleEditGoodsDialog(true, row)}
+                                >
+                                    编辑商品
+                                </Button>
+                            )}
                         </div>
                         <div style={{ marginTop: -6 }}>
-                            <Link to={`/goods/local/version?id=${row.commodity_id}`}>
+                            <Link to={`/goods/local/${row.commodity_id}`}>
                                 <Button type="link">查看更多版本</Button>
                             </Link>
                         </div>
@@ -404,6 +413,16 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
     // 编辑商品-弹框
     toggleEditGoodsDialog = (status: boolean, rowData?: IRowDataItem) => {
         // console.log('toggleEditGoodsDialog', rowData);
+        if (rowData) {
+            const { goods_img, sku_image } = rowData;
+            const list = [...sku_image];
+            const index = list.findIndex(img => img === goods_img);
+            if (index > -1) {
+                list.splice(index, 1);
+                list.unshift(goods_img);
+                rowData.sku_image = list;
+            }
+        }
         this.setState({
             goodsEditDialogStatus: status,
             currentEditGoods: rowData ? { ...rowData } : null,
@@ -536,6 +555,9 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             goodsList,
             loading,
             allCatagoryList,
+            exportVisible,
+            onCancel,
+            onOKey,
         } = this.props;
         const {
             goodsEditDialogStatus,
@@ -601,10 +623,16 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 <SkuDialog
                     visible={skuDialogStatus}
                     ref={this.skuDialogRef}
-                    currentRowData={currentEditGoods}
+                    currentSkuInfo={currentEditGoods}
                     hideSkuDialog={this.hideSkuDialog}
                 />
                 <GoodsMergeDialog onReload={this.onReload} ref={this.goodsMergeRef} />
+                <Export
+                    columns={this.columns as any}
+                    visible={exportVisible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
+                />
             </>
         );
     }

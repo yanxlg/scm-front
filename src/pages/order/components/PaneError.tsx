@@ -1,15 +1,18 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, FitTable, LoadingButton } from 'react-components';
-import { getErrorOrderList, postExportErrOrder } from '@/services/order-manage';
+import { getErrorOrderList, postExportErrOrder, queryChannelSource } from '@/services/order-manage';
 import {
     defaultOptionItem,
     channelOptionList,
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
+    failureReasonList,
+    failureReasonMap,
+    failureReasonCode,
 } from '@/enums/OrderEnum';
-import { useList, useModal } from 'react-components/es/hooks';
+import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -17,8 +20,9 @@ import { Store } from 'rc-field-form/lib/interface';
 import { FormInstance } from 'antd/es/form';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
-import SimilarStyleModal from '@/pages/order/components/SimilarStyleModal';
+import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
+import Export from '@/components/Export';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -38,6 +42,8 @@ export declare interface IErrorOrderItem {
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
     purchaseWaybillNo?: string; // 首程运单号
+    purchaseFailCode?: failureReasonCode;
+    similarGoodsStatus?: number;
     _rowspan?: number;
 }
 
@@ -47,7 +53,12 @@ const PaneErrTab = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
 
-    const { visible, setVisibleProps, onClose } = useModal<string>();
+    const { visible, setVisibleProps, onClose } = useModal<{
+        order_goods_id: string;
+        purchase_plan_id: string;
+    }>();
+
+    const { visible: exportModal, setVisibleProps: setExportModal } = useModal<boolean>();
 
     const fieldList: FormField[] = useMemo(() => {
         return [
@@ -57,14 +68,21 @@ const PaneErrTab = () => {
                 label: '订单号',
                 className: 'order-input',
                 placeholder: '请输入订单号',
-                formatter: 'number',
             },
             {
                 type: 'select',
                 name: 'channel_source',
                 label: '销售渠道',
                 className: 'order-input',
-                optionList: [defaultOptionItem, ...channelOptionList],
+                // optionList: [defaultOptionItem, ...channelOptionList],
+                syncDefaultOption: defaultOptionItem,
+                optionList: () =>
+                    queryChannelSource().then(({ data = {} }) => {
+                        return Object.keys(data).map(key => ({
+                            name: data[key],
+                            value: Number(key),
+                        }));
+                    }),
             },
             {
                 type: 'select',
@@ -175,22 +193,58 @@ const PaneErrTab = () => {
             title: '异常详情',
             dataIndex: 'abnormalDetailType',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: ErrorDetailOptionCode, row: IErrorOrderItem) => {
+                const reason =
+                    failureReasonMap[(row.purchaseFailCode as unknown) as failureReasonCode];
+                const reasonStr = reason ? `（${reason}）` : '';
+                // 0代拍，1爬取中，2爬取成功，3爬取失败
+                const status = Number(row.similarGoodsStatus);
                 return {
                     children: (
                         <div>
                             {errorDetailOptionMap[value]}
+                            <div>{reasonStr}</div>
                             {value === 12 ? (
                                 <div>
-                                    <Button
-                                        type="link"
-                                        onClick={() =>
-                                            setVisibleProps(row.purchasePlanId as string)
-                                        }
-                                    >
-                                        相似款代拍
-                                    </Button>
+                                    {status === 0 ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() =>
+                                                setVisibleProps({
+                                                    order_goods_id: row.orderGoodsId,
+                                                    purchase_plan_id: row.purchasePlanId as string,
+                                                })
+                                            }
+                                        >
+                                            相似款代拍
+                                        </Button>
+                                    ) : status === 1 || status === 5 ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() =>
+                                                setVisibleProps({
+                                                    order_goods_id: row.orderGoodsId,
+                                                    purchase_plan_id: row.purchasePlanId as string,
+                                                })
+                                            }
+                                        >
+                                            代拍详情-爬取中
+                                        </Button>
+                                    ) : status === 3 ? (
+                                        <Button
+                                            type="link"
+                                            danger={true}
+                                            onClick={() =>
+                                                setVisibleProps({
+                                                    order_goods_id: row.orderGoodsId,
+                                                    purchase_plan_id: row.purchasePlanId as string,
+                                                })
+                                            }
+                                        >
+                                            代拍详情-爬取失败
+                                        </Button>
+                                    ) : null}
                                 </div>
                             ) : null}
                         </div>
@@ -321,22 +375,19 @@ const PaneErrTab = () => {
         pageSize,
         pageNumber,
         onChange,
+        onReload,
     } = useList({
         queryList: getErrorOrderList,
         formRef: [formRef, formRef1],
     });
 
-    const onExport = useCallback(() => {
-        const params = Object.assign(
-            {
-                page: 1,
-                page_count: 50,
-                abnormal_type: 1,
-                abnormal_detail_type: 2,
-            },
-            queryRef.current,
-        );
-        return postExportErrOrder(params);
+    const onExport = useCallback((values: any) => {
+        return postExportErrOrder({
+            abnormal_type: 1,
+            abnormal_detail_type: 2,
+            ...queryRef.current,
+            ...values,
+        });
     }, []);
 
     const formComponent = useMemo(() => {
@@ -354,14 +405,15 @@ const PaneErrTab = () => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onExport}>
+                    <Button className={formStyles.formBtn} onClick={() => setExportModal(true)}>
                         导出数据
-                    </LoadingButton>
+                    </Button>
                 </JsonForm>
                 <JsonForm
                     ref={formRef1}
                     labelClassName="order-error-label"
                     enableCollapse={false}
+                    layout="horizontal"
                     fieldList={[
                         {
                             type: 'hide',
@@ -436,10 +488,10 @@ const PaneErrTab = () => {
                                                     label: errorDetailOptionMap[4],
                                                     value: 4,
                                                 },
-                                                /*  {
+                                                {
                                                     label: errorDetailOptionMap[12],
                                                     value: 12,
-                                                },*/
+                                                },
                                             ],
                                             onChange: () => {
                                                 onSearch(); // 立即查询
@@ -464,6 +516,41 @@ const PaneErrTab = () => {
                                 }
                             },
                         },
+                        {
+                            type: 'dynamic',
+                            shouldUpdate: (prevValues: Store, nextValues: Store) => {
+                                return (
+                                    prevValues.abnormal_detail_type !==
+                                    nextValues.abnormal_detail_type
+                                );
+                            },
+                            dynamic: (form: FormInstance) => {
+                                const abnormal_type = form.getFieldValue('abnormal_detail_type');
+                                switch (abnormal_type) {
+                                    case 12:
+                                        return {
+                                            type: 'checkboxGroup',
+                                            name: 'purchase_fail_code',
+                                            label: '失败原因',
+                                            formatter: 'join',
+                                            options: failureReasonList.map(({ id, name }) => {
+                                                return {
+                                                    label: name,
+                                                    value: id,
+                                                };
+                                            }),
+                                            onChange: () => {
+                                                onSearch(); // 立即查询
+                                            },
+                                        };
+                                    default:
+                                        return {
+                                            type: 'hide',
+                                            name: 'none',
+                                        };
+                                }
+                            },
+                        },
                     ]}
                     initialValues={{
                         abnormal_detail_type: 11,
@@ -483,7 +570,7 @@ const PaneErrTab = () => {
             const orderList: IErrorOrderItem[] = [];
             dataSource.forEach((goodsItem: any) => {
                 const { orderGoods, orderInfo } = goodsItem;
-                const {
+                let {
                     createTime,
                     orderGoodsId,
                     channelOrderGoodsSn,
@@ -495,6 +582,12 @@ const PaneErrTab = () => {
                 } = orderGoods;
                 const { confirmTime } = orderInfo;
                 if (orderGoodsPurchasePlan) {
+                    // 拍单失败需要过滤purchaseOrderStatus === 7
+                    if (Number(abnormalDetailType) === 12) {
+                        orderGoodsPurchasePlan = orderGoodsPurchasePlan.filter(
+                            (item: any) => item.purchaseOrderStatus === 7,
+                        );
+                    }
                     // 生成采购计划
                     orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
                         const {
@@ -504,6 +597,8 @@ const PaneErrTab = () => {
                             payTime,
                             purchaseWaybillNo,
                             platformSendOrderTime,
+                            purchaseFailCode,
+                            similarGoodsStatus,
                         } = purchaseItem;
                         const childOrderItem: IErrorOrderItem = {
                             createTime, // 订单时间
@@ -523,6 +618,8 @@ const PaneErrTab = () => {
                             platformOrderTime, // 拍单时间
                             payTime, // 支付时间
                             purchaseWaybillNo, // 首程运单号
+                            purchaseFailCode,
+                            similarGoodsStatus,
                         };
                         if (index === 0) {
                             childOrderItem._rowspan = orderGoodsPurchasePlan.length;
@@ -579,8 +676,19 @@ const PaneErrTab = () => {
         );
     }, [loading]);
 
+    const exportModalComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns}
+                visible={exportModal}
+                onOKey={onExport}
+                onCancel={() => setExportModal(false)}
+            />
+        );
+    }, [exportModal]);
+
     const similarModal = useMemo(() => {
-        return <SimilarStyleModal visible={visible} onClose={onClose} />;
+        return <SimilarStyleModal visible={visible} onClose={onClose} onReload={onReload} />;
     }, [visible]);
 
     return useMemo(() => {
@@ -589,9 +697,10 @@ const PaneErrTab = () => {
                 {formComponent}
                 {table}
                 {similarModal}
+                {exportModalComponent}
             </div>
         );
-    }, [loading, visible]);
+    }, [loading, visible, exportModal]);
 };
 
 export default PaneErrTab;

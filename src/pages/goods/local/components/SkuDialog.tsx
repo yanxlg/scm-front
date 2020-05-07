@@ -4,7 +4,7 @@ import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import { FitTable } from 'react-components';
 
-import { ISkuStyleItem } from '@/interface/ILocalGoods';
+import { ISkuStyleItem, ISkuInfo } from '@/interface/ILocalGoods';
 import { getGoodsSkuList, ISkuParams } from '@/services/goods';
 import { setCommoditySkuTag } from '@/services/goods-attr';
 
@@ -27,8 +27,7 @@ declare interface ISkuItem {
 
 declare interface IPorps {
     visible: boolean;
-    // currentRowData: IRowDataItem | null;
-    currentRowData: any;
+    currentSkuInfo: ISkuInfo | null;
     hideSkuDialog(): void;
 }
 
@@ -123,11 +122,11 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
             align: 'center',
             width: 170,
             render: (value, row: ISkuItem) => {
-                const { currentRowData } = this.props;
+                const { currentSkuInfo } = this.props;
                 const { tags, commodity_sku_id } = row;
                 return (
                     <div style={{ textAlign: 'left' }}>
-                        {currentRowData.tags.map((item: string) => {
+                        {currentSkuInfo?.tags?.map((item: string) => {
                             const isActive = tags.indexOf(item) > -1;
                             return (
                                 <Button
@@ -161,6 +160,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
 
     private setCommoditySkuTag = (commodity_sku_id: string, item: string, tags: string[]) => {
         // console.log('commodity_sku_id', commodity_sku_id);
+        const commodity_id = this.props.currentSkuInfo!.commodity_id as string;
         const index = tags.indexOf(item);
         let list: string[] = [];
         if (index > -1) {
@@ -174,6 +174,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
         setCommoditySkuTag({
             commodity_sku_id,
             tag_name: list,
+            commodity_id,
         })
             .then(() => {
                 // console.log('setCommoditySkuTag', res);
@@ -247,7 +248,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
     };
 
     onChangePage = (page: number) => {
-        this.getSkuList(this.props.currentRowData!.product_id, {
+        this.getSkuList(this.props.currentSkuInfo!.product_id, {
             page,
         });
     };
@@ -260,15 +261,15 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
 
     handleClickSearch = () => {
         const { value } = this.state;
-        this.getSkuList(this.props.currentRowData!.product_id, {
+        this.getSkuList(this.props.currentSkuInfo!.product_id, {
             page: 1,
         });
     };
 
     render() {
-        const { visible, currentRowData } = this.props;
+        const { visible, currentSkuInfo } = this.props;
         const { loading, page, allCount, skuList, value } = this.state;
-        if (!currentRowData) {
+        if (!currentSkuInfo) {
             return null;
         } else {
             const {
@@ -281,7 +282,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                 first_catagory,
                 second_catagory,
                 third_catagory,
-            } = currentRowData;
+            } = currentSkuInfo;
             return (
                 <Modal
                     width={1000}
@@ -296,7 +297,7 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                             <img className="main-img" src={goods_img} />
                             <div className="content">
                                 <Row>
-                                    <Col span={6}>Product ID: {product_id}</Col>
+                                    <Col span={7}>Product ID: {product_id}</Col>
                                     <Col span={10}>Commodity ID: {commodity_id}</Col>
                                     <Col span={5}>爬虫商品 ID: {worm_goods_id}</Col>
                                 </Row>
@@ -307,9 +308,9 @@ class SkuDialog extends React.PureComponent<IPorps, IState> {
                                     </a>
                                 </div>
                                 <Row>
-                                    <Col span={8}>一级分类: {first_catagory.name}</Col>
-                                    <Col span={8}>二级分类: {second_catagory.name}</Col>
-                                    <Col span={8}>三级分类: {third_catagory.name}</Col>
+                                    <Col span={8}>一级分类: {first_catagory?.name}</Col>
+                                    <Col span={8}>二级分类: {second_catagory?.name}</Col>
+                                    <Col span={8}>三级分类: {third_catagory?.name}</Col>
                                 </Row>
                             </div>
                         </div>

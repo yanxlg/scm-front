@@ -1,4 +1,4 @@
-import request, { errorHandlerFactory } from '@/utils/request';
+import request from '@/utils/request';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import {
     IChannelProductListBody,
@@ -112,18 +112,14 @@ export async function queryChannelChangedProperties() {
 export async function updateChannelShelveState(data: IChannelShelveStateBody) {
     return request.put<IResponse<null>>(ChannelApiPath.UpdateShelveState, {
         data,
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 
-export async function exportChannelProductList(data: IChannelProductListBody & RequestPagination) {
-    return request
-        .post(ChannelApiPath.ExportProductList, {
-            data: transPaginationRequest(data),
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function exportChannelProductList(data: IChannelProductListBody) {
+    return request.post(ChannelApiPath.ExportProductList, {
+        data: { ...data },
+    });
 }
 
 // 查询国家运费
@@ -160,10 +156,17 @@ export const queryShopList = singlePromiseWrap(() => {
     return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
 });
 
-export async function queryOnOffLog(product_ids: string) {
+export async function queryOnOffLog({
+    merchant_id,
+    product_ids,
+}: {
+    product_ids: string;
+    merchant_id: string;
+}) {
     return request.post<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
         data: {
             product_ids,
+            merchant_id,
         },
     });
 }

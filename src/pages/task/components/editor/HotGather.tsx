@@ -335,10 +335,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     }}
                 >
                     <Form.Item
-                        className={classNames(
-                            edit ? '' : formStyles.formItem,
-                            formStyles.formInline,
-                        )}
+                        className={edit ? '' : formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -352,7 +349,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Input className="picker-default" />
                     </Form.Item>
                     <Form.Item
-                        className={classNames(formStyles.formItem, formStyles.formInline)}
+                        className={formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="channel"
                         label="任务渠道"
@@ -384,11 +381,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             validateTrigger={'onBlur'}
                             name="grab_page_count"
                             label="爬取页数"
-                            className={classNames(
-                                formStyles.formItem,
-                                formStyles.formHorizon,
-                                formStyles.formInline,
-                            )}
+                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
                             rules={[
                                 {
                                     required: true,
@@ -401,11 +394,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Form.Item
                             validateTrigger={'onBlur'}
                             name="grab_count_max"
-                            className={classNames(
-                                formStyles.formItem,
-                                formStyles.formHorizon,
-                                formStyles.formInline,
-                            )}
+                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
                             label={
                                 <span>
                                     爬取数量

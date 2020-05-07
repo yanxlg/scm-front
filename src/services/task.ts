@@ -1,5 +1,5 @@
-import request, { errorHandlerFactory } from '@/utils/request';
-import { TaskExecuteType, TaskStatusCode, HotTaskRange } from '@/enums/StatusEnum';
+import request from '@/utils/request';
+import { TaskExecuteType, HotTaskRange } from '@/enums/StatusEnum';
 import {
     IHotTaskBody,
     ITaskCreatedResponse,
@@ -24,31 +24,6 @@ import { TaskApiPath } from '@/config/api/TaskApiPath';
 import { EmptyObject } from '@/config/global';
 import { isZero, transPaginationRequest, transPaginationResponse } from '@/utils/utils';
 
-export declare interface IPddHotTaskParams {
-    range?: number;
-    category_level_one?: string;
-    category_level_two?: string;
-    category_level_three?: string;
-    sort_type?: string;
-    keywords?: string;
-    task_type?: TaskExecuteType;
-    sales_volume_min?: number;
-    sales_volume_max?: number;
-    price_min?: number;
-    price_max?: number;
-    grab_page_count?: number;
-    grab_count_max?: number;
-    task_start_time?: number;
-    task_end_time?: number;
-    task_interval_seconds?: number;
-    task_name?: string;
-    is_upper_shelf: boolean;
-    success?: number;
-    fail?: number;
-    urls?: string;
-    status?: TaskStatusCode;
-}
-
 export async function getTaskList(query: ITaskListQuery) {
     const params = transPaginationRequest(query);
     return request
@@ -65,7 +40,7 @@ export async function addPddHotTask(params: IHotTaskBody) {
             version: '1.0',
             platform: 'PDD',
         },
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 
@@ -76,7 +51,7 @@ export async function addPddURLTask(params: IURLTaskBody) {
             version: '1.0',
             platform: 'PDD',
         },
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 
@@ -87,7 +62,7 @@ export async function addPDDTimerUpdateTask(params: IPUTaskBody) {
             version: '1.0',
             platform: 'PDD',
         },
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 
