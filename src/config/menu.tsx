@@ -6,6 +6,7 @@ import '@/styles/menu.less';
 export default [
     {
         path: '/',
+        hideInMenu: true,
         name: '首页',
         icon: <DashboardOutlined className="menu-icon" />,
     },
@@ -139,5 +140,5 @@ export default [
                 name: '重要报关信息映射',
             },
         ],
-    },
+    }
 ];
