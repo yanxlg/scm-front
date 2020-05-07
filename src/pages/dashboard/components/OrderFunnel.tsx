@@ -96,9 +96,18 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
             // 绘制图表
             chartRef.current?.setOption({
                 title: {
-                    text: `订单流转漏斗模型(更新时间: ${getUpdateTime()})`,
+                    text: '订单流转漏斗模型',
+                    subtext: `(更新时间: ${getUpdateTime()})`,
                     left: 'center',
-                    top: 'bottom',
+                    bottom: '0%',
+                    textStyle: {
+                        fontSize: 16,
+                        color: '#131415'
+                    },
+                    subtextStyle: {
+                        fontSize: 13,
+                        color: '#575858'
+                    }
                 },
                 tooltip: {
                     trigger: 'item',
@@ -121,7 +130,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         width: leftWidth,
                         height: '80%',
                         left: '15%',
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'right',
                         label: {
                             position: 'leftTop',
@@ -203,7 +212,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         width: leftWidth,
                         height: '80%',
                         left: '15%',
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'right',
                         label: {
                             // show: false,
@@ -283,7 +292,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         height: '80%',
                         // left: '50%',
                         left: rightOffset,
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
                         sort: 'none',
@@ -388,7 +397,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         height: '80%',
                         // left: '50%',
                         left: rightOffset,
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
                         sort: 'none',
@@ -424,20 +433,25 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                             purchaseOrderPercentage,
                                             reserveStockPercentage,
                                         } = data;
+                                        // <div>需采购和预定积压库存的订单占比: ${formatTwodecimal(
+                                        //     purchaseAndStockPercentage,
+                                        // )}%</div>
                                         return `
-                                            <div style="margin-bottom: 10px;">已生成的销售订单</div>
-                                            <div>仅需采购的订单占比: ${formatTwodecimal(
-                                                purchaseOrderPercentage,
-                                            )}%</div>
-                                            <div>需采购和预定积压库存的订单占比: ${formatTwodecimal(
-                                                purchaseAndStockPercentage,
-                                            )}%</div>
-                                            <div>仅预定积压库存的订单占比: ${formatTwodecimal(
-                                                reserveStockPercentage,
-                                            )}%</div>
-                                            <div>已取消订单: ${formatTwodecimal(
-                                                cancelOrderPercentage,
-                                            )}%</div>
+                                            <div style="padding: 8px 20px 8px 10px;">
+                                                <div style="margin-bottom: 10px;">销售订单已确认</div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
+                                                    已销售-需拍单: ${formatTwodecimal(purchaseOrderPercentage)}%
+                                                </div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
+                                                    已销售-已预定库存: ${formatTwodecimal(reserveStockPercentage)}%
+                                                </div>
+                                                <div>
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: transparent; vertical-align: 2px;"></span>
+                                                    已取消订单: ${formatTwodecimal(cancelOrderPercentage)}%
+                                                </div>
+                                            </div>
                                         `;
                                     },
                                 },
@@ -490,13 +504,17 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                             stockOutStorageOrderPercentage,
                                         } = data;
                                         return `
-                                            <div style="margin-bottom: 10px">订单已出库</div>
-                                            <div>需采购订单占比: ${formatTwodecimal(
-                                                purchaseOutStorageOrderPercentage,
-                                            )}%</div>
-                                            <div>仅预定积压库存的订单占比: ${formatTwodecimal(
-                                                stockOutStorageOrderPercentage,
-                                            )}%</div>
+                                            <div style="padding: 8px 20px 8px 10px;">
+                                                <div style="margin-bottom: 10px">订单已出库</div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
+                                                    需采购订单占比: ${formatTwodecimal(purchaseOutStorageOrderPercentage)}%</div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
+                                                    仅预定积压库存的订单占比: ${formatTwodecimal(stockOutStorageOrderPercentage)}%
+                                                </div>
+                                            </div>
+                                            
                                         `;
                                     },
                                 },
