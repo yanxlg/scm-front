@@ -241,6 +241,11 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             defaultHide: true,
+            render: (_, row: IChildOrderItem) => {
+                const { purchaseNumber, purchaseAmount } = row;
+                const price = Number(purchaseAmount) / Number(purchaseNumber);
+                return isNaN(price) ? '' : price.toFixed(2);
+            },
         },
         {
             key: 'purchaseNumber',
@@ -255,11 +260,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: '_purchaseTotalAmount',
             align: 'center',
             width: 140,
-            render: (_, row: IChildOrderItem) => {
-                const { purchaseNumber, purchaseAmount } = row;
-                const total = Number(purchaseNumber) * Number(purchaseAmount);
-                return isNaN(total) ? '' : total.toFixed(2);
-            },
+            render: (_, row: IChildOrderItem) => row.purchaseAmount
         },
         // // 勾选展示 - 待补充
         // {
