@@ -252,28 +252,12 @@ const PendingShipped = () => {
                 dataIndex: 'purchasePlatform',
                 width: '130px',
                 align: 'center',
-                render: (value, row) => {
-                    return {
-                        children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
             },
             {
                 title: '采购店铺',
                 dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
-                render: (value, row) => {
-                    return {
-                        children: value,
-                        props: {
-                            rowSpan: row.rowSpan || 0,
-                        },
-                    };
-                },
             },
             {
                 title: '供应商订单号',
