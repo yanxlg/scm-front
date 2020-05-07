@@ -166,7 +166,7 @@ const OrderAnalysis: React.FC = props => {
                         <Radio.Group
                             value={statisticsType}
                             onChange={changeStatisticsType}
-                            buttonStyle="solid"
+                            // buttonStyle="solid"
                         >
                             <Radio.Button value="0">订单量</Radio.Button>
                             <Radio.Button value="1">GMV($)</Radio.Button>
