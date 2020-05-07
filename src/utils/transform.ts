@@ -45,3 +45,7 @@ export function formatThousands(num: string | number, str = ',') {
     const numStr = num + '';
     return numStr ? numStr.replace(reg, '$&,') : '';
 }
+
+export function formatTwodecimal(num: number | string) {
+    return Number((Number(num || 0) * 100).toFixed(2));
+}

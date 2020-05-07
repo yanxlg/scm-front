@@ -6,6 +6,7 @@ import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/funnel';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
+import { formatTwodecimal } from '@/utils/transform';
 
 interface IProps {
     loading: boolean;
@@ -14,7 +15,8 @@ interface IProps {
     orderInfo: IOrderDashboardRes;
 }
 
-const labelFormatter = (percentage: string, name: string) => `${name} ${percentage}%`;
+const labelFormatter = (percentage: string, name: string) =>
+    `${name} ${formatTwodecimal(percentage)}%`;
 
 const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisticsType }) => {
     const chartRef = useRef<ECharts | null>(null);
@@ -37,6 +39,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
     const renderChart = useCallback(
         orderInfo => {
             if (Object.keys(orderInfo).length === 0) {
+                chartRef.current?.clear();
                 return;
             }
             const suffix = statisticsType === '0' ? '单' : '';
@@ -137,6 +140,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         tooltip: {
                             show: false,
                         },
+                        sort: 'none',
                         data: [
                             {
                                 name: '需采购',
@@ -212,6 +216,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         itemStyle: {
                             color: '#63DAAB',
                         },
+                        sort: 'none',
                         data: [
                             {
                                 name: '需采购',
@@ -281,6 +286,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         top: '10%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
+                        sort: 'none',
                         label: {
                             position: 'rightTop',
                             color: '#333',
@@ -385,6 +391,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         top: '10%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
+                        sort: 'none',
                         label: {
                             position: 'insideLeft',
                             formatter: (item: any) => {
@@ -419,10 +426,18 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                         } = data;
                                         return `
                                             <div style="margin-bottom: 10px;">已生成的销售订单</div>
-                                            <div>仅需采购的订单占比: ${purchaseOrderPercentage}%</div>
-                                            <div>需采购和预定积压库存的订单占比: ${purchaseAndStockPercentage}%</div>
-                                            <div>仅预定积压库存的订单占比: ${reserveStockPercentage}%</div>
-                                            <div>已取消订单: ${cancelOrderPercentage}%</div>
+                                            <div>仅需采购的订单占比: ${formatTwodecimal(
+                                                purchaseOrderPercentage,
+                                            )}%</div>
+                                            <div>需采购和预定积压库存的订单占比: ${formatTwodecimal(
+                                                purchaseAndStockPercentage,
+                                            )}%</div>
+                                            <div>仅预定积压库存的订单占比: ${formatTwodecimal(
+                                                reserveStockPercentage,
+                                            )}%</div>
+                                            <div>已取消订单: ${formatTwodecimal(
+                                                cancelOrderPercentage,
+                                            )}%</div>
                                         `;
                                     },
                                 },
@@ -476,8 +491,12 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                         } = data;
                                         return `
                                             <div style="margin-bottom: 10px">订单已出库</div>
-                                            <div>需采购订单占比: ${purchaseOutStorageOrderPercentage}%</div>
-                                            <div>仅预定积压库存的订单占比: ${stockOutStorageOrderPercentage}%</div>
+                                            <div>需采购订单占比: ${formatTwodecimal(
+                                                purchaseOutStorageOrderPercentage,
+                                            )}%</div>
+                                            <div>仅预定积压库存的订单占比: ${formatTwodecimal(
+                                                stockOutStorageOrderPercentage,
+                                            )}%</div>
                                         `;
                                     },
                                 },
