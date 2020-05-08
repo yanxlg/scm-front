@@ -186,10 +186,16 @@ const PendingOut = () => {
                                 formStyles.flex,
                                 formStyles.flexRow,
                                 formStyles.flexAlign,
+                                styles.justifyCenter,
                             )}
                         >
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div className={classNames(formStyles.flex1, styles.productDesc)}>
+                            <div
+                                className={classNames(
+                                    styles.productDesc,
+                                    productImageUrl ? undefined : styles.textCenter,
+                                )}
+                            >
                                 <div title={purchasePlatformGoodsName}>
                                     <Paragraph ellipsis={{ rows: 2 }} className={styles.paragraph}>
                                         {purchasePlatformGoodsName}
