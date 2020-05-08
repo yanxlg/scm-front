@@ -60,10 +60,13 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
         return currentDate.valueOf() > dayjs().valueOf();
     }, []);
 
-    const handleRangePicker = useCallback(values => {
-        // console.log(args);
-        setDates(values);
-    }, []);
+    const handleRangePicker = useCallback(
+        values => {
+            // console.log(args);
+            setDates(values);
+        },
+        [setDates],
+    );
 
     const handleToday = useCallback(() => {
         if (!isToday) {
@@ -71,7 +74,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             const today = dayjs();
             setDates([today, today]);
         }
-    }, [isToday]);
+    }, [isToday, setDates]);
 
     const handleYesterday = useCallback(() => {
         if (!isYesterday) {
@@ -79,7 +82,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             const yesterday = dayjs().add(-1, 'day');
             setDates([yesterday, yesterday]);
         }
-    }, [isYesterday]);
+    }, [isYesterday, setDates]);
 
     const handleThreeDay = useCallback(() => {
         if (!isThreeToday) {
@@ -87,7 +90,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             // const threeDay = dayjs().add(-3, 'day');
             setDates([dayjs().add(-3, 'day'), dayjs().add(-1, 'day')]);
         }
-    }, [isThreeToday]);
+    }, [isThreeToday, setDates]);
 
     const handleSevenDay = useCallback(() => {
         if (!isSevenToday) {
@@ -95,13 +98,14 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
             // const sevenDay = dayjs().add(-7, 'day');
             setDates([dayjs().add(-7, 'day'), dayjs().add(-1, 'day')]);
         }
-    }, [isSevenToday]);
+    }, [isSevenToday, setDates]);
 
     return useMemo(() => {
         return (
             <div>
                 日期：
                 <Button
+                    ghost={isToday}
                     className={btnStyles.btnGutter}
                     type={isToday ? 'primary' : 'default'}
                     onClick={handleToday}
@@ -109,6 +113,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                     今日
                 </Button>
                 <Button
+                    ghost={isYesterday}
                     className={btnStyles.btnGutter}
                     type={isYesterday ? 'primary' : 'default'}
                     onClick={handleYesterday}
@@ -116,6 +121,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                     昨日
                 </Button>
                 <Button
+                    ghost={isThreeToday}
                     className={btnStyles.btnGutter}
                     type={isThreeToday ? 'primary' : 'default'}
                     onClick={handleThreeDay}
@@ -123,6 +129,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                     近三日
                 </Button>
                 <Button
+                    ghost={isSevenToday}
                     className={btnStyles.btnGutter}
                     type={isSevenToday ? 'primary' : 'default'}
                     onClick={handleSevenDay}
@@ -137,7 +144,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
                 />
             </div>
         );
-    }, [dates]);
+    }, [dates, setDates]);
 };
 
 export default DateRange;
