@@ -564,7 +564,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 ref={formRef}
                 fieldList={fieldList}
                 initialValues={defaultInitialValues}
-                enableCollapse={false}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
