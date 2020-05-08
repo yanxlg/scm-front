@@ -306,14 +306,10 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
+                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => setExportStatus(true)}
-                    >
+                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
                         导出
                     </Button>
                 </JsonForm>

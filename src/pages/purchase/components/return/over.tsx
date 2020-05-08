@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import { AutoEnLargeImg, FitTable, JsonForm, LoadingButton, useList } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button } from 'antd';
+import { Button, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -17,7 +17,8 @@ import {
 import styles from '@/pages/purchase/_return.less';
 import Export from '@/components/Export';
 import { fieldList } from '@/pages/purchase/components/return/all';
-
+import classNames from 'classnames';
+const { Paragraph } = Typography;
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const Over = () => {
@@ -61,15 +62,20 @@ const Over = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
+            <JsonForm
+                fieldList={fieldList}
+                ref={formRef}
+                enableCollapse={false}
+                labelClassName={styles.formItem}
+            >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
                     </LoadingButton>
-                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
-                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
+                    <Button onClick={showExportFn} className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>
@@ -87,7 +93,7 @@ const Over = () => {
             },
             {
                 title: '出入库类型',
-                width: '150px',
+                width: '120px',
                 align: 'center',
                 dataIndex: 'outboundType',
                 render: () => {
@@ -104,7 +110,7 @@ const Over = () => {
             {
                 title: '商品信息',
                 dataIndex: 'productInfo',
-                width: '178px',
+                width: '280px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
                     const {
@@ -125,11 +131,23 @@ const Over = () => {
                         }
                     } catch (e) {}
                     return (
-                        <div>
+                        <div
+                            className={classNames(
+                                formStyles.flex,
+                                formStyles.flexRow,
+                                formStyles.flexAlign,
+                            )}
+                        >
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchasePlatformGoodsName}</div>
-                            <div>{skus}</div>
-                            <div>数量：x{returnNumber}</div>
+                            <div className={classNames(formStyles.flex1, styles.productDesc)}>
+                                <div title={purchasePlatformGoodsName}>
+                                    <Paragraph ellipsis={{ rows: 2 }} className={styles.paragraph}>
+                                        {purchasePlatformGoodsName}
+                                    </Paragraph>
+                                </div>
+                                <div>{skus}</div>
+                                <div>数量：x{returnNumber}</div>
+                            </div>
                         </div>
                     );
                 },
@@ -194,6 +212,7 @@ const Over = () => {
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsReturnId"
+                bordered={true}
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}

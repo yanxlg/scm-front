@@ -406,7 +406,7 @@ const PaneErrTab = () => {
                         查询
                     </LoadingButton>
                     <Button className={formStyles.formBtn} onClick={() => setExportModal(true)}>
-                        导出数据
+                        导出
                     </Button>
                 </JsonForm>
                 <JsonForm

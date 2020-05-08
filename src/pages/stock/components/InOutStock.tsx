@@ -535,7 +535,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 onClick={() => setVisibleProps(true)}
                 className={formStyles.formBtn}
             >
-                导出Excel表
+                导出
             </Button>,
         ];
     }, []);
