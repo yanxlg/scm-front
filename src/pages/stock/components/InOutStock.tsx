@@ -528,29 +528,18 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <Button
-                key="export"
-                onClick={() => setVisibleProps(true)}
-                className={formStyles.formBtn}
-            >
-                导出
-            </Button>,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
-            <FitTable
+            <FitTable<IStockInItem | IStockOutItem>
+                bordered
                 rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
                 columns={columns as ColumnProps<any>[]}
                 dataSource={dataSource as any[]}
+                // toolBarRender={toolBarRender}
                 loading={loading}
                 onChange={onChange}
             />
@@ -573,10 +562,17 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        onClick={() => setVisibleProps(true)}
+                        className={formStyles.formBtn}
+                    >
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const addressModal = useMemo(() => {
         return <AddressModal visible={visible} onClose={onClose} />;
