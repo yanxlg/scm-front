@@ -659,8 +659,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                                 取消渠道订单
                             </LoadingButton>
                         ) : null}
-                        <Button type="primary" className="order-btn" onClick={this.showExport}>
-                            导出数据
+                        <Button className="order-btn" onClick={this.showExport}>
+                            导出
                         </Button>
                         <Button className="order-btn" onClick={this.changeShowFilterStatus}>
                             {showFilterStatus ? '收起' : '展示'}搜索条件

@@ -202,7 +202,7 @@ const StockControl: React.FC = () => {
     const toolBarRender = useCallback(() => {
         return [
             <Button key="export" onClick={showExport} className={formStyles.formBtn}>
-                导出Excel表
+                导出
             </Button>,
         ];
     }, []);
