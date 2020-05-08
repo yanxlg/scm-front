@@ -50,4 +50,9 @@ export enum OrderApiPath {
     padSimilarGood = '/api/v1/orders/similar_goods_pat',
     querySimilarInfo = '/api/v1/orders/similar_goods_info',
     queryChannelSource = '/api/v1/orders/channel_source',
+
+    // 待审核
+    getReviewOrderList = '/api/v1/orders/list/1',
+    // 导出待支付
+    postExportReview = '/api/v1/orders/exports/8',
 }

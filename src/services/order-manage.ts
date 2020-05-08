@@ -236,7 +236,7 @@ export const queryChannelSource = singlePromiseWrap(() => {
 
 export function getReviewOrderList(data: any) {
     return api
-        .post(OrderApiPath.getWaitShipList, {
+        .post(OrderApiPath.getReviewOrderList, {
             requestType: 'json',
             data: data,
         })

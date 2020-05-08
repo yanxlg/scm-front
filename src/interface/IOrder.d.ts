@@ -141,3 +141,7 @@ export interface ISimilarInfoResponse {
 export interface IChannelSourceResponse {
     [key: string]: string;
 }
+
+export interface IReviewOrderItem {
+    [key: string]: any;
+}

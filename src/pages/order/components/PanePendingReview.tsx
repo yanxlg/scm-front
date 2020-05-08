@@ -1,21 +1,22 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { Button, notification } from 'antd';
-import { JsonForm, LoadingButton, FitTable, useModal, useList } from 'react-components';
+import {
+    JsonForm,
+    LoadingButton,
+    FitTable,
+    useModal,
+    useList,
+    AutoEnLargeImg,
+} from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { IWaitShipSearch, IWaitShipOrderItem } from '@/interface/IOrder';
+import { IWaitShipSearch, IReviewOrderItem } from '@/interface/IOrder';
 import {
     delPurchaseOrders,
     delChannelOrders,
     postExportWaitShip,
-    getReviewOrderList
+    getReviewOrderList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { getStatusDesc } from '@/utils/transform';
-import {
-    purchaseOrderOptionList,
-    purchaseShippingOptionList,
-    orderStatusOptionList,
-} from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 import Export from '@/components/Export';
 
@@ -41,6 +42,14 @@ const formFields: FormField[] = [
         placeholder: '请输入子订单ID',
         formatter: 'number_str_arr',
     },
+    // product_shop
+    {
+        type: 'input',
+        name: 'product_shop',
+        label: '销售店铺名称',
+        className: 'order-input-review',
+        placeholder: '请输入销售店铺名称',
+    },
     {
         type: 'input',
         name: 'channel_order_goods_sn',
@@ -65,7 +74,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         onChange,
         onReload,
         selectedRowKeys,
-        setSelectedRowKeys
+        setSelectedRowKeys,
     } = useList({
         queryList: getReviewOrderList,
         formRef: [searchRef],
@@ -74,40 +83,38 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
 
     let currentSearchParams: IWaitShipSearch | null = null;
 
-    
-    const handleOrderList = useCallback(list => {
-        return list.map((current: any) => {
+    const orderList = useMemo(() => {
+        console.log('dataSource', dataSource);
+        const list: IReviewOrderItem[] = [];
+        dataSource.forEach(({ orderGoods, orderInfo }: any) => {
             const {
-                platformOrderTime,
-                purchasePlatformOrderId,
-                purchaseAmount,
-                purchaseOrderStatus,
-                purchaseOrderShippingStatus,
-                purchasePlanId,
+                createTime,
                 orderGoodsId,
-                productId,
-                // purchasewaybillNo,
-                orderGoods,
-                orderInfo,
-            } = current;
-            const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
-            const { channelSource } = orderInfo;
-            return {
-                platformOrderTime,
-                purchasePlatformOrderId,
-                purchaseAmount,
-                orderGoodsStatus,
-                purchaseOrderStatus,
-                purchaseOrderShippingStatus,
-                purchasePlanId,
+                productImage,
+                productStyle,
+                goodsNumber,
+                freight,
+                goodsAmount,
+                productShop,
+                channelOrderGoodsSn,
+            } = orderGoods;
+            // const {
+
+            // } = orderInfo;
+            list.push({
+                createTime,
                 orderGoodsId,
-                orderCreateTime,
-                productId,
-                // purchasewaybillNo,
-                channelSource,
-            } as IWaitShipOrderItem;
+                productImage,
+                productStyle,
+                goodsNumber,
+                freight,
+                goodsAmount,
+                productShop,
+                channelOrderGoodsSn,
+            });
         });
-    }, []);
+        return list;
+    }, [dataSource]);
 
     const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
         getAllTabCount();
@@ -179,11 +186,6 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, []);
 
-    const orderList = useMemo(() => {
-        console.log('dataSource', dataSource);
-        return [];
-    }, [dataSource])
-
     const search = useMemo(() => {
         return (
             <JsonForm
@@ -193,11 +195,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 // initialValues={defaultInitialValues}
             >
                 <div>
-                    <LoadingButton
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={onSearch}
-                    >
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
                     <LoadingButton className={formStyles.formBtn} onClick={onReload}>
@@ -208,7 +206,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         );
     }, []);
 
-    const columns = useMemo<TableProps<IWaitShipOrderItem>['columns']>(() => {
+    const columns = useMemo<TableProps<IReviewOrderItem>['columns']>(() => {
         return [
             {
                 title: '操作',
@@ -218,69 +216,87 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 title: '订单生成时间',
-                dataIndex: 'purchasePlatformOrderId',
+                dataIndex: 'createTime',
                 align: 'center',
                 width: 120,
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
                 title: '子订单ID',
-                dataIndex: 'purchaseAmount',
+                dataIndex: 'orderGoodsId',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '爬虫Goods ID',
-                dataIndex: 'channelSource',
+                dataIndex: 'a1',
                 align: 'center',
                 width: 120,
             },
             {
                 title: 'SKU图片',
-                dataIndex: 'productId',
+                dataIndex: 'productImage',
                 align: 'center',
-                width: 120,
+                width: 100,
+                render: (value: string) => {
+                    return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+                },
             },
             {
                 title: '商品名称',
-                dataIndex: 'orderGoodsStatus',
+                dataIndex: 'a2',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '商品规格',
-                dataIndex: 'purchaseOrderStatus',
+                dataIndex: 'productStyle',
                 align: 'center',
-                width: 120,
+                width: 180,
+                render: (value: string) => {
+                    let child: any = null;
+                    if (value) {
+                        try {
+                            const styleInfo = JSON.parse(value);
+                            child = (
+                                <>
+                                    {Object.keys(styleInfo).map(key => (
+                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                    ))}
+                                </>
+                            );
+                        } catch (err) {}
+                    }
+                    return child;
+                },
             },
             {
                 title: '销售商品数量',
-                dataIndex: 'purchaseOrderShippingStatus',
+                dataIndex: 'goodsNumber',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '销售商品运费',
-                dataIndex: 'purchasePlanId',
+                dataIndex: 'freight',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '销售商品总金额',
-                dataIndex: 'orderGoodsId',
+                dataIndex: 'goodsAmount',
                 align: 'center',
                 width: 130,
             },
             {
                 title: '销售店铺名称',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'productShop',
                 align: 'center',
                 width: 120,
-                
             },
             {
                 title: '销售订单ID',
-                dataIndex: 'a1',
+                dataIndex: 'channelOrderGoodsSn',
                 align: 'center',
                 width: 120,
             },
