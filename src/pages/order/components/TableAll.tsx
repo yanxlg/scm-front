@@ -260,7 +260,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: '_purchaseTotalAmount',
             align: 'center',
             width: 140,
-            render: (_, row: IChildOrderItem) => row.purchaseAmount
+            render: (_, row: IChildOrderItem) => row.purchaseAmount,
         },
         // // 勾选展示 - 待补充
         // {
