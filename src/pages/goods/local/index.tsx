@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { message } from 'antd';
+import { message, Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton } from 'react-components';
 import Container from '@/components/Container';
@@ -521,6 +521,9 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             >
                                 刷新
                             </LoadingButton>
+                            <Button disabled={allCount <= 0} className={formStyles.formBtn} onClick={() => this.toggleExcelDialog(true)}>
+                                导出
+                            </Button>
                         </div>
                     </JsonForm>
                     <GoodsProTable
@@ -540,7 +543,6 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                         handleClickOnsale={this.handleClickOnsale}
                         handleClickAllOnsale={this.handleClickAllOnsale}
                         getGoodsDelete={this.getGoodsDelete}
-                        toggleExcelDialog={this.toggleExcelDialog}
                     />
                     <CopyLink getCopiedLinkQuery={this.getCopiedLinkQuery} />
                     <MerchantListModal

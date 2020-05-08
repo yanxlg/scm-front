@@ -1,9 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button } from 'antd';
-// import ProTable from '@/components/ProTable';
-import { ProTable, FitTable, LoadingButton } from 'react-components';
+import { FitTable, LoadingButton } from 'react-components';
 import { PaginationConfig } from 'antd/es/pagination';
-import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
 import { AutoEnLargeImg } from 'react-components';
 import ShelvesDialog from './ShelvesDialog';
@@ -21,7 +19,6 @@ import Export from '@/components/Export';
 import { ColumnsType } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
-const pageSizeOptions = ['50', '100', '500', '1000'];
 
 declare interface IProps {
     loading: boolean;
@@ -42,7 +39,6 @@ declare interface IProps {
     exportVisible: boolean;
     onCancel: () => void;
     onOKey: (values: any) => Promise<any>;
-    toggleExcelDialog(status: boolean): void;
 }
 
 declare interface IState {
@@ -116,8 +112,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     <>
                         <div>{_value}</div>
                         <Button
-                            // ghost={true}
-                            // size="small"
                             type="link"
                             onClick={() => this.showMergeDialog(row)}
                         >
@@ -558,7 +552,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
             handleClickOnsale,
             handleClickAllOnsale,
             getGoodsDelete,
-            toggleExcelDialog,
         } = this.props;
         const disabled = selectedRowKeys.length === 0;
         return [
@@ -586,10 +579,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 disabled={disabled}
             >
                 删除
-            </LoadingButton>,
-            <Button key="4" className={formStyles.formBtn} onClick={() => toggleExcelDialog(true)}>
-                导出
-            </Button>,
+            </LoadingButton>
         ];
     };
 
@@ -616,41 +606,9 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         } = this.state;
         return (
             <>
-                {/* <ProTable<IRowDataItem>
-                    headerTitle="本地产品库列表"
-                    rowKey="product_id"
-                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                    bottom={60}
-                    minHeight={500}
-                    rowSelection={{
-                        fixed: true,
-                        columnWidth: 60,
-                        selectedRowKeys: selectedRowKeys,
-                        onChange: this.onSelectChange,
-                    }}
-                    pagination={{
-                        total: total,
-                        current: currentPage,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                        pageSizeOptions: pageSizeOptions,
-                    }}
-                    tableAlertRender={false}
-                    columns={this.columns}
-                    dataSource={goodsList}
-                    loading={loading}
-                    onChange={this.onChangeProTable}
-                    options={{
-                        density: true,
-                        fullScreen: true,
-                        reload: this.onReload,
-                        setting: true,
-                    }}
-                /> */}
                 <FitTable
                     bordered
                     rowKey="product_id"
-                    // className="order-table"
                     loading={loading}
                     columns={this.columns}
                     rowSelection={{

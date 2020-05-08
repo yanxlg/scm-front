@@ -14,9 +14,9 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import { defaultOptionItem, purchasePlatformOptionList } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 import QRCode from 'qrcode.react';
+import Export from '@/components/Export';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import Export from '@/components/Export';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -298,10 +298,17 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
                         刷新
                     </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => setVisibleProps(true)}
+                    >
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const columns = useMemo<TableProps<IWaitPayOrderItem>['columns']>(() => {
         return [
@@ -489,14 +496,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 disabled={disabled}
             >
                 取消渠道订单
-            </LoadingButton>,
-            <Button
-                key="export"
-                className={formStyles.formBtn}
-                onClick={() => setVisibleProps(true)}
-            >
-                导出
-            </Button>,
+            </LoadingButton>
         ];
     }, [selectedOrderGoodsIdList, _cancelPurchaseOrder, _delChannelOrders]);
 
@@ -511,7 +511,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 <FitTable
                     bordered={true}
                     rowKey="purchase_plan_id"
-                    className="order-table"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}

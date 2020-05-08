@@ -102,6 +102,19 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
+                title: '操作',
+                dataIndex: '_operate',
+                align: 'center',
+                width: 150,
+                render: (_, row) => {
+                    return (
+                        <Button type="link" onClick={() => showDetail(row)}>
+                            查看详情
+                        </Button>
+                    );
+                },
+            },
+            {
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
@@ -153,19 +166,6 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                 dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
-            },
-            {
-                title: '操作',
-                dataIndex: '_operate',
-                align: 'center',
-                width: 150,
-                render: (_, row) => {
-                    return (
-                        <Button type="link" onClick={() => showDetail(row)}>
-                            查看详情
-                        </Button>
-                    );
-                },
             },
         ];
     }, []);
@@ -223,7 +223,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         return (
             <>
                 <JsonForm
-                    // labelClassName="order-error-label"
+                    labelClassName={styles.label}
                     fieldList={fieldList}
                     ref={formRef1}
                     initialValues={{

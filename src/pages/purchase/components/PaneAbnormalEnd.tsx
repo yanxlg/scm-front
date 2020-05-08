@@ -97,6 +97,19 @@ const PaneAbnormalEnd: React.FC = props => {
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
+                title: '操作',
+                dataIndex: '_operate',
+                align: 'center',
+                width: 150,
+                render: (_, row) => {
+                    return (
+                        <Button type="link" onClick={() => showDetail(row)}>
+                            查看详情
+                        </Button>
+                    );
+                },
+            },
+            {
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
@@ -156,19 +169,6 @@ const PaneAbnormalEnd: React.FC = props => {
                 width: 150,
                 render: val => utcToLocal(val),
             },
-            {
-                title: '操作',
-                dataIndex: '_operate',
-                align: 'center',
-                width: 150,
-                render: (_, row) => {
-                    return (
-                        <Button type="link" onClick={() => showDetail(row)}>
-                            查看详情
-                        </Button>
-                    );
-                },
-            },
         ];
     }, []);
 
@@ -198,7 +198,7 @@ const PaneAbnormalEnd: React.FC = props => {
         return (
             <>
                 <JsonForm
-                    // labelClassName="order-error-label"
+                    labelClassName={styles.label}
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{

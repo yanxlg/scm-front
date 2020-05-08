@@ -199,14 +199,6 @@ const StockControl: React.FC = () => {
         });
     }, []);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <Button key="export" onClick={showExport} className={formStyles.formBtn}>
-                导出
-            </Button>,
-        ];
-    }, []);
-
     const pagination = useMemo(() => {
         return {
             total: total,
@@ -225,7 +217,7 @@ const StockControl: React.FC = () => {
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
+                // toolBarRender={toolBarRender}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
@@ -249,9 +241,12 @@ const StockControl: React.FC = () => {
                 <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                     刷新
                 </LoadingButton>
+                <Button disabled={total <= 0} onClick={showExport} className={formStyles.formBtn}>
+                    导出
+                </Button>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const exportComponent = useMemo(() => {
         return (
