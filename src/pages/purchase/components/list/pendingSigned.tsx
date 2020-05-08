@@ -138,10 +138,10 @@ const PendingSigned = () => {
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
                     </LoadingButton>
-                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
-                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
+                    <Button onClick={showExportFn} className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>

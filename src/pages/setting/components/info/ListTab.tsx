@@ -300,6 +300,7 @@ const ListTab: React.FC<ListTabProps> = ({ activeKey }) => {
                     </LoadingButton>
                 </JsonForm>
                 <FitTable<ICustomItem>
+                    bordered
                     className={formStyles.formItem}
                     rowKey="countryCode"
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}

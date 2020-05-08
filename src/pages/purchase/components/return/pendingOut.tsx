@@ -89,10 +89,10 @@ const PendingOut = () => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         搜索
                     </LoadingButton>
-                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
+                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
+                    <Button onClick={showExportFn} className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>

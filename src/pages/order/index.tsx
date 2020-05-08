@@ -86,7 +86,9 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                         defaultActiveKey={this.defaultActiveKey}
                     >
                         <TabPane tab={`全部（${allListCount}）`} key="1">
-                            <PaneAll getAllTabCount={this.getAllTabCount} />
+                            <div className="order-tab-content">
+                                <PaneAll getAllTabCount={this.getAllTabCount} />
+                            </div>
                         </TabPane>
                         <TabPane tab={`待审核（xxx）`} key="8">
                             <div className="order-tab-content">
