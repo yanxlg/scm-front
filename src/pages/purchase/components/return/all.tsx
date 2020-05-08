@@ -9,7 +9,7 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button } from 'antd';
+import { Button, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -21,6 +21,8 @@ import { EmptyObject } from '@/config/global';
 import styles from '@/pages/purchase/_return.less';
 import { PurchaseReturnCode, PurchaseReturnMap } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
+import classNames from 'classnames';
+const { Paragraph } = Typography;
 
 export const fieldList: FormField[] = [
     {
@@ -98,7 +100,12 @@ const AllList: React.FC<AllListProps> = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
+            <JsonForm
+                fieldList={fieldList}
+                ref={formRef}
+                enableCollapse={false}
+                labelClassName={styles.formItem}
+            >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         搜索
@@ -124,7 +131,7 @@ const AllList: React.FC<AllListProps> = () => {
             },
             {
                 title: '出入库类型',
-                width: '100px',
+                width: '120px',
                 align: 'center',
                 dataIndex: 'outboundType',
                 render: () => {
@@ -141,7 +148,7 @@ const AllList: React.FC<AllListProps> = () => {
             {
                 title: '商品信息',
                 dataIndex: 'productInfo',
-                width: '178px',
+                width: '280px',
                 align: 'center',
                 render: (_, item: IReturnItem) => {
                     let {
@@ -162,11 +169,23 @@ const AllList: React.FC<AllListProps> = () => {
                         }
                     } catch (e) {}
                     return (
-                        <div>
+                        <div
+                            className={classNames(
+                                formStyles.flex,
+                                formStyles.flexRow,
+                                formStyles.flexAlign,
+                            )}
+                        >
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchasePlatformGoodsName}</div>
-                            <div>{skus}</div>
-                            <div>数量：x{returnNumber}</div>
+                            <div className={classNames(formStyles.flex1, styles.productDesc)}>
+                                <div title={purchasePlatformGoodsName}>
+                                    <Paragraph ellipsis={{ rows: 2 }} className={styles.paragraph}>
+                                        {purchasePlatformGoodsName}
+                                    </Paragraph>
+                                </div>
+                                <div>{skus}</div>
+                                <div>数量：x{returnNumber}</div>
+                            </div>
                         </div>
                     );
                 },
@@ -255,6 +274,7 @@ const AllList: React.FC<AllListProps> = () => {
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsReturnId"
+                bordered={true}
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
