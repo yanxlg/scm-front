@@ -461,6 +461,11 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 dataIndex: 'purchaseAmount',
                 align: 'center',
                 width: 120,
+                render: (value: string, row: IPendingOrderItem) => {
+                    const { purchaseNumber } = row;
+                    const price = Number(value) / Number(purchaseNumber);
+                    return isNaN(price) ? '' : price.toFixed(2);
+                },
             },
         ];
     }, []);
