@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { downloadExcel } from '@/utils/common';
+import { GlobalApiPath } from '@/config/api/GlobalApiPath';
 import {
     IPadSimilarBody,
     IWarehouseNotShipSearch,
@@ -242,3 +242,22 @@ export function getReviewOrderList(data: any) {
         })
         .then(transPaginationResponse);
 }
+
+export async function postExportReview(data: any) {
+    return request.post(GlobalApiPath.downloadExcel, {
+        data,
+    });
+}
+
+export function postReviewPass(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postReviewPass, {
+        data
+    })
+}
+
+export function postOrderOffsale(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postOrderOffsale, {
+        data
+    })
+}
+

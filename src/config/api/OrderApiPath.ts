@@ -52,7 +52,11 @@ export enum OrderApiPath {
     queryChannelSource = '/api/v1/orders/channel_source',
 
     // 待审核
-    getReviewOrderList = '/api/v1/orders/list/1',
+    getReviewOrderList = '/api/v1/orders/list/8',
     // 导出待支付
     postExportReview = '/api/v1/orders/exports/8',
+    // 审核通过
+    postReviewPass = '/api/v1/orders/check/pass',
+    // 下架商品
+    postOrderOffsale = '/api/v1/orders/offsale',
 }

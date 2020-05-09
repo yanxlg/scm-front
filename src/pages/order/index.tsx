@@ -28,11 +28,12 @@ declare interface IOrderState {
     penddingPurchaseListCount: number;
     penddingWarehousingListCount: number;
     errorOrderCount: number;
+    penddingCheckListCount: number;
 }
 
 class Order extends React.PureComponent<IProps, IOrderState> {
     private type: number = 2;
-    private defaultActiveKey: string = '1';
+    private defaultActiveKey: string = '8';
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -43,6 +44,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingPurchaseListCount: 0,
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
+            penddingCheckListCount: 0
         };
         // console.log(11111, this.props);
         this.defaultActiveKey = this.props.location?.query?.type || '8';
@@ -76,6 +78,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingShipingOrderCount,
             penddingPurchaseListCount,
             penddingWarehousingListCount,
+            penddingCheckListCount
         } = this.state;
         return (
             <Container>
@@ -90,7 +93,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                                 <PaneAll getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
-                        <TabPane tab={`待审核（xxx）`} key="8">
+                        <TabPane tab={`待审核（${penddingCheckListCount}）`} key="8">
                             <div className="order-tab-content">
                                 <PanePendingReview getAllTabCount={this.getAllTabCount} />
                             </div>

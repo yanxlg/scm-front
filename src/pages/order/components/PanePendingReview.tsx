@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useCallback } from 'react';
 import { Button, notification } from 'antd';
 import {
     JsonForm,
@@ -11,13 +11,15 @@ import {
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { IWaitShipSearch, IReviewOrderItem } from '@/interface/IOrder';
 import {
-    delPurchaseOrders,
-    delChannelOrders,
-    postExportWaitShip,
     getReviewOrderList,
+    postExportReview,
+    delChannelOrders,
+    postReviewPass,
+    postOrderOffsale,
+    getOrderGoodsDetail
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { TableProps } from 'antd/es/table';
+import { ColumnsType } from 'antd/es/table';
 import Export from '@/components/Export';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -61,8 +63,7 @@ const formFields: FormField[] = [
 ];
 
 const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
-    const searchRef = useRef<JsonFormRef>(null);
-
+    const formRef = useRef<JsonFormRef>(null);
     const {
         dataSource,
         loading,
@@ -77,11 +78,9 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         setSelectedRowKeys,
     } = useList({
         queryList: getReviewOrderList,
-        formRef: [searchRef],
+        formRef: formRef
     });
     const { visible, setVisibleProps, onClose } = useModal<boolean>();
-
-    let currentSearchParams: IWaitShipSearch | null = null;
 
     const orderList = useMemo(() => {
         console.log('dataSource', dataSource);
@@ -97,6 +96,8 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 goodsAmount,
                 productShop,
                 channelOrderGoodsSn,
+                productName,
+                productId
             } = orderGoods;
             // const {
 
@@ -111,6 +112,8 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 goodsAmount,
                 productShop,
                 channelOrderGoodsSn,
+                productName,
+                productId
             });
         });
         return list;
@@ -148,51 +151,85 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         [],
     );
 
-    const _cancelPurchaseOrder = useCallback(() => {
-        return delPurchaseOrders({
-            order_goods_ids: selectedRowKeys as string[],
-        }).then(res => {
-            onSearch();
-            const { success, failed } = res.data;
-            if (success!.length) {
-                batchOperateSuccess('取消采购单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消采购单', failed);
-            }
-        });
-    }, [selectedRowKeys]);
-
-    const _delChannelOrders = useCallback(() => {
+    const _delChannelOrders = useCallback((orderGoodsIds: string[]) => {
         return delChannelOrders({
-            order_goods_ids: selectedRowKeys as string[],
+            order_goods_ids: orderGoodsIds,
         }).then(res => {
-            onSearch();
+            onReload();
             const { success, failed } = res.data;
-
             if (success!.length) {
-                batchOperateSuccess('取消渠道订单', success);
+                batchOperateSuccess('取消订单', success);
             }
             if (failed!.length) {
-                batchOperateFail('取消渠道订单', failed);
+                batchOperateFail('取消订单', failed);
             }
         });
-    }, [selectedRowKeys]);
+    }, []);
 
-    const _postExportWaitShip = useCallback((values: any) => {
-        return postExportWaitShip({
-            ...currentSearchParams,
+    // 审核通过
+    const _postReviewPass = useCallback((orderGoodsIds: string[]) => {
+        return postReviewPass({
+            order_goods_ids: orderGoodsIds
+        }).then(res => {
+            // console.log('postReviewPass', res);
+            onReload();
+            const { success, failed } = res.data;
+            if (success!.length) {
+                batchOperateSuccess('审核通过', success);
+            }
+            if (failed!.length) {
+                batchOperateFail('审核通过', failed.map(({orderGoodsId, msg}: any) => ({
+                    order_goods_id: orderGoodsId,
+                    result: msg
+                })));
+            }
+        })
+    }, []);
+
+    // 下架商品
+    const _postOrderOffsale = useCallback((orderGoodsIds: string[]) => {
+        return postOrderOffsale({
+            order_goods_ids: orderGoodsIds
+        }).then(res => {
+            // console.log('postOrderOffsale', res);
+            onReload();
+            // failed
+            const { success } = res.data;
+            if (success!.length) {
+                batchOperateSuccess('下架商品', [...new Set(success.map((item: any) => item.product_id))] as string[]);
+            }
+            // if (failed!.length) {
+            //     batchOperateFail('下架商品', [...new Set(failed.map((item: any) => item.product_id))] as string[]);
+            // }
+        })
+    }, []);
+
+    // 获取跳转链接
+    const _getOrderGoodsDetail = useCallback((productId: string) => {
+        return getOrderGoodsDetail(productId)
+            .then(res => {
+                // console.log('getOrderGoodsDetail', res);
+                const { worm_goodsinfo_link } = res.data;
+                window.open(worm_goodsinfo_link);
+            })
+    }, []);
+
+    const _postExportReview = useCallback((values: any) => {
+        // console.log('_postExportReview', values, queryRef.current);
+        return postExportReview({
             ...values,
+            query: queryRef.current,
+            module: 3,
+            type: 9
         });
     }, []);
 
     const search = useMemo(() => {
         return (
             <JsonForm
-                ref={searchRef}
+                ref={formRef}
                 fieldList={formFields}
                 labelClassName="order-label"
-                // initialValues={defaultInitialValues}
             >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
@@ -201,18 +238,35 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => setVisibleProps(true)}
+                    >
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
-    const columns = useMemo<TableProps<IReviewOrderItem>['columns']>(() => {
+    const columns = useMemo<ColumnsType<IReviewOrderItem>>(() => {
         return [
             {
                 title: '操作',
-                dataIndex: 'platformOrderTime',
+                dataIndex: '_',
                 align: 'center',
                 width: 120,
+                render: (_, row: IReviewOrderItem) => {
+                    const { orderGoodsId } = row;
+                    return (
+                        <>
+                            <div><a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a></div>
+                            <div style={{ margin: '2px 0' }} onClick={() => _delChannelOrders([orderGoodsId])}><a>取消订单</a></div>
+                            <div><a onClick={() => _postOrderOffsale([orderGoodsId])}>下架商品</a></div>
+                        </>
+                    )
+                }
             },
             {
                 title: '订单生成时间',
@@ -228,10 +282,15 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
             {
-                title: '爬虫Goods ID',
-                dataIndex: 'a1',
+                title: '商品标题',
+                dataIndex: 'productName',
                 align: 'center',
                 width: 120,
+                render: (value: string, row: IReviewOrderItem) => {
+                    // href=""
+                    const { productId } = row;
+                    return <a className="order-link" onClick={() => _getOrderGoodsDetail(productId)}>{value}</a>
+                }
             },
             {
                 title: 'SKU图片',
@@ -241,12 +300,6 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 render: (value: string) => {
                     return <AutoEnLargeImg src={value} className="order-img-lazy" />;
                 },
-            },
-            {
-                title: '商品名称',
-                dataIndex: 'a2',
-                align: 'center',
-                width: 120,
             },
             {
                 title: '商品规格',
@@ -277,16 +330,16 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
             {
-                title: '销售商品运费',
+                title: '销售商品运费($)',
                 dataIndex: 'freight',
                 align: 'center',
-                width: 120,
+                width: 130,
             },
             {
-                title: '销售商品总金额',
+                title: '销售商品总金额($)',
                 dataIndex: 'goodsAmount',
                 align: 'center',
-                width: 130,
+                width: 150,
             },
             {
                 title: '销售店铺名称',
@@ -317,38 +370,38 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         const disabled = selectedRowKeys.length === 0 ? true : false;
         return [
             <LoadingButton
-                key="_order"
+                key="1"
                 type="primary"
                 disabled={disabled}
                 className={formStyles.formBtn}
-                onClick={_cancelPurchaseOrder}
+                onClick={() => _postReviewPass(selectedRowKeys)}
             >
                 审核通过
             </LoadingButton>,
             <LoadingButton
-                key="channel_order"
+                key="2"
                 type="primary"
                 className={formStyles.formBtn}
-                onClick={() => _delChannelOrders()}
+                onClick={() => _delChannelOrders(selectedRowKeys)}
                 disabled={selectedRowKeys.length === 0}
             >
-                取消渠道订单
+                取消订单
             </LoadingButton>,
-            <Button
-                key="export"
+            <LoadingButton
+                key="3"
+                type="primary"
                 className={formStyles.formBtn}
-                onClick={() => setVisibleProps(true)}
+                onClick={() => _postOrderOffsale(selectedRowKeys)}
+                disabled={selectedRowKeys.length === 0}
             >
-                导出
-            </Button>,
+                下架商品
+            </LoadingButton>
         ];
-    }, [selectedRowKeys, _cancelPurchaseOrder, _delChannelOrders, _postExportWaitShip]);
+    }, [selectedRowKeys]);
 
-    useEffect(() => {
-        onSearch();
-    }, []);
 
     return useMemo(() => {
+        // console.log('setSelectedRowKeys', selectedRowKeys);
         return (
             <>
                 {search}
@@ -373,9 +426,9 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     toolBarRender={toolBarRender}
                 />
                 <Export
-                    columns={columns as any}
+                    columns={columns.filter((item: any) => item.dataIndex[0] !== '_') as any}
                     visible={visible}
-                    onOKey={_postExportWaitShip}
+                    onOKey={_postExportReview}
                     onCancel={onClose}
                 />
             </>
