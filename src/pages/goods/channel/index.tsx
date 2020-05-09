@@ -605,9 +605,17 @@ const ChannelList: React.FC = props => {
                 <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                     刷新
                 </LoadingButton>
+                <Button
+                    disabled={total <= 0}
+                    // type="primary"
+                    className={formStyles.formBtn}
+                    onClick={showExcelDialog}
+                >
+                    导出
+                </Button>
             </div>
         );
-    }, []);
+    }, [total]);
 
     const search = useMemo(() => {
         return (
@@ -620,7 +628,7 @@ const ChannelList: React.FC = props => {
                 {children}
             </JsonForm>
         );
-    }, []);
+    }, [children]);
 
     const toolBarRender = useCallback(() => {
         const size = selectedRowKeys.length;
@@ -643,20 +651,12 @@ const ChannelList: React.FC = props => {
             >
                 一键下架
             </LoadingButton>,
-            <Button
-                key="export"
-                disabled={total <= 0}
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={showExcelDialog}
-            >
-                导出
-            </Button>,
         ];
     }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
             <FitTable<IChannelProductListItem>
+                bordered
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}
