@@ -9,14 +9,14 @@ import {
     AutoEnLargeImg,
 } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { IWaitShipSearch, IReviewOrderItem } from '@/interface/IOrder';
+import { IReviewSearch, IReviewOrderItem } from '@/interface/IOrder';
 import {
     getReviewOrderList,
     postExportReview,
     delChannelOrders,
     postReviewPass,
     postOrderOffsale,
-    getOrderGoodsDetail
+    getOrderGoodsDetail,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
@@ -78,14 +78,13 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         setSelectedRowKeys,
     } = useList({
         queryList: getReviewOrderList,
-        formRef: formRef
+        formRef: formRef,
     });
     const { visible, setVisibleProps, onClose } = useModal<boolean>();
 
     const orderList = useMemo(() => {
-        console.log('dataSource', dataSource);
         const list: IReviewOrderItem[] = [];
-        dataSource.forEach(({ orderGoods, orderInfo }: any) => {
+        dataSource.forEach(({ orderGoods }: any) => {
             const {
                 createTime,
                 orderGoodsId,
@@ -97,7 +96,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 productShop,
                 channelOrderGoodsSn,
                 productName,
-                productId
+                productId,
             } = orderGoods;
             // const {
 
@@ -113,7 +112,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 productShop,
                 channelOrderGoodsSn,
                 productName,
-                productId
+                productId,
             });
         });
         return list;
@@ -169,7 +168,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     // 审核通过
     const _postReviewPass = useCallback((orderGoodsIds: string[]) => {
         return postReviewPass({
-            order_goods_ids: orderGoodsIds
+            order_goods_ids: orderGoodsIds,
         }).then(res => {
             // console.log('postReviewPass', res);
             onReload();
@@ -178,40 +177,44 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 batchOperateSuccess('审核通过', success);
             }
             if (failed!.length) {
-                batchOperateFail('审核通过', failed.map(({orderGoodsId, msg}: any) => ({
-                    order_goods_id: orderGoodsId,
-                    result: msg
-                })));
+                batchOperateFail(
+                    '审核通过',
+                    failed.map(({ orderGoodsId, msg }: any) => ({
+                        order_goods_id: orderGoodsId,
+                        result: msg,
+                    })),
+                );
             }
-        })
+        });
     }, []);
 
     // 下架商品
     const _postOrderOffsale = useCallback((orderGoodsIds: string[]) => {
         return postOrderOffsale({
-            order_goods_ids: orderGoodsIds
+            order_goods_ids: orderGoodsIds,
         }).then(res => {
             // console.log('postOrderOffsale', res);
             onReload();
             // failed
             const { success } = res.data;
             if (success!.length) {
-                batchOperateSuccess('下架商品', [...new Set(success.map((item: any) => item.product_id))] as string[]);
+                batchOperateSuccess('下架商品', [
+                    ...new Set(success.map((item: any) => item.product_id)),
+                ] as string[]);
             }
             // if (failed!.length) {
             //     batchOperateFail('下架商品', [...new Set(failed.map((item: any) => item.product_id))] as string[]);
             // }
-        })
+        });
     }, []);
 
     // 获取跳转链接
     const _getOrderGoodsDetail = useCallback((productId: string) => {
-        return getOrderGoodsDetail(productId)
-            .then(res => {
-                // console.log('getOrderGoodsDetail', res);
-                const { worm_goodsinfo_link } = res.data;
-                window.open(worm_goodsinfo_link);
-            })
+        return getOrderGoodsDetail(productId).then(res => {
+            // console.log('getOrderGoodsDetail', res);
+            const { worm_goodsinfo_link } = res.data;
+            window.open(worm_goodsinfo_link);
+        });
     }, []);
 
     const _postExportReview = useCallback((values: any) => {
@@ -220,17 +223,13 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
             ...values,
             query: queryRef.current,
             module: 3,
-            type: 9
+            type: 9,
         });
     }, []);
 
     const search = useMemo(() => {
         return (
-            <JsonForm
-                ref={formRef}
-                fieldList={formFields}
-                labelClassName="order-label"
-            >
+            <JsonForm ref={formRef} fieldList={formFields} labelClassName="order-label">
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
@@ -261,12 +260,21 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     const { orderGoodsId } = row;
                     return (
                         <>
-                            <div><a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a></div>
-                            <div style={{ margin: '2px 0' }} onClick={() => _delChannelOrders([orderGoodsId])}><a>取消订单</a></div>
-                            <div><a onClick={() => _postOrderOffsale([orderGoodsId])}>下架商品</a></div>
+                            <div>
+                                <a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a>
+                            </div>
+                            <div
+                                style={{ margin: '2px 0' }}
+                                onClick={() => _delChannelOrders([orderGoodsId])}
+                            >
+                                <a>取消订单</a>
+                            </div>
+                            <div>
+                                <a onClick={() => _postOrderOffsale([orderGoodsId])}>下架商品</a>
+                            </div>
                         </>
-                    )
-                }
+                    );
+                },
             },
             {
                 title: '订单生成时间',
@@ -289,8 +297,12 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 render: (value: string, row: IReviewOrderItem) => {
                     // href=""
                     const { productId } = row;
-                    return <a className="order-link" onClick={() => _getOrderGoodsDetail(productId)}>{value}</a>
-                }
+                    return (
+                        <a className="order-link" onClick={() => _getOrderGoodsDetail(productId)}>
+                            {value}
+                        </a>
+                    );
+                },
             },
             {
                 title: 'SKU图片',
@@ -395,18 +407,17 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 disabled={selectedRowKeys.length === 0}
             >
                 下架商品
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [selectedRowKeys]);
 
-
     return useMemo(() => {
-        // console.log('setSelectedRowKeys', selectedRowKeys);
+        console.log('orderList', orderList);
         return (
             <>
                 {search}
                 <FitTable
-                    bordered={true}
+                    bordered
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}

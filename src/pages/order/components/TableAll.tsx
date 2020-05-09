@@ -33,8 +33,8 @@ declare interface IProps {
     visible: boolean;
     onCancel: () => void;
     onOKey: (values: any) => Promise<any>;
-    page: number; 
-    pageSize: number; 
+    page: number;
+    pageSize: number;
     total: number;
     onSearch(params?: IFilterParams): Promise<any>;
     postOrdersPlace(ids: string[]): Promise<any>;
@@ -274,7 +274,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: '_purchaseTotalAmount',
             align: 'center',
             width: 140,
-            render: (_, row: IChildOrderItem) => row.purchaseAmount
+            render: (_, row: IChildOrderItem) => row.purchaseAmount,
         },
         // // 勾选展示 - 待补充
         // {
@@ -414,11 +414,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                const { reserveStatus } = row;
+                const { reserveStatus, purchaseFailReason } = row;
                 if (reserveStatus === 3 && value === 1) {
                     return '';
                 }
-                return getStatusDesc(purchaseOrderOptionList, value);
+                return (
+                    <>
+                        {getStatusDesc(purchaseOrderOptionList, value)}
+                        {value === 7 && purchaseFailReason && <div>({purchaseFailReason})</div>}
+                    </>
+                );
             },
         },
         // 勾选展示
@@ -585,16 +590,29 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     onChange = ({ current, pageSize }: PaginationConfig) => {
         this.props.onSearch({
             page: current,
-            page_count: pageSize
+            page_count: pageSize,
         });
-    }
+    };
 
     toolBarRender = () => {
-        const { postOrdersPlace, cancelPurchaseOrder, cancelChannelOrder, changeParentOrder, showParentStatus, getOrderGoodsIdList } = this.props;
+        const {
+            postOrdersPlace,
+            cancelPurchaseOrder,
+            cancelChannelOrder,
+            changeParentOrder,
+            showParentStatus,
+            getOrderGoodsIdList,
+        } = this.props;
         const orderGoodsIdList = getOrderGoodsIdList();
         const disabled = orderGoodsIdList.length === 0;
         return [
-            <Checkbox onChange={e => changeParentOrder(e.target.checked)} checked={showParentStatus} key="0">仅展示父订单ID</Checkbox>,
+            <Checkbox
+                onChange={e => changeParentOrder(e.target.checked)}
+                checked={showParentStatus}
+                key="0"
+            >
+                仅展示父订单ID
+            </Checkbox>,
             <LoadingButton
                 key="1"
                 type="primary"
@@ -621,9 +639,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 onClick={() => cancelChannelOrder(orderGoodsIdList)}
             >
                 取消渠道订单
-            </LoadingButton>
-        ]
-    }
+            </LoadingButton>,
+        ];
+    };
 
     render() {
         const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;

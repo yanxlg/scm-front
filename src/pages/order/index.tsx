@@ -33,7 +33,7 @@ declare interface IOrderState {
 
 class Order extends React.PureComponent<IProps, IOrderState> {
     private type: number = 2;
-    private defaultActiveKey: string = '8';
+    private defaultActiveKey: string = '1';
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -44,10 +44,10 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingPurchaseListCount: 0,
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
-            penddingCheckListCount: 0
+            penddingCheckListCount: 0,
         };
         // console.log(11111, this.props);
-        this.defaultActiveKey = this.props.location?.query?.type || '8';
+        this.defaultActiveKey = this.props.location?.query?.type || '1';
     }
 
     componentDidMount() {
@@ -78,7 +78,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingShipingOrderCount,
             penddingPurchaseListCount,
             penddingWarehousingListCount,
-            penddingCheckListCount
+            penddingCheckListCount,
         } = this.state;
         return (
             <Container>

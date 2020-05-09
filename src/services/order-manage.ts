@@ -10,6 +10,7 @@ import {
     IPendingOrderSearch,
     ISimilarInfoResponse,
     IChannelSourceResponse,
+    IReviewSearch,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
@@ -234,7 +235,7 @@ export const queryChannelSource = singlePromiseWrap(() => {
     return request.get<IResponse<IChannelSourceResponse>>(OrderApiPath.queryChannelSource);
 });
 
-export function getReviewOrderList(data: any) {
+export function getReviewOrderList(data: IReviewSearch) {
     return api
         .post(OrderApiPath.getReviewOrderList, {
             requestType: 'json',
@@ -251,13 +252,12 @@ export async function postExportReview(data: any) {
 
 export function postReviewPass(data: { order_goods_ids: string[] }) {
     return request.post(OrderApiPath.postReviewPass, {
-        data
-    })
+        data,
+    });
 }
 
 export function postOrderOffsale(data: { order_goods_ids: string[] }) {
     return request.post(OrderApiPath.postOrderOffsale, {
-        data
-    })
+        data,
+    });
 }
-
