@@ -1,20 +1,17 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable, useModal } from 'react-components';
-import { Button, message } from 'antd';
+import { FitTable, useModal, useList } from 'react-components';
+import { Button } from 'antd';
 import '@/styles/index.less';
 import { ColumnProps, TableProps } from 'antd/es/table';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { FormInstance } from 'rc-field-form/lib/interface';
 import { exportStockList, queryStockList } from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { AutoEnLargeImg } from 'react-components';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
-import { useList } from '@/utils/hooks';
-import { IStockRequest, IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
-import { RequestPagination } from '@/interface/IGlobal';
+import { IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import { LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
@@ -50,8 +47,22 @@ const StockControl: React.FC = () => {
             {
                 title: '商品属性',
                 width: '130px',
-                dataIndex: ['sku_item', 'mainImageUrl'],
+                dataIndex: ['sku_item', 'optionValue'],
                 align: 'center',
+                render: _ => {
+                    let skus: any[] = [];
+                    try {
+                        const sku = JSON.parse(_);
+                        for (let key in sku) {
+                            skus.push(
+                                <div key={key}>
+                                    {key}:{sku[key]}
+                                </div>,
+                            );
+                        }
+                    } catch (e) {}
+                    return <div>{skus}</div>;
+                },
             },
             {
                 title: '可销售库存',
@@ -103,6 +114,7 @@ const StockControl: React.FC = () => {
                 type: 'input',
                 label: '商品SKU ID',
                 name: 'commodity_sku_id',
+                formatter: 'multipleToArray',
             },
         ];
     }, []);
@@ -135,7 +147,7 @@ const StockControl: React.FC = () => {
         onSearch,
         onChange,
         onReload,
-    } = useList<IStockItem, IStockRequest & RequestPagination>({
+    } = useList<IStockItem>({
         queryList: queryStockList,
         formRef: formRef,
         defaultState: {
