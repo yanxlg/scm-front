@@ -47,12 +47,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         if (type === StockType.In) {
             return [
                 {
-                    title: '入库单ID',
-                    width: '150px',
-                    dataIndex: 'referWaybillNo',
-                    align: 'center',
-                },
-                {
                     title: '创建时间',
                     width: '150px',
                     dataIndex: 'createTime',
@@ -336,14 +330,14 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     label: '采购订单ID',
                     name: 'purchase_order_goods_id',
                 },
-                {
+                /*       {
                     type: 'input',
                     label: '入库单ID',
                     name: 'refer_waybill_no',
                     formatter: 'multipleToArray',
-                },
+                },*/
                 {
-                    type: 'input',
+                    type: 'select',
                     label: '物流商',
                     name: 'purchase_shipping_name',
                     defaultValue: '',
@@ -384,7 +378,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 type: 'dateRanger',
                 label: '发送出库指令时间',
-                name: ['delivery_command_time_end', 'order_goods_shipping_status'],
+                name: ['delivery_command_time_start', 'delivery_command_time_end'],
                 className: 'stock-form-picker',
                 formatter: ['start_date', 'end_date'],
             },
@@ -543,7 +537,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const table = useMemo(() => {
         return (
             <FitTable
-                rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
+                rowKey={type === StockType.In ? 'purchaseOrderGoodsId' : 'skuId'}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
@@ -564,7 +558,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 ref={formRef}
                 fieldList={fieldList}
                 initialValues={defaultInitialValues}
-                enableCollapse={false}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>

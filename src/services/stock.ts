@@ -65,12 +65,9 @@ export function exportOutList(data: IStockOUTFormData) {
 }
 
 export function queryStockList(data: IStockRequest & IRequestPagination1) {
-    return request.post<IResponse<IPaginationResponse<IStockItem>>>(
-        StockApiPathEnum.QueryStockList,
-        {
-            data: data,
-        },
-    );
+    return api.post<IResponse<IPaginationResponse<IStockItem>>>(StockApiPathEnum.QueryStockList, {
+        data: data,
+    });
 }
 
 export function exportStockList(data: IStockRequest) {
