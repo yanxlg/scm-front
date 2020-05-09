@@ -73,7 +73,7 @@ interface IProps {
 }
 
 const AllColumnsSetting: React.FC<IProps> = ({ value, onChange }) => {
-    console.log('AllColumnsSetting', value);
+    // console.log('AllColumnsSetting', value);
     const [baseList, setBaseList] = useState(
         value.filter(key => baseAllKeyList.indexOf(key as string) > -1),
     );
