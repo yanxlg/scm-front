@@ -155,7 +155,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 title: '收货地址',
                 width: '150px',
-                dataIndex: 'commodity_id',
                 align: 'center',
                 render: (value, row) => {
                     return {
@@ -527,6 +526,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             <FitTable<IStockInItem | IStockOutItem>
                 bordered={true}
                 rowKey={type === StockType.In ? 'purchaseOrderGoodsId' : 'skuId'}
+                bordered={true}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
