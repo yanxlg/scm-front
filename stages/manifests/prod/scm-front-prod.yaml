@@ -119,7 +119,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: trigram-scm-front-page
-          image: 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod
+          image: 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -228,9 +228,9 @@ apiVersion: v1
 metadata:
   name: trigram-scm-front-page-external-prod-elb
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:832373879023:certificate/3f84bac5-ca0d-48a0-8da2-f4b9f7d1d03f
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:512358210769:certificate/cc03a721-5f47-4cec-95ed-bcba97e46952
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-1980996e
+    service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-0ac24f3c90dd52e38
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "120"
 spec:

@@ -405,8 +405,11 @@ const PaneErrTab = () => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportModal(true)}>
-                        导出数据
+                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                        刷新
+                    </LoadingButton>
+                    <Button disabled={total <= 0} className={formStyles.formBtn} onClick={() => setExportModal(true)}>
+                        导出
                     </Button>
                 </JsonForm>
                 <JsonForm
@@ -559,7 +562,7 @@ const PaneErrTab = () => {
                 />
             </>
         );
-    }, []);
+    }, [loading]);
 
     const dataSet = useMemo(() => {
         if (dataSource.length === 0) {
@@ -660,6 +663,7 @@ const PaneErrTab = () => {
     const table = useMemo(() => {
         return (
             <FitTable
+                bordered
                 rowKey={record => {
                     return record.purchasePlanId || record.orderGoodsId;
                 }}
