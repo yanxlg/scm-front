@@ -155,7 +155,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 title: '收货地址',
                 width: '150px',
-                dataIndex: 'commodity_id',
                 align: 'center',
                 render: (value, row) => {
                     return {
