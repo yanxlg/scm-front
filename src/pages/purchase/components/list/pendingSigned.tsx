@@ -9,7 +9,7 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal } from 'antd';
+import { Button, message, Modal, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -23,10 +23,13 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
 import { FormInstance } from 'antd/es/form';
+import classNames from 'classnames';
+
+const { Paragraph } = Typography;
 
 const fieldList: FormField[] = [
     {
-        label: '采购单id',
+        label: '采购单ID',
         type: 'input',
         name: 'purchase_order_goods_id',
     },
@@ -133,15 +136,20 @@ const PendingSigned = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
+            <JsonForm
+                fieldList={fieldList}
+                ref={formRef}
+                enableCollapse={false}
+                labelClassName={styles.formItem}
+            >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
                     </LoadingButton>
-                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
-                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
+                    <Button onClick={showExportFn} className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>
@@ -231,7 +239,7 @@ const PendingSigned = () => {
             },
             {
                 title: '采购金额',
-                width: '200px',
+                width: '150px',
                 dataIndex: 'purchaseTotalAmount',
                 align: 'center',
                 render: (value, row) => {
@@ -246,7 +254,7 @@ const PendingSigned = () => {
             {
                 title: '商品信息',
                 dataIndex: 'productInfo',
-                width: '178px',
+                width: '280px',
                 align: 'center',
                 render: (_, item) => {
                     const {
@@ -267,11 +275,23 @@ const PendingSigned = () => {
                         }
                     } catch (e) {}
                     const children = (
-                        <div>
+                        <div
+                            className={classNames(
+                                formStyles.flex,
+                                formStyles.flexRow,
+                                formStyles.flexAlign,
+                            )}
+                        >
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchaseGoodsName}</div>
-                            <div>{skus}</div>
-                            <div>数量：x{purchaseGoodsNumber}</div>
+                            <div className={classNames(formStyles.flex1, styles.productDesc)}>
+                                <div title={purchaseGoodsName}>
+                                    <Paragraph ellipsis={{ rows: 2 }} className={styles.paragraph}>
+                                        {purchaseGoodsName}
+                                    </Paragraph>
+                                </div>
+                                <div>{skus}</div>
+                                <div>数量：x{purchaseGoodsNumber}</div>
+                            </div>
                         </div>
                     );
                     return {
@@ -368,7 +388,7 @@ const PendingSigned = () => {
             {
                 title: '出入库类型',
                 dataIndex: 'boundType',
-                width: '223px',
+                width: '150px',
                 align: 'center',
                 render: (_ = 0) => {
                     const code = String(_);
@@ -393,6 +413,7 @@ const PendingSigned = () => {
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"
+                bordered={true}
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}

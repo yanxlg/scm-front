@@ -160,6 +160,34 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
+                title: '操作',
+                dataIndex: '_operate',
+                align: 'center',
+                width: 150,
+                render: (_, row: IPurchaseAbnormalItem) => {
+                    const { waybillExceptionType } = row;
+                    return (
+                        <>
+                            <div>
+                                <a onClick={() => showDiscardModal(row)}>废弃</a>
+                            </div>
+                            {hasRelatedPurchase(waybillExceptionType) && (
+                                <div>
+                                    <a onClick={() => showRelatedPurchase()}>关联采购单</a>
+                                </div>
+                            )}
+                            {hasExceptionHandle(waybillExceptionType) && (
+                                <div>
+                                    <a type="link" onClick={() => showAbnormal(row)}>
+                                        异常处理
+                                    </a>
+                                </div>
+                            )}
+                        </>
+                    );
+                },
+            },
+            {
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
@@ -211,34 +239,6 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
-            },
-            {
-                title: '操作',
-                dataIndex: '_operate',
-                align: 'center',
-                width: 150,
-                render: (_, row: IPurchaseAbnormalItem) => {
-                    const { waybillExceptionType } = row;
-                    return (
-                        <>
-                            <div>
-                                <a onClick={() => showDiscardModal(row)}>废弃</a>
-                            </div>
-                            {hasRelatedPurchase(waybillExceptionType) && (
-                                <div>
-                                    <a onClick={() => showRelatedPurchase()}>关联采购单</a>
-                                </div>
-                            )}
-                            {hasExceptionHandle(waybillExceptionType) && (
-                                <div>
-                                    <a type="link" onClick={() => showAbnormal(row)}>
-                                        异常处理
-                                    </a>
-                                </div>
-                            )}
-                        </>
-                    );
-                },
             },
         ];
     }, []);
@@ -296,7 +296,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
         return (
             <>
                 <JsonForm
-                    // labelClassName="order-error-label"
+                    labelClassName={styles.label}
                     fieldList={fieldList}
                     ref={formRef1}
                     initialValues={{
@@ -306,14 +306,10 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onReload}>
+                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => setExportStatus(true)}
-                    >
+                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
                         导出
                     </Button>
                 </JsonForm>

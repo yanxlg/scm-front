@@ -1,6 +1,6 @@
-import React, { HtmlHTMLAttributes } from 'react';
+import React from 'react';
 import { Checkbox } from 'antd';
-import { AutoEnLargeImg, FitTable } from 'react-components';
+import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
@@ -12,13 +12,17 @@ import {
     orderShippingOptionList,
     purchaseOrderOptionList,
     purchasePayOptionList,
-    purchaseShippingOptionList,
     purchaseReserveOptionList,
     childrenOrderCancelOptionList,
     purchasePlanCancelOptionList,
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
+import { IFilterParams } from '@/services/order-manage';
+import { PaginationConfig } from 'antd/es/pagination';
+
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
 declare interface IProps {
     loading: boolean;
@@ -29,6 +33,16 @@ declare interface IProps {
     visible: boolean;
     onCancel: () => void;
     onOKey: (values: any) => Promise<any>;
+    page: number; 
+    pageSize: number; 
+    total: number;
+    onSearch(params?: IFilterParams): Promise<any>;
+    postOrdersPlace(ids: string[]): Promise<any>;
+    cancelPurchaseOrder(ids: string[]): Promise<any>;
+    cancelChannelOrder(ids: string[]): Promise<any>;
+    changeParentOrder(checked: boolean): void;
+    showParentStatus: boolean;
+    getOrderGoodsIdList(): string[];
 }
 
 declare interface IState {
@@ -260,7 +274,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: '_purchaseTotalAmount',
             align: 'center',
             width: 140,
-            render: (_, row: IChildOrderItem) => row.purchaseAmount
+            render: (_, row: IChildOrderItem) => row.purchaseAmount,
         },
         // // 勾选展示 - 待补充
         // {
@@ -568,34 +582,82 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
+    onChange = ({ current, pageSize }: PaginationConfig) => {
+        this.props.onSearch({
+            page: current,
+            page_count: pageSize
+        });
+    }
+
+    toolBarRender = () => {
+        const { postOrdersPlace, cancelPurchaseOrder, cancelChannelOrder, changeParentOrder, showParentStatus, getOrderGoodsIdList } = this.props;
+        const orderGoodsIdList = getOrderGoodsIdList();
+        const disabled = orderGoodsIdList.length === 0;
+        return [
+            <Checkbox onChange={e => changeParentOrder(e.target.checked)} checked={showParentStatus} key="0">仅展示父订单ID</Checkbox>,
+            <LoadingButton
+                key="1"
+                type="primary"
+                disabled={disabled}
+                className={formStyles.formBtn}
+                onClick={() => postOrdersPlace(orderGoodsIdList)}
+            >
+                一键拍单
+            </LoadingButton>,
+            <LoadingButton
+                key="2"
+                type="primary"
+                disabled={disabled}
+                className={formStyles.formBtn}
+                onClick={() => cancelPurchaseOrder(orderGoodsIdList)}
+            >
+                取消采购单
+            </LoadingButton>,
+            <LoadingButton
+                key="3"
+                type="primary"
+                disabled={disabled}
+                className={formStyles.formBtn}
+                onClick={() => cancelChannelOrder(orderGoodsIdList)}
+            >
+                取消渠道订单
+            </LoadingButton>
+        ]
+    }
+
     render() {
-        const { loading, orderList, visible, onCancel, onOKey } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;
         const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
         // const columns = this.createColumns();
         return (
             <>
                 <FitTable
-                    // key={columns.length}
-                    bordered={true}
+                    bordered
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}
-                    // rowKey="orderGoodsId"
-                    className="order-table"
+                    // className="order-table"
                     rowClassName="order-tr"
                     loading={loading}
                     columns={this.allColumns}
-                    // rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
-                    pagination={false}
+                    pagination={{
+                        current: page,
+                        pageSize: pageSize,
+                        total: total,
+                        showSizeChanger: true,
+                        position: ['topRight', 'bottomRight'],
+                    }}
                     columnsSettingRender={AllColumnsSetting}
+                    onChange={this.onChange}
                     onRow={record => {
                         return {
                             'data-id': record.orderGoodsId,
                         } as any;
                     }}
+                    toolBarRender={this.toolBarRender}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}
