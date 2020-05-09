@@ -203,6 +203,7 @@ const StockControl: React.FC = () => {
     const table = useMemo(() => {
         return (
             <FitTable<IStockItem>
+                bordered={true}
                 rowKey={'in_order'}
                 scroll={scroll}
                 bottom={150}

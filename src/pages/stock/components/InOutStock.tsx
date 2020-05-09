@@ -538,6 +538,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         return (
             <FitTable
                 rowKey={type === StockType.In ? 'purchaseOrderGoodsId' : 'skuId'}
+                bordered={true}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
