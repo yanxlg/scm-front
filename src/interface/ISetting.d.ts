@@ -106,18 +106,22 @@ export interface IPriceStrategy {
 
 export interface IPriceStrategyItem {
     before_strategy_content: {
-        purchase_crawler_price_condition: number;
-        sale_crawler_price_value: number;
+        first_purchase_crawler_price_condition: number;
+        first_sale_crawler_price_value: number;
+        first_fix_price_value: number;
         middle_condition: number;
-        purchase_minus_sale_crawler_price_condition: number;
-        fix_price_value: number;
+        second_purchase_crawler_price_condition: number;
+        second_sale_crawler_price_value: number;
+        second_fix_price_value: number;
     };
     end_strategy_content: {
-        purchase_crawler_price_condition: number;
-        sale_crawler_price_value: number;
+        first_purchase_crawler_price_condition: number;
+        first_sale_crawler_price_value: number;
+        first_fix_price_value: number;
         middle_condition: number;
-        purchase_minus_sale_crawler_price_condition: number;
-        fix_price_value: number;
+        second_purchase_crawler_price_condition: number;
+        second_sale_crawler_price_value: number;
+        second_fix_price_value: number;
     };
     strategy_type: '1';
     operator: string;
