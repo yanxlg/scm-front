@@ -52,6 +52,7 @@ declare interface ImgEditDialogState {
 
 class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialogState> {
     private startItem: any;
+    private zipId?: string;
 
     constructor(props: ImgEditDialogProps) {
         super(props);
@@ -65,7 +66,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     private handleOk = () => {
         const { toggleEditGoodsDialog, onSearch } = this.props;
-        if (this.isChangeData()) {
+        if (this.isChangeData() || this.zipId) {
             const data = this.getGoodsEditData();
             if (data && !data.title) {
                 return message.error('标题不能为空');
@@ -76,7 +77,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             this.setState({
                 confirmLoading: true,
             });
-            putGoodsEdit(data as IGoodsEditData)
+            putGoodsEdit({
+                ...data,
+                has_zip: this.zipId ? 1 : 2,
+                zip_id: this.zipId,
+            } as IGoodsEditData)
                 .then(res => {
                     // console.log('putGoodsEdit', res);
                     toggleEditGoodsDialog(false);
@@ -276,7 +281,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             const { product_id } = currentEditGoods!;
             formData.append('file', file);
             uploadGoodsPic(formData, product_id)
-                .then(() => {
+                .then(({ data }) => {
+                    this.zipId = data;
                     message.success('上传成功，服务端处理中，请稍后刷新!');
                 })
                 .catch(e => {
@@ -299,6 +305,16 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             history.push('/setting/export');
         });
     };
+
+    componentDidUpdate(
+        prevProps: Readonly<ImgEditDialogProps>,
+        prevState: Readonly<ImgEditDialogState>,
+        snapshot?: any,
+    ): void {
+        if (!this.props.visible) {
+            this.zipId = undefined; // 清空
+        }
+    }
 
     render() {
         const {
