@@ -50,13 +50,15 @@ const columns: TableProps<IPriceStrategyItem>['columns'] = [
                 return '--';
             }
             const {
-                purchase_crawler_price_condition,
-                sale_crawler_price_value,
+                first_purchase_crawler_price_condition,
+                first_sale_crawler_price_value,
+                first_fix_price_value,
                 middle_condition,
-                purchase_minus_sale_crawler_price_condition,
-                fix_price_value,
+                second_purchase_crawler_price_condition,
+                second_sale_crawler_price_value,
+                second_fix_price_value,
             } = record.before_strategy_content;
-            return `采购的爬虫价${condition[purchase_crawler_price_condition]}销售的爬虫价*${sale_crawler_price_value}% ${widthCondition[middle_condition]}采购的爬虫价-销售的爬虫价${condition[purchase_minus_sale_crawler_price_condition]}$${fix_price_value}`;
+            return `采购的爬虫价${condition[first_purchase_crawler_price_condition]}销售的爬虫价*${first_sale_crawler_price_value}%+$${first_fix_price_value} ${widthCondition[middle_condition]}采购的爬虫价${condition[second_purchase_crawler_price_condition]}销售的爬虫价*${second_sale_crawler_price_value}%+$${second_fix_price_value}`;
         },
     },
     {
@@ -69,13 +71,15 @@ const columns: TableProps<IPriceStrategyItem>['columns'] = [
                 return '--';
             }
             const {
-                purchase_crawler_price_condition,
-                sale_crawler_price_value,
+                first_purchase_crawler_price_condition,
+                first_sale_crawler_price_value,
+                first_fix_price_value,
                 middle_condition,
-                purchase_minus_sale_crawler_price_condition,
-                fix_price_value,
+                second_purchase_crawler_price_condition,
+                second_sale_crawler_price_value,
+                second_fix_price_value,
             } = record.end_strategy_content;
-            return `采购的爬虫价${condition[purchase_crawler_price_condition]}销售的爬虫价*${sale_crawler_price_value}% ${widthCondition[middle_condition]}采购的爬虫价-销售的爬虫价${condition[purchase_minus_sale_crawler_price_condition]}$${fix_price_value}`;
+            return `采购的爬虫价${condition[first_purchase_crawler_price_condition]}销售的爬虫价*${first_sale_crawler_price_value}%+$${first_fix_price_value} ${widthCondition[middle_condition]}采购的爬虫价${condition[second_purchase_crawler_price_condition]}销售的爬虫价*${second_sale_crawler_price_value}%+$${second_fix_price_value}`;
         },
     },
     {
@@ -142,6 +146,7 @@ const PriceStrategyModal = ({ visible, onClose }: PriceStrategyModalProps) => {
                 onCancel={onClose}
             >
                 <FitTable<IPriceStrategyItem>
+                    bordered={true}
                     loading={loading}
                     columns={columns}
                     dataSource={dataSource}

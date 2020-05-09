@@ -157,6 +157,14 @@ const Store = () => {
         );
     }, [cacheData, loading]);
 
+    const naturalNumberValidate = useCallback((rule, value) => {
+        if (isNaN(Number(value))) {
+            return Promise.reject('输入的非数字');
+        } else {
+            return Promise.resolve();
+        }
+    }, []);
+
     const editForm = useMemo(() => {
         const disabled = !edit;
         return (
@@ -173,7 +181,7 @@ const Store = () => {
                         <div>
                             <Form.Item
                                 label="采购的爬虫价"
-                                name="purchase_crawler_price_condition"
+                                name="first_purchase_crawler_price_condition"
                                 colon={false}
                                 className={classNames(formStyles.formItem, formStyles.formHorizon)}
                                 rules={[
@@ -197,9 +205,13 @@ const Store = () => {
                             </Form.Item>
                             <Form.Item
                                 label="销售的爬虫价"
-                                name="sale_crawler_price_value"
+                                name="first_sale_crawler_price_value"
                                 colon={false}
-                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                className={classNames(
+                                    formStyles.formItem,
+                                    formStyles.formHorizon,
+                                    styles.afterItem,
+                                )}
                                 rules={[
                                     {
                                         required: true,
@@ -214,7 +226,36 @@ const Store = () => {
                                     disabled={disabled}
                                 />
                             </Form.Item>
+                            <Form.Item
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                            >
+                                +
+                            </Form.Item>
+                            <Form.Item
+                                label="固定金额"
+                                name="first_fix_price_value"
+                                colon={false}
+                                validateTrigger={'onBlur'}
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请输入固定金额',
+                                    },
+                                    {
+                                        validator: naturalNumberValidate,
+                                    },
+                                ]}
+                            >
+                                <RichInput
+                                    richType="naturalNumber"
+                                    className={styles.select}
+                                    addonAfter="$"
+                                    disabled={disabled}
+                                />
+                            </Form.Item>
                         </div>
+
                         <Form.Item
                             label=""
                             name="middle_condition"
@@ -234,8 +275,8 @@ const Store = () => {
                         </Form.Item>
                         <div>
                             <Form.Item
-                                label="采购的爬虫价-销售的爬虫价"
-                                name="purchase_minus_sale_crawler_price_condition"
+                                label="采购的爬虫价"
+                                name="second_purchase_crawler_price_condition"
                                 colon={false}
                                 className={classNames(formStyles.formItem, formStyles.formHorizon)}
                                 rules={[
@@ -258,21 +299,53 @@ const Store = () => {
                                 </Select>
                             </Form.Item>
                             <Form.Item
-                                label="固定金额"
-                                name="fix_price_value"
+                                label="销售的爬虫价"
+                                name="second_sale_crawler_price_value"
                                 colon={false}
-                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                className={classNames(
+                                    formStyles.formItem,
+                                    formStyles.formHorizon,
+                                    styles.afterItem,
+                                )}
                                 rules={[
                                     {
                                         required: true,
-                                        message: '请输入固定金额',
+                                        message: '请输入销售爬虫价',
                                     },
                                 ]}
                             >
                                 <RichInput
                                     richType="number"
                                     className={styles.select}
-                                    addonBefore="$"
+                                    addonAfter="%"
+                                    disabled={disabled}
+                                />
+                            </Form.Item>
+                            <Form.Item
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                            >
+                                +
+                            </Form.Item>
+                            <Form.Item
+                                label="固定金额"
+                                name="second_fix_price_value"
+                                colon={false}
+                                className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                                validateTrigger={'onBlur'}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: '请输入固定金额',
+                                    },
+                                    {
+                                        validator: naturalNumberValidate,
+                                    },
+                                ]}
+                            >
+                                <RichInput
+                                    richType="naturalNumber"
+                                    className={styles.select}
+                                    addonAfter="$"
                                     disabled={disabled}
                                 />
                             </Form.Item>
