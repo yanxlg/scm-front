@@ -90,3 +90,8 @@ export declare interface IStockItem {
         color?: string;
     };
 }
+
+export declare interface Ilogistic {
+    carrier_id: string;
+    carrier_name: string;
+}

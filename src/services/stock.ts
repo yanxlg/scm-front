@@ -7,10 +7,14 @@ import {
     IStockOutItem,
     IStockRequest,
     IStockItem,
+    Ilogistic,
 } from '@/interface/IStock';
 import { IPaginationResponse, IResponse } from 'react-components/es/hooks/useList';
 import { IRequestPagination1 } from '@/interface/IGlobal';
 import { api } from 'react-components';
+import { singlePromiseWrap } from '@/utils/utils';
+import { ISHopList } from '@/interface/IChannel';
+import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 
 export function queryInList(data: IStockINFormData & IRequestPagination1) {
     return api.post<IResponse<IPaginationResponse<IStockInItem>>>(StockApiPathEnum.QueryInList, {
@@ -79,3 +83,7 @@ export function exportStockList(data: IStockRequest) {
 export function syncStock() {
     return request.post(StockApiPathEnum.SyncStock);
 }
+
+export const queryLogistics = singlePromiseWrap(() => {
+    return request.get<IResponse<Ilogistic[]>>(StockApiPathEnum.QueryLogistics);
+});
