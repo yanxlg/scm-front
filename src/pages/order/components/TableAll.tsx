@@ -414,11 +414,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                const { reserveStatus } = row;
+                const { reserveStatus, purchaseFailReason } = row;
                 if (reserveStatus === 3 && value === 1) {
                     return '';
                 }
-                return getStatusDesc(purchaseOrderOptionList, value);
+                return (
+                    <>
+                        {getStatusDesc(purchaseOrderOptionList, value)}
+                        {value === 7 && purchaseFailReason && <div>({purchaseFailReason})</div>}
+                    </>
+                );
             },
         },
         // 勾选展示
