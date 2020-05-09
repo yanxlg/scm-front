@@ -9,6 +9,7 @@ enum StockApiPathEnum {
     QueryStockList = '/api/v1/inventory/list',
     ExportStockList = '/api/v1/inventory/stork_export',
     SyncStock = '/api/v1/inventory/sync',
+    QueryLogistics = '/api/v1/inventory/logistics',
 }
 
 export { StockApiPathEnum };

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FitTable, useModal, useList, AutoEnLargeImg } from 'react-components';
 import { Button } from 'antd';
 import '@/styles/index.less';
@@ -7,7 +7,13 @@ import { ColumnProps, TableProps } from 'antd/es/table';
 import { unixToStartDate, unixToEndDate, utcToLocal } from 'react-components/es/utils/date';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
+import {
+    exportInList,
+    exportOutList,
+    queryInList,
+    queryLogistics,
+    queryOutList,
+} from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import {
@@ -26,6 +32,7 @@ import { IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import { AddressModal } from './AddressModal';
+import { queryShopList } from '@/services/channel';
 
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
@@ -38,6 +45,8 @@ const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
 
 const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const formRef = useRef<JsonFormRef>(null);
+
+    const logisticsMap = useRef<{ [key: string]: string }>({});
 
     const { visible, setVisibleProps: setOrderVisible, onClose } = useModal<
         IStockOutItem['orderAddress']
@@ -200,11 +209,11 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 title: '物流商',
                 width: '150px',
-                dataIndex: 'carrierName',
+                dataIndex: 'carrierId',
                 align: 'center',
                 render: (value, row) => {
                     return {
-                        children: value,
+                        children: logisticsMap.current[value],
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -411,13 +420,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 label: '物流商',
                 name: 'carrier_id',
                 defaultValue: '',
-                optionList: [
-                    {
-                        name: '全部',
-                        value: '',
-                    },
-                    ...carrierList,
-                ],
+                syncDefaultOption: {
+                    value: '',
+                    name: '全部',
+                },
+                optionList: () =>
+                    queryLogistics().then(({ data = [] }) => {
+                        return data.map(({ carrier_name, carrier_id }) => {
+                            return { name: carrier_name, value: carrier_id };
+                        });
+                    }),
             },
             {
                 type: 'input',
@@ -434,6 +446,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 type: 'input',
                 label: '商品SKU ID',
                 name: 'sku_id',
+                formatter: 'multipleToArray',
             },
         ];
     }, []);
@@ -481,7 +494,22 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             pageSize: page_size,
             pageNumber: page_number,
         },
+        autoQuery: false,
     });
+
+    useEffect(() => {
+        if (type === StockType.Out) {
+            queryLogistics().then(({ data = [] }) => {
+                data.map(({ carrier_name, carrier_id }) => {
+                    logisticsMap.current[carrier_id] = carrier_name;
+                });
+
+                onSearch();
+            });
+        } else {
+            onSearch();
+        }
+    }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
         return {
