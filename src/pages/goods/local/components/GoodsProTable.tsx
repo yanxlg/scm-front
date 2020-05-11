@@ -1,9 +1,7 @@
 import React, { RefObject } from 'react';
 import { Button } from 'antd';
-// import ProTable from '@/components/ProTable';
-import { ProTable } from 'react-components';
+import { FitTable, LoadingButton } from 'react-components';
 import { PaginationConfig } from 'antd/es/pagination';
-import { ProColumns } from 'react-components/es/ProTable';
 import { Link } from 'umi';
 import { AutoEnLargeImg } from 'react-components';
 import ShelvesDialog from './ShelvesDialog';
@@ -18,8 +16,9 @@ import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { publishStatusMap, publishStatusCode } from '@/enums/LocalGoodsEnum';
 import Export from '@/components/Export';
+import { ColumnsType } from 'antd/es/table';
 
-const pageSizeOptions = ['50', '100', '500', '1000'];
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface IProps {
     loading: boolean;
@@ -32,6 +31,9 @@ declare interface IProps {
     onSearch(pageData?: IPageData, isRefresh?: boolean): void;
     changeSelectedRowKeys(keys: string[]): void;
     setProductTags(productId: string, tags: string[]): void;
+    handleClickOnsale(): void;
+    handleClickAllOnsale(): void;
+    getGoodsDelete(): Promise<any>;
 
     // 导出弹窗
     exportVisible: boolean;
@@ -51,14 +53,14 @@ declare interface IState {
 class GoodsProTable extends React.PureComponent<IProps, IState> {
     private skuDialogRef: RefObject<SkuDialog> = React.createRef();
     private goodsMergeRef: RefObject<GoodsMergeDialog> = React.createRef();
-    private columns = [
+    private columns: ColumnsType<IRowDataItem> = [
         {
             fixed: 'left',
             key: '_operation',
             title: '操作',
             align: 'center',
             width: 156,
-            render: (value, row: IRowDataItem) => {
+            render: (_: any, row: IRowDataItem) => {
                 const { goods_status } = row;
                 return (
                     <>
@@ -110,8 +112,6 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                     <>
                         <div>{_value}</div>
                         <Button
-                            // ghost={true}
-                            // size="small"
                             type="link"
                             onClick={() => this.showMergeDialog(row)}
                         >
@@ -363,7 +363,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 );
             },
         },
-    ] as ProColumns<IRowDataItem>[];
+    ];
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -380,7 +380,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         this.props.changeSelectedRowKeys(selectedRowKeys as string[]);
     };
 
-    private onChangeProTable = ({ current, pageSize }: PaginationConfig) => {
+    private onChangeTable = ({ current, pageSize }: PaginationConfig) => {
         const { currentPage, pageSize: _pageSize } = this.props;
         this.props.onSearch({
             page:
@@ -546,6 +546,43 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         });
     };
 
+    toolBarRender = () => {
+        const {
+            selectedRowKeys,
+            handleClickOnsale,
+            handleClickAllOnsale,
+            getGoodsDelete,
+        } = this.props;
+        const disabled = selectedRowKeys.length === 0;
+        return [
+            <Button
+                key="1"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={handleClickOnsale}
+                disabled={disabled}
+            >
+                一键上架
+            </Button>,
+            <Button
+                key="2"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={handleClickAllOnsale}
+            >
+                查询商品一键上架
+            </Button>,
+            <LoadingButton
+                key="3"
+                className={formStyles.formBtn}
+                onClick={getGoodsDelete}
+                disabled={disabled}
+            >
+                删除
+            </LoadingButton>
+        ];
+    };
+
     render() {
         const {
             selectedRowKeys,
@@ -569,38 +606,29 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
         } = this.state;
         return (
             <>
-                <ProTable<IRowDataItem>
-                    // optimize={false}
-                    headerTitle="本地产品库列表"
+                <FitTable
+                    bordered
                     rowKey="product_id"
-                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                    bottom={60}
-                    minHeight={500}
+                    loading={loading}
+                    columns={this.columns}
                     rowSelection={{
                         fixed: true,
                         columnWidth: 60,
                         selectedRowKeys: selectedRowKeys,
                         onChange: this.onSelectChange,
                     }}
+                    dataSource={goodsList}
+                    scroll={{ x: 'max-content' }}
+                    columnsSettingRender={true}
                     pagination={{
                         total: total,
                         current: currentPage,
                         pageSize: pageSize,
                         showSizeChanger: true,
-                        pageSizeOptions: pageSizeOptions,
+                        position: ['topRight', 'bottomRight'],
                     }}
-                    // toolBarRender={false}
-                    tableAlertRender={false}
-                    columns={this.columns}
-                    dataSource={goodsList}
-                    loading={loading}
-                    onChange={this.onChangeProTable}
-                    options={{
-                        density: true,
-                        fullScreen: true,
-                        reload: this.onReload,
-                        setting: true,
-                    }}
+                    onChange={this.onChangeTable}
+                    toolBarRender={this.toolBarRender}
                 />
                 <ShelvesDialog
                     visible={shelvesDialogStatus}

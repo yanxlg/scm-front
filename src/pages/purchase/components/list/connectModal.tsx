@@ -9,7 +9,7 @@ const fieldList: FormField[] = [
     {
         type: 'input',
         name: 'purchase_waybill_no',
-        label: <span>运&emsp;单&emsp;号</span>,
+        label: '运单号',
         className: styles.connectInput,
     },
     {
@@ -59,6 +59,7 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
                 destroyOnClose={true}
             >
                 <JsonForm
+                    labelClassName={styles.connectLabel}
                     containerClassName={''}
                     fieldList={fieldList}
                     layout="horizontal"

@@ -9,29 +9,26 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal } from 'antd';
+import { Button, message, Modal, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import {
-    applyReturn,
-    cancelReturnOrder,
-    exportPurchaseList,
-    queryPurchaseList,
-} from '@/services/purchase';
-import { IPurchaseItem, IReturnItem } from '@/interface/IPurchase';
+import { applyReturn, exportPurchaseList, queryPurchaseList } from '@/services/purchase';
+import { IPurchaseItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
-import { colSpanDataSource } from '@/pages/purchase/components/list/all';
 import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from './connectModal';
 import Export from '@/components/Export';
 import { FormInstance } from 'antd/es/form';
+import classNames from 'classnames';
+
+const { Paragraph } = Typography;
 
 const fieldList: FormField[] = [
     {
-        label: '采购单id',
+        label: '采购单ID',
         type: 'input',
         name: 'purchase_order_goods_id',
     },
@@ -127,15 +124,20 @@ const PendingShipped = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList} ref={formRef} enableCollapse={false}>
+            <JsonForm
+                fieldList={fieldList}
+                ref={formRef}
+                enableCollapse={false}
+                labelClassName={styles.formItem}
+            >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
                     </LoadingButton>
-                    <LoadingButton onClick={onReload} type="primary" className={formStyles.formBtn}>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
-                    <Button onClick={showExportFn} type="primary" className={formStyles.formBtn}>
+                    <Button onClick={showExportFn} className={formStyles.formBtn}>
                         导出
                     </Button>
                 </div>
@@ -207,7 +209,7 @@ const PendingShipped = () => {
             },
             {
                 title: '采购金额',
-                width: '200px',
+                width: '150px',
                 dataIndex: 'purchaseTotalAmount',
                 align: 'center',
                 render: value => {
@@ -217,7 +219,7 @@ const PendingShipped = () => {
             {
                 title: '商品信息',
                 dataIndex: 'productInfo',
-                width: '178px',
+                width: '280px',
                 align: 'center',
                 render: (_, item) => {
                     const {
@@ -238,11 +240,23 @@ const PendingShipped = () => {
                         }
                     } catch (e) {}
                     return (
-                        <div>
+                        <div
+                            className={classNames(
+                                formStyles.flex,
+                                formStyles.flexRow,
+                                formStyles.flexAlign,
+                            )}
+                        >
                             <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div>{purchaseGoodsName}</div>
-                            <div>{skus}</div>
-                            <div>数量：x{purchaseGoodsNumber}</div>
+                            <div className={classNames(formStyles.flex1, styles.productDesc)}>
+                                <div title={purchaseGoodsName}>
+                                    <Paragraph ellipsis={{ rows: 2 }} className={styles.paragraph}>
+                                        {purchaseGoodsName}
+                                    </Paragraph>
+                                </div>
+                                <div>{skus}</div>
+                                <div>数量：x{purchaseGoodsNumber}</div>
+                            </div>
                         </div>
                     );
                 },
@@ -309,6 +323,7 @@ const PendingShipped = () => {
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"
+                bordered={true}
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
