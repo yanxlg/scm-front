@@ -395,7 +395,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             },
             {
                 type: 'select',
-                label: '入库单状态',
+                label: '出库单状态',
                 name: 'order_goods_shipping_status',
                 formatter: 'number',
                 defaultValue: '',
