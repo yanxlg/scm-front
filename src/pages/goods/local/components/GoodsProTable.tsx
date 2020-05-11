@@ -10,7 +10,7 @@ import SkuDialog from './SkuDialog';
 import GoodsMergeDialog from './GoodsMergeDialog';
 import PopConfirmSetAttr from './PopConfirmSetAttr';
 
-import { IRowDataItem, IPageData } from '../index';
+import { IRowDataItem, IPageData } from '../_index';
 import { IPublishItem, ICatagoryItem } from '@/interface/ILocalGoods';
 import { getCurrentPage } from '@/utils/common';
 import { utcToLocal } from 'react-components/es/utils/date';

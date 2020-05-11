@@ -9,7 +9,8 @@ import {
 } from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ICountryItem } from '@/interface/ISetting';
-import { singlePromiseWrap } from '@/utils/utils';
+import { singlePromiseWrap, transPaginationResponse } from '@/utils/utils';
+import { api } from 'react-components';
 
 export declare interface IFilterParams {
     page?: number;
@@ -88,11 +89,21 @@ export declare interface ISkuParams {
 
 // 兼容SearchForm数据结构 { name: '', value: '' }
 
-export async function getGoodsList(params: IFilterParams) {
-    return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
-        // requestType: 'form',
-        data: params,
-    });
+export function getGoodsList(params: IFilterParams) {
+    // return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
+    //     // requestType: 'form',
+    //     data: params,
+    // });
+
+    return api
+        .post(LocalApiPath.getGoodsList, {
+            data: params,
+        })
+        // .then(res => {
+        //     console.log('getGoodsList', res);
+        //     return res
+        // })
+        .then(transPaginationResponse);
 }
 
 export async function postGoodsExports(data: IFilterParams) {
@@ -123,8 +134,8 @@ export async function postGoodsOnsale(data: IOnsaleData) {
 }
 
 // 查询商品一键上架
-export async function getAllGoodsOnsale(data: IFilterParams) {
-    return request.post(LocalApiPath.getAllGoodsOnsale, {
+export async function postAllGoodsOnsale(data: IFilterParams) {
+    return request.post(LocalApiPath.postAllGoodsOnsale, {
         data,
     });
 }
