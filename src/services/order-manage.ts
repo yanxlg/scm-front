@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { downloadExcel } from '@/utils/common';
+import { GlobalApiPath } from '@/config/api/GlobalApiPath';
 import {
     IPadSimilarBody,
     IWarehouseNotShipSearch,
@@ -10,6 +10,7 @@ import {
     IPendingOrderSearch,
     ISimilarInfoResponse,
     IChannelSourceResponse,
+    IReviewSearch,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
@@ -163,13 +164,6 @@ export function getErrorOrderList(data: IErrFilterParams) {
             data: data,
         })
         .then(transPaginationResponse);
-    /*
-    return request
-        .post(OrderApiPath.getErrorOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);*/
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -240,3 +234,30 @@ export async function querySimilarInfo(query: {
 export const queryChannelSource = singlePromiseWrap(() => {
     return request.get<IResponse<IChannelSourceResponse>>(OrderApiPath.queryChannelSource);
 });
+
+export function getReviewOrderList(data: IReviewSearch) {
+    return api
+        .post(OrderApiPath.getReviewOrderList, {
+            requestType: 'json',
+            data: data,
+        })
+        .then(transPaginationResponse);
+}
+
+export async function postExportReview(data: any) {
+    return request.post(GlobalApiPath.downloadExcel, {
+        data,
+    });
+}
+
+export function postReviewPass(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postReviewPass, {
+        data,
+    });
+}
+
+export function postOrderOffsale(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postOrderOffsale, {
+        data,
+    });
+}

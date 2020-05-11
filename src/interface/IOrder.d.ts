@@ -141,3 +141,25 @@ export interface ISimilarInfoResponse {
 export interface IChannelSourceResponse {
     [key: string]: string;
 }
+
+export interface IReviewSearch extends IPagination {
+    order_time_start?: number;
+    order_time_end?: number;
+    order_goods_id?: string[];
+    product_shop?: string;
+    channel_order_goods_sn?: string;
+}
+
+export interface IReviewOrderItem {
+    createTime: string;
+    orderGoodsId: string;
+    productImage: string;
+    productStyle: string;
+    goodsNumber: number;
+    freight: string;
+    goodsAmount: string;
+    productShop: string;
+    channelOrderGoodsSn: string;
+    productName: string;
+    productId: string;
+}
