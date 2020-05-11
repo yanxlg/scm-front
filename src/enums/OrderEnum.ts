@@ -105,6 +105,7 @@ export const failureReasonMap = {
     '40001': '未登录',
     '1001': '海淘、预售等无法拍单的商品属性',
     '1002': '任务超时失败',
+    '-100': '采购价异常',
 };
 
 export const failureReasonList = transStatusList(failureReasonMap);
