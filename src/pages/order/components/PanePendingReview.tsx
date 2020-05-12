@@ -290,7 +290,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
             {
-                title: '商品标题',
+                title: '商品名称',
                 dataIndex: 'productName',
                 align: 'center',
                 width: 120,
