@@ -451,7 +451,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 onClick={_delChannelOrders}
             >
                 取消渠道订单
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [selectedRowKeys, _delChannelOrders]);
 

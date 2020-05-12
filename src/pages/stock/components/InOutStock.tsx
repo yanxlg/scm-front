@@ -295,7 +295,8 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                         className={formStyles.formBtn}
                     >
                         导出
-                    </Button>,
+                    </Button>
+                    ,
                 </div>
             </JsonForm>
         );

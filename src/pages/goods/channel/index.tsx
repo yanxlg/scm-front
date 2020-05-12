@@ -651,7 +651,7 @@ const ChannelList: React.FC = props => {
                 disabled={size === 0}
             >
                 一键下架
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [selectedRowKeys, loading]);
     const table = useMemo(() => {

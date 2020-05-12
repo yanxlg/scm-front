@@ -275,16 +275,22 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     toolBarRender = () => {
         const { changeParentOrder, showParentStatus } = this.props;
         return [
-            <Checkbox onChange={e => changeParentOrder(e.target.checked)} checked={showParentStatus} key="0">仅展示父订单ID</Checkbox>,
-        ]
-    }
+            <Checkbox
+                onChange={e => changeParentOrder(e.target.checked)}
+                checked={showParentStatus}
+                key="0"
+            >
+                仅展示父订单ID
+            </Checkbox>,
+        ];
+    };
 
     onChange = ({ current, pageSize }: PaginationConfig) => {
         this.props.onSearch({
             page: current,
-            page_count: pageSize
+            page_count: pageSize,
         });
-    }
+    };
 
     render() {
         const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;

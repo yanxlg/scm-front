@@ -301,7 +301,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         onClick={() => setVisibleProps(true)}
                     >
                         导出
-                    </Button>,
+                    </Button>
+                    ,
                 </div>
             </JsonForm>
         );
@@ -529,7 +530,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 disabled={list.length ? false : true}
             >
                 取消渠道订单
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [getOrderGoodsIdList, _delChannelOrders]);
 

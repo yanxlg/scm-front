@@ -33,8 +33,8 @@ declare interface IProps {
     visible: boolean;
     onCancel: () => void;
     onOKey: (values: any) => Promise<any>;
-    page: number; 
-    pageSize: number; 
+    page: number;
+    pageSize: number;
     total: number;
     onSearch(params?: IFilterParams): Promise<any>;
     postOrdersPlace(ids: string[]): Promise<any>;
@@ -585,16 +585,29 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
     onChange = ({ current, pageSize }: PaginationConfig) => {
         this.props.onSearch({
             page: current,
-            page_count: pageSize
+            page_count: pageSize,
         });
-    }
+    };
 
     toolBarRender = () => {
-        const { postOrdersPlace, cancelPurchaseOrder, cancelChannelOrder, changeParentOrder, showParentStatus, getOrderGoodsIdList } = this.props;
+        const {
+            postOrdersPlace,
+            cancelPurchaseOrder,
+            cancelChannelOrder,
+            changeParentOrder,
+            showParentStatus,
+            getOrderGoodsIdList,
+        } = this.props;
         const orderGoodsIdList = getOrderGoodsIdList();
         const disabled = orderGoodsIdList.length === 0;
         return [
-            <Checkbox onChange={e => changeParentOrder(e.target.checked)} checked={showParentStatus} key="0">仅展示父订单ID</Checkbox>,
+            <Checkbox
+                onChange={e => changeParentOrder(e.target.checked)}
+                checked={showParentStatus}
+                key="0"
+            >
+                仅展示父订单ID
+            </Checkbox>,
             <LoadingButton
                 key="1"
                 type="primary"
@@ -621,9 +634,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 onClick={() => cancelChannelOrder(orderGoodsIdList)}
             >
                 取消渠道订单
-            </LoadingButton>
-        ]
-    }
+            </LoadingButton>,
+        ];
+    };
 
     render() {
         const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;
