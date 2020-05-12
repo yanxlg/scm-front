@@ -470,7 +470,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 180,
                 render: (value, row: IChildOrderItem) => {
                     const { productPrice = 0, purchaseNormalPrice = 0 } = row;
-                    return productPrice - purchaseNormalPrice;
+                    return Number(productPrice) - Number(purchaseNormalPrice);
                 },
             },
         ];
