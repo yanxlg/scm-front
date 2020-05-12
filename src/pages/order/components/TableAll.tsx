@@ -548,6 +548,17 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 return <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>;
             },
         },
+        {
+            key: 'saleMinusPurchaseNormalPrice',
+            title: '销售-采购价差',
+            dataIndex: 'saleMinusPurchaseNormalPrice',
+            align: 'center',
+            width: 180,
+            render: (value, row: IChildOrderItem) => {
+                const { productPrice = 0, purchaseNormalPrice = 0 } = row;
+                return productPrice - purchaseNormalPrice;
+            },
+        },
     ];
 
     constructor(props: IProps) {

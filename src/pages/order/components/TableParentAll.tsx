@@ -3,7 +3,7 @@ import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { FitTable } from 'react-components';
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IParentOrderItem, IGoodsDetail } from './PaneAll';
+import { IParentOrderItem, IGoodsDetail, IChildOrderItem } from './PaneAll';
 import { getOrderGoodsDetail, IFilterParams } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -217,6 +217,17 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: this.mergeCell,
             defaultHide: true,
+        },
+        {
+            key: 'saleMinusPurchaseNormalPrice',
+            title: '销售-采购价差',
+            dataIndex: 'saleMinusPurchaseNormalPrice',
+            align: 'center',
+            width: 180,
+            render: (value, row: IChildOrderItem) => {
+                const { productPrice = 0, purchaseNormalPrice = 0 } = row;
+                return productPrice - purchaseNormalPrice;
+            },
         },
     ];
 
