@@ -1,9 +1,9 @@
 import React, { useMemo, useCallback, ReactText, useState, RefObject } from 'react';
 import { FitTable, AutoEnLargeImg, LoadingButton, message } from 'react-components';
 import { Button } from 'antd';
-import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILocalGoods';
+import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem, ISkuInfo } from '@/interface/ILocalGoods';
 import { Link } from 'umi';
-import PopConfirmSetAttr from '../PopConfirmSetAttr';
+import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
 import { utcToLocal } from 'react-components/lib/utils/date';
 import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
@@ -21,6 +21,8 @@ import {
 } from '@/services/goods';
 import Export from '@/components/Export';
 import { JsonFormRef } from 'react-components/lib/JsonForm';
+import ShelvesModal from '../ShelvesModal/ShelvesModal';
+import SkuModal from '../SkuModal/SkuModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -58,7 +60,10 @@ const GoodsTable: React.FC<IProps> = ({
 }) => {
     const [merchantStatus, setMerchantStatus] = useState(false);
     const [publistStatus, setPublistStatus] = useState(false);
+    const [skuStatus, setSkuStatus] = useState(false);
     const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
+    const [publistList, setPublistList] = useState<IPublishItem[]>([]);
+    const [currentSkuInfo, setCurrentSkuInfo] = useState<ISkuInfo | null>(null);
     
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -173,8 +178,54 @@ const GoodsTable: React.FC<IProps> = ({
         setExportStatus(false);
     }, []);
 
-    const showGoodsPublist = useCallback(() => {
+    const showGoodsPublist = useCallback((publistList) => {
+        setPublistStatus(true);
+        setPublistList(publistList.map(
+            (item: IPublishItem, index: number): IPublishItem => {
+                return {
+                    ...item,
+                    serialNum: index + 1,
+                };
+            }
+        ));
+    }, []);
 
+    const hideGoodsPublist = useCallback(() => {
+        setPublistStatus(false);
+        setPublistList([]);
+    }, []);
+
+    const showSkuModal = useCallback((record) => {
+        const {
+            tags,
+            product_id,
+            goods_img,
+            title,
+            worm_goodsinfo_link,
+            worm_goods_id,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+            commodity_id
+        } = record;
+        setSkuStatus(true);
+        setCurrentSkuInfo({
+            tags,
+            product_id,
+            goods_img,
+            title,
+            worm_goodsinfo_link,
+            worm_goods_id,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+            commodity_id
+        })
+    }, []);
+
+    const hideSkuModal = useCallback(() => {
+        setSkuStatus(false);
+        setCurrentSkuInfo(null);
     }, []);
 
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
@@ -304,12 +355,12 @@ const GoodsTable: React.FC<IProps> = ({
                                     </Button>
                                 ))}
                             </div>
-                            {/* <PopConfirmSetAttr
+                            <PopConfirmSetAttr
                                 tags={value}
                                 commodityId={commodity_id}
                                 productId={product_id}
-                                setProductTags={this.props.setProductTags}
-                            /> */}
+                                onReload={onReload}
+                            />
                         </div>
                     );
                 },
@@ -338,7 +389,7 @@ const GoodsTable: React.FC<IProps> = ({
                             <Button
                                 type="link"
                                 // className="goods-local-img-edit"
-                                // onClick={() => this.showSkuDialog(row)}
+                                onClick={() => showSkuModal(row)}
                             >
                                 查看sku信息
                             </Button>
@@ -442,7 +493,7 @@ const GoodsTable: React.FC<IProps> = ({
                             })}
                             <Button 
                                 type="link" 
-                                // onClick={() => showGoodsPublist(value)}
+                                onClick={() => showGoodsPublist(value)}
                             >
                                 上架日志
                             </Button>
@@ -535,9 +586,19 @@ const GoodsTable: React.FC<IProps> = ({
                     onOKey={handleExportOkey}
                     onCancel={handleExportCancel}
                 />
+                <ShelvesModal
+                    visible={publistStatus}
+                    publishStatusList={publistList}
+                    onCancel={hideGoodsPublist}
+                />
+                <SkuModal
+                    visible={skuStatus}
+                    currentSkuInfo={currentSkuInfo}
+                    onCancel={hideSkuModal}
+                />
             </>
         )
-    }, [loading, selectedRowKeys, merchantStatus, exportStatus]);
+    }, [loading, selectedRowKeys, merchantStatus, exportStatus, publistStatus, skuStatus]);
 }
 
 export default GoodsTable;

@@ -61,7 +61,7 @@ const ShelvesDialog: React.FC<IProps> = ({
     }, []);
 
     return useMemo(() => {
-        const pagination = publishStatusList.length > 1 ? {} : false;
+        const pagination = publishStatusList.length > 5 ? {} : false;
         return (
             <Modal
                 title="上架状态记录"

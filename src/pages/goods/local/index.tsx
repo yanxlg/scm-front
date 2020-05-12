@@ -216,7 +216,7 @@ const LocalPage: React.FC = props => {
         queryList: getGoodsList
     });
 
-    const goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
+    let goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
         return (dataSource as IGoodsList[])?.map(item => {
             const { sku_info } = item;
             if (sku_info.length > 0) {
