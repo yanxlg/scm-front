@@ -255,27 +255,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <Button
-                key="export"
-                onClick={() => setVisibleProps(true)}
-                className={formStyles.formBtn}
-            >
-                导出Excel表
-            </Button>,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
             <FitTable<IStockInItem | IStockOutItem>
+                bordered
                 rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
                 scroll={scroll}
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
+                // toolBarRender={toolBarRender}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
@@ -300,10 +289,18 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        onClick={() => setVisibleProps(true)}
+                        className={formStyles.formBtn}
+                    >
+                        导出
+                    </Button>
+                    ,
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     return useMemo(() => {
         return (
