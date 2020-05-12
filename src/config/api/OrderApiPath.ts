@@ -59,4 +59,5 @@ export enum OrderApiPath {
     postReviewPass = '/api/v1/orders/check/pass',
     // 下架商品
     postOrderOffsale = '/api/v1/orders/offsale',
+    QueryShopList = '/api/v1/vova_goods/store_list',
 }

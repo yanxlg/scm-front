@@ -15,7 +15,7 @@ import {
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
 import { IResponse } from '@/interface/IGlobal';
-import { ISHopList } from '@/interface/IChannel';
+// import { ISHopList } from '@/interface/IChannel';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 
 export declare interface IFilterParams {
@@ -265,5 +265,5 @@ export function postOrderOffsale(data: { order_goods_ids: string[] }) {
 }
 
 export const queryShopList = singlePromiseWrap(() => {
-    return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
+    return request.get(OrderApiPath.QueryShopList);
 });
