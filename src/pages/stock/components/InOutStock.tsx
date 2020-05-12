@@ -258,6 +258,13 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 align: 'center',
             },
             {
+                title: '发送发货指令时间',
+                width: '150px',
+                dataIndex: 'deliveryCommandTime',
+                align: 'center',
+                render: value => (value ? utcToLocal(value) : ''),
+            },
+            {
                 title: '揽收重量',
                 width: '150px',
                 dataIndex: 'totalWeight',
@@ -287,13 +294,13 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 },
             },
             {
-                title: '发送发货指令时间',
+                title: '揽收时间',
                 width: '150px',
-                dataIndex: 'deliveryCommandTime',
+                dataIndex: 'collectTime',
                 align: 'center',
                 render: (value, row) => {
                     return {
-                        children: utcToLocal(value),
+                        children: value ? utcToLocal(value) : '',
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
