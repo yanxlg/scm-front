@@ -17,6 +17,7 @@ import QRCode from 'qrcode.react';
 import Export from '@/components/Export';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -460,6 +461,17 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 dataIndex: 'purchase_pay_status_desc',
                 align: 'center',
                 width: 160,
+            },
+            {
+                key: 'saleMinusPurchaseNormalPrice',
+                title: '销售-采购价差',
+                dataIndex: 'saleMinusPurchaseNormalPrice',
+                align: 'center',
+                width: 180,
+                render: (value, row: IChildOrderItem) => {
+                    const { productPrice = 0, purchaseNormalPrice = 0 } = row;
+                    return Number(productPrice) - Number(purchaseNormalPrice);
+                },
             },
         ];
     }, []);
