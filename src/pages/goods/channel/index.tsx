@@ -20,6 +20,7 @@ import {
     ProductStatusList,
     checkLowerShelf,
     checkUpperShelf,
+    ProductStatusResponseMap,
 } from '@/config/dictionaries/Product';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
@@ -522,10 +523,10 @@ const ChannelList: React.FC = props => {
                 dataIndex: 'product_status',
                 align: 'center',
                 width: 150,
-                render: (status: ProductStatusCode, record) => {
+                render: (status: ProductStatusCode = 0, record) => {
                     return (
                         <div>
-                            {ProductStatusMap[status]}
+                            {ProductStatusResponseMap[status]}
                             <Button type="link" onClick={() => showLog(record)}>
                                 上下架日志
                             </Button>

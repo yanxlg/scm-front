@@ -7,6 +7,7 @@ import 'echarts/lib/chart/funnel';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import { formatTwodecimal } from '@/utils/transform';
+import { getUTCDate } from '@/utils/date';
 
 interface IProps {
     loading: boolean;
@@ -22,7 +23,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
     const chartRef = useRef<ECharts | null>(null);
 
     const getUpdateTime = useCallback(() => {
-        const threeDayStart = dayjs()
+        const threeDayStart = getUTCDate()
             .add(-3, 'day')
             .hour(0)
             .minute(0)
@@ -30,9 +31,9 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
             .unix();
         // console.log(111111, startDate.unix(), threeDayStart);
         if (startDate.unix() >= threeDayStart) {
-            return `${dayjs().format('YYYY-MM-DD hh')}:00`;
+            return `${getUTCDate().format('YYYY-MM-DD hh')}:00`;
         } else {
-            return dayjs().format('YYYY-MM-DD') + ' 00:00';
+            return getUTCDate().format('YYYY-MM-DD') + ' 00:00';
         }
     }, [startDate]);
 
