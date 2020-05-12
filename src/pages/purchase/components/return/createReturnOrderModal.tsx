@@ -84,7 +84,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 disabled,
             },
             {
-                label: <span>收 货 人</span>,
+                label: '收货人',
                 type: 'input',
                 name: 'receiver_name',
                 rules: [{ required: true, message: '请输入收货人' }],
@@ -92,7 +92,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 disabled,
             },
             {
-                label: <span>手 机 号</span>,
+                label: '手机号',
                 type: 'input',
                 name: 'receiver_tel',
                 className: styles.formInput,
@@ -254,7 +254,10 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                         description={
                             <JsonForm
                                 ref={form2}
-                                className={formStyles.formHelpAbsolute}
+                                className={classNames(
+                                    formStyles.formHelpAbsolute,
+                                    current === 0 ? styles.formLabelDisabled : undefined,
+                                )}
                                 enableCollapse={false}
                                 layout="horizontal"
                                 fieldList={fieldList1}

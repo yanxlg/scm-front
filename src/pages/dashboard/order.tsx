@@ -7,9 +7,10 @@ import DateRange from './components/DateRange';
 import { getOrderDashboardData, getPlatformAndStore } from '@/services/dashboard';
 import dayjs, { Dayjs } from 'dayjs';
 import { IOrderDashboardReq, IOrderDashboardRes } from '@/interface/IDashboard';
-import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
+// import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
 import { getAllTabCount } from '@/services/order-manage';
 import { Link } from 'umi';
+import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
@@ -56,7 +57,7 @@ const OrderAnalysis: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const [loading, setLoading] = useState(false);
     const [statisticsType, setStatisticsType] = useState('0');
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([dayjs(), dayjs()]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate(), getUTCDate()]);
     const [orderInfo, setOrderInfo] = useState<IOrderDashboardRes>({});
     const [catagoryOrderCount, setCatagoryOrderCount] = useState<ICatagoryOrderItem>({
         penddingOrderCount: 0,
@@ -69,11 +70,11 @@ const OrderAnalysis: React.FC = props => {
             // console.log(searchRef.current?.getFieldsValue(), dates, statisticsType);
             return getOrderDashboardData({
                 ...searchRef.current?.getFieldsValue(),
-                statistics_start_time: startDateToUnix(dates[0]),
+                statistics_start_time: startDateToUnixWithUTC(dates[0]),
                 statistics_end_time:
-                    dayjs().format(timeFormat) === dates[1].format(timeFormat)
-                        ? dayjs().unix()
-                        : endDateToUnix(dates[1]),
+                    getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(dates[1]),
                 statistics_type: statisticsType,
                 ...params,
             } as IOrderDashboardReq)
@@ -113,11 +114,11 @@ const OrderAnalysis: React.FC = props => {
         currentDates => {
             setDates(currentDates);
             _getOrderDashboardData({
-                statistics_start_time: startDateToUnix(currentDates[0]),
+                statistics_start_time: startDateToUnixWithUTC(currentDates[0]),
                 statistics_end_time:
-                    dayjs().format(timeFormat) === currentDates[1].format(timeFormat)
-                        ? dayjs().unix()
-                        : endDateToUnix(currentDates[1]),
+                    getUTCDate().format(timeFormat) === currentDates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(currentDates[1]),
             });
         },
         [_getOrderDashboardData],

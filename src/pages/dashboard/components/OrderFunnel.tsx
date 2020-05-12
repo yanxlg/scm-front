@@ -7,6 +7,7 @@ import 'echarts/lib/chart/funnel';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import { formatTwodecimal } from '@/utils/transform';
+import { getUTCDate } from '@/utils/date';
 
 interface IProps {
     loading: boolean;
@@ -22,7 +23,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
     const chartRef = useRef<ECharts | null>(null);
 
     const getUpdateTime = useCallback(() => {
-        const threeDayStart = dayjs()
+        const threeDayStart = getUTCDate()
             .add(-3, 'day')
             .hour(0)
             .minute(0)
@@ -30,9 +31,9 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
             .unix();
         // console.log(111111, startDate.unix(), threeDayStart);
         if (startDate.unix() >= threeDayStart) {
-            return `${dayjs().format('YYYY-MM-DD hh')}:00`;
+            return `${getUTCDate().format('YYYY-MM-DD hh')}:00`;
         } else {
-            return dayjs().format('YYYY-MM-DD') + ' 00:00';
+            return getUTCDate().format('YYYY-MM-DD') + ' 00:00';
         }
     }, [startDate]);
 
@@ -102,12 +103,12 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                     bottom: '0%',
                     textStyle: {
                         fontSize: 16,
-                        color: '#131415'
+                        color: '#131415',
                     },
                     subtextStyle: {
                         fontSize: 13,
-                        color: '#575858'
-                    }
+                        color: '#575858',
+                    },
                 },
                 tooltip: {
                     trigger: 'item',
@@ -441,15 +442,21 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                                 <div style="margin-bottom: 10px;">销售订单已确认</div>
                                                 <div style="margin-bottom: 4px;">
                                                     <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
-                                                    已销售-需拍单: ${formatTwodecimal(purchaseOrderPercentage)}%
+                                                    已销售-需拍单: ${formatTwodecimal(
+                                                        purchaseOrderPercentage,
+                                                    )}%
                                                 </div>
                                                 <div style="margin-bottom: 4px;">
                                                     <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
-                                                    已销售-已预定库存: ${formatTwodecimal(reserveStockPercentage)}%
+                                                    已销售-已预定库存: ${formatTwodecimal(
+                                                        reserveStockPercentage,
+                                                    )}%
                                                 </div>
                                                 <div>
                                                     <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: transparent; vertical-align: 2px;"></span>
-                                                    已取消订单: ${formatTwodecimal(cancelOrderPercentage)}%
+                                                    已取消订单: ${formatTwodecimal(
+                                                        cancelOrderPercentage,
+                                                    )}%
                                                 </div>
                                             </div>
                                         `;
@@ -508,10 +515,14 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                                 <div style="margin-bottom: 10px">订单已出库</div>
                                                 <div style="margin-bottom: 4px;">
                                                     <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
-                                                    需采购订单占比: ${formatTwodecimal(purchaseOutStorageOrderPercentage)}%</div>
+                                                    需采购订单占比: ${formatTwodecimal(
+                                                        purchaseOutStorageOrderPercentage,
+                                                    )}%</div>
                                                 <div style="margin-bottom: 4px;">
                                                     <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
-                                                    仅预定积压库存的订单占比: ${formatTwodecimal(stockOutStorageOrderPercentage)}%
+                                                    仅预定积压库存的订单占比: ${formatTwodecimal(
+                                                        stockOutStorageOrderPercentage,
+                                                    )}%
                                                 </div>
                                             </div>
                                             

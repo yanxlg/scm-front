@@ -17,11 +17,11 @@ import {
     postReviewPass,
     postOrderOffsale,
     getOrderGoodsDetail,
+    queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
 import Export from '@/components/Export';
-import { queryShopList } from '@/services/channel';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 

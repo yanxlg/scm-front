@@ -46,6 +46,16 @@
 .form-label {
     width: 4em;
     text-align: right;
+    &-disabled {
+        .form-label {
+            color: rgba(0, 0, 0, 0.45) !important;
+        }
+        :global(.ant-form-item-label) > label {
+            &:after {
+                color: rgba(0, 0, 0, 0.45) !important;
+            }
+        }
+    }
 }
 
 .form-input {
@@ -58,8 +68,10 @@
 }
 
 .image {
-    width: 60px !important;
-    height: 60px !important;
+    width: 77px !important;
+    height: 77px !important;
+    min-width: 77px !important;
+    min-height: 77px !important;
 }
 
 .modal {
@@ -85,4 +97,27 @@
             margin-left: 10px;
         }
     }
+}
+
+.paragraph {
+    margin-bottom: 0 !important;
+}
+
+.product {
+    &-desc {
+        margin-left: 10px;
+        text-align: left;
+    }
+}
+
+.form-item {
+    width: 90px;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.text-center {
+    text-align: center !important;
 }
