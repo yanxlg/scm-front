@@ -17,6 +17,7 @@ import {
     postReviewPass,
     postOrderOffsale,
     getOrderGoodsDetail,
+    queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
@@ -44,13 +45,22 @@ const formFields: FormField[] = [
         placeholder: '请输入子订单ID',
         formatter: 'number_str_arr',
     },
-    // product_shop
     {
-        type: 'input',
+        type: 'select',
         name: 'product_shop',
         label: '销售店铺名称',
         className: 'order-input-review',
-        placeholder: '请输入销售店铺名称',
+        syncDefaultOption: { name: '全部', value: '' },
+        optionList: () =>
+            queryShopList().then(({ data = [] }) => {
+                return data.map((item: any) => {
+                    const { merchant_name } = item;
+                    return {
+                        name: merchant_name,
+                        value: merchant_name,
+                    };
+                });
+            }),
     },
     {
         type: 'input',
@@ -61,6 +71,10 @@ const formFields: FormField[] = [
         formatter: 'str_arr',
     },
 ];
+
+const initialValues = {
+    product_shop: '',
+};
 
 const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     const formRef = useRef<JsonFormRef>(null);
@@ -229,7 +243,12 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
 
     const search = useMemo(() => {
         return (
-            <JsonForm ref={formRef} fieldList={formFields} labelClassName="order-label">
+            <JsonForm
+                ref={formRef}
+                fieldList={formFields}
+                labelClassName="order-label"
+                initialValues={initialValues}
+            >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
@@ -290,10 +309,10 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
             {
-                title: '商品标题',
+                title: '商品名称',
                 dataIndex: 'productName',
                 align: 'center',
-                width: 120,
+                width: 180,
                 render: (value: string, row: IReviewOrderItem) => {
                     // href=""
                     const { productId } = row;
@@ -412,7 +431,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     }, [selectedRowKeys]);
 
     return useMemo(() => {
-        console.log('orderList', orderList);
+        // console.log('orderList', orderList);
         return (
             <>
                 {search}
