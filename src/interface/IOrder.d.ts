@@ -163,3 +163,9 @@ export interface IReviewOrderItem {
     productName: string;
     productId: string;
 }
+
+export declare interface IPlatformItem {
+    name: string;
+    value: string;
+    children?: IPlatformItem[];
+}

@@ -15,6 +15,7 @@ import {
     purchaseReserveOptionList,
     childrenOrderCancelOptionList,
     purchasePlanCancelOptionList,
+    FinalCancelMap,
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
@@ -134,7 +135,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         },
         {
             key: 'productId',
-            title: 'Version ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
@@ -291,14 +292,15 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
         },
-        // // 勾选展示 - 待补充
-        // {
-        //     key: '',
-        //     title: '销售店铺名称',
-        //     dataIndex: '',
-        //     align: 'center',
-        //     width: 120,
-        // },
+        // 勾选展示 - 待补充
+        {
+            key: 'productShop',
+            title: '销售店铺名称',
+            dataIndex: 'productShop',
+            align: 'center',
+            width: 120,
+            defaultHide: true,
+        },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -414,14 +416,16 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 140,
             render: (value: number, row: IChildOrderItem) => {
-                const { reserveStatus, purchaseFailReason } = row;
+                const { reserveStatus, purchaseFailCode } = row;
                 if (reserveStatus === 3 && value === 1) {
                     return '';
                 }
                 return (
                     <>
                         {getStatusDesc(purchaseOrderOptionList, value)}
-                        {value === 7 && purchaseFailReason && <div>({purchaseFailReason})</div>}
+                        {value === 7 && (
+                            <div>({FinalCancelMap[purchaseFailCode as '40001'] || '未知原因'})</div>
+                        )}
                     </>
                 );
             },
