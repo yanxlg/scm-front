@@ -15,6 +15,7 @@ import { IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import { LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
     x: true,
@@ -34,20 +35,20 @@ const StockControl: React.FC = () => {
             {
                 title: '中台商品ID',
                 width: '180px',
-                dataIndex: ['sku_item', 'commodityId'],
+                dataIndex: 'commodityId',
                 align: 'center',
             },
             {
                 title: '商品图片',
                 width: '130px',
-                dataIndex: ['sku_item', 'mainImageUrl'],
+                dataIndex: 'productImage',
                 align: 'center',
                 render: (value: string) => <AutoEnLargeImg src={value} className="stock-img" />,
             },
             {
                 title: '商品属性',
                 width: '130px',
-                dataIndex: ['sku_item', 'optionValue'],
+                dataIndex: 'productStyle',
                 align: 'center',
                 render: _ => {
                     let skus: any[] = [];
@@ -67,13 +68,13 @@ const StockControl: React.FC = () => {
             {
                 title: '可销售库存',
                 width: '100px',
-                dataIndex: 'can_sale_inventory',
+                dataIndex: 'canSaleInventory',
                 align: 'center',
             },
             {
                 title: '在途库存',
                 width: '100px',
-                dataIndex: 'transportation_inventory',
+                dataIndex: 'transportationInventory',
                 align: 'center',
             },
             {
@@ -94,6 +95,7 @@ const StockControl: React.FC = () => {
                 width: '150px',
                 dataIndex: 'lastUpdateTime',
                 align: 'center',
+                render: _ => utcToLocal(_),
             },
         ];
     }, []);
