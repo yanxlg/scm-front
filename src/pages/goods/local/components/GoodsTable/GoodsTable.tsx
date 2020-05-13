@@ -23,6 +23,7 @@ import Export from '@/components/Export';
 import { JsonFormRef } from 'react-components/lib/JsonForm';
 import ShelvesModal from '../ShelvesModal/ShelvesModal';
 import SkuModal from '../SkuModal/SkuModal';
+import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal'
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -64,6 +65,10 @@ const GoodsTable: React.FC<IProps> = ({
     const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
     const [publistList, setPublistList] = useState<IPublishItem[]>([]);
     const [currentSkuInfo, setCurrentSkuInfo] = useState<ISkuInfo | null>(null);
+    // 关联商品
+    const [mergeStatus, setMergeStatus] = useState(false);
+    const [commodityId, setCommodityId] = useState('');
+    const [productSn, setProductSn] = useState('');
     
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -228,6 +233,19 @@ const GoodsTable: React.FC<IProps> = ({
         setCurrentSkuInfo(null);
     }, []);
 
+    const showMergeModal = useCallback((commodity_id, product_sn) => {
+        setMergeStatus(true);
+        setCommodityId(commodity_id);
+        setProductSn((product_sn !== '0') ? product_sn : '');
+  
+    }, []);
+
+    const hideMergeModal = useCallback(() => {
+        setMergeStatus(false);
+        setCommodityId('');
+        setProductSn('');
+    }, []);
+
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
         return [
             {
@@ -284,12 +302,13 @@ const GoodsTable: React.FC<IProps> = ({
                 width: 140,
                 render: (value: string, row: IGoodsAndSkuItem) => {
                     const _value = value !== '0' ? value : '';
+                    const { commodity_id, product_sn } = row;
                     return (
                         <>
                             <div>{_value}</div>
                             <Button
                                 type="link"
-                                // onClick={() => this.showMergeDialog(row)}
+                                onClick={() => showMergeModal(commodity_id, product_sn)}
                             >
                                 {_value ? '查看商品组' : '关联商品'}
                             </Button>
@@ -596,9 +615,16 @@ const GoodsTable: React.FC<IProps> = ({
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />
+                <GoodsMergeModal
+                    visible={mergeStatus}
+                    commodityId={commodityId}
+                    productSn={productSn}
+                    onReload={onReload}
+                    onCancel={hideMergeModal}
+                />
             </>
         )
-    }, [loading, selectedRowKeys, merchantStatus, exportStatus, publistStatus, skuStatus]);
+    }, [loading, selectedRowKeys, merchantStatus, exportStatus, publistStatus, skuStatus, mergeStatus]);
 }
 
 export default GoodsTable;
