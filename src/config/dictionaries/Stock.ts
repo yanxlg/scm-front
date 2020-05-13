@@ -17,10 +17,6 @@ export const StockType = {
 };
 
 export const OutStockState = {
-    1: '未配送',
-    2: '头程已配送',
-    3: '已妥投未入库',
-    4: '已入库',
     5: '出库中',
     6: '出库失败',
     7: '取消出库',
