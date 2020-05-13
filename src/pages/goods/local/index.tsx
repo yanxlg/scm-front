@@ -521,7 +521,11 @@ class Local extends React.PureComponent<LocalPageProps, IIndexState> {
                             >
                                 刷新
                             </LoadingButton>
-                            <Button disabled={allCount <= 0} className={formStyles.formBtn} onClick={() => this.toggleExcelDialog(true)}>
+                            <Button
+                                disabled={allCount <= 0}
+                                className={formStyles.formBtn}
+                                onClick={() => this.toggleExcelDialog(true)}
+                            >
                                 导出
                             </Button>
                         </div>

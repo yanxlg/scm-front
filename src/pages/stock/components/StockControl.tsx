@@ -1,20 +1,17 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable, useModal } from 'react-components';
-import { Button, message } from 'antd';
+import { FitTable, useModal, useList } from 'react-components';
+import { Button } from 'antd';
 import '@/styles/index.less';
 import { ColumnProps, TableProps } from 'antd/es/table';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { FormInstance } from 'rc-field-form/lib/interface';
 import { exportStockList, queryStockList } from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
 import { AutoEnLargeImg } from 'react-components';
 import { isEmptyObject } from '@/utils/utils';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
-import { useList } from '@/utils/hooks';
-import { IStockRequest, IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
-import { RequestPagination } from '@/interface/IGlobal';
+import { IStockItem, IStockInItem, IStockOutItem } from '@/interface/IStock';
 import { LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
@@ -29,41 +26,48 @@ const StockControl: React.FC = () => {
     const columns = useMemo<ColumnProps<IStockItem>[]>(() => {
         return [
             {
+                title: '商品SKU ID',
+                width: '180px',
+                dataIndex: 'sku',
+                align: 'center',
+            },
+            {
                 title: '中台商品ID',
                 width: '180px',
                 dataIndex: ['sku_item', 'commodityId'],
                 align: 'center',
             },
             {
-                title: '商品子SKU',
-                width: '180px',
-                dataIndex: 'sku',
-                align: 'center',
-            },
-            {
-                title: 'SKU对应图片',
-                width: '130px',
-                dataIndex: ['sku_item', 'imageUrl'],
-                align: 'center',
-                render: (value: string) => <AutoEnLargeImg src={value} className="stock-img" />,
-            },
-            {
-                title: '商品主图',
+                title: '商品图片',
                 width: '130px',
                 dataIndex: ['sku_item', 'mainImageUrl'],
                 align: 'center',
                 render: (value: string) => <AutoEnLargeImg src={value} className="stock-img" />,
             },
             {
-                title: 'size',
-                width: '128px',
-                dataIndex: ['sku_item', 'size'],
+                title: '商品属性',
+                width: '130px',
+                dataIndex: ['sku_item', 'optionValue'],
                 align: 'center',
+                render: _ => {
+                    let skus: any[] = [];
+                    try {
+                        const sku = JSON.parse(_);
+                        for (let key in sku) {
+                            skus.push(
+                                <div key={key}>
+                                    {key}:{sku[key]}
+                                </div>,
+                            );
+                        }
+                    } catch (e) {}
+                    return <div>{skus}</div>;
+                },
             },
             {
-                title: 'color',
-                width: '128px',
-                dataIndex: ['sku_item', 'color'],
+                title: '可销售库存',
+                width: '100px',
+                dataIndex: 'can_sale_inventory',
                 align: 'center',
             },
             {
@@ -78,16 +82,17 @@ const StockControl: React.FC = () => {
                 dataIndex: 'bookedInventory',
                 align: 'center',
             },
-            {
-                title: '可销售库存',
-                width: '100px',
-                dataIndex: 'can_sale_inventory',
-                align: 'center',
-            },
+
             {
                 title: '仓库库存',
                 width: '100px',
                 dataIndex: 'warehousingInventory',
+                align: 'center',
+            },
+            {
+                title: '仓库库存更新时间',
+                width: '150px',
+                dataIndex: 'lastUpdateTime',
                 align: 'center',
             },
         ];
@@ -95,42 +100,21 @@ const StockControl: React.FC = () => {
     const fieldsList = useMemo<FormField[]>(() => {
         return [
             {
-                type: 'input',
-                label: '中台商品ID',
-                name: 'commodity_id',
-                rules: [
-                    (form: FormInstance) => {
-                        return {
-                            validator: (rule, value) => {
-                                const sku_id = form.getFieldValue('commodity_sku_id');
-                                if (sku_id || value) {
-                                    return Promise.resolve();
-                                } else {
-                                    return Promise.reject('必须输入一个筛选条件');
-                                }
-                            },
-                        };
-                    },
-                ],
+                type: 'dateRanger',
+                label: '仓库库存更新时间',
+                name: ['last_update_time_start', 'last_update_time_end'],
+                formatter: ['start_date', 'end_date'],
             },
             {
                 type: 'input',
-                label: 'commodity_sku_id',
+                label: '中台商品ID',
+                name: 'commodity_id',
+            },
+            {
+                type: 'input',
+                label: '商品SKU ID',
                 name: 'commodity_sku_id',
-                rules: [
-                    (form: FormInstance) => {
-                        return {
-                            validator: (rule, value) => {
-                                const commodity_id = form.getFieldValue('commodity_id');
-                                if (commodity_id || value) {
-                                    return Promise.resolve();
-                                } else {
-                                    return Promise.reject('必须输入一个筛选条件');
-                                }
-                            },
-                        };
-                    },
-                ],
+                formatter: 'multipleToArray',
             },
         ];
     }, []);
@@ -163,14 +147,13 @@ const StockControl: React.FC = () => {
         onSearch,
         onChange,
         onReload,
-    } = useList<IStockItem, IStockRequest & RequestPagination>({
+    } = useList<IStockItem>({
         queryList: queryStockList,
         formRef: formRef,
         defaultState: {
             pageSize: page_size,
             pageNumber: page_number,
         },
-        autoQuery: false,
     });
 
     const getCopiedLinkQuery = useCallback(() => {
@@ -212,6 +195,7 @@ const StockControl: React.FC = () => {
     const table = useMemo(() => {
         return (
             <FitTable<IStockItem>
+                bordered={true}
                 rowKey={'in_order'}
                 scroll={scroll}
                 bottom={150}
