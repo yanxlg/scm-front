@@ -2,13 +2,14 @@ import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react'
 import { notification, Checkbox, Button } from 'antd';
 import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
+import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
 import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
 import {
     getWarehouseNotShipList,
     delChannelOrders,
     postExportWarehouseNotShip,
     queryChannelSource,
+    getPlatformAndStore,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -53,14 +54,8 @@ const formFields: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
     },
     {
         type: 'dateRanger',
@@ -72,7 +67,7 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: 100,
+    channel_source: '',
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
@@ -301,7 +296,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         onClick={() => setVisibleProps(true)}
                     >
                         导出
-                    </Button>,
+                    </Button>
+                    ,
                 </div>
             </JsonForm>
         );
@@ -529,7 +525,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 disabled={list.length ? false : true}
             >
                 取消渠道订单
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [getOrderGoodsIdList, _delChannelOrders]);
 

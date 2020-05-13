@@ -24,6 +24,7 @@ import { ColumnsType } from 'antd/es/table';
 import Export from '@/components/Export';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { defaultOptionItem1 } from '@/enums/OrderEnum';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -50,7 +51,7 @@ const formFields: FormField[] = [
         name: 'product_shop',
         label: '销售店铺名称',
         className: 'order-input-review',
-        syncDefaultOption: { name: '全部', value: '' },
+        syncDefaultOption: defaultOptionItem1,
         optionList: () =>
             queryShopList().then(({ data = [] }) => {
                 return data.map((item: any) => {
