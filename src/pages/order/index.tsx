@@ -8,7 +8,7 @@ import PaneError from './components/PaneError';
 import PaneNotWarehouse from './components/PaneNotWarehouse';
 import PaneWarehouseNotShip from './components/PaneWarehouseNotShip';
 import Container from '@/components/Container';
-// import { Location } from "history";
+import PanePendingReview from './components/PanePendingReview';
 
 import { getAllTabCount } from '@/services/order-manage';
 
@@ -28,6 +28,7 @@ declare interface IOrderState {
     penddingPurchaseListCount: number;
     penddingWarehousingListCount: number;
     errorOrderCount: number;
+    penddingCheckListCount: number;
 }
 
 class Order extends React.PureComponent<IProps, IOrderState> {
@@ -43,6 +44,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingPurchaseListCount: 0,
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
+            penddingCheckListCount: 0,
         };
         // console.log(11111, this.props);
         this.defaultActiveKey = this.props.location?.query?.type || '1';
@@ -76,6 +78,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingShipingOrderCount,
             penddingPurchaseListCount,
             penddingWarehousingListCount,
+            penddingCheckListCount,
         } = this.state;
         return (
             <Container>
@@ -88,6 +91,11 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <div className="order-tab-content">
                                 <PaneAll getAllTabCount={this.getAllTabCount} />
+                            </div>
+                        </TabPane>
+                        <TabPane tab={`待审核（${penddingCheckListCount}）`} key="8">
+                            <div className="order-tab-content">
+                                <PanePendingReview getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`待拍单（${penddingOrderCount}）`} key="2">

@@ -8,7 +8,7 @@ const baseGroupList = [
     { key: 'orderGoodsShippingStatusShow', name: '配送状态' },
     { key: 'orderId', name: '父订单ID' },
     { key: 'orderGoodsId', name: '子订单ID' },
-    { key: 'productId', name: 'Version ID' },
+    { key: 'productId', name: 'Product ID' },
     { key: 'skuId', name: '中台SKU ID' },
     // { key: '', name: '采购渠道' },
     // { key: '', name: '采购渠道Goods ID' },
@@ -32,7 +32,7 @@ const baseGroupList = [
 
 const saleGroupList = [
     { key: 'channelSource', name: '销售渠道' },
-    // { key: '', name: '销售店铺名称' },
+    { key: 'productShop', name: '销售店铺名称' },
     // { key: '', name: '二级分类' },
     // { key: '', name: '销售渠道Goods ID' },
     { key: 'confirmTime', name: '销售订单确认时间' },
