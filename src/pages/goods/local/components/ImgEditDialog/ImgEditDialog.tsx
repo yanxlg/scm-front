@@ -273,6 +273,12 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
     // RcFile
     private beforeUpload = (file: RcFile) => {
         if (file) {
+            const overSize = file.size / 1024 / 1024 >= 20; // 限制20M
+            if (overSize) {
+                message.error('不支持上传20M以上的文件！');
+                return false;
+            }
+
             this.setState({
                 uploading: true,
             });
