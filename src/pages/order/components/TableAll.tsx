@@ -412,7 +412,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             title: '采购订单状态',
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
-            width: 120,
+            width: 140,
             render: (value: number, row: IChildOrderItem) => {
                 const { reserveStatus, purchaseFailReason } = row;
                 if (reserveStatus === 3 && value === 1) {
