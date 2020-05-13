@@ -364,7 +364,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 title: '销售商品运费($)',
                 dataIndex: 'freight',
                 align: 'center',
-                width: 130,
+                width: 140,
             },
             {
                 title: '销售商品总金额($)',
