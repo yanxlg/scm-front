@@ -1,15 +1,16 @@
 import { FormField } from 'react-components/es/JsonForm';
 import { transStatusList } from '@/utils/transform';
-import { queryChannelSource } from '@/services/order-manage';
+import { queryChannelSource, getPlatformAndStore } from '@/services/order-manage';
 
 declare interface optionItem {
     name: string;
-    value: number;
+    value: number | string;
 }
 
 export const pageSizeOptions = ['50', '100', '200', '500'];
 
 export const defaultOptionItem: optionItem = { name: '全部', value: 100 };
+export const defaultOptionItem1: optionItem = { name: '全部', value: '' };
 
 export const channelOptionList = [
     { name: 'VOVA', value: 1 },
@@ -186,16 +187,23 @@ export const childDefaultFieldList: FormField[] = [
         name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        // formItemClassName: 'order-form-item',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
+        onChange: (_, form) => {
+            form.resetFields(['product_shop']);
+        },
+    },
+    {
+        type: 'select',
+        name: 'product_shop',
+        label: '销售店铺名称',
+        className: 'order-input-review',
+        syncDefaultOption: defaultOptionItem1,
+        optionListDependence: {
+            name: 'channel_source',
+            key: 'children',
+        },
+        optionList: () => getPlatformAndStore(),
     },
 ];
 
@@ -241,10 +249,10 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'input',
         name: 'product_id',
-        label: 'Version ID',
+        label: 'Product ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入Version ID',
+        placeholder: '请输入Product ID',
         formatter: 'str_arr',
     },
     {
@@ -428,7 +436,7 @@ export const defaultColChildList = [
     'orderGoodsStatus', // 订单状态
     'orderGoodsShippingStatusShow', // 配送状态
     'orderGoodsId', // 子订单ID
-    'productId', // Version ID
+    'productId', // Product ID
     'productImage', // SKU图片
     // 'a1',                             // 商品名称 - 待确认
     'productStyle', // 商品规格
@@ -472,17 +480,24 @@ export const parentDefaultFieldList: FormField[] = [
         name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        // formItemClassName: 'order-form-item',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
+        // onChange: (_, form) => {
+        //     form.resetFields(['product_shop']);
+        // },
     },
+    // {
+    //     type: 'select',
+    //     name: 'product_shop',
+    //     label: '销售店铺名称',
+    //     className: 'order-input-review',
+    //     syncDefaultOption: defaultOptionItem1,
+    //     optionListDependence: {
+    //         name: 'channel_source',
+    //         key: 'children',
+    //     },
+    //     optionList: () => getPlatformAndStore()
+    // },
 ];
 
 export const parentAllFieldList: FormField[] = [
@@ -603,3 +618,19 @@ export const stockNotShipOptionalColList = [
         name: '发货剩余时间',
     },
 ];
+
+export const FinalCancelMap = {
+    '40001': '未登录',
+    '46024': '待支付订单过多',
+    '410031': '已售罄',
+    '41003': '已售罄',
+    '46028': '购买数量超出范围',
+    '42004': '购买次数超限制',
+    '-101': '采购价不符规则',
+    '-100': '特殊商品拦截',
+    '-200': '特殊商品无需拍单',
+    '41006': '收货地址不支持',
+    '40003': '系统错误',
+    '503': '系统错误',
+    // 未知原因
+};

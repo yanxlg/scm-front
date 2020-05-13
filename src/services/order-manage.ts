@@ -11,6 +11,7 @@ import {
     ISimilarInfoResponse,
     IChannelSourceResponse,
     IReviewSearch,
+    IPlatformItem,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
@@ -266,4 +267,29 @@ export function postOrderOffsale(data: { order_goods_ids: string[] }) {
 
 export const queryShopList = singlePromiseWrap(() => {
     return request.get(OrderApiPath.QueryShopList);
+});
+
+export const getPlatformAndStore = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.QueryShopList).then(res => {
+        const list: IPlatformItem[] = [];
+        const obj: any = {};
+        res.data?.forEach((item: any) => {
+            const { merchant_platform, merchant_name } = item;
+            const nameList = obj[merchant_platform];
+            !nameList && (obj[merchant_platform] = []);
+            obj[merchant_platform].push({
+                name: merchant_name,
+                value: merchant_name,
+            });
+        });
+        Object.keys(obj).forEach(platform => {
+            const item: IPlatformItem = {
+                name: platform,
+                value: platform,
+                children: obj[platform],
+            };
+            list.push(item);
+        });
+        return list;
+    });
 });
