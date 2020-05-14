@@ -23,7 +23,7 @@ const Config: React.FC = () => {
                         <TabPane tab="PDD热销款采集" key="1">
                             <HotGather />
                         </TabPane>,
-                        <TabPane tab="VoVa采集" key="2">
+                        <TabPane tab="vova商品采集" key="2">
                             <HotGather />
                         </TabPane>,
                         <TabPane tab="定时商品更新" key="3">
