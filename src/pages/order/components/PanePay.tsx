@@ -469,12 +469,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 align: 'center',
                 width: 180,
                 render: (value, row: IChildOrderItem) => {
-                    const { productPrice = 0, purchaseNormalPrice = 0 } = row;
+                    const { productPrice = 0, purchaseNormalPrice = 0, purchaseNumber = 0 } = row;
                     const purchasePrice = Number(purchaseNormalPrice);
                     if (purchasePrice === 0 || isNaN(purchasePrice)) {
                         return '';
                     }
-                    const result = Number(productPrice) - purchasePrice;
+                    const result = (Number(productPrice) - purchasePrice) * Number(purchaseNumber);
                     return result < 0 ? <span style={{ color: 'red' }}>{result}</span> : result;
                 },
             },
