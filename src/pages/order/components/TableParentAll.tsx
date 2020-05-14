@@ -239,7 +239,9 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                 if (purchasePrice === 0 || isNaN(purchasePrice)) {
                     return '';
                 }
-                return Number(productPrice) - purchasePrice;
+                const result = Number(productPrice) - purchasePrice;
+
+                return result < 0 ? <span style={{ color: 'red' }}>{result}</span> : result;
             },
         },
     ];
