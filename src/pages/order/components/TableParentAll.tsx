@@ -85,7 +85,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'productId',
-            title: 'Version ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
@@ -200,6 +200,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell,
             defaultHide: true,
         },
+        // {
+        //     key: 'productShop',
+        //     title: '销售店铺名称',
+        //     dataIndex: 'productShop',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        //     defaultHide: true,
+        // },
         {
             key: 'currency',
             title: '货币类型',

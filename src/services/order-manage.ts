@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { downloadExcel } from '@/utils/common';
+import { GlobalApiPath } from '@/config/api/GlobalApiPath';
 import {
     IPadSimilarBody,
     IWarehouseNotShipSearch,
@@ -10,10 +10,14 @@ import {
     IPendingOrderSearch,
     ISimilarInfoResponse,
     IChannelSourceResponse,
+    IReviewSearch,
+    IPlatformItem,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
 import { IResponse } from '@/interface/IGlobal';
+// import { ISHopList } from '@/interface/IChannel';
+import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 
 export declare interface IFilterParams {
     page?: number;
@@ -163,13 +167,6 @@ export function getErrorOrderList(data: IErrFilterParams) {
             data: data,
         })
         .then(transPaginationResponse);
-    /*
-    return request
-        .post(OrderApiPath.getErrorOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);*/
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -239,4 +236,60 @@ export async function querySimilarInfo(query: {
 
 export const queryChannelSource = singlePromiseWrap(() => {
     return request.get<IResponse<IChannelSourceResponse>>(OrderApiPath.queryChannelSource);
+});
+
+export function getReviewOrderList(data: IReviewSearch) {
+    return api
+        .post(OrderApiPath.getReviewOrderList, {
+            requestType: 'json',
+            data: data,
+        })
+        .then(transPaginationResponse);
+}
+
+export async function postExportReview(data: any) {
+    return request.post(GlobalApiPath.downloadExcel, {
+        data,
+    });
+}
+
+export function postReviewPass(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postReviewPass, {
+        data,
+    });
+}
+
+export function postOrderOffsale(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postOrderOffsale, {
+        data,
+    });
+}
+
+export const queryShopList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.QueryShopList);
+});
+
+export const getPlatformAndStore = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.QueryShopList).then(res => {
+        const list: IPlatformItem[] = [];
+        const obj: any = {};
+        res.data?.forEach((item: any) => {
+            const { merchant_platform, merchant_name } = item;
+            const nameList = obj[merchant_platform];
+            !nameList && (obj[merchant_platform] = []);
+            obj[merchant_platform].push({
+                name: merchant_name,
+                value: merchant_name,
+            });
+        });
+        Object.keys(obj).forEach(platform => {
+            const item: IPlatformItem = {
+                name: platform,
+                value: platform,
+                children: obj[platform],
+            };
+            list.push(item);
+        });
+        return list;
+    });
 });

@@ -1,15 +1,16 @@
 import { FormField } from 'react-components/es/JsonForm';
 import { transStatusList } from '@/utils/transform';
-import { queryChannelSource } from '@/services/order-manage';
+import { queryChannelSource, getPlatformAndStore } from '@/services/order-manage';
 
 declare interface optionItem {
     name: string;
-    value: number;
+    value: number | string;
 }
 
 export const pageSizeOptions = ['50', '100', '200', '500'];
 
 export const defaultOptionItem: optionItem = { name: '全部', value: 100 };
+export const defaultOptionItem1: optionItem = { name: '全部', value: '' };
 
 export const channelOptionList = [
     { name: 'VOVA', value: 1 },
@@ -20,7 +21,7 @@ export const channelOptionList = [
 export const orderStatusOptionList = [
     { name: '已确认', value: 1 },
     { name: '已取消', value: 2 },
-    // { name: '采购失败', value: 3 },
+    { name: '待审核', value: 3 },
 ];
 
 export const orderShippingOptionList = [
@@ -106,6 +107,7 @@ export const failureReasonMap = {
     '1001': '海淘、预售等无法拍单的商品属性',
     '1002': '任务超时失败',
     '-100': '采购价异常',
+    '888': '中台商品缺失',
 };
 
 export const failureReasonList = transStatusList(failureReasonMap);
@@ -186,16 +188,23 @@ export const childDefaultFieldList: FormField[] = [
         name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        // formItemClassName: 'order-form-item',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
+        onChange: (_, form) => {
+            form.resetFields(['product_shop']);
+        },
+    },
+    {
+        type: 'select',
+        name: 'product_shop',
+        label: '销售店铺名称',
+        className: 'order-input-review',
+        syncDefaultOption: defaultOptionItem1,
+        optionListDependence: {
+            name: 'channel_source',
+            key: 'children',
+        },
+        optionList: () => getPlatformAndStore(),
     },
 ];
 
@@ -241,10 +250,10 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'input',
         name: 'product_id',
-        label: 'Version ID',
+        label: 'Product ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入Version ID',
+        placeholder: '请输入Product ID',
         formatter: 'str_arr',
     },
     {
@@ -428,7 +437,7 @@ export const defaultColChildList = [
     'orderGoodsStatus', // 订单状态
     'orderGoodsShippingStatusShow', // 配送状态
     'orderGoodsId', // 子订单ID
-    'productId', // Version ID
+    'productId', // Product ID
     'productImage', // SKU图片
     // 'a1',                             // 商品名称 - 待确认
     'productStyle', // 商品规格
@@ -472,17 +481,24 @@ export const parentDefaultFieldList: FormField[] = [
         name: 'channel_source',
         label: '销售渠道',
         className: 'order-input',
-        // formItemClassName: 'order-form-item',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
+        // onChange: (_, form) => {
+        //     form.resetFields(['product_shop']);
+        // },
     },
+    // {
+    //     type: 'select',
+    //     name: 'product_shop',
+    //     label: '销售店铺名称',
+    //     className: 'order-input-review',
+    //     syncDefaultOption: defaultOptionItem1,
+    //     optionListDependence: {
+    //         name: 'channel_source',
+    //         key: 'children',
+    //     },
+    //     optionList: () => getPlatformAndStore()
+    // },
 ];
 
 export const parentAllFieldList: FormField[] = [
@@ -603,3 +619,15 @@ export const stockNotShipOptionalColList = [
         name: '发货剩余时间',
     },
 ];
+
+export const FinalCancelMap = {
+    '40001': '未登录',
+    '46024': '待支付订单过多',
+    '410031': '已售罄',
+    '41003': '已售罄',
+    '1001': '特殊商品无需拍单',
+    '1002': '拍单超时',
+    '888': '中台商品缺失',
+    '-100': '采购价异常',
+    // 未知原因
+};
