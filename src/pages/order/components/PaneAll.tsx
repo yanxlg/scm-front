@@ -71,7 +71,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<JsonFormRef> = React.createRef();
     private currentSearchParams: IFilterParams | null = null;
     private initialValues = {
-        channel_source: 100,
+        channel_source: '',
+        product_shop: '',
         order_goods_status: 100,
         order_goods_shipping_status: 100,
         non_purchase_plan: 100,
