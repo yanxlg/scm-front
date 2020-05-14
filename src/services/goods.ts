@@ -79,7 +79,7 @@ export declare interface IGoodsEditData {
     cat_id: number;
     imgs?: IGoodsEditImgItem[];
     has_zip?: 1 | 2;
-    zip_id?: string;
+    zip_id?: number;
 }
 
 export declare interface ISkuParams {

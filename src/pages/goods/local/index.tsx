@@ -26,6 +26,14 @@ import GoodsTable from './components/GoodsTable/GoodsTable';
 import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 
+const initialValues= {
+    inventory_status: '',
+    version_status: '',
+    first_catagory: '',
+    second_catagory: '',
+    third_catagory: '',
+    publish_channel: ''
+} 
 
 const formFields: FormField[] = [
     {
@@ -235,7 +243,7 @@ const LocalPage: React.FC = props => {
                 <div className={styles.form}>
                     <JsonForm
                         labelClassName={styles.formLabel}
-                        // initialValues={this.initialValues}
+                        initialValues={initialValues}
                         ref={formRef}
                         fieldList={formFields}
                     >

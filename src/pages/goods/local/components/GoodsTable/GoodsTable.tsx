@@ -31,9 +31,11 @@ import ShelvesModal from '../ShelvesModal/ShelvesModal';
 import SkuModal from '../SkuModal/SkuModal';
 import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal';
 import GoodsEditModal from '../GoodsEditModal/GoodsEditModal';
+import useSkuModal from '../../hooks/useSkuModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import useGoodsEditModal from '../../hooks/useGoodsEditModal';
 
 interface IProps {
     loading: boolean;
@@ -68,17 +70,26 @@ const GoodsTable: React.FC<IProps> = ({
 }) => {
     const [merchantStatus, setMerchantStatus] = useState(false);
     const [publistStatus, setPublistStatus] = useState(false);
-    const [skuStatus, setSkuStatus] = useState(false);
     const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
     const [publistList, setPublistList] = useState<IPublishItem[]>([]);
-    const [currentSkuInfo, setCurrentSkuInfo] = useState<ISkuInfo | null>(null);
     // 关联商品
     const [mergeStatus, setMergeStatus] = useState(false);
     const [commodityId, setCommodityId] = useState('');
     const [productSn, setProductSn] = useState('');
     // 编辑商品
-    const [editGoodsStatus, setEditGoodsStatus] = useState(false);
-    const [editGoodsInfo, setEditGoodsInfo] = useState<IGoodsEditItem | null>(null);
+    const {
+        editGoodsStatus,
+        editGoodsInfo,
+        showEditGoods,
+        hideEditGoods
+    } = useGoodsEditModal();
+    // 查看sku信息
+    const {
+        skuStatus,
+        currentSkuInfo,
+        showSkuModal,
+        hideSkuModal
+    } = useSkuModal();
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -215,74 +226,6 @@ const GoodsTable: React.FC<IProps> = ({
         setPublistList([]);
     }, []);
 
-    const showEditGoods = useCallback((record: IGoodsAndSkuItem) => {
-        // console.log('showEditGoods', record);
-        const {
-            product_id,
-            title,
-            description,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-            goods_img,
-            sku_image,
-        } = record;
-        setEditGoodsStatus(true);
-        const list = [...sku_image];
-        const index = list.findIndex(img => img === goods_img);
-        if (index > -1) {
-            list.splice(index, 1);
-            list.unshift(goods_img);
-        }
-        setEditGoodsInfo({
-            product_id,
-            title,
-            description,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-            goods_img,
-            sku_image: list,
-        });
-    }, []);
-
-    const hideEditGoods = useCallback(() => {
-        setEditGoodsStatus(false);
-    }, []);
-
-    const showSkuModal = useCallback(record => {
-        const {
-            tags,
-            product_id,
-            goods_img,
-            title,
-            worm_goodsinfo_link,
-            worm_goods_id,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-            commodity_id,
-        } = record;
-        setSkuStatus(true);
-        setCurrentSkuInfo({
-            tags,
-            product_id,
-            goods_img,
-            title,
-            worm_goodsinfo_link,
-            worm_goods_id,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-            commodity_id,
-        });
-    }, []);
-
-    const hideSkuModal = useCallback(() => {
-        setSkuStatus(false);
-        setCurrentSkuInfo(null);
-    }, []);
-
     const showMergeModal = useCallback((commodity_id, product_sn) => {
         setMergeStatus(true);
         setCommodityId(commodity_id);
@@ -301,6 +244,7 @@ const GoodsTable: React.FC<IProps> = ({
                 fixed: 'left',
                 key: '_operation',
                 title: '操作',
+                dataIndex: '_operation',
                 align: 'center',
                 width: 156,
                 render: (_: any, row: IGoodsAndSkuItem) => {
@@ -644,7 +588,7 @@ const GoodsTable: React.FC<IProps> = ({
                     onCancel={merchantCancel}
                 />
                 <Export
-                    columns={columns}
+                    columns={columns.filter((item: any) => item.dataIndex[0] !== '_')}
                     visible={exportStatus}
                     // onOKey
                     onOKey={handleExportOkey}
@@ -671,6 +615,7 @@ const GoodsTable: React.FC<IProps> = ({
                     visible={editGoodsStatus}
                     currentGoodsInfo={editGoodsInfo}
                     onCancel={hideEditGoods}
+                    onReload={onReload}
                 />
             </>
         );

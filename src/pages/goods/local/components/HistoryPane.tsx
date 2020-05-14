@@ -6,10 +6,11 @@ import { getGoodsVersion } from '@/services/goods';
 import { IGoodsVersionAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import usePagination from '../hooks/usePagination';
-import useSkuDialog from '../hooks/useSkuDialog';
-import SkuDialog from './SkuDialog';
+import useSkuModal from '../hooks/useSkuModal';
 
 import styles from '../_version.less';
+import SkuModal from './SkuModal/SkuModal';
+
 
 interface IProps {
     commodityId: string;
@@ -18,15 +19,14 @@ interface IProps {
 const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
     const [loading, setLoading] = useState(false);
     const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
-
     const { page, setPage, pageSize, setPageSize, total, setTotal } = usePagination();
+    // 查看sku信息
     const {
         skuStatus,
-        currentSkuGoods,
-        skuDialogRef,
-        showSkuDialog,
-        hideSkuDialog,
-    } = useSkuDialog();
+        currentSkuInfo,
+        showSkuModal,
+        hideSkuModal
+    } = useSkuModal();
 
     const _getGoodsVersion = useCallback(
         (params = { page, page_count: pageSize }) => {
@@ -70,32 +70,6 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
         _getGoodsVersion({
             page: current,
             page_count: pageSize,
-        });
-    }, []);
-
-    const handleShowSku = useCallback(record => {
-        const {
-            tags,
-            product_id,
-            goods_img,
-            title,
-            worm_goodsinfo_link,
-            worm_goods_id,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-        } = record;
-        showSkuDialog({
-            commodity_id: commodityId,
-            tags,
-            product_id,
-            goods_img,
-            title,
-            worm_goodsinfo_link,
-            worm_goods_id,
-            first_catagory,
-            second_catagory,
-            third_catagory,
         });
     }, []);
 
@@ -177,7 +151,7 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                             <Button
                                 type="link"
                                 className={styles.link}
-                                onClick={() => handleShowSku(row)}
+                                onClick={() => showSkuModal(row)}
                             >
                                 查看sku信息
                             </Button>
@@ -241,15 +215,14 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                     pagination={pagination}
                     onChange={onChange}
                 />
-                <SkuDialog
+                <SkuModal
                     visible={skuStatus}
-                    ref={skuDialogRef}
-                    currentSkuInfo={currentSkuGoods}
-                    hideSkuDialog={hideSkuDialog}
+                    currentSkuInfo={currentSkuInfo}
+                    onCancel={hideSkuModal}
                 />
             </>
         );
-    }, [loading, goodsList, skuStatus, currentSkuGoods]);
+    }, [loading, goodsList, skuStatus, currentSkuInfo]);
 };
 
 export default HistoryPane;
