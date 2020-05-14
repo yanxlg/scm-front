@@ -556,7 +556,11 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 180,
             render: (value, row: IChildOrderItem) => {
                 const { productPrice = 0, purchaseNormalPrice = 0 } = row;
-                return Number(productPrice) - Number(purchaseNormalPrice);
+                const purchasePrice = Number(purchaseNormalPrice);
+                if (purchasePrice === 0 || isNaN(purchasePrice)) {
+                    return '';
+                }
+                return Number(productPrice) - purchasePrice;
             },
         },
     ];
