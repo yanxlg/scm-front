@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { Button, DatePicker, Radio } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
+import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
 
 // import styles from '../_order.less';
 import btnStyles from '@/styles/_btn.less';
@@ -15,16 +16,15 @@ interface IProps {
 
 const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
     const isToday = useMemo(() => {
-        // console.log('isToday', dates);
         const [startDate, endDate] = dates;
-        const todayStr = dayjs().format(timeFormat);
+        const todayStr = getUTCDate().format(timeFormat);
         const startDateStr = startDate.format(timeFormat);
         const endDateStr = endDate.format(timeFormat);
         return endDateStr === todayStr && startDateStr === todayStr;
     }, [dates]);
     const isYesterday = useMemo(() => {
         const [startDate, endDate] = dates;
-        const yesterdayStr = dayjs()
+        const yesterdayStr = getUTCDate()
             .add(-1, 'day')
             .format(timeFormat);
         const startDateStr = startDate.format(timeFormat);
@@ -33,10 +33,10 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
     }, [dates]);
     const isThreeToday = useMemo(() => {
         const [startDate, endDate] = dates;
-        const yesterdayStr = dayjs()
+        const yesterdayStr = getUTCDate()
             .add(-1, 'day')
             .format(timeFormat);
-        const threeDayStr = dayjs()
+        const threeDayStr = getUTCDate()
             .add(-3, 'day')
             .format(timeFormat);
         const startDateStr = startDate.format(timeFormat);
@@ -45,10 +45,10 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
     }, [dates]);
     const isSevenToday = useMemo(() => {
         const [startDate, endDate] = dates;
-        const yesterdayStr = dayjs()
+        const yesterdayStr = getUTCDate()
             .add(-1, 'day')
             .format(timeFormat);
-        const sevenDayStr = dayjs()
+        const sevenDayStr = getUTCDate()
             .add(-7, 'day')
             .format(timeFormat);
         const startDateStr = startDate.format(timeFormat);
@@ -57,7 +57,7 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
     }, [dates]);
 
     const disabledDate = useCallback(currentDate => {
-        return currentDate.valueOf() > dayjs().valueOf();
+        return currentDate.valueOf() > getUTCDate().valueOf();
     }, []);
 
     const handleRangePicker = useCallback(
@@ -70,33 +70,27 @@ const DateRange: React.FC<IProps> = ({ dates, setDates }) => {
 
     const handleToday = useCallback(() => {
         if (!isToday) {
-            // console.log('handleToday');
-            const today = dayjs();
+            const today = getUTCDate();
             setDates([today, today]);
         }
     }, [isToday, setDates]);
 
     const handleYesterday = useCallback(() => {
         if (!isYesterday) {
-            // console.log('handleYesterday');
-            const yesterday = dayjs().add(-1, 'day');
+            const yesterday = getUTCDate().add(-1, 'day');
             setDates([yesterday, yesterday]);
         }
     }, [isYesterday, setDates]);
 
     const handleThreeDay = useCallback(() => {
         if (!isThreeToday) {
-            // console.log('handleThreeDay');
-            // const threeDay = dayjs().add(-3, 'day');
-            setDates([dayjs().add(-3, 'day'), dayjs().add(-1, 'day')]);
+            setDates([getUTCDate().add(-3, 'day'), getUTCDate().add(-1, 'day')]);
         }
     }, [isThreeToday, setDates]);
 
     const handleSevenDay = useCallback(() => {
         if (!isSevenToday) {
-            // console.log('handleSevenDay');
-            // const sevenDay = dayjs().add(-7, 'day');
-            setDates([dayjs().add(-7, 'day'), dayjs().add(-1, 'day')]);
+            setDates([getUTCDate().add(-7, 'day'), getUTCDate().add(-1, 'day')]);
         }
     }, [isSevenToday, setDates]);
 

@@ -111,10 +111,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 return (
                     <>
                         <div>{_value}</div>
-                        <Button
-                            type="link"
-                            onClick={() => this.showMergeDialog(row)}
-                        >
+                        <Button type="link" onClick={() => this.showMergeDialog(row)}>
                             {_value ? '查看商品组' : '关联商品'}
                         </Button>
                     </>
@@ -579,7 +576,7 @@ class GoodsProTable extends React.PureComponent<IProps, IState> {
                 disabled={disabled}
             >
                 删除
-            </LoadingButton>
+            </LoadingButton>,
         ];
     };
 

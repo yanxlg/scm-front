@@ -1,3 +1,6 @@
+import formatter from 'react-components/es/utils/formatter';
+import { multipleToArray } from '@/utils/formatter';
+
 const logger = require('dva-logger');
 
 // const _ = require('lodash/lodash.js');
@@ -71,4 +74,15 @@ window.addEventListener('load', function() {
         // tslint:disable-next-line:no-console
         console && console.table && console.table(n);
     }
+});
+
+// formatter 扩展
+
+declare module 'react-components' {
+    interface Formatters {
+        multipleToArray: typeof multipleToArray;
+    }
+}
+formatter.extend({
+    multipleToArray: multipleToArray,
 });

@@ -78,6 +78,8 @@ export declare interface IGoodsEditData {
     description: string;
     cat_id: number;
     imgs?: IGoodsEditImgItem[];
+    has_zip?: 1 | 2;
+    zip_id?: string;
 }
 
 export declare interface ISkuParams {
@@ -307,5 +309,22 @@ export function setGoodsMix(data: {
 }) {
     return request.post(LocalApiPath.setGoodsMix, {
         data,
+    });
+}
+
+export function exportAllSkuImages(product_id: string) {
+    return request.post(LocalApiPath.exportAllSkuImages, {
+        data: {
+            module: 8,
+            filename: product_id,
+            query: { product_id },
+        },
+    });
+}
+
+export async function uploadGoodsPic(data: any, product_id: string) {
+    return request.post(LocalApiPath.uploadGoodsPic.replace(':product_id', product_id), {
+        data,
+        skipResponseInterceptors: true,
     });
 }

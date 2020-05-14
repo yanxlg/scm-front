@@ -37,6 +37,7 @@ const fieldList: FormField[] = [
             { value: 5, name: '采购管理-仓库异常' },
             { value: 6, name: '采购退货列表' },
             { value: 7, name: '采购单导出' },
+            { value: 8, name: '商品编辑-图片下载' },
         ],
     },
     {
@@ -209,6 +210,7 @@ const Export = () => {
                                     status,
                                     filesize = '0',
                                     object_url,
+                                    module,
                                 }: IFileItem) => {
                                     return (
                                         <Col key={id} span={12}>
@@ -227,7 +229,11 @@ const Export = () => {
                                                             className={exportStyles.exportIconWrap}
                                                         >
                                                             <Icons
-                                                                type={'scm-biaoge'}
+                                                                type={
+                                                                    module === '8'
+                                                                        ? 'scm-zip'
+                                                                        : 'scm-xls'
+                                                                }
                                                                 className={exportStyles.exportIcon}
                                                             />
                                                         </div>

@@ -16,7 +16,7 @@ import {
     childAllFieldList,
     parentAllFieldList,
     defaultColChildList,
-    defaultParentColList
+    defaultParentColList,
 } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
 
@@ -108,7 +108,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             // 表格展示的列
             colChildList: defaultColChildList,
             colParentList: defaultParentColList,
-            exportModal: false
+            exportModal: false,
         };
     }
 
@@ -174,7 +174,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const { showParentStatus } = this.state;
         return {
             ...this.formRef.current!.getFieldsValue(),
-            only_p_order: showParentStatus ? 1 : 0
+            only_p_order: showParentStatus ? 1 : 0,
         };
     };
 
@@ -274,7 +274,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 total: 0,
                 childOrderList: [],
                 parentOrderList: [],
-                fieldList: status ? parentAllFieldList : childAllFieldList
+                fieldList: status ? parentAllFieldList : childAllFieldList,
             },
             () => {
                 this.onSearch();
@@ -476,9 +476,9 @@ class PaneAll extends React.PureComponent<IProps, IState> {
 
     private handleClickSearch = () => {
         return this.onSearch({
-            page: 1
+            page: 1,
         });
-    }
+    };
 
     render() {
         const {
@@ -520,7 +520,11 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             >
                                 刷新
                             </LoadingButton>
-                            <Button disabled={total <= 0} className={formStyles.formBtn} onClick={this.showExport}>
+                            <Button
+                                disabled={total <= 0}
+                                className={formStyles.formBtn}
+                                onClick={this.showExport}
+                            >
                                 导出
                             </Button>
                         </div>

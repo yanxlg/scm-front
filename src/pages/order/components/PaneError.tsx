@@ -408,7 +408,11 @@ const PaneErrTab = () => {
                     <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                         刷新
                     </LoadingButton>
-                    <Button disabled={total <= 0} className={formStyles.formBtn} onClick={() => setExportModal(true)}>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => setExportModal(true)}
+                    >
                         导出
                     </Button>
                 </JsonForm>

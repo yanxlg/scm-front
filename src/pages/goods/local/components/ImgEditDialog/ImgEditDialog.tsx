@@ -1,15 +1,20 @@
 import React, { ChangeEvent } from 'react';
-import { Modal, Input, Select, Upload, message, Popconfirm } from 'antd';
+import { Modal, Input, Select, Upload, message, Popconfirm, Row, Col, Button } from 'antd';
 import { RcFile } from 'antd/lib/upload';
 import { CloseOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 
 // import { UploadChangeParam } from 'antd/lib/upload';
 
-import { postGoodsPicUpload } from '@/services/goods';
+import { exportAllSkuImages, postGoodsPicUpload, uploadGoodsPic } from '@/services/goods';
 import { putGoodsEdit, IGoodsEditImgItem, IGoodsEditData } from '@/services/goods';
 import { ICatagoryItem, IGoodsEditItem } from '@/interface/ILocalGoods';
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 import './ImgEditDialog.less';
+import { Icons } from '@/components/Icon';
+import { history } from '@@/core/history';
+import { LoadingButton } from 'react-components';
+import classNames from 'classnames';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -42,10 +47,12 @@ declare interface ImgEditDialogState {
     loading: boolean;
     confirmLoading: boolean;
     addImgList: IAddImgItem[];
+    uploading: boolean;
 }
 
 class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialogState> {
     private startItem: any;
+    private zipId?: string;
 
     constructor(props: ImgEditDialogProps) {
         super(props);
@@ -53,12 +60,13 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             loading: false,
             confirmLoading: false,
             addImgList: [],
+            uploading: false,
         };
     }
 
     private handleOk = () => {
         const { toggleEditGoodsDialog, onSearch } = this.props;
-        if (this.isChangeData()) {
+        if (this.isChangeData() || this.zipId) {
             const data = this.getGoodsEditData();
             if (data && !data.title) {
                 return message.error('标题不能为空');
@@ -69,7 +77,11 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             this.setState({
                 confirmLoading: true,
             });
-            putGoodsEdit(data as IGoodsEditData)
+            putGoodsEdit({
+                ...data,
+                has_zip: this.zipId ? 1 : 2,
+                zip_id: this.zipId,
+            } as IGoodsEditData)
                 .then(res => {
                     // console.log('putGoodsEdit', res);
                     toggleEditGoodsDialog(false);
@@ -260,87 +272,55 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
 
     // RcFile
     private beforeUpload = (file: RcFile) => {
+        if (file) {
+            const overSize = file.size / 1024 / 1024 >= 20; // 限制20M
+            if (overSize) {
+                message.error('不支持上传20M以上的文件！');
+                return false;
+            }
+
+            this.setState({
+                uploading: true,
+            });
+            const formData = new FormData();
+            const { currentEditGoods } = this.props;
+            const { product_id } = currentEditGoods!;
+            formData.append('file', file);
+            uploadGoodsPic(formData, product_id)
+                .then(({ data }) => {
+                    this.zipId = data;
+                    message.success('上传成功，服务端处理中，请稍后刷新!');
+                })
+                .catch(e => {
+                    message.error('上传失败，请重试!');
+                })
+                .finally(() => {
+                    this.setState({
+                        uploading: false,
+                    });
+                });
+        }
         return false;
     };
 
-    // UploadChangeParam
-    private uploadImg = (info: any) => {
-        const { loading, addImgList } = this.state;
-        const { currentEditGoods, changeGoodsImg } = this.props;
-        if (!loading && currentEditGoods) {
-            const { sku_image, product_id } = currentEditGoods;
-
-            this.setState(
-                {
-                    loading: true,
-                },
-                () => {
-                    // 检验图片规格
-                    const file = info.file;
-                    if (file.type !== 'image/jpeg') {
-                        message.error('导入失败！图片格式错误', 1.5).then(
-                            () => {
-                                this.setState({
-                                    loading: false,
-                                });
-                            },
-                            () => {},
-                        );
-                        return false;
-                    }
-                    const isLt = file.size / 1024 / 1024 <= 0.1;
-                    if (!isLt) {
-                        message.error('导入失败！图片大于100k', 1.5).then(
-                            () => {
-                                this.setState({
-                                    loading: false,
-                                });
-                            },
-                            () => {},
-                        );
-                        return false;
-                    }
-                    const formData = new FormData();
-                    //.originFileObj;
-                    formData.append('file', file);
-                    // 获取图片的原始宽高
-                    const _URL = window.URL || window.webkitURL;
-                    const img = new Image();
-                    const fileUrl = _URL.createObjectURL(file);
-                    img.onload = () => {
-                        postGoodsPicUpload(formData)
-                            .then(res => {
-                                message.success('图片上传成功');
-                                this.setState({
-                                    loading: false,
-                                    addImgList: [
-                                        ...addImgList,
-                                        {
-                                            fileUrl,
-                                            url: res.data.url,
-                                            type: 'new',
-                                            alt: product_id,
-                                            width: img.width,
-                                            height: img.height,
-                                        },
-                                    ],
-                                });
-                                changeGoodsImg([...sku_image, fileUrl]);
-                                // console.log('postGoodsPicUpload', res);
-                            })
-                            .catch(err => {
-                                // console.log('postGoodsPicUpload', err);
-                                message.error('图片上传失败！');
-                                this.setState({
-                                    loading: false,
-                                });
-                            });
-                    };
-                    img.src = fileUrl;
-                },
-            );
-        }
+    private exportAllImages = () => {
+        const { currentEditGoods } = this.props;
+        const { product_id } = currentEditGoods!;
+        return exportAllSkuImages(product_id).then(() => {
+            // jump
+            history.push('/setting/export');
+        });
     };
+
+    componentDidUpdate(
+        prevProps: Readonly<ImgEditDialogProps>,
+        prevState: Readonly<ImgEditDialogState>,
+        snapshot?: any,
+    ): void {
+        if (!this.props.visible) {
+            this.zipId = undefined; // 清空
+        }
+    }
 
     render() {
         const {
@@ -352,7 +332,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
             changeGoodsCatagory,
             resetGoodsData,
         } = this.props;
-        const { loading, confirmLoading } = this.state;
+        const { loading, confirmLoading, uploading } = this.state;
         if (!currentEditGoods) {
             return null;
         }
@@ -400,8 +380,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                     <div className="label">Product ID</div>
                     <div>{product_id}</div>
                 </div>
-                <div className="goods-edit-item">
-                    <div className="label">商品标题</div>
+                <div className="goods-edit-item goods-edit-item-top">
+                    <div className="label">商品标题：</div>
                     <TextArea
                         className="textarea"
                         autoSize={true}
@@ -411,8 +391,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         }}
                     />
                 </div>
-                <div className="goods-edit-item">
-                    <div className="label">商品描述</div>
+                <div className="goods-edit-item goods-edit-item-top">
+                    <div className="label">商品描述：</div>
                     <TextArea
                         className="textarea"
                         autoSize={true}
@@ -422,8 +402,8 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         }}
                     />
                 </div>
-                <div className="goods-edit-item">
-                    <div className="label">一级类目</div>
+                <div className="goods-edit-item goods-edit-item-center">
+                    <div className="label">一级类目：</div>
                     <Select
                         className="select"
                         value={first_catagory.id}
@@ -435,7 +415,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             </Option>
                         ))}
                     </Select>
-                    <div className="label">二级类目</div>
+                    <div className="label">二级类目：</div>
                     <Select
                         className="select"
                         value={second_catagory.id || ''}
@@ -448,7 +428,7 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                             </Option>
                         ))}
                     </Select>
-                    <div className="label">三级类目</div>
+                    <div className="label">三级类目：</div>
                     <Select
                         className="select"
                         value={third_catagory.id || ''}
@@ -462,34 +442,25 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                         ))}
                     </Select>
                 </div>
-                <div className="goods-edit-item">
-                    <div className="label">图片编辑</div>
-                </div>
-                <div className="goods-edit-img">
-                    <div className="first">
-                        <p>主图</p>
-                        <div className="img-box">
-                            <img
-                                src={sku_image[0]}
-                                onDragStart={() => this.dragstart(sku_image[0])}
-                                onDragOver={this.dragover}
-                                onDrop={() => this.drop(sku_image[0])}
-                            />
-                        </div>
-                    </div>
-                    <div className="secondary">
-                        <p>副图</p>
-                        <div className="list">
-                            {sku_image.slice(1).map(item => {
-                                return (
-                                    <div key={item} className="img-box item">
-                                        <img
-                                            src={item}
-                                            onDragStart={() => this.dragstart(item)}
-                                            onDragOver={this.dragover}
-                                            onDrop={() => this.drop(item)}
-                                        />
-                                        {/* {
+                <div className={'goods-edit-item goods-edit-item-top'}>
+                    <div className="label">商品图片：</div>
+                    <div className={formStyles.flex1}>
+                        <div className="goods-edit-img">
+                            <div className="secondary">
+                                <div className="list">
+                                    {sku_image.map((item, index) => {
+                                        return (
+                                            <div key={item} className="img-box item">
+                                                <img
+                                                    src={item}
+                                                    onDragStart={() => this.dragstart(item)}
+                                                    onDragOver={this.dragover}
+                                                    onDrop={() => this.drop(item)}
+                                                />
+                                                {index === 0 ? (
+                                                    <div className="goods-edit-img-label">主图</div>
+                                                ) : null}
+                                                {/* {
                                             goods_img !== item ? (
                                                 <Popconfirm
                                                     title="确定删除吗?"
@@ -501,29 +472,34 @@ class ImgEditDialog extends React.PureComponent<ImgEditDialogProps, ImgEditDialo
                                                 </Popconfirm>
                                             ) : null
                                         } */}
-                                    </div>
-                                );
-                            })}
-                            <Upload
-                                className="item"
-                                showUploadList={false}
-                                beforeUpload={this.beforeUpload}
-                                onChange={this.uploadImg}
-                            >
-                                <div className="add">
-                                    <div className="inner">
-                                        {loading ? (
-                                            <LoadingOutlined className="add-icon" />
-                                        ) : (
-                                            <PlusOutlined className="add-icon" />
-                                        )}
-                                    </div>
-                                    <div className="desc">图片为低于100k的jpg格式</div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            </Upload>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div className="goods-edit-img-btns">
+                    <Upload
+                        accept="*.zip,application/zip"
+                        showUploadList={false}
+                        beforeUpload={this.beforeUpload}
+                        className={classNames(formStyles.inlineBlock, 'goods-edit-img-btn')}
+                    >
+                        <Button loading={uploading} icon={<Icons type="scm-upload" />}>
+                            批量上传
+                        </Button>
+                    </Upload>
+                    <LoadingButton
+                        icon={<Icons type="scm-download" />}
+                        className="goods-edit-img-btn"
+                        onClick={this.exportAllImages}
+                    >
+                        下载图片
+                    </LoadingButton>
+                </div>
+                <div className="goods-edit-img-desc">*仅支持ZIP文件</div>
             </Modal>
         );
     }

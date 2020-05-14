@@ -409,7 +409,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 disabled={selectedRowKeys.length === 0}
             >
                 取消渠道订单
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [selectedRowKeys, _cancelPurchaseOrder, _delChannelOrders, _postExportWaitShip]);
 
