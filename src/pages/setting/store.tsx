@@ -35,10 +35,16 @@ const Store = () => {
             return queryPriceStrategy(values['merchant_id'])
                 .then(({ data }) => {
                     if (data) {
+                        const { first_fix_price_value, second_fix_price_value, ...extra } = data;
+                        const values = {
+                            ...extra,
+                            first_fix_price_value: Number(first_fix_price_value) / 6.9,
+                            second_fix_price_value: Number(second_fix_price_value) / 6.9,
+                        };
                         setHasData(true);
-                        setCacheData(data);
+                        setCacheData(values);
                         // form reset
-                        editFormInstance.setFieldsValue(data);
+                        editFormInstance.setFieldsValue(values);
                     } else {
                         setCacheData(null);
                         setHasData(false);
@@ -80,14 +86,21 @@ const Store = () => {
 
     const savePriceStrategy = useCallback(() => {
         const { merchant_id } = formRef.current!.getFieldsValue();
-        return editFormInstance.validateFields().then((values: any) => {
+        return editFormInstance.validateFields().then((_values: any) => {
+            const { first_fix_price_value, second_fix_price_value, ...extra } = _values;
+            const values = {
+                ...extra,
+                first_fix_price_value: Number(first_fix_price_value) * 6.9,
+                second_fix_price_value: Number(second_fix_price_value) * 6.9,
+            };
+
             return updatePriceStrategy({
                 merchant_id,
                 ...values,
             }).then(() => {
                 message.success('保存成功');
                 setEdit(false);
-                setCacheData(values);
+                setCacheData(_values);
             });
         });
     }, []);
@@ -254,6 +267,15 @@ const Store = () => {
                                     disabled={disabled}
                                 />
                             </Form.Item>
+                            <Form.Item
+                                className={classNames(
+                                    formStyles.formItem,
+                                    formStyles.formHorizon,
+                                    styles.priceAfter,
+                                )}
+                            >
+                                * 6.9
+                            </Form.Item>
                         </div>
 
                         <Form.Item
@@ -348,6 +370,15 @@ const Store = () => {
                                     addonAfter="$"
                                     disabled={disabled}
                                 />
+                            </Form.Item>
+                            <Form.Item
+                                className={classNames(
+                                    formStyles.formItem,
+                                    formStyles.formHorizon,
+                                    styles.priceAfter,
+                                )}
+                            >
+                                * 6.9
                             </Form.Item>
                         </div>
                         {edit ? (

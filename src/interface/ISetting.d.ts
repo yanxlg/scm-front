@@ -97,11 +97,13 @@ export interface IFileItem {
 }
 
 export interface IPriceStrategy {
-    purchase_crawler_price_condition: string; // 1---<，2---=，3--->，4---<=，5--->=
-    sale_crawler_price_value: string;
-    middle_condition: string; //1且，2或
-    purchase_minus_sale_crawler_price_condition: string; // 1---<，2---=，3--->，4---<=，5--->=
-    fix_price_value: string;
+    first_purchase_crawler_price_condition: number;
+    first_sale_crawler_price_value: number;
+    first_fix_price_value: number;
+    middle_condition: number;
+    second_purchase_crawler_price_condition: number;
+    second_sale_crawler_price_value: number;
+    second_fix_price_value: number;
 }
 
 export interface IPriceStrategyItem {
