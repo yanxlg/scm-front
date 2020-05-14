@@ -13,8 +13,6 @@ import { IPaginationResponse, IResponse } from 'react-components/es/hooks/useLis
 import { IRequestPagination1 } from '@/interface/IGlobal';
 import { api } from 'react-components';
 import { singlePromiseWrap } from '@/utils/utils';
-import { ISHopList } from '@/interface/IChannel';
-import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 
 export function queryInList(data: IStockINFormData & IRequestPagination1) {
     return api.post<IResponse<IPaginationResponse<IStockInItem>>>(StockApiPathEnum.QueryInList, {
