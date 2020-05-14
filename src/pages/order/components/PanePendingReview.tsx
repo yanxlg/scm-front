@@ -319,11 +319,13 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     const { productId } = row;
                     return (
                         <div className="order-text-ellipsis">
-                            <a className="order-link" onClick={() => _getOrderGoodsDetail(productId)}>
+                            <a
+                                className="order-link"
+                                onClick={() => _getOrderGoodsDetail(productId)}
+                            >
                                 {value}
                             </a>
                         </div>
-                        
                     );
                 },
             },

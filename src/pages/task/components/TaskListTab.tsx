@@ -22,7 +22,6 @@ import { JsonForm } from 'react-components';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
 import { history } from '@@/core/history';
-import { SearchOutlined } from '@ant-design/icons';
 import { LoadingButton } from 'react-components';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
