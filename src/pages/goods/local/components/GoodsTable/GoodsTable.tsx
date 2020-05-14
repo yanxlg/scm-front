@@ -1,7 +1,13 @@
 import React, { useMemo, useCallback, ReactText, useState, RefObject } from 'react';
 import { FitTable, AutoEnLargeImg, LoadingButton, message } from 'react-components';
 import { Button } from 'antd';
-import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem, ISkuInfo } from '@/interface/ILocalGoods';
+import {
+    IGoodsAndSkuItem,
+    ICatagoryItem,
+    IPublishItem,
+    ISkuInfo,
+    IGoodsEditItem,
+} from '@/interface/ILocalGoods';
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
@@ -23,7 +29,8 @@ import Export from '@/components/Export';
 import { JsonFormRef } from 'react-components/lib/JsonForm';
 import ShelvesModal from '../ShelvesModal/ShelvesModal';
 import SkuModal from '../SkuModal/SkuModal';
-import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal'
+import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal';
+import GoodsEditModal from '../GoodsEditModal/GoodsEditModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -57,7 +64,7 @@ const GoodsTable: React.FC<IProps> = ({
     setSelectedRowKeys,
     onChange,
     onReload,
-    queryRef
+    queryRef,
 }) => {
     const [merchantStatus, setMerchantStatus] = useState(false);
     const [publistStatus, setPublistStatus] = useState(false);
@@ -69,7 +76,10 @@ const GoodsTable: React.FC<IProps> = ({
     const [mergeStatus, setMergeStatus] = useState(false);
     const [commodityId, setCommodityId] = useState('');
     const [productSn, setProductSn] = useState('');
-    
+    // 编辑商品
+    const [editGoodsStatus, setEditGoodsStatus] = useState(false);
+    const [editGoodsInfo, setEditGoodsInfo] = useState<IGoodsEditItem | null>(null);
+
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
         return postGoodsOnsale({
@@ -117,11 +127,14 @@ const GoodsTable: React.FC<IProps> = ({
         });
     }, [selectedRowKeys, goodsList]);
 
-    const merchantOkey = useCallback((merchants_id: string[]) => {
-        return onsaleType === 'default'
-            ? _postGoodsOnsale(merchants_id, selectedRowKeys)
-            : _postAllGoodsOnsale(merchants_id);
-    }, [onsaleType, selectedRowKeys]);
+    const merchantOkey = useCallback(
+        (merchants_id: string[]) => {
+            return onsaleType === 'default'
+                ? _postGoodsOnsale(merchants_id, selectedRowKeys)
+                : _postAllGoodsOnsale(merchants_id);
+        },
+        [onsaleType, selectedRowKeys],
+    );
 
     const merchantCancel = useCallback(() => {
         setMerchantStatus(false);
@@ -137,11 +150,11 @@ const GoodsTable: React.FC<IProps> = ({
             setMerchantStatus(true);
             setOnsaleType('default');
         };
-    
+
         const handleClickAllOnsale = () => {
             setMerchantStatus(true);
             setOnsaleType('all');
-        }
+        };
         const disabled = selectedRowKeys.length === 0;
         return [
             <Button
@@ -168,31 +181,33 @@ const GoodsTable: React.FC<IProps> = ({
                 disabled={disabled}
             >
                 删除
-            </LoadingButton>
+            </LoadingButton>,
         ];
     }, [selectedRowKeys, _getGoodsDelete]);
 
-    const handleExportOkey = useCallback((values) => {
+    const handleExportOkey = useCallback(values => {
         return postGoodsExports({
             ...values,
-            ...queryRef.current
-        })
+            ...queryRef.current,
+        });
     }, []);
 
     const handleExportCancel = useCallback(() => {
         setExportStatus(false);
     }, []);
 
-    const showGoodsPublist = useCallback((publistList) => {
+    const showGoodsPublist = useCallback(publistList => {
         setPublistStatus(true);
-        setPublistList(publistList.map(
-            (item: IPublishItem, index: number): IPublishItem => {
-                return {
-                    ...item,
-                    serialNum: index + 1,
-                };
-            }
-        ));
+        setPublistList(
+            publistList.map(
+                (item: IPublishItem, index: number): IPublishItem => {
+                    return {
+                        ...item,
+                        serialNum: index + 1,
+                    };
+                },
+            ),
+        );
     }, []);
 
     const hideGoodsPublist = useCallback(() => {
@@ -200,7 +215,42 @@ const GoodsTable: React.FC<IProps> = ({
         setPublistList([]);
     }, []);
 
-    const showSkuModal = useCallback((record) => {
+    const showEditGoods = useCallback((record: IGoodsAndSkuItem) => {
+        // console.log('showEditGoods', record);
+        const {
+            product_id,
+            title,
+            description,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+            goods_img,
+            sku_image,
+        } = record;
+        setEditGoodsStatus(true);
+        const list = [...sku_image];
+        const index = list.findIndex(img => img === goods_img);
+        if (index > -1) {
+            list.splice(index, 1);
+            list.unshift(goods_img);
+        }
+        setEditGoodsInfo({
+            product_id,
+            title,
+            description,
+            first_catagory,
+            second_catagory,
+            third_catagory,
+            goods_img,
+            sku_image: list,
+        });
+    }, []);
+
+    const hideEditGoods = useCallback(() => {
+        setEditGoodsStatus(false);
+    }, []);
+
+    const showSkuModal = useCallback(record => {
         const {
             tags,
             product_id,
@@ -211,7 +261,7 @@ const GoodsTable: React.FC<IProps> = ({
             first_catagory,
             second_catagory,
             third_catagory,
-            commodity_id
+            commodity_id,
         } = record;
         setSkuStatus(true);
         setCurrentSkuInfo({
@@ -224,8 +274,8 @@ const GoodsTable: React.FC<IProps> = ({
             first_catagory,
             second_catagory,
             third_catagory,
-            commodity_id
-        })
+            commodity_id,
+        });
     }, []);
 
     const hideSkuModal = useCallback(() => {
@@ -236,8 +286,7 @@ const GoodsTable: React.FC<IProps> = ({
     const showMergeModal = useCallback((commodity_id, product_sn) => {
         setMergeStatus(true);
         setCommodityId(commodity_id);
-        setProductSn((product_sn !== '0') ? product_sn : '');
-  
+        setProductSn(product_sn !== '0' ? product_sn : '');
     }, []);
 
     const hideMergeModal = useCallback(() => {
@@ -260,10 +309,7 @@ const GoodsTable: React.FC<IProps> = ({
                         <>
                             <div>
                                 {goods_status !== 'FROZEN' && (
-                                    <Button
-                                        type="link"
-                                        // onClick={() => this.toggleEditGoodsDialog(true, row)}
-                                    >
+                                    <Button type="link" onClick={() => showEditGoods(row)}>
                                         编辑商品
                                     </Button>
                                 )}
@@ -392,7 +438,9 @@ const GoodsTable: React.FC<IProps> = ({
                 width: 120,
                 render: (value: ICatagoryItem, row: IGoodsAndSkuItem) => {
                     const { second_catagory, third_catagory } = row;
-                    return <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>;
+                    return (
+                        <div>{third_catagory.name || second_catagory.name || value.name || ''}</div>
+                    );
                 },
             },
             {
@@ -510,10 +558,7 @@ const GoodsTable: React.FC<IProps> = ({
                                     </div>
                                 );
                             })}
-                            <Button 
-                                type="link" 
-                                onClick={() => showGoodsPublist(value)}
-                            >
+                            <Button type="link" onClick={() => showGoodsPublist(value)}>
                                 上架日志
                             </Button>
                         </>
@@ -554,17 +599,17 @@ const GoodsTable: React.FC<IProps> = ({
                     );
                 },
             },
-        ]
+        ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig >(() => {
+    const pagination = useMemo<TablePaginationConfig>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,
             total: total,
             showSizeChanger: true,
             position: ['topRight', 'bottomRight'],
-        }
+        };
     }, [loading]);
 
     const rowSelection = useMemo(() => {
@@ -573,7 +618,7 @@ const GoodsTable: React.FC<IProps> = ({
             columnWidth: 60,
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectedRowKeysChange,
-        }
+        };
     }, [selectedRowKeys]);
 
     return useMemo(() => {
@@ -622,9 +667,23 @@ const GoodsTable: React.FC<IProps> = ({
                     onReload={onReload}
                     onCancel={hideMergeModal}
                 />
+                <GoodsEditModal
+                    visible={editGoodsStatus}
+                    currentGoodsInfo={editGoodsInfo}
+                    onCancel={hideEditGoods}
+                />
             </>
-        )
-    }, [loading, selectedRowKeys, merchantStatus, exportStatus, publistStatus, skuStatus, mergeStatus]);
-}
+        );
+    }, [
+        loading,
+        selectedRowKeys,
+        merchantStatus,
+        exportStatus,
+        publistStatus,
+        skuStatus,
+        mergeStatus,
+        editGoodsStatus,
+    ]);
+};
 
 export default GoodsTable;
