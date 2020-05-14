@@ -5,6 +5,7 @@ import '@/styles/index.less';
 import TimerUpdate from '@/pages/task/components/editor/TimerUpdate';
 import AutoPurchaseTask from '@/pages/task/components/editor/AutoPurchaseTask';
 import Container from '@/components/Container';
+import { VoVaGather } from '@/pages/task/components/editor/VoVaGather';
 
 const { TabPane } = Tabs;
 
@@ -24,7 +25,7 @@ const Config: React.FC = () => {
                             <HotGather />
                         </TabPane>,
                         <TabPane tab="vova商品采集" key="2">
-                            <HotGather />
+                            <VoVaGather />
                         </TabPane>,
                         <TabPane tab="定时商品更新" key="3">
                             <TimerUpdate />
