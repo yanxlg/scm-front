@@ -2,17 +2,16 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonForm, LoadingButton } from 'react-components';
 import { FormField } from 'react-components/lib/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { HotTaskRange, TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
+import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
 import TaskCycle from '@/pages/task/components/config/hot/TaskCycle';
 import '@/styles/index.less';
-import { Button } from 'antd';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { addPddHotTask, addVoVaTask } from '@/services/task';
+import { addVoVaTask } from '@/services/task';
 import { EmptyObject } from '@/config/global';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { dateToUnix } from 'react-components/es/utils/date';
-import { IFormData } from '@/pages/task/components/editor/HotGather';
+import { queryShopList } from '@/services/global';
 
 const fieldList: FormField[] = [
     {
@@ -130,13 +129,27 @@ const VoVaGather = () => {
     const onGatherOn = useCallback(() => {
         return formRef.current!.validateFields().then(values => {
             const params = convertFormData(values);
-            return addVoVaTask({
-                ...params,
-                is_upper_shelf: true,
-            })
-                .then(({ data = EmptyObject } = EmptyObject) => {
-                    formRef.current!.resetFields();
-                    showSuccessModal(data);
+            return queryShopList()
+                .then(({ data = [] }) => {
+                    const merchant = data.find(
+                        ({ merchant_platform }) => merchant_platform === 'florynight',
+                    );
+                    if (merchant) {
+                        return addVoVaTask({
+                            ...params,
+                            is_upper_shelf: true,
+                            merchants_id: merchant.merchant_id,
+                        })
+                            .then(({ data = EmptyObject } = EmptyObject) => {
+                                formRef.current!.resetFields();
+                                showSuccessModal(data);
+                            })
+                            .catch(() => {
+                                showFailureModal();
+                            });
+                    } else {
+                        showFailureModal();
+                    }
                 })
                 .catch(() => {
                     showFailureModal();
