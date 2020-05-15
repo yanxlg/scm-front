@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox } from 'antd';
+import { Checkbox, Button } from 'antd';
 import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
@@ -24,6 +24,7 @@ import { PaginationConfig } from 'antd/es/pagination';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import CancelOrder from './CancelOrder';
 
 declare interface IProps {
     loading: boolean;
@@ -44,6 +45,7 @@ declare interface IProps {
     changeParentOrder(checked: boolean): void;
     showParentStatus: boolean;
     getOrderGoodsIdList(): string[];
+    getAllTabCount(type: number): void;
 }
 
 declare interface IState {
@@ -132,6 +134,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'orderGoodsId',
             align: 'center',
             width: 120,
+        },
+        {
+            key: 'commodityId',
+            title: 'Commodity ID',
+            dataIndex: 'commodityId',
+            align: 'center',
+            width: 130,
         },
         {
             key: 'productId',
@@ -411,7 +420,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'purchaseOrderStatus',
-            title: '采购订单状态',
+            title: '采购计划状态',
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
             width: 140,
@@ -606,9 +615,12 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             changeParentOrder,
             showParentStatus,
             getOrderGoodsIdList,
+            onSearch,
+            getAllTabCount,
         } = this.props;
         const orderGoodsIdList = getOrderGoodsIdList();
         const disabled = orderGoodsIdList.length === 0;
+        const _getAllTabCount = () => getAllTabCount(2);
         return [
             <Checkbox
                 onChange={e => changeParentOrder(e.target.checked)}
@@ -635,15 +647,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             >
                 取消采购单
             </LoadingButton>,
-            <LoadingButton
-                key="3"
-                type="primary"
-                disabled={disabled}
-                className={formStyles.formBtn}
-                onClick={() => cancelChannelOrder(orderGoodsIdList)}
+            <CancelOrder
+                orderGoodsIds={orderGoodsIdList}
+                onReload={onSearch}
+                getAllTabCount={_getAllTabCount}
             >
-                取消渠道订单
-            </LoadingButton>,
+                <Button
+                    key="3"
+                    type="primary"
+                    disabled={disabled}
+                    className={formStyles.formBtn}
+                    // onClick={() => cancelChannelOrder(orderGoodsIdList)}
+                >
+                    取消渠道订单
+                </Button>
+            </CancelOrder>,
         ];
     };
 

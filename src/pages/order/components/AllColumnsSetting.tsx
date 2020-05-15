@@ -8,6 +8,7 @@ const baseGroupList = [
     { key: 'orderGoodsShippingStatusShow', name: '配送状态' },
     { key: 'orderId', name: '父订单ID' },
     { key: 'orderGoodsId', name: '子订单ID' },
+    { key: 'commodityId', name: 'Commodity ID' },
     { key: 'productId', name: 'Product ID' },
     { key: 'skuId', name: '中台SKU ID' },
     // { key: '', name: '采购渠道' },

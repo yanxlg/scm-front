@@ -22,6 +22,7 @@ import {
 import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
 import Export from '@/components/Export';
+import CancelOrder from './CancelOrder';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { defaultOptionItem1 } from '@/enums/OrderEnum';
@@ -112,6 +113,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 channelOrderGoodsSn,
                 productName,
                 productId,
+                commodityId,
             } = orderGoods;
             // const {
 
@@ -128,6 +130,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 channelOrderGoodsSn,
                 productName,
                 productId,
+                commodityId,
             });
         });
         return list;
@@ -164,21 +167,6 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         },
         [],
     );
-
-    const _delChannelOrders = useCallback((orderGoodsIds: string[]) => {
-        return delChannelOrders({
-            order_goods_ids: orderGoodsIds,
-        }).then(res => {
-            onReload();
-            const { success, failed } = res.data;
-            if (success!.length) {
-                batchOperateSuccess('取消订单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消订单', failed);
-            }
-        });
-    }, []);
 
     // 审核通过
     const _postReviewPass = useCallback((orderGoodsIds: string[]) => {
@@ -283,11 +271,14 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                             <div>
                                 <a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a>
                             </div>
-                            <div
-                                style={{ margin: '2px 0' }}
-                                onClick={() => _delChannelOrders([orderGoodsId])}
-                            >
-                                <a>取消订单</a>
+                            <div style={{ margin: '2px 0' }}>
+                                <CancelOrder
+                                    orderGoodsIds={[orderGoodsId]}
+                                    onReload={onReload}
+                                    getAllTabCount={getAllTabCount}
+                                >
+                                    <a>取消订单</a>
+                                </CancelOrder>
                             </div>
                             <div>
                                 <a onClick={() => _postOrderOffsale([orderGoodsId])}>下架商品</a>
@@ -310,6 +301,12 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
             {
+                title: 'Commodity ID',
+                dataIndex: 'commodityId',
+                align: 'center',
+                width: 130,
+            },
+            {
                 title: '商品名称',
                 dataIndex: 'productName',
                 align: 'center',
@@ -319,11 +316,13 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     const { productId } = row;
                     return (
                         <div className="order-text-ellipsis">
-                            <a className="order-link" onClick={() => _getOrderGoodsDetail(productId)}>
+                            <a
+                                className="order-link"
+                                onClick={() => _getOrderGoodsDetail(productId)}
+                            >
                                 {value}
                             </a>
                         </div>
-                        
                     );
                 },
             },
@@ -413,15 +412,20 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 审核通过
             </LoadingButton>,
-            <LoadingButton
-                key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => _delChannelOrders(selectedRowKeys)}
-                disabled={selectedRowKeys.length === 0}
+            <CancelOrder
+                orderGoodsIds={selectedRowKeys}
+                onReload={onReload}
+                getAllTabCount={getAllTabCount}
             >
-                取消订单
-            </LoadingButton>,
+                <Button
+                    key="2"
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={selectedRowKeys.length === 0}
+                >
+                    取消订单
+                </Button>
+            </CancelOrder>,
             <LoadingButton
                 key="3"
                 type="primary"

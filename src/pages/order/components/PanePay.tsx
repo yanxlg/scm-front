@@ -17,6 +17,7 @@ import QRCode from 'qrcode.react';
 import Export from '@/components/Export';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import CancelOrder from './CancelOrder';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -240,22 +241,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, [selectedOrderGoodsIdList]);
 
-    const _delChannelOrders = useCallback(() => {
-        return delChannelOrders({
-            order_goods_ids: selectedOrderGoodsIdList,
-        }).then(res => {
-            onSearch();
-            const { success, failed } = res.data;
-
-            if (success!.length) {
-                batchOperateSuccess('取消渠道订单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消渠道订单', failed);
-            }
-        });
-    }, [selectedOrderGoodsIdList]);
-
     const _postExportPay = useCallback((values: any) => {
         return postExportPay({
             ...currentSearchParams,
@@ -449,7 +434,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchase_order_status_desc',
-                title: '采购订单状态',
+                title: '采购计划状态',
                 dataIndex: 'purchase_order_status_desc',
                 align: 'center',
                 width: 120,
@@ -488,17 +473,22 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消采购单
             </LoadingButton>,
-            <LoadingButton
-                key="channel_order"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={_delChannelOrders}
-                disabled={disabled}
+            <CancelOrder
+                orderGoodsIds={selectedOrderGoodsIdList}
+                onReload={onSearch}
+                getAllTabCount={getAllTabCount}
             >
-                取消渠道订单
-            </LoadingButton>,
+                <Button
+                    key="channel_order"
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                >
+                    取消渠道订单
+                </Button>
+            </CancelOrder>,
         ];
-    }, [selectedOrderGoodsIdList, _cancelPurchaseOrder, _delChannelOrders]);
+    }, [selectedOrderGoodsIdList, _cancelPurchaseOrder]);
 
     useEffect(() => {
         onSearch();

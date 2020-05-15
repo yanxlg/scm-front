@@ -197,7 +197,7 @@ export const childDefaultFieldList: FormField[] = [
         type: 'select',
         name: 'product_shop',
         label: '销售店铺名称',
-        className: 'order-input-review',
+        className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
         optionListDependence: {
             name: 'channel_source',
@@ -286,7 +286,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'purchase_order_status',
-        label: '采购订单状态',
+        label: '采购计划状态',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
@@ -453,7 +453,7 @@ export const defaultColChildList = [
     'purchasePlanId', // 采购计划ID
     'reserveStatus', // 仓库库存预定状态
     'purchasePlatform', // 采购平台
-    'purchaseOrderStatus', // 采购订单状态
+    'purchaseOrderStatus', // 采购计划状态
     'purchaseOrderPayStatus', // 采购支付状态
 ];
 

@@ -580,6 +580,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             changeParentOrder={this.changeParentOrder}
                             showParentStatus={showParentStatus}
                             getOrderGoodsIdList={this.getOrderGoodsIdList}
+                            getAllTabCount={this.props.getAllTabCount}
                         />
                     ) : (
                         <TableParentAll

@@ -162,6 +162,7 @@ export interface IReviewOrderItem {
     channelOrderGoodsSn: string;
     productName: string;
     productId: string;
+    commodityId: string;
 }
 
 export declare interface IPlatformItem {
