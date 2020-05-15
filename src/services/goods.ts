@@ -97,15 +97,17 @@ export function getGoodsList(params: IFilterParams) {
     //     data: params,
     // });
 
-    return api
-        .post(LocalApiPath.getGoodsList, {
-            data: params,
-        })
-        // .then(res => {
-        //     console.log('getGoodsList', res);
-        //     return res
-        // })
-        .then(transPaginationResponse);
+    return (
+        api
+            .post(LocalApiPath.getGoodsList, {
+                data: params,
+            })
+            // .then(res => {
+            //     console.log('getGoodsList', res);
+            //     return res
+            // })
+            .then(transPaginationResponse)
+    );
 }
 
 export async function postGoodsExports(data: IFilterParams) {
@@ -327,4 +329,8 @@ export async function uploadGoodsPic(data: any, product_id: string) {
         data,
         skipResponseInterceptors: true,
     });
+}
+
+export function getGoodsDetail(product_id: string) {
+    return request.get(LocalApiPath.getGoodsDetail.replace(':product_id', product_id));
 }

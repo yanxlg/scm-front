@@ -3,14 +3,13 @@ import { Button } from 'antd';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsVersion } from '@/services/goods';
-import { IGoodsVersionAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
+import { IGoodsVersionAndSkuItem, IPublishItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import usePagination from '../hooks/usePagination';
 import useSkuModal from '../hooks/useSkuModal';
 
 import styles from '../_version.less';
 import SkuModal from './SkuModal/SkuModal';
-
 
 interface IProps {
     commodityId: string;
@@ -21,12 +20,7 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
     const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
     const { page, setPage, pageSize, setPageSize, total, setTotal } = usePagination();
     // 查看sku信息
-    const {
-        skuStatus,
-        currentSkuInfo,
-        showSkuModal,
-        hideSkuModal
-    } = useSkuModal();
+    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
 
     const _getGoodsVersion = useCallback(
         (params = { page, page_count: pageSize }) => {
@@ -93,11 +87,11 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
             },
             {
                 title: '上架渠道',
-                dataIndex: 'onsale_info',
+                dataIndex: 'publish_status',
                 align: 'center',
                 width: 120,
-                render: (value: IOnsaleItem[]) => {
-                    return [...new Set(value.map(item => item.onsale_channel))].map(channel => (
+                render: (value: IPublishItem[]) => {
+                    return [...new Set(value.map(item => item.publishChannel))].map(channel => (
                         <div key={channel}>{channel}</div>
                     ));
                 },

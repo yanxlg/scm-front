@@ -3,11 +3,7 @@ import { Button, message } from 'antd';
 import { FitTable, AutoEnLargeImg, LoadingButton } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsLock, setGoodsLock, getGoodsCurrentList, setGoodsMix } from '@/services/goods';
-import {
-    IGoodsLockItem,
-    IPublishItem,
-    IGoodsAndSkuItem
-} from '@/interface/ILocalGoods';
+import { IGoodsLockItem, IPublishItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import Lock from './Lock';
 
@@ -35,19 +31,9 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     });
     const [applyList, setApplyList] = useState<string[]>([]);
     // 编辑商品
-    const {
-        editGoodsStatus,
-        editGoodsInfo,
-        showEditGoods,
-        hideEditGoods
-    } = useGoodsEditModal();
+    const { editGoodsStatus, productId, showEditGoods, hideEditGoods } = useGoodsEditModal();
     // 查看sku信息
-    const {
-        skuStatus,
-        currentSkuInfo,
-        showSkuModal,
-        hideSkuModal
-    } = useSkuModal();
+    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
 
     const conversionData = useCallback(record => {
         const { sku_info, update_time } = record;
@@ -319,7 +305,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                                     <div className={styles.current}>当前版本</div>
                                     <Button
                                         type="link"
-                                        onClick={() => showEditGoods(row)}
+                                        onClick={() => showEditGoods(row.product_id)}
                                     >
                                         编辑
                                     </Button>
@@ -633,7 +619,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 </div>
                 <GoodsEditModal
                     visible={editGoodsStatus}
-                    currentGoodsInfo={editGoodsInfo}
+                    productId={productId}
                     onCancel={hideEditGoods}
                     onReload={_getGoodsCurrentList}
                 />
@@ -644,15 +630,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 />
             </>
         );
-    }, [
-        goodsList,
-        loading,
-        skuStatus,
-        currentSkuInfo,
-        columns,
-        applyList,
-        editGoodsStatus
-    ]);
+    }, [goodsList, loading, skuStatus, currentSkuInfo, columns, applyList, editGoodsStatus]);
 };
 
 export default CurrentPane;

@@ -1,13 +1,7 @@
 import React, { useMemo, useCallback, ReactText, useState, RefObject } from 'react';
 import { FitTable, AutoEnLargeImg, LoadingButton, message } from 'react-components';
 import { Button } from 'antd';
-import {
-    IGoodsAndSkuItem,
-    ICatagoryItem,
-    IPublishItem,
-    ISkuInfo,
-    IGoodsEditItem,
-} from '@/interface/ILocalGoods';
+import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILocalGoods';
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
@@ -16,14 +10,10 @@ import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { PaginationConfig } from 'antd/es/pagination';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
-    getGoodsList,
     postGoodsExports,
     postGoodsOnsale,
     getGoodsDelete,
-    IFilterParams,
-    getCatagoryList,
     postAllGoodsOnsale,
-    getGoodsStatusList,
 } from '@/services/goods';
 import Export from '@/components/Export';
 import { JsonFormRef } from 'react-components/lib/JsonForm';
@@ -77,19 +67,9 @@ const GoodsTable: React.FC<IProps> = ({
     const [commodityId, setCommodityId] = useState('');
     const [productSn, setProductSn] = useState('');
     // 编辑商品
-    const {
-        editGoodsStatus,
-        editGoodsInfo,
-        showEditGoods,
-        hideEditGoods
-    } = useGoodsEditModal();
+    const { editGoodsStatus, showEditGoods, hideEditGoods, productId } = useGoodsEditModal();
     // 查看sku信息
-    const {
-        skuStatus,
-        currentSkuInfo,
-        showSkuModal,
-        hideSkuModal
-    } = useSkuModal();
+    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -248,12 +228,12 @@ const GoodsTable: React.FC<IProps> = ({
                 align: 'center',
                 width: 156,
                 render: (_: any, row: IGoodsAndSkuItem) => {
-                    const { goods_status } = row;
+                    const { goods_status, product_id } = row;
                     return (
                         <>
                             <div>
                                 {goods_status !== 'FROZEN' && (
-                                    <Button type="link" onClick={() => showEditGoods(row)}>
+                                    <Button type="link" onClick={() => showEditGoods(product_id)}>
                                         编辑商品
                                     </Button>
                                 )}
@@ -284,28 +264,28 @@ const GoodsTable: React.FC<IProps> = ({
                     return <div className={row.hasnew_version ? 'red' : ''}>{value}</div>;
                 },
             },
-            {
-                key: 'product_sn',
-                title: 'Product SN',
-                dataIndex: 'product_sn',
-                align: 'center',
-                width: 140,
-                render: (value: string, row: IGoodsAndSkuItem) => {
-                    const _value = value !== '0' ? value : '';
-                    const { commodity_id, product_sn } = row;
-                    return (
-                        <>
-                            <div>{_value}</div>
-                            <Button
-                                type="link"
-                                onClick={() => showMergeModal(commodity_id, product_sn)}
-                            >
-                                {_value ? '查看商品组' : '关联商品'}
-                            </Button>
-                        </>
-                    );
-                },
-            },
+            // {
+            //     key: 'product_sn',
+            //     title: 'Product SN',
+            //     dataIndex: 'product_sn',
+            //     align: 'center',
+            //     width: 140,
+            //     render: (value: string, row: IGoodsAndSkuItem) => {
+            //         const _value = value !== '0' ? value : '';
+            //         const { commodity_id, product_sn } = row;
+            //         return (
+            //             <>
+            //                 <div>{_value}</div>
+            //                 <Button
+            //                     type="link"
+            //                     onClick={() => showMergeModal(commodity_id, product_sn)}
+            //                 >
+            //                     {_value ? '查看商品组' : '关联商品'}
+            //                 </Button>
+            //             </>
+            //         );
+            //     },
+            // },
             {
                 key: 'goods_status',
                 title: '版本状态',
@@ -613,7 +593,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <GoodsEditModal
                     visible={editGoodsStatus}
-                    currentGoodsInfo={editGoodsInfo}
+                    productId={productId}
                     onCancel={hideEditGoods}
                     onReload={onReload}
                 />
@@ -621,6 +601,7 @@ const GoodsTable: React.FC<IProps> = ({
         );
     }, [
         loading,
+        productId,
         selectedRowKeys,
         merchantStatus,
         exportStatus,
