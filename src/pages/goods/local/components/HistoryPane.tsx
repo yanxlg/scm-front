@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsVersion } from '@/services/goods';
-import { IGoodsVersionAndSkuItem, IOnsaleItem } from '@/interface/ILocalGoods';
+import { IGoodsVersionAndSkuItem, IOnsaleItem, IPublishItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import usePagination from '../hooks/usePagination';
 import useSkuDialog from '../hooks/useSkuDialog';
@@ -119,11 +119,11 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
             },
             {
                 title: '上架渠道',
-                dataIndex: 'onsale_info',
+                dataIndex: 'publish_status',
                 align: 'center',
                 width: 120,
-                render: (value: IOnsaleItem[]) => {
-                    return [...new Set(value.map(item => item.onsale_channel))].map(channel => (
+                render: (value: IPublishItem[]) => {
+                    return [...new Set(value.map(item => item.publishChannel))].map(channel => (
                         <div key={channel}>{channel}</div>
                     ));
                 },
