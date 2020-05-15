@@ -3,12 +3,7 @@ import { Button, message } from 'antd';
 import { FitTable, AutoEnLargeImg, LoadingButton } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsLock, setGoodsLock, getGoodsCurrentList, setGoodsMix } from '@/services/goods';
-import {
-    IOnsaleItem,
-    IGoodsLockItem,
-    ICurrentGoodsItem,
-    IPublishItem,
-} from '@/interface/ILocalGoods';
+import { IGoodsLockItem, ICurrentGoodsItem, IPublishItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
 import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
 import SkuDialog from './SkuDialog';

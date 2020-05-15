@@ -442,7 +442,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
             <>
                 {search}
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="orderGoodsId"
                     className="order-table"
                     loading={loading}
