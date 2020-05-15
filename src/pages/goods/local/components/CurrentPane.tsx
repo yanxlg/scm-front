@@ -3,16 +3,16 @@ import { Button, message } from 'antd';
 import { FitTable, AutoEnLargeImg, LoadingButton } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
 import { getGoodsLock, setGoodsLock, getGoodsCurrentList, setGoodsMix } from '@/services/goods';
-import { IGoodsLockItem, ICurrentGoodsItem, IPublishItem } from '@/interface/ILocalGoods';
+import { IGoodsLockItem, IPublishItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
 import { utcToLocal } from 'react-components/es/utils/date';
-import ImgEditDialog from './ImgEditDialog/ImgEditDialog';
-import SkuDialog from './SkuDialog';
-import useEditDialog from '../hooks/useEditDialog';
-import useSkuDialog from '../hooks/useSkuDialog';
 import Lock from './Lock';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_version.less';
+import SkuModal from './SkuModal/SkuModal';
+import useSkuModal from '../hooks/useSkuModal';
+import GoodsEditModal from './GoodsEditModal/GoodsEditModal';
+import useGoodsEditModal from '../hooks/useGoodsEditModal';
 
 interface IProps {
     commodityId: string;
@@ -21,29 +21,7 @@ interface IProps {
 const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     const currentProductRef = useRef<any>();
     const [loading, setLoading] = useState(false);
-    const [goodsList, setGoodsList] = useState<ICurrentGoodsItem[]>([]);
-    const {
-        goodsEditStatus,
-        // setGoodsEditStatus,
-        currentEditGoods,
-        // setCurrentEditGoods,
-        originEditGoods,
-        // setOriginEditGoods,
-        allCatagoryList,
-        getCurrentCatagory,
-        toggleEditGoodsDialog,
-        changeGoodsText,
-        changeGoodsCatagory,
-        changeGoodsImg,
-        resetGoodsData,
-    } = useEditDialog();
-    const {
-        skuStatus,
-        currentSkuGoods,
-        skuDialogRef,
-        showSkuDialog,
-        hideSkuDialog,
-    } = useSkuDialog();
+    const [goodsList, setGoodsList] = useState<IGoodsAndSkuItem[]>([]);
     const [lockInfo, setLockInfo] = useState<IGoodsLockItem>({
         image_is_lock: false,
         description_is_lock: false,
@@ -52,6 +30,10 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         category_is_lock: false,
     });
     const [applyList, setApplyList] = useState<string[]>([]);
+    // 编辑商品
+    const { editGoodsStatus, productId, showEditGoods, hideEditGoods } = useGoodsEditModal();
+    // 查看sku信息
+    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
 
     const conversionData = useCallback(record => {
         const { sku_info, update_time } = record;
@@ -73,10 +55,10 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
 
     const _getGoodsCurrentList = useCallback(() => {
         setLoading(true);
-        getGoodsCurrentList(commodityId)
+        return getGoodsCurrentList(commodityId)
             .then((res: any) => {
                 const { crawlerProduct, parentProduct, currentProduct } = res.data;
-                const list: ICurrentGoodsItem[] = [];
+                const list: IGoodsAndSkuItem[] = [];
                 const _currentProduct = conversionData({
                     ...currentProduct,
                     _type: 'current',
@@ -145,32 +127,6 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         [lockInfo],
     );
 
-    const handleShowSku = useCallback(record => {
-        const {
-            tags,
-            product_id,
-            goods_img,
-            title,
-            worm_goodsinfo_link,
-            worm_goods_id,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-        } = record;
-        showSkuDialog({
-            commodity_id: commodityId,
-            tags,
-            product_id: product_id,
-            goods_img,
-            title,
-            worm_goodsinfo_link,
-            worm_goods_id,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-        });
-    }, []);
-
     const updateApplyToTable = useCallback(
         (field, currentStatus) => {
             setGoodsList(
@@ -236,7 +192,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                                 } else {
                                     return {
                                         ...item,
-                                        [field]: goodsList[0][field],
+                                        [field]: goodsList[0][field as 'title'],
                                     };
                                 }
                         }
@@ -287,10 +243,10 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
             const { _type } = item;
             if (_type === 'current') {
                 release_product_id = item.product_id;
-                release_origin = item.origin;
+                release_origin = item.origin as string;
             } else if (_type === 'new') {
                 new_product_id = item.product_id;
-                new_origin = item.origin;
+                new_origin = item.origin as string;
             }
         });
         if (release_origin === 'MID_STAGE' && new_origin === 'CRAWLER') {
@@ -314,7 +270,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
         updateApplyToTable('all', true);
     }, [updateApplyToTable]);
 
-    const columns = useMemo<ColumnType<ICurrentGoodsItem>[]>(() => {
+    const columns = useMemo<ColumnType<IGoodsAndSkuItem>[]>(() => {
         const {
             image_is_lock,
             description_is_lock,
@@ -329,7 +285,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: '_type',
                 width: 140,
                 align: 'center',
-                render: (val: string, row: ICurrentGoodsItem) => {
+                render: (val: string, row: IGoodsAndSkuItem) => {
                     const isAllApply = applyList.length === 6;
                     return (
                         <>
@@ -349,7 +305,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                                     <div className={styles.current}>当前版本</div>
                                     <Button
                                         type="link"
-                                        onClick={() => toggleEditGoodsDialog(true, row)}
+                                        onClick={() => showEditGoods(row.product_id)}
                                     >
                                         编辑
                                     </Button>
@@ -402,7 +358,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'goods_img',
                 align: 'center',
                 width: 120,
-                render: (val: string, row: ICurrentGoodsItem) => {
+                render: (val: string, row: IGoodsAndSkuItem) => {
                     const { _type } = row;
                     const isCrawlerProduct = _type === 'new';
                     const isApply = applyList.indexOf('goods_img') > -1;
@@ -437,7 +393,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'title',
                 width: 160,
                 align: 'center',
-                render: (val, row: ICurrentGoodsItem) => {
+                render: (val, row: IGoodsAndSkuItem) => {
                     const { _type } = row;
                     const isCrawlerProduct = _type === 'new';
                     const isApply = applyList.indexOf('title') > -1;
@@ -474,7 +430,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'description',
                 width: 240,
                 align: 'center',
-                render: (val, row: ICurrentGoodsItem) => {
+                render: (val, row: IGoodsAndSkuItem) => {
                     const { _type } = row;
                     const isCrawlerProduct = _type === 'new';
                     const isApply = applyList.indexOf('description') > -1;
@@ -507,7 +463,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'first_catagory',
                 align: 'center',
                 width: 160,
-                render: (_, row: ICurrentGoodsItem) => {
+                render: (_, row: IGoodsAndSkuItem) => {
                     const { first_catagory, second_catagory, third_catagory, _type } = row;
                     const val = `${first_catagory.name || ''}-${second_catagory.name ||
                         ''}-${third_catagory.name || ''}`;
@@ -542,7 +498,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'sku_number',
                 width: 120,
                 align: 'center',
-                render: (value: number, row: ICurrentGoodsItem) => {
+                render: (value: number, row: IGoodsAndSkuItem) => {
                     const { _type } = row;
                     const isCrawlerProduct = _type === 'new';
                     const isApply = applyList.indexOf('sku_number') > -1;
@@ -553,7 +509,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                             <Button
                                 type="link"
                                 className={styles.link}
-                                onClick={() => handleShowSku(row)}
+                                onClick={() => showSkuModal(row)}
                             >
                                 查看sku信息
                             </Button>
@@ -580,7 +536,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'price_min',
                 width: 120,
                 align: 'center',
-                render: (_: string, row: ICurrentGoodsItem) => {
+                render: (_: string, row: IGoodsAndSkuItem) => {
                     const { price_min, price_max, shipping_fee_min, shipping_fee_max, _type } = row;
                     const isCrawlerProduct = _type === 'new';
                     const isApply = applyList.indexOf('price') > -1;
@@ -661,37 +617,20 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                         保存
                     </LoadingButton>
                 </div>
-                <ImgEditDialog
-                    visible={goodsEditStatus}
-                    originEditGoods={originEditGoods}
-                    currentEditGoods={currentEditGoods}
-                    allCatagoryList={allCatagoryList}
-                    toggleEditGoodsDialog={toggleEditGoodsDialog}
-                    getCurrentCatagory={getCurrentCatagory}
-                    changeGoodsText={changeGoodsText}
-                    changeGoodsCatagory={changeGoodsCatagory}
-                    changeGoodsImg={changeGoodsImg}
-                    resetGoodsData={resetGoodsData}
-                    onSearch={_getGoodsCurrentList}
+                <GoodsEditModal
+                    visible={editGoodsStatus}
+                    productId={productId}
+                    onCancel={hideEditGoods}
+                    onReload={_getGoodsCurrentList}
                 />
-                <SkuDialog
+                <SkuModal
                     visible={skuStatus}
-                    ref={skuDialogRef}
-                    currentSkuInfo={currentSkuGoods}
-                    hideSkuDialog={hideSkuDialog}
+                    currentSkuInfo={currentSkuInfo}
+                    onCancel={hideSkuModal}
                 />
             </>
         );
-    }, [
-        goodsList,
-        loading,
-        goodsEditStatus,
-        currentEditGoods,
-        skuStatus,
-        currentSkuGoods,
-        columns,
-        applyList,
-    ]);
+    }, [goodsList, loading, skuStatus, currentSkuInfo, columns, applyList, editGoodsStatus]);
 };
 
 export default CurrentPane;
