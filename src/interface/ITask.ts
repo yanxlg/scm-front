@@ -247,3 +247,14 @@ export interface ISubTaskIdData {
 export interface ISubTaskIdQuery extends RequestPagination {
     task_id: number;
 }
+
+export interface IVoVaTaskBody {
+    task_name: string;
+    country_code: string[];
+    task_type: 1 | 2;
+    is_immediately_execute?: boolean;
+    task_start_time?: number;
+    task_end_time?: number;
+    task_interval_seconds?: number;
+    is_upper_shelf?: boolean;
+}

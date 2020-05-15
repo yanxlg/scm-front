@@ -41,7 +41,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
-    initialValues?: ITaskListQuery;
+    initialValues?: Partial<ITaskListQuery>;
     setCountArr: (count: number[]) => void;
 }
 
@@ -59,8 +59,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
         }
-
-        const routeInitialValues = initialValues ?? {};
+        const routeInitialValues = initialValues ?? {}; // 路由初始参数
         const {
             pageNumber = defaultPageNumber,
             pageSize = defaultPageSize,
@@ -73,7 +72,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             task_end_time = 0,
         } = query;
         return {
-            ...routeInitialValues,
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
             task_id,
@@ -83,6 +81,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             task_type,
             task_begin_time: unixToStartDate(Number(task_begin_time)),
             task_end_time: unixToEndDate(Number(task_end_time)),
+            ...routeInitialValues,
         };
     }, []);
 
@@ -176,10 +175,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     const task_id = record.task_id;
                     const onceTask = isOnceTask(record.execute_count);
                     const taskType = record.task_type;
+                    const taskRange = record.task_range; // vova采集不显示详情
 
                     return (
                         <>
-                            {taskType === TaskTypeEnum.Gather ||
+                            {(taskType === TaskTypeEnum.Gather && String(taskRange) !== '34') ||
                             taskType === TaskTypeEnum.Grounding ||
                             taskType === TaskTypeEnum.GatherGrounding ? (
                                 <Button type="link" onClick={() => viewTaskDetail(task_id)}>
