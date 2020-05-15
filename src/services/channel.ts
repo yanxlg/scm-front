@@ -8,9 +8,6 @@ import {
     IChannelShelveStateBody,
     IChannelProductVersionQuery,
     IChannelProductVersionResponse,
-    IChannelProductDetailQuery,
-    IChannelProductDetailResponse,
-    IEditChannelProductDetailBody,
     IActiveChannelProductVersionBody,
     IRegionShippingFeeBody,
     IRegionShippingFeeResponse,
@@ -20,7 +17,6 @@ import {
     IGoodsSkuResponse,
     IEditSkuBody,
     IEditSkuResponse,
-    ISHopList,
     ILogItem,
 } from '@/interface/IChannel';
 import { IResponse, RequestPagination } from '@/interface/IGlobal';
@@ -36,21 +32,6 @@ export async function queryChannelProductVersion(query?: IChannelProductVersionQ
             params: query,
         },
     );
-}
-
-export async function queryChannelProductDetail(query: IChannelProductDetailQuery) {
-    return request.get<IResponse<IChannelProductDetailResponse>>(
-        ChannelApiPath.QueryProductDetail,
-        {
-            params: query,
-        },
-    );
-}
-
-export async function editChannelProductDetail(body: IEditChannelProductDetailBody) {
-    return request.put<IResponse<null>>(ChannelApiPath.EditProductDetail, {
-        data: body,
-    });
 }
 
 export async function exportChannelProductVersion(data?: IChannelProductVersionQuery) {
@@ -151,10 +132,6 @@ export async function editSkuPrice(data: IEditSkuBody) {
         data,
     });
 }
-
-export const queryShopList = singlePromiseWrap(() => {
-    return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
-});
 
 export async function queryOnOffLog({
     merchant_id,

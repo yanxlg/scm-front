@@ -112,6 +112,10 @@ export default [
         icon: <Icons type="scm-setting" className="menu-icon" />,
         children: [
             {
+                path: '/setting/store',
+                name: '店铺设置',
+            },
+            {
                 path: '/setting/account',
                 name: '账户管理',
             },
