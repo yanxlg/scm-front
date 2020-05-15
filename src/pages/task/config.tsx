@@ -15,7 +15,7 @@ const Config: React.FC = () => {
             <Container>
                 <Tabs
                     className="tabs-margin-none"
-                    defaultActiveKey="2"
+                    defaultActiveKey="1"
                     type="card"
                     children={[
                         /*<TabPane tab="指定URL采集" key="1">
