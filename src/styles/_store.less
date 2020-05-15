@@ -1,0 +1,42 @@
+.select {
+    width: 100px !important;
+}
+
+.disable {
+    :global(.ant-input-affix-wrapper-disabled) {
+        background-color: #f4faff;
+    }
+    :global(.ant-input[disabled]) {
+        background-color: #f4faff !important;
+    }
+    :global(.ant-select-disabled.ant-select-single:not(.ant-select-customize-input)) {
+        :global(.ant-select-selector) {
+            background-color: #f4faff;
+        }
+    }
+}
+
+.title {
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 500;
+    padding-top: 30px !important;
+}
+
+.refresh {
+    width: 120px;
+}
+
+.right {
+    position: absolute;
+    right: 0;
+}
+
+.after-item {
+    &:global(.ant-form-item) {
+        margin-right: 51px !important;
+    }
+}
+
+.price-after {
+    margin-left: 30px;
+}
