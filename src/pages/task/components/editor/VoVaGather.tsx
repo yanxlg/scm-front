@@ -13,6 +13,7 @@ import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessMod
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { dateToUnix } from 'react-components/es/utils/date';
 import { IFormData } from '@/pages/task/components/editor/HotGather';
+import { queryShopList } from '@/services/global';
 
 const fieldList: FormField[] = [
     {
@@ -130,13 +131,20 @@ const VoVaGather = () => {
     const onGatherOn = useCallback(() => {
         return formRef.current!.validateFields().then(values => {
             const params = convertFormData(values);
-            return addVoVaTask({
-                ...params,
-                is_upper_shelf: true,
-            })
-                .then(({ data = EmptyObject } = EmptyObject) => {
-                    formRef.current!.resetFields();
-                    showSuccessModal(data);
+            return queryShopList()
+                .then(({ data = [] }) => {
+                    console.log(data);
+                    return addVoVaTask({
+                        ...params,
+                        is_upper_shelf: true,
+                    })
+                        .then(({ data = EmptyObject } = EmptyObject) => {
+                            formRef.current!.resetFields();
+                            showSuccessModal(data);
+                        })
+                        .catch(() => {
+                            showFailureModal();
+                        });
                 })
                 .catch(() => {
                     showFailureModal();
