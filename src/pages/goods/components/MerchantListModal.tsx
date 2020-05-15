@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Checkbox, Form, Modal, Divider, Spin } from 'antd';
-import { IShopItem } from '@/interface/IChannel';
-import { queryShopList } from '@/services/channel';
+import { IShopItem } from '@/interface/IGlobal';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '@/styles/_merchant.less';
 import style from '@/styles/_index.less';
+import { queryShopList } from '@/services/global';
 
 declare interface MerchantListModalProps {
     visible: boolean;

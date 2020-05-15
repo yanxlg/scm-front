@@ -95,3 +95,37 @@ export interface IFileItem {
     last_update_time: string;
     filesize: string;
 }
+
+export interface IPriceStrategy {
+    first_purchase_crawler_price_condition: number;
+    first_sale_crawler_price_value: number;
+    first_fix_price_value: number;
+    middle_condition: number;
+    second_purchase_crawler_price_condition: number;
+    second_sale_crawler_price_value: number;
+    second_fix_price_value: number;
+}
+
+export interface IPriceStrategyItem {
+    before_strategy_content: {
+        first_purchase_crawler_price_condition: number;
+        first_sale_crawler_price_value: number;
+        first_fix_price_value: number;
+        middle_condition: number;
+        second_purchase_crawler_price_condition: number;
+        second_sale_crawler_price_value: number;
+        second_fix_price_value: number;
+    };
+    end_strategy_content: {
+        first_purchase_crawler_price_condition: number;
+        first_sale_crawler_price_value: number;
+        first_fix_price_value: number;
+        middle_condition: number;
+        second_purchase_crawler_price_condition: number;
+        second_sale_crawler_price_value: number;
+        second_fix_price_value: number;
+    };
+    strategy_type: '1';
+    operator: string;
+    updated_time: string;
+}

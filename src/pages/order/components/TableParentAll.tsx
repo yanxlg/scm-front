@@ -3,7 +3,7 @@ import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { FitTable } from 'react-components';
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IParentOrderItem, IGoodsDetail } from './PaneAll';
+import { IParentOrderItem, IGoodsDetail, IChildOrderItem } from './PaneAll';
 import { getOrderGoodsDetail, IFilterParams } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';

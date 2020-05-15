@@ -28,3 +28,11 @@ export type IPaginationResponse<T> = {
 };
 
 export type IBoolean = 0 | 1;
+
+export interface IShopItem {
+    merchant_id: string;
+    merchant_name: string;
+    merchant_platform: string;
+}
+
+export type ISHopList = IShopItem[];
