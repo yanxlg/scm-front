@@ -11,7 +11,6 @@ import {
     queryChannelGoodsList,
     updateChannelShelveState,
     queryChannelCategory,
-    queryShopList,
     exportChannelProductList,
 } from '@/services/channel';
 import {
@@ -41,6 +40,7 @@ import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
+import { queryShopList } from '@/services/global';
 
 const salesVolumeList = [
     {

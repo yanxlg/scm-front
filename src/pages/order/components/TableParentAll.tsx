@@ -3,7 +3,7 @@ import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { FitTable } from 'react-components';
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IParentOrderItem, IGoodsDetail } from './PaneAll';
+import { IParentOrderItem, IGoodsDetail, IChildOrderItem } from './PaneAll';
 import { getOrderGoodsDetail, IFilterParams } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -85,7 +85,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'productId',
-            title: 'Version ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
@@ -200,6 +200,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell,
             defaultHide: true,
         },
+        // {
+        //     key: 'productShop',
+        //     title: '销售店铺名称',
+        //     dataIndex: 'productShop',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        //     defaultHide: true,
+        // },
         {
             key: 'currency',
             title: '货币类型',

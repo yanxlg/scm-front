@@ -5,8 +5,6 @@ export enum ChannelApiPath {
     UpdateShelveState = '/api/v1/vova_goods/sales',
     ExportProductList = '/api/v1/vova_goods/exports',
     QueryProductVersion = '/api/v1/vova_goods/version_list',
-    QueryProductDetail = '/api/v1/vova_goods/detail',
-    EditProductDetail = '/api/v1/vova_goods/edits',
     CleanChangedProperties = '/api/v1/vova_goods/readed_property',
     ExportProductVersion = '/api/v1/vova_goods/version_exports',
     ActiveProductVersion = '/api/v1/vova_goods/apply_version',
@@ -14,6 +12,5 @@ export enum ChannelApiPath {
     QueryGoodsDetail = '/api/v1/vova_goods/detail',
     QueryGoodsSkuList = '/api/v1/vova_goods/sku_list',
     EditSkuPrice = '/api/v1/vova_goods/edits',
-    QueryShopList = '/api/v1/vova_goods/store_list',
     QueryOnOffLog = '/api/v1/vova_goods/sales_log',
 }

@@ -17,6 +17,7 @@ import QRCode from 'qrcode.react';
 import Export from '@/components/Export';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 
 declare interface IProps {
     getAllTabCount(): void;

@@ -9,9 +9,15 @@ import {
     postExportPendingOrder,
     postOrdersPlace,
     queryChannelSource,
+    getPlatformAndStore,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { defaultOptionItem, channelOptionList, purchaseOrderOptionList } from '@/enums/OrderEnum';
+import {
+    defaultOptionItem,
+    channelOptionList,
+    purchaseOrderOptionList,
+    defaultOptionItem1,
+} from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -53,14 +59,8 @@ const formFields: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
     },
     {
         type: 'dateRanger',
@@ -73,7 +73,7 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: 100,
+    channel_source: '',
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
