@@ -111,14 +111,14 @@ export const failureReasonMap = {
 };
 
 export const FinalCancelMap = {
-    '410031': '已售罄',
-    '41003': '已售罄',
-    '46024': '待未支付订单过多',
     '40001': '未登录',
+    '46024': '待支付订单过多',
+    '410031': 'sku已售罄',
+    '41003': '商品已售罄',
     '1001': '特殊商品无需拍单',
     '1002': '拍单超时',
-    '-100': '采购价异常',
     '888': '中台商品缺失',
+    '-100': '采购价异常',
 };
 
 export const finalCancelStatusList = transOptionList(FinalCancelMap);
@@ -313,7 +313,11 @@ export const childAllFieldList: FormField[] = [
         label: '失败原因',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        optionList: [defaultOptionItem1, ...finalCancelStatusList],
+        formatter: 'join',
+        placeholder: '请选择失败原因',
+        mode: 'multiple',
+        maxTagCount: 2,
+        optionList: [...finalCancelStatusList],
     },
     {
         type: 'select',
