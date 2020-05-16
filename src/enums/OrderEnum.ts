@@ -1,5 +1,5 @@
 import { FormField } from 'react-components/es/JsonForm';
-import { transStatusList } from '@/utils/transform';
+import { transStatusList, transOptionList } from '@/utils/transform';
 import { queryChannelSource, getPlatformAndStore } from '@/services/order-manage';
 
 declare interface optionItem {
@@ -108,6 +108,21 @@ export const failureReasonMap = {
     '1002': '任务超时失败',
     '888': '中台商品缺失',
 };
+
+export const FinalCancelMap = {
+    '410031': 'sku已告罄',
+    '41003': '商品已告罄',
+    '46024': '当前未支付订单过多',
+    '40001': '未登录',
+    '1001': '海淘、预售等无法拍单的商品属性',
+    '1002': '任务超时失败',
+    '-100': '采购价异常',
+    '888': '中台商品缺失',
+};
+
+export const finalCancelStatusList = transOptionList(FinalCancelMap);
+
+export type FinalCancelStatus = keyof typeof FinalCancelMap;
 
 export const failureReasonList = transStatusList(failureReasonMap);
 export type failureReasonCode = keyof typeof failureReasonMap;
@@ -290,6 +305,14 @@ export const childAllFieldList: FormField[] = [
         className: 'order-input',
         // formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_fail_code',
+        label: '失败原因',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        optionList: [defaultOptionItem1, ...finalCancelStatusList],
     },
     {
         type: 'select',
@@ -618,15 +641,3 @@ export const stockNotShipOptionalColList = [
         name: '发货剩余时间',
     },
 ];
-
-export const FinalCancelMap = {
-    '40001': '未登录',
-    '46024': '待支付订单过多',
-    '410031': '已售罄',
-    '41003': '已售罄',
-    '1001': '特殊商品无需拍单',
-    '1002': '拍单超时',
-    '888': '中台商品缺失',
-    '-100': '采购价异常',
-    // 未知原因
-};

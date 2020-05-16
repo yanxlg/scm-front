@@ -16,6 +16,7 @@ import {
     childrenOrderCancelOptionList,
     purchasePlanCancelOptionList,
     FinalCancelMap,
+    FinalCancelStatus,
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
@@ -442,7 +443,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: string, row: IChildOrderItem) => {
                 const { purchaseOrderStatus } = row;
                 return purchaseOrderStatus === 7
-                    ? FinalCancelMap[value as keyof typeof FinalCancelMap] || '未知原因'
+                    ? FinalCancelMap[value as FinalCancelStatus] || ''
                     : '';
             },
             defaultHide: true,
