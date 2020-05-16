@@ -1,39 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { IGoodsEditItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
+// import { IGoodsEditItem, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
 
-export default function () {
+export default function() {
     const [editGoodsStatus, setEditGoodsStatus] = useState(false);
-    const [editGoodsInfo, setEditGoodsInfo] = useState<IGoodsEditItem | null>(null);
+    const [productId, setProductId] = useState('');
 
-    const showEditGoods = useCallback((record: IGoodsAndSkuItem) => {
+    const showEditGoods = useCallback(productId => {
         // console.log('showEditGoods', record);
-        const {
-            product_id,
-            title,
-            description,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-            goods_img,
-            sku_image,
-        } = record;
         setEditGoodsStatus(true);
-        const list = [...sku_image];
-        const index = list.findIndex(img => img === goods_img);
-        if (index > -1) {
-            list.splice(index, 1);
-            list.unshift(goods_img);
-        }
-        setEditGoodsInfo({
-            product_id,
-            title,
-            description,
-            first_catagory,
-            second_catagory,
-            third_catagory,
-            goods_img,
-            sku_image: list,
-        });
+        setProductId(productId);
     }, []);
 
     const hideEditGoods = useCallback(() => {
@@ -42,8 +17,9 @@ export default function () {
 
     return {
         editGoodsStatus,
-        editGoodsInfo,
         showEditGoods,
-        hideEditGoods
-    }
+        hideEditGoods,
+        productId,
+        setProductId,
+    };
 }
