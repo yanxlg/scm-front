@@ -17,6 +17,7 @@ export const TaskRangeMap = {
     24: '指定店铺',
     31: '商品更新',
     34: 'VOVA采集',
+    35: 'VOVA采集上架',
 };
 
 export const isGoodsUpdateType = (code: TaskRangeCode) => {
