@@ -46,6 +46,7 @@ declare interface IProps {
     showParentStatus: boolean;
     getOrderGoodsIdList(): string[];
     getAllTabCount(type: number): void;
+    changeRegenerate(status: boolean): void;
 }
 
 declare interface IState {
@@ -423,21 +424,28 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             title: '采购计划状态',
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
-            width: 140,
+            width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                const { reserveStatus, purchaseFailCode } = row;
+                const { reserveStatus } = row;
                 if (reserveStatus === 3 && value === 1) {
                     return '';
                 }
-                return (
-                    <>
-                        {getStatusDesc(purchaseOrderOptionList, value)}
-                        {value === 7 && (
-                            <div>({FinalCancelMap[purchaseFailCode as '40001'] || '未知原因'})</div>
-                        )}
-                    </>
-                );
+                return getStatusDesc(purchaseOrderOptionList, value);
             },
+        },
+        {
+            key: 'purchaseFailCode',
+            title: '失败原因',
+            dataIndex: 'purchaseFailCode',
+            align: 'center',
+            width: 140,
+            render: (value: string, row: IChildOrderItem) => {
+                const { purchaseOrderStatus } = row;
+                return purchaseOrderStatus === 7
+                    ? FinalCancelMap[value as keyof typeof FinalCancelMap] || '未知原因'
+                    : '';
+            },
+            defaultHide: true,
         },
         // 勾选展示
         {
@@ -607,11 +615,15 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
+    handleChangeRegenerate = (status: boolean) => {
+        // console.log(1111111, status);
+        this.props.changeRegenerate(status);
+    };
+
     toolBarRender = () => {
         const {
             postOrdersPlace,
             cancelPurchaseOrder,
-            cancelChannelOrder,
             changeParentOrder,
             showParentStatus,
             getOrderGoodsIdList,
@@ -629,8 +641,11 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             >
                 仅展示父订单ID
             </Checkbox>,
+            <Checkbox onChange={e => this.handleChangeRegenerate(e.target.checked)} key="1">
+                展示已重新生成
+            </Checkbox>,
             <LoadingButton
-                key="1"
+                key="2"
                 type="primary"
                 disabled={disabled}
                 className={formStyles.formBtn}
@@ -639,7 +654,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 一键拍单
             </LoadingButton>,
             <LoadingButton
-                key="2"
+                key="3"
                 type="primary"
                 disabled={disabled}
                 className={formStyles.formBtn}
@@ -653,7 +668,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 getAllTabCount={_getAllTabCount}
             >
                 <Button
-                    key="3"
+                    key="4"
                     type="primary"
                     disabled={disabled}
                     className={formStyles.formBtn}
@@ -695,6 +710,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     onRow={record => {
                         return {
                             'data-id': record.orderGoodsId,
+                            // hidden: false,
                         } as any;
                     }}
                     toolBarRender={this.toolBarRender}
