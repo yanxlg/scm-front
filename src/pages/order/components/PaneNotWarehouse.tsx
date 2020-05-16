@@ -23,6 +23,7 @@ import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
+import CancelOrder from './CancelOrder';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -82,7 +83,7 @@ const formFields: FormField[] = [
     {
         type: 'select',
         name: 'purchase_order_status',
-        label: '采购订单状态',
+        label: '采购计划状态',
         className: 'order-input',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
     },
@@ -129,6 +130,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     currentSearchParams = params;
                     const { all_count: total, list } = res.data;
                     // const { page, page_count } = params;
+                    setSelectedRowKeys([]);
                     if (list) {
                         setPage(params.page as number);
                         setPageSize(params.page_count as number);
@@ -201,54 +203,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             page: current,
         });
     }, []);
-
-    const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
-        getAllTabCount();
-        notification.success({
-            message: `${name}成功`,
-            description: (
-                <div>
-                    {list.map((item: string) => (
-                        <div key={item}>{item}</div>
-                    ))}
-                </div>
-            ),
-        });
-    }, []);
-
-    const batchOperateFail = useCallback(
-        (name: string = '', list: { order_goods_id: string; result: string }[]) => {
-            notification.error({
-                message: `${name}失败`,
-                description: (
-                    <div>
-                        {list.map((item: any) => (
-                            <div>
-                                {item.order_goods_id}: {item.result.slice(0, 50)}
-                            </div>
-                        ))}
-                    </div>
-                ),
-            });
-        },
-        [],
-    );
-
-    const _delChannelOrders = useCallback(() => {
-        return delChannelOrders({
-            order_goods_ids: selectedRowKeys as string[],
-        }).then(res => {
-            onSearch();
-            const { success, failed } = res.data;
-
-            if (success!.length) {
-                batchOperateSuccess('取消渠道订单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消渠道订单', failed);
-            }
-        });
-    }, [selectedRowKeys]);
 
     const _postExportPurchasedNotWarehouse = useCallback((values: any) => {
         return postExportPurchasedNotWarehouse({
@@ -367,7 +321,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchaseOrderStatus',
-                title: '采购订单状态',
+                title: '采购计划状态',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
                 width: 120,
@@ -438,17 +392,22 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0 ? true : false;
         return [
-            <LoadingButton
-                key="channel_order"
-                type="primary"
-                disabled={disabled}
-                className={formStyles.formBtn}
-                onClick={_delChannelOrders}
+            <CancelOrder
+                orderGoodsIds={selectedRowKeys as string[]}
+                onReload={onSearch}
+                getAllTabCount={getAllTabCount}
             >
-                取消渠道订单
-            </LoadingButton>,
+                <Button
+                    key="channel_order"
+                    type="primary"
+                    disabled={disabled}
+                    className={formStyles.formBtn}
+                >
+                    取消渠道订单
+                </Button>
+            </CancelOrder>,
         ];
-    }, [selectedRowKeys, _delChannelOrders]);
+    }, [selectedRowKeys]);
 
     useEffect(() => {
         onSearch();
