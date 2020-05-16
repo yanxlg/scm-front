@@ -443,7 +443,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: string, row: IChildOrderItem) => {
                 const { purchaseOrderStatus } = row;
                 return purchaseOrderStatus === 7
-                    ? FinalCancelMap[value as FinalCancelStatus] || ''
+                    ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
                     : '';
             },
             defaultHide: true,
