@@ -40,6 +40,7 @@ export interface ITaskListItem {
     end_time: number;
     execute_count: number;
     update_type?: PUTaskRangeTypeCode[];
+    channel: '1' | '2' | '3';
 }
 
 export interface ITaskListExtraData {
