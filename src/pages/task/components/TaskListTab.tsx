@@ -175,13 +175,13 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     const task_id = record.task_id;
                     const onceTask = isOnceTask(record.execute_count);
                     const taskType = record.task_type;
-                    const taskRange = record.task_range; // vova采集不显示详情
-
+                    const channel = record.channel;
                     return (
                         <>
-                            {(taskType === TaskTypeEnum.Gather && String(taskRange) !== '34') ||
+                            {(taskType === TaskTypeEnum.Gather && String(channel) !== '3') ||
                             taskType === TaskTypeEnum.Grounding ||
-                            taskType === TaskTypeEnum.GatherGrounding ? (
+                            (taskType === TaskTypeEnum.GatherGrounding &&
+                                String(channel) !== '3') ? (
                                 <Button type="link" onClick={() => viewTaskDetail(task_id)}>
                                     查看详情
                                 </Button>
