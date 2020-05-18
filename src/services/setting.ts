@@ -15,6 +15,7 @@ import { EmptyObject } from '@/config/global';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { api } from 'react-components';
 import { IPaginationResponse as PaginationResponse } from 'react-components/es/hooks/useList';
+import { FetchFactory } from '@/hooks/useFetch';
 
 export async function queryCustomList(query: ICustomListQuery) {
     const params = transPaginationRequest(query);
@@ -143,23 +144,21 @@ export function queryPriceStrategyHistory(params: any) {
     );
 }
 
-export function queryReplaceStoreOutList() {
-    return new Promise(resolve => {
-        resolve({
-            data: {
-                total: 100,
-                list: [
-                    {
-                        id: '11',
-                        1: '21',
-                        2: '34',
-                        3: '54',
-                        4: '232',
-                        5: '2323',
-                    },
-                ],
-            },
-        });
-    }) as any;
-    // return api.get();
+export function queryReplaceStoreOutList(fetch: FetchFactory) {
+    return Promise.resolve({
+        data: {
+            total: 100,
+            list: [
+                {
+                    id: '11',
+                    0: '店铺名',
+                    1: '21',
+                    2: '34',
+                    3: '54',
+                    4: '232',
+                    5: '2323',
+                },
+            ],
+        },
+    });
 }

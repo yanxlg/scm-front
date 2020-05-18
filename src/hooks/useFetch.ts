@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react';
 import Request, { CancelToken, Canceler, RequestOptionsInit } from 'umi-request';
 import request from '@/utils/request';
 
-const CancelToken = Request.CancelToken;
+const CancelFactory = Request.CancelToken;
 
-class FetchFactory {
+export class FetchFactory {
     private readonly token: CancelToken;
     public cancel: Canceler;
     constructor() {
-        const { token, cancel } = CancelToken.source();
+        const { token, cancel } = CancelFactory.source();
         this.token = token;
         this.cancel = cancel;
     }
