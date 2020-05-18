@@ -1,15 +1,17 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { FitTable, JsonForm, LoadingButton } from 'react-components';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { FitTable, JsonForm, LoadingButton, useList } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { FormInstance } from 'antd/es/form';
 import styles from '@/styles/_store.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
-import { Button, Form } from 'antd';
+import { Button, Form, Input } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { IParentOrderItem } from '@/pages/order/components/PaneAll';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { ColumnsType } from 'antd/es/table/interface';
+import { ColumnType } from 'antd/es/table/interface';
+import { queryReplaceStoreOutList } from '@/services/setting';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 
 const fieldList: Array<FormField> = [
     {
@@ -67,15 +69,72 @@ const fieldList: Array<FormField> = [
     },
 ];
 
-declare interface EditColumnsType {}
+declare type EditColumnsType<T> = Array<
+    ColumnType<T> & {
+        editable?: boolean;
+    }
+>;
+
+declare interface IReplaceStoreOutItem {
+    id: string;
+}
+
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+    editing: boolean;
+    dataIndex: string;
+    title: any;
+    inputType: 'number' | 'text';
+    record: IReplaceStoreOutItem;
+    index: number;
+    children: React.ReactNode;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+    editing,
+    dataIndex,
+    title,
+    inputType,
+    record,
+    index,
+    children,
+    ...restProps
+}) => {
+    return (
+        <td {...restProps}>
+            {editing ? (
+                <Form.Item
+                    name={dataIndex}
+                    style={{ margin: 0 }}
+                    rules={[
+                        {
+                            required: true,
+                            message: `请输入Cookie`,
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+            ) : (
+                children
+            )}
+        </td>
+    );
+};
 
 const ReplaceStoreOut = () => {
     const [form] = Form.useForm();
+    const formRef = useRef<JsonFormRef>(null);
     const [editingKey, setEditingKey] = useState<string | undefined>(undefined);
+    const { total, loading, dataSource, pageSize, pageNumber } = useList({
+        queryList: queryReplaceStoreOutList,
+        formRef: formRef,
+    });
+
+    const isEditing = (record: IReplaceStoreOutItem) => record.id === editingKey;
 
     const formElement = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList}>
+            <JsonForm fieldList={fieldList} ref={formRef}>
                 <LoadingButton type="primary" className={formStyles.formBtn} onClick={() => {}}>
                     查询
                 </LoadingButton>
@@ -85,8 +144,7 @@ const ReplaceStoreOut = () => {
             </JsonForm>
         );
     }, []);
-
-    const columns: ColumnsType<any> = [
+    const columns: EditColumnsType<IReplaceStoreOutItem> = [
         {
             dataIndex: '0',
             title: '店铺名',
@@ -121,10 +179,26 @@ const ReplaceStoreOut = () => {
             dataIndex: 'actions',
             title: '操作',
             width: 200,
+            render: (_, record) => {
+                const isEditable = isEditing(record);
+                return (
+                    <>
+                        {isEditable ? (
+                            <Button type="link">保存</Button>
+                        ) : (
+                            <React.Fragment>
+                                <Button type="link">查看商品</Button>
+                                <Button type="link">修改</Button>
+                            </React.Fragment>
+                        )}
+                        <Button type="link" danger={true}>
+                            删除
+                        </Button>
+                    </>
+                );
+            },
         },
     ];
-
-    const isEditing = (record: ITableItem) => record.account_id === editingKey;
 
     const mergedColumns = columns.map(col => {
         if (!col.editable) {
@@ -132,7 +206,7 @@ const ReplaceStoreOut = () => {
         }
         return {
             ...col,
-            onCell: (record: ITableItem) => ({
+            onCell: (record: IReplaceStoreOutItem) => ({
                 record,
                 dataIndex: col.dataIndex,
                 title: col.title,
@@ -141,30 +215,35 @@ const ReplaceStoreOut = () => {
         };
     });
 
-    const edit = (record: ITableItem) => {
+    const edit = (record: IReplaceStoreOutItem) => {
         form.setFieldsValue({ ...record });
-        setEditingKey(record.account_id);
+        setEditingKey(record.id);
     };
 
-    const save = async (key: string) => {
-        try {
-            const values = await form.validateFields();
-            await saveCookie({
-                account_id: key,
-                cookie: values.cookie,
-            });
-            setEditingKey(undefined);
-            refresh();
-        } catch (errInfo) {}
-    };
+    const save = async (key: string) => {};
 
     const table = useMemo(() => {
         return (
             <Form form={form} component={false}>
-                <FitTable columns={columns} dataSource={[]} />
+                <FitTable
+                    components={{
+                        body: {
+                            cell: EditableCell,
+                        },
+                    }}
+                    columns={columns}
+                    dataSource={dataSource}
+                    pagination={{
+                        current: pageNumber,
+                        pageSize: pageSize,
+                        total: total,
+                        showSizeChanger: true,
+                        position: ['topRight', 'bottomRight'],
+                    }}
+                />
             </Form>
         );
-    }, []);
+    }, [loading]);
 
     return useMemo(() => {
         return (
@@ -173,7 +252,7 @@ const ReplaceStoreOut = () => {
                 {table}
             </div>
         );
-    }, []);
+    }, [loading]);
 };
 
 export default ReplaceStoreOut;

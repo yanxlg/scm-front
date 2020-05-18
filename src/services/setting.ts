@@ -142,3 +142,24 @@ export function queryPriceStrategyHistory(params: any) {
         },
     );
 }
+
+export function queryReplaceStoreOutList() {
+    return new Promise(resolve => {
+        resolve({
+            data: {
+                total: 100,
+                list: [
+                    {
+                        id: '11',
+                        1: '21',
+                        2: '34',
+                        3: '54',
+                        4: '232',
+                        5: '2323',
+                    },
+                ],
+            },
+        });
+    }) as any;
+    // return api.get();
+}
