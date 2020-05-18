@@ -59,4 +59,4 @@ export const goodsSourceMap = {
     2: 'VOVA',
 };
 
-export const goodsSourceList = transOptionList(publishChannelStatusMap);
+export const goodsSourceList = transOptionList(goodsSourceMap);

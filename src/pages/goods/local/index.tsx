@@ -26,6 +26,7 @@ import GoodsTable from './components/GoodsTable/GoodsTable';
 
 import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { queryGoodsSourceList } from '@/services/global';
 
 const initialValues = {
     inventory_status: '',
@@ -34,7 +35,7 @@ const initialValues = {
     second_catagory: '',
     third_catagory: '',
     publish_channel: '',
-    a1: '',
+    source_channel: '',
 };
 
 const formFields: FormField[] = [
@@ -81,10 +82,10 @@ const formFields: FormField[] = [
     {
         type: 'select',
         label: '商品渠道来源',
-        name: 'a1',
+        name: 'source_channel',
         className: styles.input,
-        formatter: 'number',
-        optionList: [defaultOption, ...goodsSourceList],
+        syncDefaultOption: defaultOption,
+        optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'select',

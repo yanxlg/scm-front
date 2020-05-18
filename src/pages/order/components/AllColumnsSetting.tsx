@@ -28,6 +28,7 @@ const baseGroupList = [
     // { key: 'cancelType', name: '中台订单取消原因' }, // 带补充
     { key: '_logisticsTrack', name: '物流轨迹' },
     { key: 'cancelType', name: '子订单取消类型' },
+    { key: 'orderAddress', name: '用户地址信息' },
 ];
 
 const saleGroupList = [
