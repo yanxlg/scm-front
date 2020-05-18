@@ -10,7 +10,7 @@ import { ColumnsType } from 'antd/es/table';
 import dayjs, { Dayjs } from 'dayjs';
 import classNames from 'classnames';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
+import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
 import { IDashboardOverviewReq, IOverviewInfo, IOverviewDetailItem } from '@/interface/IDashboard';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -165,7 +165,7 @@ const Overview: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
 
     const [loading, setLoading] = useState(false);
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([dayjs(), dayjs()]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate(), getUTCDate()]);
     const [detailList, setDetailList] = useState<IOverviewDetailItem[]>([]);
     const [overviewInfo, setOverviewInfo] = useState<IOverviewInfo>({
         totalTradeAmount: '0',
@@ -193,11 +193,11 @@ const Overview: React.FC = props => {
             setLoading(true);
             return getDashboardTradeData({
                 ...searchRef.current?.getFieldsValue(),
-                statistics_start_time: startDateToUnix(dates[0]),
+                statistics_start_time: startDateToUnixWithUTC(dates[0]),
                 statistics_end_time:
-                    dayjs().format(timeFormat) === dates[1].format(timeFormat)
-                        ? dayjs().unix()
-                        : endDateToUnix(dates[1]),
+                    getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(dates[1]),
                 ...params,
             } as IDashboardOverviewReq)
                 .then(res => {
@@ -257,11 +257,11 @@ const Overview: React.FC = props => {
         currentDates => {
             setDates(currentDates);
             _getDashboardTradeData({
-                statistics_start_time: startDateToUnix(currentDates[0]),
+                statistics_start_time: startDateToUnixWithUTC(currentDates[0]),
                 statistics_end_time:
-                    dayjs().format(timeFormat) === currentDates[1].format(timeFormat)
-                        ? dayjs().unix()
-                        : endDateToUnix(currentDates[1]),
+                    getUTCDate().format(timeFormat) === currentDates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(currentDates[1]),
             });
         },
         [_getDashboardTradeData],
