@@ -15,6 +15,8 @@ import { IDashboardOverviewReq, IOverviewInfo, IOverviewDetailItem } from '@/int
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_overview.less';
+import Export from '@/components/Export';
+import { exportExcel } from '@/services/global';
 
 const formFields: FormField[] = [
     {
@@ -163,8 +165,9 @@ const timeFormat = 'YYYY-MM-DD';
 
 const Overview: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
-
+    const queryRef = useRef<any>();
     const [loading, setLoading] = useState(false);
+    const [exportStatus, setExportStatus] = useState(false);
     const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate(), getUTCDate()]);
     const [detailList, setDetailList] = useState<IOverviewDetailItem[]>([]);
     const [overviewInfo, setOverviewInfo] = useState<IOverviewInfo>({
@@ -191,7 +194,7 @@ const Overview: React.FC = props => {
     const _getDashboardTradeData = useCallback(
         (params = {}) => {
             setLoading(true);
-            return getDashboardTradeData({
+            const data: IDashboardOverviewReq = {
                 ...searchRef.current?.getFieldsValue(),
                 statistics_start_time: startDateToUnixWithUTC(dates[0]),
                 statistics_end_time:
@@ -199,9 +202,11 @@ const Overview: React.FC = props => {
                         ? getUTCDate().unix()
                         : endDateToUnixWithUTC(dates[1]),
                 ...params,
-            } as IDashboardOverviewReq)
+            };
+            return getDashboardTradeData(data)
                 .then(res => {
                     // console.log('getDashboardTradeData', res);
+                    queryRef.current = data;
                     const {
                         totalTradeAmount,
                         totalOrderNum,
@@ -267,6 +272,18 @@ const Overview: React.FC = props => {
         [_getDashboardTradeData],
     );
 
+    const onCancelExport = useCallback(() => {
+        setExportStatus(false);
+    }, []);
+
+    const createExcel = useCallback(values => {
+        return exportExcel({
+            module: 9,
+            query: queryRef.current,
+            ...values,
+        });
+    }, []);
+
     useEffect(() => {
         _getDashboardTradeData();
     }, []);
@@ -318,6 +335,12 @@ const Overview: React.FC = props => {
                             >
                                 刷新
                             </LoadingButton>
+                            <Button
+                                className={formStyles.formBtn}
+                                onClick={() => setExportStatus(true)}
+                            >
+                                导出
+                            </Button>
                         </div>
                     </JsonForm>
                 </div>
@@ -548,9 +571,15 @@ const Overview: React.FC = props => {
                         </div>
                     </div>
                 </Spin>
+                <Export
+                    columns={columns as any}
+                    visible={exportStatus}
+                    onOKey={createExcel}
+                    onCancel={onCancelExport}
+                />
             </div>
         );
-    }, [dates, loading, overviewInfo, detailList]);
+    }, [dates, loading, overviewInfo, detailList, exportStatus]);
 };
 
 export default Overview;
