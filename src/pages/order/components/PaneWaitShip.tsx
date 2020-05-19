@@ -23,6 +23,7 @@ import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
+import CancelOrder from './CancelOrder';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -70,7 +71,7 @@ const formFields: FormField[] = [
     {
         type: 'select',
         name: 'purchase_order_status',
-        label: '采购订单状态',
+        label: '采购计划状态',
         className: 'order-input',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
     },
@@ -125,6 +126,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     currentSearchParams = params;
                     const { all_count: total, list } = res.data;
                     // const { page, page_count } = params;
+                    setSelectedRowKeys([]);
                     if (list) {
                         setPage(params.page as number);
                         setPageSize(params.page_count as number);
@@ -231,22 +233,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, [selectedRowKeys]);
 
-    const _delChannelOrders = useCallback(() => {
-        return delChannelOrders({
-            order_goods_ids: selectedRowKeys as string[],
-        }).then(res => {
-            onSearch();
-            const { success, failed } = res.data;
-
-            if (success!.length) {
-                batchOperateSuccess('取消渠道订单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消渠道订单', failed);
-            }
-        });
-    }, [selectedRowKeys]);
-
     const _postExportWaitShip = useCallback((values: any) => {
         return postExportWaitShip({
             ...currentSearchParams,
@@ -333,7 +319,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchaseOrderStatus',
-                title: '采购订单状态',
+                title: '采购计划状态',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
                 width: 120,
@@ -396,17 +382,22 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消采购单
             </LoadingButton>,
-            <LoadingButton
-                key="channel_order"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => _delChannelOrders()}
-                disabled={selectedRowKeys.length === 0}
+            <CancelOrder
+                orderGoodsIds={selectedRowKeys as string[]}
+                onReload={onSearch}
+                getAllTabCount={getAllTabCount}
             >
-                取消渠道订单
-            </LoadingButton>,
+                <Button
+                    key="channel_order"
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={selectedRowKeys.length === 0}
+                >
+                    取消渠道订单
+                </Button>
+            </CancelOrder>,
         ];
-    }, [selectedRowKeys, _cancelPurchaseOrder, _delChannelOrders, _postExportWaitShip]);
+    }, [selectedRowKeys, _cancelPurchaseOrder, _postExportWaitShip]);
 
     useEffect(() => {
         onSearch();

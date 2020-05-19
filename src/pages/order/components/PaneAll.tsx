@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react';
-import { Pagination, Button, message, notification } from 'antd';
+import { Button, notification } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton } from 'react-components';
 import TableAll from './TableAll';
@@ -70,9 +70,13 @@ declare interface IState {
 class PaneAll extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<JsonFormRef> = React.createRef();
     private currentSearchParams: IFilterParams | null = null;
+    private regenerateStatus: boolean = false;
+    // 保留接口返回的list
+    private resList: any[] = [];
     private initialValues = {
         channel_source: '',
         product_shop: '',
+        // purchase_fail_code: '',
         order_goods_status: 100,
         order_goods_shipping_status: 100,
         non_purchase_plan: 100,
@@ -81,17 +85,6 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         reserve_status: 100,
         order_goods_cancel_type: 100,
         purchase_plan_cancel_type: 100,
-    };
-
-    private endFieldItem: FormField = {
-        type: 'checkbox',
-        name: 'only_p_order',
-        label: '仅展示父订单ID',
-        formItemClassName: 'order-form-item',
-        // name, form, setState
-        onChange: (name, form) => {
-            this.changeParentOrder(form.getFieldValue(name));
-        },
     };
 
     constructor(props: IProps) {
@@ -104,7 +97,6 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             showParentStatus: false,
             childOrderList: [],
             parentOrderList: [],
-            // , this.endFieldItem
             fieldList: [...childAllFieldList],
             // 表格展示的列
             colChildList: defaultColChildList,
@@ -152,6 +144,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             parentOrderList: this.getParentOrderData(list),
                         });
                     } else {
+                        this.resList = list;
                         this.setState(
                             {
                                 childOrderList: this.getChildOrderData(list),
@@ -189,12 +182,19 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
             // console.log(111, orderGoodsPurchasePlan, orderGoods);
             if (orderGoodsPurchasePlan) {
+                let purchasePlanList = [...orderGoodsPurchasePlan];
+                if (!this.regenerateStatus) {
+                    purchasePlanList = purchasePlanList.filter(
+                        (item: any) => item.purchaseOrderStatus !== 6,
+                    );
+                }
                 // 生成采购计划
-                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                purchasePlanList.forEach((purchaseItem: any, index: number) => {
                     const {
                         createTime: purchaseCreateTime,
                         lastUpdateTime: purchaseLastUpdateTime,
                         cancelType: purchaseCancelType,
+                        purchaseOrderStatus,
                         ...purchaseRest
                     } = purchaseItem;
                     const childOrderItem: any = {
@@ -207,9 +207,10 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         confirmTime,
                         channelOrderSn,
                         channelSource,
+                        purchaseOrderStatus,
                     };
                     if (index === 0) {
-                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._rowspan = purchasePlanList.length;
                         childOrderItem._checked = false;
                     }
                     childOrderList.push(childOrderItem);
@@ -230,6 +231,13 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         // console.log(1111, childOrderList);
         return childOrderList;
     }
+
+    private changeRegenerate = (status: boolean) => {
+        this.regenerateStatus = status;
+        this.setState({
+            childOrderList: this.getChildOrderData(this.resList),
+        });
+    };
 
     // 获取中单订单=>子订单数据
     private getParentOrderData(list: any[]): IParentOrderItem[] {
@@ -580,6 +588,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             changeParentOrder={this.changeParentOrder}
                             showParentStatus={showParentStatus}
                             getOrderGoodsIdList={this.getOrderGoodsIdList}
+                            getAllTabCount={this.props.getAllTabCount}
+                            changeRegenerate={this.changeRegenerate}
                         />
                     ) : (
                         <TableParentAll
