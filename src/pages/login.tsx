@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
@@ -7,6 +7,7 @@ import { history } from 'umi';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { getPageQuery } from '@/utils/utils';
+import request from '@/utils/request';
 
 declare interface ILoginState {
     remember: boolean;
@@ -20,57 +21,59 @@ declare interface ILoginState {
     login: boolean;
 }
 
-class Login extends React.PureComponent<{}, ILoginState> {
-    constructor(props: {}) {
-        super(props);
-        this.state = {
-            userName: User.userName,
-            password: User.password,
-            remember: !!User.password,
-            userNameActive: !!User.userName,
-            passwordActive: !!User.password,
-            login: false,
-        };
-    }
-    private onUserNameFocus() {
-        this.setState({
-            userNameActive: true,
-        });
-    }
-    private onInputUserName(e: React.ChangeEvent<HTMLInputElement>) {
-        const value = e.target.value;
-        this.setState({
-            userName: value,
-        });
-    }
-    private onUserNameBlur() {
-        const { userName } = this.state;
-        this.setState({
-            userNameActive: !!userName,
-        });
-    }
-    private onPasswordFocus() {
-        this.setState({
-            passwordActive: true,
-        });
-    }
-    private onInputPassword(e: React.ChangeEvent<HTMLInputElement>) {
-        const value = e.target.value;
-        this.setState({
-            password: value,
-        });
-    }
-    private onPasswordBlur() {
-        const { password } = this.state;
-        this.setState({
-            passwordActive: !!password,
-        });
-    }
-    private login() {
-        this.setState({
-            login: true,
-        });
-        const { password = '', userName = '', remember } = this.state;
+const Login = () => {
+    const [userName, setUserName] = useState(User.userName);
+    const [password, setPassword] = useState(User.password || '');
+    const [userNameError, setUserNameError] = useState();
+    const [passwordError, setPasswordError] = useState();
+    const [userNameActive, setUserNameActive] = useState(!!User.userName);
+    const [passwordActive, setPasswordActive] = useState(!!User.password);
+    const [login, setLogin] = useState(false);
+    const [remember, setRemember] = useState(!!User.password);
+
+    const onUserNameFocus = useCallback(() => {
+        setUserNameActive(true);
+    }, []);
+    const onInputUserName = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setUserName(e.target.value);
+    }, []);
+
+    const onUserNameBlur = useCallback(() => {
+        setUserNameActive(!!userName);
+    }, [userName]);
+
+    const onPasswordFocus = useCallback(() => {
+        setPasswordActive(true);
+    }, []);
+
+    const onInputPassword = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+    }, []);
+
+    const onPasswordBlur = useCallback(() => {
+        setPasswordActive(!!password);
+    }, [password]);
+
+    const onRememberChange = useCallback((e: CheckboxChangeEvent) => {
+        setRemember(e.target.checked);
+    }, []);
+
+    const onLogin = () => {
+        setLogin(true);
+
+        // 获取页面中的execution
+
+        request
+            .get(
+                'https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login',
+                {
+                    mode: 'cors',
+                },
+            )
+            .then(result => {
+                console.log(result);
+            });
+        return;
         userLogin({
             username: userName,
             password: password,
@@ -110,33 +113,31 @@ class Login extends React.PureComponent<{}, ILoginState> {
                 history.replace(redirect || '/');
             })
             .catch(({ message }) => {
-                this.setState({
-                    userNameError: message,
-                    passwordError: message,
-                });
+                setUserNameError(message);
             })
             .finally(() => {
-                this.setState({
-                    login: false,
-                });
+                setLogin(false);
             });
-    }
-    private onRememberChange(e: CheckboxChangeEvent) {
-        this.setState({
-            remember: e.target.checked,
-        });
-    }
-    render() {
-        const {
-            userNameActive,
-            passwordActive,
-            userName,
-            password = '',
-            userNameError,
-            passwordError,
-            login,
-            remember,
-        } = this.state;
+    };
+
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const onLoaded = useCallback(() => {
+        console.log(iframeRef.current);
+        // 读取url
+        alert('loaded');
+    }, []);
+    const iframe = useMemo(() => {
+        // 有可能会直接访问中台页面，如果直接是中台页面说明登陆状态仍然存在，否则才走登陆
+        return (
+            <iframe
+                ref={iframeRef}
+                src="https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login"
+                onLoad={onLoaded}
+                style={{ display: 'none' }}
+            />
+        );
+    }, []);
+    return useMemo(() => {
         return (
             <main className="main login-bg">
                 <div className="login-logo">供应链管理中台</div>
@@ -147,9 +148,9 @@ class Login extends React.PureComponent<{}, ILoginState> {
                             spellCheck={false}
                             value={userName}
                             className="login-input"
-                            onFocus={this.onUserNameFocus}
-                            onChange={this.onInputUserName}
-                            onBlur={this.onUserNameBlur}
+                            onFocus={onUserNameFocus}
+                            onChange={onInputUserName}
+                            onBlur={onUserNameBlur}
                         />
                         <label
                             className={`login-input-label ${
@@ -167,9 +168,9 @@ class Login extends React.PureComponent<{}, ILoginState> {
                             spellCheck={false}
                             value={password}
                             className="login-input"
-                            onFocus={this.onPasswordFocus}
-                            onChange={this.onInputPassword}
-                            onBlur={this.onPasswordBlur}
+                            onFocus={onPasswordFocus}
+                            onChange={onInputPassword}
+                            onBlur={onPasswordBlur}
                         />
                         <label
                             className={`login-input-label ${
@@ -183,7 +184,7 @@ class Login extends React.PureComponent<{}, ILoginState> {
                     <Checkbox
                         checked={remember}
                         className="login-remember"
-                        onChange={this.onRememberChange}
+                        onChange={onRememberChange}
                     >
                         下次自动登录
                     </Checkbox>
@@ -192,14 +193,15 @@ class Login extends React.PureComponent<{}, ILoginState> {
                         disabled={!userName || !password}
                         type="primary"
                         className="login-btn"
-                        onClick={this.login}
+                        onClick={onLogin}
                     >
                         登录
                     </Button>
                 </div>
+                {iframe}
             </main>
         );
-    }
-}
+    }, [password, userName]);
+};
 
 export default Login;
