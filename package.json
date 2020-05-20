@@ -24,7 +24,8 @@
         "react-components":"git+ssh://git@git.gitvv.com:38022/trigram/react-components.git#0.0.5-alpha.64",
         "query-string": "^6.11.1",
         "react": "^16.13.0",
-        "react-dom": "^16.13.0"
+        "react-dom": "^16.13.0",
+        "jsonp": "^0.2.1"
     },
     "devDependencies": {
         "@types/classnames": "^2.2.9",

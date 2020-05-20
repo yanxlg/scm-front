@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
@@ -8,6 +8,7 @@ import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { getPageQuery } from '@/utils/utils';
 import request from '@/utils/request';
+const jsonp = require('jsonp');
 
 declare interface ILoginState {
     remember: boolean;
@@ -121,21 +122,22 @@ const Login = () => {
     };
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    const onLoaded = useCallback(() => {
-        console.log(iframeRef.current);
+    const onLoaded = useCallback(e => {
         // 读取url
-        alert('loaded');
+    }, []);
+
+    useEffect(() => {
+        jsonp(
+            'https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login',
+            {},
+            (err, data) => {
+                console.log(data);
+            },
+        );
     }, []);
     const iframe = useMemo(() => {
         // 有可能会直接访问中台页面，如果直接是中台页面说明登陆状态仍然存在，否则才走登陆
-        return (
-            <iframe
-                ref={iframeRef}
-                src="https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login"
-                onLoad={onLoaded}
-                style={{ display: 'none' }}
-            />
-        );
+        return null;
     }, []);
     return useMemo(() => {
         return (
