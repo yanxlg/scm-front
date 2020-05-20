@@ -60,11 +60,6 @@ data:
             add_header Content-Type text/plain;
         }
 
-
-        location /iframe{
-            proxy_pass https://cas-t.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
-        }
-
         location ~.*\.(js|css|png|jpg)$
         {
             expires 30d;
