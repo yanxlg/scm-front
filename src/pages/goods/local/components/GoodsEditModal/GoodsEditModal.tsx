@@ -397,14 +397,14 @@ const GoodsEditModal: React.FC<IProps> = ({ visible, productId, onCancel, onRelo
                             name="title"
                             rules={[{ required: true, message: '不能为空!' }]}
                         >
-                            <TextArea autoSize className={styles.textarea} />
+                            <TextArea autoSize />
                         </Form.Item>
                         <Form.Item
                             label="商品描述"
                             name="description"
                             rules={[{ required: true, message: '不能为空!' }]}
                         >
-                            <TextArea autoSize className={styles.textarea} />
+                            <TextArea autoSize />
                         </Form.Item>
                         <Row gutter={32}>
                             <Col span={8}>
