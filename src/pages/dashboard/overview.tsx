@@ -10,11 +10,13 @@ import { ColumnsType } from 'antd/es/table';
 import dayjs, { Dayjs } from 'dayjs';
 import classNames from 'classnames';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
+import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
 import { IDashboardOverviewReq, IOverviewInfo, IOverviewDetailItem } from '@/interface/IDashboard';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_overview.less';
+import Export from '@/components/Export';
+import { exportExcel } from '@/services/global';
 
 const formFields: FormField[] = [
     {
@@ -163,9 +165,10 @@ const timeFormat = 'YYYY-MM-DD';
 
 const Overview: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
-
+    const queryRef = useRef<any>();
     const [loading, setLoading] = useState(false);
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([dayjs(), dayjs()]);
+    const [exportStatus, setExportStatus] = useState(false);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate(), getUTCDate()]);
     const [detailList, setDetailList] = useState<IOverviewDetailItem[]>([]);
     const [overviewInfo, setOverviewInfo] = useState<IOverviewInfo>({
         totalTradeAmount: '0',
@@ -191,17 +194,19 @@ const Overview: React.FC = props => {
     const _getDashboardTradeData = useCallback(
         (params = {}) => {
             setLoading(true);
-            return getDashboardTradeData({
+            const data: IDashboardOverviewReq = {
                 ...searchRef.current?.getFieldsValue(),
-                statistics_start_time: startDateToUnix(dates[0]),
+                statistics_start_time: startDateToUnixWithUTC(dates[0]),
                 statistics_end_time:
-                    dayjs().format(timeFormat) === dates[1].format(timeFormat)
-                        ? dayjs().unix()
-                        : endDateToUnix(dates[1]),
+                    getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(dates[1]),
                 ...params,
-            } as IDashboardOverviewReq)
+            };
+            return getDashboardTradeData(data)
                 .then(res => {
                     // console.log('getDashboardTradeData', res);
+                    queryRef.current = data;
                     const {
                         totalTradeAmount,
                         totalOrderNum,
@@ -257,15 +262,27 @@ const Overview: React.FC = props => {
         currentDates => {
             setDates(currentDates);
             _getDashboardTradeData({
-                statistics_start_time: startDateToUnix(currentDates[0]),
+                statistics_start_time: startDateToUnixWithUTC(currentDates[0]),
                 statistics_end_time:
-                    dayjs().format(timeFormat) === currentDates[1].format(timeFormat)
-                        ? dayjs().unix()
-                        : endDateToUnix(currentDates[1]),
+                    getUTCDate().format(timeFormat) === currentDates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(currentDates[1]),
             });
         },
         [_getDashboardTradeData],
     );
+
+    const onCancelExport = useCallback(() => {
+        setExportStatus(false);
+    }, []);
+
+    const createExcel = useCallback(values => {
+        return exportExcel({
+            module: 9,
+            query: queryRef.current,
+            ...values,
+        });
+    }, []);
 
     useEffect(() => {
         _getDashboardTradeData();
@@ -318,6 +335,12 @@ const Overview: React.FC = props => {
                             >
                                 刷新
                             </LoadingButton>
+                            <Button
+                                className={formStyles.formBtn}
+                                onClick={() => setExportStatus(true)}
+                            >
+                                导出
+                            </Button>
                         </div>
                     </JsonForm>
                 </div>
@@ -548,9 +571,15 @@ const Overview: React.FC = props => {
                         </div>
                     </div>
                 </Spin>
+                <Export
+                    columns={columns as any}
+                    visible={exportStatus}
+                    onOKey={createExcel}
+                    onCancel={onCancelExport}
+                />
             </div>
         );
-    }, [dates, loading, overviewInfo, detailList]);
+    }, [dates, loading, overviewInfo, detailList, exportStatus]);
 };
 
 export default Overview;
