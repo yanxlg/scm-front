@@ -18,8 +18,3 @@ export declare interface ITagItem {
     type?: ITagOpsType;
     page?: number;
 }
-
-export declare interface IPublishInterceptItem {
-    name: string;
-    checked: boolean;
-}

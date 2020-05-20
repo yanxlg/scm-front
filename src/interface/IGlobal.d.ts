@@ -36,3 +36,8 @@ export interface IShopItem {
 }
 
 export type ISHopList = IShopItem[];
+
+export declare interface ICheckedBtnItem {
+    name: string;
+    checked: boolean;
+}

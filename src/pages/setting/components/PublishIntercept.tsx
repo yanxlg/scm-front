@@ -2,12 +2,13 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { message, Spin } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
 import { getInterceptTagList, getTagsList, setInterceptTagList } from '@/services/goods-attr';
-import { IPublishInterceptItem, ITagItem } from '@/interface/IGoodsAttr';
+import { ITagItem } from '@/interface/IGoodsAttr';
 import { LoadingButton } from 'react-components';
+import { ICheckedBtnItem } from '@/interface/IGlobal';
 
 const PublishIntercept: React.FC = props => {
     const [loading, setLoading] = useState(true);
-    const [tagList, setTagList] = useState<IPublishInterceptItem[]>([]);
+    const [tagList, setTagList] = useState<ICheckedBtnItem[]>([]);
 
     const _getInterceptTagList = useCallback(async () => {
         try {
