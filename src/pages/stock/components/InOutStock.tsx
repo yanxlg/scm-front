@@ -591,6 +591,9 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
+                    <Button onClick={() => setVisibleProps(true)} className={formStyles.formBtn}>
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
