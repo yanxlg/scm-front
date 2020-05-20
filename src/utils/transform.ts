@@ -24,7 +24,10 @@ export function getStatusDesc(
     return '';
 }
 
-export function transOptionList(statusMap: { [key: number]: string; [key: string]: string }, isNumberKey: boolean = false) {
+export function transOptionList(
+    statusMap: { [key: number]: string; [key: string]: string },
+    isNumberKey: boolean = false,
+) {
     let statusList = [];
     for (let key in statusMap) {
         if (statusMap.hasOwnProperty(key)) {
@@ -41,4 +44,8 @@ export function formatThousands(num: string | number, str = ',') {
     const reg = /\d{1,3}(?=(\d{3})+$)/g;
     const numStr = num + '';
     return numStr ? numStr.replace(reg, '$&,') : '';
+}
+
+export function formatTwodecimal(num: number | string) {
+    return Number((Number(num || 0) * 100).toFixed(2));
 }

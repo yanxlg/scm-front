@@ -43,14 +43,15 @@ const Purchase: React.FC = props => {
         const { penddingCount, allPenddingCount, execingCount, allExecingCount } = countInfo;
         return (
             <Container>
-                <Tabs defaultActiveKey="1" type="card">
+                <Tabs defaultActiveKey="1" type="card" className="tabs-margin-none">
                     <TabPane tab="全部" key="1">
-                        <PaneAbnormalAll
-                            getExceptionCount={getExceptionCount}
-                        />
+                        <PaneAbnormalAll getExceptionCount={getExceptionCount} />
                     </TabPane>
                     <TabPane tab={`待处理（${allPenddingCount}）`} key="2">
-                        <PaneAbnormalPending penddingCount={penddingCount} getExceptionCount={getExceptionCount}/>
+                        <PaneAbnormalPending
+                            penddingCount={penddingCount}
+                            getExceptionCount={getExceptionCount}
+                        />
                     </TabPane>
                     <TabPane tab={`处理中（${allExecingCount}）`} key="3">
                         <PaneAbnormalProcessing execingCount={execingCount} />

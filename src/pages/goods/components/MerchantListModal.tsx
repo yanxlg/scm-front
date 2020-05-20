@@ -1,18 +1,24 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Checkbox, Form, Modal, Divider, Spin } from 'antd';
-import { IShopItem } from '@/interface/IChannel';
-import { queryShopList } from '@/services/channel';
+import { IShopItem } from '@/interface/IGlobal';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '@/styles/_merchant.less';
 import style from '@/styles/_index.less';
+import { queryShopList } from '@/services/global';
 
 declare interface MerchantListModalProps {
     visible: boolean;
     onOKey: (merchant_ids: string[]) => Promise<any>;
     onCancel: () => void;
+    disabledChannelList?: string[]; // vova、florynight
 }
 
-const MerchantListModal: React.FC<MerchantListModalProps> = ({ visible, onCancel, onOKey }) => {
+const MerchantListModal: React.FC<MerchantListModalProps> = ({
+    visible,
+    onCancel,
+    onOKey,
+    disabledChannelList = [],
+}) => {
     const [list, setList] = useState<IShopItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
@@ -45,6 +51,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({ visible, onCancel
         for (let merchant_platform in dataSource) {
             if (dataSource.hasOwnProperty(merchant_platform)) {
                 const _list = dataSource[merchant_platform];
+                const disabled = disabledChannelList.indexOf(merchant_platform) > -1;
                 platformArr.push(
                     <div key={merchant_platform}>
                         <Divider orientation="left">{merchant_platform}</Divider>
@@ -55,6 +62,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({ visible, onCancel
                                         key={merchant_id}
                                         value={merchant_id}
                                         className={formStyles.formCheckbox}
+                                        disabled={disabled}
                                     >
                                         {merchant_name}
                                     </Checkbox>

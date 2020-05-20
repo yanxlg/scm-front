@@ -16,6 +16,10 @@ export enum PurchaseApiPath {
     CancelReturn = '/api/v1/purchase/cancel_purchase_return',
     QueryPurchaseStatic = '/api/v1/purchase/purchase_count',
     Export = '/api/v1/download/create',
+    QueryPurchasePlainList = '/api/v1/purchase/plan_list',
     getPurchaseGoodsInfo = '/api/v1/purchase/purchase_info/:id',
+    ApplyReturn = '/api/v1/purchase/refund',
+    QueryReturnInfo = '/api/v1/purchase/refund_info',
+    AddWaybill = '/api/v1/purchase/waybill',
     setPurchaseException = '/api/v1/purchase/exception/exec',
 }

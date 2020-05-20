@@ -80,9 +80,10 @@ class SkuDialog extends React.PureComponent<{}, IState> {
             align: 'center',
             width: 120,
             render: (value: string, row: IGoodsSkuItem) => {
+                const min = row.price === void 0 ? 0 : -Number(row.price);
                 return (
                     <InputNumber
-                        min={0}
+                        min={min}
                         precision={2}
                         defaultValue={value ? Number(value) : undefined}
                         style={{ width: '100%' }}
@@ -93,7 +94,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         },
         {
             key: 'adjust_reason',
-            title: '销售价格调整',
+            title: '备注',
             dataIndex: 'adjust_reason',
             align: 'center',
             width: 180,
@@ -219,6 +220,10 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                 return message.info(`请完善${sku}修改信息`);
             }
         }
+        if (!editList || editList.length === 0) {
+            message.warn(`请修改后再保存`);
+            return;
+        }
         editSkuPrice({
             sku_list: editList,
             merchant_id: merchant_id,
@@ -238,7 +243,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         // console.log('changePrice', val, rowData);
         const { editList } = this.state;
         const i = editList.findIndex(item => item.sku === rowData.sku_name);
-        const valStr = val ? val + '' : '';
+        const valStr = val !== void 0 ? val + '' : '';
         if (i > -1) {
             this.setState({
                 editList: editList.map((item, index: number) => {

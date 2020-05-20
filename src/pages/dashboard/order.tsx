@@ -7,9 +7,10 @@ import DateRange from './components/DateRange';
 import { getOrderDashboardData, getPlatformAndStore } from '@/services/dashboard';
 import dayjs, { Dayjs } from 'dayjs';
 import { IOrderDashboardReq, IOrderDashboardRes } from '@/interface/IDashboard';
-import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
+// import { startDateToUnix, endDateToUnix } from 'react-components/es/utils/date';
 import { getAllTabCount } from '@/services/order-manage';
 import { Link } from 'umi';
+import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
@@ -56,32 +57,36 @@ const OrderAnalysis: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const [loading, setLoading] = useState(false);
     const [statisticsType, setStatisticsType] = useState('0');
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([dayjs(), dayjs()]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate(), getUTCDate()]);
     const [orderInfo, setOrderInfo] = useState<IOrderDashboardRes>({});
     const [catagoryOrderCount, setCatagoryOrderCount] = useState<ICatagoryOrderItem>({
         penddingOrderCount: 0,
         penddingPayCount: 0,
     });
 
-    const _getOrderDashboardData = useCallback(() => {
-        setLoading(true);
-        // console.log(searchRef.current?.getFieldsValue(), dates, statisticsType);
-        return getOrderDashboardData({
-            ...searchRef.current?.getFieldsValue(),
-            statistics_start_time: startDateToUnix(dates[0]),
-            statistics_end_time:
-                dayjs().format(timeFormat) === dates[1].format(timeFormat)
-                    ? dayjs().unix()
-                    : endDateToUnix(dates[1]),
-            statistics_type: statisticsType,
-        } as IOrderDashboardReq)
-            .then(res => {
-                setOrderInfo(res.data);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [statisticsType, dates]);
+    const _getOrderDashboardData = useCallback(
+        (params = {}) => {
+            setLoading(true);
+            // console.log(searchRef.current?.getFieldsValue(), dates, statisticsType);
+            return getOrderDashboardData({
+                ...searchRef.current?.getFieldsValue(),
+                statistics_start_time: startDateToUnixWithUTC(dates[0]),
+                statistics_end_time:
+                    getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(dates[1]),
+                statistics_type: statisticsType,
+                ...params,
+            } as IOrderDashboardReq)
+                .then(res => {
+                    setOrderInfo(res.data);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [statisticsType, dates],
+    );
 
     const _getAllTabCount = useCallback(() => {
         getAllTabCount(2).then(res => {
@@ -93,6 +98,31 @@ const OrderAnalysis: React.FC = props => {
             });
         });
     }, []);
+
+    const changeStatisticsType = useCallback(
+        e => {
+            const val = e.target.value;
+            setStatisticsType(val);
+            _getOrderDashboardData({
+                statistics_type: val,
+            });
+        },
+        [_getOrderDashboardData],
+    );
+
+    const handleChangeDates = useCallback(
+        currentDates => {
+            setDates(currentDates);
+            _getOrderDashboardData({
+                statistics_start_time: startDateToUnixWithUTC(currentDates[0]),
+                statistics_end_time:
+                    getUTCDate().format(timeFormat) === currentDates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(currentDates[1]),
+            });
+        },
+        [_getOrderDashboardData],
+    );
 
     useEffect(() => {
         _getAllTabCount();
@@ -133,11 +163,11 @@ const OrderAnalysis: React.FC = props => {
                 </div>
                 <div className={styles.chartSection}>
                     <div className={styles.operationBox}>
-                        <DateRange dates={dates} setDates={setDates} />
+                        <DateRange dates={dates} setDates={handleChangeDates} />
                         <Radio.Group
                             value={statisticsType}
-                            onChange={e => setStatisticsType(e.target.value)}
-                            buttonStyle="solid"
+                            onChange={changeStatisticsType}
+                            // buttonStyle="solid"
                         >
                             <Radio.Button value="0">订单量</Radio.Button>
                             <Radio.Button value="1">GMV($)</Radio.Button>
@@ -177,7 +207,15 @@ const OrderAnalysis: React.FC = props => {
                 </div>
             </div>
         );
-    }, [loading, statisticsType, orderInfo, dates, statisticsType, catagoryOrderCount]);
+    }, [
+        loading,
+        statisticsType,
+        orderInfo,
+        dates,
+        statisticsType,
+        catagoryOrderCount,
+        handleChangeDates,
+    ]);
 };
 
 export default OrderAnalysis;

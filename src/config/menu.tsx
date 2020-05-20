@@ -6,6 +6,7 @@ import '@/styles/menu.less';
 export default [
     {
         path: '/',
+        hideInMenu: true,
         name: '首页',
         icon: <DashboardOutlined className="menu-icon" />,
     },
@@ -110,6 +111,10 @@ export default [
         name: '基本设置',
         icon: <Icons type="scm-setting" className="menu-icon" />,
         children: [
+            {
+                path: '/setting/store',
+                name: '店铺设置',
+            },
             {
                 path: '/setting/account',
                 name: '账户管理',

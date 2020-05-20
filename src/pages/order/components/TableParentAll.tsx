@@ -1,14 +1,15 @@
 import React from 'react';
+import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 import { FitTable } from 'react-components';
-
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IParentOrderItem, IGoodsDetail } from './PaneAll';
-import { getOrderGoodsDetail } from '@/services/order-manage';
+import { IParentOrderItem, IGoodsDetail, IChildOrderItem } from './PaneAll';
+import { getOrderGoodsDetail, IFilterParams } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
 import Export from '@/components/Export';
+import { PaginationConfig } from 'antd/es/pagination';
 
 declare interface IProps {
     loading: boolean;
@@ -17,6 +18,12 @@ declare interface IProps {
     visible: boolean;
     onCancel: () => void;
     onOKey: (values: any) => Promise<any>;
+    page: number;
+    pageSize: number;
+    total: number;
+    showParentStatus: boolean;
+    changeParentOrder(checked: boolean): void;
+    onSearch(params?: IFilterParams): Promise<any>;
 }
 
 declare interface IState {
@@ -78,7 +85,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'productId',
-            title: 'Version ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
@@ -193,6 +200,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             render: this.mergeCell,
             defaultHide: true,
         },
+        // {
+        //     key: 'productShop',
+        //     title: '销售店铺名称',
+        //     dataIndex: 'productShop',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        //     defaultHide: true,
+        // },
         {
             key: 'currency',
             title: '货币类型',
@@ -265,25 +281,50 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         });
     };
 
+    toolBarRender = () => {
+        const { changeParentOrder, showParentStatus } = this.props;
+        return [
+            <Checkbox
+                onChange={e => changeParentOrder(e.target.checked)}
+                checked={showParentStatus}
+                key="0"
+            >
+                仅展示父订单ID
+            </Checkbox>,
+        ];
+    };
+
+    onChange = ({ current, pageSize }: PaginationConfig) => {
+        this.props.onSearch({
+            page: current,
+            page_count: pageSize,
+        });
+    };
+
     render() {
-        const { loading, orderList, visible, onCancel, onOKey } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
-        // const columns = this.createColumns();
         return (
             <>
                 <FitTable
-                    bordered={true}
-                    // key={columns.length}
+                    bordered
                     rowKey="orderGoodsId"
-                    className="order-table"
+                    // className="order-table"
                     loading={loading}
                     columns={this.allColumns}
-                    // rowSelection={rowSelection}
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
-                    pagination={false}
+                    pagination={{
+                        current: page,
+                        pageSize: pageSize,
+                        total: total,
+                        showSizeChanger: true,
+                        position: ['topRight', 'bottomRight'],
+                    }}
                     columnsSettingRender={true}
+                    toolBarRender={this.toolBarRender}
+                    onChange={this.onChange}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}

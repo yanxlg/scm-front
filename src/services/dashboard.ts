@@ -6,7 +6,7 @@ import { singlePromiseWrap } from '@/utils/utils';
 // IOrderDashboardReq
 export function getOrderDashboardData(data: IOrderDashboardReq) {
     return request.post(DashboardApiPath.getOrderDashboardData, {
-        data
+        data,
     });
 }
 
@@ -20,14 +20,14 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
             !nameList && (obj[merchant_platform] = []);
             obj[merchant_platform].push({
                 name: merchant_name,
-                value: merchant_name
+                value: merchant_name,
             });
         });
         Object.keys(obj).forEach(platform => {
             const item: IPlatformItem = {
                 name: platform,
                 value: platform,
-                children: obj[platform]
+                children: obj[platform],
             };
             list.push(item);
         });
@@ -37,7 +37,6 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
 
 export function getDashboardTradeData(data: IDashboardOverviewReq) {
     return request.post(DashboardApiPath.getDashboardTradeData, {
-        data
+        data,
     });
 }
-

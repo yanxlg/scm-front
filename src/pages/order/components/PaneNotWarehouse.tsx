@@ -2,13 +2,14 @@ import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react'
 import { Button, notification } from 'antd';
 import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList } from '@/enums/OrderEnum';
+import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
 import { INotWarehouseSearch, INotWarehouseOrderItem } from '@/interface/IOrder';
 import {
     getPurchasedNotWarehouseList,
     postExportPurchasedNotWarehouse,
     delChannelOrders,
     queryChannelSource,
+    getPlatformAndStore,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -68,14 +69,8 @@ const formFields: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
     },
     {
         type: 'select',
@@ -102,7 +97,7 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: 100,
+    channel_source: '',
     order_goods_status: 100,
     purchase_order_status: 100,
 };
@@ -281,10 +276,17 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
                         刷新
                     </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => setVisibleProps(true)}
+                    >
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const columns = useMemo<TableProps<INotWarehouseOrderItem>['columns']>(() => {
         return [
@@ -445,13 +447,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消渠道订单
             </LoadingButton>,
-            <Button
-                key="export"
-                className={formStyles.formBtn}
-                onClick={() => setVisibleProps(true)}
-            >
-                导出至EXCEL
-            </Button>,
         ];
     }, [selectedRowKeys, _delChannelOrders]);
 
@@ -466,7 +461,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 <FitTable
                     bordered={true}
                     rowKey="orderGoodsId"
-                    className="order-table"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     rowSelection={{

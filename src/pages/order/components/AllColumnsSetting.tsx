@@ -8,7 +8,7 @@ const baseGroupList = [
     { key: 'orderGoodsShippingStatusShow', name: '配送状态' },
     { key: 'orderId', name: '父订单ID' },
     { key: 'orderGoodsId', name: '子订单ID' },
-    { key: 'productId', name: 'Version ID' },
+    { key: 'productId', name: 'Product ID' },
     { key: 'skuId', name: '中台SKU ID' },
     // { key: '', name: '采购渠道' },
     // { key: '', name: '采购渠道Goods ID' },
@@ -28,11 +28,12 @@ const baseGroupList = [
     // { key: 'cancelType', name: '中台订单取消原因' }, // 带补充
     { key: '_logisticsTrack', name: '物流轨迹' },
     { key: 'cancelType', name: '子订单取消类型' },
+    { key: 'orderAddress', name: '用户地址信息' },
 ];
 
 const saleGroupList = [
     { key: 'channelSource', name: '销售渠道' },
-    // { key: '', name: '销售店铺名称' },
+    { key: 'productShop', name: '销售店铺名称' },
     // { key: '', name: '二级分类' },
     // { key: '', name: '销售渠道Goods ID' },
     { key: 'confirmTime', name: '销售订单确认时间' },
@@ -73,7 +74,7 @@ interface IProps {
 }
 
 const AllColumnsSetting: React.FC<IProps> = ({ value, onChange }) => {
-    console.log('AllColumnsSetting', value);
+    // console.log('AllColumnsSetting', value);
     const [baseList, setBaseList] = useState(
         value.filter(key => baseAllKeyList.indexOf(key as string) > -1),
     );

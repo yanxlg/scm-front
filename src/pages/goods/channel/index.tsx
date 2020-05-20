@@ -11,7 +11,6 @@ import {
     queryChannelGoodsList,
     updateChannelShelveState,
     queryChannelCategory,
-    queryShopList,
     exportChannelProductList,
 } from '@/services/channel';
 import {
@@ -20,6 +19,7 @@ import {
     ProductStatusList,
     checkLowerShelf,
     checkUpperShelf,
+    ProductStatusResponseMap,
 } from '@/config/dictionaries/Product';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
@@ -40,6 +40,7 @@ import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
+import { queryShopList } from '@/services/global';
 
 const salesVolumeList = [
     {
@@ -522,10 +523,10 @@ const ChannelList: React.FC = props => {
                 dataIndex: 'product_status',
                 align: 'center',
                 width: 150,
-                render: (status: ProductStatusCode, record) => {
+                render: (status: ProductStatusCode = 0, record) => {
                     return (
                         <div>
-                            {ProductStatusMap[status]}
+                            {ProductStatusResponseMap[status]}
                             <Button type="link" onClick={() => showLog(record)}>
                                 上下架日志
                             </Button>
@@ -605,9 +606,17 @@ const ChannelList: React.FC = props => {
                 <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                     刷新
                 </LoadingButton>
+                <Button
+                    disabled={total <= 0}
+                    // type="primary"
+                    className={formStyles.formBtn}
+                    onClick={showExcelDialog}
+                >
+                    导出
+                </Button>
             </div>
         );
-    }, []);
+    }, [total]);
 
     const search = useMemo(() => {
         return (
@@ -620,7 +629,7 @@ const ChannelList: React.FC = props => {
                 {children}
             </JsonForm>
         );
-    }, []);
+    }, [children]);
 
     const toolBarRender = useCallback(() => {
         const size = selectedRowKeys.length;
@@ -643,20 +652,12 @@ const ChannelList: React.FC = props => {
             >
                 一键下架
             </LoadingButton>,
-            <Button
-                key="export"
-                disabled={total <= 0}
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={showExcelDialog}
-            >
-                导出
-            </Button>,
         ];
     }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
             <FitTable<IChannelProductListItem>
+                bordered
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}

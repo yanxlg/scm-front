@@ -160,6 +160,34 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
+                title: '操作',
+                dataIndex: '_operate',
+                align: 'center',
+                width: 150,
+                render: (_, row: IPurchaseAbnormalItem) => {
+                    const { waybillExceptionType } = row;
+                    return (
+                        <>
+                            <div>
+                                <a onClick={() => showDiscardModal(row)}>废弃</a>
+                            </div>
+                            {hasRelatedPurchase(waybillExceptionType) && (
+                                <div>
+                                    <a onClick={() => showRelatedPurchase()}>关联采购单</a>
+                                </div>
+                            )}
+                            {hasExceptionHandle(waybillExceptionType) && (
+                                <div>
+                                    <a type="link" onClick={() => showAbnormal(row)}>
+                                        异常处理
+                                    </a>
+                                </div>
+                            )}
+                        </>
+                    );
+                },
+            },
+            {
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
@@ -188,12 +216,12 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     return <AutoEnLargeImg src={value} className={styles.imgCell} />;
                 },
             },
-            {
-                title: '异常数量',
-                dataIndex: 'quantity',
-                align: 'center',
-                width: 150,
-            },
+            // {
+            //     title: '异常数量',
+            //     dataIndex: 'quantity',
+            //     align: 'center',
+            //     width: 150,
+            // },
             {
                 title: '异常描述',
                 dataIndex: 'waybillExceptionDescription',
@@ -212,34 +240,6 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 align: 'center',
                 width: 150,
             },
-            {
-                title: '操作',
-                dataIndex: '_operate',
-                align: 'center',
-                width: 150,
-                render: (_, row: IPurchaseAbnormalItem) => {
-                    const { waybillExceptionType } = row;
-                    return (
-                        <>
-                            <div>
-                                <a onClick={() => showDiscardModal(row)}>废弃</a>
-                            </div>
-                            {hasRelatedPurchase(waybillExceptionType) && (
-                                <div>
-                                    <a onClick={() => showRelatedPurchase()}>关联采购单</a>
-                                </div>
-                            )}
-                            {hasExceptionHandle(waybillExceptionType) && (
-                                <div>
-                                    <a type="link" onClick={() => showAbnormal(row)}>
-                                        异常处理
-                                    </a>
-                                </div>
-                            )}
-                        </>
-                    );
-                },
-            },
         ];
     }, []);
 
@@ -247,10 +247,13 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
         return [
             {
                 type: 'checkbox',
-                name: 'time_out',
+                name: 'exec_more_time',
                 label: `24小时未处理（${penddingCount}）`,
                 formItemClassName: '',
                 formatter: (val: boolean) => (val ? 24 : undefined),
+                onChange: () => {
+                    onSearch();
+                },
             },
         ];
     }, [penddingCount]);
@@ -268,6 +271,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
     const toolBarRender = useCallback(() => {
         return [
             <JsonForm
+                key="1"
                 containerClassName=""
                 enableCollapse={false}
                 fieldList={fieldCheckboxList}
@@ -292,7 +296,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
         return (
             <>
                 <JsonForm
-                    // labelClassName="order-error-label"
+                    labelClassName={styles.label}
                     fieldList={fieldList}
                     ref={formRef1}
                     initialValues={{
@@ -310,9 +314,9 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     </Button>
                 </JsonForm>
                 <FitTable
-                    bordered={true}
-                    rowKey="purchase_plan_id"
-                    className="order-table"
+                    bordered
+                    rowKey="waybillExceptionSn"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}

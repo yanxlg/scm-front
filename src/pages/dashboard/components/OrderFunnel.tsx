@@ -6,6 +6,8 @@ import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/funnel';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
+import { formatTwodecimal } from '@/utils/transform';
+import { getUTCDate } from '@/utils/date';
 
 interface IProps {
     loading: boolean;
@@ -14,13 +16,14 @@ interface IProps {
     orderInfo: IOrderDashboardRes;
 }
 
-const labelFormatter = (percentage: string, name: string) => `${name} ${percentage}%`;
+const labelFormatter = (percentage: string, name: string) =>
+    `${name} ${formatTwodecimal(percentage)}%`;
 
 const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisticsType }) => {
     const chartRef = useRef<ECharts | null>(null);
 
     const getUpdateTime = useCallback(() => {
-        const threeDayStart = dayjs()
+        const threeDayStart = getUTCDate()
             .add(-3, 'day')
             .hour(0)
             .minute(0)
@@ -28,15 +31,16 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
             .unix();
         // console.log(111111, startDate.unix(), threeDayStart);
         if (startDate.unix() >= threeDayStart) {
-            return `${dayjs().format('YYYY-MM-DD hh')}:00`;
+            return `${getUTCDate().format('YYYY-MM-DD hh')}:00`;
         } else {
-            return dayjs().format('YYYY-MM-DD') + ' 00:00';
+            return getUTCDate().format('YYYY-MM-DD') + ' 00:00';
         }
     }, [startDate]);
 
     const renderChart = useCallback(
         orderInfo => {
             if (Object.keys(orderInfo).length === 0) {
+                chartRef.current?.clear();
                 return;
             }
             const suffix = statisticsType === '0' ? '单' : '';
@@ -93,9 +97,18 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
             // 绘制图表
             chartRef.current?.setOption({
                 title: {
-                    text: `订单流转漏斗模型(更新时间: ${getUpdateTime()})`,
+                    text: '订单流转漏斗模型',
+                    subtext: `(更新时间: ${getUpdateTime()})`,
                     left: 'center',
-                    top: 'bottom',
+                    bottom: '0%',
+                    textStyle: {
+                        fontSize: 16,
+                        color: '#131415',
+                    },
+                    subtextStyle: {
+                        fontSize: 13,
+                        color: '#575858',
+                    },
                 },
                 tooltip: {
                     trigger: 'item',
@@ -118,7 +131,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         width: leftWidth,
                         height: '80%',
                         left: '15%',
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'right',
                         label: {
                             position: 'leftTop',
@@ -137,6 +150,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         tooltip: {
                             show: false,
                         },
+                        sort: 'none',
                         data: [
                             {
                                 name: '需采购',
@@ -199,7 +213,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         width: leftWidth,
                         height: '80%',
                         left: '15%',
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'right',
                         label: {
                             // show: false,
@@ -212,6 +226,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         itemStyle: {
                             color: '#63DAAB',
                         },
+                        sort: 'none',
                         data: [
                             {
                                 name: '需采购',
@@ -278,9 +293,10 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         height: '80%',
                         // left: '50%',
                         left: rightOffset,
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
+                        sort: 'none',
                         label: {
                             position: 'rightTop',
                             color: '#333',
@@ -382,9 +398,10 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         height: '80%',
                         // left: '50%',
                         left: rightOffset,
-                        top: '10%',
+                        top: '2%',
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
+                        sort: 'none',
                         label: {
                             position: 'insideLeft',
                             formatter: (item: any) => {
@@ -417,12 +434,31 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                             purchaseOrderPercentage,
                                             reserveStockPercentage,
                                         } = data;
+                                        // <div>需采购和预定积压库存的订单占比: ${formatTwodecimal(
+                                        //     purchaseAndStockPercentage,
+                                        // )}%</div>
                                         return `
-                                            <div style="margin-bottom: 10px;">已生成的销售订单</div>
-                                            <div>仅需采购的订单占比: ${purchaseOrderPercentage}%</div>
-                                            <div>需采购和预定积压库存的订单占比: ${purchaseAndStockPercentage}%</div>
-                                            <div>仅预定积压库存的订单占比: ${reserveStockPercentage}%</div>
-                                            <div>已取消订单: ${cancelOrderPercentage}%</div>
+                                            <div style="padding: 8px 20px 8px 10px;">
+                                                <div style="margin-bottom: 10px;">销售订单已确认</div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
+                                                    已销售-需拍单: ${formatTwodecimal(
+                                                        purchaseOrderPercentage,
+                                                    )}%
+                                                </div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
+                                                    已销售-已预定库存: ${formatTwodecimal(
+                                                        reserveStockPercentage,
+                                                    )}%
+                                                </div>
+                                                <div>
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: transparent; vertical-align: 2px;"></span>
+                                                    已取消订单: ${formatTwodecimal(
+                                                        cancelOrderPercentage,
+                                                    )}%
+                                                </div>
+                                            </div>
                                         `;
                                     },
                                 },
@@ -475,9 +511,21 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                             stockOutStorageOrderPercentage,
                                         } = data;
                                         return `
-                                            <div style="margin-bottom: 10px">订单已出库</div>
-                                            <div>需采购订单占比: ${purchaseOutStorageOrderPercentage}%</div>
-                                            <div>仅预定积压库存的订单占比: ${stockOutStorageOrderPercentage}%</div>
+                                            <div style="padding: 8px 20px 8px 10px;">
+                                                <div style="margin-bottom: 10px">订单已出库</div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
+                                                    需采购订单占比: ${formatTwodecimal(
+                                                        purchaseOutStorageOrderPercentage,
+                                                    )}%</div>
+                                                <div style="margin-bottom: 4px;">
+                                                    <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
+                                                    仅预定积压库存的订单占比: ${formatTwodecimal(
+                                                        stockOutStorageOrderPercentage,
+                                                    )}%
+                                                </div>
+                                            </div>
+                                            
                                         `;
                                     },
                                 },

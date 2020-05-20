@@ -1,9 +1,10 @@
 import React from 'react';
+import { Redirect } from 'react-router';
 import '@/styles/index.less';
 
 class Index extends React.PureComponent {
     render() {
-        return 'Home';
+        return <Redirect to="/dashboard/overview"></Redirect>;
     }
 }
 

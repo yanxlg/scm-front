@@ -165,66 +165,6 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
             {
-                title: '异常单ID',
-                dataIndex: 'waybillExceptionSn',
-                align: 'center',
-                width: 150,
-            },
-            {
-                title: '异常类型',
-                dataIndex: 'waybillExceptionType',
-                align: 'center',
-                width: 150,
-                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
-            },
-            {
-                title: '异常单状态',
-                dataIndex: 'waybillExceptionStatus',
-                align: 'center',
-                width: 150,
-                render: (val: IWaybillExceptionStatusKey) => waybillExceptionStatusMap[val],
-            },
-            {
-                title: '异常图片',
-                dataIndex: 'goodsImageUrl',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IPurchaseAbnormalItem) => {
-                    return <AutoEnLargeImg src={value} className={styles.imgCell} />;
-                },
-            },
-            {
-                title: '异常数量',
-                dataIndex: 'quantity',
-                align: 'center',
-                width: 150,
-            },
-            {
-                title: '异常描述',
-                dataIndex: 'waybillExceptionDescription',
-                align: 'center',
-                width: 150,
-            },
-            {
-                title: '采购单ID',
-                dataIndex: 'purchaseOrderGoodsId',
-                align: 'center',
-                width: 150,
-            },
-            {
-                title: '运单号',
-                dataIndex: 'purchaseWaybillNo',
-                align: 'center',
-                width: 150,
-            },
-            {
-                title: '完结时间',
-                dataIndex: 'finishedTime',
-                align: 'center',
-                width: 150,
-                render: val => utcToLocal(val),
-            },
-            {
                 title: '操作',
                 dataIndex: '_operate',
                 align: 'center',
@@ -253,6 +193,66 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                         <a onClick={() => showDetail(row)}>查看详情</a>
                     );
                 },
+            },
+            {
+                title: '异常单ID',
+                dataIndex: 'waybillExceptionSn',
+                align: 'center',
+                width: 150,
+            },
+            {
+                title: '异常类型',
+                dataIndex: 'waybillExceptionType',
+                align: 'center',
+                width: 150,
+                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
+            },
+            {
+                title: '异常单状态',
+                dataIndex: 'waybillExceptionStatus',
+                align: 'center',
+                width: 150,
+                render: (val: IWaybillExceptionStatusKey) => waybillExceptionStatusMap[val],
+            },
+            {
+                title: '异常图片',
+                dataIndex: 'goodsImageUrl',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IPurchaseAbnormalItem) => {
+                    return <AutoEnLargeImg src={value} className={styles.imgCell} />;
+                },
+            },
+            // {
+            //     title: '异常数量',
+            //     dataIndex: 'quantity',
+            //     align: 'center',
+            //     width: 150,
+            // },
+            {
+                title: '异常描述',
+                dataIndex: 'waybillExceptionDescription',
+                align: 'center',
+                width: 150,
+            },
+            {
+                title: '采购单ID',
+                dataIndex: 'purchaseOrderGoodsId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                title: '运单号',
+                dataIndex: 'purchaseWaybillNo',
+                align: 'center',
+                width: 150,
+            },
+            {
+                title: '完结时间',
+                dataIndex: 'finishedTime',
+                align: 'center',
+                width: 150,
+                render: val => utcToLocal(val),
             },
         ];
     }, []);
@@ -283,7 +283,7 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
         return (
             <>
                 <JsonForm
-                    // labelClassName="order-error-label"
+                    labelClassName={styles.label}
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
@@ -301,9 +301,9 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                     </Button>
                 </JsonForm>
                 <FitTable
-                    bordered={true}
-                    rowKey="purchase_plan_id"
-                    className="order-table"
+                    bordered
+                    rowKey="waybillExceptionSn"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}

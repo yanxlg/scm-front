@@ -9,9 +9,15 @@ import {
     postExportPendingOrder,
     postOrdersPlace,
     queryChannelSource,
+    getPlatformAndStore,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { defaultOptionItem, channelOptionList, purchaseOrderOptionList } from '@/enums/OrderEnum';
+import {
+    defaultOptionItem,
+    channelOptionList,
+    purchaseOrderOptionList,
+    defaultOptionItem1,
+} from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -53,14 +59,8 @@ const formFields: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem,
-        optionList: () =>
-            queryChannelSource().then(({ data = {} }) => {
-                return Object.keys(data).map(key => ({
-                    name: data[key],
-                    value: Number(key),
-                }));
-            }),
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
     },
     {
         type: 'dateRanger',
@@ -73,7 +73,7 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: 100,
+    channel_source: '',
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
@@ -312,10 +312,17 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
                         刷新
                     </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => setVisibleProps(true)}
+                    >
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const columns = useMemo<TableProps<IPendingOrderItem>['columns']>(() => {
         return [
@@ -461,6 +468,11 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 dataIndex: 'purchaseAmount',
                 align: 'center',
                 width: 120,
+                render: (value: string, row: IPendingOrderItem) => {
+                    const { purchaseNumber } = row;
+                    const price = Number(value) / Number(purchaseNumber);
+                    return isNaN(price) ? '' : price.toFixed(2);
+                },
             },
         ];
     }, []);
@@ -498,13 +510,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             >
                 取消渠道订单
             </LoadingButton>,
-            <Button
-                key="export"
-                className={formStyles.formBtn}
-                onClick={() => setVisibleProps(true)}
-            >
-                导出至EXCEL
-            </Button>,
         ];
     }, [selectedOrderGoodsIdList, _postOrdersPlace, _delChannelOrders, _postExportPendingOrder]);
 
@@ -519,7 +524,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 <FitTable
                     bordered={true}
                     rowKey="purchasePlanId"
-                    className="order-table"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
                     // rowSelection={rowSelection}

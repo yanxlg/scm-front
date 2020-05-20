@@ -11,7 +11,7 @@ export enum LocalApiPath {
     getGoodsVersion = '/api/v1/goods/version_list',
     postGoodsVersionExport = '/api/v1/goods/version_export',
     postGoodsIgnoreVersion = '/api/v1/goods/ignore_version',
-    getAllGoodsOnsale = '/api/v1/goods/batch_onsale_goods',
+    postAllGoodsOnsale = '/api/v1/goods/batch_onsale_goods',
     postGoodsMerge = '/api/v1/goods/merge',
     putGoodsMergeMain = '/api/v1/goods/merge/main',
     delGoodsMergeDelete = '/api/v1/goods/merge/delete',
@@ -22,4 +22,7 @@ export enum LocalApiPath {
     setGoodsLock = '/api/v1/goods/:commodity_id/lock',
     getGoodsCurrentList = '/api/v1/goods/mix/:commodity_id/list',
     setGoodsMix = '/api/v1/goods/mix',
+    exportAllSkuImages = '/api/v1/download/create',
+    uploadGoodsPic = '/api/v1/goods/upload/product_pic_zip/:product_id',
+    getGoodsDetail = '/api/v1/goods/get/:product_id',
 }

@@ -9,7 +9,8 @@ import {
 } from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ICountryItem } from '@/interface/ISetting';
-import { singlePromiseWrap } from '@/utils/utils';
+import { singlePromiseWrap, transPaginationResponse } from '@/utils/utils';
+import { api } from 'react-components';
 
 export declare interface IFilterParams {
     page?: number;
@@ -77,6 +78,8 @@ export declare interface IGoodsEditData {
     description: string;
     cat_id: number;
     imgs?: IGoodsEditImgItem[];
+    has_zip?: 1 | 2;
+    zip_id?: number;
 }
 
 export declare interface ISkuParams {
@@ -88,11 +91,23 @@ export declare interface ISkuParams {
 
 // 兼容SearchForm数据结构 { name: '', value: '' }
 
-export async function getGoodsList(params: IFilterParams) {
-    return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
-        // requestType: 'form',
-        data: params,
-    });
+export function getGoodsList(params: IFilterParams) {
+    // return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
+    //     // requestType: 'form',
+    //     data: params,
+    // });
+
+    return (
+        api
+            .post(LocalApiPath.getGoodsList, {
+                data: params,
+            })
+            // .then(res => {
+            //     console.log('getGoodsList', res);
+            //     return res
+            // })
+            .then(transPaginationResponse)
+    );
 }
 
 export async function postGoodsExports(data: IFilterParams) {
@@ -123,8 +138,8 @@ export async function postGoodsOnsale(data: IOnsaleData) {
 }
 
 // 查询商品一键上架
-export async function getAllGoodsOnsale(data: IFilterParams) {
-    return request.post(LocalApiPath.getAllGoodsOnsale, {
+export async function postAllGoodsOnsale(data: IFilterParams) {
+    return request.post(LocalApiPath.postAllGoodsOnsale, {
         data,
     });
 }
@@ -297,4 +312,25 @@ export function setGoodsMix(data: {
     return request.post(LocalApiPath.setGoodsMix, {
         data,
     });
+}
+
+export function exportAllSkuImages(product_id: string) {
+    return request.post(LocalApiPath.exportAllSkuImages, {
+        data: {
+            module: 8,
+            filename: product_id,
+            query: { product_id },
+        },
+    });
+}
+
+export async function uploadGoodsPic(data: any, product_id: string) {
+    return request.post(LocalApiPath.uploadGoodsPic.replace(':product_id', product_id), {
+        data,
+        skipResponseInterceptors: true,
+    });
+}
+
+export function getGoodsDetail(product_id: string) {
+    return request.get(LocalApiPath.getGoodsDetail.replace(':product_id', product_id));
 }

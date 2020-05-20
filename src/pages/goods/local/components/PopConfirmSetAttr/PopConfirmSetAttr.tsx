@@ -9,10 +9,11 @@ declare interface IProps {
     commodityId: string;
     productId: string;
     tags: string[];
-    setProductTags(productId: string, tags: string[]): void;
+    // setProductTags(productId: string, tags: string[]): void;
+    onReload(): Promise<void>;
 }
 
-const SetAttr: React.FC<IProps> = ({ tags, commodityId, productId, setProductTags }) => {
+const SetAttr: React.FC<IProps> = ({ tags, commodityId, productId, onReload }) => {
     const [selectedTags, setSelectedTags] = useState<string[]>(tags);
     const [loading, setLoading] = useState(false);
     const [tagList, setTagList] = useState<ITagItem[]>([]);
@@ -36,10 +37,10 @@ const SetAttr: React.FC<IProps> = ({ tags, commodityId, productId, setProductTag
             commodity_id: commodityId,
             tag_name: selectedTags,
         }).then(() => {
-            setProductTags(productId, selectedTags);
+            onReload();
             message.success('设置成功！');
         });
-    }, [selectedTags, commodityId, productId, setProductTags]);
+    }, [selectedTags, commodityId, onReload]);
 
     const attrTag = useMemo(() => {
         return (

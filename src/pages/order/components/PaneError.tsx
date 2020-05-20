@@ -1,7 +1,12 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, FitTable, LoadingButton } from 'react-components';
-import { getErrorOrderList, postExportErrOrder, queryChannelSource } from '@/services/order-manage';
+import {
+    getErrorOrderList,
+    postExportErrOrder,
+    queryChannelSource,
+    getPlatformAndStore,
+} from '@/services/order-manage';
 import {
     defaultOptionItem,
     channelOptionList,
@@ -11,6 +16,7 @@ import {
     failureReasonList,
     failureReasonMap,
     failureReasonCode,
+    defaultOptionItem1,
 } from '@/enums/OrderEnum';
 import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -75,14 +81,8 @@ const PaneErrTab = () => {
                 label: '销售渠道',
                 className: 'order-input',
                 // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem,
-                optionList: () =>
-                    queryChannelSource().then(({ data = {} }) => {
-                        return Object.keys(data).map(key => ({
-                            name: data[key],
-                            value: Number(key),
-                        }));
-                    }),
+                syncDefaultOption: defaultOptionItem1,
+                optionList: () => getPlatformAndStore(),
             },
             {
                 type: 'select',
@@ -398,15 +398,22 @@ const PaneErrTab = () => {
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
-                        channel_source: 100,
+                        channel_source: '',
                         abnormal_type: 1,
                     }}
                 >
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportModal(true)}>
-                        导出数据
+                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                        刷新
+                    </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => setExportModal(true)}
+                    >
+                        导出
                     </Button>
                 </JsonForm>
                 <JsonForm
@@ -559,7 +566,7 @@ const PaneErrTab = () => {
                 />
             </>
         );
-    }, []);
+    }, [loading]);
 
     const dataSet = useMemo(() => {
         if (dataSource.length === 0) {
@@ -660,6 +667,7 @@ const PaneErrTab = () => {
     const table = useMemo(() => {
         return (
             <FitTable
+                bordered
                 rowKey={record => {
                     return record.purchasePlanId || record.orderGoodsId;
                 }}

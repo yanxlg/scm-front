@@ -1,19 +1,20 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Modal } from 'antd';
+import { message, Modal } from 'antd';
 import { JsonForm } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import styles from '@/pages/purchase/_list.less';
+import { setCorrelateWaybill } from '@/services/purchase';
 
 const fieldList: FormField[] = [
     {
         type: 'input',
-        name: 'number',
-        label: <span>运&emsp;单&emsp;号</span>,
+        name: 'purchase_waybill_no',
+        label: '运单号',
         className: styles.connectInput,
     },
     {
         type: 'number',
-        name: 'count',
+        name: 'goods_number',
         label: '应入库数量',
         className: styles.connectInput,
     },
@@ -29,8 +30,22 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
     const formRef = useRef<JsonFormRef>(null);
 
     const onOKey = useCallback(() => {
-        setSubmitting(true);
-    }, []);
+        formRef.current!.validateFields().then(values => {
+            setSubmitting(true);
+            setCorrelateWaybill(({
+                purchase_order_goods_id: visible as string,
+                request_type: 'PURCHASE_ORDER',
+                ...values,
+            } as unknown) as any)
+                .then(() => {
+                    message.success('关联成功');
+                    onCancel();
+                })
+                .finally(() => {
+                    setSubmitting(false);
+                });
+        });
+    }, [visible]);
 
     return useMemo(() => {
         return (
@@ -44,6 +59,8 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
                 destroyOnClose={true}
             >
                 <JsonForm
+                    labelClassName={styles.connectLabel}
+                    containerClassName={''}
                     fieldList={fieldList}
                     layout="horizontal"
                     ref={formRef}
