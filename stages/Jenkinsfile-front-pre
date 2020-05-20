@@ -45,9 +45,9 @@ pipeline {
                                branches: [[name: "$refspec"]],
                                userRemoteConfigs: [[url: 'ssh://git@git.gitvv.com:38022/trigram/scm-front.git', credentialsId: 'b86f9919-deee-4bdf-94fc-c81fa69186c2',]]])
                     if (NpmInstall == "true" || !fileExists("./node_modules")) {
-                        sh """docker run -u 0 --rm -v \$(pwd):/opt/app-root/scm-front  -v /home/ec2-user/.awstools/keys/gitpuller_rsa_gitvv:/root/.awstools/keys/gitpuller_rsa_gitvv --name scm-front-buildx node:10 bash -c 'mkdir -p /root/.ssh;chmod 700 /root/.ssh;cd /root/.ssh;(echo "StrictHostKeyChecking no";echo "CheckHostIP no"; echo "UserKnownHostsFile /dev/null";echo "Host git.gitvv.com";echo "Hostname git.gitvv.com";echo "User git";echo "IdentityFile /root/.awstools/keys/gitpuller_rsa_gitvv";) > config; useradd -u 500 git;cd /opt/app-root/scm-front;rm -rf node_modules; rm -f package-lock.json;npm install'"""
+                        sh """docker run -u 0 --rm -v \$(pwd):/opt/app-root/scm-front  -v /home/ec2-user/.awstools/keys/gitpuller_rsa_gitvv:/root/.awstools/keys/gitpuller_rsa_gitvv --name scm-front-pre-buildx node:10 bash -c 'mkdir -p /root/.ssh;chmod 700 /root/.ssh;cd /root/.ssh;(echo "StrictHostKeyChecking no";echo "CheckHostIP no"; echo "UserKnownHostsFile /dev/null";echo "Host git.gitvv.com";echo "Hostname git.gitvv.com";echo "User git";echo "IdentityFile /root/.awstools/keys/gitpuller_rsa_gitvv";) > config; useradd -u 500 git;cd /opt/app-root/scm-front;rm -rf node_modules; rm -f package-lock.json;npm install'"""
                     }
-                    sh "docker run --rm -v \$(pwd):/opt/app-root/scm-front --name scm-front-build node:10 bash -c 'cd /opt/app-root/scm-front;npm run build'; \
+                    sh "docker run --rm -v \$(pwd):/opt/app-root/scm-front --name scm-front-pre-build node:10 bash -c 'cd /opt/app-root/scm-front;npm run build'; \
                         sudo chown -R ec2-user.ec2-user \$(pwd); \
                         git rev-parse --short HEAD > dist/version; \
                     "

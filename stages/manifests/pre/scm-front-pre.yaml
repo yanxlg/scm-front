@@ -22,20 +22,20 @@ data:
           '"remote_user":"$remote_user",'
           '"time_local":"$time_local",'
           '"request":"$request",'
-          '"status":"$status",'
-          '"body_bytes_sent":"$body_bytes_sent",'
+          '"status":$status,'
+          '"body_bytes_sent":$body_bytes_sent,'
           '"http_referer":"$http_referer",'
           '"http_user_agent":"$http_user_agent",'
           '"http_x_forwarded_for":"$http_x_forwarded_for",'
           '"host":"$host",'
           '"upstream_cache_status":"$upstream_cache_status",'
-          '"request_time":"$request_time"}';
+          '"request_time":$request_time}';
 
 
         access_log  /var/log/nginx/access.log  apache_format;
         sendfile        on;
         #tcp_nopush     on;
-        keepalive_timeout  65;
+        keepalive_timeout  120;
         gzip on;
         gzip_http_version 1.0;
         gzip_proxied any;
@@ -54,11 +54,18 @@ data:
         set $prjroot /usr/share/nginx/html;
         root $prjroot/;
         index index.html;
-        location ~ /version {
+        location /version {
             root $prjroot/;
             add_header Content-Type text/plain;
         }
-       location / {
+
+        location ~.*\.(js|css|png|jpg)$
+        {
+            expires 30d;
+            try_files $uri $uri/ /index.html;
+        }
+
+        location / {
             if ($cookie_jsessionid = "")
             {
                 return 302 https://cas.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
@@ -142,7 +149,7 @@ spec:
       volumes:
         - name: nginx-log-pre
           hostPath:
-            path: /opt/data1/logs/scm-front/nginx
+            path: /opt/data1/logs/scm-front/pre/nginx
         - name: nginx-conf-pre
           configMap:
             name: trigram-scm-front-page-nginx-conf-pre
@@ -225,6 +232,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
     service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-0ac24f3c90dd52e38
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "120"
 spec:
   selector:
     name: trigram-scm-front-page-pre
@@ -243,5 +251,6 @@ spec:
     - 58.247.99.18/32
     - 116.228.132.228/32
     - 180.169.144.154/32
+    - 180.168.193.50/32
     - 45.117.98.16/32 #11楼专线
 
