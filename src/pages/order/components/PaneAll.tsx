@@ -213,8 +213,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         confirmTime,
                         channelOrderSn,
                         channelSource,
-                        purchaseOrderStatus,
                         orderAddress,
+                        purchaseOrderStatus,
                     };
                     if (index === 0) {
                         childOrderItem._rowspan = purchasePlanList.length;
