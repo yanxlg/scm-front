@@ -34,7 +34,7 @@ export interface ISkuItem {
     sku_inventory?: string;
     sku_price?: string;
     sku_sn?: string;
-    sku_style?: ISkuStyleItem[];
+    sku_style?: any[];
     sku_weight?: string;
 }
 
@@ -109,7 +109,7 @@ export interface IGoodsVersionSkuItem {
     sku_id?: string;
     sku_inventory?: string;
     sku_price?: string;
-    sku_style?: ISkuStyleItem[];
+    sku_style?: any[];
     sku_weight?: string;
 }
 
