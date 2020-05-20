@@ -89,6 +89,8 @@ export interface IGoodsList {
     shipping_fee_min: number;
     shipping_fee_max: number;
     tags: string[];
+    multiple_price: string;
+    source_channel: string;
     _type?: string;
     origin?: string;
 }

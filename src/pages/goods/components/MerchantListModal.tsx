@@ -39,6 +39,9 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
     const dataSource = useMemo(() => {
         let dataSet: { [key: string]: IShopItem[] } = {};
         list.forEach(({ merchant_id, merchant_name, merchant_platform }) => {
+            if (merchant_platform === 'vova_old') {
+                return;
+            }
             const _list = dataSet[merchant_platform] || [];
             _list.push({ merchant_platform, merchant_name, merchant_id });
             dataSet[merchant_platform] = _list;
@@ -69,12 +72,13 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                                 );
                             })}
                         </div>
+                        {disabled && <p style={{ color: 'red' }}>不支持商品渠道来源条件</p>}
                     </div>,
                 );
             }
         }
         return platformArr;
-    }, [list]);
+    }, [list, loading]);
 
     const onOKeyFunc = useCallback(() => {
         form.validateFields().then(({ merchant_ids }) => {

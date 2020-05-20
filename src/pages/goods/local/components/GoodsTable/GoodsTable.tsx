@@ -71,7 +71,13 @@ const GoodsTable: React.FC<IProps> = ({
     const [commodityId, setCommodityId] = useState('');
     const [productSn, setProductSn] = useState('');
     // 编辑商品
-    const { editGoodsStatus, showEditGoods, hideEditGoods, productId } = useGoodsEditModal();
+    const {
+        editGoodsStatus,
+        showEditGoods,
+        hideEditGoods,
+        productId,
+        setProductId,
+    } = useGoodsEditModal();
     // 查看sku信息
     const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
     // 查看国家运费
@@ -138,8 +144,10 @@ const GoodsTable: React.FC<IProps> = ({
         setMerchantStatus(true);
         // console.log('111111', formRef.current?.getFieldsValue());
         const { source_channel } = formRef.current?.getFieldsValue() as any;
-        if (!source_channel || source_channel === GoodsSourceEnum.VOVA) {
+        if (!source_channel || source_channel === String(GoodsSourceEnum.VOVA)) {
             setDisabledChannelList(['vova']);
+        } else {
+            setDisabledChannelList([]);
         }
     }, []);
 
@@ -148,7 +156,6 @@ const GoodsTable: React.FC<IProps> = ({
     }, []);
 
     const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
-        // console.log('selectedKeys', selectedKeys);
         setSelectedRowKeys(selectedKeys as string[]);
     }, []);
 
@@ -234,12 +241,14 @@ const GoodsTable: React.FC<IProps> = ({
         setProductSn('');
     }, []);
 
-    const showCountryFreight = useCallback(() => {
+    const showCountryFreight = useCallback(productId => {
         setCountryFreightStatus(true);
+        setProductId(productId);
     }, []);
 
     const hideCountryFreight = useCallback(() => {
         setCountryFreightStatus(false);
+        setProductId('');
     }, []);
 
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
@@ -408,16 +417,23 @@ const GoodsTable: React.FC<IProps> = ({
                 dataIndex: 'price_min',
                 align: 'center',
                 render: (value: number, row: IGoodsAndSkuItem) => {
-                    const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                    const {
+                        price_min,
+                        price_max,
+                        shipping_fee_min,
+                        shipping_fee_max,
+                        multiple_price,
+                        product_id,
+                    } = row;
                     return (
                         <div>
                             {price_min}~{price_max}
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
-                            <div>
-                                <a onClick={showCountryFreight}>更多国家价格</a>
-                            </div>
+                            {multiple_price ? (
+                                <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
+                            ) : null}
                         </div>
                     );
                 },
@@ -531,7 +547,7 @@ const GoodsTable: React.FC<IProps> = ({
             },
             {
                 title: '商品渠道来源',
-                dataIndex: 'a1',
+                dataIndex: 'source_channel',
                 align: 'center',
                 width: 120,
             },
@@ -558,7 +574,6 @@ const GoodsTable: React.FC<IProps> = ({
     }, [selectedRowKeys]);
 
     return useMemo(() => {
-        // console.log('selectedRowKeys-1111111', selectedRowKeys);
         return (
             <>
                 <FitTable
@@ -576,6 +591,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <MerchantListModal
                     visible={merchantStatus}
+                    disabledChannelList={disabledChannelList}
                     onOKey={merchantOkey}
                     onCancel={merchantCancel}
                 />
@@ -609,7 +625,11 @@ const GoodsTable: React.FC<IProps> = ({
                     onCancel={hideEditGoods}
                     onReload={onReload}
                 />
-                <CountryFreightModal visible={countryFreightStatus} onCancel={hideCountryFreight} />
+                <CountryFreightModal
+                    visible={countryFreightStatus}
+                    productId={productId}
+                    onCancel={hideCountryFreight}
+                />
             </>
         );
     }, [
