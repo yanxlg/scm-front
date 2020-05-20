@@ -10,7 +10,7 @@ pipeline {
     }
     parameters {
         string(name: 'refspec',
-            defaultValue: 'master',
+            defaultValue: 'develop',
             description: 'which branch or commit id?'
         )
         booleanParam(name: 'NpmInstall',
