@@ -558,18 +558,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <Button
-                key="export"
-                onClick={() => setVisibleProps(true)}
-                className={formStyles.formBtn}
-            >
-                导出Excel表
-            </Button>,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
             <FitTable
@@ -579,7 +567,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
                 columns={columns as ColumnProps<any>[]}
                 dataSource={dataSource as any[]}
                 loading={loading}
@@ -603,6 +590,9 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
+                    <Button onClick={() => setVisibleProps(true)} className={formStyles.formBtn}>
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );
