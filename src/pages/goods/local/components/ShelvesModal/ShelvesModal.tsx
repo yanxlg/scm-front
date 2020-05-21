@@ -11,12 +11,7 @@ interface IProps {
     onCancel(): void;
 }
 
-const ShelvesDialog: React.FC<IProps> = ({
-    visible,
-    publishStatusList,
-    onCancel
-}) => {
-
+const ShelvesDialog: React.FC<IProps> = ({ visible, publishStatusList, onCancel }) => {
     const columns = useMemo<ColumnType<IPublishItem>[]>(() => {
         return [
             {
@@ -57,7 +52,7 @@ const ShelvesDialog: React.FC<IProps> = ({
                 dataIndex: 'productId',
                 align: 'center',
             },
-        ]
+        ];
     }, []);
 
     return useMemo(() => {
@@ -78,8 +73,8 @@ const ShelvesDialog: React.FC<IProps> = ({
                     columns={columns}
                 />
             </Modal>
-        )
+        );
     }, [visible]);
-}
+};
 
 export default ShelvesDialog;
