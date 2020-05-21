@@ -1,9 +1,4 @@
-import React, { 
-    useState,
-    useMemo, 
-    useCallback,
-    useEffect
-} from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Modal, Row, Col, Input, Button, Pagination } from 'antd';
 import { ISkuStyleItem, ISkuInfo } from '@/interface/ILocalGoods';
 import { FitTable, AutoEnLargeImg } from 'react-components';
@@ -34,11 +29,7 @@ interface IProps {
     onCancel(): void;
 }
 
-const SkuModal: React.FC<IProps> = ({
-    visible,
-    currentSkuInfo,
-    onCancel
-}) => {
+const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
     const [loading, setLoading] = useState(false);
     const [pageNumber, setPageNumber] = useState(1);
     const [total, setTotal] = useState(0);
@@ -53,99 +44,118 @@ const SkuModal: React.FC<IProps> = ({
         onCancel();
     }, []);
 
-    const _getGoodsSkuList = useCallback((pageData?: ISkuParams) => {
-        const productId = currentSkuInfo?.product_id as string;
-        let params: ISkuParams = {
-            page: pageNumber,
-            product_id: productId,
-            page_count: 50,
-            variantids: searchVal,
-        };
-        if (pageData) {
-            params = Object.assign(params, pageData);
-        }
-        setLoading(true);
-        getGoodsSkuList(params)
-            .then(res => {
-                // console.log('getGoodsSkuList', res);
-                const { all_count, list } = res.data;
-                setPageNumber(params.page);
-                setTotal(all_count);
-                setSkuList(list.map((item: any, index: number) => {
-                    let { sku_style, sku_price, shipping_fee, variant_image, ...rest } = item;
-                    return {
-                        ...rest,
-                        sku_price,
-                        shipping_fee,
-                        sku_amount: Number(sku_price) + Number(shipping_fee),
-                        sku_style: sku_style.map(({ option, value }: any) => ({
-                            option,
-                            value,
-                        })),
-                        image_url: variant_image?.url,
-                        serial: (params.page - 1) * 50 + index + 1,
-                    };
-                }))
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [pageNumber, searchVal, currentSkuInfo]);
+    const _getGoodsSkuList = useCallback(
+        (pageData?: ISkuParams) => {
+            const productId = currentSkuInfo?.product_id as string;
+            let params: ISkuParams = {
+                page: pageNumber,
+                product_id: productId,
+                page_count: 50,
+                variantids: searchVal,
+            };
+            if (pageData) {
+                params = Object.assign(params, pageData);
+            }
+            setLoading(true);
+            getGoodsSkuList(params)
+                .then(res => {
+                    // console.log('getGoodsSkuList', res);
+                    const { all_count, list } = res.data;
+                    setPageNumber(params.page);
+                    setTotal(all_count);
+                    setSkuList(
+                        list.map((item: any, index: number) => {
+                            let {
+                                sku_style,
+                                sku_price,
+                                shipping_fee,
+                                variant_image,
+                                ...rest
+                            } = item;
+                            return {
+                                ...rest,
+                                sku_price,
+                                shipping_fee,
+                                sku_amount: Number(sku_price) + Number(shipping_fee),
+                                sku_style: sku_style.map(({ option, value }: any) => ({
+                                    option,
+                                    value,
+                                })),
+                                image_url: variant_image?.url,
+                                serial: (params.page - 1) * 50 + index + 1,
+                            };
+                        }),
+                    );
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [pageNumber, searchVal, currentSkuInfo],
+    );
 
-    const _setCommoditySkuTag = useCallback((commodity_sku_id: string, item: string, tags: string[]) => {
-        const commodity_id = currentSkuInfo?.commodity_id as string;
-        const index = tags.indexOf(item);
-        let list: string[] = [];
-        if (index > -1) {
-            list = [...tags.slice(0, index), ...tags.slice(index + 1)];
-        } else {
-            list = [...tags, item];
-        }
-        setLoading(loading);
-        setCommoditySkuTag({
-            commodity_sku_id,
-            tag_name: list,
-            commodity_id,
-        })
-            .then(() => {
-                setSkuList(skuList.map(item => {
-                    if (item.commodity_sku_id === commodity_sku_id) {
-                        return {
-                            ...item,
-                            tags: list,
-                        };
-                    }
-                    return item;
-                }))
+    const _setCommoditySkuTag = useCallback(
+        (commodity_sku_id: string, item: string, tags: string[]) => {
+            const commodity_id = currentSkuInfo?.commodity_id as string;
+            const index = tags.indexOf(item);
+            let list: string[] = [];
+            if (index > -1) {
+                list = [...tags.slice(0, index), ...tags.slice(index + 1)];
+            } else {
+                list = [...tags, item];
+            }
+            setLoading(loading);
+            setCommoditySkuTag({
+                commodity_sku_id,
+                tag_name: list,
+                commodity_id,
             })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [currentSkuInfo, skuList]);
+                .then(() => {
+                    setSkuList(
+                        skuList.map(item => {
+                            if (item.commodity_sku_id === commodity_sku_id) {
+                                return {
+                                    ...item,
+                                    tags: list,
+                                };
+                            }
+                            return item;
+                        }),
+                    );
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [currentSkuInfo, skuList],
+    );
 
     const handleClickSearch = useCallback(() => {
         _getGoodsSkuList({
-            page: 1
+            page: 1,
         });
     }, [_getGoodsSkuList]);
 
-    const handleChangePage = useCallback((page: number) => {
-        _getGoodsSkuList({
-            page
-        });
-    }, [_getGoodsSkuList])
+    const handleChangePage = useCallback(
+        (page: number) => {
+            _getGoodsSkuList({
+                page,
+            });
+        },
+        [_getGoodsSkuList],
+    );
 
     useEffect(() => {
         if (visible) {
             _getGoodsSkuList({
-                page: 1
+                page: 1,
             });
         }
-    }, [visible])
+    }, [visible]);
 
     const goodsInfoNode = useMemo(() => {
         if (!currentSkuInfo) {
-            return null
+            return null;
         }
         const {
             goods_img,
@@ -180,7 +190,7 @@ const SkuModal: React.FC<IProps> = ({
                     </Row>
                 </div>
             </div>
-        )
+        );
     }, [currentSkuInfo]);
 
     const columns = useMemo<ColumnsType<ISkuItem>>(() => {
@@ -289,68 +299,66 @@ const SkuModal: React.FC<IProps> = ({
                     );
                 },
             },
-        ]
+        ];
     }, [total, currentSkuInfo, _setCommoditySkuTag]);
 
     return useMemo(() => {
-     
         return (
             <Modal
-                    width={1000}
-                    visible={visible}
-                    style={{ top: 50 }}
-                    onCancel={handleCancel}
-                    maskClosable={false}
-                    footer={null}
-                >
-                    <div className={styles.skuContent}>
-                        {goodsInfoNode}
-                        <Row className={styles.filterSection} gutter={16}>
-                            <Col span={21} className={styles.inputWrap}>
-                                <span className={styles.label}>SKU ID:</span>
-                                <Input
-                                    value={searchVal}
-                                    onChange={e => setSearchVal(e.target.value)}
-                                    placeholder="支持多个搜索，以英文逗号隔开"
-                                />
-                            </Col>
-                            <Col span={3}>
-                                <Button
-                                    type="primary"
-                                    className={styles.btn}
-                                    loading={loading}
-                                    onClick={handleClickSearch}
-                                >
-                                    搜索
-                                </Button>
-                            </Col>
-                        </Row>
-                        <FitTable
-                            bordered
-                            rowKey="sku_id"
-                            className={styles.table}
-                            loading={loading}
-                            columns={columns}
-                            dataSource={skuList}
-                            scroll={{ x: 'max-content', y: 400 }}
-                            autoFitY={false}
-                            pagination={false}
-                        />
-                        <Pagination
-                            size="small"
-                            total={total}
-                            current={pageNumber}
-                            defaultPageSize={50}
-                            showQuickJumper={true}
-                            showSizeChanger={false}
-                            onChange={handleChangePage}
-                            showTotal={total => `共${total}条`}
-                        />
-                    </div>
-                </Modal>
-        )
+                width={1000}
+                visible={visible}
+                style={{ top: 50 }}
+                onCancel={handleCancel}
+                maskClosable={false}
+                footer={null}
+            >
+                <div className={styles.skuContent}>
+                    {goodsInfoNode}
+                    <Row className={styles.filterSection} gutter={16}>
+                        <Col span={21} className={styles.inputWrap}>
+                            <span className={styles.label}>SKU ID:</span>
+                            <Input
+                                value={searchVal}
+                                onChange={e => setSearchVal(e.target.value)}
+                                placeholder="支持多个搜索，以英文逗号隔开"
+                            />
+                        </Col>
+                        <Col span={3}>
+                            <Button
+                                type="primary"
+                                className={styles.btn}
+                                loading={loading}
+                                onClick={handleClickSearch}
+                            >
+                                搜索
+                            </Button>
+                        </Col>
+                    </Row>
+                    <FitTable
+                        bordered
+                        rowKey="sku_id"
+                        className={styles.table}
+                        loading={loading}
+                        columns={columns}
+                        dataSource={skuList}
+                        scroll={{ x: 'max-content', y: 400 }}
+                        autoFitY={false}
+                        pagination={false}
+                    />
+                    <Pagination
+                        size="small"
+                        total={total}
+                        current={pageNumber}
+                        defaultPageSize={50}
+                        showQuickJumper={true}
+                        showSizeChanger={false}
+                        onChange={handleChangePage}
+                        showTotal={total => `共${total}条`}
+                    />
+                </div>
+            </Modal>
+        );
     }, [visible, currentSkuInfo, searchVal, loading, skuList]);
-}
+};
 
 export default SkuModal;
-
