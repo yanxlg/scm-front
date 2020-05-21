@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -8,19 +8,9 @@ import {
     inventoryStatusList,
     versionStatusList,
     publishChannelStatusList,
-    goodsSourceList,
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
-import {
-    getGoodsList,
-    postGoodsExports,
-    postGoodsOnsale,
-    getGoodsDelete,
-    IFilterParams,
-    getCatagoryList,
-    postAllGoodsOnsale,
-    getGoodsStatusList,
-} from '@/services/goods';
+import { getGoodsList, getCatagoryList, getGoodsStatusList } from '@/services/goods';
 import { IGoodsList, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
 import GoodsTable from './components/GoodsTable/GoodsTable';
 
