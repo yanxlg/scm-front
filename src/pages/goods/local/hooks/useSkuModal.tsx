@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { ISkuInfo } from '@/interface/ILocalGoods';
 
-export default function () {
+export default function() {
     const [skuStatus, setSkuStatus] = useState(false);
     const [currentSkuInfo, setCurrentSkuInfo] = useState<ISkuInfo | null>(null);
 
@@ -42,6 +42,6 @@ export default function () {
         skuStatus,
         currentSkuInfo,
         showSkuModal,
-        hideSkuModal
-    }
+        hideSkuModal,
+    };
 }
