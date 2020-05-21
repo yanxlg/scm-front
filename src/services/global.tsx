@@ -1,6 +1,6 @@
 import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
-import { IResponse, ISHopList } from '@/interface/IGlobal';
+import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 
 export function downloadFile(url: string) {
@@ -51,3 +51,9 @@ export const queryShopFilterList = singlePromiseWrap(() => {
             return [];
         });
 });
+
+export function exportExcel(data: IExportExcelReqData) {
+    return request.post(GlobalApiPath.ExportExcel, {
+        data,
+    });
+}
