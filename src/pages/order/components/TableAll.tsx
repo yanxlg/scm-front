@@ -587,7 +587,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 if (purchasePrice === 0 || isNaN(purchasePrice)) {
                     return '';
                 }
-                const result = (Number(productPrice) - purchasePrice) * Number(purchaseNumber);
+                const result =
+                    ((Number(productPrice) * 1000 - purchasePrice * 1000) *
+                        Number(purchaseNumber)) /
+                    1000;
                 return result < 0 ? <span style={{ color: 'red' }}>{result}</span> : result;
             },
         },
