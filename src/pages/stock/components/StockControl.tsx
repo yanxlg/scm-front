@@ -16,6 +16,7 @@ import { LoadingButton } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { WarehouseList, WarehouseMap, WarehouseMapCode } from '@/config/dictionaries/Stock';
 
 const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
     x: true,
@@ -26,6 +27,15 @@ const StockControl: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
     const columns = useMemo<ColumnProps<IStockItem>[]>(() => {
         return [
+            {
+                title: '仓库名',
+                width: '150px',
+                dataIndex: 'warehouseId',
+                align: 'center',
+                render: (value: WarehouseMapCode, row) => {
+                    return WarehouseMap[value];
+                },
+            },
             {
                 title: '商品SKU ID',
                 width: '180px',
@@ -117,6 +127,19 @@ const StockControl: React.FC = () => {
                 label: '商品SKU ID',
                 name: 'commodity_sku_id',
                 formatter: 'multipleToArray',
+            },
+            {
+                type: 'select',
+                label: '仓库名',
+                name: 'warehouse_id',
+                defaultValue: '',
+                optionList: [
+                    {
+                        name: '全部',
+                        value: '',
+                    },
+                    ...WarehouseList,
+                ],
             },
         ];
     }, []);
