@@ -14,4 +14,5 @@ export enum SettingApiPath {
     QueryPriceStrategy = '/api/v1/price_strategy/detail',
     UpdatePriceStrategy = '/api/v1/price_strategy/store',
     QueryPriceStrategyHistory = '/api/v1/price_strategy/history',
+    QueryReplaceList = '/api/v1/orders/setting/delivery/replace/list',
 }

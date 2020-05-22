@@ -1,6 +1,11 @@
 import { transPaginationRequest } from '@/utils/utils';
 import request from '@/utils/request';
-import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
+import {
+    IPaginationResponse,
+    IRequestPagination,
+    IRequestPagination1,
+    IResponse,
+} from '@/interface/IGlobal';
 import {
     ICountryItem,
     ICustomItem,
@@ -9,6 +14,7 @@ import {
     ICookieResponse,
     IPriceStrategy,
     IPriceStrategyItem,
+    IReplaceBody,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -144,21 +150,10 @@ export function queryPriceStrategyHistory(params: any) {
     );
 }
 
-export function queryReplaceStoreOutList(fetch: FetchFactory) {
-    return Promise.resolve({
+export function queryReplaceStoreOutList(data: IReplaceBody & IRequestPagination1) {
+    return api.post(SettingApiPath.QueryReplaceList, {
         data: {
-            total: 100,
-            list: [
-                {
-                    id: '11',
-                    0: '店铺名',
-                    1: '21',
-                    2: '34',
-                    3: '54',
-                    4: '232',
-                    5: '2323',
-                },
-            ],
+            ...data,
         },
     });
 }

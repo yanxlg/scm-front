@@ -129,3 +129,19 @@ export interface IPriceStrategyItem {
     operator: string;
     updated_time: string;
 }
+
+export interface IReplaceBody {
+    sale_commodity_ids?: string;
+    sale_commodity_sku_ids?: string;
+    outbound_commodity_ids?: string;
+    outbound_commodity_sku_ids?: string;
+}
+
+export interface IReplaceStoreOutItem {
+    id: string;
+    sale_commodity_id: string;
+    sale_commodity_sku_id: string;
+    outbound_commodity_id: string;
+    outbound_commodity_sku_id: string;
+    outbound_score: string;
+}

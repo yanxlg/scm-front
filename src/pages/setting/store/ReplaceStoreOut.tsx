@@ -24,6 +24,7 @@ import { SelectProps } from 'antd/lib/select';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { setLocale } from '@@/plugin-locale/localeExports';
 import useFetch from '@/hooks/useFetch';
+import { IReplaceStoreOutItem } from '@/interface/ISetting';
 
 const fieldList: Array<FormField> = [
     {
@@ -90,10 +91,6 @@ declare type EditColumnsType<T> = Array<
         editable?: boolean;
     }
 >;
-
-declare interface IReplaceStoreOutItem {
-    id: string;
-}
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
     editing: boolean;
@@ -183,14 +180,11 @@ const ReplaceStoreOut = () => {
     const [form] = Form.useForm();
     const formRef = useRef<JsonFormRef>(null);
     const [editingKey, setEditingKey] = useState<string | undefined>(undefined);
-    const [fetch] = useFetch();
-    const [dataSource, setDataSource] = useState<IReplaceStoreOutItem[]>([]);
 
-    useEffect(() => {
-        queryReplaceStoreOutList(fetch).then(({ data: { list = [] } }) => {
-            setDataSource(list);
-        });
-    }, []);
+    const { dataSource, setDataSource, loading, setLoading } = useList({
+        queryList: queryReplaceStoreOutList,
+        formRef: formRef,
+    });
 
     const isEditing = (record: IReplaceStoreOutItem) => record.id === editingKey;
 
@@ -351,7 +345,7 @@ const ReplaceStoreOut = () => {
                 />
             </Form>
         );
-    }, [dataSource, editingKey]);
+    }, [loading, editingKey]);
 
     return useMemo(() => {
         return (
