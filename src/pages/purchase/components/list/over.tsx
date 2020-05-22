@@ -270,6 +270,21 @@ const Over = () => {
                 },
             },
             {
+                title: '入库数量',
+                dataIndex: 'purchaseMerchantName',
+                width: '130px',
+                align: 'center',
+                render: (value, row) => {
+                    const { realInStorageNumber = 0, purchaseGoodsNumber = 0 } = row;
+                    return {
+                        children: `${realInStorageNumber}/${purchaseGoodsNumber}`,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
                 title: '采购平台',
                 dataIndex: 'purchasePlatform',
                 width: '130px',

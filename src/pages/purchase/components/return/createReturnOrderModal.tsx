@@ -242,7 +242,13 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                                             >
                                                 {goods?.purchaseGoodsName}
                                             </div>
-                                            <div className={styles.modalSkus}>{skuComponent}</div>
+                                            <div className={styles.modalSkus}>
+                                                <div className={styles.modalSku}>
+                                                    入库数量:{goods?.realInStorageNumber ?? 0}/
+                                                    {goods?.purchaseGoodsNumber ?? 0}
+                                                </div>
+                                                {skuComponent}
+                                            </div>
                                         </div>
                                     </div>
                                 ) : null}

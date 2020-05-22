@@ -103,6 +103,7 @@ export declare interface IPurchaseItem {
     type?: string; // flat
     rowSpan?: number;
     boundStatus?: string;
+    realInStorageNumber?: number;
 }
 
 export declare interface IReturnItem {
