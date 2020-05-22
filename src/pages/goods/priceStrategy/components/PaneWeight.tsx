@@ -2,44 +2,84 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
-import { defaultSelectOption } from '@/config/global';
-import { getGoodsList } from '@/services/goods';
+import { getGoodsList, getCatagoryList } from '@/services/goods';
 import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
-import { ISellItem, IEdiyKey } from '@/interface/IPriceAdjustment';
-import { EditEnum } from '@/enums/PriceAdjustmentEnum';
-import FreightConfig from './FreightConfig/FreightConfig';
-import DeliveryCountryModal from './DeliveryCountryModal/DeliveryCountryModal';
+import { ISellItem } from '@/interface/IPriceAdjustment';
+import WeightModal from './WeightModal/WeightModal';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
+import { EmptyObject, defaultSelectOption } from '@/config/global';
 
 const formFields: FormField[] = [
     {
         type: 'select',
-        label: '运费规则名称',
-        name: 'a1',
+        label: '一级类目',
+        name: 'first_catagory',
+        // className: styles.input,
         defaultValue: '',
         syncDefaultOption: defaultSelectOption,
-        optionList: [],
+        optionList: () =>
+            getCatagoryList()
+                .then(({ convertList = [] } = EmptyObject) => {
+                    return convertList;
+                })
+                .catch(() => {
+                    return [];
+                }),
+        onChange: (name, form) => {
+            form.resetFields(['second_catagory']);
+            form.resetFields(['third_catagory']);
+        },
     },
     {
         type: 'select',
-        label: '运费价卡',
-        name: 'a2',
+        label: '二级类目',
+        name: 'second_catagory',
+        // className: styles.input,
         defaultValue: '',
+        optionListDependence: {
+            name: 'first_catagory',
+            key: 'children',
+        },
         syncDefaultOption: defaultSelectOption,
-        optionList: [],
-        // optionList: () => queryShopFilterList(),
-        // onChange: (name, form) => {
-        //     form.resetFields(['a3']);
-        // },
+        optionList: () =>
+            getCatagoryList()
+                .then(({ convertList = [] } = EmptyObject) => {
+                    return convertList;
+                })
+                .catch(() => {
+                    return [];
+                }),
+        onChange: (name, form) => {
+            form.resetFields(['third_catagory']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        name: 'third_catagory',
+        // className: styles.input,
+        defaultValue: '',
+        optionListDependence: {
+            name: ['first_catagory', 'second_catagory'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultSelectOption,
+        optionList: () =>
+            getCatagoryList()
+                .then(({ convertList = [] } = EmptyObject) => {
+                    return convertList;
+                })
+                .catch(() => {
+                    return [];
+                }),
     },
 ];
 
-const PaneFreight: React.FC = props => {
+const PaneWeight: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
-    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // EditEnum.ADD
-    const [deliveryCountryStatus, setDeliveryCountryStatus] = useState(false);
+    const [weightStatus, setWeightStatus] = useState(false);
     const {
         loading,
         pageNumber,
@@ -54,102 +94,49 @@ const PaneFreight: React.FC = props => {
         queryList: getGoodsList,
     });
 
-    const showDeliveryCountryModal = useCallback(() => {
-        setDeliveryCountryStatus(true);
-    }, []);
-
-    const hideDeliveryCountryModal = useCallback(() => {
-        setDeliveryCountryStatus(false);
+    const hideWeightModal = useCallback(() => {
+        setWeightStatus(false);
     }, []);
 
     const columns = useMemo<ColumnsType<ISellItem>>(() => {
         return [
             {
-                fixed: 'left',
-                title: '操作',
-                dataIndex: '_operation',
-                align: 'center',
-                width: 120,
-                render: (_: any, row: ISellItem) => {
-                    return (
-                        <Button type="link" className={styles.hover}>
-                            更新
-                        </Button>
-                    );
-                },
-            },
-            {
-                title: '规则名称',
+                title: '一级品类',
                 dataIndex: 'a1',
                 align: 'center',
                 width: 120,
             },
             {
-                title: '商品标签',
+                title: '二级品类',
                 dataIndex: 'a2',
                 align: 'center',
                 width: 120,
             },
             {
-                title: '重量区间(g)',
+                title: '三级品类',
                 dataIndex: 'a3',
                 align: 'center',
                 width: 120,
             },
             {
-                title: '阈值范围',
+                title: '预估重量 (g)',
                 dataIndex: 'a4',
                 align: 'center',
                 width: 120,
             },
             {
-                title: '运费价卡',
+                title: '平均重量 (g)',
                 dataIndex: 'a5',
                 align: 'center',
                 width: 120,
             },
             {
-                title: '配送国家',
+                title: '更新记录',
                 dataIndex: 'a6',
                 align: 'center',
                 width: 120,
                 render: () => {
-                    return (
-                        <a className={styles.hover} onClick={() => showDeliveryCountryModal()}>
-                            123
-                        </a>
-                    );
-                },
-            },
-            {
-                title: '排序等级',
-                dataIndex: 'a7',
-                align: 'center',
-                width: 120,
-            },
-            {
-                title: '生效商品量',
-                dataIndex: 'a8',
-                align: 'center',
-                width: 120,
-            },
-            {
-                title: '启用状态',
-                dataIndex: 'a9',
-                align: 'center',
-                width: 140,
-            },
-            {
-                title: '更新记录',
-                dataIndex: 'a10',
-                align: 'center',
-                width: 120,
-                render: () => {
-                    return (
-                        <Button type="link" className={styles.hover}>
-                            查看
-                        </Button>
-                    );
+                    return <a className={styles.hover}>查看</a>;
                 },
             },
         ];
@@ -184,10 +171,18 @@ const PaneFreight: React.FC = props => {
                         ghost
                         type="primary"
                         className={formStyles.formBtn}
-                        onClick={() => setEditType(EditEnum.ADD)}
+                        onClick={() => setWeightStatus(true)}
                     >
-                        +新增运费规则
+                        批量导入
                     </Button>
+                    <LoadingButton
+                        ghost
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={() => Promise.resolve()}
+                    >
+                        全部导出
+                    </LoadingButton>
                 </div>
             </JsonForm>
         );
@@ -208,18 +203,13 @@ const PaneFreight: React.FC = props => {
         );
     }, [loading]);
 
-    return editType === EditEnum.DEFAULT ? (
+    return (
         <>
             {searchNode}
             {table}
-            <DeliveryCountryModal
-                visible={deliveryCountryStatus}
-                onCancel={hideDeliveryCountryModal}
-            />
+            <WeightModal visible={weightStatus} onCancel={hideWeightModal} />
         </>
-    ) : (
-        <FreightConfig type={editType} />
     );
 };
 
-export default React.memo(PaneFreight);
+export default React.memo(PaneWeight);

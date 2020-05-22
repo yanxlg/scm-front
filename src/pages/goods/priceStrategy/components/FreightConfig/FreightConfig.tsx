@@ -17,7 +17,7 @@ interface IProps {
     type: IEdiyKey;
 }
 
-const SellConfig: React.FC<IProps> = ({ type }) => {
+const FreightConfig: React.FC<IProps> = ({ type }) => {
     const [form] = Form.useForm();
     const [name, setName] = useState('');
     const [goodsTagList, setGoodsTagList] = useState<ICheckedBtnItem[]>([
@@ -37,13 +37,11 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
 
     return (
         <div className={styles.formContainer}>
-            <div className={styles.title}>
-                {EditEnum.ADD === type ? '新增' : '更新'}商品售价配置
-            </div>
+            <div className={styles.title}>{EditEnum.ADD === type ? '新增' : '更新'}运费规则</div>
             <Form form={form}>
                 <div className={styles.item}>
                     <Form.Item
-                        label="售价规则"
+                        label="运费规则名称"
                         name="a1"
                         className={styles.customLabel}
                         rules={[requiredRule, maxLengthRule]}
@@ -55,42 +53,6 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
                         />
                     </Form.Item>
                 </div>
-                <div className={styles.item}>
-                    <Form.Item
-                        label="采购渠道"
-                        name="a2"
-                        className={styles.customLabel}
-                        rules={[requiredRule]}
-                    >
-                        <Select placeholder="请选择">
-                            <Option value="1">PDD</Option>
-                        </Select>
-                    </Form.Item>
-                </div>
-                <div className={styles.item}>
-                    <Form.Item
-                        label="销售渠道"
-                        name="a3"
-                        className={styles.customLabel}
-                        rules={[requiredRule]}
-                    >
-                        <Select placeholder="请选择">
-                            <Option value="1">xxx</Option>
-                        </Select>
-                    </Form.Item>
-                </div>
-                <div className={styles.item}>
-                    <Form.Item
-                        label="销售店铺"
-                        name="a4"
-                        className={styles.customLabel}
-                        rules={[requiredRule]}
-                    >
-                        <Select placeholder="请选择">
-                            <Option value="1">xxx</Option>
-                        </Select>
-                    </Form.Item>
-                </div>
                 <Form.Item label="商品标签" className={styles.customLabel}>
                     <div>
                         {goodsTagList.map(item => (
@@ -98,7 +60,7 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
                         ))}
                     </div>
                 </Form.Item>
-                <Form.Item label="爬虫价格区间" name="a5" className={styles.customLabel}>
+                <Form.Item label="重量区间" name="a5" className={styles.customLabel}>
                     <div className={classnames(styles.flex, styles.noneMargin)}>
                         <Form.Item name="min-price">
                             <InputNumber />
@@ -107,7 +69,7 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
                         <Form.Item name="max-price">
                             <InputNumber />
                         </Form.Item>
-                        <div className={styles.extra}>¥</div>
+                        <div className={styles.extra}>g</div>
                     </div>
                 </Form.Item>
                 <Form.Item
@@ -125,25 +87,31 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
                 >
                     <InputNumber precision={0} />
                 </Form.Item>
-                <div className={styles.flex}>
+                <Form.Item label="售价阈值($)" className={styles.customLabel}>
+                    10
+                </Form.Item>
+                <div className={styles.item}>
                     <Form.Item
-                        label="价格系数(X)"
-                        name="X"
-                        className={classnames(styles.itemMargin, styles.customLabel)}
+                        label="$10以下运费价卡"
+                        name="a2"
+                        className={styles.customLabel}
                         rules={[requiredRule]}
                     >
-                        <InputNumber precision={0} />
+                        <Select placeholder="请选择">
+                            <Option value="1">PDD</Option>
+                        </Select>
                     </Form.Item>
+                </div>
+                <div className={styles.item}>
                     <Form.Item
-                        label="固定调整(Y)"
-                        name="Y"
-                        className={styles.itemMargin}
+                        label="$10以上运费价卡"
+                        name="a3"
+                        className={styles.customLabel}
                         rules={[requiredRule]}
                     >
-                        <InputNumber precision={0} />
-                    </Form.Item>
-                    <Form.Item label="运费放大系数(Z)" name="Z" rules={[requiredRule]}>
-                        <InputNumber precision={0} />
+                        <Select placeholder="请选择">
+                            <Option value="1">xxx</Option>
+                        </Select>
                     </Form.Item>
                 </div>
                 <Form.Item
@@ -180,4 +148,4 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
     );
 };
 
-export default React.memo(SellConfig);
+export default React.memo(FreightConfig);

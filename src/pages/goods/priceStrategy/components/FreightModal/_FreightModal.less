@@ -1,0 +1,43 @@
+@labelWidth: 72px;
+
+.item {
+    :global {
+        .ant-form-item-label {
+            width: @labelWidth
+        }
+    }
+}
+
+.input {
+    width: 240px;
+}
+
+.extra {
+    color: #999;
+}
+
+.download {
+    margin-left: 3px;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.btn-save {
+    margin-left: @labelWidth;
+}
+
+.filename {
+    color: #1890ff;
+
+    .icon-file {
+        font-size: 16px;
+        margin-right: 2px;
+    }
+
+    .icon-close {
+        color: #ccc;
+        margin-left: 10px;
+    }
+}

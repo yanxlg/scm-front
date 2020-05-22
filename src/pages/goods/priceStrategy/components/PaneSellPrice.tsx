@@ -9,6 +9,9 @@ import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
 import { ISellItem, IEdiyKey } from '@/interface/IPriceAdjustment';
 import { EditEnum } from '@/enums/PriceAdjustmentEnum';
 import SellConfig from './SellConfig/SellConfig';
+import UpdateRangeModal from './UpdateRangeModal/UpdateRangeModal';
+import useUpdateRecord from '@/pages/goods/priceStrategy/hooks/useUpdateRecord';
+import UpdateRecordModal from './UpdateRecordModal/UpdateRecordModal';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
@@ -61,7 +64,14 @@ const formFields: FormField[] = [
 
 const PaneSellPrice: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
-    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT);
+    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // ADD
+    const [updateRangeStatus, setUpdateRangeStatus] = useState(false);
+    const {
+        updateRecordStatus,
+        recordId,
+        showUpdateRecordModal,
+        hideUpdateRecordModal,
+    } = useUpdateRecord();
     const {
         loading,
         pageNumber,
@@ -76,6 +86,10 @@ const PaneSellPrice: React.FC = props => {
         queryList: getGoodsList,
     });
 
+    const hideUpdateRangeModal = useCallback(() => {
+        setUpdateRangeStatus(false);
+    }, []);
+
     const toolBarRender = useCallback(() => {
         return [
             <Button
@@ -83,7 +97,7 @@ const PaneSellPrice: React.FC = props => {
                 key="1"
                 type="primary"
                 className={formStyles.formBtn}
-                // onClick={handleClickAllOnsale}
+                onClick={() => setUpdateRangeStatus(true)}
             >
                 更新商品售价
             </Button>,
@@ -191,7 +205,11 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
                 render: () => {
                     return (
-                        <Button type="link" className={styles.hover}>
+                        <Button
+                            type="link"
+                            className={styles.hover}
+                            onClick={() => showUpdateRecordModal('11')}
+                        >
                             查看
                         </Button>
                     );
@@ -258,6 +276,8 @@ const PaneSellPrice: React.FC = props => {
         <>
             {searchNode}
             {table}
+            <UpdateRangeModal visible={updateRangeStatus} onCancel={hideUpdateRangeModal} />
+            <UpdateRecordModal visible={updateRecordStatus} onCancel={hideUpdateRecordModal} />
         </>
     ) : (
         <SellConfig type={editType} />
