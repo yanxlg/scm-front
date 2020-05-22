@@ -271,7 +271,7 @@ const Over = () => {
             },
             {
                 title: '入库数量',
-                dataIndex: 'purchaseMerchantName',
+                dataIndex: 'realInStorageNumber',
                 width: '130px',
                 align: 'center',
                 render: (value, row) => {
