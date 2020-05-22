@@ -89,6 +89,8 @@ export interface IGoodsList {
     shipping_fee_min: number;
     shipping_fee_max: number;
     tags: string[];
+    _type?: string;
+    origin?: string;
 }
 
 export type IGoodsAndSkuItem = IGoodsList & ISkuItem;

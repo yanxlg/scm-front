@@ -124,7 +124,7 @@ class OrderFilter extends React.PureComponent {
                 <Form.Item
                     name="purchase_order_status"
                     className="order-form-item"
-                    label={<Label text="采购订单状态" />}
+                    label={<Label text="采购计划状态" />}
                 >
                     <Select className="order-input">
                         <Option value="">全部</Option>

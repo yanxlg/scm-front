@@ -18,6 +18,7 @@ import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
+import CancelOrder from './CancelOrder';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -216,54 +217,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         return orderList.filter(item => item._checked).map(item => item.orderGoodsId);
     }, [orderList]);
 
-    const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
-        getAllTabCount();
-        notification.success({
-            message: `${name}成功`,
-            description: (
-                <div>
-                    {list.map((item: string) => (
-                        <div key={item}>{item}</div>
-                    ))}
-                </div>
-            ),
-        });
-    }, []);
-
-    const batchOperateFail = useCallback(
-        (name: string = '', list: { order_goods_id: string; result: string }[]) => {
-            notification.error({
-                message: `${name}失败`,
-                description: (
-                    <div>
-                        {list.map((item: any) => (
-                            <div>
-                                {item.order_goods_id}: {item.result.slice(0, 50)}
-                            </div>
-                        ))}
-                    </div>
-                ),
-            });
-        },
-        [],
-    );
-
-    const _delChannelOrders = useCallback(() => {
-        return delChannelOrders({
-            order_goods_ids: getOrderGoodsIdList(),
-        }).then(res => {
-            onSearch();
-            const { success, failed } = res.data;
-
-            if (success!.length) {
-                batchOperateSuccess('取消渠道订单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消渠道订单', failed);
-            }
-        });
-    }, [getOrderGoodsIdList]);
-
     const _postExportWarehouseNotShip = useCallback((values: any) => {
         return postExportWarehouseNotShip({
             ...currentSearchParams,
@@ -387,7 +340,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchaseOrderStatus',
-                title: '采购订单状态',
+                title: '采购计划状态',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
                 width: 120,
@@ -517,17 +470,18 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const list = getOrderGoodsIdList();
         return [
-            <LoadingButton
-                key="channel_order"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={_delChannelOrders}
-                disabled={list.length ? false : true}
-            >
-                取消渠道订单
-            </LoadingButton>,
+            <CancelOrder orderGoodsIds={list} onReload={onSearch} getAllTabCount={getAllTabCount}>
+                <Button
+                    key="channel_order"
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={list.length ? false : true}
+                >
+                    取消渠道订单
+                </Button>
+            </CancelOrder>,
         ];
-    }, [getOrderGoodsIdList, _delChannelOrders]);
+    }, [getOrderGoodsIdList]);
 
     useEffect(() => {
         onSearch();
