@@ -8,6 +8,7 @@ import {
     inventoryStatusList,
     versionStatusList,
     publishChannelStatusList,
+    goodsSourceList,
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 import {
@@ -25,6 +26,7 @@ import GoodsTable from './components/GoodsTable/GoodsTable';
 
 import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { queryGoodsSourceList } from '@/services/global';
 
 const initialValues = {
     inventory_status: '',
@@ -33,6 +35,7 @@ const initialValues = {
     second_catagory: '',
     third_catagory: '',
     publish_channel: '',
+    source_channel: '',
 };
 
 const formFields: FormField[] = [
@@ -75,6 +78,14 @@ const formFields: FormField[] = [
         className: styles.input,
         formatter: 'number',
         optionList: [defaultOption, ...publishChannelStatusList],
+    },
+    {
+        type: 'select',
+        label: '商品渠道来源',
+        name: 'source_channel',
+        className: styles.input,
+        syncDefaultOption: defaultOption,
+        optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'select',

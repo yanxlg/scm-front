@@ -594,6 +594,40 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 return result < 0 ? <span style={{ color: 'red' }}>{result}</span> : result;
             },
         },
+        {
+            key: 'orderAddress',
+            title: '用户地址信息',
+            dataIndex: 'orderAddress',
+            align: 'center',
+            width: 180,
+            render: (value: any) => {
+                if (!value) {
+                    return '';
+                }
+                const {
+                    consignee = '',
+                    address1 = '',
+                    city = '',
+                    province = '',
+                    country = '',
+                    zipCode = '',
+                    tel = '',
+                } = value;
+                return (
+                    <div style={{ textAlign: 'left', wordBreak: 'break-all' }}>
+                        <div>{consignee}</div>
+                        <div>
+                            {address1},{city},{province},{country}
+                        </div>
+                        <div>
+                            {zipCode},{tel}
+                        </div>
+                    </div>
+                );
+            },
+            // render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
+            // defaultHide: true,
+        },
     ];
 
     constructor(props: IProps) {
