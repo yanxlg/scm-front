@@ -15,6 +15,7 @@ import {
     IPriceStrategy,
     IPriceStrategyItem,
     IReplaceBody,
+    IReplaceStoreOutItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -151,9 +152,12 @@ export function queryPriceStrategyHistory(params: any) {
 }
 
 export function queryReplaceStoreOutList(data: IReplaceBody & IRequestPagination1) {
-    return api.post(SettingApiPath.QueryReplaceList, {
-        data: {
-            ...data,
+    return api.post<IResponse<PaginationResponse<IReplaceStoreOutItem>>>(
+        SettingApiPath.QueryReplaceList,
+        {
+            data: {
+                ...data,
+            },
         },
-    });
+    );
 }

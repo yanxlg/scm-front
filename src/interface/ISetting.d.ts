@@ -138,10 +138,10 @@ export interface IReplaceBody {
 }
 
 export interface IReplaceStoreOutItem {
-    id: string;
-    sale_commodity_id: string;
-    sale_commodity_sku_id: string;
-    outbound_commodity_id: string;
-    outbound_commodity_sku_id: string;
-    outbound_score: string;
+    id: string | Symbol;
+    sale_commodity_id?: string;
+    sale_commodity_sku_id?: string;
+    outbound_commodity_id?: string;
+    outbound_commodity_sku_id?: string;
+    outbound_score?: string;
 }

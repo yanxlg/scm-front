@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
     FitTable,
     JsonForm,
@@ -14,17 +14,14 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 import { Button, Form, Input, Select } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { IParentOrderItem } from '@/pages/order/components/PaneAll';
-import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnType } from 'antd/es/table/interface';
 import { queryReplaceStoreOutList } from '@/services/setting';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import { queryShopList } from '@/services/global';
 import { SelectProps } from 'antd/lib/select';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { setLocale } from '@@/plugin-locale/localeExports';
-import useFetch from '@/hooks/useFetch';
 import { IReplaceStoreOutItem } from '@/interface/ISetting';
+import { ITaskListItem } from '@/interface/ITask';
 
 const fieldList: Array<FormField> = [
     {
@@ -94,7 +91,7 @@ declare type EditColumnsType<T> = Array<
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
     editing: boolean;
-    dataIndex: string;
+    dataIndex: keyof IReplaceStoreOutItem;
     title: any;
     inputType: 'number' | 'text';
     record: IReplaceStoreOutItem;
@@ -136,15 +133,15 @@ const EditableCell: React.FC<EditableCellProps> = ({
     ...restProps
 }) => {
     const message =
-        dataIndex === '0'
+        dataIndex === 'id'
             ? '请选择店铺'
-            : dataIndex === '1'
+            : dataIndex === 'sale_commodity_id'
             ? '请输入售卖商品commodity id'
-            : dataIndex === '2'
+            : dataIndex === 'sale_commodity_sku_id'
             ? '请输入售卖商品commodity sku id'
-            : dataIndex === '3'
+            : dataIndex === 'outbound_commodity_id'
             ? '请输入出库商品commodity id'
-            : dataIndex === '4'
+            : dataIndex === 'outbound_commodity_sku_id'
             ? '请输入出库商品commodity sku id'
             : '请输入出库系数';
 
@@ -161,9 +158,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
                         },
                     ]}
                 >
-                    {dataIndex === '0' ? (
+                    {dataIndex === 'id' ? (
                         <ShopSelect />
-                    ) : dataIndex === '5' ? (
+                    ) : dataIndex === 'outbound_score' ? (
                         <RichInput richType={'positiveInteger'} />
                     ) : (
                         <Input allowClear={true} />
@@ -176,15 +173,45 @@ const EditableCell: React.FC<EditableCellProps> = ({
     );
 };
 
+const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
+
 const ReplaceStoreOut = () => {
     const [form] = Form.useForm();
     const formRef = useRef<JsonFormRef>(null);
-    const [editingKey, setEditingKey] = useState<string | undefined>(undefined);
+    const [editingKey, setEditingKey] = useState<string | Symbol | undefined>(undefined);
+    const [update, setUpdate] = useState(0);
+    const shopMap = useRef<{ [key: string]: string }>({});
 
-    const { dataSource, setDataSource, loading, setLoading } = useList({
+    const startUpdate = useCallback(() => {
+        setUpdate(update => update + 1);
+    }, []);
+
+    const {
+        dataSource,
+        setDataSource,
+        loading,
+        total,
+        pageNumber,
+        pageSize,
+        onSearch,
+        onReload,
+    } = useList({
         queryList: queryReplaceStoreOutList,
         formRef: formRef,
+        autoQuery: false,
     });
+
+    useEffect(() => {
+        queryShopList().then(({ data = [] }) => {
+            const map: { [key: string]: string } = {};
+            data.forEach(item => {
+                map[item.merchant_id] = map[item.merchant_name];
+            });
+            shopMap.current = map;
+            // 请求
+            onSearch();
+        });
+    }, []);
 
     const isEditing = (record: IReplaceStoreOutItem) => record.id === editingKey;
 
@@ -199,13 +226,16 @@ const ReplaceStoreOut = () => {
 
     const add = () => {
         // 如果已经有一条了则不会创建新的
-        if (dataSource[dataSource.length - 1]?.id !== '') {
-            setDataSource(
-                dataSource.concat({
-                    id: '',
-                }),
-            );
-            setEditingKey('');
+        if (typeof dataSource[0]?.id !== 'symbol') {
+            const id = Symbol();
+            setDataSource(dataSource => {
+                return [
+                    {
+                        id: id,
+                    } as IReplaceStoreOutItem,
+                ].concat(dataSource);
+            });
+            setEditingKey(id);
         }
     };
 
@@ -219,10 +249,10 @@ const ReplaceStoreOut = () => {
     const formElement = useMemo(() => {
         return (
             <JsonForm fieldList={fieldList} ref={formRef}>
-                <LoadingButton type="primary" className={formStyles.formBtn} onClick={() => {}}>
+                <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                     查询
                 </LoadingButton>
-                <LoadingButton className={formStyles.formBtn} onClick={() => {}}>
+                <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                     刷新
                 </LoadingButton>
             </JsonForm>
@@ -231,42 +261,45 @@ const ReplaceStoreOut = () => {
 
     const columns: EditColumnsType<IReplaceStoreOutItem> = [
         {
-            dataIndex: '0',
+            dataIndex: 'id',
             title: '店铺名',
             align: 'center',
             width: 150,
             editable: true,
+            render: _ => {
+                return shopMap.current[_];
+            },
         },
         {
-            dataIndex: '1',
+            dataIndex: 'sale_commodity_id',
             title: '售卖商品 commodity id',
             align: 'center',
             width: 150,
             editable: true,
         },
         {
-            dataIndex: '2',
+            dataIndex: 'sale_commodity_sku_id',
             title: '售卖商品 commodity sku id',
             align: 'center',
-            width: 150,
+            width: 180,
             editable: true,
         },
         {
-            dataIndex: '3',
+            dataIndex: 'outbound_commodity_id',
             title: '出库商品commodity id',
             align: 'center',
             width: 150,
             editable: true,
         },
         {
-            dataIndex: '4',
+            dataIndex: 'outbound_commodity_sku_id',
             title: '出库商品commodity sku id',
             align: 'center',
-            width: 150,
+            width: 180,
             editable: true,
         },
         {
-            dataIndex: '5',
+            dataIndex: 'outbound_score',
             title: '出库系数',
             align: 'center',
             width: 150,
@@ -334,30 +367,43 @@ const ReplaceStoreOut = () => {
         return (
             <Form form={form} component={false} className={formStyles.formHelpAbsolute}>
                 <FitTable
+                    loading={loading}
                     components={{
                         body: {
                             cell: EditableCell,
                         },
                     }}
+                    scroll={scroll}
                     columns={mergedColumns}
                     dataSource={dataSource}
-                    pagination={false}
+                    pagination={{
+                        total: total,
+                        current: pageNumber,
+                        pageSize: pageSize,
+                        showSizeChanger: true,
+                        position: ['topRight', 'bottomRight'],
+                    }}
                 />
             </Form>
         );
-    }, [loading, editingKey]);
+    }, [loading, update, editingKey]);
 
     return useMemo(() => {
         return (
             <div>
                 {formElement}
                 {table}
-                <Button type="link" icon={<PlusCircleOutlined />} onClick={add}>
+                <Button
+                    className={styles.absBtn}
+                    type="link"
+                    icon={<PlusCircleOutlined />}
+                    onClick={add}
+                >
                     添加替换出库配置
                 </Button>
             </div>
         );
-    }, [dataSource, editingKey]);
+    }, [loading, update, editingKey]);
 };
 
 export default ReplaceStoreOut;
