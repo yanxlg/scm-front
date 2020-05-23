@@ -22,10 +22,12 @@ import SkuModal from '../SkuModal/SkuModal';
 import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal';
 import GoodsEditModal from '../GoodsEditModal/GoodsEditModal';
 import useSkuModal from '../../hooks/useSkuModal';
+import useGoodsEditModal from '../../hooks/useGoodsEditModal';
+import CountryFreightModal from '../CountryFreightModal/CountryFreightModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import useGoodsEditModal from '../../hooks/useGoodsEditModal';
+import { GoodsSourceEnum } from '@/enums/GlobalEnum';
 
 interface IProps {
     loading: boolean;
@@ -58,18 +60,28 @@ const GoodsTable: React.FC<IProps> = ({
     onReload,
     queryRef,
 }) => {
-    const [merchantStatus, setMerchantStatus] = useState(false);
     const [publistStatus, setPublistStatus] = useState(false);
-    const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
     const [publistList, setPublistList] = useState<IPublishItem[]>([]);
+    // 上架商品
+    const [merchantStatus, setMerchantStatus] = useState(false);
+    const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
+    const [disabledChannelList, setDisabledChannelList] = useState<string[]>([]);
     // 关联商品
     const [mergeStatus, setMergeStatus] = useState(false);
     const [commodityId, setCommodityId] = useState('');
     const [productSn, setProductSn] = useState('');
     // 编辑商品
-    const { editGoodsStatus, showEditGoods, hideEditGoods, productId } = useGoodsEditModal();
+    const {
+        editGoodsStatus,
+        showEditGoods,
+        hideEditGoods,
+        productId,
+        setProductId,
+    } = useGoodsEditModal();
     // 查看sku信息
     const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
+    // 查看国家运费
+    const [countryFreightStatus, setCountryFreightStatus] = useState(false);
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -127,23 +139,34 @@ const GoodsTable: React.FC<IProps> = ({
         [onsaleType, selectedRowKeys],
     );
 
+    const showMerchantModal = useCallback(() => {
+        // {1: "pdd", 2: "vova"}
+        setMerchantStatus(true);
+        // console.log('111111', formRef.current?.getFieldsValue());
+        const { source_channel } = formRef.current?.getFieldsValue() as any;
+        if (!source_channel || source_channel === String(GoodsSourceEnum.VOVA)) {
+            setDisabledChannelList(['vova']);
+        } else {
+            setDisabledChannelList([]);
+        }
+    }, []);
+
     const merchantCancel = useCallback(() => {
         setMerchantStatus(false);
     }, []);
 
     const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
-        // console.log('selectedKeys', selectedKeys);
         setSelectedRowKeys(selectedKeys as string[]);
     }, []);
 
     const toolBarRender = useCallback(() => {
         const handleClickOnsale = () => {
-            setMerchantStatus(true);
+            showMerchantModal();
             setOnsaleType('default');
         };
 
         const handleClickAllOnsale = () => {
-            setMerchantStatus(true);
+            showMerchantModal();
             setOnsaleType('all');
         };
         const disabled = selectedRowKeys.length === 0;
@@ -218,11 +241,20 @@ const GoodsTable: React.FC<IProps> = ({
         setProductSn('');
     }, []);
 
+    const showCountryFreight = useCallback(productId => {
+        setCountryFreightStatus(true);
+        setProductId(productId);
+    }, []);
+
+    const hideCountryFreight = useCallback(() => {
+        setCountryFreightStatus(false);
+        setProductId('');
+    }, []);
+
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
         return [
             {
                 fixed: 'left',
-                key: '_operation',
                 title: '操作',
                 dataIndex: '_operation',
                 align: 'center',
@@ -248,14 +280,12 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'commodity_id',
                 title: 'Commodity ID',
                 dataIndex: 'commodity_id',
                 align: 'center',
                 width: 140,
             },
             {
-                key: 'product_id',
                 title: 'Product ID',
                 dataIndex: 'product_id',
                 align: 'center',
@@ -287,14 +317,12 @@ const GoodsTable: React.FC<IProps> = ({
             //     },
             // },
             {
-                key: 'goods_status',
                 title: '版本状态',
                 dataIndex: 'goods_status',
                 align: 'center',
                 width: 110,
             },
             {
-                key: 'inventory_status',
                 title: '销售状态',
                 dataIndex: 'inventory_status',
                 align: 'center',
@@ -304,7 +332,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'goods_img',
                 title: '商品图片',
                 dataIndex: 'goods_img',
                 align: 'center',
@@ -314,7 +341,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'title',
                 title: '商品名称',
                 dataIndex: 'title',
                 align: 'center',
@@ -324,7 +350,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'tags',
                 title: '商品属性',
                 dataIndex: 'tags',
                 align: 'center',
@@ -355,7 +380,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'first_catagory',
                 title: '商品分类',
                 dataIndex: 'first_catagory',
                 align: 'center',
@@ -368,7 +392,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'sku_number',
                 title: 'sku数量',
                 dataIndex: 'sku_number',
                 align: 'center',
@@ -389,67 +412,69 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'price_min',
                 width: 140,
                 title: '爬虫价格(￥)',
                 dataIndex: 'price_min',
                 align: 'center',
                 render: (value: number, row: IGoodsAndSkuItem) => {
-                    const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                    const {
+                        price_min,
+                        price_max,
+                        shipping_fee_min,
+                        shipping_fee_max,
+                        multiple_price,
+                        product_id,
+                    } = row;
                     return (
                         <div>
                             {price_min}~{price_max}
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
+                            {multiple_price ? (
+                                <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
+                            ) : null}
                         </div>
                     );
                 },
             },
             {
-                key: 'sales_volume',
                 title: '销量',
                 dataIndex: 'sales_volume',
                 align: 'center',
                 width: 100,
             },
             {
-                key: 'comments',
                 title: '评价数量',
                 dataIndex: 'comments',
                 align: 'center',
                 width: 100,
             },
             {
-                key: 'store_id',
                 title: '店铺 id',
                 dataIndex: 'store_id',
                 align: 'center',
                 width: 110,
             },
             {
-                key: 'store_name',
                 title: '店铺名称',
                 dataIndex: 'store_name',
                 align: 'center',
                 width: 140,
             },
             {
-                key: 'worm_task_id',
                 title: '爬虫任务ID',
                 dataIndex: 'worm_task_id',
                 align: 'center',
                 width: 120,
             },
             {
-                key: 'worm_goods_id',
                 title: '爬虫商品ID',
                 dataIndex: 'worm_goods_id',
                 align: 'center',
                 width: 120,
             },
             {
-                key: 'publish_status',
                 title: '上架渠道',
                 dataIndex: 'publish_status',
                 align: 'center',
@@ -490,7 +515,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'update_time',
                 title: '更新时间',
                 dataIndex: 'update_time',
                 align: 'center',
@@ -500,7 +524,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'create_time',
                 title: '上传时间',
                 dataIndex: 'create_time',
                 align: 'center',
@@ -510,7 +533,6 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                key: 'worm_goodsinfo_link',
                 title: '商详链接',
                 dataIndex: 'worm_goodsinfo_link',
                 align: 'center',
@@ -522,6 +544,12 @@ const GoodsTable: React.FC<IProps> = ({
                         </a>
                     );
                 },
+            },
+            {
+                title: '商品渠道来源',
+                dataIndex: 'source_channel',
+                align: 'center',
+                width: 120,
             },
         ];
     }, []);
@@ -546,7 +574,6 @@ const GoodsTable: React.FC<IProps> = ({
     }, [selectedRowKeys]);
 
     return useMemo(() => {
-        // console.log('selectedRowKeys-1111111', selectedRowKeys);
         return (
             <>
                 <FitTable
@@ -564,6 +591,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <MerchantListModal
                     visible={merchantStatus}
+                    disabledChannelList={disabledChannelList}
                     onOKey={merchantOkey}
                     onCancel={merchantCancel}
                 />
@@ -597,6 +625,11 @@ const GoodsTable: React.FC<IProps> = ({
                     onCancel={hideEditGoods}
                     onReload={onReload}
                 />
+                <CountryFreightModal
+                    visible={countryFreightStatus}
+                    productId={productId}
+                    onCancel={hideCountryFreight}
+                />
             </>
         );
     }, [
@@ -609,6 +642,7 @@ const GoodsTable: React.FC<IProps> = ({
         skuStatus,
         mergeStatus,
         editGoodsStatus,
+        countryFreightStatus,
     ]);
 };
 

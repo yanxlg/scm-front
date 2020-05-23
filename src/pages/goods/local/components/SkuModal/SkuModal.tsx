@@ -12,7 +12,7 @@ declare interface ISkuItem {
     origin_sku_id: string;
     shipping_fee: number;
     sku_id: string;
-    sku_style: ISkuStyleItem[];
+    sku_style: any[];
     sku_price: string;
     sku_inventory: string;
     sku_weight: number;
@@ -225,10 +225,10 @@ const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
                 dataIndex: 'sku_style',
                 align: 'center',
                 width: 200,
-                render: (value: ISkuStyleItem[]) => {
+                render: (value: any[]) => {
                     return value.map(item => (
-                        <div key={item.option}>
-                            {item.option}: {item.value}
+                        <div key={item.option.text}>
+                            {item.option.text}: {item.value.text}
                         </div>
                     ));
                 },

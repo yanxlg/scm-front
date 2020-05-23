@@ -334,3 +334,7 @@ export async function uploadGoodsPic(data: any, product_id: string) {
 export function getGoodsDetail(product_id: string) {
     return request.get(LocalApiPath.getGoodsDetail.replace(':product_id', product_id));
 }
+
+export function getCountryPrice(product_id: string) {
+    return request.get(LocalApiPath.getCountryPrice.replace(':product_id', product_id));
+}
