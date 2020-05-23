@@ -526,14 +526,14 @@ const GoodsTable: React.FC<IProps> = ({
         ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig>(() => {
+    const pagination = useMemo(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,
             total: total,
             showSizeChanger: true,
             position: ['topRight', 'bottomRight'],
-        };
+        } as any;
     }, [loading]);
 
     const rowSelection = useMemo(() => {
