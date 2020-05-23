@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DatePicker, Input, Radio, Form, Spin, Checkbox } from 'antd';
+import { DatePicker, Input, Radio, Form, Spin, Checkbox, Select } from 'antd';
 import '@/styles/config.less';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
@@ -25,6 +25,7 @@ declare interface IFormData extends IPUTaskBody {
     day: number;
     second: number;
     update_item: UpdateItemType;
+    platform: 'PDD' | 'VOVA';
 }
 
 declare interface ITimerUpdateProps {
@@ -65,8 +66,10 @@ const convertFormData = (values: IFormData) => {
         task_start_time,
         task_name,
         update_item,
+        platform,
     } = values;
     return {
+        platform,
         task_name,
         ranges: ranges,
         update_item,
@@ -196,6 +199,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         taskIntervalType: TaskIntervalConfigType.day,
                         day: 1,
                         update_item: UpdateItemType.All,
+                        platform: 'PDD',
                     }}
                 >
                     <Form.Item
@@ -212,6 +216,24 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         ]}
                     >
                         <Input className="picker-default" />
+                    </Form.Item>
+                    <Form.Item
+                        className={formStyles.formItem}
+                        validateTrigger={'onBlur'}
+                        name="platform"
+                        label="商品渠道"
+                        validateFirst={true}
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择商品渠道',
+                            },
+                        ]}
+                    >
+                        <Select className="picker-default">
+                            <Select.Option value="PDD">PDD</Select.Option>
+                            <Select.Option value="VOVA">VOVA</Select.Option>
+                        </Select>
                     </Form.Item>
                     <Form.Item
                         validateTrigger={'onBlur'}

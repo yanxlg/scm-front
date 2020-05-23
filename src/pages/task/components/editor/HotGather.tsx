@@ -361,11 +361,16 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         ]}
                     >
                         <Select className="picker-default" onChange={taskChannelChange}>
-                            {TaskChannelList.map(({ name, id }) => (
-                                <Select.Option value={id} key={id}>
-                                    {name}
-                                </Select.Option>
-                            ))}
+                            {TaskChannelList.map(({ name, id }) => {
+                                if (id === '3') {
+                                    return null;
+                                }
+                                return (
+                                    <Select.Option value={id} key={id}>
+                                        {name}
+                                    </Select.Option>
+                                );
+                            })}
                         </Select>
                     </Form.Item>
                     <TaskRange form={form} onTaskRangeChange={taskRangeChange} />
