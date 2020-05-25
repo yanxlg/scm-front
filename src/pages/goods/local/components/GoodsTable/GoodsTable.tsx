@@ -79,7 +79,7 @@ const GoodsTable: React.FC<IProps> = ({
         setProductId,
     } = useGoodsEditModal();
     // 查看sku信息
-    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
+    const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
     // 查看国家运费
     const [countryFreightStatus, setCountryFreightStatus] = useState(false);
 
@@ -609,6 +609,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <SkuModal
                     visible={skuStatus}
+                    channelSource={channelSource}
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />

@@ -19,12 +19,18 @@ const columns: ColumnsType<IPriceItem> = [
         title: '价格(￥)',
         dataIndex: 'price',
         align: 'center',
+        render: ({ minPrice, maxPrice }) => `${minPrice} ~ ${maxPrice}`,
     },
 ];
 
+interface IPriceInfo {
+    minPrice: number;
+    maxPrice: number;
+}
+
 interface IPriceItem {
     country: string;
-    price: string;
+    price: IPriceInfo;
 }
 
 const CountryFreightModal: React.FC<IProps> = ({ visible, onCancel, productId }) => {
@@ -39,7 +45,7 @@ const CountryFreightModal: React.FC<IProps> = ({ visible, onCancel, productId })
                 if (data) {
                     const list = Object.keys(data).map(key => ({
                         country: key,
-                        price: data[key].toFixed(2),
+                        price: data[key],
                     }));
                     setPriceList(list);
                 }
