@@ -20,7 +20,7 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
     const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
     const { page, setPage, pageSize, setPageSize, total, setTotal } = usePagination();
     // 查看sku信息
-    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
+    const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
 
     const _getGoodsVersion = useCallback(
         (params = { page, page_count: pageSize }) => {
@@ -211,6 +211,7 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                 />
                 <SkuModal
                     visible={skuStatus}
+                    channelSource={channelSource}
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />

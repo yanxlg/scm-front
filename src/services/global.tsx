@@ -57,6 +57,7 @@ export function exportExcel(data: IExportExcelReqData) {
         data,
     });
 }
+
 export const queryGoodsSourceList = singlePromiseWrap(() => {
     return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1')).then(res => {
         const { data } = res;
