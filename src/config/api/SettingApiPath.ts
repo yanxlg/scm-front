@@ -15,4 +15,8 @@ export enum SettingApiPath {
     UpdatePriceStrategy = '/api/v1/price_strategy/store',
     QueryPriceStrategyHistory = '/api/v1/price_strategy/history',
     QueryReplaceList = '/api/v1/orders/setting/delivery/replace/list',
+    DeleteReplaceList = '/api/v1/orders/setting/delivery/replace/{id}',
+    AddReplaceList = '/api/v1/orders/setting/delivery/replace',
+    EditReplaceList = '/api/v1/orders/setting/delivery/replace/{id}',
+    QueryReplace = '/api/v1/orders/setting/delivery/replace/{id}',
 }

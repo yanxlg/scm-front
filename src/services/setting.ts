@@ -16,6 +16,7 @@ import {
     IPriceStrategyItem,
     IReplaceBody,
     IReplaceStoreOutItem,
+    ReplaceItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -151,7 +152,10 @@ export function queryPriceStrategyHistory(params: any) {
     );
 }
 
-export function queryReplaceStoreOutList(data: IReplaceBody & IRequestPagination1) {
+export function queryReplaceStoreOutList({
+    type,
+    ...data
+}: IReplaceBody & IRequestPagination1 & { type?: string }) {
     return api.post<IResponse<PaginationResponse<IReplaceStoreOutItem>>>(
         SettingApiPath.QueryReplaceList,
         {
@@ -160,4 +164,41 @@ export function queryReplaceStoreOutList(data: IReplaceBody & IRequestPagination
             },
         },
     );
+}
+
+export function deleteReplaceStoreOutList(id: string) {
+    return request.delete(SettingApiPath.DeleteReplaceList.replace('{id}', id), {
+        data: {
+            id,
+        },
+    });
+}
+
+export function addReplaceStoreOutList({
+    outbound_score,
+    ...extra
+}: Partial<IReplaceStoreOutItem>) {
+    return request.post(SettingApiPath.AddReplaceList, {
+        data: {
+            ...extra,
+            outbound_score: Number(outbound_score),
+        },
+    });
+}
+
+export function updateReplaceStoreOutList({ outbound_score, ...extra }: IReplaceStoreOutItem) {
+    return request.put(SettingApiPath.EditReplaceList.replace('{id}', extra.id), {
+        data: {
+            ...extra,
+            outbound_score: Number(outbound_score),
+        },
+    });
+}
+
+export function queryReplaceStoreOut(fetch: FetchFactory, id: string) {
+    return fetch.get<IResponse<ReplaceItem>>(SettingApiPath.QueryReplace.replace('{id}', id), {
+        params: {
+            id,
+        },
+    });
 }

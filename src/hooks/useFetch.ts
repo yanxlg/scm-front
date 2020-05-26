@@ -12,25 +12,25 @@ export class FetchFactory {
         this.token = token;
         this.cancel = cancel;
     }
-    public post(url: string, options?: RequestOptionsInit) {
-        return request.post(url, { ...options, cancelToken: this.token });
+    public post<T>(url: string, options?: RequestOptionsInit) {
+        return request.post<T>(url, { ...options, cancelToken: this.token });
     }
-    public get(url: string, options?: RequestOptionsInit) {
-        return request.get(url, { ...options, cancelToken: this.token });
+    public get<T>(url: string, options?: RequestOptionsInit) {
+        return request.get<T>(url, { ...options, cancelToken: this.token });
     }
-    public put(url: string, options?: RequestOptionsInit) {
-        return request.put(url, { ...options, cancelToken: this.token });
+    public put<T>(url: string, options?: RequestOptionsInit) {
+        return request.put<T>(url, { ...options, cancelToken: this.token });
     }
 }
 
-function useFetch(clean = true) {
+function useFetch(clean = true, deps: any[] = []) {
     const fetchRef = useRef(new FetchFactory());
 
     useEffect(() => {
         return () => {
             clean && fetchRef.current.cancel('by destroy');
         };
-    }, []);
+    }, deps);
 
     return [fetchRef.current];
 }

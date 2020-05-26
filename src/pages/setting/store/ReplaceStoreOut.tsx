@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     FitTable,
     JsonForm,
@@ -6,46 +6,36 @@ import {
     PopConfirmLoadingButton,
     RichInput,
     useList,
+    useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
 import { FormInstance } from 'antd/es/form';
 import styles from '@/styles/_store.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Form, Input, message, Select } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { ColumnType } from 'antd/es/table/interface';
-import { queryReplaceStoreOutList } from '@/services/setting';
+import {
+    addReplaceStoreOutList,
+    deleteReplaceStoreOutList,
+    queryReplaceStoreOutList,
+    updateReplaceStoreOutList,
+} from '@/services/setting';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { queryShopList } from '@/services/global';
-import { SelectProps } from 'antd/lib/select';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { IReplaceStoreOutItem } from '@/interface/ISetting';
 import { ITaskListItem } from '@/interface/ITask';
+import ModalWrap from '@/pages/setting/store/ReplaceModal';
 
 const fieldList: Array<FormField> = [
-    {
-        type: 'select',
-        name: 'store',
-        label: '店铺名',
-        defaultValue: '',
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map(({ merchant_name, merchant_id }) => {
-                    return { name: merchant_name, value: merchant_id };
-                });
-            }),
-    },
     {
         type: 'select',
         name: 'type',
         colon: false,
         defaultValue: '1',
         formItemClassName: classNames(formStyles.formItem, styles.formAsLabel),
+        className: styles.selectType,
         optionList: [
             {
                 name: '售卖商品Commoity ID',
@@ -72,12 +62,19 @@ const fieldList: Array<FormField> = [
         },
         dynamic: (form: FormInstance) => {
             const type = form.getFieldValue('type');
+            const name =
+                type === '1'
+                    ? 'sale_commodity_ids'
+                    : type === '2'
+                    ? 'sale_commodity_sku_ids'
+                    : type === '3'
+                    ? 'outbound_commodity_ids'
+                    : 'outbound_commodity_sku_ids';
             return {
                 type: 'input',
                 colon: false,
-                name: `value_${type}`,
+                name: name,
                 placeholder: '逗号隔开',
-                formatter: 'multipleToArray',
             };
         },
     },
@@ -99,29 +96,6 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
     children: React.ReactNode;
 }
 
-const ShopSelect = (props: SelectProps<string>) => {
-    const [list, setList] = useState<Array<{ name: string; value: string }>>([]);
-    useEffect(() => {
-        queryShopList().then(({ data = [] }) => {
-            setList(
-                data.map(({ merchant_name, merchant_id }) => {
-                    return { name: merchant_name, value: merchant_id };
-                }),
-            );
-        });
-    }, []);
-
-    return (
-        <Select {...props}>
-            {list.map(({ name, value }) => (
-                <Select.Option key={value} value={value}>
-                    {name}
-                </Select.Option>
-            ))}
-        </Select>
-    );
-};
-
 const EditableCell: React.FC<EditableCellProps> = ({
     editing,
     dataIndex,
@@ -133,9 +107,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
     ...restProps
 }) => {
     const message =
-        dataIndex === 'id'
-            ? '请选择店铺'
-            : dataIndex === 'sale_commodity_id'
+        dataIndex === 'sale_commodity_id'
             ? '请输入售卖商品commodity id'
             : dataIndex === 'sale_commodity_sku_id'
             ? '请输入售卖商品commodity sku id'
@@ -150,7 +122,8 @@ const EditableCell: React.FC<EditableCellProps> = ({
             {editing ? (
                 <Form.Item
                     name={dataIndex}
-                    style={{ margin: 0 }}
+                    style={{ margin: 0, padding: '10px 0' }}
+                    validateTrigger="onBlur"
                     rules={[
                         {
                             required: true,
@@ -158,9 +131,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
                         },
                     ]}
                 >
-                    {dataIndex === 'id' ? (
-                        <ShopSelect />
-                    ) : dataIndex === 'outbound_score' ? (
+                    {dataIndex === 'outbound_score' ? (
                         <RichInput richType={'positiveInteger'} />
                     ) : (
                         <Input allowClear={true} />
@@ -178,13 +149,8 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 const ReplaceStoreOut = () => {
     const [form] = Form.useForm();
     const formRef = useRef<JsonFormRef>(null);
-    const [editingKey, setEditingKey] = useState<string | Symbol | undefined>(undefined);
-    const [update, setUpdate] = useState(0);
-    const shopMap = useRef<{ [key: string]: string }>({});
-
-    const startUpdate = useCallback(() => {
-        setUpdate(update => update + 1);
-    }, []);
+    const [editingKey, setEditingKey] = useState<string | undefined>(undefined);
+    const { visible, setVisibleProps, onClose } = useModal<string>();
 
     const {
         dataSource,
@@ -198,51 +164,62 @@ const ReplaceStoreOut = () => {
     } = useList({
         queryList: queryReplaceStoreOutList,
         formRef: formRef,
-        autoQuery: false,
     });
-
-    useEffect(() => {
-        queryShopList().then(({ data = [] }) => {
-            const map: { [key: string]: string } = {};
-            data.forEach(item => {
-                map[item.merchant_id] = map[item.merchant_name];
-            });
-            shopMap.current = map;
-            // 请求
-            onSearch();
-        });
-    }, []);
 
     const isEditing = (record: IReplaceStoreOutItem) => record.id === editingKey;
 
     const edit = (record: IReplaceStoreOutItem) => {
+        setDataSource(dataSource => {
+            return dataSource.filter(data => data.id !== '');
+        });
         form.setFieldsValue({ ...record });
         setEditingKey(record.id);
     };
 
-    const del = (key: string) => {
-        return new Promise(() => {});
+    const del = (id: string) => {
+        if (id === '') {
+            return Promise.resolve().then(() => {
+                setDataSource(dataSource => {
+                    return dataSource.filter(data => data.id !== id);
+                });
+                setEditingKey(editKey => {
+                    return editKey === id ? undefined : editKey;
+                });
+                message.success('删除成功！');
+            });
+        } else {
+            return deleteReplaceStoreOutList(id as string).then(() => {
+                message.success('删除成功！');
+                onReload();
+            });
+        }
     };
 
     const add = () => {
         // 如果已经有一条了则不会创建新的
-        if (typeof dataSource[0]?.id !== 'symbol') {
-            const id = Symbol();
+        if (dataSource[0]?.id !== '') {
             setDataSource(dataSource => {
                 return [
                     {
-                        id: id,
+                        id: '',
                     } as IReplaceStoreOutItem,
                 ].concat(dataSource);
             });
-            setEditingKey(id);
+            setEditingKey('');
+            form.resetFields();
         }
     };
 
-    const save = async (key: string) => {
+    const save = async (id: string) => {
         // 保存
-        form.validateFields().then((values: any) => {
-            console.log(values);
+        const values = await form.validateFields();
+        if (id === '') {
+            await addReplaceStoreOutList(values);
+        } else {
+            await updateReplaceStoreOutList({ ...values, id });
+        }
+        onReload().finally(() => {
+            setEditingKey(undefined);
         });
     };
 
@@ -259,92 +236,92 @@ const ReplaceStoreOut = () => {
         );
     }, []);
 
-    const columns: EditColumnsType<IReplaceStoreOutItem> = [
-        {
-            dataIndex: 'id',
-            title: '店铺名',
-            align: 'center',
-            width: 150,
-            editable: true,
-            render: _ => {
-                return shopMap.current[_];
+    const columns: EditColumnsType<IReplaceStoreOutItem> = useMemo(() => {
+        return [
+            {
+                dataIndex: 'sale_commodity_id',
+                title: '售卖商品 commodity id',
+                align: 'center',
+                width: 150,
+                editable: true,
             },
-        },
-        {
-            dataIndex: 'sale_commodity_id',
-            title: '售卖商品 commodity id',
-            align: 'center',
-            width: 150,
-            editable: true,
-        },
-        {
-            dataIndex: 'sale_commodity_sku_id',
-            title: '售卖商品 commodity sku id',
-            align: 'center',
-            width: 180,
-            editable: true,
-        },
-        {
-            dataIndex: 'outbound_commodity_id',
-            title: '出库商品commodity id',
-            align: 'center',
-            width: 150,
-            editable: true,
-        },
-        {
-            dataIndex: 'outbound_commodity_sku_id',
-            title: '出库商品commodity sku id',
-            align: 'center',
-            width: 180,
-            editable: true,
-        },
-        {
-            dataIndex: 'outbound_score',
-            title: '出库系数',
-            align: 'center',
-            width: 150,
-            editable: true,
-        },
-        {
-            dataIndex: 'actions',
-            title: '操作',
-            align: 'center',
-            width: 200,
-            render: (_, record) => {
-                const isEditable = isEditing(record);
-                return (
-                    <>
-                        {isEditable ? (
-                            <Button type="link" onClick={() => save(record.id)}>
-                                保存
-                            </Button>
-                        ) : (
-                            <React.Fragment>
-                                <Button type="link">查看商品</Button>
-                                <Button type="link" onClick={() => edit(record)}>
-                                    修改
+            {
+                dataIndex: 'sale_commodity_sku_id',
+                title: '售卖商品 commodity sku id',
+                align: 'center',
+                width: 180,
+                editable: true,
+            },
+            {
+                dataIndex: 'outbound_commodity_id',
+                title: '出库商品commodity id',
+                align: 'center',
+                width: 150,
+                editable: true,
+            },
+            {
+                dataIndex: 'outbound_commodity_sku_id',
+                title: '出库商品commodity sku id',
+                align: 'center',
+                width: 180,
+                editable: true,
+            },
+            {
+                dataIndex: 'outbound_score',
+                title: '出库系数',
+                align: 'center',
+                width: 150,
+                editable: true,
+            },
+            {
+                dataIndex: 'actions',
+                title: '操作',
+                align: 'center',
+                width: 200,
+                render: (_, record) => {
+                    const isEditable = isEditing(record);
+                    return (
+                        <>
+                            {isEditable ? (
+                                <LoadingButton type="link" onClick={() => save(record.id)}>
+                                    保存
+                                </LoadingButton>
+                            ) : (
+                                <React.Fragment>
+                                    <Button type="link" onClick={() => setVisibleProps(record.id)}>
+                                        查看商品
+                                    </Button>
+                                    <Button type="link" onClick={() => edit(record)}>
+                                        修改
+                                    </Button>
+                                </React.Fragment>
+                            )}
+                            {record.id === '' ? (
+                                <Button type="link" danger={true} onClick={() => del(record.id)}>
+                                    删除
                                 </Button>
-                            </React.Fragment>
-                        )}
-                        <PopConfirmLoadingButton
-                            popConfirmProps={{
-                                title: '确定要删除该替换出库记录吗？',
-                                okText: '确定',
-                                cancelText: '取消',
-                                placement: 'topRight',
-                                onConfirm: () => del(record.id),
-                            }}
-                            buttonProps={{
-                                children: '删除',
-                                type: 'link',
-                                danger: true,
-                            }}
-                        />
-                    </>
-                );
+                            ) : (
+                                <PopConfirmLoadingButton
+                                    popConfirmProps={{
+                                        title: '确定要删除该替换出库记录吗？',
+                                        okText: '确定',
+                                        cancelText: '取消',
+                                        placement: 'topRight',
+                                        onConfirm: () => del(record.id),
+                                    }}
+                                    buttonProps={{
+                                        children: '删除',
+                                        type: 'link',
+                                        danger: true,
+                                    }}
+                                />
+                            )}
+                        </>
+                    );
+                },
             },
-        },
-    ];
+        ];
+    }, [editingKey]);
 
     const mergedColumns = useMemo(() => {
         return columns.map(col => {
@@ -365,8 +342,9 @@ const ReplaceStoreOut = () => {
 
     const table = useMemo(() => {
         return (
-            <Form form={form} component={false} className={formStyles.formHelpAbsolute}>
+            <Form form={form} className={formStyles.formHelpAbsolute}>
                 <FitTable
+                    rowKey="id"
                     loading={loading}
                     components={{
                         body: {
@@ -386,7 +364,9 @@ const ReplaceStoreOut = () => {
                 />
             </Form>
         );
-    }, [loading, update, editingKey]);
+    }, [loading, editingKey, dataSource.length]);
+
+    console.log(visible);
 
     return useMemo(() => {
         return (
@@ -401,9 +381,10 @@ const ReplaceStoreOut = () => {
                 >
                     添加替换出库配置
                 </Button>
+                <ModalWrap visible={visible} onClose={onClose} />
             </div>
         );
-    }, [loading, update, editingKey]);
+    }, [loading, editingKey, dataSource.length, visible]);
 };
 
 export default ReplaceStoreOut;
