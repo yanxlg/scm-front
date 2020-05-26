@@ -33,7 +33,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     // 编辑商品
     const { editGoodsStatus, productId, showEditGoods, hideEditGoods } = useGoodsEditModal();
     // 查看sku信息
-    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
+    const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
 
     const conversionData = useCallback(record => {
         const { sku_info, update_time } = record;
@@ -625,6 +625,7 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 />
                 <SkuModal
                     visible={skuStatus}
+                    channelSource={channelSource}
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />
