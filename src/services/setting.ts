@@ -1,6 +1,11 @@
 import { transPaginationRequest } from '@/utils/utils';
 import request from '@/utils/request';
-import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
+import {
+    IPaginationResponse,
+    IRequestPagination,
+    IRequestPagination1,
+    IResponse,
+} from '@/interface/IGlobal';
 import {
     ICountryItem,
     ICustomItem,
@@ -13,12 +18,16 @@ import {
     IOfflinePurchaseQuery,
     IOfflinePurchaseReqData,
     IOfflinePurchaseItem,
+    IReplaceBody,
+    IReplaceStoreOutItem,
+    ReplaceItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { api } from 'react-components';
 import { IPaginationResponse as PaginationResponse } from 'react-components/es/hooks/useList';
+import { FetchFactory } from '@/hooks/useFetch';
 
 export async function queryCustomList(query: ICustomListQuery) {
     const params = transPaginationRequest(query);
@@ -147,25 +156,55 @@ export function queryPriceStrategyHistory(params: any) {
     );
 }
 
-export function queryReplaceStoreOutList() {
-    return new Promise(resolve => {
-        resolve({
+export function queryReplaceStoreOutList({
+    type,
+    ...data
+}: IReplaceBody & IRequestPagination1 & { type?: string }) {
+    return api.post<IResponse<PaginationResponse<IReplaceStoreOutItem>>>(
+        SettingApiPath.QueryReplaceList,
+        {
             data: {
-                total: 100,
-                list: [
-                    {
-                        id: '11',
-                        1: '21',
-                        2: '34',
-                        3: '54',
-                        4: '232',
-                        5: '2323',
-                    },
-                ],
+                ...data,
             },
-        });
-    }) as any;
-    // return api.get();
+        },
+    );
+}
+
+export function deleteReplaceStoreOutList(id: string) {
+    return request.delete(SettingApiPath.DeleteReplaceList.replace('{id}', id), {
+        data: {
+            id,
+        },
+    });
+}
+
+export function addReplaceStoreOutList({
+    outbound_score,
+    ...extra
+}: Partial<IReplaceStoreOutItem>) {
+    return request.post(SettingApiPath.AddReplaceList, {
+        data: {
+            ...extra,
+            outbound_score: Number(outbound_score),
+        },
+    });
+}
+
+export function updateReplaceStoreOutList({ outbound_score, ...extra }: IReplaceStoreOutItem) {
+    return request.put(SettingApiPath.EditReplaceList.replace('{id}', extra.id), {
+        data: {
+            ...extra,
+            outbound_score: Number(outbound_score),
+        },
+    });
+}
+
+export function queryReplaceStoreOut(fetch: FetchFactory, id: string) {
+    return fetch.get<IResponse<ReplaceItem>>(SettingApiPath.QueryReplace.replace('{id}', id), {
+        params: {
+            id,
+        },
+    });
 }
 
 export function queryOfflinePurchaseList(data: IOfflinePurchaseQuery) {

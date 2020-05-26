@@ -177,7 +177,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         // console.log(1111, list);
         const childOrderList: IChildOrderItem[] = [];
         list.forEach((goodsItem: any) => {
-            const { orderGoods, orderInfo } = goodsItem;
+            const { orderGoods, orderInfo, orderGods } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
             const {
                 currency,
@@ -215,6 +215,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         channelSource,
                         orderAddress,
                         purchaseOrderStatus,
+                        orderGods,
                     };
                     if (index === 0) {
                         childOrderItem._rowspan = purchasePlanList.length;
@@ -231,6 +232,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     channelSource,
                     ...orderRest,
                     orderAddress,
+                    orderGods,
                     _rowspan: 1,
                     _checked: false,
                 });
@@ -547,7 +549,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         </div>
                     </JsonForm>
                     {/* <div className="order-operation">
-                        
+
                         {!showParentStatus ? (
                             <LoadingButton
                                 type="primary"
