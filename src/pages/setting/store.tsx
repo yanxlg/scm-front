@@ -13,7 +13,7 @@ const Store = () => {
         return (
             <Container>
                 <Tabs
-                    defaultActiveKey="2"
+                    defaultActiveKey="1"
                     className="tabs-margin-none"
                     type="card"
                     children={[
