@@ -29,7 +29,7 @@ const PublishIntercept: React.FC = props => {
                             checked,
                         };
                     }),
-                );
+                ); //dasdasdsa
             }
         } catch (error) {
             setLoading(false);

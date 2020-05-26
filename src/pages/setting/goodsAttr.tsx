@@ -92,7 +92,7 @@ const GoodsAttr: React.FC = props => {
         // console.log('editList', editList);
         for (let i = 0, len = editList.length; i < len; i++) {
             const { name, keyWords, page, type } = editList[i];
-            if (type !== 'delete' && (!name || !keyWords)) {
+            if (type !== 'delete' && !name) {
                 message.error(`第${page}页面存在空值，请检查`);
                 return false;
             }
