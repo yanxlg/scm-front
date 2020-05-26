@@ -4,7 +4,7 @@
 .container {
     padding: 20px 30px;
 
-    @spacing: 64px + 48px;
+    @spacing: 64px+48px;
 
     min-height: calc(~'100vh - @{spacing}');
 }
@@ -28,6 +28,7 @@
 .block {
     display: block !important;
 }
+
 .inline-block {
     display: inline-block !important;
 }
@@ -40,30 +41,35 @@
 
 .select {
     &-default {
-        width: @inputWidth !important;
+        width: @inputWidth  !important;
     }
+
     &-equal {
         &-date {
-            width: @inputEqualDateSelectorWidth !important;
+            width: @inputEqualDateSelectorWidth  !important;
         }
     }
 }
 
 .input {
     &-default {
-        width: @inputWidth !important;
+        width: @inputWidth  !important;
     }
+
     &-large {
-        width: @inputLargeWidth !important;
+        width: @inputLargeWidth  !important;
     }
+
     &-small {
-        width: @inputSmallWidth !important;
+        width: @inputSmallWidth  !important;
     }
+
     &-handler {
         .ant-input-number-handler-wrap {
             display: none;
         }
     }
+
     &-equal {
         &-date {
             width: @inputEqualDateSelectorWidth;
@@ -75,24 +81,28 @@
     &-small {
         width: @pickerSmallWidth;
     }
+
     &-default {
-        width: @pickerDefaultWidth !important;
+        width: @pickerDefaultWidth  !important;
     }
 }
 
 .btn {
     &-group {
-        & ~ & {
+        &~& {
             margin-left: @btnDefaultSpacing;
         }
     }
+
     &-default {
         min-width: @btnDefaultWidth;
         height: @btnDefaultHeight;
-        & ~ & {
+
+        &~& {
             margin-left: @btnDefaultSpacing;
         }
     }
+
     &-go {
         width: 46px;
         height: 32px;
@@ -104,8 +114,10 @@
         margin-left: 32px;
         padding: 0;
     }
+
     &-clear {
         &:extend(.padding-none);
+
         .ant-btn {
             &:extend(.padding-none);
         }
@@ -119,19 +131,24 @@
         &:extend(.flex);
         flex-direction: row;
     }
+
     &-column {
         &:extend(.flex);
         flex-direction: column;
     }
+
     &-1 {
         flex: 1;
     }
+
     &-align {
         align-items: center;
     }
+
     &-inline {
         display: inline-flex;
     }
+
     &-wrap {
         flex-wrap: wrap;
     }
@@ -147,11 +164,14 @@
     &-left {
         float: left;
     }
+
     &-right {
         float: right;
     }
+
     &-clear {
         clear: both;
+
         &:after {
             content: '';
             clear: both;
@@ -163,18 +183,22 @@
 .card {
     &-divider {
         border-top-width: 0;
+
         .ant-divider {
             position: absolute;
             left: 0;
             top: -2px;
             margin: 0;
             transform: translateY(-50%);
+
             &:before {
                 width: 1.5%;
             }
+
             &:after {
                 width: 98.5%;
             }
+
             &:before,
             &:after {
                 border-radius: @card-radius; //@card-radius
@@ -197,4 +221,8 @@ body {
     &-pointer {
         cursor: pointer;
     }
+}
+
+.ant-tooltip {
+    max-width: 300px !important;
 }

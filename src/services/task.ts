@@ -18,6 +18,7 @@ import {
     ISubTaskProgressResponse,
     ISubTaskIdQuery,
     ISubTaskIdData,
+    IVoVaTaskBody,
 } from '@/interface/ITask';
 import { IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
@@ -60,7 +61,6 @@ export async function addPDDTimerUpdateTask(params: IPUTaskBody) {
         data: {
             ...params,
             version: '1.0',
-            platform: 'PDD',
         },
         skipResponseInterceptors: true,
     });
@@ -194,5 +194,15 @@ export async function querySubTaskProgress(query: ISubTaskProgressQuery) {
 export async function querySubTaskIdList(params: ISubTaskIdQuery) {
     return request.get<IResponse<ISubTaskIdData>>(TaskApiPath.QuerySubTaskIdList, {
         params: transPaginationRequest(params),
+    });
+}
+
+export async function addVoVaTask(params: IVoVaTaskBody) {
+    return request.post(TaskApiPath.AddVoVaTask, {
+        data: {
+            ...params,
+            version: '1.0',
+            platform: 'VOVA',
+        },
     });
 }

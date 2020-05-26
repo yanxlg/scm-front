@@ -179,7 +179,13 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         list.forEach((goodsItem: any) => {
             const { orderGoods, orderInfo } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
+            const {
+                currency,
+                confirmTime,
+                channelOrderSn,
+                channelSource,
+                orderAddress,
+            } = orderInfo;
             // console.log(111, orderGoodsPurchasePlan, orderGoods);
             if (orderGoodsPurchasePlan) {
                 let purchasePlanList = [...orderGoodsPurchasePlan];
@@ -207,6 +213,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         confirmTime,
                         channelOrderSn,
                         channelSource,
+                        orderAddress,
                         purchaseOrderStatus,
                     };
                     if (index === 0) {
@@ -223,6 +230,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     channelOrderSn,
                     channelSource,
                     ...orderRest,
+                    orderAddress,
                     _rowspan: 1,
                     _checked: false,
                 });

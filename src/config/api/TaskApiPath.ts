@@ -6,6 +6,7 @@ export enum TaskApiPath {
     AddPDDHotTask = '/api/v1/task/spider/pdd_hotsale',
     AddPDDURLTask = '/api/v1/task/spider/url',
     AddPUTask = '/api/v1/task/spider/goods_update',
+    AddVoVaTask = '/api/v1/task/vova_spider',
     DeleteTask = '/api/v1/task/delete',
     ActiveTask = '/api/v1/task/plan',
     RetryTask = '/api/v1/task/retry',

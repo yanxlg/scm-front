@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Modal, Row, Col, Input, Button, Pagination } from 'antd';
+import { Modal, Row, Col, Input, Button, Pagination, Tooltip, Table } from 'antd';
 import { ISkuStyleItem, ISkuInfo } from '@/interface/ILocalGoods';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { setCommoditySkuTag } from '@/services/goods-attr';
@@ -10,26 +10,28 @@ import styles from './_SkuModal.less';
 
 declare interface ISkuItem {
     origin_sku_id: string;
-    shipping_fee: number;
+    shipping_fee: string;
     sku_id: string;
-    sku_style: ISkuStyleItem[];
-    sku_price: string;
+    sku_style: any[];
+    sku_price: [string, string];
     sku_inventory: string;
     sku_weight: number;
     serial: number;
-    sku_amount: number; // 爬虫价格 = 价格 + 运费
+    sku_amount: [string, string]; // 爬虫价格 = 价格 + 运费
     image_url: string;
     commodity_sku_id: string;
     tags: string[];
+    multiple_price: { [key: string]: number };
 }
 
 interface IProps {
     visible: boolean;
+    channelSource: string;
     currentSkuInfo: ISkuInfo | null;
     onCancel(): void;
 }
 
-const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
+const SkuModal: React.FC<IProps> = ({ visible, channelSource, currentSkuInfo, onCancel }) => {
     const [loading, setLoading] = useState(false);
     const [pageNumber, setPageNumber] = useState(1);
     const [total, setTotal] = useState(0);
@@ -70,13 +72,27 @@ const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
                                 sku_price,
                                 shipping_fee,
                                 variant_image,
+                                multiple_price,
                                 ...rest
                             } = item;
+                            const skuPrice = Number(sku_price);
+                            const shippingFee = Number(shipping_fee);
+                            let min = skuPrice;
+                            let max = skuPrice;
+                            if (multiple_price && !Array.isArray(multiple_price)) {
+                                const priceList: number[] = Object.values(multiple_price);
+                                min = Math.min(...priceList);
+                                max = Math.max(...priceList);
+                            }
                             return {
                                 ...rest,
-                                sku_price,
+                                multiple_price,
+                                sku_price: [min.toFixed(2), max.toFixed(2)],
                                 shipping_fee,
-                                sku_amount: Number(sku_price) + Number(shipping_fee),
+                                sku_amount: [
+                                    (min + shippingFee).toFixed(2),
+                                    (max + shippingFee).toFixed(2),
+                                ],
                                 sku_style: sku_style.map(({ option, value }: any) => ({
                                     option,
                                     value,
@@ -225,10 +241,10 @@ const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
                 dataIndex: 'sku_style',
                 align: 'center',
                 width: 200,
-                render: (value: ISkuStyleItem[]) => {
+                render: (value: any[]) => {
                     return value.map(item => (
-                        <div key={item.option}>
-                            {item.option}: {item.value}
+                        <div key={item.option.text}>
+                            {item.option.text}: {item.value.text}
                         </div>
                     ));
                 },
@@ -239,13 +255,55 @@ const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
                 dataIndex: 'sku_amount',
                 align: 'center',
                 width: 140,
+                render: (value: [string, string], row: ISkuItem) => {
+                    if (channelSource?.toLowerCase() === 'pdd') {
+                        return value[0];
+                    }
+                    let dataSource: any[] = [];
+                    const { multiple_price } = row;
+                    if (multiple_price) {
+                        dataSource = Object.keys(multiple_price).map(key => ({
+                            country: key,
+                            price: `￥ ${multiple_price[key]}`,
+                        }));
+                    }
+                    return (
+                        <>
+                            {value[0]} ~ {value[1]}
+                            <div>
+                                <PopTable text="更多国家爬虫价" dataSource={dataSource} />
+                            </div>
+                        </>
+                    );
+                },
             },
             {
                 key: 'sku_price',
                 title: '单价(￥)',
                 dataIndex: 'sku_price',
                 align: 'center',
-                width: 100,
+                width: 140,
+                render: (value: [string, string], row: ISkuItem) => {
+                    if (channelSource?.toLowerCase() === 'pdd') {
+                        return value[0];
+                    }
+                    let dataSource: any[] = [];
+                    const { multiple_price } = row;
+                    if (multiple_price) {
+                        dataSource = Object.keys(multiple_price).map(key => ({
+                            country: key,
+                            price: `￥ ${multiple_price[key]}`,
+                        }));
+                    }
+                    return (
+                        <>
+                            {value[0]} ~ {value[1]}
+                            <div>
+                                <PopTable text="更多国家单价" dataSource={dataSource} />
+                            </div>
+                        </>
+                    );
+                },
             },
             {
                 key: 'shipping_fee',
@@ -300,7 +358,7 @@ const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
                 },
             },
         ];
-    }, [total, currentSkuInfo, _setCommoditySkuTag]);
+    }, [total, currentSkuInfo, _setCommoditySkuTag, channelSource]);
 
     return useMemo(() => {
         return (
@@ -360,5 +418,39 @@ const SkuModal: React.FC<IProps> = ({ visible, currentSkuInfo, onCancel }) => {
         );
     }, [visible, currentSkuInfo, searchVal, loading, skuList]);
 };
+
+function PopTable({ text, dataSource }: any) {
+    const columns: ColumnsType<any> = [
+        {
+            title: '国家',
+            dataIndex: 'country',
+            align: 'center',
+            width: 120,
+        },
+        {
+            title: '价格',
+            dataIndex: 'price',
+            align: 'center',
+            width: 120,
+        },
+    ];
+    const table = (
+        <Table
+            bordered
+            size="small"
+            rowKey="country"
+            columns={columns}
+            dataSource={dataSource}
+            className={styles.popTable}
+            scroll={{ y: 200 }}
+            pagination={false}
+        />
+    );
+    return (
+        <Tooltip placement="bottom" title={table}>
+            <a>{text}</a>
+        </Tooltip>
+    );
+}
 
 export default SkuModal;
