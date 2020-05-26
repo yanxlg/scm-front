@@ -16,13 +16,15 @@ const columns: ColumnsType<IOfflinePurchaseDetail> = [
         title: 'Commodity Id',
         dataIndex: 'commodity_id',
         align: 'center',
-        width: 140,
+        width: 160,
+        render: (val: string) => <div style={{ wordBreak: 'break-all' }}>{val}</div>,
     },
     {
         title: 'Commodity Sku Id',
         dataIndex: 'commodity_sku_id',
         align: 'center',
-        width: 140,
+        width: 160,
+        render: (val: string) => <div style={{ wordBreak: 'break-all' }}>{val}</div>,
     },
     {
         title: '对应图片',
@@ -36,13 +38,13 @@ const columns: ColumnsType<IOfflinePurchaseDetail> = [
         title: '商品名称',
         dataIndex: 'goods_name',
         align: 'center',
-        width: 140,
+        width: 160,
     },
     {
         title: '规格',
         dataIndex: 'sku_style',
         align: 'center',
-        width: 140,
+        width: 160,
     },
     {
         title: '库存',
@@ -61,9 +63,9 @@ const GoodsModal: React.FC<IProps> = ({ visible, id, onCancel }) => {
         onCancel();
     }, []);
 
-    const _queryOfflinePurchaseInfo = useCallback(() => {
+    const _queryOfflinePurchaseInfo = useCallback(id => {
         setLoading(true);
-        return queryOfflinePurchaseInfo('111')
+        return queryOfflinePurchaseInfo(id)
             .then(res => {
                 setGoodsList([res.data]);
             })
@@ -74,9 +76,9 @@ const GoodsModal: React.FC<IProps> = ({ visible, id, onCancel }) => {
 
     useEffect(() => {
         if (visible) {
-            _queryOfflinePurchaseInfo();
+            _queryOfflinePurchaseInfo(id);
         }
-    }, [visible]);
+    }, [visible, id]);
 
     return (
         <Modal

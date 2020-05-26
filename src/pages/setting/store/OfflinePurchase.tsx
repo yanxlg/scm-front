@@ -5,7 +5,6 @@ import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
 import { FormInstance } from 'antd/lib/form';
 import { JsonForm, LoadingButton, FitTable, useList } from 'react-components';
 import { ColumnType } from 'antd/lib/table';
-import { queryReplaceStoreOutList } from '@/services/setting';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import GoodsModal from '@/pages/setting/components/store/GoodsModal';
 import {
@@ -85,6 +84,8 @@ const OfflinePurchase: React.FC = ({}) => {
         setDataSource,
         onReload,
         onSearch,
+        setLoading,
+        onChange,
     } = useList<IOfflinePurchaseItem>({
         queryList: queryOfflinePurchaseList,
         formRef: formRef,
@@ -112,6 +113,9 @@ const OfflinePurchase: React.FC = ({}) => {
             })
             .catch(() => {
                 message.error('新增失败！');
+            })
+            .finally(() => {
+                setLoading(false);
             });
     }, []);
 
@@ -124,6 +128,10 @@ const OfflinePurchase: React.FC = ({}) => {
             })
             .catch(() => {
                 message.error('更新失败！');
+            })
+            .finally(() => {
+                setEditingKey(undefined);
+                setLoading(false);
             });
     }, []);
 
@@ -137,6 +145,7 @@ const OfflinePurchase: React.FC = ({}) => {
     );
 
     const save = useCallback(async id => {
+        setLoading(true);
         const data = await form.validateFields();
         return id ? _updateOfflinePurchase(id, data) : _addOfflinePurchase(data);
         // console.log(111111, data);
@@ -174,6 +183,7 @@ const OfflinePurchase: React.FC = ({}) => {
                 delAddNotSaveConfig(dataSource);
             } else {
                 // const index = dataSource.findIndex(item => item.id === id);
+                setLoading(true);
                 delOfflinePurchase(id)
                     .then(() => {
                         message.success('删除成功！');
@@ -181,6 +191,9 @@ const OfflinePurchase: React.FC = ({}) => {
                     })
                     .catch(() => {
                         message.error('删除失败！');
+                    })
+                    .finally(() => {
+                        setLoading(false);
                     });
             }
         },
@@ -289,10 +302,10 @@ const OfflinePurchase: React.FC = ({}) => {
                 },
             },
         ];
-    }, [editingKey]);
+    }, [editingKey, edit, delPurchaseConfig]);
 
     const table = useMemo(() => {
-        // console.log();
+        // console.log('dataSource', dataSource);
         const mergedColumns = columns.map(col => {
             if (!col.editable) {
                 return col;
@@ -323,13 +336,16 @@ const OfflinePurchase: React.FC = ({}) => {
                     }}
                     columns={mergedColumns}
                     dataSource={dataSource}
-                    pagination={{
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        total: total,
-                        showSizeChanger: true,
-                        position: ['topRight', 'bottomRight'],
-                    }}
+                    onChange={onChange}
+                    pagination={
+                        {
+                            current: pageNumber,
+                            pageSize: pageSize,
+                            total: total,
+                            showSizeChanger: true,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
                 />
             </Form>
         );
