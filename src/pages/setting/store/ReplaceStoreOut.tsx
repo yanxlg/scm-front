@@ -161,6 +161,7 @@ const ReplaceStoreOut = () => {
         pageSize,
         onSearch,
         onReload,
+        onChange,
     } = useList({
         queryList: queryReplaceStoreOutList,
         formRef: formRef,
@@ -354,6 +355,7 @@ const ReplaceStoreOut = () => {
                     scroll={scroll}
                     columns={mergedColumns}
                     dataSource={dataSource}
+                    onChange={onChange}
                     pagination={{
                         total: total,
                         current: pageNumber,
@@ -365,8 +367,6 @@ const ReplaceStoreOut = () => {
             </Form>
         );
     }, [loading, editingKey, dataSource.length]);
-
-    console.log(visible);
 
     return useMemo(() => {
         return (
