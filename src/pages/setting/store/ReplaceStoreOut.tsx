@@ -13,7 +13,7 @@ import { FormInstance } from 'antd/es/form';
 import styles from '@/styles/_store.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
-import { Button, Form, Input, message, Select } from 'antd';
+import { Button, Form, Input, message, Select, Tooltip } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { ColumnType } from 'antd/es/table/interface';
 import {
@@ -23,7 +23,7 @@ import {
     updateReplaceStoreOutList,
 } from '@/services/setting';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, QuestionCircleFilled } from '@ant-design/icons';
 import { IReplaceStoreOutItem } from '@/interface/ISetting';
 import { ITaskListItem } from '@/interface/ITask';
 import ModalWrap from '@/pages/setting/store/ReplaceModal';
@@ -108,14 +108,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
 }) => {
     const message =
         dataIndex === 'sale_commodity_id'
-            ? '请输入售卖商品commodity id'
+            ? '必填'
             : dataIndex === 'sale_commodity_sku_id'
-            ? '请输入售卖商品commodity sku id'
+            ? '必填'
             : dataIndex === 'outbound_commodity_id'
-            ? '请输入出库商品commodity id'
+            ? '必填'
             : dataIndex === 'outbound_commodity_sku_id'
-            ? '请输入出库商品commodity sku id'
-            : '请输入出库系数';
+            ? '必填'
+            : '请以整数为单位';
 
     return (
         <td {...restProps}>
@@ -269,7 +269,14 @@ const ReplaceStoreOut = () => {
             },
             {
                 dataIndex: 'outbound_score',
-                title: '出库系数',
+                title: (
+                    <span>
+                        出库系数
+                        <Tooltip title="*出库系数=需出库数量/售卖数量">
+                            <QuestionCircleFilled />
+                        </Tooltip>
+                    </span>
+                ),
                 align: 'center',
                 width: 150,
                 editable: true,
