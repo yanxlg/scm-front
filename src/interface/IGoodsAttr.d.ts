@@ -22,4 +22,6 @@ export declare interface ITagItem {
 export declare interface IPublishInterceptItem {
     name: string;
     checked: boolean;
+    originChecked: boolean;
+    type: 0 | 1 | 2;
 }
