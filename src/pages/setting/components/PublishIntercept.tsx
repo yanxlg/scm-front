@@ -60,10 +60,14 @@ const PublishIntercept = ({ pending }: { pending: false | any }) => {
     const _setInterceptTagList = useCallback(() => {
         // console.log('tagList', tagList);
 
-        const data = tagList.map(item => ({
-            keywords: item.name,
-            type: item.type,
-        }));
+        const data = tagList
+            .filter(item => {
+                return item.originChecked === true || item.type != 0;
+            })
+            .map(item => ({
+                keywords: item.name,
+                type: item.type,
+            }));
 
         return setInterceptTagList(data).then(res => {
             message.success('保存成功！');

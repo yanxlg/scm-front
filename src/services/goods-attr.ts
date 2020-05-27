@@ -72,8 +72,6 @@ export async function setInterceptTagList(
     }>,
 ) {
     return request.post<IResponse<any>>(GoodsAttrApiPath.setInterceptTagList, {
-        data: {
-            data,
-        },
+        data: data,
     });
 }
