@@ -366,7 +366,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     ],
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '采购订单ID',
                     name: 'purchase_order_goods_id',
                     formatter: 'multipleToArray',
@@ -391,19 +391,19 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     ],
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '采购运单ID',
                     name: 'purchase_waybill_no',
                     formatter: 'multipleToArray',
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '中台商品ID',
                     name: 'commodity_id',
                     formatter: 'multipleToArray',
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '商品SKU ID',
                     name: 'commodity_sku_id',
                     formatter: 'multipleToArray',
