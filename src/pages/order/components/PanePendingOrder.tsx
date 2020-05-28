@@ -29,62 +29,21 @@ declare interface IProps {
     getAllTabCount(): void;
 }
 
-const formFields: FormField[] = [
-    {
-        type: 'input',
-        name: 'order_goods_id',
-        label: '中台订单ID',
-        className: 'order-input',
-        placeholder: '请输入中台订单ID',
-        formatter: 'number_str_arr',
-    },
-    {
-        type: 'input',
-        name: 'product_id',
-        label: '中台商品ID',
-        className: 'order-input',
-        placeholder: '请输入中台商品ID',
-        formatter: 'str_arr',
-    },
-    {
-        type: 'input',
-        name: 'sku_id',
-        label: '中台SKU ID',
-        className: 'order-input',
-        placeholder: '请输入中台SKU ID',
-        formatter: 'str_arr',
-    },
-    {
-        type: 'select',
-        name: 'channel_source',
-        label: '销售渠道',
-        className: 'order-input',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
-    },
-    {
-        type: 'dateRanger',
-        name: ['order_time_start', 'order_time_end'],
-        label: '订单时间',
-        className: 'order-pending-date-picker',
-        placeholder: '请选择订单时间',
-        formatter: ['start_date', 'end_date'],
-    },
-];
-
 const defaultInitialValues = {
     channel_source: '',
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchRef = useRef<JsonFormRef>(null);
+    const searchRef1 = useRef<JsonFormRef>(null);
     const orderListRef = useRef<IPendingOrderItem[]>([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
     const [orderList, setOrderList] = useState<IPendingOrderItem[]>([]);
+
+    const [status, setStatus] = useState('1');
 
     let currentSearchParams: IPendingOrderSearch | null = null;
 
@@ -106,6 +65,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 },
                 paginationParams,
                 searchRef.current?.getFieldsValue(),
+                searchRef1.current?.getFieldsValue(),
             );
             setLoading(true);
             return getPendingOrderList(params)
@@ -278,36 +238,254 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, []);
 
+    const formFieldsState = useMemo<FormField[]>(() => {
+        switch (status) {
+            case '1':
+            default:
+            case '2':
+                return [
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '销售店铺名称',
+                    },
+                    {
+                        type: 'input',
+                        name: 'order_goods_id',
+                        label: '子订单ID',
+                        className: 'order-input',
+                        placeholder: '请输入中台订单ID',
+                        formatter: 'number_str_arr',
+                    },
+                    {
+                        type: 'input',
+                        name: 'order_commodity_id',
+                        label: 'Commodity ID',
+                        className: 'order-input',
+                        placeholder: 'Commodity ID',
+                        formatter: 'number_str_arr',
+                    },
+                    {
+                        type: 'input',
+                        name: 'product_id',
+                        label: '采购计划ID',
+                        className: 'order-input',
+                        placeholder: '请输入中台商品ID',
+                        formatter: 'str_arr',
+                    },
+                    {
+                        type: 'dateRanger',
+                        name: ['order_time_start', 'order_time_end'],
+                        label: '订单生成时间',
+                        className: 'order-pending-date-picker',
+                        placeholder: '请选择订单时间',
+                        formatter: ['start_date', 'end_date'],
+                    },
+                    {
+                        type: 'dateRanger',
+                        name: ['purchase_time_start', 'purchase_order_time_end'],
+                        label: '采购计划生成时间',
+                        className: 'order-pending-date-picker',
+                        placeholder: '请选择订单时间',
+                        formatter: ['start_date', 'end_date'],
+                    },
+                ];
+
+            case '3':
+                return [
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '销售店铺名称',
+                    },
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '仓库库存预定状态',
+                    },
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '采购计划状态',
+                    },
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '失败原因',
+                    },
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '采购单取消类型',
+                    },
+                    {
+                        type: 'input',
+                        name: 'order_goods_id',
+                        label: '子订单ID',
+                        className: 'order-input',
+                        placeholder: '请输入中台订单ID',
+                        formatter: 'number_str_arr',
+                    },
+                    {
+                        type: 'input',
+                        name: 'order_commodity_id',
+                        label: 'Commodity ID',
+                        className: 'order-input',
+                        placeholder: 'Commodity ID',
+                        formatter: 'number_str_arr',
+                    },
+                    {
+                        type: 'input',
+                        name: 'product_id',
+                        label: '采购计划ID',
+                        className: 'order-input',
+                        placeholder: '请输入中台商品ID',
+                        formatter: 'str_arr',
+                    },
+                    {
+                        type: 'dateRanger',
+                        name: ['order_time_start', 'order_time_end'],
+                        label: '订单生成时间',
+                        className: 'order-pending-date-picker',
+                        placeholder: '请选择订单时间',
+                        formatter: ['start_date', 'end_date'],
+                    },
+                    {
+                        type: 'dateRanger',
+                        name: ['purchase_time_start', 'purchase_order_time_end'],
+                        label: '采购计划生成时间',
+                        className: 'order-pending-date-picker',
+                        placeholder: '请选择订单时间',
+                        formatter: ['start_date', 'end_date'],
+                    },
+                ];
+            case '4':
+                return [
+                    {
+                        type: 'select',
+                        name: 'store',
+                        label: '销售店铺名称',
+                    },
+                    {
+                        type: 'select',
+                        name: 'purchase_status',
+                        label: '采购计划状态',
+                    },
+                    {
+                        type: 'input',
+                        name: 'order_goods_id',
+                        label: '子订单ID',
+                        className: 'order-input',
+                        placeholder: '请输入中台订单ID',
+                        formatter: 'number_str_arr',
+                    },
+                    {
+                        type: 'input',
+                        name: 'order_commodity_id',
+                        label: 'Commodity ID',
+                        className: 'order-input',
+                        placeholder: 'Commodity ID',
+                        formatter: 'number_str_arr',
+                    },
+                    {
+                        type: 'input',
+                        name: 'product_id',
+                        label: '采购计划ID',
+                        className: 'order-input',
+                        placeholder: '请输入中台商品ID',
+                        formatter: 'str_arr',
+                    },
+                    {
+                        type: 'dateRanger',
+                        name: ['order_time_start', 'order_time_end'],
+                        label: '订单生成时间',
+                        className: 'order-pending-date-picker',
+                        placeholder: '请选择订单时间',
+                        formatter: ['start_date', 'end_date'],
+                    },
+                    {
+                        type: 'dateRanger',
+                        name: ['purchase_time_start', 'purchase_order_time_end'],
+                        label: '采购计划生成时间',
+                        className: 'order-pending-date-picker',
+                        placeholder: '请选择订单时间',
+                        formatter: ['start_date', 'end_date'],
+                    },
+                ];
+        }
+    }, [status]);
+
+    const statusFormFields = useMemo<FormField[]>(() => {
+        return [
+            {
+                type: 'radioGroup',
+                name: 'status',
+                label: '拍单状态',
+                options: [
+                    {
+                        label: '待拍单',
+                        value: '1',
+                    },
+                    {
+                        label: '拍单中',
+                        value: '2',
+                    },
+                    {
+                        label: '拍单失败',
+                        value: '3',
+                    },
+                    {
+                        label: '相似款代拍中',
+                        value: '4',
+                    },
+                ],
+                onChange: (name, form) => {
+                    searchRef.current?.resetFields();
+                    setStatus(form.getFieldValue('status'));
+                },
+            },
+        ];
+    }, []);
+
     const search = useMemo(() => {
         return (
-            <JsonForm
-                ref={searchRef}
-                fieldList={formFields}
-                labelClassName="order-label"
-                initialValues={defaultInitialValues}
-            >
-                <div>
-                    <LoadingButton
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={handleClickSearch}
-                    >
-                        查询
-                    </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
-                        刷新
-                    </LoadingButton>
-                    <Button
-                        disabled={total <= 0}
-                        className={formStyles.formBtn}
-                        onClick={() => setVisibleProps(true)}
-                    >
-                        导出
-                    </Button>
-                </div>
-            </JsonForm>
+            <>
+                <JsonForm
+                    ref={searchRef1}
+                    initialValues={{
+                        status: '1',
+                    }}
+                    fieldList={statusFormFields}
+                />
+                <JsonForm
+                    ref={searchRef}
+                    fieldList={formFieldsState}
+                    labelClassName="order-label"
+                    initialValues={defaultInitialValues}
+                >
+                    <div>
+                        <LoadingButton
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={handleClickSearch}
+                        >
+                            查询
+                        </LoadingButton>
+                        <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
+                            刷新
+                        </LoadingButton>
+                        <Button
+                            disabled={total <= 0}
+                            className={formStyles.formBtn}
+                            onClick={() => setVisibleProps(true)}
+                        >
+                            导出
+                        </Button>
+                    </div>
+                </JsonForm>
+            </>
         );
-    }, [loading]);
+    }, [loading, status]);
 
     const columns = useMemo<TableProps<IPendingOrderItem>['columns']>(() => {
         return [
@@ -533,7 +711,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 />
             </>
         );
-    }, [page, pageSize, total, loading, orderList, visible]);
+    }, [page, pageSize, total, loading, orderList, visible, status]);
 };
 
 export default PaneWarehouseNotShip;
