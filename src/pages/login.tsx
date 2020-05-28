@@ -8,7 +8,6 @@ import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import { getPageQuery } from '@/utils/utils';
 import request from '@/utils/request';
-const jsonp = require('jsonp');
 
 declare interface ILoginState {
     remember: boolean;
@@ -61,64 +60,6 @@ const Login = () => {
 
     const onLogin = () => {
         setLogin(true);
-
-        // 获取页面中的execution
-
-        request
-            .get(
-                'https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login',
-                {
-                    mode: 'cors',
-                },
-            )
-            .then(result => {
-                console.log(result);
-            });
-        return;
-        userLogin({
-            username: userName,
-            password: password,
-        })
-            .then(res => {
-                // 登录成功，跳转到原来的页面
-                // 缓存用户信息
-                User.setUser(
-                    Object.assign({}, User.localUser, {
-                        ...(remember
-                            ? {
-                                  userName: userName,
-                                  password: password,
-                              }
-                            : {
-                                  userName: '',
-                                  password: '',
-                              }),
-                        token: res?.data?.token,
-                    }),
-                );
-                const urlParams = new URL(window.location.href);
-                const params = getPageQuery();
-                let { redirect } = params as { redirect: string };
-                if (redirect) {
-                    const redirectUrlParams = new URL(redirect);
-                    if (redirectUrlParams.origin === urlParams.origin) {
-                        redirect = redirect.substr(urlParams.origin.length);
-                        if (redirect.match(/^\/.*#/)) {
-                            redirect = redirect.substr(redirect.indexOf('#') + 1);
-                        }
-                    } else {
-                        window.location.href = redirect;
-                        return;
-                    }
-                }
-                history.replace(redirect || '/');
-            })
-            .catch(({ message }) => {
-                setUserNameError(message);
-            })
-            .finally(() => {
-                setLogin(false);
-            });
     };
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -126,15 +67,6 @@ const Login = () => {
         // 读取url
     }, []);
 
-    useEffect(() => {
-        jsonp(
-            'https://cas-t.vova.com.hk/cas/login?service=https://scm-front-t.vova.com.hk/auth/cas_login',
-            {},
-            (err, data) => {
-                console.log(data);
-            },
-        );
-    }, []);
     const iframe = useMemo(() => {
         // 有可能会直接访问中台页面，如果直接是中台页面说明登陆状态仍然存在，否则才走登陆
         return null;
