@@ -137,7 +137,7 @@ export default [
             },
             {
                 path: '/setting/info',
-                name: '重要报关信息映射',
+                name: '重量报关信息映射',
             },
         ],
     },
