@@ -18,10 +18,10 @@ const CustomDeclarationInfoPage: React.FC = () => {
                     onChange={setActiveKey}
                     type="card"
                     children={[
-                        <TabPane tab={'重要报关信息设置'} key="1">
+                        <TabPane tab={'重量报关信息设置'} key="1">
                             <EditTab />
                         </TabPane>,
-                        <TabPane tab={'重要报关信息查看'} key="2">
+                        <TabPane tab={'重量报关信息查看'} key="2">
                             <ListTab activeKey={activeKey} />
                         </TabPane>,
                     ]}
