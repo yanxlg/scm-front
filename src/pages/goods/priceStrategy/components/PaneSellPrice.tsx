@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
-import { queryShopList, queryShopFilterList } from '@/services/global';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
-import { defaultSelectOption } from '@/config/global';
+import { queryShopList, queryShopFilterList } from '@/services/global';
 import { getGoodsList } from '@/services/goods';
+import { getAllGoodsTagList } from '@/services/price-strategy';
 import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
 import { ISellItem, IEdiyKey } from '@/interface/IPriceAdjustment';
 import { EditEnum } from '@/enums/PriceAdjustmentEnum';
@@ -21,43 +21,62 @@ const formFields: FormField[] = [
         type: 'select',
         label: '采购渠道',
         name: 'a1',
-        defaultValue: '',
-        syncDefaultOption: defaultSelectOption,
-        optionList: [],
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
+        optionList: [
+            { name: 'pdd', value: 'pdd' },
+            { name: 'vova', value: 'vova' },
+        ],
     },
     {
         type: 'select',
         label: '销售渠道',
         name: 'a2',
-        defaultValue: '',
-        syncDefaultOption: defaultSelectOption,
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
         optionList: () => queryShopFilterList(),
         onChange: (name, form) => {
             form.resetFields(['a3']);
         },
+        formatter: 'join',
     },
     {
         type: 'select',
         label: '销售店铺',
         name: 'a3',
-        defaultValue: '',
         optionListDependence: { name: 'a2', key: 'children' },
-        syncDefaultOption: defaultSelectOption,
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
         optionList: () => queryShopFilterList(),
+        formatter: 'join',
     },
     {
         type: 'select',
         label: '商品标签',
-        name: 'a3',
-        defaultValue: '',
-        syncDefaultOption: defaultSelectOption,
-        optionList: [],
+        name: 'a4',
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
+        optionList: () => getAllGoodsTagList(),
+        formatter: 'join',
     },
     {
         type: 'inputRange',
         label: '爬虫价格区间',
         precision: 2,
         name: ['min_price', 'max_price'],
+        endExtra: '￥',
         // className: styles.inputMin,
     },
 ];
@@ -85,6 +104,10 @@ const PaneSellPrice: React.FC = props => {
         formRef: searchRef,
         queryList: getGoodsList,
     });
+
+    const goBack = useCallback(() => {
+        setEditType(EditEnum.DEFAULT);
+    }, []);
 
     const hideUpdateRangeModal = useCallback(() => {
         setUpdateRangeStatus(false);
@@ -218,7 +241,7 @@ const PaneSellPrice: React.FC = props => {
         ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig>(() => {
+    const pagination = useMemo<any>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,
@@ -236,11 +259,7 @@ const PaneSellPrice: React.FC = props => {
                 // labelClassName="product-form-label"
             >
                 <div>
-                    <LoadingButton
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => Promise.resolve()}
-                    >
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
                     <Button
@@ -272,6 +291,10 @@ const PaneSellPrice: React.FC = props => {
         );
     }, [loading]);
 
+    useEffect(() => {
+        // getAllGoodsTagList();
+    }, []);
+
     return editType === EditEnum.DEFAULT ? (
         <>
             {searchNode}
@@ -280,7 +303,7 @@ const PaneSellPrice: React.FC = props => {
             <UpdateRecordModal visible={updateRecordStatus} onCancel={hideUpdateRecordModal} />
         </>
     ) : (
-        <SellConfig type={editType} />
+        <SellConfig type={editType} goBack={goBack} />
     );
 };
 

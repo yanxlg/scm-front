@@ -16,23 +16,32 @@ import styles from '../_index.less';
 const formFields: FormField[] = [
     {
         type: 'select',
-        label: '运费规则名称',
+        label: '商品标签',
         name: 'a1',
-        defaultValue: '',
-        syncDefaultOption: defaultSelectOption,
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
         optionList: [],
     },
     {
         type: 'select',
         label: '运费价卡',
         name: 'a2',
-        defaultValue: '',
-        syncDefaultOption: defaultSelectOption,
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
         optionList: [],
-        // optionList: () => queryShopFilterList(),
-        // onChange: (name, form) => {
-        //     form.resetFields(['a3']);
-        // },
+    },
+    {
+        type: 'inputRange',
+        label: '重量区间(g)',
+        precision: 2,
+        name: ['min_weight', 'max_weight'],
+        // className: styles.inputMin,
     },
 ];
 
@@ -155,7 +164,7 @@ const PaneFreight: React.FC = props => {
         ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig>(() => {
+    const pagination = useMemo<any>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,

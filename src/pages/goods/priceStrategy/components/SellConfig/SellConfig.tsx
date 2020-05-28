@@ -1,5 +1,16 @@
 import React, { useState, useCallback } from 'react';
-import { Form, Input, Row, Col, Select, Button, InputNumber, Radio, Tooltip } from 'antd';
+import {
+    Form,
+    Input,
+    Row,
+    Col,
+    Select,
+    Button,
+    InputNumber,
+    Radio,
+    Tooltip,
+    Popconfirm,
+} from 'antd';
 import { IEdiyKey } from '@/interface/IPriceAdjustment';
 import { EditEnum, requiredRule, maxLengthRule } from '@/enums/PriceAdjustmentEnum';
 import CheckedBtn from '@/components/CheckedBtn';
@@ -15,11 +26,13 @@ const { Option } = Select;
 
 interface IProps {
     type: IEdiyKey;
+    goBack(): void;
 }
 
-const SellConfig: React.FC<IProps> = ({ type }) => {
+const SellConfig: React.FC<IProps> = ({ type, goBack }) => {
     const [form] = Form.useForm();
     const [name, setName] = useState('');
+    const [loading, setLoading] = useState(false);
     const [goodsTagList, setGoodsTagList] = useState<ICheckedBtnItem[]>([
         { name: '商品标签1', checked: false },
         { name: '商品标签1', checked: true },
@@ -31,8 +44,11 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
     }, []);
 
     const handleSave = useCallback(async () => {
-        const data = await form.validateFields();
-        console.log(1111111, data);
+        // const data = await form.validateFields();
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000);
     }, []);
 
     return (
@@ -165,16 +181,30 @@ const SellConfig: React.FC<IProps> = ({ type }) => {
                 </div>
             </Form>
             <div className={styles.btnContainer}>
-                <Button
-                    ghost
-                    type="primary"
-                    className={classnames(styles.cancel, formStyles.formBtn)}
+                <Popconfirm
+                    title="返回数据将清空，确认返回吗？"
+                    onConfirm={goBack}
+                    okText="确认"
+                    cancelText="取消"
                 >
-                    返回
-                </Button>
-                <Button type="primary" className={formStyles.formBtn} onClick={() => handleSave()}>
-                    保存
-                </Button>
+                    <Button
+                        ghost
+                        type="primary"
+                        className={classnames(styles.cancel, formStyles.formBtn)}
+                    >
+                        返回
+                    </Button>
+                </Popconfirm>
+                <Popconfirm
+                    title="确认保存吗？"
+                    onConfirm={handleSave}
+                    okText="确认"
+                    cancelText="取消"
+                >
+                    <Button type="primary" loading={loading} className={formStyles.formBtn}>
+                        保存
+                    </Button>
+                </Popconfirm>
             </div>
         </div>
     );
