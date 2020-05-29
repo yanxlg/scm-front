@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { Button, Input, Tabs, Pagination, Modal, message } from 'antd';
+import { Button, Input, Tabs, Pagination, Modal, message, Progress } from 'antd';
 import Container from '@/components/Container';
 // import EditTag from './components/EditTag';
 import { getTagsList, putBatchUpdateTags, getBatchUpdateProgress } from '@/services/goods-attr';
@@ -22,7 +22,13 @@ const GoodsAttr: React.FC = props => {
         pageOneOriginData: [],
         cacheData: {},
     });
-    const [pending, setPending] = useState(false);
+    const [pending, setPending] = useState<
+        | false
+        | {
+              progress: number;
+              total: number;
+          }
+    >(false);
     const [saveLoading, setSaveLoading] = useState(false);
     const [page, setPage] = useState(1);
     // const [pageSize, setPageSize] = useState(10);
@@ -92,7 +98,7 @@ const GoodsAttr: React.FC = props => {
         // console.log('editList', editList);
         for (let i = 0, len = editList.length; i < len; i++) {
             const { name, keyWords, page, type } = editList[i];
-            if (type !== 'delete' && (!name || !keyWords)) {
+            if (type !== 'delete' && !name) {
                 message.error(`第${page}页面存在空值，请检查`);
                 return false;
             }
@@ -197,9 +203,8 @@ const GoodsAttr: React.FC = props => {
     );
 
     const _getBatchUpdateProgress = useCallback(() => {
-        getBatchUpdateProgress().then(res => {
-            // console.log('getBatchUpdateProgress', res);
-            setPending(res.data === 'finish' ? false : true);
+        getBatchUpdateProgress().then(({ data }) => {
+            setPending(data.msg === 'finish' ? false : { ...data });
         });
     }, []);
 
@@ -270,7 +275,7 @@ const GoodsAttr: React.FC = props => {
                             <TextArea
                                 value={val}
                                 onChange={e => editAttr('keyWords', e.target.value, index)}
-                                autoSize
+                                autoSize={true}
                             />
                         );
                     },
@@ -313,12 +318,17 @@ const GoodsAttr: React.FC = props => {
                         <div className={styles.tableContainer}>
                             {pending && (
                                 <div className={styles.loadingContainer}>
-                                    <LoadingOutlined />
-                                    系统自动打标签中，请稍等...
+                                    <Progress
+                                        style={{ width: 180 }}
+                                        percent={pending.progress / pending.total}
+                                        status="active"
+                                        format={percent => `${pending.progress}/${pending.total}`}
+                                    />
+                                    <div>系统自动打标签中，请稍等...</div>
                                 </div>
                             )}
                             <FitTable
-                                bordered
+                                bordered={true}
                                 // rowKey="tagId"
                                 loading={loading}
                                 dataSource={attrList}
@@ -334,7 +344,7 @@ const GoodsAttr: React.FC = props => {
                             <div className={styles.paginationContainer}>
                                 {!pending && (
                                     <Button
-                                        ghost
+                                        ghost={true}
                                         type="primary"
                                         onClick={addAttr}
                                         className={styles.btnAdd}
@@ -369,7 +379,18 @@ const GoodsAttr: React.FC = props => {
                         )}
                     </TabPane>
                     <TabPane tab="上架拦截策略" key="2">
-                        <PublishIntercept />
+                        {pending && (
+                            <div className={styles.loadingContainer}>
+                                <Progress
+                                    style={{ width: 180 }}
+                                    percent={pending.progress / pending.total}
+                                    status="active"
+                                    format={percent => `${pending.progress}/${pending.total}`}
+                                />
+                                <div>系统自动打标签中，请稍等...</div>
+                            </div>
+                        )}
+                        <PublishIntercept pending={pending} />
                     </TabPane>
                 </Tabs>
             </Container>
