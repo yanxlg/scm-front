@@ -7,3 +7,17 @@ export const isUrl = function(url: string) {
 export const isNumber = function(val: any) {
     return typeof val === 'number' && !Number.isNaN(val);
 };
+
+export function validateRange(
+    getFieldValue: (name: string) => any,
+    minName: string,
+    maxName: string,
+) {
+    const min = getFieldValue(minName);
+    const max = getFieldValue(maxName);
+    const typeList = [null, undefined, ''];
+    if (typeList.indexOf(min) === -1 && typeList.indexOf(max) === -1 && min > max) {
+        return Promise.reject('请检查区间!');
+    }
+    return Promise.resolve();
+}

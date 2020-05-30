@@ -11,8 +11,8 @@ import {
     Tooltip,
     Popconfirm,
 } from 'antd';
-import { IEdiyKey } from '@/interface/IPriceAdjustment';
-import { EditEnum, requiredRule, maxLengthRule } from '@/enums/PriceAdjustmentEnum';
+import { IEdiyKey } from '@/interface/IPriceStrategy';
+import { EditEnum, requiredRule, maxLengthRule } from '@/enums/PriceStrategyEnum';
 import CheckedBtn from '@/components/CheckedBtn';
 import classnames from 'classnames';
 import { ICheckedBtnItem } from '@/interface/IGlobal';
@@ -56,7 +56,7 @@ const SellConfig: React.FC<IProps> = ({ type, goBack }) => {
             <div className={styles.title}>
                 {EditEnum.ADD === type ? '新增' : '更新'}商品售价配置
             </div>
-            <Form form={form}>
+            <Form form={form} initialValues={{ enable: '1' }}>
                 <div className={styles.item}>
                     <Form.Item
                         label="售价规则"
@@ -165,7 +165,7 @@ const SellConfig: React.FC<IProps> = ({ type, goBack }) => {
                 <Form.Item
                     label="是否启用"
                     name="enable"
-                    initialValue="1"
+                    // initialValue="1"
                     className={styles.customLabel}
                     required
                 >

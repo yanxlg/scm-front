@@ -1,12 +1,17 @@
 @labelWidth: 130px;
 @selectWidth: 200px;
+@inputNumberWidth: 120px;
 
 .pane-content {
     margin-top: -20px;
 }
 
+.input-number {
+    width: @inputNumberWidth !important;
+}
+
 .select {
-    width: @selectWidth  !important;
+    width: @selectWidth !important;
 }
 
 .hover {
@@ -54,13 +59,13 @@
     .custom-label {
         :global {
             .ant-form-item-label {
-                width: @labelWidth  !important;
+                width: @labelWidth !important;
             }
         }
     }
 
     .btn-container {
-        margin-left: @labelWidth  !important;
+        margin-left: @labelWidth !important;
 
         .cancel {
             margin-right: 20px;
@@ -70,4 +75,12 @@
 
 .multiple-select {
     width: 260px !important;
+}
+
+.calc-container {
+    margin-top: -10px;
+
+    .calc {
+        margin-top: 10px;
+    }
 }

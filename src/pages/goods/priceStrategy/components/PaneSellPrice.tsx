@@ -5,9 +5,9 @@ import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
 import { queryShopList, queryShopFilterList } from '@/services/global';
 import { getGoodsList } from '@/services/goods';
 import { getAllGoodsTagList } from '@/services/price-strategy';
-import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
-import { ISellItem, IEdiyKey } from '@/interface/IPriceAdjustment';
-import { EditEnum } from '@/enums/PriceAdjustmentEnum';
+import { ColumnsType } from 'antd/lib/table';
+import { ISellItem, IEdiyKey } from '@/interface/IPriceStrategy';
+import { EditEnum } from '@/enums/PriceStrategyEnum';
 import SellConfig from './SellConfig/SellConfig';
 import UpdateRangeModal from './UpdateRangeModal/UpdateRangeModal';
 import useUpdateRecord from '@/pages/goods/priceStrategy/hooks/useUpdateRecord';
@@ -15,6 +15,7 @@ import UpdateRecordModal from './UpdateRecordModal/UpdateRecordModal';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
+import useSellChannel from '../hooks/useSellChannel';
 
 const formFields: FormField[] = [
     {
@@ -104,6 +105,7 @@ const PaneSellPrice: React.FC = props => {
         formRef: searchRef,
         queryList: getGoodsList,
     });
+    const { sellChannelList } = useSellChannel();
 
     const goBack = useCallback(() => {
         setEditType(EditEnum.DEFAULT);
@@ -299,7 +301,11 @@ const PaneSellPrice: React.FC = props => {
         <>
             {searchNode}
             {table}
-            <UpdateRangeModal visible={updateRangeStatus} onCancel={hideUpdateRangeModal} />
+            <UpdateRangeModal
+                visible={updateRangeStatus}
+                sellChannelList={sellChannelList}
+                onCancel={hideUpdateRangeModal}
+            />
             <UpdateRecordModal visible={updateRecordStatus} onCancel={hideUpdateRecordModal} />
         </>
     ) : (

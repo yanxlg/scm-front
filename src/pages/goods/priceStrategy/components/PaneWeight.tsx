@@ -4,7 +4,7 @@ import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
 import { getGoodsList, getCatagoryList } from '@/services/goods';
 import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
-import { ISellItem } from '@/interface/IPriceAdjustment';
+import { ISellItem } from '@/interface/IPriceStrategy';
 import WeightModal from './WeightModal/WeightModal';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -142,7 +142,7 @@ const PaneWeight: React.FC = props => {
         ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig>(() => {
+    const pagination = useMemo<any>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,

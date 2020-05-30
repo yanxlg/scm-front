@@ -187,8 +187,13 @@ export default request;
 import User from '@/storage/User';
 import { request } from 'react-components';
 import { RequestOptionsInit } from 'umi-request';
+import { getCookie } from './common';
 
 request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
+    // const username = getCookie('USERNAME');
+    // if (!username) {
+    //     location.reload();
+    // }
     if (User.token) {
         options.headers = Object.assign({}, options.headers, {
             'X-Token': User.token,

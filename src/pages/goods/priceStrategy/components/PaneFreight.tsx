@@ -2,13 +2,16 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
-import { defaultSelectOption } from '@/config/global';
-import { getGoodsList } from '@/services/goods';
-import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
-import { ISellItem, IEdiyKey } from '@/interface/IPriceAdjustment';
-import { EditEnum } from '@/enums/PriceAdjustmentEnum';
+import { ColumnsType } from 'antd/lib/table';
+import { IShippingFeeRuleRes, IEdiyKey, ISaveShippingFeeRuleReq } from '@/interface/IPriceStrategy';
+import { EditEnum } from '@/enums/PriceStrategyEnum';
 import FreightConfig from './FreightConfig/FreightConfig';
 import DeliveryCountryModal from './DeliveryCountryModal/DeliveryCountryModal';
+import {
+    getAllGoodsTagList,
+    getShippingCardNameList,
+    getShippingFeeRuleList,
+} from '@/services/price-strategy';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
@@ -23,18 +26,18 @@ const formFields: FormField[] = [
         mode: 'multiple',
         className: styles.select,
         maxTagCount: 4,
-        optionList: [],
+        optionList: () => getAllGoodsTagList(),
     },
     {
         type: 'select',
         label: '运费价卡',
-        name: 'a2',
+        name: 'card_name',
         isShortcut: true,
         placeholder: '请选择',
         mode: 'multiple',
         className: styles.select,
         maxTagCount: 4,
-        optionList: [],
+        optionList: () => getShippingCardNameList(),
     },
     {
         type: 'inputRange',
@@ -49,6 +52,7 @@ const PaneFreight: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // EditEnum.ADD
     const [deliveryCountryStatus, setDeliveryCountryStatus] = useState(false);
+    const [updateData, setUpdateData] = useState<ISaveShippingFeeRuleReq | null>(null);
     const {
         loading,
         pageNumber,
@@ -58,10 +62,43 @@ const PaneFreight: React.FC = props => {
         onReload,
         onSearch,
         onChange,
-    } = useList<ISellItem>({
+    } = useList<IShippingFeeRuleRes>({
         formRef: searchRef,
-        queryList: getGoodsList,
+        queryList: getShippingFeeRuleList,
     });
+
+    const goBack = useCallback(() => {
+        setEditType(EditEnum.DEFAULT);
+        setUpdateData(null);
+    }, []);
+
+    const showFreightConfig = useCallback((type: IEdiyKey, record?: IShippingFeeRuleRes) => {
+        setEditType(type);
+        if (record) {
+            const {
+                id,
+                product_tags,
+                min_weight,
+                max_weight,
+                lower_shipping_card,
+                upper_shipping_card,
+                order,
+                is_enable,
+            } = record;
+            setUpdateData({
+                rule_id: id,
+                product_tags,
+                min_weight: String(min_weight),
+                max_weight: String(max_weight),
+                order,
+                comment: 'comment',
+                lower_shipping_card,
+                upper_shipping_card,
+                rule_name: 'rule_name',
+                enable: String(is_enable),
+            });
+        }
+    }, []);
 
     const showDeliveryCountryModal = useCallback(() => {
         setDeliveryCountryStatus(true);
@@ -71,7 +108,7 @@ const PaneFreight: React.FC = props => {
         setDeliveryCountryStatus(false);
     }, []);
 
-    const columns = useMemo<ColumnsType<ISellItem>>(() => {
+    const columns = useMemo<ColumnsType<IShippingFeeRuleRes>>(() => {
         return [
             {
                 fixed: 'left',
@@ -79,9 +116,13 @@ const PaneFreight: React.FC = props => {
                 dataIndex: '_operation',
                 align: 'center',
                 width: 120,
-                render: (_: any, row: ISellItem) => {
+                render: (_: any, record: IShippingFeeRuleRes) => {
                     return (
-                        <Button type="link" className={styles.hover}>
+                        <Button
+                            type="link"
+                            className={styles.hover}
+                            onClick={() => showFreightConfig(EditEnum.UPDATE, record)}
+                        >
                             更新
                         </Button>
                     );
@@ -95,58 +136,80 @@ const PaneFreight: React.FC = props => {
             },
             {
                 title: '商品标签',
-                dataIndex: 'a2',
+                dataIndex: 'product_tags',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '重量区间(g)',
-                dataIndex: 'a3',
+                dataIndex: 'min_weight',
                 align: 'center',
                 width: 120,
+                render: (val: number, record: IShippingFeeRuleRes) => {
+                    const { max_weight } = record;
+                    return `${val.toFixed(4)} ~ ${max_weight.toFixed(4)}`;
+                },
             },
             {
                 title: '阈值范围',
                 dataIndex: 'a4',
                 align: 'center',
                 width: 120,
+                render: () => {
+                    return (
+                        <>
+                            <div>$xxx以上</div>
+                            <div>$xxx以下</div>
+                        </>
+                    );
+                },
             },
             {
                 title: '运费价卡',
-                dataIndex: 'a5',
+                dataIndex: 'lower_shipping_card',
                 align: 'center',
-                width: 120,
+                width: 160,
+                render: (val: string, record: IShippingFeeRuleRes) => {
+                    const { upper_shipping_card } = record;
+                    return (
+                        <>
+                            <div>{upper_shipping_card}</div>
+                            <div>{val}</div>
+                        </>
+                    );
+                },
             },
             {
                 title: '配送国家',
-                dataIndex: 'a6',
+                dataIndex: 'support_country_count',
                 align: 'center',
                 width: 120,
-                render: () => {
+                render: (val: number) => {
                     return (
                         <a className={styles.hover} onClick={() => showDeliveryCountryModal()}>
-                            123
+                            {val}
                         </a>
                     );
                 },
             },
             {
                 title: '排序等级',
-                dataIndex: 'a7',
+                dataIndex: 'order',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '生效商品量',
-                dataIndex: 'a8',
+                dataIndex: 'product_count',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '启用状态',
-                dataIndex: 'a9',
+                dataIndex: 'is_enable',
                 align: 'center',
-                width: 140,
+                width: 120,
+                render: (val: number) => (val === 0 ? '禁用' : '启用'),
             },
             {
                 title: '更新记录',
@@ -193,7 +256,7 @@ const PaneFreight: React.FC = props => {
                         ghost
                         type="primary"
                         className={formStyles.formBtn}
-                        onClick={() => setEditType(EditEnum.ADD)}
+                        onClick={() => showFreightConfig(EditEnum.ADD)}
                     >
                         +新增运费规则
                     </Button>
@@ -227,7 +290,7 @@ const PaneFreight: React.FC = props => {
             />
         </>
     ) : (
-        <FreightConfig type={editType} />
+        <FreightConfig type={editType} goBack={goBack} updateData={updateData} />
     );
 };
 

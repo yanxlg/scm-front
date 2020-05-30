@@ -526,7 +526,7 @@ const GoodsTable: React.FC<IProps> = ({
         ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig>(() => {
+    const pagination = useMemo<any>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,
