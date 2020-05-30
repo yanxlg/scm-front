@@ -24,6 +24,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { getStatusDesc } from '@/utils/transform';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
+import { FormInstance } from 'antd/es/form';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -36,6 +37,7 @@ const defaultInitialValues = {
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchRef = useRef<JsonFormRef>(null);
     const searchRef1 = useRef<JsonFormRef>(null);
+    const searchRef2 = useRef<JsonFormRef>(null);
     const orderListRef = useRef<IPendingOrderItem[]>([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
@@ -487,158 +489,537 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         );
     }, [loading, status]);
 
+    const searchForm1 = useMemo(() => {
+        return (
+            <JsonForm
+                layout="horizontal"
+                // containerClassName={status === '4' ? '' : undefined}
+                key={'form1'}
+                ref={searchRef2}
+                enableCollapse={false}
+                fieldList={
+                    status === '3'
+                        ? [
+                              {
+                                  type: 'checkboxGroup',
+                                  name: 'showRecreated',
+                                  options: [
+                                      {
+                                          label: '展示已重新生成',
+                                          value: true,
+                                      },
+                                  ],
+                                  onChange: (name: string, form: FormInstance) => {
+                                      onSearch();
+                                  },
+                                  formatter: 'join',
+                              },
+                              {
+                                  type: 'checkboxGroup',
+                                  name: 'resolveType',
+                                  label: '处理方式',
+                                  options: [
+                                      {
+                                          label: '仅重拍',
+                                          value: 1,
+                                      },
+                                      {
+                                          label: '仅相似款代拍',
+                                          value: 2,
+                                      },
+                                      {
+                                          label: '重拍或相似款代拍',
+                                          value: 3,
+                                      },
+                                  ],
+                              },
+                          ]
+                        : [
+                              {
+                                  type: 'checkboxGroup',
+                                  name: 'showRecreated',
+                                  formItemClassName: status === '4' ? '' : undefined,
+                                  options: [
+                                      {
+                                          label: '展示已重新生成',
+                                          value: true,
+                                      },
+                                  ],
+                                  onChange: (name: string, form: FormInstance) => {
+                                      onSearch();
+                                  },
+                                  formatter: 'join',
+                              },
+                          ]
+                }
+            />
+        );
+    }, [status]);
+
     const columns = useMemo<TableProps<IPendingOrderItem>['columns']>(() => {
-        return [
-            {
-                fixed: true,
-                key: '_checked',
-                title: () => {
-                    const rowspanList = orderListRef.current.filter(item => item._rowspan);
-                    const checkedListLen = rowspanList.filter(item => item._checked).length;
-                    let indeterminate = false,
-                        checked = false;
-                    if (rowspanList.length && rowspanList.length === checkedListLen) {
-                        checked = true;
-                    } else if (checkedListLen) {
-                        indeterminate = true;
-                    }
-                    return (
-                        <Checkbox
-                            indeterminate={indeterminate}
-                            checked={checked}
-                            onChange={e => onCheckAllChange(e.target.checked)}
-                        />
-                    );
-                },
-                dataIndex: '_checked',
-                align: 'center',
-                width: 60,
-                render: (value: boolean, row: IPendingOrderItem) => {
-                    return {
-                        children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
-                        props: {
-                            rowSpan: row._rowspan || 0,
+        switch (status) {
+            default:
+            case '1':
+            case '2':
+                return [
+                    {
+                        fixed: true,
+                        key: '_checked',
+                        title: () => {
+                            const rowspanList = orderListRef.current.filter(item => item._rowspan);
+                            const checkedListLen = rowspanList.filter(item => item._checked).length;
+                            let indeterminate = false,
+                                checked = false;
+                            if (rowspanList.length && rowspanList.length === checkedListLen) {
+                                checked = true;
+                            } else if (checkedListLen) {
+                                indeterminate = true;
+                            }
+                            return (
+                                <Checkbox
+                                    indeterminate={indeterminate}
+                                    checked={checked}
+                                    onChange={e => onCheckAllChange(e.target.checked)}
+                                />
+                            );
                         },
-                    };
-                },
-                hideInSetting: true,
-            },
-            {
-                fixed: true,
-                key: 'createTime',
-                title: '订单时间',
-                dataIndex: 'createTime',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IPendingOrderItem) => {
-                    return {
-                        children: utcToLocal(value, ''),
-                        props: {
-                            rowSpan: row._rowspan || 0,
+                        dataIndex: '_checked',
+                        align: 'center',
+                        width: 60,
+                        render: (value: boolean, row: IPendingOrderItem) => {
+                            return {
+                                children: (
+                                    <Checkbox checked={value} onChange={() => onSelectedRow(row)} />
+                                ),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
                         },
-                    };
-                },
-            },
-            {
-                fixed: true,
-                key: 'orderGoodsId',
-                title: '中台订单ID',
-                dataIndex: 'orderGoodsId',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'goodsNumber',
-                title: '商品数量',
-                dataIndex: 'goodsNumber',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'goodsAmount',
-                title: '商品价格',
-                dataIndex: 'goodsAmount',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'freight',
-                title: '预估运费',
-                dataIndex: 'freight',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'productId',
-                title: '中台商品ID',
-                dataIndex: 'productId',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'skuId',
-                title: '中台SKU ID',
-                dataIndex: 'skuId',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'channelSource',
-                title: '销售渠道',
-                dataIndex: 'channelSource',
-                align: 'center',
-                width: 120,
-                render: mergeCell,
-            },
-            {
-                key: 'purchaseOrderStatus',
-                title: '采购计划状态',
-                dataIndex: 'purchaseOrderStatus',
-                align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
-            },
-            {
-                key: 'purchasePlatform',
-                title: '采购平台',
-                dataIndex: 'purchasePlatform',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'purchasePlanId',
-                title: '计划子项ID',
-                dataIndex: 'purchasePlanId',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'purchaseNumber',
-                title: '采购数量',
-                dataIndex: 'purchaseNumber',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'purchaseAmount',
-                title: '采购单价',
-                dataIndex: 'purchaseAmount',
-                align: 'center',
-                width: 120,
-                render: (value: string, row: IPendingOrderItem) => {
-                    const { purchaseNumber } = row;
-                    const price = Number(value) / Number(purchaseNumber);
-                    return isNaN(price) ? '' : price.toFixed(2);
-                },
-            },
-        ];
-    }, []);
+                        hideInSetting: true,
+                    },
+                    {
+                        fixed: true,
+                        key: 'createTime',
+                        title: '订单生成时间',
+                        dataIndex: 'createTime',
+                        align: 'center',
+                        width: 120,
+                        render: (value: string, row: IPendingOrderItem) => {
+                            return {
+                                children: utcToLocal(value, ''),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
+                    },
+                    {
+                        fixed: true,
+                        key: 'orderGoodsId',
+                        title: '子订单ID',
+                        dataIndex: 'orderGoodsId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'commodityId',
+                        title: 'Commodity ID',
+                        dataIndex: 'commodityId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsName',
+                        title: '商品名称',
+                        dataIndex: 'goodsName',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'skuImg',
+                        title: 'SKU图片',
+                        dataIndex: 'skuImg',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'productStyle',
+                        title: '商品规格',
+                        dataIndex: 'productStyle',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsNumber',
+                        title: '销售商品数量',
+                        dataIndex: 'goodsNumber',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'freight',
+                        title: '销售商品运费',
+                        dataIndex: 'freight',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsAmount',
+                        title: '销售商品总金额($)',
+                        dataIndex: 'goodsAmount',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsStore',
+                        title: '销售店铺名称',
+                        dataIndex: 'goodsStore',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsStore',
+                        title: '销售订单ID',
+                        dataIndex: 'goodsStore',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购计划ID',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购订单生成时间',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                    {
+                        key: 'purchaseOrderStatus',
+                        title: '采购计划状态',
+                        dataIndex: 'purchaseOrderStatus',
+                        align: 'center',
+                        width: 120,
+                        render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
+                    },
+                ];
+            case '3':
+                return [
+                    {
+                        fixed: true,
+                        key: '_checked',
+                        title: () => {
+                            const rowspanList = orderListRef.current.filter(item => item._rowspan);
+                            const checkedListLen = rowspanList.filter(item => item._checked).length;
+                            let indeterminate = false,
+                                checked = false;
+                            if (rowspanList.length && rowspanList.length === checkedListLen) {
+                                checked = true;
+                            } else if (checkedListLen) {
+                                indeterminate = true;
+                            }
+                            return (
+                                <Checkbox
+                                    indeterminate={indeterminate}
+                                    checked={checked}
+                                    onChange={e => onCheckAllChange(e.target.checked)}
+                                />
+                            );
+                        },
+                        dataIndex: '_checked',
+                        align: 'center',
+                        width: 60,
+                        render: (value: boolean, row: IPendingOrderItem) => {
+                            return {
+                                children: (
+                                    <Checkbox checked={value} onChange={() => onSelectedRow(row)} />
+                                ),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
+                        hideInSetting: true,
+                    },
+                    {
+                        fixed: true,
+                        key: 'createTime',
+                        title: '订单生成时间',
+                        dataIndex: 'createTime',
+                        align: 'center',
+                        width: 120,
+                        render: (value: string, row: IPendingOrderItem) => {
+                            return {
+                                children: utcToLocal(value, ''),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
+                    },
+                    {
+                        fixed: true,
+                        key: 'orderGoodsId',
+                        title: '仓库库存预定状态',
+                        dataIndex: 'orderGoodsId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        fixed: true,
+                        key: 'orderGoodsId',
+                        title: '子订单ID',
+                        dataIndex: 'orderGoodsId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'commodityId',
+                        title: 'Commodity ID',
+                        dataIndex: 'commodityId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'commodityId',
+                        title: '拍单失败原因',
+                        dataIndex: 'commodityId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsName',
+                        title: '商品名称',
+                        dataIndex: 'goodsName',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'skuImg',
+                        title: 'SKU图片',
+                        dataIndex: 'skuImg',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'productStyle',
+                        title: '商品规格',
+                        dataIndex: 'productStyle',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsStore',
+                        title: '销售店铺名称',
+                        dataIndex: 'goodsStore',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购计划ID',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购订单生成时间',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                    {
+                        key: 'purchaseOrderStatus',
+                        title: '采购计划状态',
+                        dataIndex: 'purchaseOrderStatus',
+                        align: 'center',
+                        width: 120,
+                        render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购单取消类型',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                ];
+            case '4':
+                return [
+                    {
+                        fixed: true,
+                        key: '_checked',
+                        title: () => {
+                            const rowspanList = orderListRef.current.filter(item => item._rowspan);
+                            const checkedListLen = rowspanList.filter(item => item._checked).length;
+                            let indeterminate = false,
+                                checked = false;
+                            if (rowspanList.length && rowspanList.length === checkedListLen) {
+                                checked = true;
+                            } else if (checkedListLen) {
+                                indeterminate = true;
+                            }
+                            return (
+                                <Checkbox
+                                    indeterminate={indeterminate}
+                                    checked={checked}
+                                    onChange={e => onCheckAllChange(e.target.checked)}
+                                />
+                            );
+                        },
+                        dataIndex: '_checked',
+                        align: 'center',
+                        width: 60,
+                        render: (value: boolean, row: IPendingOrderItem) => {
+                            return {
+                                children: (
+                                    <Checkbox checked={value} onChange={() => onSelectedRow(row)} />
+                                ),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
+                        hideInSetting: true,
+                    },
+                    {
+                        fixed: true,
+                        key: 'createTime',
+                        title: '订单生成时间',
+                        dataIndex: 'createTime',
+                        align: 'center',
+                        width: 120,
+                        render: (value: string, row: IPendingOrderItem) => {
+                            return {
+                                children: utcToLocal(value, ''),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
+                    },
+                    {
+                        fixed: true,
+                        key: 'orderGoodsId',
+                        title: '子订单ID',
+                        dataIndex: 'orderGoodsId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'commodityId',
+                        title: 'Commodity ID',
+                        dataIndex: 'commodityId',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsName',
+                        title: '商品名称',
+                        dataIndex: 'goodsName',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'skuImg',
+                        title: 'SKU图片',
+                        dataIndex: 'skuImg',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'productStyle',
+                        title: '商品规格',
+                        dataIndex: 'productStyle',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsNumber',
+                        title: '销售商品数量',
+                        dataIndex: 'goodsNumber',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'freight',
+                        title: '销售商品运费',
+                        dataIndex: 'freight',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsAmount',
+                        title: '销售商品总金额($)',
+                        dataIndex: 'goodsAmount',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'goodsStore',
+                        title: '销售店铺名称',
+                        dataIndex: 'goodsStore',
+                        align: 'center',
+                        width: 120,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购计划ID',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                    {
+                        key: 'purchasePlanId',
+                        title: '采购订单生成时间',
+                        dataIndex: 'purchasePlanId',
+                        align: 'center',
+                        width: 120,
+                    },
+                    {
+                        key: 'purchaseOrderStatus',
+                        title: '采购计划状态',
+                        dataIndex: 'purchaseOrderStatus',
+                        align: 'center',
+                        width: 120,
+                        render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
+                    },
+                ];
+        }
+    }, [status]);
 
     const pagination = useMemo(() => {
         return {
@@ -653,33 +1034,59 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const { visible, onClose, setVisibleProps } = useModal<boolean>();
 
     const toolBarRender = useCallback(() => {
-        const disabled = selectedOrderGoodsIdList.length === 0 ? true : false;
-        return [
-            <LoadingButton
-                key="place_order"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={_postOrdersPlace}
-                disabled={disabled}
-            >
-                一键拍单
-            </LoadingButton>,
-            <CancelOrder
-                orderGoodsIds={selectedOrderGoodsIdList}
-                onReload={onSearch}
-                getAllTabCount={getAllTabCount}
-            >
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={disabled}
-                >
-                    取消渠道订单
-                </Button>
-            </CancelOrder>,
-        ];
-    }, [selectedOrderGoodsIdList, _postOrdersPlace, _postExportPendingOrder]);
+        const disabled = selectedOrderGoodsIdList.length === 0;
+        switch (status) {
+            default:
+            case '1':
+            case '3':
+                return [
+                    <LoadingButton
+                        key="place_order"
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={_postOrdersPlace}
+                        disabled={disabled}
+                    >
+                        一键重拍
+                    </LoadingButton>,
+                    <CancelOrder
+                        key={'cancel'}
+                        orderGoodsIds={selectedOrderGoodsIdList}
+                        onReload={onSearch}
+                        getAllTabCount={getAllTabCount}
+                    >
+                        <Button
+                            key="channel_order"
+                            type="primary"
+                            className={formStyles.formBtn}
+                            disabled={disabled}
+                        >
+                            取消订单
+                        </Button>
+                    </CancelOrder>,
+                ];
+            case '2':
+                return [
+                    <CancelOrder
+                        key={'cancel'}
+                        orderGoodsIds={selectedOrderGoodsIdList}
+                        onReload={onSearch}
+                        getAllTabCount={getAllTabCount}
+                    >
+                        <Button
+                            key="channel_order"
+                            type="primary"
+                            className={formStyles.formBtn}
+                            disabled={disabled}
+                        >
+                            取消订单
+                        </Button>
+                    </CancelOrder>,
+                ];
+            case '4':
+                return [searchForm1];
+        }
+    }, [selectedOrderGoodsIdList, _postOrdersPlace, _postExportPendingOrder, status]);
 
     useEffect(() => {
         onSearch();
@@ -689,6 +1096,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         return (
             <>
                 {search}
+                {status === '4' ? null : searchForm1}
                 <FitTable
                     bordered={true}
                     rowKey="purchasePlanId"
