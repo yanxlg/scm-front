@@ -1,6 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Modal, Form, Select, InputNumber } from 'antd';
-import { ICheckedBtnItem } from '@/interface/IGlobal';
 import CheckedBtn from '@/components/CheckedBtn';
 import classnames from 'classnames';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
@@ -9,6 +8,10 @@ import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
 import useGoodsCatagory from '../../hooks/useGoodsCatagory';
 
 import styles from './_UpdateRangeModal.less';
+import { requiredRule } from '@/enums/PriceStrategyEnum';
+import useGoodsTag from '../../hooks/useGoodsTag';
+import { startPriceStrategyUpdate } from '@/services/price-strategy';
+import { IStartStrategyUpdateReq } from '@/interface/IPriceStrategy';
 
 const { Option } = Select;
 
@@ -20,14 +23,16 @@ interface IProps {
 
 const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) => {
     const [form] = Form.useForm();
-    const [goodsTagList, setGoodsTagList] = useState<ICheckedBtnItem[]>([
-        { name: '商品标签1', checked: false },
-        { name: '商品标签2', checked: true },
-    ]);
+    const [confirmLoading, setConfirmLoading] = useState(false);
     const { catagoryList } = useGoodsCatagory();
+    const { goodsTagList, toggleGoodsTag } = useGoodsTag();
 
-    const handleOk = useCallback(() => {
-        console.log('handleOk', form.getFieldsValue());
+    const handleOk = useCallback(async () => {
+        // console.log('handleOk', form.getFieldsValue());
+        const data = await form.validateFields();
+        startPriceStrategyUpdate(data as IStartStrategyUpdateReq)
+            .then(res => {})
+            .finally(() => {});
     }, []);
 
     const handleCancel = useCallback(() => {
@@ -40,103 +45,114 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
             title="执行范围"
             width={800}
             visible={visible}
+            confirmLoading={confirmLoading}
             onCancel={handleCancel}
             onOk={handleOk}
         >
             <Form form={form} className={styles.container}>
-                <Form.Item label="一级品类" name="first_cat">
-                    <MultipleSelect
-                        name="first_cat"
-                        className={styles.select}
-                        form={form}
-                        optionList={catagoryList}
-                        onChange={() => {
-                            form.resetFields(['second_cat']);
-                            form.resetFields(['third_cat']);
-                        }}
-                    />
-                </Form.Item>
-                <Form.Item label="二级品类" name="second_cat">
-                    <MultipleSelect
-                        name="second_cat"
-                        className={styles.select}
-                        form={form}
-                        optionList={catagoryList}
-                        dependNameList={['first_cat']}
-                        onChange={() => {
-                            // console.log(11111);
-                            form.resetFields(['third_cat']);
-                        }}
-                    />
-                </Form.Item>
-                <Form.Item label="三级品类" name="third_cat">
-                    <MultipleSelect
-                        name="third_cat"
-                        className={styles.select}
-                        form={form}
-                        optionList={catagoryList}
-                        dependNameList={['first_cat', 'second_cat']}
-                    />
-                </Form.Item>
+                <div className={styles.title}>商品售价更新范围</div>
+                <MultipleSelect
+                    label="一级品类"
+                    name="first_cat"
+                    className={styles.select}
+                    form={form}
+                    optionList={catagoryList}
+                    rules={[requiredRule]}
+                    onChange={() => {
+                        form.resetFields(['second_cat']);
+                        form.resetFields(['third_cat']);
+                    }}
+                />
+                <MultipleSelect
+                    label="二级品类"
+                    name="second_cat"
+                    className={styles.select}
+                    form={form}
+                    optionList={catagoryList}
+                    dependencies={['first_cat']}
+                    rules={[requiredRule]}
+                    onChange={() => {
+                        form.resetFields(['third_cat']);
+                    }}
+                />
+                <MultipleSelect
+                    label="三级品类"
+                    name="third_cat"
+                    className={styles.select}
+                    form={form}
+                    optionList={catagoryList}
+                    rules={[requiredRule]}
+                    dependencies={['first_cat', 'second_cat']}
+                />
                 <Form.Item label="商品标签">
                     <div>
                         {goodsTagList.map(item => (
-                            <CheckedBtn item={item} key={item.name} />
+                            <CheckedBtn
+                                item={item}
+                                key={item.name}
+                                onClick={() => toggleGoodsTag(item.name)}
+                            />
                         ))}
                     </div>
                 </Form.Item>
                 <Form.Item
                     label="爬虫价格区间"
                     name="_"
-                    dependencies={['min-price', 'max-price']}
+                    dependencies={['min_origin_price', 'max_origin_price']}
                     rules={[
                         ({ getFieldValue }) => ({
                             validator(rule, value) {
-                                return validateRange(getFieldValue, 'min-price', 'max-price');
+                                return validateRange(
+                                    getFieldValue,
+                                    'min_origin_price',
+                                    'max_origin_price',
+                                );
                             },
                         }),
                     ]}
                 >
                     <div className={classnames(styles.flex, styles.noneMargin)}>
-                        <Form.Item name="min-price" trigger="onBlur">
+                        <Form.Item name="min_origin_price" trigger="onBlur">
                             <InputNumber min={0} precision={2} />
                         </Form.Item>
                         <div className={styles.gutter}>-</div>
-                        <Form.Item name="max-price" trigger="onBlur">
+                        <Form.Item name="max_origin_price" trigger="onBlur">
                             <InputNumber min={0} precision={2} />
                         </Form.Item>
                         <div className={styles.extra}>¥</div>
                     </div>
                 </Form.Item>
-                <Form.Item label="销售渠道" name="enable_platform">
+                <div className={styles.flex}>
                     <MultipleSelect
+                        label="销售渠道"
                         name="enable_platform"
                         className={styles.select}
                         form={form}
                         optionList={sellChannelList}
+                        rules={[requiredRule]}
                         onChange={() => {
-                            console.log(11111);
-                            // form.resetFields(['enable_merchant']);
+                            form.resetFields(['enable_merchant']);
                         }}
                     />
-                </Form.Item>
-                <Form.Item label="销售店铺" name="enable_merchant">
                     <MultipleSelect
+                        label="销售店铺"
                         name="enable_merchant"
-                        dependNameList={['enable_platform']}
                         className={styles.select}
                         form={form}
                         optionList={sellChannelList}
+                        dependencies={['enable_platform']}
+                        rules={[requiredRule]}
                     />
-                </Form.Item>
-                <Form.Item label="销售国家" name="shipping_fee_country">
-                    <MultipleSelect
-                        name="shipping_fee_country"
-                        className={styles.select}
-                        form={form}
-                        optionList={[]}
-                    />
-                </Form.Item>
+                </div>
+                <div className={classnames(styles.title, styles.second)}>商品运费更新范围</div>
+                <MultipleSelect
+                    label="销售国家"
+                    name="shipping_fee_country"
+                    className={styles.select}
+                    form={form}
+                    optionList={[]}
+                    rules={[requiredRule]}
+                />
             </Form>
         </Modal>
     );

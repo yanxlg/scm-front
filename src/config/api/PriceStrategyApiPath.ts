@@ -6,4 +6,5 @@ export enum PriceStrategyApiPath {
     saveShippingCard = '/api/v1/price_strategy/shipping_card_save',
     getShippingFeeRuleList = '/v1/price_strategy/list_shipping_fee_rule',
     saveShippingFeeRule = '/api/v1/price_strategy/shipping_fee_rule_save',
+    startPriceStrategyUpdate = '/api/v1/price_strategy/rule_update',
 }

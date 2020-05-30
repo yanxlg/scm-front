@@ -11,6 +11,7 @@ import { saveShippingFeeRule, getAllGoodsTagList } from '@/services/price-strate
 import styles from '../../_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { validateRange } from '@/utils/validate';
+import useGoodsTag from '../../hooks/useGoodsTag';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -25,28 +26,12 @@ const FreightConfig: React.FC<IProps> = ({ type, updateData, goBack }) => {
     const [form] = Form.useForm();
     const [saveLoading, setSaveLoading] = useState(false);
     const [name, setName] = useState('');
-    // const [goodsTagList, setGoodsTagList] = useState<ICheckedBtnItem[]>([]);
-    const [allGoodsTagList, setAllGoodsTagList] = useState<string[]>([]);
-    const [checkedGoodsTagList, setCheckedGoodsTagList] = useState<string[]>([]);
+    const { goodsTagList, toggleGoodsTag, setCheckedGoodsTagList } = useGoodsTag();
 
     const handleChangeName = useCallback(e => {
         // console.log(11111, e);
         setName(e.target.value);
     }, []);
-
-    const toggleGoodsTag = useCallback(
-        (name: string) => {
-            const index = checkedGoodsTagList.findIndex(currentName => currentName === name);
-            if (index > -1) {
-                const list = [...checkedGoodsTagList];
-                list.splice(index, 1);
-                setCheckedGoodsTagList(list);
-            } else {
-                setCheckedGoodsTagList([...checkedGoodsTagList, name]);
-            }
-        },
-        [checkedGoodsTagList],
-    );
 
     const _saveShippingFeeRule = useCallback((data: ISaveShippingFeeRuleReq) => {
         setSaveLoading(true);
@@ -71,21 +56,6 @@ const FreightConfig: React.FC<IProps> = ({ type, updateData, goBack }) => {
             upper_shipping_card,
             comment,
         } = data;
-    }, []);
-
-    const goodsTagList = useMemo(() => {
-        return allGoodsTagList.map(name => {
-            return {
-                name: name,
-                checked: checkedGoodsTagList.indexOf(name) > -1,
-            };
-        });
-    }, [allGoodsTagList, checkedGoodsTagList]);
-
-    useEffect(() => {
-        getAllGoodsTagList().then(list => {
-            setAllGoodsTagList(list.map(({ name }: any) => name));
-        });
     }, []);
 
     useEffect(() => {

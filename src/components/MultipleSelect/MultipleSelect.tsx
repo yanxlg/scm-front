@@ -1,25 +1,31 @@
 import React, { useCallback, useMemo } from 'react';
-import { Select, Radio } from 'antd';
+import { Select, Radio, Form } from 'antd';
 import { SelectProps } from 'antd/es/select';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
-import { FormInstance } from 'antd/lib/form';
+import { FormInstance, FormItemProps } from 'antd/lib/form';
+import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 
 const { Option } = Select;
 
 type IProps = {
+    // label: string;
     name: string;
     optionList: IOptionItem[];
-    dependNameList?: string[];
+    dependencies?: string[];
     form: FormInstance;
     onChange?(): void;
-} & SelectProps<string>;
-// Omit<SelectProps<string>, 'onChange'>
+    rules?: any[];
+} & SelectProps<string> &
+    FormItemLabelProps;
 
 const MultipleSelect: React.FC<IProps> = ({
+    label,
     optionList,
     name,
     form,
-    dependNameList,
+    dependencies,
+    rules,
+    maxTagCount = 4,
     placeholder = '请选择',
     mode = 'multiple',
     onChange,
@@ -35,13 +41,13 @@ const MultipleSelect: React.FC<IProps> = ({
             : {};
     }, []);
 
-    const list = useMemo(() => {
-        if (!dependNameList) {
+    const getOptionList = useCallback(() => {
+        if (!dependencies) {
             return optionList;
         }
         let parentList: IOptionItem[] = [...optionList];
-        for (let i = 0; i < dependNameList.length; i++) {
-            const currentName = dependNameList[i];
+        for (let i = 0; i < dependencies.length; i++) {
+            const currentName = dependencies[i];
             const vals = form.getFieldValue(currentName);
             if (vals && vals.length > 0) {
                 const checkedList = parentList.filter(({ value }) => vals.indexOf(value) > -1);
@@ -56,11 +62,11 @@ const MultipleSelect: React.FC<IProps> = ({
             }
         }
         return parentList;
-        // return optionList;
-    }, [optionList, dependNameList]);
+    }, [optionList, dependencies]);
 
     const dropdownRender = useCallback(
         (menu: React.ReactElement): React.ReactElement => {
+            const list = getOptionList();
             if (list.length) {
                 return (
                     <div>
@@ -72,8 +78,7 @@ const MultipleSelect: React.FC<IProps> = ({
                                     form?.setFieldsValue({
                                         [name]: list.map(item => item.value),
                                     });
-                                    // const { onChange } = resetProps;
-                                    // onChange && onChange();
+                                    onChange && onChange();
                                 }}
                             >
                                 全选
@@ -85,7 +90,7 @@ const MultipleSelect: React.FC<IProps> = ({
                                     form?.setFieldsValue({
                                         [name]: [],
                                     });
-                                    // onChange && onChange();
+                                    onChange && onChange();
                                 }}
                             >
                                 取消全选
@@ -97,23 +102,50 @@ const MultipleSelect: React.FC<IProps> = ({
             }
             return menu;
         },
-        [list, name, resetProps],
+        [getOptionList, name],
     );
 
     return (
-        <Select
-            mode={mode}
-            placeholder={placeholder}
-            {...eventProps}
-            dropdownRender={dropdownRender}
-            {...resetProps}
+        <Form.Item
+            noStyle={true}
+            dependencies={dependencies}
+            shouldUpdate={(prevValues, currentValues) => {
+                if (!dependencies) {
+                    return false;
+                }
+                let updated = false;
+                let i = 0;
+                let length = dependencies.length;
+                while (!updated && i < length) {
+                    const dependenceName = dependencies[i];
+                    updated = prevValues[dependenceName] !== currentValues[dependenceName];
+                    i++;
+                }
+                return updated;
+            }}
         >
-            {list.map(({ name, value }) => (
-                <Option key={name} value={value}>
-                    {name}
-                </Option>
-            ))}
-        </Select>
+            {() => {
+                const list = getOptionList();
+                return (
+                    <Form.Item label={label} name={name} rules={rules}>
+                        <Select
+                            mode={mode}
+                            maxTagCount={maxTagCount}
+                            placeholder={placeholder}
+                            dropdownRender={dropdownRender}
+                            {...eventProps}
+                            {...resetProps}
+                        >
+                            {list.map(({ name, value }) => (
+                                <Option key={value} value={value}>
+                                    {name}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                );
+            }}
+        </Form.Item>
     );
 };
 

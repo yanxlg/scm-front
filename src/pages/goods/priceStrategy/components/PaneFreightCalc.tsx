@@ -158,7 +158,7 @@ const PaneFreightCalc: React.FC = props => {
                 mode: 'multiple',
                 isShortcut: true,
                 maxTagCount: 4,
-                className: styles.multipleSelect,
+                className: styles.select,
                 optionList: nameList,
                 formatter: 'join',
                 onChange: (name, form) => {
@@ -176,7 +176,7 @@ const PaneFreightCalc: React.FC = props => {
                 mode: 'multiple',
                 isShortcut: true,
                 maxTagCount: 4,
-                className: styles.multipleSelect,
+                className: styles.select,
                 optionList: countryCodeList,
                 formatter: 'join',
             },

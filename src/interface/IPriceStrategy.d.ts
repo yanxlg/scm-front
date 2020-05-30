@@ -56,3 +56,16 @@ export type IShippingCardListRes = {
     country_code: string;
     weight_config: IWeightConfigItem[];
 };
+
+export type IStartStrategyUpdateReq = {
+    first_cat: string;
+    second_cat: string;
+    third_cat: string;
+    enable_platform: string;
+    enable_merchant: string;
+    shipping_fee_country: string;
+    type: string;
+    product_tags?: string;
+    min_origin_price?: string;
+    max_origin_price?: string;
+};

@@ -7,6 +7,7 @@ import {
     IShippingFeeRuleReq,
     IShippingFeeRuleRes,
     ISaveShippingFeeRuleReq,
+    IStartStrategyUpdateReq,
 } from '@/interface/IPriceStrategy';
 import { api } from 'react-components';
 import { IResponse, IPaginationResponse } from 'react-components/lib/hooks/useList';
@@ -80,6 +81,13 @@ export function getShippingCardList(params: IShippingCardListReq) {
 // 保存和更新运费价卡
 export function saveShippingCard(data: FormData) {
     return request.post(PriceStrategyApiPath.saveShippingCard, {
+        data,
+    });
+}
+
+// 更新商品售价(圈定范围)
+export function startPriceStrategyUpdate(data: IStartStrategyUpdateReq) {
+    return request.post(PriceStrategyApiPath.startPriceStrategyUpdate, {
         data,
     });
 }

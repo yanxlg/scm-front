@@ -11,69 +11,66 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import { EmptyObject, defaultSelectOption } from '@/config/global';
 
+const _getCatagoryList = () =>
+    getCatagoryList()
+        .then(({ convertList = [] } = EmptyObject) => {
+            return convertList;
+        })
+        .catch(() => {
+            return [];
+        });
+
 const formFields: FormField[] = [
     {
         type: 'select',
-        label: '一级类目',
-        name: 'first_catagory',
-        // className: styles.input,
-        defaultValue: '',
-        syncDefaultOption: defaultSelectOption,
-        optionList: () =>
-            getCatagoryList()
-                .then(({ convertList = [] } = EmptyObject) => {
-                    return convertList;
-                })
-                .catch(() => {
-                    return [];
-                }),
+        label: '一级品类',
+        name: 'first_category',
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
+        optionList: _getCatagoryList,
         onChange: (name, form) => {
-            form.resetFields(['second_catagory']);
-            form.resetFields(['third_catagory']);
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
         },
+        formatter: 'join',
     },
     {
         type: 'select',
-        label: '二级类目',
-        name: 'second_catagory',
-        // className: styles.input,
-        defaultValue: '',
+        label: '二级品类',
+        name: 'second_category',
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
         optionListDependence: {
-            name: 'first_catagory',
+            name: 'first_category',
             key: 'children',
         },
-        syncDefaultOption: defaultSelectOption,
-        optionList: () =>
-            getCatagoryList()
-                .then(({ convertList = [] } = EmptyObject) => {
-                    return convertList;
-                })
-                .catch(() => {
-                    return [];
-                }),
+        optionList: _getCatagoryList,
         onChange: (name, form) => {
-            form.resetFields(['third_catagory']);
+            form.resetFields(['third_category']);
         },
+        formatter: 'join',
     },
     {
         type: 'select',
-        label: '三级类目',
-        name: 'third_catagory',
-        // className: styles.input,
-        defaultValue: '',
+        label: '三级品类',
+        name: 'third_category',
+        isShortcut: true,
+        placeholder: '请选择',
+        mode: 'multiple',
+        className: styles.select,
+        maxTagCount: 4,
         optionListDependence: {
-            name: ['first_catagory', 'second_catagory'],
+            name: ['first_category', 'second_category'],
             key: 'children',
         },
-        syncDefaultOption: defaultSelectOption,
-        optionList: () =>
-            getCatagoryList()
-                .then(({ convertList = [] } = EmptyObject) => {
-                    return convertList;
-                })
-                .catch(() => {
-                    return [];
-                }),
+        optionList: _getCatagoryList,
+        formatter: 'join',
     },
 ];
 
