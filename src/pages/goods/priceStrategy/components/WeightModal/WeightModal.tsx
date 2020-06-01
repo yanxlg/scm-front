@@ -1,27 +1,36 @@
 import React, { useState, useCallback } from 'react';
 import { Modal, Form, Input, Upload, Button } from 'antd';
+import { LoadingButton } from 'react-components';
+import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
 import styles from './_WeightModal.less';
-import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { saveCatagoryWeight } from '@/services/price-strategy';
 
 const { TextArea } = Input;
 
 interface IProps {
     visible: boolean;
-    onCancel(): void;
+    onCancel(isRefresh?: boolean): void;
 }
 
 const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
     const [form] = Form.useForm();
     const [name, setName] = useState('');
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = useCallback((isRefresh?: boolean) => {
         setName('');
-        onCancel();
+        onCancel(isRefresh);
     }, []);
 
     const saveUpload = useCallback(() => {
-        console.log(11111111, form.getFieldsValue());
+        // console.log(11111111, form.getFieldsValue());
+        const { file, remark } = form.getFieldsValue();
+        const data = new FormData();
+        data.append('file', file);
+        data.append('remark', remark || '');
+        return saveCatagoryWeight(data).then(() => {
+            handleCancel(true);
+        });
     }, []);
 
     const normFile = useCallback(e => {
@@ -45,7 +54,7 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
             footer={null}
             maskClosable={false}
             visible={visible}
-            onCancel={handleCancel}
+            onCancel={() => handleCancel()}
         >
             <Form form={form}>
                 <Form.Item
@@ -55,8 +64,8 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
                     getValueFromEvent={normFile}
                     extra={
                         <div className={styles.extra}>
-                            仅支持CSV格式文件 如无模板，可下载
-                            <a className={styles.download}>品类预估重量csv模板</a>
+                            仅支持xlsx格式文件 如无模板，可下载
+                            <a className={styles.download}>品类预估重量xlsx模板</a>
                         </div>
                     }
                 >
@@ -67,7 +76,7 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
                             <CloseCircleOutlined onClick={delFile} className={styles.iconClose} />
                         </div>
                     ) : (
-                        <Upload accept=".csv" showUploadList={false} beforeUpload={() => false}>
+                        <Upload accept=".xlsx" showUploadList={false} beforeUpload={() => false}>
                             <a>
                                 <UploadOutlined /> 上传品类预估重量表
                             </a>
@@ -78,9 +87,9 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
                     <TextArea placeholder="此规则仅适用于VOVA-新店铺运营1个月内" />
                 </Form.Item>
                 <div className={styles.btnSave}>
-                    <Button type="primary" onClick={saveUpload}>
+                    <LoadingButton type="primary" onClick={saveUpload} disabled={!name}>
                         确认上传
-                    </Button>
+                    </LoadingButton>
                 </div>
             </Form>
         </Modal>

@@ -306,7 +306,12 @@ const PaneSellPrice: React.FC = props => {
                 sellChannelList={sellChannelList}
                 onCancel={hideUpdateRangeModal}
             />
-            <UpdateRecordModal visible={updateRecordStatus} onCancel={hideUpdateRecordModal} />
+            <UpdateRecordModal
+                visible={updateRecordStatus}
+                id={recordId}
+                type="sale_price"
+                onCancel={hideUpdateRecordModal}
+            />
         </>
     ) : (
         <SellConfig type={editType} goBack={goBack} />

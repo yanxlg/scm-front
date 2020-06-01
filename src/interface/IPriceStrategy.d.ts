@@ -69,3 +69,34 @@ export type IStartStrategyUpdateReq = {
     min_origin_price?: string;
     max_origin_price?: string;
 };
+
+export type ICatagoryWeightListReq = {
+    first_category?: string;
+    second_category?: string;
+    third_category?: string;
+} & IRequestPagination1;
+
+export type ICatagoryWeightListRes = {
+    first_category_name: string;
+    second_category_name: string;
+    third_category_name: string;
+    third_category_id: string;
+    estimate_weight: string;
+    avg_weight: string;
+};
+
+export type ICatagoryWeightLogReq = {
+    third_category_id: string;
+} & IRequestPagination1;
+
+export type ICatagoryWeightLogRes = {
+    operate_content: string;
+    operate_people: string;
+    create_time: string;
+};
+
+export type IUpdateRecoreItem = {
+    operate_info: string;
+    operator: string;
+    operate_time: string;
+};

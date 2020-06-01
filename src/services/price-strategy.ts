@@ -8,6 +8,10 @@ import {
     IShippingFeeRuleRes,
     ISaveShippingFeeRuleReq,
     IStartStrategyUpdateReq,
+    ICatagoryWeightListReq,
+    ICatagoryWeightListRes,
+    ICatagoryWeightLogReq,
+    ICatagoryWeightLogRes,
 } from '@/interface/IPriceStrategy';
 import { api } from 'react-components';
 import { IResponse, IPaginationResponse } from 'react-components/lib/hooks/useList';
@@ -90,4 +94,43 @@ export function startPriceStrategyUpdate(data: IStartStrategyUpdateReq) {
     return request.post(PriceStrategyApiPath.startPriceStrategyUpdate, {
         data,
     });
+}
+
+// 获取品类预估重量列表
+export function getCatagoryWeightList(params: ICatagoryWeightListReq) {
+    return api.get<IResponse<IPaginationResponse<ICatagoryWeightListRes>>>(
+        PriceStrategyApiPath.getCatagoryWeightList,
+        {
+            params,
+        },
+    );
+}
+
+// 品类预估重量保存
+export function saveCatagoryWeight(data: FormData) {
+    return request.post(PriceStrategyApiPath.saveCatagoryWeight, {
+        data,
+    });
+}
+
+// 品类预估重量日志
+export function getCatagoryWeightLog(params: ICatagoryWeightLogReq) {
+    return request
+        .get<IResponse<IPaginationResponse<ICatagoryWeightLogRes>>>(
+            PriceStrategyApiPath.getCatagoryWeightLog,
+            {
+                params,
+            },
+        )
+        .then(({ data }) => {
+            const { list, total } = data;
+            return {
+                list: list.map(({ operate_content, operate_people, create_time }) => ({
+                    operate_info: operate_content,
+                    operator: operate_people,
+                    operate_time: create_time,
+                })),
+                total,
+            };
+        });
 }

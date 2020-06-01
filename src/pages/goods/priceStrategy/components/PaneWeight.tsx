@@ -4,12 +4,15 @@ import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
 import { getGoodsList, getCatagoryList } from '@/services/goods';
 import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
-import { ISellItem } from '@/interface/IPriceStrategy';
+import { ICatagoryWeightListRes } from '@/interface/IPriceStrategy';
 import WeightModal from './WeightModal/WeightModal';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import { EmptyObject, defaultSelectOption } from '@/config/global';
+import { getCatagoryWeightList } from '@/services/price-strategy';
+import useUpdateRecord from '../hooks/useUpdateRecord';
+import UpdateRecordModal from './UpdateRecordModal/UpdateRecordModal';
 
 const _getCatagoryList = () =>
     getCatagoryList()
@@ -86,54 +89,65 @@ const PaneWeight: React.FC = props => {
         onReload,
         onSearch,
         onChange,
-    } = useList<ISellItem>({
+    } = useList<ICatagoryWeightListRes>({
         formRef: searchRef,
-        queryList: getGoodsList,
+        queryList: getCatagoryWeightList,
     });
+    const {
+        updateRecordStatus,
+        recordId,
+        showUpdateRecordModal,
+        hideUpdateRecordModal,
+    } = useUpdateRecord();
 
-    const hideWeightModal = useCallback(() => {
+    const hideWeightModal = useCallback((isRefresh?: boolean) => {
         setWeightStatus(false);
+        isRefresh && onReload();
     }, []);
 
-    const columns = useMemo<ColumnsType<ISellItem>>(() => {
+    const columns = useMemo<ColumnsType<ICatagoryWeightListRes>>(() => {
         return [
             {
                 title: '一级品类',
-                dataIndex: 'a1',
+                dataIndex: 'first_category_name',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '二级品类',
-                dataIndex: 'a2',
+                dataIndex: 'second_category_name',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '三级品类',
-                dataIndex: 'a3',
+                dataIndex: 'third_category_name',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '预估重量 (g)',
-                dataIndex: 'a4',
+                dataIndex: 'estimate_weight',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '平均重量 (g)',
-                dataIndex: 'a5',
+                dataIndex: 'avg_weight',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '更新记录',
-                dataIndex: 'a6',
+                dataIndex: 'third_category_id',
                 align: 'center',
                 width: 120,
-                render: () => {
-                    return <a className={styles.hover}>查看</a>;
+                render: (val: string) => {
+                    return (
+                        <a className={styles.hover} onClick={() => showUpdateRecordModal(val)}>
+                            查看
+                        </a>
+                    );
                 },
             },
         ];
@@ -189,7 +203,8 @@ const PaneWeight: React.FC = props => {
         return (
             <FitTable
                 bordered
-                columnsSettingRender={true}
+                // columnsSettingRender={true}
+                rowKey="third_category_id"
                 loading={loading}
                 columns={columns}
                 dataSource={dataSource}
@@ -205,6 +220,12 @@ const PaneWeight: React.FC = props => {
             {searchNode}
             {table}
             <WeightModal visible={weightStatus} onCancel={hideWeightModal} />
+            <UpdateRecordModal
+                visible={updateRecordStatus}
+                id={recordId}
+                type="weight"
+                onCancel={hideUpdateRecordModal}
+            />
         </>
     );
 };
