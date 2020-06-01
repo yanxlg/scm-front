@@ -33,7 +33,6 @@ const fieldList: Array<FormField> = [
         type: 'select',
         name: 'type',
         colon: false,
-        defaultValue: '1',
         formItemClassName: classNames(formStyles.formItem, styles.formAsLabel),
         className: styles.selectType,
         optionList: [
@@ -226,7 +225,13 @@ const ReplaceStoreOut = () => {
 
     const formElement = useMemo(() => {
         return (
-            <JsonForm fieldList={fieldList} ref={formRef}>
+            <JsonForm
+                fieldList={fieldList}
+                ref={formRef}
+                initialValues={{
+                    type: '1',
+                }}
+            >
                 <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                     查询
                 </LoadingButton>
