@@ -20,6 +20,7 @@ import styles from '@/pages/purchase/_list.less';
 import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import CreatePurchaseModal from '@/pages/purchase/components/list/createPurchase';
 
 const { Paragraph } = Typography;
 
@@ -374,6 +375,7 @@ const AllList = () => {
                     onOKey={onExport}
                     onCancel={closeExportFn}
                 />
+                <CreatePurchaseModal visible={'111'} onClose={() => {}} />
             </>
         );
     }, [loading, visible, showExport]);
