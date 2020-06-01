@@ -290,7 +290,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 render: value => (value ? utcToLocal(value) : ''),
             },
             {
-                title: '揽收重量',
+                title: '出库重量',
                 width: '150px',
                 dataIndex: 'totalWeight',
                 align: 'center',
@@ -453,15 +453,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 ],
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '渠道订单ID',
                 name: 'channel_order_goods_sn',
                 formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '中台订单ID',
                 name: 'order_goods_id',
+                formatter: 'multipleToArray',
             },
             {
                 type: 'select',
@@ -480,18 +481,19 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     }),
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '尾程运单ID',
                 name: 'last_waybill_no',
                 formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '中台商品ID',
                 name: 'commodity_id',
+                formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '商品SKU ID',
                 name: 'sku_id',
                 formatter: 'multipleToArray',

@@ -720,6 +720,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 orderGoodsIds={orderGoodsIdList}
                 onReload={onSearch}
                 getAllTabCount={_getAllTabCount}
+                offShelfChecked={false}
             >
                 <Button
                     key="4"

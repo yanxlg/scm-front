@@ -11,7 +11,7 @@ const { TabPane } = Tabs;
 const Stock: React.FC = (props: any) => {
     return useMemo(() => {
         const { query } = queryString.parseUrl(window.location.href);
-        const defaultActiveKey = ((query.tabKey ?? '1') as unknown) as string;
+        const defaultActiveKey = ((query.tabKey ?? '2') as unknown) as string;
         return (
             <Container>
                 <Tabs
