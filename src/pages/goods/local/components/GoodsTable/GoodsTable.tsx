@@ -594,6 +594,7 @@ const GoodsTable: React.FC<IProps> = ({
                         : goodsList.filter(({ product_id }) => modal.indexOf(product_id) > -1)
                 }
                 onClose={closeModal}
+                onReload={onReload}
             />
         );
     }, [modal]);

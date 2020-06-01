@@ -26,4 +26,5 @@ export enum LocalApiPath {
     uploadGoodsPic = '/api/v1/goods/upload/product_pic_zip/:product_id',
     getGoodsDetail = '/api/v1/goods/get/:product_id',
     getCountryPrice = '/api/v1/goods/multiple_price/:product_id',
+    UpdateTagsList = '/api/v1/goods/batch_apply_tag',
 }

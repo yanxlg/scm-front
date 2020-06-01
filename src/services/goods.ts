@@ -338,3 +338,13 @@ export function getGoodsDetail(product_id: string) {
 export function getCountryPrice(product_id: string) {
     return request.get(LocalApiPath.getCountryPrice.replace(':product_id', product_id));
 }
+
+export function updateTagList(data: {
+    add_tag_list: string[];
+    del_tag_list: string[];
+    commodity_id_list: string[];
+}) {
+    return request.post(LocalApiPath.UpdateTagsList, {
+        data: data,
+    });
+}
