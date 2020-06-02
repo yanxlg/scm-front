@@ -15,6 +15,12 @@ declare interface IProps {
 
 const SetAttr: React.FC<IProps> = ({ tags, commodityId, productId, onReload }) => {
     const [selectedTags, setSelectedTags] = useState<string[]>(tags);
+
+    // 组件数据更新
+    useMemo(() => {
+        setSelectedTags(tags);
+    }, [tags]);
+
     const [loading, setLoading] = useState(false);
     const [tagList, setTagList] = useState<ITagItem[]>([]);
 
