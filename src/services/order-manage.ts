@@ -308,5 +308,9 @@ export const queryPendingCount = () => {
 };
 
 export const queryTakeOrders = () => {
-    return request.get<IResponse<Array<IPurchaseLog>>>(OrderApiPath.QueryTakeOrders);
+    return request.get<
+        IResponse<{
+            data: Array<IPurchaseLog>;
+        }>
+    >(OrderApiPath.QueryTakeOrders);
 };

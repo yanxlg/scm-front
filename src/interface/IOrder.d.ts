@@ -127,6 +127,9 @@ export interface ISimilarInfoResponse {
         skuId: string;
         productSkuStyle: string;
         purchaseFailCode: failureReasonCode;
+        orderGoods: {
+            commodityId: string;
+        };
     };
     originOrderInfo: {
         skuImageUrl: string;
@@ -134,6 +137,7 @@ export interface ISimilarInfoResponse {
         skuId: string;
         productTitle: string;
         productOptionValue: string;
+        commodityId: string;
     };
     historySimilarGoodsInfo: Array<IHistorySimilar>;
 }

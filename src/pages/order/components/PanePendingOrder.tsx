@@ -26,6 +26,9 @@ import {
     finalCancelStatusList,
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
+    errorDetailOptionMap,
+    failureReasonMap,
+    failureReasonCode,
 } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
@@ -39,6 +42,7 @@ import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 import { EmptyObject } from '@/config/global';
 import TakeOrdersRecordModal from '@/pages/order/components/TakeOrdersRecordModal';
 import classNames from 'classnames';
+import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -553,7 +557,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     }, [counts]);
 
     useEffect(() => {
-        onSearch();
+        handleClickSearch();
     }, [status]);
 
     const search = useMemo(() => {
@@ -650,7 +654,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                       },
                                   ],
                                   onChange: (name: string, form: FormInstance) => {
-                                      onSearch();
+                                      handleClickSearch();
                                   },
                               },
                           ]
@@ -683,6 +687,21 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             window.open(worm_goodsinfo_link);
         });
     }, []);
+
+    const [similarModal, showSimilarModal, hideSimilarModal] = useModal2<{
+        order_goods_id: string;
+        purchase_plan_id: string;
+    }>();
+
+    const similarModalComponent = useMemo(() => {
+        return (
+            <SimilarStyleModal
+                visible={similarModal}
+                onClose={hideSimilarModal}
+                onReload={onSearch}
+            />
+        );
+    }, [similarModal]);
 
     const columns = useMemo<TableProps<IPendingOrderItem>['columns']>(() => {
         switch (status) {
@@ -986,14 +1005,60 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '拍单失败原因',
                         dataIndex: 'purchaseFailCode',
                         align: 'center',
-                        width: 120,
+                        width: 150,
                         render: (value, row) => {
-                            return {
-                                children: getStatusDesc(finalCancelStatusList, value),
-                                props: {
-                                    rowSpan: row._rowspan || 0,
-                                },
-                            };
+                            const reason = getStatusDesc(finalCancelStatusList, value);
+                            const reasonStr = reason ? `${reason}` : '';
+                            // 0代拍，1爬取中，2爬取成功，3爬取失败
+                            const status = Number(row.similarGoodsStatus);
+                            const purchaseOrderStatus = row.purchaseOrderStatus;
+                            return (
+                                <div>
+                                    <div>{reasonStr}</div>
+                                    {purchaseOrderStatus === 7 && (
+                                        <div>
+                                            {status === 0 ? (
+                                                <Button
+                                                    type="link"
+                                                    onClick={() =>
+                                                        showSimilarModal({
+                                                            order_goods_id: row.orderGoodsId,
+                                                            purchase_plan_id: row.purchasePlanId as string,
+                                                        })
+                                                    }
+                                                >
+                                                    相似款代拍
+                                                </Button>
+                                            ) : status === 1 || status === 5 ? (
+                                                <Button
+                                                    type="link"
+                                                    onClick={() =>
+                                                        showSimilarModal({
+                                                            order_goods_id: row.orderGoodsId,
+                                                            purchase_plan_id: row.purchasePlanId as string,
+                                                        })
+                                                    }
+                                                >
+                                                    代拍详情-爬取中
+                                                </Button>
+                                            ) : status === 3 ? (
+                                                <Button
+                                                    type="link"
+                                                    danger={true}
+                                                    onClick={() =>
+                                                        showSimilarModal({
+                                                            order_goods_id: row.orderGoodsId,
+                                                            purchase_plan_id: row.purchasePlanId as string,
+                                                        })
+                                                    }
+                                                >
+                                                    代拍详情-爬取失败
+                                                </Button>
+                                            ) : null}
+                                        </div>
+                                    )}
+                                </div>
+                            );
                         },
                     },
                     {
@@ -1393,9 +1458,22 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     onCancel={onClose}
                 />
                 <TakeOrdersRecordModal visible={modal} onClose={hideModal} />
+                {similarModalComponent}
             </>
         );
-    }, [page, pageSize, total, loading, orderList, visible, status, update, counts, modal]);
+    }, [
+        page,
+        pageSize,
+        total,
+        loading,
+        orderList,
+        visible,
+        status,
+        update,
+        counts,
+        modal,
+        similarModal,
+    ]);
 };
 
 export default PaneWarehouseNotShip;
