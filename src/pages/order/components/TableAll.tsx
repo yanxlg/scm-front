@@ -453,7 +453,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             render: (value: number, row: IChildOrderItem) => {
                 const { reserveStatus } = row;
                 if (reserveStatus === 3 && value === 1) {
-                    return '';
+                    return '无需拍单'; // feature_4170
                 }
                 return getStatusDesc(purchaseOrderOptionList, value);
             },
