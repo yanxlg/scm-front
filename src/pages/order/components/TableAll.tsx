@@ -408,6 +408,18 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchasePlanId',
             align: 'center',
             width: 120,
+            render: (value: string, record) => {
+                return (
+                    <>
+                        {value}
+                        <div style={{ color: 'red' }}>
+                            {String(record?.orderGods?.isOfflinePurchase) === '1'
+                                ? '（线下采购，无需拍单）'
+                                : ''}
+                        </div>
+                    </>
+                );
+            },
         },
         {
             key: 'reserveStatus',

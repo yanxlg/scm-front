@@ -14,6 +14,10 @@ import {
     ICookieResponse,
     IPriceStrategy,
     IPriceStrategyItem,
+    IOfflinePurchaseDetail,
+    IOfflinePurchaseQuery,
+    IOfflinePurchaseReqData,
+    IOfflinePurchaseItem,
     IReplaceBody,
     IReplaceStoreOutItem,
     ReplaceItem,
@@ -201,4 +205,35 @@ export function queryReplaceStoreOut(fetch: FetchFactory, id: string) {
             id,
         },
     });
+}
+
+export function queryOfflinePurchaseList(data: IOfflinePurchaseQuery) {
+    return api.post<IResponse<PaginationResponse<IOfflinePurchaseItem>>>(
+        SettingApiPath.QueryOfflinePurchaseList,
+        {
+            data,
+        },
+    );
+}
+
+export function queryOfflinePurchaseInfo(id: string) {
+    return request.get<IResponse<IOfflinePurchaseDetail>>(
+        SettingApiPath.QueryOfflinePurchaseInfo.replace(':id', id),
+    );
+}
+
+export function addOfflinePurchase(data: IOfflinePurchaseReqData) {
+    return request.post(SettingApiPath.AddOfflinePurchase, {
+        data,
+    });
+}
+
+export function updateOfflinePurchase(id: string, data: IOfflinePurchaseReqData) {
+    return request.put(SettingApiPath.UpdateOfflinePurchase.replace(':id', id), {
+        data,
+    });
+}
+
+export function delOfflinePurchase(id: string) {
+    return request.delete(SettingApiPath.DelOfflinePurchase.replace(':id', id));
 }
