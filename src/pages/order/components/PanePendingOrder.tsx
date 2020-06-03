@@ -1,12 +1,21 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { notification, Checkbox, Button } from 'antd';
-import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
-import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { IPendingOrderSearch, IPendingOrderItem } from '@/interface/IOrder';
 import {
+    JsonForm,
+    LoadingButton,
+    FitTable,
+    useModal,
+    AutoEnLargeImg,
+    useModal2,
+} from 'react-components';
+import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { IPendingOrderSearch, IPendingOrderItem, IReviewOrderItem } from '@/interface/IOrder';
+import {
+    getOrderGoodsDetail,
     getPendingOrderList,
     postExportPendingOrder,
     postOrdersPlace,
+    queryPendingCount,
     queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
@@ -26,6 +35,10 @@ import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
 import { FormInstance } from 'antd/es/form';
 import styles from './_pending.less';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
+import { EmptyObject } from '@/config/global';
+import TakeOrdersRecordModal from '@/pages/order/components/TakeOrdersRecordModal';
+import classNames from 'classnames';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -41,6 +54,35 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
     const [orderList, setOrderList] = useState<IPendingOrderItem[]>([]);
+    const cacheList = useRef<any[]>([]);
+    const [update, setUpdate] = useState(0);
+
+    const [counts, setCounts] = useState({
+        penddingFailOrderCount: 0,
+        penddingOrderCount: 0,
+        samePenddingOrderCount: 0,
+        waitPenddingOrderCount: 0,
+    });
+    // 统计
+    useEffect(() => {
+        queryPendingCount().then(
+            ({
+                data: {
+                    penddingFailOrderCount = 0,
+                    penddingOrderCount = 0,
+                    samePenddingOrderCount = 0,
+                    waitPenddingOrderCount = 0,
+                } = EmptyObject,
+            }) => {
+                setCounts({
+                    penddingFailOrderCount,
+                    penddingOrderCount,
+                    samePenddingOrderCount,
+                    waitPenddingOrderCount,
+                });
+            },
+        );
+    }, []);
 
     const [status, setStatus] = useState(1);
 
@@ -65,6 +107,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 paginationParams,
                 searchRef.current?.getFieldsValue(),
                 searchRef1.current?.getFieldsValue(),
+                searchRef2.current?.getFieldsValue(),
             );
             setLoading(true);
             return getPendingOrderList(params)
@@ -76,7 +119,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         setPage(params.page as number);
                         setPageSize(params.page_count as number);
                         setTotal(total);
-                        _setOrderList(getOrderList(list));
+                        _setOrderList(filterOrderList(list));
                     }
                 })
                 .finally(() => {
@@ -86,17 +129,30 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         [page, pageSize],
     );
 
-    const getOrderList = useCallback(list => {
-        // console.log(1111, list);
+    const filterOrderList = useCallback(list => {
+        cacheList.current = list;
         const childOrderList: IPendingOrderItem[] = [];
         list.forEach((goodsItem: any) => {
             const { orderGoods, orderInfo } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
-            // console.log(111, orderGoodsPurchasePlan, orderGoods);
+            const {
+                currency,
+                confirmTime,
+                channelOrderSn,
+                channelSource,
+                channelMerchantName,
+            } = orderInfo;
             if (orderGoodsPurchasePlan) {
+                let purchasePlanList = [...orderGoodsPurchasePlan];
+                // 重新生成筛选
+                const { showRecreated } = searchRef2.current?.getFieldsValue() ?? {};
+                if (!showRecreated) {
+                    purchasePlanList = purchasePlanList.filter(
+                        (item: any) => item.purchaseOrderStatus !== 6,
+                    );
+                }
                 // 生成采购计划
-                orderGoodsPurchasePlan.forEach((purchaseItem: any, index: number) => {
+                purchasePlanList.forEach((purchaseItem: any, index: number) => {
                     const {
                         createTime: purchaseCreateTime,
                         lastUpdateTime: purchaseLastUpdateTime,
@@ -111,9 +167,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         confirmTime,
                         channelOrderSn,
                         channelSource,
+                        channelMerchantName,
                     };
                     if (index === 0) {
-                        childOrderItem._rowspan = orderGoodsPurchasePlan.length;
+                        childOrderItem._rowspan = purchasePlanList.length;
                         childOrderItem._checked = false;
                     }
                     childOrderList.push(childOrderItem);
@@ -125,13 +182,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     confirmTime,
                     channelOrderSn,
                     channelSource,
+                    channelMerchantName,
                     ...orderRest,
                     _rowspan: 1,
                     _checked: false,
                 });
             }
         });
-        // console.log(1111, childOrderList);
         return childOrderList;
     }, []);
 
@@ -452,19 +509,19 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 label: '拍单状态',
                 options: [
                     {
-                        label: '待拍单',
+                        label: `待拍单(${counts.waitPenddingOrderCount})`,
                         value: 1,
                     },
                     {
-                        label: '拍单中',
+                        label: `拍单中(${counts.penddingOrderCount})`,
                         value: 2,
                     },
                     {
-                        label: '拍单失败',
+                        label: `拍单失败(${counts.penddingFailOrderCount})`,
                         value: 3,
                     },
                     {
-                        label: '相似款代拍中',
+                        label: `相似款代拍中(${counts.samePenddingOrderCount})`,
                         value: 4,
                     },
                 ],
@@ -477,8 +534,23 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     setStatus(form.getFieldValue('purchase_order_combine_status'));
                 },
             },
+            {
+                type: 'layout',
+                className: classNames(formStyles.flex1, formStyles.flexRow),
+                fieldList: [],
+                footer: (
+                    <React.Fragment>
+                        <div className={formStyles.flex1} />
+                        <div className={formStyles.formItem}>
+                            <Button type="link" onClick={() => showModal(true)}>
+                                查看拍单记录
+                            </Button>
+                        </div>
+                    </React.Fragment>
+                ),
+            },
         ];
-    }, []);
+    }, [counts]);
 
     useEffect(() => {
         onSearch();
@@ -493,6 +565,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         purchase_order_combine_status: 1,
                     }}
                     fieldList={statusFormFields}
+                    enableCollapse={false}
                 />
                 <JsonForm
                     ref={searchRef}
@@ -527,16 +600,19 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 </JsonForm>
             </>
         );
-    }, [loading, status]);
+    }, [loading, status, counts]);
 
     const searchForm1 = useMemo(() => {
         return (
             <JsonForm
-                layout="horizontal"
-                // containerClassName={status === '4' ? '' : undefined}
+                layout={status === 4 ? 'inline' : 'horizontal'}
                 key={'form1'}
                 ref={searchRef2}
                 enableCollapse={false}
+                containerClassName={status === 4 ? '' : undefined}
+                initialValues={{
+                    purchase_fail_filter_type: 3,
+                }}
                 fieldList={
                     status === 3
                         ? [
@@ -550,12 +626,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                       },
                                   ],
                                   onChange: (name: string, form: FormInstance) => {
-                                      onSearch();
+                                      _setOrderList(filterOrderList(cacheList.current));
+                                      setUpdate(update => update + 1);
                                   },
                                   formatter: 'join',
                               },
                               {
-                                  type: 'checkboxGroup',
+                                  type: 'radioGroup',
                                   name: 'purchase_fail_filter_type',
                                   label: '处理方式',
                                   options: [
@@ -572,6 +649,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                           value: 3,
                                       },
                                   ],
+                                  onChange: (name: string, form: FormInstance) => {
+                                      onSearch();
+                                  },
                               },
                           ]
                         : [
@@ -586,7 +666,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                       },
                                   ],
                                   onChange: (name: string, form: FormInstance) => {
-                                      onSearch();
+                                      _setOrderList(filterOrderList(cacheList.current));
+                                      setUpdate(update => update + 1);
                                   },
                                   formatter: 'join',
                               },
@@ -595,6 +676,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             />
         );
     }, [status]);
+
+    const _getOrderGoodsDetail = useCallback((productId: string) => {
+        return getOrderGoodsDetail(productId).then(res => {
+            const { worm_goodsinfo_link } = res.data;
+            window.open(worm_goodsinfo_link);
+        });
+    }, []);
 
     const columns = useMemo<TableProps<IPendingOrderItem>['columns']>(() => {
         switch (status) {
@@ -668,32 +756,69 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: 'Commodity ID',
                         dataIndex: 'commodityId',
                         align: 'center',
-                        width: 120,
+                        width: 180,
                         render: mergeCell,
                     },
                     {
-                        key: 'goodsName',
+                        key: 'productName',
                         title: '商品名称',
-                        dataIndex: 'goodsName',
+                        dataIndex: 'productName',
                         align: 'center',
                         width: 120,
-                        render: mergeCell,
+                        render: (value, row) => {
+                            const { productId } = row;
+                            return {
+                                children: (
+                                    <a onClick={() => _getOrderGoodsDetail(productId)}>{value}</a>
+                                ),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'skuImg',
+                        key: 'productImage',
                         title: 'SKU图片',
-                        dataIndex: 'skuImg',
+                        dataIndex: 'productImage',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 100,
+                        render: (value: string, row) => {
+                            return {
+                                children: <AutoEnLargeImg src={value} className="order-img-lazy" />,
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
                         key: 'productStyle',
                         title: '商品规格',
                         dataIndex: 'productStyle',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 180,
+                        render: (value: string, row) => {
+                            let child: any = null;
+                            if (value) {
+                                try {
+                                    const styleInfo = JSON.parse(value);
+                                    child = (
+                                        <>
+                                            {Object.keys(styleInfo).map(key => (
+                                                <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                            ))}
+                                        </>
+                                    );
+                                } catch (err) {}
+                            }
+                            return {
+                                children: child,
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
                         key: 'goodsNumber',
@@ -716,21 +841,31 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '销售商品总金额($)',
                         dataIndex: 'goodsAmount',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 160,
+                        render: (_, row: IChildOrderItem) => {
+                            const { goodsAmount, goodsNumber, freight } = row;
+                            const total =
+                                Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                            return {
+                                children: isNaN(total) ? '' : total.toFixed(2),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'goodsStore',
+                        key: 'channelMerchantName',
                         title: '销售店铺名称',
-                        dataIndex: 'goodsStore',
+                        dataIndex: 'channelMerchantName',
                         align: 'center',
                         width: 120,
                         render: mergeCell,
                     },
                     {
-                        key: 'goodsStore',
+                        key: 'channelOrderGoodsSn',
                         title: '销售订单ID',
-                        dataIndex: 'goodsStore',
+                        dataIndex: 'channelOrderGoodsSn',
                         align: 'center',
                         width: 120,
                         render: mergeCell,
@@ -743,11 +878,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                     },
                     {
-                        key: 'purchasePlanId',
+                        key: 'purchaseCreateTime',
                         title: '采购订单生成时间',
-                        dataIndex: 'purchasePlanId',
+                        dataIndex: 'purchaseCreateTime',
                         align: 'center',
-                        width: 120,
+                        width: 180,
+                        render: _ => utcToLocal(_),
                     },
                     {
                         key: 'purchaseOrderStatus',
@@ -814,12 +950,19 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         fixed: true,
-                        key: 'orderGoodsId',
+                        key: 'reserveStatus',
                         title: '仓库库存预定状态',
-                        dataIndex: 'orderGoodsId',
+                        dataIndex: 'reserveStatus',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 160,
+                        render: (value: string, row: IPendingOrderItem) => {
+                            return {
+                                children: getStatusDesc(purchaseReserveOptionList, value),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
                         fixed: true,
@@ -835,45 +978,89 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: 'Commodity ID',
                         dataIndex: 'commodityId',
                         align: 'center',
-                        width: 120,
+                        width: 150,
                         render: mergeCell,
                     },
                     {
-                        key: 'commodityId',
+                        key: 'purchaseFailCode',
                         title: '拍单失败原因',
-                        dataIndex: 'commodityId',
+                        dataIndex: 'purchaseFailCode',
                         align: 'center',
                         width: 120,
-                        render: mergeCell,
+                        render: (value, row) => {
+                            return {
+                                children: getStatusDesc(finalCancelStatusList, value),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'goodsName',
+                        key: 'productName',
                         title: '商品名称',
-                        dataIndex: 'goodsName',
+                        dataIndex: 'productName',
                         align: 'center',
                         width: 120,
-                        render: mergeCell,
+                        render: (value, row) => {
+                            const { productId } = row;
+                            return {
+                                children: (
+                                    <a onClick={() => _getOrderGoodsDetail(productId)}>{value}</a>
+                                ),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'skuImg',
+                        key: 'productImage',
                         title: 'SKU图片',
-                        dataIndex: 'skuImg',
+                        dataIndex: 'productImage',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 100,
+                        render: (value: string, row) => {
+                            return {
+                                children: <AutoEnLargeImg src={value} className="order-img-lazy" />,
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
                         key: 'productStyle',
                         title: '商品规格',
                         dataIndex: 'productStyle',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 180,
+                        render: (value: string, row) => {
+                            let child: any = null;
+                            if (value) {
+                                try {
+                                    const styleInfo = JSON.parse(value);
+                                    child = (
+                                        <>
+                                            {Object.keys(styleInfo).map(key => (
+                                                <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                            ))}
+                                        </>
+                                    );
+                                } catch (err) {}
+                            }
+                            return {
+                                children: child,
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'goodsStore',
+                        key: 'channelMerchantName',
                         title: '销售店铺名称',
-                        dataIndex: 'goodsStore',
+                        dataIndex: 'channelMerchantName',
                         align: 'center',
                         width: 120,
                         render: mergeCell,
@@ -886,11 +1073,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                     },
                     {
-                        key: 'purchasePlanId',
+                        key: 'purchaseCreateTime',
                         title: '采购订单生成时间',
-                        dataIndex: 'purchasePlanId',
+                        dataIndex: 'purchaseCreateTime',
                         align: 'center',
-                        width: 120,
+                        width: 180,
+                        render: _ => utcToLocal(_),
                     },
                     {
                         key: 'purchaseOrderStatus',
@@ -901,11 +1089,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
                     },
                     {
-                        key: 'purchasePlanId',
+                        key: 'cancelType',
                         title: '采购单取消类型',
-                        dataIndex: 'purchasePlanId',
+                        dataIndex: 'cancelType',
                         align: 'center',
-                        width: 120,
+                        width: 150,
+                        render: value => getStatusDesc(purchasePlanCancelOptionList, value),
                     },
                 ];
             case 4:
@@ -980,28 +1169,65 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         render: mergeCell,
                     },
                     {
-                        key: 'goodsName',
+                        key: 'productName',
                         title: '商品名称',
-                        dataIndex: 'goodsName',
+                        dataIndex: 'productName',
                         align: 'center',
                         width: 120,
-                        render: mergeCell,
+                        render: (value, row) => {
+                            const { productId } = row;
+                            return {
+                                children: (
+                                    <a onClick={() => _getOrderGoodsDetail(productId)}>{value}</a>
+                                ),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'skuImg',
+                        key: 'productImage',
                         title: 'SKU图片',
-                        dataIndex: 'skuImg',
+                        dataIndex: 'productImage',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 100,
+                        render: (value: string, row) => {
+                            return {
+                                children: <AutoEnLargeImg src={value} className="order-img-lazy" />,
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
                         key: 'productStyle',
                         title: '商品规格',
                         dataIndex: 'productStyle',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 180,
+                        render: (value: string, row) => {
+                            let child: any = null;
+                            if (value) {
+                                try {
+                                    const styleInfo = JSON.parse(value);
+                                    child = (
+                                        <>
+                                            {Object.keys(styleInfo).map(key => (
+                                                <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                            ))}
+                                        </>
+                                    );
+                                } catch (err) {}
+                            }
+                            return {
+                                children: child,
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
                         key: 'goodsNumber',
@@ -1024,13 +1250,23 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '销售商品总金额($)',
                         dataIndex: 'goodsAmount',
                         align: 'center',
-                        width: 120,
-                        render: mergeCell,
+                        width: 160,
+                        render: (_, row: IChildOrderItem) => {
+                            const { goodsAmount, goodsNumber, freight } = row;
+                            const total =
+                                Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                            return {
+                                children: isNaN(total) ? '' : total.toFixed(2),
+                                props: {
+                                    rowSpan: row._rowspan || 0,
+                                },
+                            };
+                        },
                     },
                     {
-                        key: 'goodsStore',
+                        key: 'channelMerchantName',
                         title: '销售店铺名称',
-                        dataIndex: 'goodsStore',
+                        dataIndex: 'channelMerchantName',
                         align: 'center',
                         width: 120,
                         render: mergeCell,
@@ -1043,11 +1279,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                     },
                     {
-                        key: 'purchasePlanId',
+                        key: 'purchaseCreateTime',
                         title: '采购订单生成时间',
-                        dataIndex: 'purchasePlanId',
+                        dataIndex: 'purchaseCreateTime',
                         align: 'center',
-                        width: 120,
+                        width: 180,
+                        render: _ => utcToLocal(_),
                     },
                     {
                         key: 'purchaseOrderStatus',
@@ -1128,6 +1365,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         }
     }, [selectedOrderGoodsIdList, _postOrdersPlace, _postExportPendingOrder, status]);
 
+    const [modal, showModal, hideModal] = useModal2<boolean>();
+
     return useMemo(() => {
         return (
             <>
@@ -1153,9 +1392,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     onOKey={_postExportPendingOrder}
                     onCancel={onClose}
                 />
+                <TakeOrdersRecordModal visible={modal} onClose={hideModal} />
             </>
         );
-    }, [page, pageSize, total, loading, orderList, visible, status]);
+    }, [page, pageSize, total, loading, orderList, visible, status, update, counts, modal]);
 };
 
 export default PaneWarehouseNotShip;

@@ -170,3 +170,13 @@ export declare interface IPlatformItem {
     value: string;
     children?: IPlatformItem[];
 }
+
+export interface IPurchaseLog {
+    taskTime: string;
+    status: string;
+    allPurchase: string;
+    needPurchase: string;
+    effePurchase: string;
+    succPurchase: string;
+    failPurchase: string;
+}
