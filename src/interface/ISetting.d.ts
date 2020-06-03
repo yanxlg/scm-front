@@ -129,3 +129,38 @@ export interface IPriceStrategyItem {
     operator: string;
     updated_time: string;
 }
+
+export interface IReplaceBody {
+    sale_commodity_ids?: string;
+    sale_commodity_sku_ids?: string;
+    outbound_commodity_ids?: string;
+    outbound_commodity_sku_ids?: string;
+}
+
+export interface IReplaceStoreOutItem {
+    id: string;
+    sale_commodity_id?: string;
+    sale_commodity_sku_id?: string;
+    outbound_commodity_id?: string;
+    outbound_commodity_sku_id?: string;
+    outbound_score?: string;
+}
+
+export interface ReplaceItem {
+    sale: {
+        commodity_id: string;
+        commodity_sku_id: string;
+        variant_image: string;
+        goods_name: string;
+        sku_style: string;
+        sku_inventory: string;
+    };
+    outbound: {
+        commodity_id: string;
+        commodity_sku_id: string;
+        variant_image: string;
+        goods_name: string;
+        sku_style: string;
+        sku_inventory: string;
+    };
+}

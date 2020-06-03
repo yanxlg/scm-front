@@ -239,7 +239,7 @@ class SkuDialog extends React.PureComponent<{}, IState> {
         this.queryGoodsSkuList(page);
     };
 
-    private changePrice = (val: number | undefined, rowData: IGoodsSkuItem) => {
+    private changePrice = (val: number | undefined | string, rowData: IGoodsSkuItem) => {
         // console.log('changePrice', val, rowData);
         const { editList } = this.state;
         const i = editList.findIndex(item => item.sku === rowData.sku_name);
