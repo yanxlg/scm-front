@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { GlobalApiPath } from '@/config/api/GlobalApiPath';
+import { GlobalApiPath } from '@/config/api/Global';
 import {
     IPadSimilarBody,
     IWarehouseNotShipSearch,

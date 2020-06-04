@@ -36,6 +36,7 @@ export default function useGoodsTag() {
 
     return {
         goodsTagList,
+        checkedGoodsTagList,
         toggleGoodsTag,
         setCheckedGoodsTagList,
     };

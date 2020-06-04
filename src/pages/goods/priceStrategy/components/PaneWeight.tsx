@@ -6,13 +6,14 @@ import { getGoodsList, getCatagoryList } from '@/services/goods';
 import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
 import { ICatagoryWeightListRes } from '@/interface/IPriceStrategy';
 import WeightModal from './WeightModal/WeightModal';
-
-import formStyles from 'react-components/es/JsonForm/_form.less';
-import styles from '../_index.less';
 import { EmptyObject, defaultSelectOption } from '@/config/global';
 import { getCatagoryWeightList } from '@/services/price-strategy';
 import useUpdateRecord from '../hooks/useUpdateRecord';
 import UpdateRecordModal from './UpdateRecordModal/UpdateRecordModal';
+
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import styles from '../_index.less';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 const _getCatagoryList = () =>
     getCatagoryList()
@@ -38,7 +39,7 @@ const formFields: FormField[] = [
             form.resetFields(['second_category']);
             form.resetFields(['third_category']);
         },
-        formatter: 'join',
+        // formatter: 'join',
     },
     {
         type: 'select',
@@ -57,7 +58,7 @@ const formFields: FormField[] = [
         onChange: (name, form) => {
             form.resetFields(['third_category']);
         },
-        formatter: 'join',
+        // formatter: 'join',
     },
     {
         type: 'select',
@@ -73,12 +74,13 @@ const formFields: FormField[] = [
             key: 'children',
         },
         optionList: _getCatagoryList,
-        formatter: 'join',
+        // formatter: 'join',
     },
 ];
 
 const PaneWeight: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
+    const allCatagoryRef = useRef<IOptionItem[]>([]);
     const [weightStatus, setWeightStatus] = useState(false);
     const {
         loading,
@@ -92,6 +94,53 @@ const PaneWeight: React.FC = props => {
     } = useList<ICatagoryWeightListRes>({
         formRef: searchRef,
         queryList: getCatagoryWeightList,
+        convertQuery: (query: any) => {
+            const { page, page_count, first_category, second_category, third_category } = query;
+            let params = {
+                page,
+                page_count,
+                third_category: '',
+            };
+            if (first_category && first_category.length > 0 && allCatagoryRef.current.length > 0) {
+                const allCatagoryList = allCatagoryRef.current;
+                if (third_category && third_category.length > 0) {
+                    params.third_category = third_category.join(',');
+                } else if (second_category && second_category.length > 0) {
+                    let list: IOptionItem[] = [];
+                    allCatagoryList.forEach(({ value: firstVal, children: firstChildren }) => {
+                        if (
+                            first_category.indexOf(firstVal) > -1 &&
+                            firstChildren &&
+                            firstChildren.length > 0
+                        ) {
+                            firstChildren.forEach(
+                                ({ value: secondVal, children: secondChildren }: IOptionItem) => {
+                                    if (second_category.indexOf(secondVal) > -1) {
+                                        list = [...list, ...(secondChildren || [])];
+                                    }
+                                },
+                            );
+                        }
+                    });
+                    params.third_category = list.map(({ value }) => value).join(',');
+                } else {
+                    let list: IOptionItem[] = [];
+                    allCatagoryList.forEach(({ value: firstVal, children: firstChildren }) => {
+                        if (
+                            first_category.indexOf(firstVal) > -1 &&
+                            firstChildren &&
+                            firstChildren.length > 0
+                        ) {
+                            firstChildren.forEach(({ children: secondChildren }: IOptionItem) => {
+                                list = [...list, ...(secondChildren || [])];
+                            });
+                        }
+                    });
+                    params.third_category = list.map(({ value }) => value).join(',');
+                }
+            }
+            return params;
+        },
     });
     const {
         updateRecordStatus,
@@ -109,42 +158,42 @@ const PaneWeight: React.FC = props => {
         return [
             {
                 title: '一级品类',
-                dataIndex: 'first_category_name',
+                dataIndex: 'firstCategoryName',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '二级品类',
-                dataIndex: 'second_category_name',
+                dataIndex: 'secondCategoryName',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '三级品类',
-                dataIndex: 'third_category_name',
+                dataIndex: 'thirdCategoryName',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '预估重量 (g)',
-                dataIndex: 'estimate_weight',
+                dataIndex: 'estimateWeight',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '平均重量 (g)',
-                dataIndex: 'avg_weight',
+                dataIndex: 'avgWeight',
                 align: 'center',
                 width: 120,
             },
             {
                 title: '更新记录',
-                dataIndex: 'third_category_id',
+                dataIndex: 'thirdCategoryId',
                 align: 'center',
                 width: 120,
-                render: (val: string) => {
+                render: (val: number) => {
                     return (
-                        <a className={styles.hover} onClick={() => showUpdateRecordModal(val)}>
+                        <a className={styles.hover} onClick={() => showUpdateRecordModal(val + '')}>
                             查看
                         </a>
                     );
@@ -171,11 +220,7 @@ const PaneWeight: React.FC = props => {
                 // labelClassName="product-form-label"
             >
                 <div>
-                    <LoadingButton
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => Promise.resolve()}
-                    >
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
                     <Button
@@ -215,6 +260,10 @@ const PaneWeight: React.FC = props => {
         );
     }, [loading]);
 
+    useEffect(() => {
+        _getCatagoryList().then(list => (allCatagoryRef.current = list));
+    }, []);
+
     return (
         <>
             {searchNode}
@@ -223,7 +272,6 @@ const PaneWeight: React.FC = props => {
             <UpdateRecordModal
                 visible={updateRecordStatus}
                 id={recordId}
-                type="weight"
                 onCancel={hideUpdateRecordModal}
             />
         </>

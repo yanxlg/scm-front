@@ -40,8 +40,11 @@ const PaneFreightCalc: React.FC = props => {
         setFreightStatus(true);
     }, []);
 
-    const hideFreightModal = useCallback(() => {
+    const hideFreightModal = useCallback((isRefresh?: boolean) => {
         setFreightStatus(false);
+        if (isRefresh) {
+            onReload();
+        }
     }, []);
 
     const _getShippingCardNameList = useCallback(() => {
@@ -99,14 +102,16 @@ const PaneFreightCalc: React.FC = props => {
                 align: 'center',
                 width: 120,
                 render: (_: any, record: IShippingCardListRes) => {
-                    const { weight_config } = record;
+                    const { WeightConfig } = record;
                     return (
                         <div className={styles.calcContainer}>
-                            {weight_config.map((item, index) => {
+                            {WeightConfig?.map((item, index) => {
                                 const { min_weight, max_weight } = item;
                                 return (
                                     <div className={styles.calc}>
-                                        [{min_weight.toFixed(4)}, {max_weight.toFixed(4)})
+                                        {index === WeightConfig.length - 1 && max_weight === 0
+                                            ? `${min_weight}g以上`
+                                            : `[${min_weight}, ${max_weight})`}
                                     </div>
                                 );
                             })}
@@ -120,10 +125,10 @@ const PaneFreightCalc: React.FC = props => {
                 align: 'center',
                 width: 120,
                 render: (_: any, record: IShippingCardListRes) => {
-                    const { weight_config } = record;
+                    const { WeightConfig } = record;
                     return (
                         <div className={styles.calcContainer}>
-                            {weight_config.map(({ param_add, param_devide, param_multiply }) => {
+                            {WeightConfig?.map(({ param_add, param_devide, param_multiply }) => {
                                 return (
                                     <div className={styles.calc}>
                                         {param_add.toFixed(4)} + (m/{param_devide.toFixed(4)}) *
@@ -193,6 +198,14 @@ const PaneFreightCalc: React.FC = props => {
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
+                    </LoadingButton>
+                    <LoadingButton
+                        ghost
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={onSearch}
+                    >
+                        导出运费价卡
                     </LoadingButton>
                 </div>
             </JsonForm>

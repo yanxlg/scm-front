@@ -1,19 +1,18 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Modal, Form, Select, InputNumber } from 'antd';
+import { Modal, Form, InputNumber } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
 import classnames from 'classnames';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 import { validateRange } from '@/utils/validate';
 import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
 import useGoodsCatagory from '../../hooks/useGoodsCatagory';
-
-import styles from './_UpdateRangeModal.less';
 import { requiredRule } from '@/enums/PriceStrategyEnum';
 import useGoodsTag from '../../hooks/useGoodsTag';
 import { startPriceStrategyUpdate } from '@/services/price-strategy';
 import { IStartStrategyUpdateReq } from '@/interface/IPriceStrategy';
+import { history } from 'umi';
 
-const { Option } = Select;
+import styles from './_UpdateRangeModal.less';
 
 interface IProps {
     visible: boolean;
@@ -25,15 +24,40 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
     const [form] = Form.useForm();
     const [confirmLoading, setConfirmLoading] = useState(false);
     const { catagoryList } = useGoodsCatagory();
-    const { goodsTagList, toggleGoodsTag } = useGoodsTag();
+    const { goodsTagList, checkedGoodsTagList, toggleGoodsTag } = useGoodsTag();
 
     const handleOk = useCallback(async () => {
         // console.log('handleOk', form.getFieldsValue());
         const data = await form.validateFields();
-        startPriceStrategyUpdate(data as IStartStrategyUpdateReq)
-            .then(res => {})
-            .finally(() => {});
-    }, []);
+        console.log('handleOk', data);
+        const {
+            first_cat,
+            second_cat,
+            third_cat,
+            min_origin_price,
+            max_origin_price,
+            enable_platform,
+            enable_merchant,
+        } = data;
+        const postData: IStartStrategyUpdateReq = {
+            min_origin_price,
+            max_origin_price,
+            product_tags: checkedGoodsTagList?.join(','),
+            first_cat: first_cat?.join(','),
+            second_cat: second_cat?.join(','),
+            third_cat: third_cat?.join(','),
+            enable_platform: enable_platform?.join(','),
+            enable_merchant: enable_merchant?.join(','),
+        };
+        setConfirmLoading(true);
+        startPriceStrategyUpdate(postData)
+            .then(res => {
+                console.log('startPriceStrategyUpdate', res);
+            })
+            .finally(() => {
+                setConfirmLoading(false);
+            });
+    }, [checkedGoodsTagList]);
 
     const handleCancel = useCallback(() => {
         form.resetFields();
@@ -144,7 +168,7 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
                         rules={[requiredRule]}
                     />
                 </div>
-                <div className={classnames(styles.title, styles.second)}>商品运费更新范围</div>
+                {/* <div className={classnames(styles.title, styles.second)}>商品运费更新范围</div>
                 <MultipleSelect
                     label="销售国家"
                     name="shipping_fee_country"
@@ -152,7 +176,7 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
                     form={form}
                     optionList={[]}
                     rules={[requiredRule]}
-                />
+                /> */}
             </Form>
         </Modal>
     );

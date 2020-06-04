@@ -1,10 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { Modal, Form, Input, Upload, Button } from 'antd';
+import { Modal, Form, Input, Upload, Button, notification } from 'antd';
 import { LoadingButton } from 'react-components';
 import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { saveCatagoryWeight } from '@/services/price-strategy';
+import classnames from 'classnames';
 
 import styles from './_WeightModal.less';
-import { saveCatagoryWeight } from '@/services/price-strategy';
+import { downloadTemplateFile } from '@/services/global';
 
 const { TextArea } = Input;
 
@@ -16,9 +18,11 @@ interface IProps {
 const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
     const [form] = Form.useForm();
     const [name, setName] = useState('');
+    // const [templateUrl, setTemplateUrl] = useState('');
 
     const handleCancel = useCallback((isRefresh?: boolean) => {
         setName('');
+        form.resetFields();
         onCancel(isRefresh);
     }, []);
 
@@ -28,7 +32,41 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
         const data = new FormData();
         data.append('file', file);
         data.append('remark', remark || '');
-        return saveCatagoryWeight(data).then(() => {
+        return saveCatagoryWeight(data).then(res => {
+            const { data } = res;
+            if (data && data.length > 0) {
+                notification.warning({
+                    message: '部分导入失败，请重新尝试。',
+                    duration: null,
+                    description: (
+                        <div style={{ maxHeight: 600, overflow: 'auto' }}>
+                            {data.map((item: any) => {
+                                const { code, message, category } = item;
+                                if (code === '110103') {
+                                    const {
+                                        firstCategoryName,
+                                        firstCategoryId,
+                                        secondCategoryName,
+                                        secondCategoryId,
+                                        thirdCategoryName,
+                                        thirdCategoryId,
+                                    } = category;
+                                    return (
+                                        <>
+                                            {message}
+                                            <p>
+                                                {firstCategoryName}-{firstCategoryId};&emsp;
+                                                {secondCategoryName}-{secondCategoryId};&emsp;
+                                                {thirdCategoryName}-{thirdCategoryId};
+                                            </p>
+                                        </>
+                                    );
+                                }
+                            })}
+                        </div>
+                    ),
+                });
+            }
             handleCancel(true);
         });
     }, []);
@@ -65,7 +103,12 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
                     extra={
                         <div className={styles.extra}>
                             仅支持xlsx格式文件 如无模板，可下载
-                            <a className={styles.download}>品类预估重量xlsx模板</a>
+                            <a
+                                className={classnames(styles.download)}
+                                onClick={() => downloadTemplateFile('1')}
+                            >
+                                品类预估重量xlsx模板
+                            </a>
                         </div>
                     }
                 >

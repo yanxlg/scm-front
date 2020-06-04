@@ -12,9 +12,15 @@ import {
     ICatagoryWeightListRes,
     ICatagoryWeightLogReq,
     ICatagoryWeightLogRes,
+    ISaveSalePriceRuleReq,
+    ISaleAndShippingOperateReq,
+    IUpdateRecoreItem,
+    ISellItem,
+    ISalePriceListReq,
 } from '@/interface/IPriceStrategy';
 import { api } from 'react-components';
 import { IResponse, IPaginationResponse } from 'react-components/lib/hooks/useList';
+import { getCatagoryList } from './goods';
 
 // 获取所有的商品标签
 export function getAllGoodsTagList() {
@@ -53,6 +59,30 @@ export function getShippingCardCountry(names: string) {
                 value: name,
             }));
         });
+}
+
+// 售价和运费修改日志
+export function getSaleAndShippingOperateLog(params: ISaleAndShippingOperateReq) {
+    return request.get(PriceStrategyApiPath.getSaleAndShippingOperateLog, {
+        params,
+    });
+}
+
+// 获取运费规则列表
+export function getSalePriceList(params: ISalePriceListReq) {
+    return api.get<IResponse<IPaginationResponse<ISellItem>>>(
+        PriceStrategyApiPath.getSalePriceList,
+        {
+            params,
+        },
+    );
+}
+
+// 保存售价调整规则
+export function saveSalePriceRule(data: ISaveSalePriceRuleReq) {
+    return request.post(PriceStrategyApiPath.saveSalePriceRule, {
+        data,
+    });
 }
 
 // 获取运费规则列表
@@ -133,4 +163,22 @@ export function getCatagoryWeightLog(params: ICatagoryWeightLogReq) {
                 total,
             };
         });
+}
+
+// 查询运费规则详情
+export function getShippingFeeRuleConfig(id: string) {
+    return request.get(PriceStrategyApiPath.getShippingFeeRuleConfig, {
+        params: {
+            id,
+        },
+    });
+}
+
+// 查询运费规则详情
+export function getSalePriceRuleConfig(id: string) {
+    return request.get(PriceStrategyApiPath.getShippingFeeRuleConfig, {
+        params: {
+            id,
+        },
+    });
 }

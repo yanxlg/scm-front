@@ -3,8 +3,48 @@ import { IRequestPagination1 } from './IGlobal';
 
 export type IEdiyKey = EditEnum.DEFAULT | EditEnum.ADD | EditEnum.UPDATE;
 
+export type ISalePriceListReq = {
+    enable_source?: string;
+    enable_platform?: string;
+    enable_merchant?: string;
+    product_tags?: string;
+    min_origin_price?: number;
+    max_origin_price?: number;
+} & IRequestPagination1;
+
 export interface ISellItem {
-    [key: string]: any;
+    rule_name: string;
+    enable_source: string;
+    enable_platform: string;
+    enable_merchant: string;
+    product_tags: string;
+    min_origin_price: string;
+    max_origin_price: string;
+    param_price_multiply: string;
+    param_price_add: string;
+    param_shipping_fee_multiply: string;
+    effect_count: string;
+    order: string;
+    is_enable: string;
+    id: string;
+}
+
+export interface ISaveSalePriceRuleReq {
+    rule_id?: string;
+    rule_name?: string;
+    action?: 'new' | 'update';
+    enable_source: string;
+    enable_platform: string;
+    enable_merchant: string;
+    product_tags: string;
+    min_origin_price: string;
+    max_origin_price: string;
+    order: string;
+    param_price_multiply: string;
+    param_price_add: string;
+    param_shipping_fee_multiply: string;
+    is_enable: '1' | '0'; // 1-启用，0-禁用
+    comment: string;
 }
 
 export interface IWeightConfigItem {
@@ -20,10 +60,11 @@ export type IShippingFeeRuleReq = {
 } & IRequestPagination1;
 
 export type IShippingFeeRuleRes = {
-    id: number;
+    id: string;
+    rule_name: string;
     product_tags: string;
-    min_weight: number;
-    max_weight: number;
+    min_weight: string;
+    max_weight: string;
     lower_shipping_card: string;
     upper_shipping_card: string;
     support_country_count: number;
@@ -41,9 +82,9 @@ export type ISaveShippingFeeRuleReq = {
     comment: string;
     lower_shipping_card: string;
     upper_shipping_card: string;
+    is_enable: string;
     rule_id?: number;
     rule_name?: string;
-    enable: string;
 };
 
 export type IShippingCardListReq = {
@@ -54,7 +95,7 @@ export type IShippingCardListReq = {
 export type IShippingCardListRes = {
     card_name: string;
     country_code: string;
-    weight_config: IWeightConfigItem[];
+    WeightConfig: IWeightConfigItem[];
 };
 
 export type IStartStrategyUpdateReq = {
@@ -63,8 +104,8 @@ export type IStartStrategyUpdateReq = {
     third_cat: string;
     enable_platform: string;
     enable_merchant: string;
-    shipping_fee_country: string;
-    type: string;
+    // shipping_fee_country: string;
+    // type: string;
     product_tags?: string;
     min_origin_price?: string;
     max_origin_price?: string;
@@ -77,12 +118,12 @@ export type ICatagoryWeightListReq = {
 } & IRequestPagination1;
 
 export type ICatagoryWeightListRes = {
-    first_category_name: string;
-    second_category_name: string;
-    third_category_name: string;
-    third_category_id: string;
-    estimate_weight: string;
-    avg_weight: string;
+    firstCategoryName: string;
+    secondCategoryName: string;
+    thirdCategoryName: string;
+    thirdCategoryId: number;
+    estimateWeight: string;
+    avgWeight: string;
 };
 
 export type ICatagoryWeightLogReq = {
@@ -99,4 +140,9 @@ export type IUpdateRecoreItem = {
     operate_info: string;
     operator: string;
     operate_time: string;
+};
+
+export type ISaleAndShippingOperateReq = {
+    log_type: 'shipping_fee' | 'sale_price';
+    rule_id: string;
 };

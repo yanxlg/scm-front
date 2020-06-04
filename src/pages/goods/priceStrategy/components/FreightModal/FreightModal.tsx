@@ -1,11 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { Modal, Form, Input, Upload, Button, Select } from 'antd';
+import { Modal, Form, Input, Upload, Select, notification } from 'antd';
+import { LoadingButton } from 'react-components';
 import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { requiredRule } from '@/enums/PriceStrategyEnum';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 import styles from './_FreightModal.less';
 import { saveShippingCard } from '@/services/price-strategy';
+import { downloadTemplateFile } from '@/services/global';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -14,16 +16,17 @@ interface IProps {
     visible: boolean;
     freightType: 'add' | 'update';
     nameList: IOptionItem[];
-    onCancel(): void;
+    onCancel(isRefresh?: boolean): void;
 }
 
 const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameList }) => {
     const [form] = Form.useForm();
     const [filename, setFilename] = useState('');
 
-    const handleCancel = useCallback(() => {
+    const handleCancel = useCallback((isRefresh?: boolean) => {
         setFilename('');
-        onCancel();
+        form.resetFields();
+        onCancel(isRefresh);
     }, []);
 
     const saveUpload = useCallback(async () => {
@@ -36,8 +39,28 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
         formData.append('is_new', freightType === 'add' ? '1' : '0');
         formData.append('comment', comment || '');
         formData.append('card_name', card_name);
-        saveShippingCard(formData).then(res => {
-            console.log('saveShippingCard', res);
+        return saveShippingCard(formData).then(res => {
+            // console.log('saveShippingCard', res);
+            const { error_list } = res?.data;
+            if (error_list && error_list.length > 0) {
+                notification.warning({
+                    message: '部分导入失败，请重新尝试。',
+                    duration: null,
+                    description: (
+                        <div style={{ maxHeight: 600, overflow: 'auto' }}>
+                            {error_list.map((item: any) => {
+                                const { country_code, error_reason } = item;
+                                return (
+                                    <p>
+                                        {error_reason}-{country_code || ''}
+                                    </p>
+                                );
+                            })}
+                        </div>
+                    ),
+                });
+            }
+            handleCancel(true);
         });
     }, [freightType]);
 
@@ -62,7 +85,7 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
             footer={null}
             maskClosable={false}
             visible={visible}
-            onCancel={handleCancel}
+            onCancel={() => handleCancel()}
         >
             <Form form={form}>
                 <Form.Item
@@ -92,7 +115,12 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                     extra={
                         <div className={styles.extra}>
                             仅支持xlsx格式文件 如无模板，可下载
-                            <a className={styles.download}>运费价卡xlsx模板</a>
+                            <a
+                                className={styles.download}
+                                onClick={() => downloadTemplateFile('2')}
+                            >
+                                运费价卡xlsx模板
+                            </a>
                         </div>
                     }
                 >
@@ -114,9 +142,9 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                     <TextArea placeholder="此规则仅适用于VOVA-新店铺运营1个月内" />
                 </Form.Item>
                 <div className={styles.btnSave}>
-                    <Button type="primary" onClick={saveUpload} disabled={!filename}>
+                    <LoadingButton type="primary" onClick={saveUpload} disabled={!filename}>
                         确认上传
-                    </Button>
+                    </LoadingButton>
                 </div>
             </Form>
         </Modal>

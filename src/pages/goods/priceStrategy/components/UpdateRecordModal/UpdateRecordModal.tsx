@@ -7,7 +7,6 @@ import { ICatagoryWeightLogReq, IUpdateRecoreItem } from '@/interface/IPriceStra
 interface IProps {
     visible: boolean;
     id: string;
-    type: 'shipping_fee' | 'sale_price' | 'weight';
     onCancel(): void;
 }
 
@@ -32,7 +31,7 @@ const columns: ColumnsType<any> = [
     },
 ];
 
-const UpdateRecordModal: React.FC<IProps> = ({ visible, id, type, onCancel }) => {
+const UpdateRecordModal: React.FC<IProps> = ({ visible, id, onCancel }) => {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     // const [pageCount, setPageCount] = useState(50);
@@ -76,15 +75,13 @@ const UpdateRecordModal: React.FC<IProps> = ({ visible, id, type, onCancel }) =>
 
     useEffect(() => {
         if (id) {
-            if (type === 'weight') {
-                _getCatagoryWeightLog({
-                    page: 1,
-                    page_count: pageCount,
-                    third_category_id: id,
-                });
-            }
+            _getCatagoryWeightLog({
+                page: 1,
+                page_count: pageCount,
+                third_category_id: id,
+            });
         }
-    }, [id, type]);
+    }, [id]);
 
     return (
         <Modal title="更新记录" width={720} visible={visible} footer={null} onCancel={handleCancel}>

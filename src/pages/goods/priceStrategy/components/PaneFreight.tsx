@@ -15,44 +15,17 @@ import {
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
-
-const formFields: FormField[] = [
-    {
-        type: 'select',
-        label: '商品标签',
-        name: 'a1',
-        isShortcut: true,
-        placeholder: '请选择',
-        mode: 'multiple',
-        className: styles.select,
-        maxTagCount: 4,
-        optionList: () => getAllGoodsTagList(),
-    },
-    {
-        type: 'select',
-        label: '运费价卡',
-        name: 'card_name',
-        isShortcut: true,
-        placeholder: '请选择',
-        mode: 'multiple',
-        className: styles.select,
-        maxTagCount: 4,
-        optionList: () => getShippingCardNameList(),
-    },
-    {
-        type: 'inputRange',
-        label: '重量区间(g)',
-        precision: 2,
-        name: ['min_weight', 'max_weight'],
-        // className: styles.inputMin,
-    },
-];
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
 
 const PaneFreight: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
-    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // EditEnum.ADD
     const [deliveryCountryStatus, setDeliveryCountryStatus] = useState(false);
-    const [updateData, setUpdateData] = useState<ISaveShippingFeeRuleReq | null>(null);
+    const [logStatus, setLogStatus] = useState(false);
+    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // EditEnum.ADD
+    // const [updateData, setUpdateData] = useState<ISaveShippingFeeRuleReq | null>(null);
+    const [cartNameList, setCardNameList] = useState<IOptionItem[]>([]);
+    const [currentId, setCurrentId] = useState('');
     const {
         loading,
         pageNumber,
@@ -69,43 +42,33 @@ const PaneFreight: React.FC = props => {
 
     const goBack = useCallback(() => {
         setEditType(EditEnum.DEFAULT);
-        setUpdateData(null);
+        setCurrentId('');
+        // setUpdateData(null);
     }, []);
 
-    const showFreightConfig = useCallback((type: IEdiyKey, record?: IShippingFeeRuleRes) => {
+    const showFreightConfig = useCallback((type: IEdiyKey, id?: string) => {
         setEditType(type);
-        if (record) {
-            const {
-                id,
-                product_tags,
-                min_weight,
-                max_weight,
-                lower_shipping_card,
-                upper_shipping_card,
-                order,
-                is_enable,
-            } = record;
-            setUpdateData({
-                rule_id: id,
-                product_tags,
-                min_weight: String(min_weight),
-                max_weight: String(max_weight),
-                order,
-                comment: 'comment',
-                lower_shipping_card,
-                upper_shipping_card,
-                rule_name: 'rule_name',
-                enable: String(is_enable),
-            });
-        }
+        id && setCurrentId(id);
     }, []);
 
-    const showDeliveryCountryModal = useCallback(() => {
+    const showDeliveryCountryModal = useCallback(id => {
         setDeliveryCountryStatus(true);
+        setCurrentId(id);
     }, []);
 
     const hideDeliveryCountryModal = useCallback(() => {
         setDeliveryCountryStatus(false);
+        setCurrentId('');
+    }, []);
+
+    const showLogModal = useCallback(id => {
+        setLogStatus(true);
+        setCurrentId(id);
+    }, []);
+
+    const hideLogModal = useCallback(() => {
+        setLogStatus(false);
+        setCurrentId('');
     }, []);
 
     const columns = useMemo<ColumnsType<IShippingFeeRuleRes>>(() => {
@@ -117,11 +80,12 @@ const PaneFreight: React.FC = props => {
                 align: 'center',
                 width: 120,
                 render: (_: any, record: IShippingFeeRuleRes) => {
+                    const { id } = record;
                     return (
                         <Button
                             type="link"
                             className={styles.hover}
-                            onClick={() => showFreightConfig(EditEnum.UPDATE, record)}
+                            onClick={() => showFreightConfig(EditEnum.UPDATE, id)}
                         >
                             更新
                         </Button>
@@ -130,7 +94,7 @@ const PaneFreight: React.FC = props => {
             },
             {
                 title: '规则名称',
-                dataIndex: 'a1',
+                dataIndex: 'rule_name',
                 align: 'center',
                 width: 120,
             },
@@ -145,9 +109,14 @@ const PaneFreight: React.FC = props => {
                 dataIndex: 'min_weight',
                 align: 'center',
                 width: 120,
-                render: (val: number, record: IShippingFeeRuleRes) => {
+                render: (val: string, record: IShippingFeeRuleRes) => {
                     const { max_weight } = record;
-                    return `${val.toFixed(4)} ~ ${max_weight.toFixed(4)}`;
+                    if (val === '0' && max_weight === '0') {
+                        return '-';
+                    } else if (max_weight === '0') {
+                        return `${val}g以上`;
+                    }
+                    return `${val} ~ ${max_weight}`;
                 },
             },
             {
@@ -158,8 +127,8 @@ const PaneFreight: React.FC = props => {
                 render: () => {
                     return (
                         <>
-                            <div>$xxx以上</div>
-                            <div>$xxx以下</div>
+                            <div>阈值以上</div>
+                            <div>阈值以下</div>
                         </>
                     );
                 },
@@ -184,9 +153,10 @@ const PaneFreight: React.FC = props => {
                 dataIndex: 'support_country_count',
                 align: 'center',
                 width: 120,
-                render: (val: number) => {
+                render: (val: number, record: IShippingFeeRuleRes) => {
+                    const { id } = record;
                     return (
-                        <a className={styles.hover} onClick={() => showDeliveryCountryModal()}>
+                        <a className={styles.hover} onClick={() => showDeliveryCountryModal(id)}>
                             {val}
                         </a>
                     );
@@ -209,16 +179,20 @@ const PaneFreight: React.FC = props => {
                 dataIndex: 'is_enable',
                 align: 'center',
                 width: 120,
-                render: (val: number) => (val === 0 ? '禁用' : '启用'),
+                render: (val: string) => (val === '0' ? '禁用' : '启用'),
             },
             {
                 title: '更新记录',
-                dataIndex: 'a10',
+                dataIndex: 'id',
                 align: 'center',
                 width: 120,
-                render: () => {
+                render: (id: string) => {
                     return (
-                        <Button type="link" className={styles.hover}>
+                        <Button
+                            type="link"
+                            className={styles.hover}
+                            onClick={() => showLogModal(id)}
+                        >
                             查看
                         </Button>
                     );
@@ -237,6 +211,40 @@ const PaneFreight: React.FC = props => {
         };
     }, [loading]);
 
+    const formFields = useMemo<FormField[]>(() => {
+        return [
+            // {
+            //     type: 'select',
+            //     label: '商品标签',
+            //     name: 'a1',
+            //     isShortcut: true,
+            //     placeholder: '请选择',
+            //     mode: 'multiple',
+            //     className: styles.select,
+            //     maxTagCount: 4,
+            //     optionList: () => getAllGoodsTagList(),
+            // },
+            {
+                type: 'select',
+                label: '运费价卡',
+                name: 'card_name',
+                isShortcut: true,
+                placeholder: '请选择',
+                mode: 'multiple',
+                className: styles.select,
+                maxTagCount: 4,
+                optionList: cartNameList,
+            },
+            // {
+            //     type: 'inputRange',
+            //     label: '重量区间(g)',
+            //     precision: 2,
+            //     name: ['min_weight', 'max_weight'],
+            //     // className: styles.inputMin,
+            // },
+        ];
+    }, [cartNameList]);
+
     const searchNode = useMemo(() => {
         return (
             <JsonForm
@@ -245,11 +253,7 @@ const PaneFreight: React.FC = props => {
                 // labelClassName="product-form-label"
             >
                 <div>
-                    <LoadingButton
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => Promise.resolve()}
-                    >
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
                     <Button
@@ -263,7 +267,7 @@ const PaneFreight: React.FC = props => {
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [formFields]);
 
     const table = useMemo(() => {
         return (
@@ -280,17 +284,35 @@ const PaneFreight: React.FC = props => {
         );
     }, [loading]);
 
+    useEffect(() => {
+        getShippingCardNameList().then(list => setCardNameList(list));
+    }, []);
+
     return editType === EditEnum.DEFAULT ? (
         <>
             {searchNode}
             {table}
             <DeliveryCountryModal
                 visible={deliveryCountryStatus}
+                id={currentId}
                 onCancel={hideDeliveryCountryModal}
+            />
+            <SaleAndShippingLogModal
+                type="shipping_fee"
+                visible={logStatus}
+                id={currentId}
+                onCancel={hideLogModal}
             />
         </>
     ) : (
-        <FreightConfig type={editType} goBack={goBack} updateData={updateData} />
+        <FreightConfig
+            type={editType}
+            id={currentId}
+            cartNameList={cartNameList}
+            // updateData={updateData}
+            goBack={goBack}
+            onReload={onReload}
+        />
     );
 };
 
