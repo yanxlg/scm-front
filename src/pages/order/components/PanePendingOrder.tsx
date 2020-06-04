@@ -997,7 +997,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: 'Commodity ID',
                         dataIndex: 'commodityId',
                         align: 'center',
-                        width: 150,
+                        width: 180,
                         render: mergeCell,
                     },
                     {
@@ -1005,7 +1005,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '拍单失败原因',
                         dataIndex: 'purchaseFailCode',
                         align: 'center',
-                        width: 150,
+                        width: 200,
                         render: (value, row) => {
                             const reason = getStatusDesc(finalCancelStatusList, value);
                             const reasonStr = reason ? `${reason}` : '';
@@ -1230,7 +1230,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: 'Commodity ID',
                         dataIndex: 'commodityId',
                         align: 'center',
-                        width: 120,
+                        width: 180,
                         render: mergeCell,
                     },
                     {
