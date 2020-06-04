@@ -15,4 +15,5 @@ export enum PriceStrategyApiPath {
     getSaleAndShippingOperateLog = '/api/v1/price_strategy/rule_operate_log',
     getShippingFeeRuleConfig = '/api/v1/price_strategy/get_shipping_fee_rule',
     getSalePriceRuleConfig = '/api/v1/price_strategy/get_sale_price_rule',
+    getShippingCartDetail = '/api/v1/price_strategy/get_shipping_card',
 }

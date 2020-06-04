@@ -27,6 +27,7 @@ export interface ISellItem {
     order: string;
     is_enable: string;
     id: string;
+    shipping_fee_rules: string;
 }
 
 export interface ISaveSalePriceRuleReq {
@@ -132,9 +133,9 @@ export type ICatagoryWeightLogReq = {
 } & IRequestPagination1;
 
 export type ICatagoryWeightLogRes = {
-    operate_content: string;
-    operate_people: string;
-    create_time: string;
+    operateContent: string;
+    operatePeople: string;
+    createTime: string;
 };
 
 export type IUpdateRecoreItem = {

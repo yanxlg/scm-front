@@ -269,7 +269,7 @@ const PaneWeight: React.FC = props => {
             <FitTable
                 bordered
                 // columnsSettingRender={true}
-                rowKey="third_category_id"
+                rowKey="thirdCategoryId"
                 loading={loading}
                 columns={columns}
                 dataSource={dataSource}

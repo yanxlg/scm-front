@@ -1,5 +1,16 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Form, Input, Select, Button, InputNumber, Radio, Tooltip, Popconfirm, Spin } from 'antd';
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+    Form,
+    Input,
+    Select,
+    Button,
+    InputNumber,
+    Radio,
+    Tooltip,
+    Popconfirm,
+    Spin,
+    message,
+} from 'antd';
 import { IEdiyKey, ISaveShippingFeeRuleReq } from '@/interface/IPriceStrategy';
 import { EditEnum, requiredRule, maxLengthRule } from '@/enums/PriceStrategyEnum';
 import CheckedBtn from '@/components/CheckedBtn';
@@ -55,9 +66,10 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
         setSaveLoading(true);
         saveShippingFeeRule(data)
             .then(res => {
-                console.log('saveShippingFeeRule', res);
+                // console.log('saveShippingFeeRule', res);
                 handleCancel();
                 onReload();
+                message.success(`${data.action === 'new' ? '新增' : '更新'}成功。`);
             })
             .finally(() => {
                 setSaveLoading(false);
@@ -241,7 +253,7 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                             label="备注"
                             name="comment"
                             className={styles.customLabel}
-                            rules={[requiredRule]}
+                            // rules={[requiredRule]}
                         >
                             <TextArea />
                         </Form.Item>

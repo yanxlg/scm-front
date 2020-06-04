@@ -1,5 +1,5 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Modal, Form, InputNumber } from 'antd';
+import React, { useCallback, useState } from 'react';
+import { Modal, Form, InputNumber, message } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
 import classnames from 'classnames';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
@@ -59,6 +59,7 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
             .then(res => {
                 // console.log('startPriceStrategyUpdate', res);
                 history.push('/task/list');
+                message.success('更新范围确认成功。');
             })
             .finally(() => {
                 setConfirmLoading(false);

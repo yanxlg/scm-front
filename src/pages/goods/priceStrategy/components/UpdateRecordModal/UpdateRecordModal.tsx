@@ -3,6 +3,7 @@ import { Modal, Table, Pagination } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { getCatagoryWeightLog } from '@/services/price-strategy';
 import { ICatagoryWeightLogReq, IUpdateRecoreItem } from '@/interface/IPriceStrategy';
+import { utcToLocal } from 'react-components/lib/utils/date';
 
 interface IProps {
     visible: boolean;
@@ -10,7 +11,7 @@ interface IProps {
     onCancel(): void;
 }
 
-const columns: ColumnsType<any> = [
+const columns: ColumnsType<IUpdateRecoreItem> = [
     {
         title: '操作内容',
         dataIndex: 'operate_info',
@@ -28,6 +29,7 @@ const columns: ColumnsType<any> = [
         dataIndex: 'operate_time',
         align: 'center',
         width: 120,
+        render: (val: string) => utcToLocal(val),
     },
 ];
 

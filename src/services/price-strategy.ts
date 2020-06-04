@@ -155,10 +155,10 @@ export function getCatagoryWeightLog(params: ICatagoryWeightLogReq) {
         .then(({ data }) => {
             const { list, total } = data;
             return {
-                list: list.map(({ operate_content, operate_people, create_time }) => ({
-                    operate_info: operate_content,
-                    operator: operate_people,
-                    operate_time: create_time,
+                list: list.map(({ operateContent, operatePeople, createTime }) => ({
+                    operate_info: operateContent,
+                    operator: operatePeople,
+                    operate_time: createTime,
                 })),
                 total,
             };
@@ -179,6 +179,15 @@ export function getSalePriceRuleConfig(id: string) {
     return request.get(PriceStrategyApiPath.getSalePriceRuleConfig, {
         params: {
             id,
+        },
+    });
+}
+
+// 查询运费价卡对应的详情
+export function getShippingCartDetail(card_name: string) {
+    return request.get(PriceStrategyApiPath.getShippingCartDetail, {
+        params: {
+            card_name,
         },
     });
 }

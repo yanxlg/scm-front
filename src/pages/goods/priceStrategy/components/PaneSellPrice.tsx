@@ -203,7 +203,7 @@ const PaneSellPrice: React.FC = props => {
             },
             {
                 title: '运费规则',
-                dataIndex: 'a11',
+                dataIndex: 'shipping_fee_rules',
                 align: 'center',
                 width: 160,
             },

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Form, Input, Button, InputNumber, Radio, Tooltip, Popconfirm, Spin } from 'antd';
+import { Form, Input, Button, InputNumber, Radio, Tooltip, Popconfirm, Spin, message } from 'antd';
 import { IEdiyKey, ISaveSalePriceRuleReq } from '@/interface/IPriceStrategy';
 import { EditEnum, requiredRule, maxLengthRule } from '@/enums/PriceStrategyEnum';
 import CheckedBtn from '@/components/CheckedBtn';
@@ -94,6 +94,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                 // console.log('saveSalePriceRule', res);
                 goBack();
                 onReload();
+                message.success(`${EditEnum.ADD === type ? '新增' : '更新'}成功。`);
             })
             .finally(() => {
                 setLoading(false);
@@ -290,7 +291,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                             label="备注"
                             name="comment"
                             className={styles.customLabel}
-                            rules={[requiredRule]}
+                            // rules={[requiredRule]}
                         >
                             <TextArea />
                         </Form.Item>

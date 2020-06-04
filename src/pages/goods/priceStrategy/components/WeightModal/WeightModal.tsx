@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Modal, Form, Input, Upload, Button, notification } from 'antd';
+import { Modal, Form, Input, Upload, notification, message } from 'antd';
 import { LoadingButton } from 'react-components';
 import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { saveCatagoryWeight } from '@/services/price-strategy';
@@ -34,7 +34,7 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
         data.append('remark', remark || '');
         return saveCatagoryWeight(data).then(res => {
             const { data } = res;
-            if (data && data.length > 0) {
+            if (data && data.filter((item: any) => item.code !== '200').length > 0) {
                 notification.warning({
                     message: '部分导入失败，请重新尝试。',
                     duration: null,
@@ -66,6 +66,8 @@ const FreightModal: React.FC<IProps> = ({ visible, onCancel }) => {
                         </div>
                     ),
                 });
+            } else {
+                message.success('导入成功。');
             }
             handleCancel(true);
         });

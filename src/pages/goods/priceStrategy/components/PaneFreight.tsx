@@ -277,6 +277,7 @@ const PaneFreight: React.FC = props => {
         return (
             <FitTable
                 bordered
+                rowKey="id"
                 columnsSettingRender={true}
                 loading={loading}
                 columns={columns}

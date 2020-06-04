@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { Modal, Form, Input, Upload, Select, notification } from 'antd';
+import { Modal, Form, Input, Upload, Select, notification, message } from 'antd';
 import { LoadingButton } from 'react-components';
 import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { requiredRule } from '@/enums/PriceStrategyEnum';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 import styles from './_FreightModal.less';
-import { saveShippingCard } from '@/services/price-strategy';
+import { saveShippingCard, getShippingCartDetail } from '@/services/price-strategy';
 import { downloadTemplateFile } from '@/services/global';
 
 const { TextArea } = Input;
@@ -27,6 +27,18 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
         setFilename('');
         form.resetFields();
         onCancel(isRefresh);
+    }, []);
+
+    const handleChangeName = useCallback(name => {
+        getShippingCartDetail(name).then(res => {
+            // console.log('res', res);
+            const { shipping_card } = res.data;
+            if (shipping_card && shipping_card.comment) {
+                form.setFieldsValue({
+                    comment: shipping_card.comment,
+                });
+            }
+        });
     }, []);
 
     const saveUpload = useCallback(async () => {
@@ -59,6 +71,8 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                         </div>
                     ),
                 });
+            } else {
+                message.success(`${freightType === 'add' ? '新增' : '更新'}成功`);
             }
             handleCancel(true);
         });
@@ -97,7 +111,11 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                     {freightType === 'add' ? (
                         <Input maxLength={32} placeholder="限制32个字符" className={styles.input} />
                     ) : (
-                        <Select placeholder="请选择" className={styles.input}>
+                        <Select
+                            placeholder="请选择"
+                            className={styles.input}
+                            onChange={handleChangeName}
+                        >
                             {nameList.map(({ name, value }) => (
                                 <Option key={name} value={value}>
                                     {name}
