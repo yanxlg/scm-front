@@ -190,10 +190,10 @@ import { RequestOptionsInit } from 'umi-request';
 import { getCookie } from './common';
 
 request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
-    // const username = getCookie('USERNAME');
-    // if (!username) {
-    //     location.reload();
-    // }
+    // console.log('1111111', location.host);
+    if (location.hostname !== 'localhost' && !getCookie('USERNAME')) {
+        location.reload();
+    }
     if (User.token) {
         options.headers = Object.assign({}, options.headers, {
             'X-Token': User.token,

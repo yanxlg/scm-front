@@ -24,12 +24,17 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
     const [form] = Form.useForm();
     const [confirmLoading, setConfirmLoading] = useState(false);
     const { catagoryList } = useGoodsCatagory();
-    const { goodsTagList, checkedGoodsTagList, toggleGoodsTag } = useGoodsTag();
+    const {
+        goodsTagList,
+        checkedGoodsTagList,
+        toggleGoodsTag,
+        setCheckedGoodsTagList,
+    } = useGoodsTag();
 
     const handleOk = useCallback(async () => {
         // console.log('handleOk', form.getFieldsValue());
         const data = await form.validateFields();
-        console.log('handleOk', data);
+        // console.log('handleOk', data);
         const {
             first_cat,
             second_cat,
@@ -52,7 +57,8 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
         setConfirmLoading(true);
         startPriceStrategyUpdate(postData)
             .then(res => {
-                console.log('startPriceStrategyUpdate', res);
+                // console.log('startPriceStrategyUpdate', res);
+                history.push('/task/list');
             })
             .finally(() => {
                 setConfirmLoading(false);
@@ -61,6 +67,7 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
 
     const handleCancel = useCallback(() => {
         form.resetFields();
+        setCheckedGoodsTagList([]);
         onCancel();
     }, []);
 

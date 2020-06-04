@@ -26,6 +26,7 @@ const PaneFreight: React.FC = props => {
     // const [updateData, setUpdateData] = useState<ISaveShippingFeeRuleReq | null>(null);
     const [cartNameList, setCardNameList] = useState<IOptionItem[]>([]);
     const [currentId, setCurrentId] = useState('');
+    const [countryList, setCountryList] = useState<string[]>([]);
     const {
         loading,
         pageNumber,
@@ -43,7 +44,7 @@ const PaneFreight: React.FC = props => {
     const goBack = useCallback(() => {
         setEditType(EditEnum.DEFAULT);
         setCurrentId('');
-        // setUpdateData(null);
+        setCountryList([]);
     }, []);
 
     const showFreightConfig = useCallback((type: IEdiyKey, id?: string) => {
@@ -51,9 +52,9 @@ const PaneFreight: React.FC = props => {
         id && setCurrentId(id);
     }, []);
 
-    const showDeliveryCountryModal = useCallback(id => {
+    const showDeliveryCountryModal = useCallback(list => {
         setDeliveryCountryStatus(true);
-        setCurrentId(id);
+        setCountryList(list);
     }, []);
 
     const hideDeliveryCountryModal = useCallback(() => {
@@ -116,7 +117,7 @@ const PaneFreight: React.FC = props => {
                     } else if (max_weight === '0') {
                         return `${val}g以上`;
                     }
-                    return `${val} ~ ${max_weight}`;
+                    return `${val} - ${max_weight}`;
                 },
             },
             {
@@ -154,9 +155,12 @@ const PaneFreight: React.FC = props => {
                 align: 'center',
                 width: 120,
                 render: (val: number, record: IShippingFeeRuleRes) => {
-                    const { id } = record;
+                    const { support_country } = record;
                     return (
-                        <a className={styles.hover} onClick={() => showDeliveryCountryModal(id)}>
+                        <a
+                            className={styles.hover}
+                            onClick={() => showDeliveryCountryModal(support_country)}
+                        >
                             {val}
                         </a>
                     );
@@ -294,7 +298,7 @@ const PaneFreight: React.FC = props => {
             {table}
             <DeliveryCountryModal
                 visible={deliveryCountryStatus}
-                id={currentId}
+                countryList={countryList}
                 onCancel={hideDeliveryCountryModal}
             />
             <SaleAndShippingLogModal

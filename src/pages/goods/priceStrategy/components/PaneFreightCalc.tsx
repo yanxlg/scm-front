@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
-import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
+import { ColumnsType } from 'antd/lib/table';
 import { IShippingCardListRes } from '@/interface/IPriceStrategy';
 import FreightModal from './FreightModal/FreightModal';
 import {
@@ -14,10 +14,13 @@ import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
+import Export from '@/components/Export';
+import { exportExcel } from '@/services/global';
 
 const PaneFreightCalc: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const [freightStatus, setFreightStatus] = useState(false);
+    const [exportStatus, setExportStatus] = useState(false);
     const [freightType, setFreightType] = useState<'add' | 'update'>('add');
     const [nameList, setNameList] = useState<IOptionItem[]>([]);
     const [countryCodeList, setCountryCodeList] = useState<IOptionItem[]>([]);
@@ -82,6 +85,17 @@ const PaneFreightCalc: React.FC = props => {
         ];
     }, []);
 
+    const onExport = useCallback((values: any) => {
+        return exportExcel({
+            query: {
+                ...searchRef.current?.getFieldsValue(),
+            },
+            module: 10,
+            type: 1,
+            ...values,
+        });
+    }, []);
+
     const columns = useMemo<ColumnsType<IShippingCardListRes>>(() => {
         return [
             {
@@ -98,7 +112,7 @@ const PaneFreightCalc: React.FC = props => {
             },
             {
                 title: '重量区间(g)',
-                dataIndex: 'weight',
+                dataIndex: 'weight_range',
                 align: 'center',
                 width: 120,
                 render: (_: any, record: IShippingCardListRes) => {
@@ -121,7 +135,7 @@ const PaneFreightCalc: React.FC = props => {
             },
             {
                 title: '计算公式',
-                dataIndex: 'calc',
+                dataIndex: '_',
                 align: 'center',
                 width: 120,
                 render: (_: any, record: IShippingCardListRes) => {
@@ -199,14 +213,14 @@ const PaneFreightCalc: React.FC = props => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton
+                    <Button
                         ghost
                         type="primary"
                         className={formStyles.formBtn}
-                        onClick={onSearch}
+                        onClick={() => setExportStatus(true)}
                     >
                         导出运费价卡
-                    </LoadingButton>
+                    </Button>
                 </div>
             </JsonForm>
         );
@@ -229,6 +243,31 @@ const PaneFreightCalc: React.FC = props => {
         );
     }, [loading]);
 
+    const exportModalComponent = useMemo(() => {
+        return (
+            <Export
+                columns={[
+                    ...columns.filter((item: any) => item.dataIndex[0] !== '_'),
+                    {
+                        title: '参数1',
+                        dataIndex: 'param_add',
+                    },
+                    {
+                        title: '参数2',
+                        dataIndex: 'param_devide',
+                    },
+                    {
+                        title: '参数三',
+                        dataIndex: 'param_multiply',
+                    },
+                ]}
+                visible={exportStatus}
+                onOKey={onExport}
+                onCancel={() => setExportStatus(false)}
+            />
+        );
+    }, [exportStatus]);
+
     useEffect(() => {
         _getShippingCardNameList();
     }, []);
@@ -243,6 +282,7 @@ const PaneFreightCalc: React.FC = props => {
                 onCancel={hideFreightModal}
                 nameList={nameList}
             />
+            {exportModalComponent}
         </>
     );
 };

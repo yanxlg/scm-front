@@ -68,6 +68,7 @@ export type IShippingFeeRuleRes = {
     lower_shipping_card: string;
     upper_shipping_card: string;
     support_country_count: number;
+    support_country: string[];
     order: number;
     product_count: number;
     is_enable: number;

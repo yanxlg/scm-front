@@ -15,6 +15,7 @@ import useSellChannel from '../hooks/useSellChannel';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
+import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
 
 const formFields: FormField[] = [
     {
@@ -80,14 +81,10 @@ const formFields: FormField[] = [
 
 const PaneSellPrice: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
+    const [logStatus, setLogStatus] = useState(false);
     const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // ADD
     const [updateRangeStatus, setUpdateRangeStatus] = useState(false);
-    const {
-        updateRecordStatus,
-        recordId,
-        showUpdateRecordModal,
-        hideUpdateRecordModal,
-    } = useUpdateRecord();
+    const [currentId, setCurrentId] = useState('');
     const {
         loading,
         pageNumber,
@@ -105,6 +102,21 @@ const PaneSellPrice: React.FC = props => {
 
     const goBack = useCallback(() => {
         setEditType(EditEnum.DEFAULT);
+    }, []);
+
+    const showLogModal = useCallback(id => {
+        setLogStatus(true);
+        setCurrentId(id);
+    }, []);
+
+    const hideLogModal = useCallback(() => {
+        setLogStatus(false);
+        setCurrentId('');
+    }, []);
+
+    const handleUpdate = useCallback(id => {
+        setEditType(EditEnum.UPDATE);
+        setCurrentId(id);
     }, []);
 
     const hideUpdateRangeModal = useCallback(() => {
@@ -134,8 +146,13 @@ const PaneSellPrice: React.FC = props => {
                 align: 'center',
                 width: 120,
                 render: (_: any, record: ISellItem) => {
+                    const { id } = record;
                     return (
-                        <Button type="link" className={styles.hover}>
+                        <Button
+                            type="link"
+                            className={styles.hover}
+                            onClick={() => handleUpdate(id)}
+                        >
                             更新
                         </Button>
                     );
@@ -185,6 +202,12 @@ const PaneSellPrice: React.FC = props => {
                 },
             },
             {
+                title: '运费规则',
+                dataIndex: 'a11',
+                align: 'center',
+                width: 160,
+            },
+            {
                 title: '价格系数(X)',
                 dataIndex: 'param_price_multiply',
                 align: 'center',
@@ -208,12 +231,6 @@ const PaneSellPrice: React.FC = props => {
                 align: 'center',
                 width: 120,
             },
-            // {
-            //     title: '运费规则',
-            //     dataIndex: 'a11',
-            //     align: 'center',
-            //     width: 120,
-            // },
             {
                 title: '生效商品量',
                 dataIndex: 'effect_count',
@@ -229,15 +246,15 @@ const PaneSellPrice: React.FC = props => {
             },
             {
                 title: '更新记录',
-                dataIndex: 'a14',
+                dataIndex: 'id',
                 align: 'center',
                 width: 120,
-                render: () => {
+                render: (val: string) => {
                     return (
                         <Button
                             type="link"
                             className={styles.hover}
-                            onClick={() => showUpdateRecordModal('11')}
+                            onClick={() => showLogModal(val)}
                         >
                             查看
                         </Button>
@@ -285,6 +302,7 @@ const PaneSellPrice: React.FC = props => {
         return (
             <FitTable
                 bordered
+                rowKey="id"
                 columnsSettingRender={true}
                 loading={loading}
                 columns={columns}
@@ -306,16 +324,17 @@ const PaneSellPrice: React.FC = props => {
                 sellChannelList={sellChannelList}
                 onCancel={hideUpdateRangeModal}
             />
-            {/* <UpdateRecordModal
-                visible={updateRecordStatus}
-                id={recordId}
+            <SaleAndShippingLogModal
                 type="sale_price"
-                onCancel={hideUpdateRecordModal}
-            /> */}
+                visible={logStatus}
+                id={currentId}
+                onCancel={hideLogModal}
+            />
         </>
     ) : (
         <SellConfig
             type={editType}
+            id={currentId}
             sellChannelList={sellChannelList}
             goBack={goBack}
             onReload={onReload}

@@ -2,11 +2,11 @@ import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
-import { getGoodsList, getCatagoryList } from '@/services/goods';
-import { TablePaginationConfig, ColumnsType } from 'antd/lib/table';
+import { getCatagoryList } from '@/services/goods';
+import { ColumnsType } from 'antd/lib/table';
 import { ICatagoryWeightListRes } from '@/interface/IPriceStrategy';
 import WeightModal from './WeightModal/WeightModal';
-import { EmptyObject, defaultSelectOption } from '@/config/global';
+import { EmptyObject } from '@/config/global';
 import { getCatagoryWeightList } from '@/services/price-strategy';
 import useUpdateRecord from '../hooks/useUpdateRecord';
 import UpdateRecordModal from './UpdateRecordModal/UpdateRecordModal';
@@ -14,6 +14,8 @@ import UpdateRecordModal from './UpdateRecordModal/UpdateRecordModal';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import Export from '@/components/Export';
+import { exportExcel } from '@/services/global';
 
 const _getCatagoryList = () =>
     getCatagoryList()
@@ -80,6 +82,8 @@ const formFields: FormField[] = [
 
 const PaneWeight: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
+    const queryParamsRef = useRef('');
+    const [exportStatus, setExportStatus] = useState(false);
     const allCatagoryRef = useRef<IOptionItem[]>([]);
     const [weightStatus, setWeightStatus] = useState(false);
     const {
@@ -139,6 +143,7 @@ const PaneWeight: React.FC = props => {
                     params.third_category = list.map(({ value }) => value).join(',');
                 }
             }
+            queryParamsRef.current = params.third_category;
             return params;
         },
     });
@@ -152,6 +157,17 @@ const PaneWeight: React.FC = props => {
     const hideWeightModal = useCallback((isRefresh?: boolean) => {
         setWeightStatus(false);
         isRefresh && onReload();
+    }, []);
+
+    const onExport = useCallback((values: any) => {
+        return exportExcel({
+            query: {
+                third_category: queryParamsRef.current,
+            },
+            module: 10,
+            type: 2,
+            ...values,
+        });
     }, []);
 
     const columns = useMemo<ColumnsType<ICatagoryWeightListRes>>(() => {
@@ -188,12 +204,16 @@ const PaneWeight: React.FC = props => {
             },
             {
                 title: '更新记录',
-                dataIndex: 'thirdCategoryId',
+                dataIndex: '_',
                 align: 'center',
                 width: 120,
-                render: (val: number) => {
+                render: (val: number, record: ICatagoryWeightListRes) => {
+                    const { thirdCategoryId } = record;
                     return (
-                        <a className={styles.hover} onClick={() => showUpdateRecordModal(val + '')}>
+                        <a
+                            className={styles.hover}
+                            onClick={() => showUpdateRecordModal(thirdCategoryId + '')}
+                        >
                             查看
                         </a>
                     );
@@ -231,14 +251,14 @@ const PaneWeight: React.FC = props => {
                     >
                         批量导入
                     </Button>
-                    <LoadingButton
+                    <Button
                         ghost
                         type="primary"
                         className={formStyles.formBtn}
-                        onClick={() => Promise.resolve()}
+                        onClick={() => setExportStatus(true)}
                     >
                         全部导出
-                    </LoadingButton>
+                    </Button>
                 </div>
             </JsonForm>
         );
@@ -260,6 +280,17 @@ const PaneWeight: React.FC = props => {
         );
     }, [loading]);
 
+    const exportModalComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns.filter((item: any) => item.dataIndex[0] !== '_')}
+                visible={exportStatus}
+                onOKey={onExport}
+                onCancel={() => setExportStatus(false)}
+            />
+        );
+    }, [exportStatus]);
+
     useEffect(() => {
         _getCatagoryList().then(list => (allCatagoryRef.current = list));
     }, []);
@@ -274,6 +305,7 @@ const PaneWeight: React.FC = props => {
                 id={recordId}
                 onCancel={hideUpdateRecordModal}
             />
+            {exportModalComponent}
         </>
     );
 };

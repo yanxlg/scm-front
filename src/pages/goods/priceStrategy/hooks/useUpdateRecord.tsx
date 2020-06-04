@@ -19,5 +19,6 @@ export default function useUpdateRecord() {
         recordId,
         showUpdateRecordModal,
         hideUpdateRecordModal,
+        setRecordId,
     };
 }

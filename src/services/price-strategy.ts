@@ -176,7 +176,7 @@ export function getShippingFeeRuleConfig(id: string) {
 
 // 查询运费规则详情
 export function getSalePriceRuleConfig(id: string) {
-    return request.get(PriceStrategyApiPath.getShippingFeeRuleConfig, {
+    return request.get(PriceStrategyApiPath.getSalePriceRuleConfig, {
         params: {
             id,
         },

@@ -85,3 +85,9 @@ export const getPurchasePlatform = singlePromiseWrap(() => {
         return [];
     });
 });
+
+export function exportExcel(data: any) {
+    return request.post(GlobalApiPath.downloadExcel, {
+        data,
+    });
+}
