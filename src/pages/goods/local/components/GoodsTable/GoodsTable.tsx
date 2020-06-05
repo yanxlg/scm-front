@@ -6,8 +6,7 @@ import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
 import { utcToLocal } from 'react-components/lib/utils/date';
-import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import { PaginationConfig } from 'antd/es/pagination';
+import { ColumnsType } from 'antd/es/table';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
     postGoodsExports,
@@ -29,6 +28,7 @@ import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { GoodsSourceEnum } from '@/enums/GlobalEnum';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
+import { PaginationConfig } from 'react-components/es/FitTable';
 
 interface IProps {
     loading: boolean;
@@ -566,7 +566,7 @@ const GoodsTable: React.FC<IProps> = ({
         ];
     }, []);
 
-    const pagination = useMemo(() => {
+    const pagination = useMemo<PaginationConfig>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,

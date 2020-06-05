@@ -24,6 +24,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { getStatusDesc } from '@/utils/transform';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -424,7 +425,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
                 width: 120,
-                render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
+                render: (value: number, row: IChildOrderItem) => {
+                    const { reserveStatus } = row;
+                    if (reserveStatus === 3 && value === 1) {
+                        return '无需拍单'; // feature_4170
+                    }
+                    return getStatusDesc(purchaseOrderOptionList, value);
+                },
             },
             {
                 key: 'purchasePlatform',
