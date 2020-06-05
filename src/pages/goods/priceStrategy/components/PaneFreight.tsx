@@ -3,22 +3,22 @@ import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
 import { ColumnsType } from 'antd/lib/table';
-import { IShippingFeeRuleRes, IEdiyKey, ISaveShippingFeeRuleReq } from '@/interface/IPriceStrategy';
+import { IShippingFeeRuleRes, IEdiyKey } from '@/interface/IPriceStrategy';
 import { EditEnum } from '@/enums/PriceStrategyEnum';
 import FreightConfig from './FreightConfig/FreightConfig';
 import DeliveryCountryModal from './DeliveryCountryModal/DeliveryCountryModal';
-import {
-    getAllGoodsTagList,
-    getShippingCardNameList,
-    getShippingFeeRuleList,
-} from '@/services/price-strategy';
+import { getShippingCardNameList, getShippingFeeRuleList } from '@/services/price-strategy';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
 
-const PaneFreight: React.FC = props => {
+interface IProps {
+    type: string;
+}
+
+const PaneFreight: React.FC<IProps> = ({ type }) => {
     const searchRef = useRef<JsonFormRef>(null);
     const [deliveryCountryStatus, setDeliveryCountryStatus] = useState(false);
     const [logStatus, setLogStatus] = useState(false);
@@ -290,35 +290,39 @@ const PaneFreight: React.FC = props => {
     }, [loading]);
 
     useEffect(() => {
-        getShippingCardNameList().then(list => setCardNameList(list));
-    }, []);
+        if (type === '2') {
+            getShippingCardNameList().then(list => setCardNameList(list));
+        }
+    }, [type]);
 
-    return editType === EditEnum.DEFAULT ? (
-        <>
-            {searchNode}
-            {table}
-            <DeliveryCountryModal
-                visible={deliveryCountryStatus}
-                countryList={countryList}
-                onCancel={hideDeliveryCountryModal}
-            />
-            <SaleAndShippingLogModal
-                type="shipping_fee"
-                visible={logStatus}
+    return useMemo(() => {
+        return editType === EditEnum.DEFAULT ? (
+            <>
+                {searchNode}
+                {table}
+                <DeliveryCountryModal
+                    visible={deliveryCountryStatus}
+                    countryList={countryList}
+                    onCancel={hideDeliveryCountryModal}
+                />
+                <SaleAndShippingLogModal
+                    type="shipping_fee"
+                    visible={logStatus}
+                    id={currentId}
+                    onCancel={hideLogModal}
+                />
+            </>
+        ) : (
+            <FreightConfig
+                type={editType}
                 id={currentId}
-                onCancel={hideLogModal}
+                cartNameList={cartNameList}
+                goBack={goBack}
+                onReload={onReload}
             />
-        </>
-    ) : (
-        <FreightConfig
-            type={editType}
-            id={currentId}
-            cartNameList={cartNameList}
-            // updateData={updateData}
-            goBack={goBack}
-            onReload={onReload}
-        />
-    );
+        );
+    }, [editType, searchNode, table, deliveryCountryStatus, logStatus, currentId, cartNameList]);
 };
 
-export default React.memo(PaneFreight);
+// export default React.memo(PaneFreight);
+export default PaneFreight;
