@@ -103,3 +103,7 @@ export const queryGoodsSourceList = singlePromiseWrap(() => {
         return [];
     });
 });
+
+export const queryWarehourseById = (id: string) => {
+    return request.get(GlobalApiPath.QueryWarehourse.replace(':warehourse_id', id));
+};

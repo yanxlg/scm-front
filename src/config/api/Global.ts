@@ -5,4 +5,5 @@ export enum GlobalApiPath {
     getPurchasePlatform = '/api/v1/common/purchase_platform',
     ExportExcel = '/api/v1/download/create',
     QuerySelectList = '/api/v1/select/:id',
+    QueryWarehourse = '/api/v1/common/warehourse_addr/:warehourse_id',
 }
