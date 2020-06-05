@@ -46,6 +46,7 @@ const PaneFreightCalc: React.FC = props => {
     const hideFreightModal = useCallback((isRefresh?: boolean) => {
         setFreightStatus(false);
         if (isRefresh) {
+            _getShippingCardNameList();
             onReload();
         }
     }, []);
