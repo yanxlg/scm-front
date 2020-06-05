@@ -72,3 +72,5 @@ export const carrierList = [
         value: 180,
     },
 ];
+
+export const defaultSelectOption = { name: '全部', value: '' };
