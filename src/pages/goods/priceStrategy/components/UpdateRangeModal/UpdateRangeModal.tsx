@@ -118,13 +118,15 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
                 />
                 <Form.Item label="商品标签">
                     <div>
-                        {goodsTagList.map(item => (
-                            <CheckedBtn
-                                item={item}
-                                key={item.name}
-                                onClick={() => toggleGoodsTag(item.name)}
-                            />
-                        ))}
+                        {goodsTagList.length > 0
+                            ? goodsTagList.map(item => (
+                                  <CheckedBtn
+                                      item={item}
+                                      key={item.name}
+                                      onClick={() => toggleGoodsTag(item.name)}
+                                  />
+                              ))
+                            : '--'}
                     </div>
                 </Form.Item>
                 <Form.Item

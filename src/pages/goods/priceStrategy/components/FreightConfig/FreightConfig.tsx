@@ -41,7 +41,6 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [saveLoading, setSaveLoading] = useState(false);
-    const [name, setName] = useState('');
     const {
         goodsTagList,
         checkedGoodsTagList,
@@ -51,15 +50,9 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
 
     const handleCancel = useCallback(() => {
         setLoading(false);
-        setName('');
         setCheckedGoodsTagList([]);
         form.resetFields();
         goBack();
-    }, []);
-
-    const handleChangeName = useCallback(e => {
-        // console.log(11111, e);
-        setName(e.target.value);
     }, []);
 
     const _saveShippingFeeRule = useCallback((data: ISaveShippingFeeRuleReq) => {
@@ -108,7 +101,7 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
         if (EditEnum.UPDATE === type && id) {
             setLoading(true);
             getShippingFeeRuleConfig(id).then(res => {
-                console.log('getShippingFeeRuleConfig', res);
+                // console.log('getShippingFeeRuleConfig', res);
                 const { shipping_fee_rule } = res.data;
                 if (shipping_fee_rule.min_weight === '0') {
                     shipping_fee_rule.min_weight = '';
@@ -118,7 +111,6 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                 }
                 setLoading(false);
                 form.setFieldsValue(shipping_fee_rule);
-                setName(shipping_fee_rule.rule_name);
                 setCheckedGoodsTagList(shipping_fee_rule.product_tags?.split(',') ?? []);
             });
         }
@@ -138,21 +130,22 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                         >
                             <Input
                                 disabled={EditEnum.UPDATE === type}
-                                onChange={handleChangeName}
                                 maxLength={32}
-                                suffix={`${name.length}/32`}
+                                placeholder="限制32个字符"
                             />
                         </Form.Item>
                     </div>
                     <Form.Item label="商品标签" className={styles.customLabel}>
                         <div>
-                            {goodsTagList.map((item, index) => (
-                                <CheckedBtn
-                                    item={item}
-                                    key={item.name}
-                                    onClick={() => toggleGoodsTag(item.name)}
-                                />
-                            ))}
+                            {goodsTagList.length > 0
+                                ? goodsTagList.map((item, index) => (
+                                      <CheckedBtn
+                                          item={item}
+                                          key={item.name}
+                                          onClick={() => toggleGoodsTag(item.name)}
+                                      />
+                                  ))
+                                : '--'}
                         </div>
                     </Form.Item>
                     <Form.Item
