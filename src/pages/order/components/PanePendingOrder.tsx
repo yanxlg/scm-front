@@ -862,8 +862,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         align: 'center',
                         width: 160,
                         render: (_, row: IChildOrderItem) => {
-                            const { goodsAmount, freight } = row;
-                            const total = Number(goodsAmount) + (Number(freight) || 0);
+                            const { goodsAmount, goodsNumber, freight } = row;
+                            const total =
+                                Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
                             return {
                                 children: isNaN(total) ? '' : total.toFixed(2),
                                 props: {
@@ -1316,8 +1317,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         align: 'center',
                         width: 160,
                         render: (_, row: IChildOrderItem) => {
-                            const { goodsAmount, freight } = row;
-                            const total = Number(goodsAmount) + (Number(freight) || 0);
+                            const { goodsAmount, goodsNumber, freight } = row;
+                            const total =
+                                Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
                             return {
                                 children: isNaN(total) ? '' : total.toFixed(2),
                                 props: {
