@@ -28,7 +28,6 @@ interface IProps {
 
 const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onReload }) => {
     const [form] = Form.useForm();
-    const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [purchasePlatformList, setPurchasePlatformList] = useState<IOptionItem[]>([]);
     const {
@@ -41,11 +40,6 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
     const onCancel = useCallback(() => {
         goBack();
         setLoading(false);
-    }, []);
-
-    const handleChangeName = useCallback(e => {
-        // console.log(11111, e);
-        setName(e.target.value);
     }, []);
 
     const handleSave = useCallback(async () => {
@@ -112,7 +106,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
         if (type === EditEnum.UPDATE && id) {
             setLoading(true);
             getSalePriceRuleConfig(id).then(res => {
-                console.log('getSalePriceRuleConfig', res);
+                // console.log('getSalePriceRuleConfig', res);
                 const { sale_price_rule } = res.data;
                 const {
                     enable_source,
@@ -121,11 +115,11 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     product_tags,
                     ...reset
                 } = sale_price_rule;
-                if (sale_price_rule.min_origin_price === '0') {
-                    sale_price_rule.min_origin_price = '';
+                if (reset.min_origin_price === '0') {
+                    reset.min_origin_price = '';
                 }
-                if (sale_price_rule.max_origin_price === '0') {
-                    sale_price_rule.max_origin_price = '';
+                if (reset.max_origin_price === '0') {
+                    reset.max_origin_price = '';
                 }
                 setLoading(false);
                 form.setFieldsValue({
@@ -134,7 +128,6 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     enable_platform: enable_platform?.split(',') ?? [],
                     enable_merchant: enable_merchant?.split(',') ?? [],
                 });
-                setName(sale_price_rule.rule_name);
                 setCheckedGoodsTagList(sale_price_rule.product_tags?.split(',') ?? []);
             });
         }
@@ -156,9 +149,8 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                         >
                             <Input
                                 disabled={EditEnum.UPDATE === type}
-                                onChange={handleChangeName}
                                 maxLength={32}
-                                suffix={`${name.length}/32`}
+                                placeholder="限制32个字符"
                             />
                         </Form.Item>
                     </div>
@@ -198,13 +190,15 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     </div>
                     <Form.Item label="商品标签" className={styles.customLabel}>
                         <div>
-                            {goodsTagList.map(item => (
-                                <CheckedBtn
-                                    item={item}
-                                    key={item.name}
-                                    onClick={() => toggleGoodsTag(item.name)}
-                                />
-                            ))}
+                            {goodsTagList.length > 0
+                                ? goodsTagList.map(item => (
+                                      <CheckedBtn
+                                          item={item}
+                                          key={item.name}
+                                          onClick={() => toggleGoodsTag(item.name)}
+                                      />
+                                  ))
+                                : '--'}
                         </div>
                     </Form.Item>
                     <Form.Item
@@ -239,7 +233,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                             <>
                                 排序等级
                                 <Tooltip placement="bottomLeft" title="排序等级越高，优先级越高">
-                                    <QuestionCircleOutlined />
+                                    <QuestionCircleOutlined style={{ marginLeft: 6 }} />
                                 </Tooltip>
                             </>
                         }
@@ -286,7 +280,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                             <Radio value="0">否</Radio>
                         </Radio.Group>
                     </Form.Item>
-                    <div className={styles.item}>
+                    <div className={styles.item} style={{ width: 450 }}>
                         <Form.Item
                             label="备注"
                             name="comment"
