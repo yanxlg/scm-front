@@ -1,13 +1,12 @@
 import React, { useMemo, useCallback, ReactText, useState, RefObject } from 'react';
-import { FitTable, AutoEnLargeImg, LoadingButton, message } from 'react-components';
+import { FitTable, AutoEnLargeImg, LoadingButton, message, useModal2 } from 'react-components';
 import { Button } from 'antd';
 import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILocalGoods';
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
 import { utcToLocal } from 'react-components/lib/utils/date';
-import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import { PaginationConfig } from 'antd/es/pagination';
+import { ColumnsType } from 'antd/es/table';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
     postGoodsExports,
@@ -28,6 +27,8 @@ import CountryFreightModal from '../CountryFreightModal/CountryFreightModal';
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { GoodsSourceEnum } from '@/enums/GlobalEnum';
+import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
+import { PaginationConfig } from 'react-components/es/FitTable';
 
 interface IProps {
     loading: boolean;
@@ -159,6 +160,8 @@ const GoodsTable: React.FC<IProps> = ({
         setSelectedRowKeys(selectedKeys as string[]);
     }, []);
 
+    const [modal, showModal, closeModal] = useModal2<Array<string>>();
+
     const toolBarRender = useCallback(() => {
         const handleClickOnsale = () => {
             showMerchantModal();
@@ -187,6 +190,15 @@ const GoodsTable: React.FC<IProps> = ({
                 onClick={handleClickAllOnsale}
             >
                 查询商品一键上架
+            </Button>,
+            <Button
+                key="4"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => showModal(selectedRowKeys)}
+                disabled={disabled}
+            >
+                修改商品属性
             </Button>,
             <LoadingButton
                 key="3"
@@ -554,7 +566,7 @@ const GoodsTable: React.FC<IProps> = ({
         ];
     }, []);
 
-    const pagination = useMemo(() => {
+    const pagination = useMemo<PaginationConfig>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,
@@ -573,11 +585,25 @@ const GoodsTable: React.FC<IProps> = ({
         };
     }, [selectedRowKeys]);
 
+    const GoodsTagsUpdateModal = useMemo(() => {
+        return (
+            <GoodsTagsModal
+                visible={
+                    modal === false
+                        ? false
+                        : goodsList.filter(({ product_id }) => modal.indexOf(product_id) > -1)
+                }
+                onClose={closeModal}
+                onReload={onReload}
+            />
+        );
+    }, [modal]);
+
     return useMemo(() => {
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="product_id"
                     loading={loading}
                     columns={columns}
@@ -631,6 +657,7 @@ const GoodsTable: React.FC<IProps> = ({
                     productId={productId}
                     onCancel={hideCountryFreight}
                 />
+                {GoodsTagsUpdateModal}
             </>
         );
     }, [
@@ -644,6 +671,7 @@ const GoodsTable: React.FC<IProps> = ({
         mergeStatus,
         editGoodsStatus,
         countryFreightStatus,
+        modal,
     ]);
 };
 

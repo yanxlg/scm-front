@@ -56,14 +56,13 @@ const Login = () => {
 
     const onLogin = () => {
         setLogin(true);
-
-        // 获取页面中的execution
     };
 
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const onLoaded = useCallback(e => {
         // 读取url
     }, []);
+
     const iframe = useMemo(() => {
         // 有可能会直接访问中台页面，如果直接是中台页面说明登陆状态仍然存在，否则才走登陆
         return null;
