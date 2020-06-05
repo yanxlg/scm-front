@@ -8,6 +8,7 @@ import {
     inventoryStatusList,
     versionStatusList,
     publishChannelStatusList,
+    goodsSourceList,
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 import {
@@ -25,15 +26,17 @@ import GoodsTable from './components/GoodsTable/GoodsTable';
 
 import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { queryGoodsSourceList } from '@/services/global';
 
-const initialValues= {
+const initialValues = {
     inventory_status: '',
     version_status: '',
     first_catagory: '',
     second_catagory: '',
     third_catagory: '',
-    publish_channel: ''
-} 
+    publish_channel: '',
+    source_channel: '',
+};
 
 const formFields: FormField[] = [
     {
@@ -75,6 +78,14 @@ const formFields: FormField[] = [
         className: styles.input,
         formatter: 'number',
         optionList: [defaultOption, ...publishChannelStatusList],
+    },
+    {
+        type: 'select',
+        label: '商品渠道来源',
+        name: 'source_channel',
+        className: styles.input,
+        syncDefaultOption: defaultOption,
+        optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'select',
@@ -221,7 +232,7 @@ const LocalPage: React.FC = props => {
         onChange,
     } = useList({
         formRef: formRef,
-        queryList: getGoodsList
+        queryList: getGoodsList,
     });
 
     let goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
@@ -255,21 +266,17 @@ const LocalPage: React.FC = props => {
                             >
                                 查询
                             </LoadingButton>
-                            <LoadingButton
-                                className={formStyles.formBtn}
-                                onClick={onReload}
-                            >
+                            <LoadingButton className={formStyles.formBtn} onClick={onReload}>
                                 刷新
                             </LoadingButton>
-                            <Button 
-                                disabled={total <= 0} 
-                                className={formStyles.formBtn} 
+                            <Button
+                                disabled={total <= 0}
+                                className={formStyles.formBtn}
                                 onClick={() => setExportStatus(true)}
                             >
                                 导出
                             </Button>
                         </div>
-                        
                     </JsonForm>
                 </div>
                 <GoodsTable
@@ -288,8 +295,8 @@ const LocalPage: React.FC = props => {
                     onReload={onReload}
                 />
             </Container>
-        )
+        );
     }, [loading, selectedRowKeys, exportStatus]);
-}
+};
 
 export default LocalPage;

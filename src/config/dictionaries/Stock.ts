@@ -35,3 +35,12 @@ export const InStockState = {
 };
 export type InStockStateCode = keyof typeof InStockState;
 export const InStockStateList = transStatusList(InStockState);
+
+export const WarehouseMap = {
+    1: '安骏',
+    2: '捷网',
+};
+
+export type WarehouseMapCode = keyof typeof WarehouseMap;
+
+export const WarehouseList = transStatusList(WarehouseMap);

@@ -18,3 +18,10 @@ export declare interface ITagItem {
     type?: ITagOpsType;
     page?: number;
 }
+
+export declare interface IPublishInterceptItem {
+    name: string;
+    checked: boolean;
+    originChecked: boolean;
+    type: 0 | 1 | 2;
+}

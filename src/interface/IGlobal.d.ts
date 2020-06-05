@@ -41,3 +41,11 @@ export declare interface ICheckedBtnItem {
     name: string;
     checked: boolean;
 }
+
+export interface IExportExcelReqData {
+    module: number;
+    query: any;
+    fields: string[];
+    type?: number;
+    filename?: string;
+}

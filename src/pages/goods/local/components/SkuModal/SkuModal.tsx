@@ -1,10 +1,5 @@
-import React, { 
-    useState,
-    useMemo, 
-    useCallback,
-    useEffect
-} from 'react';
-import { Modal, Row, Col, Input, Button, Pagination } from 'antd';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { Modal, Row, Col, Input, Button, Pagination, Tooltip, Table } from 'antd';
 import { ISkuStyleItem, ISkuInfo } from '@/interface/ILocalGoods';
 import { FitTable, AutoEnLargeImg } from 'react-components';
 import { setCommoditySkuTag } from '@/services/goods-attr';
@@ -15,30 +10,28 @@ import styles from './_SkuModal.less';
 
 declare interface ISkuItem {
     origin_sku_id: string;
-    shipping_fee: number;
+    shipping_fee: string;
     sku_id: string;
-    sku_style: ISkuStyleItem[];
-    sku_price: string;
+    sku_style: any[];
+    sku_price: [string, string];
     sku_inventory: string;
     sku_weight: number;
     serial: number;
-    sku_amount: number; // 爬虫价格 = 价格 + 运费
+    sku_amount: [string, string]; // 爬虫价格 = 价格 + 运费
     image_url: string;
     commodity_sku_id: string;
     tags: string[];
+    multiple_price: { [key: string]: number };
 }
 
 interface IProps {
     visible: boolean;
+    channelSource: string;
     currentSkuInfo: ISkuInfo | null;
     onCancel(): void;
 }
 
-const SkuModal: React.FC<IProps> = ({
-    visible,
-    currentSkuInfo,
-    onCancel
-}) => {
+const SkuModal: React.FC<IProps> = ({ visible, channelSource, currentSkuInfo, onCancel }) => {
     const [loading, setLoading] = useState(false);
     const [pageNumber, setPageNumber] = useState(1);
     const [total, setTotal] = useState(0);
@@ -53,99 +46,132 @@ const SkuModal: React.FC<IProps> = ({
         onCancel();
     }, []);
 
-    const _getGoodsSkuList = useCallback((pageData?: ISkuParams) => {
-        const productId = currentSkuInfo?.product_id as string;
-        let params: ISkuParams = {
-            page: pageNumber,
-            product_id: productId,
-            page_count: 50,
-            variantids: searchVal,
-        };
-        if (pageData) {
-            params = Object.assign(params, pageData);
-        }
-        setLoading(true);
-        getGoodsSkuList(params)
-            .then(res => {
-                // console.log('getGoodsSkuList', res);
-                const { all_count, list } = res.data;
-                setPageNumber(params.page);
-                setTotal(all_count);
-                setSkuList(list.map((item: any, index: number) => {
-                    let { sku_style, sku_price, shipping_fee, variant_image, ...rest } = item;
-                    return {
-                        ...rest,
-                        sku_price,
-                        shipping_fee,
-                        sku_amount: Number(sku_price) + Number(shipping_fee),
-                        sku_style: sku_style.map(({ option, value }: any) => ({
-                            option,
-                            value,
-                        })),
-                        image_url: variant_image?.url,
-                        serial: (params.page - 1) * 50 + index + 1,
-                    };
-                }))
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [pageNumber, searchVal, currentSkuInfo]);
+    const _getGoodsSkuList = useCallback(
+        (pageData?: ISkuParams) => {
+            const productId = currentSkuInfo?.product_id as string;
+            let params: ISkuParams = {
+                page: pageNumber,
+                product_id: productId,
+                page_count: 50,
+                variantids: searchVal,
+            };
+            if (pageData) {
+                params = Object.assign(params, pageData);
+            }
+            setLoading(true);
+            getGoodsSkuList(params)
+                .then(res => {
+                    // console.log('getGoodsSkuList', res);
+                    const { all_count, list } = res.data;
+                    setPageNumber(params.page);
+                    setTotal(all_count);
+                    setSkuList(
+                        list.map((item: any, index: number) => {
+                            let {
+                                sku_style,
+                                sku_price,
+                                shipping_fee,
+                                variant_image,
+                                multiple_price,
+                                ...rest
+                            } = item;
+                            const skuPrice = Number(sku_price);
+                            const shippingFee = Number(shipping_fee);
+                            let min = skuPrice;
+                            let max = skuPrice;
+                            if (multiple_price && !Array.isArray(multiple_price)) {
+                                const priceList: number[] = Object.values(multiple_price);
+                                min = Math.min(...priceList);
+                                max = Math.max(...priceList);
+                            }
+                            return {
+                                ...rest,
+                                multiple_price,
+                                sku_price: [min.toFixed(2), max.toFixed(2)],
+                                shipping_fee,
+                                sku_amount: [
+                                    (min + shippingFee).toFixed(2),
+                                    (max + shippingFee).toFixed(2),
+                                ],
+                                sku_style: sku_style.map(({ option, value }: any) => ({
+                                    option,
+                                    value,
+                                })),
+                                image_url: variant_image?.url,
+                                serial: (params.page - 1) * 50 + index + 1,
+                            };
+                        }),
+                    );
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [pageNumber, searchVal, currentSkuInfo],
+    );
 
-    const _setCommoditySkuTag = useCallback((commodity_sku_id: string, item: string, tags: string[]) => {
-        const commodity_id = currentSkuInfo?.commodity_id as string;
-        const index = tags.indexOf(item);
-        let list: string[] = [];
-        if (index > -1) {
-            list = [...tags.slice(0, index), ...tags.slice(index + 1)];
-        } else {
-            list = [...tags, item];
-        }
-        setLoading(loading);
-        setCommoditySkuTag({
-            commodity_sku_id,
-            tag_name: list,
-            commodity_id,
-        })
-            .then(() => {
-                setSkuList(skuList.map(item => {
-                    if (item.commodity_sku_id === commodity_sku_id) {
-                        return {
-                            ...item,
-                            tags: list,
-                        };
-                    }
-                    return item;
-                }))
+    const _setCommoditySkuTag = useCallback(
+        (commodity_sku_id: string, item: string, tags: string[]) => {
+            const commodity_id = currentSkuInfo?.commodity_id as string;
+            const index = tags.indexOf(item);
+            let list: string[] = [];
+            if (index > -1) {
+                list = [...tags.slice(0, index), ...tags.slice(index + 1)];
+            } else {
+                list = [...tags, item];
+            }
+            setLoading(loading);
+            setCommoditySkuTag({
+                commodity_sku_id,
+                tag_name: list,
+                commodity_id,
             })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [currentSkuInfo, skuList]);
+                .then(() => {
+                    setSkuList(
+                        skuList.map(item => {
+                            if (item.commodity_sku_id === commodity_sku_id) {
+                                return {
+                                    ...item,
+                                    tags: list,
+                                };
+                            }
+                            return item;
+                        }),
+                    );
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [currentSkuInfo, skuList],
+    );
 
     const handleClickSearch = useCallback(() => {
         _getGoodsSkuList({
-            page: 1
+            page: 1,
         });
     }, [_getGoodsSkuList]);
 
-    const handleChangePage = useCallback((page: number) => {
-        _getGoodsSkuList({
-            page
-        });
-    }, [_getGoodsSkuList])
+    const handleChangePage = useCallback(
+        (page: number) => {
+            _getGoodsSkuList({
+                page,
+            });
+        },
+        [_getGoodsSkuList],
+    );
 
     useEffect(() => {
         if (visible) {
             _getGoodsSkuList({
-                page: 1
+                page: 1,
             });
         }
-    }, [visible])
+    }, [visible]);
 
     const goodsInfoNode = useMemo(() => {
         if (!currentSkuInfo) {
-            return null
+            return null;
         }
         const {
             goods_img,
@@ -180,7 +206,7 @@ const SkuModal: React.FC<IProps> = ({
                     </Row>
                 </div>
             </div>
-        )
+        );
     }, [currentSkuInfo]);
 
     const columns = useMemo<ColumnsType<ISkuItem>>(() => {
@@ -215,10 +241,10 @@ const SkuModal: React.FC<IProps> = ({
                 dataIndex: 'sku_style',
                 align: 'center',
                 width: 200,
-                render: (value: ISkuStyleItem[]) => {
+                render: (value: any[]) => {
                     return value.map(item => (
-                        <div key={item.option}>
-                            {item.option}: {item.value}
+                        <div key={item.option.text}>
+                            {item.option.text}: {item.value.text}
                         </div>
                     ));
                 },
@@ -229,13 +255,55 @@ const SkuModal: React.FC<IProps> = ({
                 dataIndex: 'sku_amount',
                 align: 'center',
                 width: 140,
+                render: (value: [string, string], row: ISkuItem) => {
+                    if (channelSource?.toLowerCase() === 'pdd') {
+                        return value[0];
+                    }
+                    let dataSource: any[] = [];
+                    const { multiple_price } = row;
+                    if (multiple_price) {
+                        dataSource = Object.keys(multiple_price).map(key => ({
+                            country: key,
+                            price: `￥ ${multiple_price[key]}`,
+                        }));
+                    }
+                    return (
+                        <>
+                            {value[0]} ~ {value[1]}
+                            <div>
+                                <PopTable text="更多国家爬虫价" dataSource={dataSource} />
+                            </div>
+                        </>
+                    );
+                },
             },
             {
                 key: 'sku_price',
                 title: '单价(￥)',
                 dataIndex: 'sku_price',
                 align: 'center',
-                width: 100,
+                width: 140,
+                render: (value: [string, string], row: ISkuItem) => {
+                    if (channelSource?.toLowerCase() === 'pdd') {
+                        return value[0];
+                    }
+                    let dataSource: any[] = [];
+                    const { multiple_price } = row;
+                    if (multiple_price) {
+                        dataSource = Object.keys(multiple_price).map(key => ({
+                            country: key,
+                            price: `￥ ${multiple_price[key]}`,
+                        }));
+                    }
+                    return (
+                        <>
+                            {value[0]} ~ {value[1]}
+                            <div>
+                                <PopTable text="更多国家单价" dataSource={dataSource} />
+                            </div>
+                        </>
+                    );
+                },
             },
             {
                 key: 'shipping_fee',
@@ -289,68 +357,100 @@ const SkuModal: React.FC<IProps> = ({
                     );
                 },
             },
-        ]
-    }, [total, currentSkuInfo, _setCommoditySkuTag]);
+        ];
+    }, [total, currentSkuInfo, _setCommoditySkuTag, channelSource]);
 
     return useMemo(() => {
-     
         return (
             <Modal
-                    width={1000}
-                    visible={visible}
-                    style={{ top: 50 }}
-                    onCancel={handleCancel}
-                    maskClosable={false}
-                    footer={null}
-                >
-                    <div className={styles.skuContent}>
-                        {goodsInfoNode}
-                        <Row className={styles.filterSection} gutter={16}>
-                            <Col span={21} className={styles.inputWrap}>
-                                <span className={styles.label}>SKU ID:</span>
-                                <Input
-                                    value={searchVal}
-                                    onChange={e => setSearchVal(e.target.value)}
-                                    placeholder="支持多个搜索，以英文逗号隔开"
-                                />
-                            </Col>
-                            <Col span={3}>
-                                <Button
-                                    type="primary"
-                                    className={styles.btn}
-                                    loading={loading}
-                                    onClick={handleClickSearch}
-                                >
-                                    搜索
-                                </Button>
-                            </Col>
-                        </Row>
-                        <FitTable
-                            bordered
-                            rowKey="sku_id"
-                            className={styles.table}
-                            loading={loading}
-                            columns={columns}
-                            dataSource={skuList}
-                            scroll={{ x: 'max-content', y: 400 }}
-                            autoFitY={false}
-                            pagination={false}
-                        />
-                        <Pagination
-                            size="small"
-                            total={total}
-                            current={pageNumber}
-                            defaultPageSize={50}
-                            showQuickJumper={true}
-                            showSizeChanger={false}
-                            onChange={handleChangePage}
-                            showTotal={total => `共${total}条`}
-                        />
-                    </div>
-                </Modal>
-        )
+                width={1000}
+                visible={visible}
+                style={{ top: 50 }}
+                onCancel={handleCancel}
+                maskClosable={false}
+                footer={null}
+            >
+                <div className={styles.skuContent}>
+                    {goodsInfoNode}
+                    <Row className={styles.filterSection} gutter={16}>
+                        <Col span={21} className={styles.inputWrap}>
+                            <span className={styles.label}>SKU ID:</span>
+                            <Input
+                                value={searchVal}
+                                onChange={e => setSearchVal(e.target.value)}
+                                placeholder="支持多个搜索，以英文逗号隔开"
+                            />
+                        </Col>
+                        <Col span={3}>
+                            <Button
+                                type="primary"
+                                className={styles.btn}
+                                loading={loading}
+                                onClick={handleClickSearch}
+                            >
+                                搜索
+                            </Button>
+                        </Col>
+                    </Row>
+                    <FitTable
+                        bordered
+                        rowKey="sku_id"
+                        className={styles.table}
+                        loading={loading}
+                        columns={columns}
+                        dataSource={skuList}
+                        scroll={{ x: 'max-content', y: 400 }}
+                        autoFitY={false}
+                        pagination={false}
+                    />
+                    <Pagination
+                        size="small"
+                        total={total}
+                        current={pageNumber}
+                        defaultPageSize={50}
+                        showQuickJumper={true}
+                        showSizeChanger={false}
+                        onChange={handleChangePage}
+                        showTotal={total => `共${total}条`}
+                    />
+                </div>
+            </Modal>
+        );
     }, [visible, currentSkuInfo, searchVal, loading, skuList]);
+};
+
+function PopTable({ text, dataSource }: any) {
+    const columns: ColumnsType<any> = [
+        {
+            title: '国家',
+            dataIndex: 'country',
+            align: 'center',
+            width: 120,
+        },
+        {
+            title: '价格',
+            dataIndex: 'price',
+            align: 'center',
+            width: 120,
+        },
+    ];
+    const table = (
+        <Table
+            bordered
+            size="small"
+            rowKey="country"
+            columns={columns}
+            dataSource={dataSource}
+            className={styles.popTable}
+            scroll={{ y: 200 }}
+            pagination={false}
+        />
+    );
+    return (
+        <Tooltip placement="bottom" title={table}>
+            <a>{text}</a>
+        </Tooltip>
+    );
 }
 
 export default SkuModal;
-

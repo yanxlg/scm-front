@@ -1,6 +1,6 @@
 import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
-import { IResponse, ISHopList } from '@/interface/IGlobal';
+import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
@@ -82,12 +82,24 @@ export const getPurchasePlatform = singlePromiseWrap(() => {
                 value: name,
             }));
         }
-        return [];
     });
 });
 
-export function exportExcel(data: any) {
-    return request.post(GlobalApiPath.downloadExcel, {
+export function exportExcel(data: IExportExcelReqData) {
+    return request.post(GlobalApiPath.ExportExcel, {
         data,
     });
 }
+
+export const queryGoodsSourceList = singlePromiseWrap(() => {
+    return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1')).then(res => {
+        const { data } = res;
+        if (data) {
+            return Object.keys(data).map(key => ({
+                name: data[key],
+                value: key,
+            }));
+        }
+        return [];
+    });
+});

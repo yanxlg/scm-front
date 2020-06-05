@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { ISkuInfo } from '@/interface/ILocalGoods';
 
-export default function () {
+export default function() {
     const [skuStatus, setSkuStatus] = useState(false);
     const [currentSkuInfo, setCurrentSkuInfo] = useState<ISkuInfo | null>(null);
+    const [channelSource, setChannelSource] = useState('');
 
     const showSkuModal = useCallback(record => {
         const {
@@ -17,8 +18,10 @@ export default function () {
             second_catagory,
             third_catagory,
             commodity_id,
+            source_channel,
         } = record;
         setSkuStatus(true);
+        setChannelSource(source_channel);
         setCurrentSkuInfo({
             tags,
             product_id,
@@ -35,13 +38,15 @@ export default function () {
 
     const hideSkuModal = useCallback(() => {
         setSkuStatus(false);
+        setChannelSource('');
         setCurrentSkuInfo(null);
     }, []);
 
     return {
         skuStatus,
         currentSkuInfo,
+        channelSource,
         showSkuModal,
-        hideSkuModal
-    }
+        hideSkuModal,
+    };
 }

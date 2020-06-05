@@ -52,3 +52,11 @@ export const publishStatusMap = {
 };
 
 export type publishStatusCode = keyof typeof publishStatusMap;
+
+// 商品渠道来源 Commodity channel source
+export const goodsSourceMap = {
+    1: 'PDD',
+    2: 'VOVA',
+};
+
+export const goodsSourceList = transOptionList(goodsSourceMap);

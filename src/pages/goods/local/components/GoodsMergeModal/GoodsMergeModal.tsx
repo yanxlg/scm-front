@@ -33,12 +33,11 @@ const GoodsMergeModal: React.FC<IProps> = ({
     productSn,
     commodityId,
     onReload,
-    onCancel
+    onCancel,
 }) => {
-
     const commodityIdRef = useRef('');
     const isChangeRef = useRef(false);
-    
+
     // console.log(1111111, commodityIdRef, commodityId);
     const [loading, setLoading] = useState(false);
     const [commodityIds, setCommodityIds] = useState('');
@@ -70,36 +69,41 @@ const GoodsMergeModal: React.FC<IProps> = ({
             });
     }, []);
 
-    const _putGoodsMergeMain = useCallback((mainCommodityId: string) => {
-        setLoading(true);
-        putGoodsMergeMain({
-            product_sn: productSn,
-            main_commodity_id: mainCommodityId,
-        })
-            .then(() => {
-                isChangeRef.current = true;
-                _getGoodsMergeList(productSn);
+    const _putGoodsMergeMain = useCallback(
+        (mainCommodityId: string) => {
+            setLoading(true);
+            putGoodsMergeMain({
+                product_sn: productSn,
+                main_commodity_id: mainCommodityId,
             })
-            .catch(() => {
-                setLoading(false);
-            });
+                .then(() => {
+                    isChangeRef.current = true;
+                    _getGoodsMergeList(productSn);
+                })
+                .catch(() => {
+                    setLoading(false);
+                });
+        },
+        [goodsSnList, productSn],
+    );
 
-    }, [goodsSnList, productSn]);
-
-    const _delGoodsMergeDelete = useCallback((commodityId: string) => {
-        setLoading(true);
-        delGoodsMergeDelete({
-            product_sn: productSn,
-            commodity_ids: [commodityId],
-        })
-            .then(() => {
-                isChangeRef.current = true;
-                setGoodsSnList(goodsSnList.filter(item => item.commodityId !== commodityId));
+    const _delGoodsMergeDelete = useCallback(
+        (commodityId: string) => {
+            setLoading(true);
+            delGoodsMergeDelete({
+                product_sn: productSn,
+                commodity_ids: [commodityId],
             })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, [productSn, goodsSnList]);
+                .then(() => {
+                    isChangeRef.current = true;
+                    setGoodsSnList(goodsSnList.filter(item => item.commodityId !== commodityId));
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        },
+        [productSn, goodsSnList],
+    );
 
     // 关联后新增
     const _putGoodsMergeAdd = useCallback(() => {
@@ -213,7 +217,10 @@ const GoodsMergeModal: React.FC<IProps> = ({
                                 </Button>
                             </div>
                             <div style={{ marginTop: -4 }}>
-                                <Button type="link" onClick={() => _delGoodsMergeDelete(commodityId)}>
+                                <Button
+                                    type="link"
+                                    onClick={() => _delGoodsMergeDelete(commodityId)}
+                                >
                                     删除关联
                                 </Button>
                             </div>
@@ -221,8 +228,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
                     ) : null;
                 },
             },
-        ]
-
+        ];
     }, [_putGoodsMergeMain, _delGoodsMergeDelete]);
 
     useEffect(() => {
@@ -232,8 +238,8 @@ const GoodsMergeModal: React.FC<IProps> = ({
     }, [visible]);
 
     useEffect(() => {
-        commodityId && (commodityIdRef.current = commodityId )
-    }, [commodityId])
+        commodityId && (commodityIdRef.current = commodityId);
+    }, [commodityId]);
 
     return useMemo(() => {
         const title = productSn ? `商品组 Product SN: ${productSn}` : '商品组';
@@ -269,8 +275,8 @@ const GoodsMergeModal: React.FC<IProps> = ({
                     />
                 </div>
             </Modal>
-        )
+        );
     }, [visible, loading, commodityIds]);
-}
+};
 
 export default GoodsMergeModal;
