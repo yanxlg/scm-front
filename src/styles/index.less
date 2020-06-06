@@ -4,7 +4,7 @@
 .container {
     padding: 20px 30px;
 
-    @spacing: 64px+48px;
+    @spacing: 64px + 48px;
 
     min-height: calc(~'100vh - @{spacing}');
 }
@@ -41,27 +41,27 @@
 
 .select {
     &-default {
-        width: @inputWidth  !important;
+        width: @inputWidth !important;
     }
 
     &-equal {
         &-date {
-            width: @inputEqualDateSelectorWidth  !important;
+            width: @inputEqualDateSelectorWidth !important;
         }
     }
 }
 
 .input {
     &-default {
-        width: @inputWidth  !important;
+        width: @inputWidth !important;
     }
 
     &-large {
-        width: @inputLargeWidth  !important;
+        width: @inputLargeWidth !important;
     }
 
     &-small {
-        width: @inputSmallWidth  !important;
+        width: @inputSmallWidth !important;
     }
 
     &-handler {
@@ -83,13 +83,13 @@
     }
 
     &-default {
-        width: @pickerDefaultWidth  !important;
+        width: @pickerDefaultWidth !important;
     }
 }
 
 .btn {
     &-group {
-        &~& {
+        & ~ & {
             margin-left: @btnDefaultSpacing;
         }
     }
@@ -98,7 +98,7 @@
         min-width: @btnDefaultWidth;
         height: @btnDefaultHeight;
 
-        &~& {
+        & ~ & {
             margin-left: @btnDefaultSpacing;
         }
     }

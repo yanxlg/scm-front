@@ -29,6 +29,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { GoodsSourceEnum } from '@/enums/GlobalEnum';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
 import { PaginationConfig } from 'react-components/es/FitTable';
+import useCountryFreightModal from '../../hooks/useCountryFreightModal';
 
 interface IProps {
     loading: boolean;
@@ -36,6 +37,7 @@ interface IProps {
     pageNumber: number;
     pageSize: number;
     total: number;
+    sourceChannel: string;
     goodsList: IGoodsAndSkuItem[];
     selectedRowKeys: string[];
     formRef: RefObject<JsonFormRef>;
@@ -52,6 +54,7 @@ const GoodsTable: React.FC<IProps> = ({
     pageNumber,
     pageSize,
     total,
+    sourceChannel,
     goodsList,
     selectedRowKeys,
     formRef,
@@ -82,7 +85,12 @@ const GoodsTable: React.FC<IProps> = ({
     // 查看sku信息
     const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
     // 查看国家运费
-    const [countryFreightStatus, setCountryFreightStatus] = useState(false);
+    const {
+        countryFreightStatus,
+        countryFreightId,
+        showCountryFreight,
+        hideCountryFreight,
+    } = useCountryFreightModal();
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -179,15 +187,17 @@ const GoodsTable: React.FC<IProps> = ({
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={handleClickOnsale}
-                disabled={disabled}
+                disabled={disabled || !sourceChannel}
             >
                 一键上架
             </Button>,
             <Button
+                ghost
                 key="2"
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={handleClickAllOnsale}
+                disabled={!sourceChannel}
             >
                 查询商品一键上架
             </Button>,
@@ -200,6 +210,7 @@ const GoodsTable: React.FC<IProps> = ({
             >
                 修改商品属性
             </Button>,
+
             <LoadingButton
                 key="3"
                 className={formStyles.formBtn}
@@ -209,7 +220,7 @@ const GoodsTable: React.FC<IProps> = ({
                 删除
             </LoadingButton>,
         ];
-    }, [selectedRowKeys, _getGoodsDelete]);
+    }, [selectedRowKeys, sourceChannel, _getGoodsDelete]);
 
     const handleExportOkey = useCallback(values => {
         return postGoodsExports({
@@ -251,16 +262,6 @@ const GoodsTable: React.FC<IProps> = ({
         setMergeStatus(false);
         setCommodityId('');
         setProductSn('');
-    }, []);
-
-    const showCountryFreight = useCallback(productId => {
-        setCountryFreightStatus(true);
-        setProductId(productId);
-    }, []);
-
-    const hideCountryFreight = useCallback(() => {
-        setCountryFreightStatus(false);
-        setProductId('');
     }, []);
 
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
@@ -434,7 +435,7 @@ const GoodsTable: React.FC<IProps> = ({
                         price_max,
                         shipping_fee_min,
                         shipping_fee_max,
-                        multiple_price,
+                        source_channel,
                         product_id,
                     } = row;
                     return (
@@ -443,7 +444,7 @@ const GoodsTable: React.FC<IProps> = ({
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
-                            {multiple_price ? (
+                            {source_channel !== 'pdd' ? (
                                 <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
                             ) : null}
                         </div>
@@ -654,7 +655,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <CountryFreightModal
                     visible={countryFreightStatus}
-                    productId={productId}
+                    productId={countryFreightId}
                     onCancel={hideCountryFreight}
                 />
                 {GoodsTagsUpdateModal}
@@ -672,6 +673,7 @@ const GoodsTable: React.FC<IProps> = ({
         editGoodsStatus,
         countryFreightStatus,
         modal,
+        toolBarRender,
     ]);
 };
 
