@@ -187,6 +187,7 @@ const PaneSellPrice: React.FC = props => {
                 dataIndex: 'product_tags',
                 align: 'center',
                 width: 120,
+                render: (val: string) => val || '--',
             },
             {
                 title: '爬虫价区间',
@@ -195,7 +196,9 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
                 render: (val: string, record: ISellItem) => {
                     const { max_origin_price } = record;
-                    if (Number(max_origin_price) === 0) {
+                    if (Number(val) === 0 && Number(max_origin_price) === 0) {
+                        return '--';
+                    } else if (Number(max_origin_price) === 0) {
                         return `${val}以上`;
                     }
                     return `${val} - ${max_origin_price}`;
