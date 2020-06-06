@@ -4,23 +4,27 @@
     &-link {
         white-space: normal;
     }
+
     &-card {
-        margin-top: @cardSpacing!important;
+        margin-top: @cardSpacing !important;
     }
 
     &-modal {
         width: 80% !important;
         max-width: 1000px;
+
         &-content {
             height: 500px;
             overflow: auto;
         }
+
         &-close {
             position: absolute;
             right: 0;
             top: 0;
             cursor: pointer;
         }
+
         &-item {
             & ~ & {
                 margin-left: 16px;
@@ -34,14 +38,17 @@
                 text-align: left;
             }
         }
+
         &-specs {
             line-height: 24px !important;
+
             &-value {
                 width: 100px;
                 white-space: normal;
                 text-align: left !important;
                 line-height: 18px;
             }
+
             &-item {
                 & ~ & {
                     margin-top: 5px;
@@ -59,12 +66,14 @@
             height: 80px;
             display: inline-block;
             vertical-align: middle;
+
             &-small {
                 width: 60px;
                 height: 60px;
                 display: inline-block;
             }
         }
+
         &-name {
             width: 160px;
             overflow: hidden;
@@ -78,45 +87,55 @@
         width: 150px;
         font-size: 12px;
         color: #666666;
+
         &s {
             min-height: 30px;
         }
+
         &-value {
             font-weight: bold;
             color: #1890ff;
         }
     }
+
     &-picker {
         width: 196px;
     }
+
     &-form {
         &-label {
             display: inline-block;
             width: 88px;
         }
     }
+
     &-sku-dialog {
         .goods-img {
             float: left;
             width: 100px;
             margin-right: 12px;
         }
+
         .text {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .item {
             margin-bottom: 6px;
+
             .desc {
                 display: inline-block;
                 vertical-align: top;
                 width: 260px;
                 word-break: break-all;
             }
+
             .name {
                 margin-right: 5px;
             }
+
             .center {
                 margin: 0 8px;
             }
