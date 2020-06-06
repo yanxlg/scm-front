@@ -53,28 +53,32 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
         formData.append('card_name', card_name);
         return saveShippingCard(formData).then(res => {
             // console.log('saveShippingCard', res);
-            const { error_list } = res?.data;
-            if (error_list && error_list.length > 0) {
-                notification.warning({
-                    message: '部分导入失败，请重新尝试。',
-                    duration: null,
-                    description: (
-                        <div style={{ maxHeight: 600, overflow: 'auto' }}>
-                            {error_list.map((item: any) => {
-                                const { country_code, error_reason } = item;
-                                return (
-                                    <p>
-                                        {error_reason}-{country_code || ''}
-                                    </p>
-                                );
-                            })}
-                        </div>
-                    ),
-                });
-            } else {
-                message.success(`${freightType === 'add' ? '新增' : '更新'}成功`);
-            }
             handleCancel(true);
+            if (!res.data) {
+                message.success(`${freightType === 'add' ? '新增' : '更新'}成功`);
+            } else {
+                const { error_list } = res.data;
+                if (error_list && error_list.length > 0) {
+                    notification.warning({
+                        message: '部分导入失败，请重新尝试。',
+                        duration: null,
+                        description: (
+                            <div style={{ maxHeight: 600, overflow: 'auto' }}>
+                                {error_list.map((item: any) => {
+                                    const { country_code, error_reason } = item;
+                                    return (
+                                        <p>
+                                            {error_reason}-{country_code || ''}
+                                        </p>
+                                    );
+                                })}
+                            </div>
+                        ),
+                    });
+                } else {
+                    message.success(`${freightType === 'add' ? '新增' : '更新'}成功`);
+                }
+            }
         });
     }, [freightType]);
 
