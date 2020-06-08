@@ -9,7 +9,7 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -18,7 +18,12 @@ import { IPurchaseItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
-import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateType,
+    PurchaseCreateTypeList,
+    PurchaseMap,
+} from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
@@ -51,6 +56,19 @@ const fieldList: FormField[] = [
         label: '商品名称',
         type: 'input',
         name: 'purchase_goods_name',
+    },
+    {
+        label: '采购单类型',
+        type: 'select',
+        name: 'origin',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...PurchaseCreateTypeList,
+        ],
     },
 ];
 
@@ -108,6 +126,9 @@ const Over = () => {
                 ref={formRef}
                 enableCollapse={false}
                 labelClassName={styles.formItem}
+                initialValues={{
+                    origin: '',
+                }}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
@@ -159,17 +180,17 @@ const Over = () => {
                 width: '150px',
                 align: 'center',
                 render: (_, item) => {
+                    const { purchaseGoodsStatus } = item;
+                    // 已完结状态没有操作
                     return {
-                        children: (
-                            <>
-                                <Button type="link" onClick={() => showConnect(item)}>
-                                    关联运单号
-                                </Button>
-                                <Button type="link" onClick={() => applyReturnService(item)}>
-                                    申请退款
-                                </Button>
-                            </>
-                        ),
+                        children:
+                            String(purchaseGoodsStatus) === '7' ? null : (
+                                <>
+                                    <Button type="link" onClick={() => applyReturnService(item)}>
+                                        申请退款
+                                    </Button>
+                                </>
+                            ),
                         props: {
                             rowSpan: item.rowSpan || 0,
                         },
@@ -181,9 +202,16 @@ const Over = () => {
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
+                className: 'break-all',
                 render: (value, row) => {
+                    const { origin = PurchaseCreateType.Auto } = row;
                     return {
-                        children: value,
+                        children: (
+                            <>
+                                {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                                {value}
+                            </>
+                        ),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },

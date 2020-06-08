@@ -2,6 +2,7 @@ import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
 import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
+import { IGood } from '@/interface/ILocalGoods';
 
 export function downloadFile(url: string) {
     const iframe = document.createElement('iframe');
@@ -70,3 +71,27 @@ export const queryGoodsSourceList = singlePromiseWrap(() => {
         return [];
     });
 });
+
+export const queryWarehourseById = (id: string) => {
+    return request.get<
+        IResponse<{
+            address1: string;
+            address2: string;
+            city: string;
+            consignee: string;
+            country: string;
+            country_code: string;
+            phone_number: string;
+            province: string;
+            zip_code: string;
+        }>
+    >(GlobalApiPath.QueryWarehourse.replace(':warehourse_id', id));
+};
+
+export const queryGoodBySkuId = (commodity_sku_id: string) => {
+    return request.post<IResponse<IGood>>(GlobalApiPath.QueryGoodBySkuId, {
+        data: {
+            commodity_sku_id: commodity_sku_id,
+        },
+    });
+};
