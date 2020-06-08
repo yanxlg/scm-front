@@ -31,6 +31,9 @@ const baseGroupList = [
     { key: 'saleMinusPurchaseNormalPrice', name: '销售-采购价差' },
     { key: 'cancelType', name: '子订单取消类型' },
     { key: 'orderAddress', name: '用户地址信息' },
+    { key: 'platformUid', name: '供应商订单号' },
+    { key: 'warehouseId', name: '仓库名称' },
+    { key: 'platformUid', name: '下单账号' },
 ];
 
 const saleGroupList = [

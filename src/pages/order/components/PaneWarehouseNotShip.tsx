@@ -18,6 +18,7 @@ import { TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -59,7 +60,7 @@ const formFields: FormField[] = [
     {
         type: 'select',
         name: 'warehouse_id',
-        label: '仓库ID',
+        label: '仓库名称',
         className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
         optionList: () => getWarehouseList(),
@@ -95,6 +96,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
     const [orderList, setOrderList] = useState<IWarehouseNotShipOrderItem[]>([]);
+    const [warehouseList, setWarehouseList] = useState<IOptionItem[]>([]);
 
     let currentSearchParams: IWarehouseNotShipSearch | null = null;
 
@@ -238,6 +240,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             ...currentSearchParams,
             ...values,
         });
+    }, []);
+
+    const _getWarehouseList = useCallback(() => {
+        getWarehouseList().then(list => setWarehouseList(list));
     }, []);
 
     const search = useMemo(() => {
@@ -468,8 +474,31 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     };
                 },
             },
+            {
+                key: 'referWaybillNo',
+                title: '参考订单号',
+                dataIndex: 'referWaybillNo',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'warehouseId',
+                title: '仓库名称',
+                dataIndex: 'warehouseId',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: getStatusDesc(warehouseList, value),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
         ];
-    }, []);
+    }, [warehouseList]);
 
     const pagination = useMemo(() => {
         return {
@@ -501,6 +530,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
 
     useEffect(() => {
         onSearch();
+        _getWarehouseList();
     }, []);
 
     return useMemo(() => {

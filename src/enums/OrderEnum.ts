@@ -317,7 +317,7 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'warehouse_id',
-        label: '仓库ID',
+        label: '仓库名称',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
         syncDefaultOption: defaultOptionItem1,
