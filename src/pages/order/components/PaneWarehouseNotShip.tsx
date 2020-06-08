@@ -1,15 +1,14 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, Checkbox, Button } from 'antd';
+import { Checkbox, Button } from 'antd';
 import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
+import { defaultOptionItem1 } from '@/enums/OrderEnum';
 import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
 import {
     getWarehouseNotShipList,
-    delChannelOrders,
     postExportWarehouseNotShip,
-    queryChannelSource,
     getPlatformAndStore,
+    getWarehouseList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -50,6 +49,22 @@ const formFields: FormField[] = [
         formatter: 'multipleToArray',
     },
     {
+        type: 'textarea',
+        name: 'refer_waybill_no',
+        label: '参考订单号',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'select',
+        name: 'warehouse_id',
+        label: '仓库ID',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getWarehouseList(),
+    },
+    {
         type: 'select',
         name: 'channel_source',
         label: '销售渠道',
@@ -69,6 +84,7 @@ const formFields: FormField[] = [
 
 const defaultInitialValues = {
     channel_source: '',
+    warehouse_id: '',
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {

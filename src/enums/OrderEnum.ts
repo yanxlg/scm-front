@@ -1,6 +1,11 @@
 import { FormField } from 'react-components/es/JsonForm';
 import { transStatusList, transOptionList } from '@/utils/transform';
-import { queryChannelSource, getPlatformAndStore } from '@/services/order-manage';
+import {
+    queryChannelSource,
+    getPlatformAndStore,
+    getPurchaseUidList,
+    getWarehouseList,
+} from '@/services/order-manage';
 
 declare interface optionItem {
     name: string;
@@ -280,6 +285,15 @@ export const childAllFieldList: FormField[] = [
         placeholder: '请输入',
         formatter: 'multipleToArray',
     },
+    {
+        type: 'textarea',
+        name: 'last_waybill_no',
+        label: '供应商订单号',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
     // {
     //     type: 'select',
     //     name: 'sale_order_status',
@@ -291,6 +305,25 @@ export const childAllFieldList: FormField[] = [
     //         ...orderStatusOptionList
     //     ],
     // },
+    {
+        type: 'select',
+        name: 'platform_uid',
+        label: '下单账号',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPurchaseUidList(),
+    },
+    {
+        type: 'select',
+        name: 'warehouse_id',
+        label: '仓库ID',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getWarehouseList(),
+    },
+
     {
         type: 'select',
         name: 'reserve_status',

@@ -85,6 +85,12 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     align: 'center',
                 },
                 {
+                    title: '入库单ID',
+                    width: '150px',
+                    dataIndex: 'referWaybillNo',
+                    align: 'center',
+                },
+                {
                     title: '商品主图',
                     width: '150px',
                     dataIndex: 'productImageUrl',
@@ -409,6 +415,12 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     formatter: 'multipleToArray',
                 },
                 {
+                    type: 'textarea',
+                    label: '入库单ID',
+                    name: 'refer_waybill_no',
+                    formatter: 'multipleToArray',
+                },
+                {
                     type: 'select',
                     label: '仓库名',
                     name: 'warehouse_id',
@@ -496,6 +508,12 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 type: 'textarea',
                 label: '商品SKU ID',
                 name: 'sku_id',
+                formatter: 'multipleToArray',
+            },
+            {
+                type: 'textarea',
+                label: '参考运单号',
+                name: 'refer_waybill_no',
                 formatter: 'multipleToArray',
             },
             {
