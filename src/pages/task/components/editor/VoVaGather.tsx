@@ -209,30 +209,17 @@ const VoVaGather = () => {
         });
     }, []);
 
-    const onGatherOnOKey = useCallback(() => {
+    const onGatherOnOKey = useCallback((merchant_ids: string[]) => {
         return formRef.current!.validateFields().then(values => {
             const params = convertFormData(values);
-            return queryShopList()
-                .then(({ data = [] }) => {
-                    const merchant = data.find(
-                        ({ merchant_platform }) => merchant_platform === 'florynight',
-                    );
-                    if (merchant) {
-                        return addVoVaTask({
-                            ...params,
-                            is_upper_shelf: true,
-                            merchants_id: merchant.merchant_id,
-                        })
-                            .then(({ data = EmptyObject } = EmptyObject) => {
-                                formRef.current!.resetFields();
-                                showSuccessModal(data);
-                            })
-                            .catch(() => {
-                                showFailureModal();
-                            });
-                    } else {
-                        showFailureModal();
-                    }
+            return addVoVaTask({
+                ...params,
+                is_upper_shelf: true,
+                merchants_id: merchant_ids,
+            })
+                .then(({ data = EmptyObject } = EmptyObject) => {
+                    formRef.current!.resetFields();
+                    showSuccessModal(data);
                 })
                 .catch(() => {
                     showFailureModal();
