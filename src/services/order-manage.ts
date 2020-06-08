@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { GlobalApiPath } from '@/config/api/GlobalApiPath';
+import { GlobalApiPath } from '@/config/api/Global';
 import {
     IPadSimilarBody,
     IWarehouseNotShipSearch,
@@ -250,7 +250,7 @@ export function getReviewOrderList(data: IReviewSearch) {
 }
 
 export async function postExportReview(data: any) {
-    return request.post(GlobalApiPath.downloadExcel, {
+    return request.post(GlobalApiPath.ExportExcel, {
         data,
     });
 }

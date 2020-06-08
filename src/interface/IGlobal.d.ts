@@ -37,6 +37,11 @@ export interface IShopItem {
 
 export type ISHopList = IShopItem[];
 
+export declare interface ICheckedBtnItem {
+    name: string;
+    checked: boolean;
+}
+
 export interface IExportExcelReqData {
     module: number;
     query: any;

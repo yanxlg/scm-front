@@ -2,6 +2,7 @@
 import { EmptyObject } from '@/config/global';
 import { IResponse } from '@/interface/IGlobal';
 import { parse, stringify } from 'querystring';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 function singlePromiseWrap<T, P = any>(promise: (params?: P) => Promise<T>) {
     let syncPromise: Promise<T>;
@@ -101,3 +102,24 @@ export const parseJson = (value: any) => {
 };
 
 export const getPageQuery = () => parse(window.location.href.split('?')[1]);
+
+export const getCurrentOptionList = (
+    allList: IOptionItem[],
+    valueList: Array<string | number>,
+): IOptionItem[] => {
+    let list = [...allList];
+    for (let i = 0, len = valueList.length; i < len; i++) {
+        const currentValue = valueList[i];
+        if (currentValue) {
+            const index = list.findIndex(({ value }) => value === currentValue);
+            if (index > -1) {
+                const children = list[index].children;
+                list = children ? [...children] : [];
+                if (i === len - 1) {
+                    return list;
+                }
+            }
+        }
+    }
+    return [];
+};
