@@ -107,7 +107,7 @@ const CreatePurchase: ForwardRefRenderFunction<CreatePurchaseRef, CreatePurchase
                     layout={'horizontal'}
                     initialValues={{
                         purchase_platform: 'pdd',
-                        warehouse_id: 2, // 默认仓库
+                        warehouse_id: '2', // 默认仓库
                     }}
                     labelClassName={styles.formLabel}
                     className={formStyles.formHelpAbsolute}
