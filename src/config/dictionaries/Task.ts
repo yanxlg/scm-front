@@ -4,12 +4,14 @@ export const TaskChannelMap = {
     '1': '拼多多',
     '2': '1688',
     '3': 'VOVA',
+    '4': 'FD',
 };
 
 export const TaskChannelEnum = {
     PDD: '1',
     1688: '2',
     VOVA: '3',
+    FD: '4',
 };
 
 export type TaskChannelCode = keyof typeof TaskChannelMap;

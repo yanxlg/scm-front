@@ -24,6 +24,7 @@ import { IResponse } from '@/interface/IGlobal';
 import { TaskApiPath } from '@/config/api/TaskApiPath';
 import { EmptyObject } from '@/config/global';
 import { isZero, transPaginationRequest, transPaginationResponse } from '@/utils/utils';
+import { TaskChannelEnum } from '@/config/dictionaries/Task';
 
 export async function getTaskList(query: ITaskListQuery) {
     const params = transPaginationRequest(query);
@@ -202,7 +203,12 @@ export async function addVoVaTask(params: IVoVaTaskBody) {
         data: {
             ...params,
             version: '1.0',
-            platform: 'VOVA',
+            platform:
+                params.channel === TaskChannelEnum.VOVA
+                    ? 'VOVA'
+                    : params.channel === TaskChannelEnum.FD
+                    ? 'FLORYDAY'
+                    : '',
         },
     });
 }
