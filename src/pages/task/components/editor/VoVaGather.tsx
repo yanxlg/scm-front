@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useRef } from 'react';
-import { JsonForm, LoadingButton } from 'react-components';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { JsonForm, LoadingButton, useModal2 } from 'react-components';
 import { FormField } from 'react-components/lib/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
@@ -13,6 +13,10 @@ import { showFailureModal } from '@/pages/task/components/modal/GatherFailureMod
 import { dateToUnix } from 'react-components/es/utils/date';
 import { queryShopList } from '@/services/global';
 import { Store } from 'rc-field-form/es/interface';
+import { TaskChannelEnum } from '@/config/dictionaries/Task';
+import MerchantListModal from '@/pages/goods/components/MerchantListModal';
+import { scrollToFirstError } from '@/utils/common';
+import { Button } from 'antd';
 
 const fieldList: FormField[] = [
     {
@@ -29,38 +33,41 @@ const fieldList: FormField[] = [
     },
     {
         type: 'radioGroup',
-        label: '任务渠道',
-        name: 'platform',
+        label: '采集渠道',
+        name: 'channel',
         options: [
             {
                 label: 'VOVA',
-                value: 'VOVA',
+                value: TaskChannelEnum.VOVA,
             },
             {
                 label: 'FD',
-                value: 'FLORYDAY',
+                value: TaskChannelEnum.FD,
             },
         ],
         rules: [
             {
                 required: true,
-                message: '请选择任务渠道',
+                message: '请选择采集渠道',
             },
         ],
+        onChange: (name, form) => {
+            form.resetFields(['country_code']);
+        },
     },
     {
         type: 'dynamic',
         shouldUpdate: (prevValues: Store, nextValues: Store) => {
-            return prevValues.platform != nextValues.platform;
+            return prevValues.channel !== nextValues.channel;
         },
         dynamic: form => {
-            const platform = form.getFieldValue('platform');
+            const channel = form.getFieldValue('channel');
             return {
                 type: 'checkboxGroup',
                 label: '爬取国家',
                 name: 'country_code',
                 options:
-                    platform === 'VOVA'
+                    channel === TaskChannelEnum.VOVA
                         ? [
                               {
                                   label: 'FR',
@@ -202,7 +209,7 @@ const VoVaGather = () => {
         });
     }, []);
 
-    const onGatherOn = useCallback(() => {
+    const onGatherOnOKey = useCallback(() => {
         return formRef.current!.validateFields().then(values => {
             const params = convertFormData(values);
             return queryShopList()
@@ -233,6 +240,29 @@ const VoVaGather = () => {
         });
     }, []);
 
+    const [merchantModal, showMerchantModal, closeMerchantModal] = useModal2<boolean>();
+
+    const onGatherOn = useCallback(() => {
+        formRef.current!.validateFields().then((values: any) => {
+            showMerchantModal(true);
+        });
+    }, []);
+
+    const modals = useMemo(() => {
+        const { channel } = formRef.current?.getFieldsValue() || {};
+        return (
+            <MerchantListModal
+                visible={merchantModal}
+                onOKey={onGatherOnOKey}
+                onCancel={closeMerchantModal}
+                disabledChannelList={
+                    channel ? (channel === TaskChannelEnum.VOVA ? ['vova'] : ['florynight']) : []
+                }
+                disabledShopList={!channel || channel === TaskChannelEnum.VOVA ? [] : ['SuperAC']}
+            />
+        );
+    }, [merchantModal]);
+
     return useMemo(() => {
         return (
             <>
@@ -243,7 +273,7 @@ const VoVaGather = () => {
                         task_type: TaskExecuteType.once,
                         day: 1,
                         taskIntervalType: TaskIntervalConfigType.day,
-                        platform: 'VOVA',
+                        channel: TaskChannelEnum.VOVA,
                     }}
                     layout="horizontal"
                     className={formStyles.formHelpAbsolute}
@@ -253,13 +283,14 @@ const VoVaGather = () => {
                     <LoadingButton onClick={onGather} type="primary" className="btn-default">
                         开始采集
                     </LoadingButton>
-                    <LoadingButton type="primary" className="btn-default" onClick={onGatherOn}>
+                    <Button type="primary" className="btn-default" onClick={onGatherOn}>
                         一键采集上架
-                    </LoadingButton>
+                    </Button>
                 </div>
+                {modals}
             </>
         );
-    }, []);
+    }, [merchantModal]);
 };
 
 export { VoVaGather };
