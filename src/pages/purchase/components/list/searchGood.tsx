@@ -1,77 +1,85 @@
 import React, { RefObject, useCallback, useMemo, useRef, useState } from 'react';
 import { AutoEnLargeImg, JsonForm, LoadingButton } from 'react-components';
 import classNames from 'classnames';
-import styles from '@/pages/purchase/_return.less';
+import styles from './_searchGood.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
-import { IPurchaseItem } from '@/interface/IPurchase';
-import { queryPurchaseList } from '@/services/purchase';
 import { EmptyObject } from '@/config/global';
-import { message } from 'antd';
-
-const fieldList: FormField[] = [
-    {
-        label: 'SKU ID',
-        type: 'number',
-        name: 'commodity_sku_id',
-        rules: [{ required: true, message: '请填写商品SKU ID' }],
-        /*      formItemClassName: classNames(
-            formStyles.formRequiredHide,
-            formStyles.formRequiredAbsolute,
-            formStyles.formItem,
-        ),*/
-    },
-];
+import { Col, Row } from 'antd';
+import { queryGoodBySkuId } from '@/services/global';
+import { IGood } from '@/interface/ILocalGoods';
 
 declare interface SearchGoodProps {
     formRef?: RefObject<JsonFormRef>;
     containerClassName?: string;
+    onDataChange?: (good: IGood | undefined) => void;
 }
 
-const SearchGood = ({ formRef, containerClassName }: SearchGoodProps) => {
+const SearchGood = ({ formRef, containerClassName, onDataChange }: SearchGoodProps) => {
     const _ref = useRef<JsonFormRef>(null);
     const formRef1 = formRef || _ref;
-    const [goods, setGoods] = useState<IPurchaseItem>();
+    const [good, setGood] = useState<IGood | undefined>();
+
+    const fieldList: FormField[] = useMemo(() => {
+        return [
+            {
+                label: 'SKU ID',
+                type: 'input',
+                name: 'commodity_sku_id',
+                rules: [
+                    { required: true, message: '请填写商品SKU ID' },
+                    {
+                        validator(rule, value) {
+                            if (good) {
+                                return Promise.resolve();
+                            } else {
+                                return Promise.reject('请先校验SKU ID并获取商品信息');
+                            }
+                        },
+                        validateTrigger: 'onSubmit',
+                    },
+                ],
+                onChange: (name, form) => {
+                    setGood(undefined);
+                    onDataChange?.(undefined);
+                },
+                /*      formItemClassName: classNames(
+                    formStyles.formRequiredHide,
+                    formStyles.formRequiredAbsolute,
+                    formStyles.formItem,
+                ),*/
+            },
+        ];
+    }, [good]);
+
     const onSearch = useCallback(() => {
-        return formRef1.current!.validateFields().then(values => {
-            const { purchase_order_goods_id } = values;
-            return queryPurchaseList({
-                type: 0,
-                purchase_order_goods_id: purchase_order_goods_id,
-            })
-                .request()
-                .then(({ data: { list = [] } = EmptyObject }) => {
-                    const item = list[0];
-                    if (item) {
-                        setGoods({
-                            ...item,
-                        });
-                    } else {
-                        message.error('查询不到相关采购单');
-                    }
+        const { commodity_sku_id } = formRef1.current!.getFieldsValue(); // 不校验good
+        if (!commodity_sku_id) {
+            return formRef1.current!.validateFields();
+        } else {
+            return queryGoodBySkuId(commodity_sku_id).then(({ data = EmptyObject }) => {
+                setGood({
+                    ...data,
                 });
-        });
+                onDataChange?.(data);
+            });
+        }
     }, []);
 
     const skuComponent = useMemo(() => {
-        if (goods) {
-            let skus: any[] = [];
-            const { productSkuStyle } = goods;
-            try {
-                const sku = JSON.parse(productSkuStyle);
-                for (let key in sku) {
-                    skus.push(
-                        <div key={key} className={styles.modalSku}>
-                            {key}:{sku[key]}
-                        </div>,
-                    );
-                }
-            } catch (e) {}
-            return skus;
+        if (good) {
+            const { productOptionValue } = good;
+            return productOptionValue.map(option => {
+                return (
+                    <div key={option.option?.text} className={styles.sku}>
+                        {option.option?.text}:{option.value?.text}
+                    </div>
+                );
+            });
         } else {
             return null;
         }
-    }, [goods]);
+    }, [good]);
 
     return useMemo(() => {
         return (
@@ -87,31 +95,31 @@ const SearchGood = ({ formRef, containerClassName }: SearchGoodProps) => {
                         查询
                     </LoadingButton>
                 </JsonForm>
-                {goods ? (
-                    <div className={classNames(formStyles.flex, formStyles.flexRow)}>
+                {good ? (
+                    <div className={classNames(formStyles.flex, formStyles.flexRow, styles.good)}>
                         <div>
-                            <AutoEnLargeImg
-                                src={goods?.productImageUrl}
-                                className={styles.modalImage}
-                            />
+                            <AutoEnLargeImg src={good?.skuImage?.url} className={styles.image} />
                         </div>
                         <div>
-                            <div className={styles.modalTitle} title={goods?.purchaseGoodsName}>
-                                {goods?.purchaseGoodsName}
+                            <div className={styles.title} title={good?.productTitle}>
+                                {good?.productTitle}
                             </div>
-                            <div className={styles.modalSkus}>
-                                <div className={styles.modalSku}>
-                                    入库数量:{goods?.realInStorageNumber ?? 0}/
-                                    {goods?.purchaseGoodsNumber ?? 0}
-                                </div>
-                                {skuComponent}
-                            </div>
+                            <div className={styles.skus}>{skuComponent}</div>
+                            <Row gutter={[15, 0]}>
+                                <Col span={16} title={good?.commodityId}>
+                                    <span className={styles.skuKey}>Commodity ID</span>：
+                                    {good?.commodityId}
+                                </Col>
+                                <Col span={8} title={good?.sku}>
+                                    <span className={styles.skuKey}>SKU ID</span>：{good?.sku}
+                                </Col>
+                            </Row>
                         </div>
                     </div>
                 ) : null}
             </React.Fragment>
         );
-    }, []);
+    }, [good]);
 };
 
 export default SearchGood;
