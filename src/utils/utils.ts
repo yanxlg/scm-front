@@ -95,7 +95,11 @@ export const parseJson = (value: any) => {
     }
     let result = {};
     try {
-        result = JSON.parse(value);
+        let _result = JSON.parse(value);
+        while (typeof _result === 'string') {
+            _result = JSON.parse(_result);
+        }
+        result = _result;
     } catch (e) {}
     return result;
 };
