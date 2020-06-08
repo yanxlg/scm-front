@@ -40,7 +40,7 @@ const formFields: FormField[] = [
         maxTagCount: 4,
         optionList: () => queryShopFilterList(),
         onChange: (name, form) => {
-            form.resetFields(['a3']);
+            form.resetFields(['enable_merchant']);
         },
         formatter: 'join',
     },
@@ -48,7 +48,7 @@ const formFields: FormField[] = [
         type: 'select',
         label: '销售店铺',
         name: 'enable_merchant',
-        optionListDependence: { name: 'a2', key: 'children' },
+        optionListDependence: { name: 'enable_platform', key: 'children' },
         isShortcut: true,
         placeholder: '请选择',
         mode: 'multiple',

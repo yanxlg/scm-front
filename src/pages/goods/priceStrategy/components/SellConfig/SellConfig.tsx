@@ -265,7 +265,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                             name="param_shipping_fee_multiply"
                             rules={[requiredRule]}
                         >
-                            <InputNumber precision={2} min={0.01} />
+                            <InputNumber precision={2} min={0} />
                         </Form.Item>
                     </div>
                     <Form.Item
