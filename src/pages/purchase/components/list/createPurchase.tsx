@@ -41,13 +41,17 @@ const CreatePurchase: ForwardRefRenderFunction<CreatePurchaseRef, CreatePurchase
 ) => {
     const formRef1 = useRef<JsonFormRef>(null);
     const formRef2 = useRef<JsonFormRef>(null);
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState<number | string>(0);
 
     const [address, setAddress] = useState('');
 
     const updateAmount = useCallback(() => {
         const { shop_price, goods_number } = formRef1.current!.getFieldsValue();
-        setAmount(shop_price && goods_number ? shop_price * goods_number : 0);
+        setAmount(
+            shop_price && goods_number
+                ? Number((shop_price * 100 * goods_number) / 100).toFixed(2)
+                : 0,
+        );
     }, []);
 
     const submitForm = useCallback(() => {
