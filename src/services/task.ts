@@ -202,7 +202,6 @@ export async function addVoVaTask(params: IVoVaTaskBody) {
         data: {
             ...params,
             version: '1.0',
-            platform: 'VOVA',
         },
     });
 }

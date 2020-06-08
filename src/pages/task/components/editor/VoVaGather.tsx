@@ -12,6 +12,7 @@ import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessMod
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { dateToUnix } from 'react-components/es/utils/date';
 import { queryShopList } from '@/services/global';
+import { Store } from 'rc-field-form/es/interface';
 
 const fieldList: FormField[] = [
     {
@@ -27,42 +28,117 @@ const fieldList: FormField[] = [
         ],
     },
     {
-        type: 'checkboxGroup',
-        label: '爬取国家',
-        name: 'country_code',
+        type: 'radioGroup',
+        label: '任务渠道',
+        name: 'platform',
         options: [
             {
-                label: 'FR',
-                value: 'FR',
+                label: 'VOVA',
+                value: 'VOVA',
             },
             {
-                label: 'DE',
-                value: 'DE',
-            },
-            {
-                label: 'IT',
-                value: 'IT',
-            },
-            {
-                label: 'GB',
-                value: 'GB',
-            },
-            {
-                label: 'ES',
-                value: 'ES',
-            },
-            {
-                label: 'US',
-                value: 'US',
+                label: 'FD',
+                value: 'FLORYDAY',
             },
         ],
         rules: [
             {
                 required: true,
-                message: '请选择爬取国家',
+                message: '请选择任务渠道',
             },
         ],
     },
+    {
+        type: 'dynamic',
+        shouldUpdate: (prevValues: Store, nextValues: Store) => {
+            return prevValues.platform != nextValues.platform;
+        },
+        dynamic: form => {
+            const platform = form.getFieldValue('platform');
+            return {
+                type: 'checkboxGroup',
+                label: '爬取国家',
+                name: 'country_code',
+                options:
+                    platform === 'VOVA'
+                        ? [
+                              {
+                                  label: 'FR',
+                                  value: 'FR',
+                              },
+                              {
+                                  label: 'DE',
+                                  value: 'DE',
+                              },
+                              {
+                                  label: 'IT',
+                                  value: 'IT',
+                              },
+                              {
+                                  label: 'GB',
+                                  value: 'GB',
+                              },
+                              {
+                                  label: 'ES',
+                                  value: 'ES',
+                              },
+                              {
+                                  label: 'US',
+                                  value: 'US',
+                              },
+                          ]
+                        : [
+                              {
+                                  label: 'DE',
+                                  value: 'DE',
+                              },
+                              {
+                                  label: 'FR',
+                                  value: 'FR',
+                              },
+                              {
+                                  label: 'US',
+                                  value: 'US',
+                              },
+                              {
+                                  label: 'GB',
+                                  value: 'GB',
+                              },
+                              {
+                                  label: 'IT',
+                                  value: 'IT',
+                              },
+                              {
+                                  label: 'SE',
+                                  value: 'SE',
+                              },
+                              {
+                                  label: 'ES',
+                                  value: 'ES',
+                              },
+                              {
+                                  label: 'PL',
+                                  value: 'PL',
+                              },
+                              {
+                                  label: 'DK',
+                                  value: 'DK',
+                              },
+                              {
+                                  label: 'NO',
+                                  value: 'NO',
+                              },
+                          ],
+                rules: [
+                    {
+                        required: true,
+                        message: '请选择爬取国家',
+                    },
+                ],
+            };
+        },
+    },
+
     {
         type: 'component',
         Component: TaskCycle,
@@ -167,6 +243,7 @@ const VoVaGather = () => {
                         task_type: TaskExecuteType.once,
                         day: 1,
                         taskIntervalType: TaskIntervalConfigType.day,
+                        platform: 'VOVA',
                     }}
                     layout="horizontal"
                     className={formStyles.formHelpAbsolute}
