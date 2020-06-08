@@ -21,15 +21,23 @@ interface IProps {
 
 const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameList }) => {
     const [form] = Form.useForm();
+    const [name, setName] = useState('');
     const [filename, setFilename] = useState('');
 
     const handleCancel = useCallback((isRefresh?: boolean) => {
+        setName('');
         setFilename('');
         form.resetFields();
         onCancel(isRefresh);
     }, []);
 
+    const handleInputName = useCallback(e => {
+        // console.log(111111, e.target.value);
+        setName(e.target.value);
+    }, []);
+
     const handleChangeName = useCallback(name => {
+        setName(name);
         getShippingCartDetail(name).then(res => {
             // console.log('res', res);
             const { shipping_card } = res.data;
@@ -113,7 +121,12 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                     rules={[requiredRule]}
                 >
                     {freightType === 'add' ? (
-                        <Input maxLength={32} placeholder="限制32个字符" className={styles.input} />
+                        <Input
+                            maxLength={32}
+                            placeholder="限制32个字符"
+                            className={styles.input}
+                            onChange={handleInputName}
+                        />
                     ) : (
                         <Select
                             placeholder="请选择"
@@ -164,7 +177,11 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                     <TextArea placeholder="此规则仅适用于VOVA-新店铺运营1个月内" />
                 </Form.Item>
                 <div className={styles.btnSave}>
-                    <LoadingButton type="primary" onClick={saveUpload} disabled={!filename}>
+                    <LoadingButton
+                        type="primary"
+                        onClick={saveUpload}
+                        disabled={!name || !filename}
+                    >
                         确认上传
                     </LoadingButton>
                 </div>
