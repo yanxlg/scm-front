@@ -7,6 +7,7 @@ import { message } from 'antd';
 
 // 1--品类预估模板下载，2---运费价卡模板下载
 type IDownloadFileType = '1' | '2';
+import { IGood } from '@/interface/ILocalGoods';
 
 export function downloadFile(url: string) {
     const iframe = document.createElement('iframe');
@@ -105,5 +106,25 @@ export const queryGoodsSourceList = singlePromiseWrap(() => {
 });
 
 export const queryWarehourseById = (id: string) => {
-    return request.get(GlobalApiPath.QueryWarehourse.replace(':warehourse_id', id));
+    return request.get<
+        IResponse<{
+            address1: string;
+            address2: string;
+            city: string;
+            consignee: string;
+            country: string;
+            country_code: string;
+            phone_number: string;
+            province: string;
+            zip_code: string;
+        }>
+    >(GlobalApiPath.QueryWarehourse.replace(':warehourse_id', id));
+};
+
+export const queryGoodBySkuId = (commodity_sku_id: string) => {
+    return request.post<IResponse<IGood>>(GlobalApiPath.QueryGoodBySkuId, {
+        data: {
+            commodity_sku_id: commodity_sku_id,
+        },
+    });
 };

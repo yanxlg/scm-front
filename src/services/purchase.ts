@@ -181,3 +181,17 @@ export function createPurchase(data: {
         },
     });
 }
+
+export function cancelPurchaseByUser(purchase_order_goods_id: string) {
+    return request.delete(PurchaseApiPath.CancelPurchaseByUser, {
+        data: {
+            purchase_order_goods_id: purchase_order_goods_id,
+        },
+    });
+}
+
+export function endPurchaseByUser(purchase_order_goods_id: string) {
+    return request.post(PurchaseApiPath.EndPurchaseByUser, {
+        data: { purchase_order_goods_id },
+    });
+}

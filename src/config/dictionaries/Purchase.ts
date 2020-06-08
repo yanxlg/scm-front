@@ -1,3 +1,5 @@
+import { transOptionList } from '@/utils/transform';
+
 export enum PurchaseReturnType {
     PendingOut = '1',
     PendingReceived = '2',
@@ -23,6 +25,21 @@ export const PurchaseMap = {
     '4': '部分入库',
     '5': '已完结',
     '6': '采购退款',
+    '7': '已取消',
+    '8': '下单失败',
 };
 
 export type PurchaseCode = keyof typeof PurchaseMap;
+
+//////////////////////////////////////////////
+export enum PurchaseCreateType {
+    Auto = '1',
+    Manually = '2',
+}
+export const PurchaseCreateTypeMap = {
+    '1': '系统创建',
+    '2': '手动创建',
+};
+
+export type PurchaseCreateTypeCode = keyof typeof PurchaseCreateTypeMap;
+export const PurchaseCreateTypeList = transOptionList(PurchaseCreateTypeMap);
