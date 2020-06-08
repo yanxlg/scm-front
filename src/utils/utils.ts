@@ -96,10 +96,10 @@ export const parseJson = (value: any) => {
     let result = {};
     try {
         let _result = JSON.parse(value);
-        while (typeof _result === 'string') {
+        while (typeof _result === 'string' && _result) {
             _result = JSON.parse(_result);
         }
-        result = _result;
+        result = typeof _result === 'object' ? _result : {};
     } catch (e) {}
     return result;
 };
