@@ -142,6 +142,7 @@ export interface IGoodsVersionItem {
     shipping_fee_max: string;
     commodity_id?: string;
     _update_time?: string;
+    source_channel: string;
 }
 
 export type IGoodsVersionAndSkuItem = IGoodsVersionItem & IGoodsVersionSkuItem;
