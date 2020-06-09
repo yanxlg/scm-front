@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useRef } from 'react';
-import { JsonForm, LoadingButton } from 'react-components';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { JsonForm, LoadingButton, useModal2 } from 'react-components';
 import { FormField } from 'react-components/lib/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
@@ -12,6 +12,11 @@ import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessMod
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { dateToUnix } from 'react-components/es/utils/date';
 import { queryShopList } from '@/services/global';
+import { Store } from 'rc-field-form/es/interface';
+import { TaskChannelEnum } from '@/config/dictionaries/Task';
+import MerchantListModal from '@/pages/goods/components/MerchantListModal';
+import { scrollToFirstError } from '@/utils/common';
+import { Button } from 'antd';
 
 const fieldList: FormField[] = [
     {
@@ -27,42 +32,120 @@ const fieldList: FormField[] = [
         ],
     },
     {
-        type: 'checkboxGroup',
-        label: '爬取国家',
-        name: 'country_code',
+        type: 'radioGroup',
+        label: '采集渠道',
+        name: 'channel',
         options: [
             {
-                label: 'FR',
-                value: 'FR',
+                label: 'VOVA',
+                value: TaskChannelEnum.VOVA,
             },
             {
-                label: 'DE',
-                value: 'DE',
-            },
-            {
-                label: 'IT',
-                value: 'IT',
-            },
-            {
-                label: 'GB',
-                value: 'GB',
-            },
-            {
-                label: 'ES',
-                value: 'ES',
-            },
-            {
-                label: 'US',
-                value: 'US',
+                label: 'FD',
+                value: TaskChannelEnum.FD,
             },
         ],
         rules: [
             {
                 required: true,
-                message: '请选择爬取国家',
+                message: '请选择采集渠道',
             },
         ],
+        onChange: (name, form) => {
+            form.resetFields(['country_code']);
+        },
     },
+    {
+        type: 'dynamic',
+        shouldUpdate: (prevValues: Store, nextValues: Store) => {
+            return prevValues.channel !== nextValues.channel;
+        },
+        dynamic: form => {
+            const channel = form.getFieldValue('channel');
+            return {
+                type: 'checkboxGroup',
+                label: '爬取国家',
+                name: 'country_code',
+                options:
+                    channel === TaskChannelEnum.VOVA
+                        ? [
+                              {
+                                  label: 'FR',
+                                  value: 'FR',
+                              },
+                              {
+                                  label: 'DE',
+                                  value: 'DE',
+                              },
+                              {
+                                  label: 'IT',
+                                  value: 'IT',
+                              },
+                              {
+                                  label: 'GB',
+                                  value: 'GB',
+                              },
+                              {
+                                  label: 'ES',
+                                  value: 'ES',
+                              },
+                              {
+                                  label: 'US',
+                                  value: 'US',
+                              },
+                          ]
+                        : [
+                              {
+                                  label: 'DE',
+                                  value: 'DE',
+                              },
+                              {
+                                  label: 'FR',
+                                  value: 'FR',
+                              },
+                              {
+                                  label: 'US',
+                                  value: 'US',
+                              },
+                              {
+                                  label: 'GB',
+                                  value: 'GB',
+                              },
+                              {
+                                  label: 'IT',
+                                  value: 'IT',
+                              },
+                              {
+                                  label: 'SE',
+                                  value: 'SE',
+                              },
+                              {
+                                  label: 'ES',
+                                  value: 'ES',
+                              },
+                              {
+                                  label: 'PL',
+                                  value: 'PL',
+                              },
+                              {
+                                  label: 'DK',
+                                  value: 'DK',
+                              },
+                              {
+                                  label: 'NO',
+                                  value: 'NO',
+                              },
+                          ],
+                rules: [
+                    {
+                        required: true,
+                        message: '请选择爬取国家',
+                    },
+                ],
+            };
+        },
+    },
+
     {
         type: 'component',
         Component: TaskCycle,
@@ -126,36 +209,46 @@ const VoVaGather = () => {
         });
     }, []);
 
-    const onGatherOn = useCallback(() => {
+    const onGatherOnOKey = useCallback((merchant_ids: string[]) => {
         return formRef.current!.validateFields().then(values => {
             const params = convertFormData(values);
-            return queryShopList()
-                .then(({ data = [] }) => {
-                    const merchant = data.find(
-                        ({ merchant_platform }) => merchant_platform === 'florynight',
-                    );
-                    if (merchant) {
-                        return addVoVaTask({
-                            ...params,
-                            is_upper_shelf: true,
-                            merchants_id: merchant.merchant_id,
-                        })
-                            .then(({ data = EmptyObject } = EmptyObject) => {
-                                formRef.current!.resetFields();
-                                showSuccessModal(data);
-                            })
-                            .catch(() => {
-                                showFailureModal();
-                            });
-                    } else {
-                        showFailureModal();
-                    }
+            return addVoVaTask({
+                ...params,
+                is_upper_shelf: true,
+                merchants_id: merchant_ids,
+            })
+                .then(({ data = EmptyObject } = EmptyObject) => {
+                    formRef.current!.resetFields();
+                    showSuccessModal(data);
                 })
                 .catch(() => {
                     showFailureModal();
                 });
         });
     }, []);
+
+    const [merchantModal, showMerchantModal, closeMerchantModal] = useModal2<boolean>();
+
+    const onGatherOn = useCallback(() => {
+        formRef.current!.validateFields().then((values: any) => {
+            showMerchantModal(true);
+        });
+    }, []);
+
+    const modals = useMemo(() => {
+        const { channel } = formRef.current?.getFieldsValue() || {};
+        return (
+            <MerchantListModal
+                visible={merchantModal}
+                onOKey={onGatherOnOKey}
+                onCancel={closeMerchantModal}
+                disabledChannelList={
+                    channel ? (channel === TaskChannelEnum.VOVA ? ['vova'] : ['florynight']) : []
+                }
+                disabledShopList={!channel || channel === TaskChannelEnum.VOVA ? [] : ['SuperAC']}
+            />
+        );
+    }, [merchantModal]);
 
     return useMemo(() => {
         return (
@@ -167,6 +260,7 @@ const VoVaGather = () => {
                         task_type: TaskExecuteType.once,
                         day: 1,
                         taskIntervalType: TaskIntervalConfigType.day,
+                        channel: TaskChannelEnum.VOVA,
                     }}
                     layout="horizontal"
                     className={formStyles.formHelpAbsolute}
@@ -176,13 +270,14 @@ const VoVaGather = () => {
                     <LoadingButton onClick={onGather} type="primary" className="btn-default">
                         开始采集
                     </LoadingButton>
-                    <LoadingButton type="primary" className="btn-default" onClick={onGatherOn}>
+                    <Button type="primary" className="btn-default" onClick={onGatherOn}>
                         一键采集上架
-                    </LoadingButton>
+                    </Button>
                 </div>
+                {modals}
             </>
         );
-    }, []);
+    }, [merchantModal]);
 };
 
 export { VoVaGather };
