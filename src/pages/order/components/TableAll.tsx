@@ -496,7 +496,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // 勾选展示
         {
             key: 'purchasePlatformOrderId',
-            title: '采购订单ID',
+            title: '供应商订单ID',
             dataIndex: 'purchasePlatformOrderId',
             align: 'center',
             width: 120,

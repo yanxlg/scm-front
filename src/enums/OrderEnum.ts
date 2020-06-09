@@ -287,8 +287,8 @@ export const childAllFieldList: FormField[] = [
     },
     {
         type: 'textarea',
-        name: 'last_waybill_no',
-        label: '供应商订单号',
+        name: 'purchase_platform_order_id',
+        label: '供应商订单ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
         placeholder: '请输入',
