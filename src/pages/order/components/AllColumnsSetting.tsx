@@ -31,7 +31,6 @@ const baseGroupList = [
     { key: 'saleMinusPurchaseNormalPrice', name: '销售-采购价差' },
     { key: 'cancelType', name: '子订单取消类型' },
     { key: 'orderAddress', name: '用户地址信息' },
-    { key: 'platformUid', name: '供应商订单号' },
     { key: 'warehouseId', name: '仓库名称' },
     { key: 'platformUid', name: '下单账号' },
 ];
@@ -59,7 +58,7 @@ const purchaseGroupList = [
     { key: 'purchaseFailCode', name: '失败原因' },
     { key: 'purchaseCreateTime', name: '采购订单生成时间' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
-    { key: 'purchasePlatformOrderId', name: '采购订单ID' },
+    { key: 'purchasePlatformOrderId', name: '供应商订单ID' },
     // { key: '', name: '采购渠道订单ID' },
     { key: 'purchaseOrderPayStatus', name: '采购支付状态' },
     { key: 'payTime', name: '采购支付时间' },
