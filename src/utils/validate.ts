@@ -15,8 +15,9 @@ export function validateRange(
 ) {
     const min = getFieldValue(minName);
     const max = getFieldValue(maxName);
+    // console.log('aaaaaa', min, max);
     const typeList = [null, undefined, ''];
-    if (typeList.indexOf(min) === -1 && typeList.indexOf(max) === -1 && min > max) {
+    if (typeList.indexOf(min) === -1 && typeList.indexOf(max) === -1 && Number(min) > Number(max)) {
         return Promise.reject('请检查区间!');
     }
     return Promise.resolve();
