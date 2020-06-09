@@ -118,12 +118,13 @@ const StockControl: React.FC = () => {
                 formatter: ['start_date', 'end_date'],
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '中台商品ID',
                 name: 'commodity_id',
+                formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '商品SKU ID',
                 name: 'commodity_sku_id',
                 formatter: 'multipleToArray',

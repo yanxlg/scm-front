@@ -40,12 +40,12 @@ const formFields: FormField[] = [
         formatter: ['start_date', 'end_date'],
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'order_goods_id',
         label: '子订单ID',
         className: 'order-input-review',
-        placeholder: '请输入子订单ID',
-        formatter: 'number_str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
         type: 'select',
@@ -65,12 +65,12 @@ const formFields: FormField[] = [
             }),
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'channel_order_goods_sn',
         label: '销售订单ID',
         className: 'order-input-review',
-        placeholder: '请输入销售订单ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
 ];
 

@@ -62,4 +62,6 @@ export enum OrderApiPath {
     QueryShopList = '/api/v1/vova_goods/store_list',
     QueryPendingCount = '/api/v1/orders/pendding_count',
     QueryTakeOrders = '/api/v1/orders/purchase_log',
+    getPurchaseUidList = '/api/v1/orders/get_purchase_uid_list',
+    getWarehouseList = '/api/v1/orders/get_warhouse_list',
 }
