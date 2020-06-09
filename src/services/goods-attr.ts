@@ -68,7 +68,7 @@ export async function getInterceptTagList() {
 export async function setInterceptTagList(
     data: Array<{
         keywords: string;
-        type: 0 | 1 | 2;
+        type?: 0 | 1 | 2;
     }>,
 ) {
     return request.post<IResponse<any>>(GoodsAttrApiPath.setInterceptTagList, {
