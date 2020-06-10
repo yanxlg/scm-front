@@ -35,7 +35,7 @@ const { Paragraph } = Typography;
 const fieldList: FormField[] = [
     {
         label: '采购单ID',
-        type: 'input',
+        type: 'positiveInteger',
         name: 'purchase_order_goods_id',
     },
     {
