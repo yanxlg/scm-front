@@ -69,11 +69,12 @@ const PaneErrTab = () => {
     const fieldList: FormField[] = useMemo(() => {
         return [
             {
-                type: 'number',
+                type: 'textarea',
                 name: 'order_goods_id',
                 label: '订单号',
                 className: 'order-input',
-                placeholder: '请输入订单号',
+                placeholder: '请输入',
+                formatter: 'multipleToArray',
             },
             {
                 type: 'select',

@@ -40,6 +40,8 @@ export type ISHopList = IShopItem[];
 export declare interface ICheckedBtnItem {
     name: string;
     checked: boolean;
+    originChecked?: boolean;
+    type?: 0 | 1 | 2;
 }
 
 export interface IExportExcelReqData {

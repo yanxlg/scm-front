@@ -326,19 +326,19 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                                 </div>
                                 <div className="item">
                                     <div className="desc">
-                                        <span className="float-left">Product ID:</span>
+                                        <span className="float-left name">Product ID:</span>
                                         <div className="overflow-hidden">
                                             {goodsDetail.product_id}
                                         </div>
                                     </div>
                                     <div className="desc center">
-                                        <span className="float-left">中台商品ID:</span>
+                                        <span className="float-left name">中台商品ID:</span>
                                         <div className="overflow-hidden">
                                             {goodsDetail.commodity_id}
                                         </div>
                                     </div>
                                     <div className="desc">
-                                        <span className="float-left">爬虫商品 id:</span>
+                                        <span className="float-left name">爬虫商品 id:</span>
                                         <div className="overflow-hidden">
                                             {goodsDetail.spider_product_id}
                                         </div>
@@ -346,19 +346,19 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                                 </div>
                                 <div className="item">
                                     <div className="desc">
-                                        <span className="float-left">一级分类:</span>
+                                        <span className="float-left name">一级分类:</span>
                                         <div className="overflow-hidden">
                                             {goodsDetail.category_level_1}
                                         </div>
                                     </div>
                                     <div className="desc center">
-                                        <span className="float-left">二级分类:</span>
+                                        <span className="float-left name">二级分类:</span>
                                         <div className="overflow-hidden">
                                             {goodsDetail.category_level_2}
                                         </div>
                                     </div>
                                     <div className="desc">
-                                        <span className="float-left">三级分类:</span>
+                                        <span className="float-left name">三级分类:</span>
                                         <div className="overflow-hidden">
                                             {goodsDetail.category_level_3}
                                         </div>

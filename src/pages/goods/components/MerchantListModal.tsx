@@ -86,6 +86,11 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
         return platformArr;
     }, [list, loading, disabledChannelList, disabledShopList]);
 
+    const onCancelFunc = useCallback(() => {
+        onCancel();
+        form.resetFields();
+    }, []);
+
     const onOKeyFunc = useCallback(() => {
         form.validateFields().then(({ merchant_ids }) => {
             setConfirmLoading(true);
@@ -106,7 +111,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                 title="请选择上架店铺"
                 className={styles.merchantModal}
                 onOk={onOKeyFunc}
-                onCancel={onCancel}
+                onCancel={onCancelFunc}
                 confirmLoading={confirmLoading}
             >
                 <Spin spinning={loading} tip="加载中...">
