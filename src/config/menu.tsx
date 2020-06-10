@@ -75,6 +75,10 @@ export default [
                 name: '商品版本更新',
                 hideInMenu: true,
             },
+            {
+                path: '/goods/priceStrategy',
+                name: '定价策略',
+            },
         ],
     },
     {

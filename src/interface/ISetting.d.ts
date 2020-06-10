@@ -60,11 +60,6 @@ export declare interface IAttrItem {
     description: string;
 }
 
-export declare interface IPublishInterceptItem {
-    name: string;
-    checked: boolean;
-}
-
 export interface ICookieItem {
     account_id: string;
     phone: string;
