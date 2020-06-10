@@ -148,13 +148,13 @@ const columns: ColumnsType<object> = [
         align: 'center',
     },
     {
-        width: 120,
+        width: 150,
         title: '平均在售商品数',
         dataIndex: 'onsaleGoodsNum',
         align: 'center',
     },
     {
-        width: 120,
+        width: 150,
         title: '平均有销量商品数',
         dataIndex: 'saledGoodsNum',
         align: 'center',
@@ -162,19 +162,20 @@ const columns: ColumnsType<object> = [
     {
         width: 120,
         title: '动销率',
-        dataIndex: 'a0',
+        dataIndex: 'pinRate',
         align: 'center',
+        render: (val: string) => `${val}%`,
     },
     {
         width: 120,
         title: '上架商品数',
-        dataIndex: 'a1',
+        dataIndex: 'publishedGoodsNum',
         align: 'center',
     },
     {
         width: 120,
         title: '下架商品数',
-        dataIndex: 'a2',
+        dataIndex: 'unpublishedGoodsNum',
         align: 'center',
     },
 ];
