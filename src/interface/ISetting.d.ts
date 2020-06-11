@@ -184,3 +184,27 @@ export interface ReplaceItem {
         sku_inventory: string;
     };
 }
+
+export interface IGetStoreBlacklistReq {
+    purchase_channel: string;
+    merchant_id?: string[];
+}
+
+export interface IStoreBlacklistItem {
+    merchant_id: string;
+    purchase_channel: string;
+    operator: string;
+    created_time: string;
+    black_store_reason: string;
+}
+
+export interface ISaveBlackStoreReq {
+    purchase_channel: string;
+    merchant_id: string[];
+    black_store_reason: string;
+}
+
+export interface IDeleteBlackStoreReq {
+    purchase_channel: string;
+    merchant_id: string[];
+}
