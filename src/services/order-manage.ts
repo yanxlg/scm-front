@@ -12,12 +12,14 @@ import {
     IChannelSourceResponse,
     IReviewSearch,
     IPlatformItem,
+    IPurchaseLog,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
-import { IResponse } from '@/interface/IGlobal';
+import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 // import { ISHopList } from '@/interface/IChannel';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
+import Order from '@/pages/order';
 
 export declare interface IFilterParams {
     page?: number;
@@ -291,5 +293,46 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
             list.push(item);
         });
         return list;
+    });
+});
+
+export const queryPendingCount = () => {
+    return request.get<
+        IResponse<{
+            penddingFailOrderCount: number;
+            penddingOrderCount: number;
+            samePenddingOrderCount: number;
+            waitPenddingOrderCount: number;
+        }>
+    >(OrderApiPath.QueryPendingCount);
+};
+
+export const queryTakeOrders = () => {
+    return request.get<
+        IResponse<{
+            data: Array<IPurchaseLog>;
+        }>
+    >(OrderApiPath.QueryTakeOrders);
+};
+
+export const getPurchaseUidList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.getPurchaseUidList).then(({ data: { data } }) => {
+        if (data && data.length) {
+            return data.map(({ name, platform_uid }: any) => ({
+                name,
+                value: platform_uid,
+            }));
+        }
+
+        return [];
+    });
+});
+
+export const getWarehouseList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.getWarehouseList).then(({ data }) => {
+        return Object.keys(data).map(key => ({
+            name: data[key],
+            value: key,
+        }));
     });
 });
