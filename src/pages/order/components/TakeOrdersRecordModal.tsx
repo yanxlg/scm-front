@@ -66,7 +66,7 @@ const TakeOrdersRecordModal = ({ visible, onClose }: TakeOrdersRecordModalProps)
                             align: 'center',
                         },
                         {
-                            title: '代拍单',
+                            title: '待拍单',
                             dataIndex: 'needPurchase',
                             width: 100,
                             align: 'center',
