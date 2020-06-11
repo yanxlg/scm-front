@@ -2,9 +2,9 @@ import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
 import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
-import { IGood } from '@/interface/ILocalGoods';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
+import { IGood } from '@/interface/ILocalGoods';
 
 // 1--品类预估模板下载，2---运费价卡模板下载
 type IDownloadFileType = '1' | '2';
