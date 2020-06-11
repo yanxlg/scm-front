@@ -1,29 +1,30 @@
-import React, { useMemo, useRef, useCallback, useState, ReactText } from 'react';
+import React, { useMemo, useRef, useCallback, useState, ReactText, useEffect } from 'react';
 import { Button } from 'antd';
 import Container from '@/components/Container';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
-import { defaultOption } from '@/enums/LocalGoodsEnum';
 import { queryGoodsSourceList } from '@/services/global';
-import { getGoodsList } from '@/services/goods';
 import { PlusCircleOutlined } from '@ant-design/icons';
+import { getStoreBlacklist, deleteBlackStore, saveBlackStore } from '@/services/setting';
 
 import styles from './_shopBlacklist.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ColumnsType } from 'antd/lib/table';
+import { ISaveBlackStoreReq } from '@/interface/ISetting';
+import { utcToLocal } from 'react-components/src/utils/date';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { getStatusDesc } from '@/utils/transform';
 
 const formFields1: FormField[] = [
     {
         type: 'select',
-        name: 'a1',
+        name: 'purchase_channel',
         label: '采购渠道',
-        syncDefaultOption: defaultOption,
-        defaultValue: '',
         optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'textarea',
-        name: 'a2',
+        name: 'merchant_id',
         label: '店铺ID',
         placeholder: '请输入',
         formatter: 'multipleToArray',
@@ -33,16 +34,14 @@ const formFields1: FormField[] = [
 const formFields2: FormField[] = [
     {
         type: 'select',
-        name: 'a1',
+        name: 'purchase_channel',
         label: '采购渠道',
-        // syncDefaultOption: defaultOption,
-        defaultValue: '1',
         optionList: () => queryGoodsSourceList(),
         rules: [{ required: true }],
     },
     {
         type: 'textarea',
-        name: 'a2',
+        name: 'merchant_id',
         label: '店铺ID',
         placeholder: '请输入',
         formatter: 'multipleToArray',
@@ -50,7 +49,7 @@ const formFields2: FormField[] = [
     },
     {
         type: 'textarea',
-        name: 'a3',
+        name: 'black_store_reason',
         label: '拉给原因',
         placeholder: '请输入',
         className: styles.reason,
@@ -62,6 +61,7 @@ const ShopBlacklist: React.FC = props => {
     const form1 = useRef<JsonFormRef>(null);
     const form2 = useRef<JsonFormRef>(null);
     const [addStatus, setAddStatus] = useState(false);
+    const [purchaseChannelList, setPurchaseChannelList] = useState<IOptionItem[]>([]);
     const {
         loading,
         pageNumber,
@@ -69,15 +69,18 @@ const ShopBlacklist: React.FC = props => {
         total,
         dataSource,
         selectedRowKeys,
-        queryRef,
         setSelectedRowKeys,
         onReload,
         onSearch,
         onChange,
     } = useList({
         formRef: form1,
-        queryList: getGoodsList,
+        queryList: getStoreBlacklist,
     });
+
+    useEffect(() => {
+        queryGoodsSourceList().then(list => setPurchaseChannelList(list));
+    }, []);
 
     const showAddConfig = useCallback(() => {
         setAddStatus(true);
@@ -88,7 +91,23 @@ const ShopBlacklist: React.FC = props => {
     }, []);
 
     const delShop = useCallback(() => {
-        return Promise.resolve();
+        return deleteBlackStore({
+            purchase_channel: form1.current?.getFieldsValue()?.purchase_channel,
+            merchant_id: selectedRowKeys,
+        }).then(res => {
+            onReload();
+        });
+    }, [selectedRowKeys]);
+
+    const saveShop = useCallback(async () => {
+        const data = (await form2.current?.validateFields()) as ISaveBlackStoreReq;
+        return saveBlackStore(data).then(res => {
+            form1.current?.setFieldsValue({
+                purchase_channel: data.purchase_channel,
+            });
+            onSearch();
+            setAddStatus(false);
+        });
     }, []);
 
     const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
@@ -97,7 +116,7 @@ const ShopBlacklist: React.FC = props => {
 
     const searchNode = useMemo(() => {
         return (
-            <JsonForm ref={form1} fieldList={formFields1}>
+            <JsonForm ref={form1} fieldList={formFields1} initialValues={{ purchase_channel: '1' }}>
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
@@ -107,6 +126,7 @@ const ShopBlacklist: React.FC = props => {
                         type="primary"
                         className={formStyles.formBtn}
                         onClick={delShop}
+                        disabled={selectedRowKeys.length === 0}
                     >
                         删除
                     </LoadingButton>
@@ -121,17 +141,21 @@ const ShopBlacklist: React.FC = props => {
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [selectedRowKeys]);
 
     const addNode = useMemo(() => {
         return (
             <div className={styles.add}>
-                <JsonForm ref={form2} fieldList={formFields2}>
+                <JsonForm
+                    ref={form2}
+                    fieldList={formFields2}
+                    initialValues={{ purchase_channel: '1' }}
+                >
                     <div>
                         <LoadingButton
                             type="primary"
                             className={formStyles.formBtn}
-                            onClick={onSearch}
+                            onClick={saveShop}
                         >
                             保存
                         </LoadingButton>
@@ -165,34 +189,36 @@ const ShopBlacklist: React.FC = props => {
                 title: '采购渠道',
                 align: 'center',
                 width: 200,
-                dataIndex: 'a1',
+                dataIndex: 'purchase_channel',
+                render: (val: string) => getStatusDesc(purchaseChannelList, val),
             },
             {
                 title: '店铺ID',
                 align: 'center',
                 width: 200,
-                dataIndex: 'a2',
+                dataIndex: 'merchant_id',
             },
             {
                 title: '拉黑原因',
                 align: 'center',
                 width: 200,
-                dataIndex: 'a3',
+                dataIndex: 'black_store_reason',
             },
             {
                 title: '拉黑时间',
                 align: 'center',
                 width: 200,
-                dataIndex: 'a4',
+                dataIndex: 'created_time',
+                render: (val: string) => utcToLocal(val),
             },
             {
                 title: '操作人',
                 align: 'center',
                 width: 200,
-                dataIndex: 'a5',
+                dataIndex: 'operator',
             },
         ];
-    }, []);
+    }, [purchaseChannelList]);
 
     const rowSelection = useMemo(() => {
         return {
@@ -215,7 +241,7 @@ const ShopBlacklist: React.FC = props => {
             {addStatus ? addNode : null}
             <FitTable
                 bordered
-                // rowKey="purchase_plan_id"
+                rowKey="merchant_id"
                 loading={loading}
                 columns={columns}
                 rowSelection={rowSelection}
