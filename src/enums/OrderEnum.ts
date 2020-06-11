@@ -124,6 +124,11 @@ export const FinalCancelMap = {
     '1002': '拍单超时',
     '888': '中台商品缺失',
     '-100': '采购价异常',
+    '10011': '不可合并',
+    '10012': '海淘商品',
+    '10013': '预售商品',
+    '10014': '关键字拦截',
+    other_failed_reason: '未知原因',
 };
 
 export const finalCancelStatusList = transOptionList(FinalCancelMap);
