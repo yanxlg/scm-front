@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getCatagoryList } from '@/services/goods';
 
 export default function useGoodsCatagory() {
