@@ -783,7 +783,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '商品名称',
                         dataIndex: 'productName',
                         align: 'center',
-                        width: 120,
+                        width: 200,
                         render: (value, row) => {
                             const { productId } = row;
                             return {
@@ -1014,7 +1014,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                             const purchaseOrderStatus = row.purchaseOrderStatus;
                             return (
                                 <div>
-                                    <div>{reasonStr}</div>
+                                    <div>{reasonStr || '未知原因'}</div>
                                     {purchaseOrderStatus === 7 && (
                                         <div>
                                             {status === 0 ? (
@@ -1066,7 +1066,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '商品名称',
                         dataIndex: 'productName',
                         align: 'center',
-                        width: 120,
+                        width: 200,
                         render: (value, row) => {
                             const { productId } = row;
                             return {
@@ -1238,7 +1238,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '商品名称',
                         dataIndex: 'productName',
                         align: 'center',
-                        width: 120,
+                        width: 200,
                         render: (value, row) => {
                             const { productId } = row;
                             return {
