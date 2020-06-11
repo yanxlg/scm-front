@@ -2,7 +2,12 @@ import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react'
 import { Button, notification } from 'antd';
 import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
+import {
+    defaultOptionItem,
+    channelOptionList,
+    defaultOptionItem1,
+    purchaseReserveOptionList,
+} from '@/enums/OrderEnum';
 import { IWaitShipSearch, IWaitShipOrderItem } from '@/interface/IOrder';
 import {
     getWaitShipList,
@@ -11,6 +16,7 @@ import {
     postExportWaitShip,
     queryChannelSource,
     getPlatformAndStore,
+    queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -24,6 +30,7 @@ import { TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
+import styles from '@/pages/order/components/_pending.less';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -31,66 +38,75 @@ declare interface IProps {
 
 const formFields: FormField[] = [
     {
+        type: 'select',
+        name: 'product_shop',
+        label: '销售店铺名称',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () =>
+            queryShopList().then(({ data = [] }) => {
+                return data.map((item: any) => {
+                    const { merchant_name } = item;
+                    return {
+                        name: merchant_name,
+                        value: merchant_name,
+                    };
+                });
+            }),
+    },
+    {
+        type: 'select',
+        name: 'reserve_status',
+        label: '仓库库存预定状态',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...purchaseReserveOptionList],
+    },
+    {
         type: 'textarea',
         name: 'order_goods_id',
-        label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
+        label: <span>子订单ID</span>,
         className: 'order-input',
         placeholder: '请输入',
         formatter: 'multipleToArray',
     },
     {
         type: 'textarea',
-        name: 'purchase_platform_order_id_list',
-        label: '采购平台订单ID',
+        name: 'commodity_id',
+        label: 'Commodity ID',
         className: 'order-input',
         placeholder: '请输入',
         formatter: 'multipleToArray',
     },
     {
         type: 'textarea',
-        name: 'product_id',
-        label: '中台商品ID',
+        name: 'purchase_platform_order_id',
+        label: '供应商订单ID',
         className: 'order-input',
         placeholder: '请输入',
         formatter: 'multipleToArray',
-    },
-    {
-        type: 'select',
-        name: 'channel_source',
-        label: '销售渠道',
-        className: 'order-input',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
-    },
-    {
-        type: 'select',
-        name: 'order_goods_status',
-        label: '中台订单状态',
-        className: 'order-input',
-        optionList: [defaultOptionItem, ...orderStatusOptionList],
-    },
-    {
-        type: 'select',
-        name: 'purchase_order_status',
-        label: '采购计划状态',
-        className: 'order-input',
-        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
     },
     {
         type: 'dateRanger',
-        name: ['platform_order_time_start', 'platform_order_time_end'],
-        label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
+        name: ['order_create_time_start', 'order_create_time_end'],
+        label: '订单生成时间',
         className: 'order-date-picker',
         // placeholder: '请选择订单时间',
         formatter: ['start_date', 'end_date'],
     },
     {
         type: 'dateRanger',
-        name: ['order_create_time_start', 'order_create_time_end'],
-        label: <span>订&nbsp;单&nbsp;时&nbsp;间</span>,
-        className: 'order-date-picker',
-        // placeholder: '请选择订单时间',
+        name: ['purchase_plan_create_time_start', 'purchase_plan_create_time_end'],
+        label: '供应商订单生成时间',
+        placeholder: '请选择订单时间',
+        formatter: ['start_date', 'end_date'],
+        className: styles.formPicker,
+    },
+    {
+        type: 'dateRanger',
+        name: ['pay_time_start', 'pay_time_end'],
+        label: '支付时间',
+        className: 'order-all-date-picker',
+        // formItemClassName: 'order-form-item',
         formatter: ['start_date', 'end_date'],
     },
 ];
