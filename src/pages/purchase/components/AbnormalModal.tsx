@@ -103,7 +103,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="reject_count"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>拒收数量：</span>}
+                                label={<span className={styles.label}>拒收数量</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -116,7 +116,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="receive_name"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>收货人：</span>}
+                                label={<span className={styles.label}>收货人</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -125,7 +125,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="receive_tel"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>手机号：</span>}
+                                label={<span className={styles.label}>手机号</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -134,7 +134,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="receive_address"
                                 className={styles.cascaderBox}
-                                label={<span className={styles.label}>地址信息：</span>}
+                                label={<span className={styles.label}>地址信息</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -142,7 +142,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             </Form.Item>
                             <Form.Item
                                 name="receive_address_detail"
-                                label={<span className={styles.label}>详细地址：</span>}
+                                label={<span className={styles.label}>详细地址</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -151,7 +151,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="zip_code"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>邮政编码：</span>}
+                                label={<span className={styles.label}>邮政编码</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -165,7 +165,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="waybill_no"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>运单号：</span>}
+                                label={<span className={styles.label}>运单号</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -174,7 +174,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="purchase_shipping_name"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>物流商：</span>}
+                                label={<span className={styles.label}>物流商</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -191,7 +191,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                             <Form.Item
                                 name="in_storage_count"
                                 className={styles.itemBox}
-                                label={<span className={styles.label}>入库数量：</span>}
+                                label={<span className={styles.label}>入库数量</span>}
                                 rules={rules}
                                 required={false}
                             >
@@ -207,7 +207,7 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                         <div className={styles.remark}>
                             <Form.Item
                                 name="remarks"
-                                label={<span className={styles.label}>备注：</span>}
+                                label={<span className={styles.label}>备注</span>}
                                 rules={rules}
                                 required={false}
                             >
