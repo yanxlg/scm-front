@@ -285,7 +285,7 @@ const AllList = () => {
                                         >
                                             申请退款
                                         </Button>
-                                    ) : (
+                                    ) : null /*(
                                         <PopConfirmLoadingButton
                                             popConfirmProps={{
                                                 title: '确定要取消该采购单？',
@@ -297,7 +297,7 @@ const AllList = () => {
                                                 children: '取消采购单',
                                             }}
                                         />
-                                    )}
+                                    )*/}
                                 </>
                             );
                             break;
