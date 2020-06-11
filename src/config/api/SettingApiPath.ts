@@ -25,4 +25,8 @@ export enum SettingApiPath {
     AddReplaceList = '/api/v1/orders/setting/delivery/replace',
     EditReplaceList = '/api/v1/orders/setting/delivery/replace/{id}',
     QueryReplace = '/api/v1/orders/setting/delivery/replace/{id}',
+    // 采购店铺黑名单
+    getStoreBlacklist = '/api/v1/strategy/black_store_list',
+    saveBlackStore = '/api/v1/strategy/black_store_save',
+    deleteBlackStore = '/api/v1/strategy/black_store_delete',
 }
