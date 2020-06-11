@@ -60,4 +60,6 @@ export enum OrderApiPath {
     // 下架商品
     postOrderOffsale = '/api/v1/orders/offsale',
     QueryShopList = '/api/v1/vova_goods/store_list',
+    QueryPendingCount = '/api/v1/orders/pendding_count',
+    QueryTakeOrders = '/api/v1/orders/purchase_log',
 }
