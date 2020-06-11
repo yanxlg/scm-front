@@ -5,7 +5,7 @@ import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILoca
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
-import { utcToLocal } from 'react-components/lib/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
@@ -15,7 +15,7 @@ import {
     postAllGoodsOnsale,
 } from '@/services/goods';
 import Export from '@/components/Export';
-import { JsonFormRef } from 'react-components/lib/JsonForm';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 import ShelvesModal from '../ShelvesModal/ShelvesModal';
 import SkuModal from '../SkuModal/SkuModal';
 import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal';

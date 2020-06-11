@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Select, Radio, Form } from 'antd';
 import { SelectProps } from 'antd/es/select';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { FormInstance, FormItemProps } from 'antd/lib/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 

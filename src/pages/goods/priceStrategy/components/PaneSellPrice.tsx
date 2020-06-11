@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
-import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { queryShopList, queryShopFilterList, getPurchasePlatform } from '@/services/global';
 import { getGoodsList } from '@/services/goods';
 import { getAllGoodsTagList, getSalePriceList } from '@/services/price-strategy';
