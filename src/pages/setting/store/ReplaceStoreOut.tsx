@@ -8,7 +8,7 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { FormInstance } from 'antd/es/form';
 import styles from '@/styles/_store.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';

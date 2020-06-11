@@ -22,7 +22,7 @@ import styles from '../../_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { validateRange } from '@/utils/validate';
 import useGoodsTag from '../../hooks/useGoodsTag';
-import { IOptionItem } from 'react-components/src/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { numberToStr } from '@/utils/common';
 
 const { TextArea } = Input;

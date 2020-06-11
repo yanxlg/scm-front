@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useCallback, useState, ReactText, useEffect } from 'react';
 import { Button } from 'antd';
 import Container from '@/components/Container';
-import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { queryGoodsSourceList } from '@/services/global';
 import { PlusCircleOutlined } from '@ant-design/icons';
@@ -11,9 +11,9 @@ import styles from './_shopBlacklist.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ColumnsType } from 'antd/lib/table';
 import { ISaveBlackStoreReq } from '@/interface/ISetting';
-import { utcToLocal } from 'react-components/src/utils/date';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getStatusDesc } from '@/utils/transform';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const formFields1: FormField[] = [
     {
