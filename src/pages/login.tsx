@@ -2,12 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
-import { userLogin } from '@/services/user';
-import { history } from 'umi';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
-import { getPageQuery } from '@/utils/utils';
-import request from '@/utils/request';
 
 declare interface ILoginState {
     remember: boolean;

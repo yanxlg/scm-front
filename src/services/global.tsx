@@ -2,6 +2,11 @@ import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
 import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
+import { downloadExcel } from '@/utils/common';
+import { message } from 'antd';
+
+// 1--品类预估模板下载，2---运费价卡模板下载
+type IDownloadFileType = '1' | '2';
 
 export function downloadFile(url: string) {
     const iframe = document.createElement('iframe');
@@ -50,6 +55,34 @@ export const queryShopFilterList = singlePromiseWrap(() => {
         .catch(() => {
             return [];
         });
+});
+
+export function downloadTemplateFile(type: IDownloadFileType) {
+    return request
+        .get(GlobalApiPath.downloadTemplateFile, {
+            params: {
+                type,
+            },
+            responseType: 'blob',
+            parseResponse: false,
+            // skipResponseInterceptors: true,
+        })
+        .then(downloadExcel)
+        .catch(err => {
+            message.error('下载文件失败');
+        });
+}
+
+export const getPurchasePlatform = singlePromiseWrap(() => {
+    return request.get(GlobalApiPath.getPurchasePlatform).then(res => {
+        // console.log('getPurchasePlatform', res);
+        if (res.data) {
+            return res.data.map((name: string) => ({
+                name: name,
+                value: name,
+            }));
+        }
+    });
 });
 
 export function exportExcel(data: IExportExcelReqData) {

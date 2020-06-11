@@ -1,4 +1,4 @@
-import { RequestPagination } from '@/interface/IGlobal';
+import { RequestPagination, IRequestPagination } from '@/interface/IGlobal';
 
 export type ICustomListQuery = {
     one_cat_id?: string;
@@ -58,11 +58,6 @@ export declare interface IAttrItem {
     key: string;
     name: string;
     description: string;
-}
-
-export declare interface IPublishInterceptItem {
-    name: string;
-    checked: boolean;
 }
 
 export interface ICookieItem {
@@ -128,4 +123,64 @@ export interface IPriceStrategyItem {
     strategy_type: '1';
     operator: string;
     updated_time: string;
+}
+
+export type IOfflinePurchaseQuery = {
+    commodity_ids?: string;
+    commodity_sku_ids?: string;
+} & IRequestPagination;
+
+export interface IOfflinePurchaseReqData {
+    commodity_id: string;
+    commodity_sku_id: string;
+}
+
+export interface IOfflinePurchaseItem {
+    id: string;
+    commodity_id: string;
+    commodity_sku_id: string;
+}
+
+export interface IOfflinePurchaseDetail {
+    commodity_id: string;
+    commodity_sku_id: string;
+    variant_image: string;
+    goods_name: string;
+    sku_style: string;
+    sku_inventory: string;
+}
+
+export interface IReplaceBody {
+    sale_commodity_ids?: string;
+    sale_commodity_sku_ids?: string;
+    outbound_commodity_ids?: string;
+    outbound_commodity_sku_ids?: string;
+}
+
+export interface IReplaceStoreOutItem {
+    id: string;
+    sale_commodity_id?: string;
+    sale_commodity_sku_id?: string;
+    outbound_commodity_id?: string;
+    outbound_commodity_sku_id?: string;
+    outbound_score?: string;
+}
+
+export interface ReplaceItem {
+    sale: {
+        commodity_id: string;
+        commodity_sku_id: string;
+        variant_image: string;
+        goods_name: string;
+        sku_style: string;
+        sku_inventory: string;
+    };
+    outbound: {
+        commodity_id: string;
+        commodity_sku_id: string;
+        variant_image: string;
+        goods_name: string;
+        sku_style: string;
+        sku_inventory: string;
+    };
 }

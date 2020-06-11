@@ -2,12 +2,13 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { message, Spin } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
 import { getInterceptTagList, getTagsList, setInterceptTagList } from '@/services/goods-attr';
-import { IPublishInterceptItem, ITagItem } from '@/interface/IGoodsAttr';
+import { ITagItem } from '@/interface/IGoodsAttr';
 import { LoadingButton } from 'react-components';
+import { ICheckedBtnItem } from '@/interface/IGlobal';
 
-const PublishIntercept: React.FC = props => {
+const PublishIntercept = ({ pending }: { pending: false | any }) => {
     const [loading, setLoading] = useState(true);
-    const [tagList, setTagList] = useState<IPublishInterceptItem[]>([]);
+    const [tagList, setTagList] = useState<ICheckedBtnItem[]>([]);
 
     const _getInterceptTagList = useCallback(async () => {
         try {
@@ -18,7 +19,6 @@ const PublishIntercept: React.FC = props => {
             ]);
             setLoading(false);
             const { tags } = tagsResp.data;
-            // setTagList(tags || []);
             const interceptTags = interceptTagResp.data;
             if (tags) {
                 setTagList(
@@ -27,9 +27,11 @@ const PublishIntercept: React.FC = props => {
                         return {
                             name: item.name,
                             checked,
+                            type: 0,
+                            originChecked: checked,
                         };
                     }),
-                );
+                ); //dasdasdsa
             }
         } catch (error) {
             setLoading(false);
@@ -42,9 +44,11 @@ const PublishIntercept: React.FC = props => {
                 tagList.map((item, i) => {
                     if (i === index) {
                         const { checked } = item;
+                        const currentState = !checked;
                         return {
                             ...item,
-                            checked: !checked,
+                            checked: currentState,
+                            type: item.originChecked === currentState ? 0 : currentState ? 1 : 2,
                         };
                     }
                     return item;
@@ -56,12 +60,17 @@ const PublishIntercept: React.FC = props => {
 
     const _setInterceptTagList = useCallback(() => {
         // console.log('tagList', tagList);
-        return setInterceptTagList({
-            keywords: tagList
-                .filter(item => item.checked)
-                .map(item => item.name)
-                .join(','),
-        }).then(res => {
+
+        const data = tagList
+            .filter(item => {
+                return item.originChecked === true || item.type != 0;
+            })
+            .map(item => ({
+                keywords: item.name,
+                type: item.type,
+            }));
+
+        return setInterceptTagList(data).then(res => {
             message.success('保存成功！');
             _getInterceptTagList();
         });
@@ -78,6 +87,7 @@ const PublishIntercept: React.FC = props => {
                 <Spin spinning={loading}>
                     {tagList.map((item, index) => (
                         <CheckedBtn
+                            disabled={pending}
                             style={{ margin: '0 10px 10px 0' }}
                             key={item.name}
                             item={item}
@@ -86,13 +96,13 @@ const PublishIntercept: React.FC = props => {
                     ))}
                 </Spin>
                 <div style={{ marginTop: 10 }}>
-                    <LoadingButton type="primary" onClick={_setInterceptTagList}>
+                    <LoadingButton type="primary" disabled={pending} onClick={_setInterceptTagList}>
                         更改设置
                     </LoadingButton>
                 </div>
             </>
         );
-    }, [tagList, loading]);
+    }, [tagList, loading, pending]);
 };
 
 export default PublishIntercept;

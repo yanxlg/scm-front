@@ -88,7 +88,19 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
-            width: 120,
+            width: 200,
+            render: (value: string, record) => {
+                return (
+                    <>
+                        {value}
+                        <div style={{ color: 'red' }}>
+                            {String(record?.orderGods?.isReplaceDelivery) === '1'
+                                ? '（替换成其他商品出库）'
+                                : ''}
+                        </div>
+                    </>
+                );
+            },
         },
         {
             key: 'goodsNumber',
