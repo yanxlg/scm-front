@@ -22,6 +22,13 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
     const [checkedList, setCheckedList] = useState<number[]>([]);
     const [confirmLoading, setConfirmLoading] = useState(false);
 
+    useMemo(() => {
+        if (visible) {
+            setCheckedList([]);
+            form.resetFields();
+        }
+    }, [visible]);
+
     const handleOk = useCallback(async () => {
         const { reject_count, in_storage_count, ...rest } = await form.validateFields();
         setConfirmLoading(true);
