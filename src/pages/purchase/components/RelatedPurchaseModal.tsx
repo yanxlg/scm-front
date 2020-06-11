@@ -178,23 +178,6 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                 </Col>
                             </Row>
                             <Row gutter={16}>
-                                <Col span={8}>
-                                    <Form.Item
-                                        name="goods_number"
-                                        label={<span className={styles.label}>入库数量</span>}
-                                        required={false}
-                                        rules={rules}
-                                    >
-                                        <InputNumber
-                                            disabled={disabled}
-                                            precision={0}
-                                            placeholder="请输入数量"
-                                            className={styles.inputNumber}
-                                        />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-                            <Row gutter={16}>
                                 <Col span={12}>
                                     <Form.Item
                                         name="purchase_shipping_name"
@@ -215,6 +198,23 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                                 );
                                             })}
                                         </Select>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={8}>
+                                    <Form.Item
+                                        name="goods_number"
+                                        label={<span className={styles.label}>入库数量</span>}
+                                        required={false}
+                                        rules={rules}
+                                    >
+                                        <InputNumber
+                                            disabled={disabled}
+                                            precision={0}
+                                            placeholder="请输入数量"
+                                            className={styles.inputNumber}
+                                        />
                                     </Form.Item>
                                 </Col>
                             </Row>

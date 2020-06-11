@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Modal, Form, Checkbox, InputNumber, Input, message } from 'antd';
+import { Modal, Form, Checkbox, InputNumber, Input, message, Select } from 'antd';
 import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 import { setPurchaseException } from '@/services/purchase';
 
 import styles from '../_abnormal.less';
+import { carrierList } from '@/config/global';
 
 const rules = [{ required: true, message: '请输入！' }];
 
@@ -169,6 +170,23 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
                                 required={false}
                             >
                                 <Input className={styles.inputNumber} placeholder="关联运单号" />
+                            </Form.Item>
+                            <Form.Item
+                                name="purchase_shipping_name"
+                                className={styles.itemBox}
+                                label={<span className={styles.label}>物流商：</span>}
+                                rules={rules}
+                                required={false}
+                            >
+                                <Select className={styles.inputNumber} placeholder="请选择物流商">
+                                    {carrierList.map(({ name }) => {
+                                        return (
+                                            <Select.Option value={name} key={name}>
+                                                {name}
+                                            </Select.Option>
+                                        );
+                                    })}
+                                </Select>
                             </Form.Item>
                             <Form.Item
                                 name="in_storage_count"
