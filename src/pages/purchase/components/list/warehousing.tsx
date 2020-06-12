@@ -5,20 +5,31 @@ import {
     FitTable,
     JsonForm,
     LoadingButton,
+    PopConfirmLoadingButton,
     useList,
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { applyReturn, exportPurchaseList, queryPurchaseList } from '@/services/purchase';
+import {
+    applyReturn,
+    endPurchaseByUser,
+    exportPurchaseList,
+    queryPurchaseList,
+} from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
-import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateType,
+    PurchaseCreateTypeList,
+    PurchaseMap,
+} from '@/config/dictionaries/Purchase';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import Export from '@/components/Export';
@@ -27,7 +38,7 @@ const { Paragraph } = Typography;
 const fieldList: FormField[] = [
     {
         label: '采购单ID',
-        type: 'input',
+        type: 'positiveInteger',
         name: 'purchase_order_goods_id',
     },
     {
@@ -49,6 +60,19 @@ const fieldList: FormField[] = [
         label: '商品名称',
         type: 'input',
         name: 'purchase_goods_name',
+    },
+    {
+        label: '采购单类型',
+        type: 'select',
+        name: 'origin',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...PurchaseCreateTypeList,
+        ],
     },
 ];
 
@@ -106,6 +130,9 @@ const Warehousing = () => {
                 ref={formRef}
                 enableCollapse={false}
                 labelClassName={styles.formItem}
+                initialValues={{
+                    origin: '',
+                }}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
@@ -148,6 +175,12 @@ const Warehousing = () => {
         setConnect(false);
     }, []);
 
+    const onEndPurchaseByUser = useCallback((purchaseOrderGoodsId: string) => {
+        return endPurchaseByUser(purchaseOrderGoodsId).then(() => {
+            onReload();
+        });
+    }, []);
+
     const columns = useMemo(() => {
         return [
             {
@@ -157,15 +190,30 @@ const Warehousing = () => {
                 width: '150px',
                 align: 'center',
                 render: (_, item) => {
+                    const { origin = PurchaseCreateType.Manually, purchaseOrderGoodsId } = item;
+
                     return {
                         children: (
                             <>
                                 <Button type="link" onClick={() => showConnect(item)}>
                                     关联运单号
                                 </Button>
-                                <Button type="link" onClick={() => applyReturnService(item)}>
-                                    申请退款
-                                </Button>
+                                {origin === PurchaseCreateType.Auto ? (
+                                    <Button type="link" onClick={() => applyReturnService(item)}>
+                                        申请退款
+                                    </Button>
+                                ) : null}
+                                {/*所有部分入库都可以完结*/}
+                                <PopConfirmLoadingButton
+                                    popConfirmProps={{
+                                        title: '确定要完结该采购单？',
+                                        onConfirm: () => onEndPurchaseByUser(purchaseOrderGoodsId),
+                                    }}
+                                    buttonProps={{
+                                        type: 'link',
+                                        children: '完结采购单',
+                                    }}
+                                />
                             </>
                         ),
                         props: {
@@ -180,10 +228,17 @@ const Warehousing = () => {
                 align: 'center',
                 width: '150px',
                 render: (value, row) => {
+                    const { origin = PurchaseCreateType.Auto } = row;
                     return {
-                        children: value,
+                        children: (
+                            <>
+                                {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                                {value}
+                            </>
+                        ),
                         props: {
                             rowSpan: row.rowSpan || 0,
+                            className: 'break-all',
                         },
                     };
                 },
@@ -269,13 +324,13 @@ const Warehousing = () => {
             },
             {
                 title: '入库数量',
-                dataIndex: 'purchaseMerchantName',
+                dataIndex: 'realInStorageNumber',
                 width: '130px',
                 align: 'center',
                 render: (value, row) => {
-                    const { waybillNumber = 0, purchaseGoodsNumber = 0 } = row;
+                    const { realInStorageNumber = 0, purchaseGoodsNumber = 0 } = row;
                     return {
-                        children: `${waybillNumber}/${purchaseGoodsNumber}`,
+                        children: `${realInStorageNumber}/${purchaseGoodsNumber}`,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },

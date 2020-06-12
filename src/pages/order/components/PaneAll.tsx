@@ -177,9 +177,15 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         // console.log(1111, list);
         const childOrderList: IChildOrderItem[] = [];
         list.forEach((goodsItem: any) => {
-            const { orderGoods, orderInfo } = goodsItem;
+            const { orderGoods, orderInfo, orderGods } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
+            const {
+                currency,
+                confirmTime,
+                channelOrderSn,
+                channelSource,
+                orderAddress,
+            } = orderInfo;
             // console.log(111, orderGoodsPurchasePlan, orderGoods);
             if (orderGoodsPurchasePlan) {
                 let purchasePlanList = [...orderGoodsPurchasePlan];
@@ -207,7 +213,9 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         confirmTime,
                         channelOrderSn,
                         channelSource,
+                        orderAddress,
                         purchaseOrderStatus,
+                        orderGods,
                     };
                     if (index === 0) {
                         childOrderItem._rowspan = purchasePlanList.length;
@@ -223,6 +231,8 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     channelOrderSn,
                     channelSource,
                     ...orderRest,
+                    orderAddress,
+                    orderGods,
                     _rowspan: 1,
                     _checked: false,
                 });
@@ -539,7 +549,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         </div>
                     </JsonForm>
                     {/* <div className="order-operation">
-                        
+
                         {!showParentStatus ? (
                             <LoadingButton
                                 type="primary"

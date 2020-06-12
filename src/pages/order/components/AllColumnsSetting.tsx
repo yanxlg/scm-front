@@ -28,7 +28,9 @@ const baseGroupList = [
     // { key: '', name: '商品属性标签' },
     // { key: 'cancelType', name: '中台订单取消原因' }, // 带补充
     { key: '_logisticsTrack', name: '物流轨迹' },
+    { key: 'saleMinusPurchaseNormalPrice', name: '销售-采购价差' },
     { key: 'cancelType', name: '子订单取消类型' },
+    { key: 'orderAddress', name: '用户地址信息' },
 ];
 
 const saleGroupList = [
@@ -52,7 +54,7 @@ const purchaseGroupList = [
     // { key: '', name: '采购店铺名称' },
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },
-    { key: 'purchaseCreateTime', name: '采购订单生成时间' },
+    { key: 'purchaseCreateTime', name: '采购计划生成时间' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
     { key: 'purchasePlatformOrderId', name: '采购订单ID' },
     // { key: '', name: '采购渠道订单ID' },

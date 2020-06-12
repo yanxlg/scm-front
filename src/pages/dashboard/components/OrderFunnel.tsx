@@ -90,9 +90,9 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
             const leftRatio =
                 _reserveOverstockCount / (_reserveOverstockCount + _mustPurchaseOrderCount);
             // const rightRatio = 1 - leftRatio;
-            const leftWidth = (70 * leftRatio).toFixed(2) + '%';
-            const rightWidth = (70 * (1 - leftRatio)).toFixed(2) + '%';
-            const rightOffset = (15 + 70 * leftRatio).toFixed(2) + '%';
+            const leftWidth = (65 * leftRatio).toFixed(2) + '%';
+            const rightWidth = (65 * (1 - leftRatio)).toFixed(2) + '%';
+            const rightOffset = (25 + 65 * leftRatio).toFixed(2) + '%';
 
             // 绘制图表
             chartRef.current?.setOption({
@@ -106,7 +106,6 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         color: '#131415',
                     },
                     subtextStyle: {
-                        fontSize: 13,
                         color: '#575858',
                     },
                 },
@@ -130,16 +129,19 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         // width: '35%',
                         width: leftWidth,
                         height: '80%',
-                        left: '15%',
+                        left: '25%',
                         top: '2%',
                         funnelAlign: 'right',
+                        gap: 1,
                         label: {
                             position: 'leftTop',
-                            color: '#333',
+                            color: '#999',
                         },
                         labelLine: {
+                            length: 60,
                             lineStyle: {
-                                color: '#333',
+                                color: '#999',
+                                width: 0.5,
                             },
                         },
                         itemStyle: {
@@ -192,7 +194,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                     // },
                                     // width: 100,
                                     formatter: ({ data }: any) =>
-                                        labelFormatter(data.percentage, '预定积压库存\r\n--出库率'),
+                                        labelFormatter(data.percentage, '预定积压库存--出库率'),
                                 },
                             },
                             {
@@ -201,7 +203,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                                 percentage: stockReceivedPercentage,
                                 label: {
                                     formatter: ({ data }: any) =>
-                                        labelFormatter(data.percentage, '预定积压库存\r\n--收货率'),
+                                        labelFormatter(data.percentage, '预定积压库存--收货率'),
                                 },
                             },
                         ],
@@ -212,12 +214,14 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         // width: '35%',
                         width: leftWidth,
                         height: '80%',
-                        left: '15%',
+                        left: '25%',
                         top: '2%',
                         funnelAlign: 'right',
+                        gap: 1,
                         label: {
                             // show: false,
                             position: 'insideRight',
+                            color: 'rgba(0, 0, 0, 0.85)',
                         },
                         tooltip: {
                             show: false,
@@ -297,13 +301,16 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
                         sort: 'none',
+                        gap: 1,
                         label: {
                             position: 'rightTop',
-                            color: '#333',
+                            color: '#999',
                         },
                         labelLine: {
+                            length: 60,
                             lineStyle: {
-                                color: '#333',
+                                color: '#999',
+                                width: 0.5,
                             },
                         },
                         itemStyle: {
@@ -402,12 +409,15 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                         funnelAlign: 'left',
                         // center: ['50%', '50%'],  // for pie
                         sort: 'none',
+                        gap: 1,
                         label: {
                             position: 'insideLeft',
                             formatter: (item: any) => {
                                 const { value, name } = item;
                                 return name + value + suffix;
                             },
+                            color: 'rgba(0, 0, 0, 0.85)',
+                            // fontWeight: 'bolder',
                         },
                         itemStyle: {
                             color: '#6395FA',
@@ -539,42 +549,6 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
                             },
                         ],
                     },
-                    // {
-                    //     type: 'graph',
-                    //     layout: 'none',
-                    //     coordinateSystem: 'cartesian2d',
-                    //     symbolSize: 0,
-                    //     lineStyle: {
-                    //         normal: {
-                    //             width: 1,
-                    //             shadowColor: 'none',
-                    //         },
-                    //     },
-                    //     data: [
-                    //         {
-                    //             name: '点1',
-                    //             value: [0, 0],
-                    //             symbolSize: 0
-                    //         },
-                    //         {
-                    //             name: '点2',
-                    //             value: [0, -1],
-                    //             symbolSize: 0
-                    //         },
-                    //     ],
-                    //     links: [
-                    //         {
-                    //             source: '点1',
-                    //             target: '点2',
-                    //             label: {
-                    //                 show: true,
-                    //                 formatter: '转换率(25.61%)',
-                    //                 // position: 'left'
-                    //             },
-                    //             lineStyle: { color: '#333' },
-                    //         },
-                    //     ],
-                    // },
                 ] as any,
             });
         },
@@ -595,7 +569,7 @@ const OrderFunnel: React.FC<IProps> = ({ loading, orderInfo, startDate, statisti
     }, [orderInfo, loading]);
 
     return useMemo(() => {
-        return <div id="order-funnel" style={{ height: 550 }}></div>;
+        return <div id="order-funnel" style={{ height: 680 }}></div>;
     }, []);
 };
 

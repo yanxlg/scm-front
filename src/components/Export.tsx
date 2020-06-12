@@ -125,7 +125,7 @@ const Export: React.FC<ExportProps> = ({ columns, visible, onCancel, onOKey }: E
                         label={''}
                         rules={[{ required: true, message: '请选择导出字段' }]}
                     >
-                        <Checkbox.Group>
+                        <Checkbox.Group style={{ width: '100%' }}>
                             <Row gutter={[0, 10]}>
                                 {_columns.map(item => {
                                     return (

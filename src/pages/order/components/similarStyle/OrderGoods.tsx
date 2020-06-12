@@ -10,7 +10,14 @@ import { Col, Row } from 'antd';
 
 const OrderGoods = (props: ISimilarInfoResponse['originOrderInfo']) => {
     return useMemo(() => {
-        const { skuImageUrl, productOptionValue, productId, skuId, productTitle } = props;
+        const {
+            skuImageUrl,
+            productOptionValue,
+            productId,
+            skuId,
+            productTitle,
+            commodityId,
+        } = props;
         const productStyle = parseJson(productOptionValue);
 
         let styleArray: string[] = [];
@@ -40,7 +47,8 @@ const OrderGoods = (props: ISimilarInfoResponse['originOrderInfo']) => {
                         </div>
                         <Row gutter={[15, 0]}>
                             <Col span={8} className={styles.textEllipse} title={productId}>
-                                <span className={similarStyles.key}>Product ID</span>：{productId}
+                                <span className={similarStyles.key}>Commodity ID</span>：
+                                {commodityId}
                             </Col>
                             <Col span={8} className={styles.textEllipse} title={skuId}>
                                 <span className={similarStyles.key}>Commodity SKU ID</span>：{skuId}

@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
-import { Modal, Form, Input, Row, Col, InputNumber } from 'antd';
+import { Modal, Form, Input, Row, Col, InputNumber, Select } from 'antd';
 import { LoadingButton } from 'react-components';
 import classnames from 'classnames';
 import { setCorrelateWaybill, getPurchaseGoodsInfo } from '@/services/purchase';
@@ -7,6 +7,7 @@ import { ICorrelateWaybillReq } from '@/interface/IPurchase';
 
 import styles from '../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { carrierList } from '@/config/global';
 
 const rules = [{ required: true, message: '请输入！' }];
 
@@ -173,6 +174,30 @@ const RelatedPurchaseModal: React.FC<IProps> = ({ visible, onCancel, onRefresh }
                                             disabled={disabled}
                                             placeholder="请输入想关联的运单号"
                                         />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="purchase_shipping_name"
+                                        label={<span className={styles.label}>物流商</span>}
+                                        required={false}
+                                        rules={rules}
+                                    >
+                                        <Select
+                                            className={styles.inputNumber}
+                                            placeholder="请选择物流商"
+                                            disabled={disabled}
+                                        >
+                                            {carrierList.map(({ name }) => {
+                                                return (
+                                                    <Select.Option value={name} key={name}>
+                                                        {name}
+                                                    </Select.Option>
+                                                );
+                                            })}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                             </Row>

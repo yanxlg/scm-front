@@ -32,6 +32,16 @@ export type OutStockStateCode = keyof typeof OutStockState;
 export const InStockState = {
     1: '未入库',
     10: '已入库',
+    40: '已取消',
 };
 export type InStockStateCode = keyof typeof InStockState;
 export const InStockStateList = transStatusList(InStockState);
+
+export const WarehouseMap = {
+    1: '安骏',
+    2: '捷网',
+};
+
+export type WarehouseMapCode = keyof typeof WarehouseMap;
+
+export const WarehouseList = transStatusList(WarehouseMap);

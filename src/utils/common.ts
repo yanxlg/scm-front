@@ -116,3 +116,11 @@ export function splitStrToArr(str: string | undefined, split: string = ','): str
     }
     return str as undefined;
 }
+
+/**
+ * 字符串转成number或者undefined
+ * @param string
+ */
+export const numberToStr = (val: number | undefined): string => {
+    return val === 0 || val ? String(val) : '';
+};

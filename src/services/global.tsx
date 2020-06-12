@@ -1,7 +1,13 @@
 import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
-import { IResponse, ISHopList } from '@/interface/IGlobal';
+import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
+import { downloadExcel } from '@/utils/common';
+import { message } from 'antd';
+import { IGood } from '@/interface/ILocalGoods';
+
+// 1--品类预估模板下载，2---运费价卡模板下载
+type IDownloadFileType = '1' | '2';
 
 export function downloadFile(url: string) {
     const iframe = document.createElement('iframe');
@@ -51,3 +57,74 @@ export const queryShopFilterList = singlePromiseWrap(() => {
             return [];
         });
 });
+
+export function downloadTemplateFile(type: IDownloadFileType) {
+    return request
+        .get(GlobalApiPath.downloadTemplateFile, {
+            params: {
+                type,
+            },
+            responseType: 'blob',
+            parseResponse: false,
+            // skipResponseInterceptors: true,
+        })
+        .then(downloadExcel)
+        .catch(err => {
+            message.error('下载文件失败');
+        });
+}
+
+export const getPurchasePlatform = singlePromiseWrap(() => {
+    return request.get(GlobalApiPath.getPurchasePlatform).then(res => {
+        // console.log('getPurchasePlatform', res);
+        if (res.data) {
+            return res.data.map((name: string) => ({
+                name: name,
+                value: name,
+            }));
+        }
+    });
+});
+
+export function exportExcel(data: IExportExcelReqData) {
+    return request.post(GlobalApiPath.ExportExcel, {
+        data,
+    });
+}
+
+export const queryGoodsSourceList = singlePromiseWrap(() => {
+    return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1')).then(res => {
+        const { data } = res;
+        if (data) {
+            return Object.keys(data).map(key => ({
+                name: data[key],
+                value: key,
+            }));
+        }
+        return [];
+    });
+});
+
+export const queryWarehourseById = (id: string) => {
+    return request.get<
+        IResponse<{
+            address1: string;
+            address2: string;
+            city: string;
+            consignee: string;
+            country: string;
+            country_code: string;
+            phone_number: string;
+            province: string;
+            zip_code: string;
+        }>
+    >(GlobalApiPath.QueryWarehourse.replace(':warehourse_id', id));
+};
+
+export const queryGoodBySkuId = (commodity_sku_id: string) => {
+    return request.post<IResponse<IGood>>(GlobalApiPath.QueryGoodBySkuId, {
+        data: {
+            commodity_sku_id: commodity_sku_id,
+        },
+    });
+};

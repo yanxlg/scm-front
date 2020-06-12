@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { GlobalApiPath } from '@/config/api/GlobalApiPath';
+import { GlobalApiPath } from '@/config/api/Global';
 import {
     IPadSimilarBody,
     IWarehouseNotShipSearch,
@@ -12,12 +12,14 @@ import {
     IChannelSourceResponse,
     IReviewSearch,
     IPlatformItem,
+    IPurchaseLog,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
-import { IResponse } from '@/interface/IGlobal';
+import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 // import { ISHopList } from '@/interface/IChannel';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
+import Order from '@/pages/order';
 
 export declare interface IFilterParams {
     page?: number;
@@ -248,7 +250,7 @@ export function getReviewOrderList(data: IReviewSearch) {
 }
 
 export async function postExportReview(data: any) {
-    return request.post(GlobalApiPath.downloadExcel, {
+    return request.post(GlobalApiPath.ExportExcel, {
         data,
     });
 }
@@ -293,3 +295,22 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
         return list;
     });
 });
+
+export const queryPendingCount = () => {
+    return request.get<
+        IResponse<{
+            penddingFailOrderCount: number;
+            penddingOrderCount: number;
+            samePenddingOrderCount: number;
+            waitPenddingOrderCount: number;
+        }>
+    >(OrderApiPath.QueryPendingCount);
+};
+
+export const queryTakeOrders = () => {
+    return request.get<
+        IResponse<{
+            data: Array<IPurchaseLog>;
+        }>
+    >(OrderApiPath.QueryTakeOrders);
+};
