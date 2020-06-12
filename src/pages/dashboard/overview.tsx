@@ -164,7 +164,7 @@ const columns: ColumnsType<object> = [
         title: '动销率',
         dataIndex: 'pinRate',
         align: 'center',
-        render: (val: string) => `${val}%`,
+        render: (val: string) => `${Number(val) * 100}%`,
     },
     {
         width: 120,
