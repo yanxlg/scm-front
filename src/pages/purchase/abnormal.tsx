@@ -6,6 +6,7 @@ import PaneAbnormalPending from './components/PaneAbnormalPending';
 import PaneAbnormalProcessing from './components/PaneAbnormalProcessing';
 import PaneAbnormalEnd from './components/PaneAbnormalEnd';
 import { getExceptionCount } from '@/services/purchase';
+import PaneAbnormalReview from './components/PaneAbnormalReview';
 
 const { TabPane } = Tabs;
 
@@ -43,20 +44,26 @@ const Purchase: React.FC = props => {
         const { penddingCount, allPenddingCount, execingCount, allExecingCount } = countInfo;
         return (
             <Container>
-                <Tabs defaultActiveKey="1" type="card" className="tabs-margin-none">
+                <Tabs defaultActiveKey="2" type="card" className="tabs-margin-none">
                     <TabPane tab="全部" key="1">
                         <PaneAbnormalAll getExceptionCount={getExceptionCount} />
                     </TabPane>
-                    <TabPane tab={`待处理（${allPenddingCount}）`} key="2">
+                    <TabPane tab={`待审核（xxx）`} key="2">
+                        <PaneAbnormalReview
+                            penddingCount={penddingCount}
+                            getExceptionCount={getExceptionCount}
+                        />
+                    </TabPane>
+                    <TabPane tab={`待处理（${allPenddingCount}）`} key="3">
                         <PaneAbnormalPending
                             penddingCount={penddingCount}
                             getExceptionCount={getExceptionCount}
                         />
                     </TabPane>
-                    <TabPane tab={`处理中（${allExecingCount}）`} key="3">
+                    <TabPane tab={`处理中（${allExecingCount}）`} key="4">
                         <PaneAbnormalProcessing execingCount={execingCount} />
                     </TabPane>
-                    <TabPane tab="已完结" key="4">
+                    <TabPane tab="已完结" key="5">
                         <PaneAbnormalEnd />
                     </TabPane>
                 </Tabs>

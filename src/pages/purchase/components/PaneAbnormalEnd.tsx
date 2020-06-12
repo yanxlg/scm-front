@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
+import { useList, FitTable, JsonForm, LoadingButton, AutoEnLargeImg } from 'react-components';
 import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
@@ -9,7 +9,6 @@ import {
     IWaybillExceptionTypeKey,
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
-import { AutoEnLargeImg } from 'react-components';
 import {
     waybillExceptionTypeList,
     defaultOptionItem,
@@ -27,8 +26,8 @@ const fieldList: FormField[] = [
     {
         type: 'input',
         name: 'waybill_exception_sn',
-        label: '异常单id',
-        placeholder: '请输入异常单id',
+        label: '异常单ID',
+        placeholder: '请输入',
         formatter: 'str_arr',
     },
     {
@@ -40,8 +39,8 @@ const fieldList: FormField[] = [
     {
         type: 'input',
         name: 'purchase_order_id',
-        label: '采购单id',
-        placeholder: '请输入采购单id',
+        label: '采购单ID',
+        placeholder: '请输入',
         formatter: 'str_arr',
     },
     {
@@ -135,7 +134,12 @@ const PaneAbnormalEnd: React.FC = props => {
                 align: 'center',
                 width: 120,
                 render: (value: string, row: IPurchaseAbnormalItem) => {
-                    return <AutoEnLargeImg src={value} className={styles.imgCell} />;
+                    const { packageImageUrl } = row;
+                    const list: string[] = [];
+                    value && list.push(value);
+                    packageImageUrl && list.push(packageImageUrl);
+
+                    return <AutoEnLargeImg srcList={list} className={styles.imgCell} />;
                 },
             },
             // {
@@ -218,16 +222,13 @@ const PaneAbnormalEnd: React.FC = props => {
                 <FitTable
                     bordered
                     rowKey="waybillExceptionSn"
-                    // className="order-table"
                     loading={loading}
                     columns={columns}
-                    // rowSelection={rowSelection}
                     dataSource={dataSource}
                     scroll={{ x: 'max-content' }}
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
-                    // toolBarRender={toolBarRender}
                 />
                 <DetailModal
                     visible={detailStatus}

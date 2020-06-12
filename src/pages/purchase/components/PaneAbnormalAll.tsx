@@ -31,8 +31,8 @@ const fieldList: FormField[] = [
     {
         type: 'input',
         name: 'waybill_exception_sn',
-        label: '异常单id',
-        placeholder: '请输入异常单id',
+        label: '异常单ID',
+        placeholder: '请输入',
         formatter: 'str_arr',
     },
     {
@@ -44,8 +44,8 @@ const fieldList: FormField[] = [
     {
         type: 'input',
         name: 'purchase_order_id',
-        label: '采购单id',
-        placeholder: '请输入采购单id',
+        label: '采购单ID',
+        placeholder: '请输入',
         formatter: 'str_arr',
     },
     {
@@ -220,7 +220,12 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                 align: 'center',
                 width: 120,
                 render: (value: string, row: IPurchaseAbnormalItem) => {
-                    return <AutoEnLargeImg src={value} className={styles.imgCell} />;
+                    const { packageImageUrl } = row;
+                    const list: string[] = [];
+                    value && list.push(value);
+                    packageImageUrl && list.push(packageImageUrl);
+
+                    return <AutoEnLargeImg srcList={list} className={styles.imgCell} />;
                 },
             },
             // {

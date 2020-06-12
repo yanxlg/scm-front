@@ -34,6 +34,7 @@ export interface IPurchaseAbnormalItem {
     // platformUid: string;
     // purchasePlatform: string;
     remark: string;
+    packageImageUrl?: string;
 }
 
 export interface IPurchaseAbnormalReq {
