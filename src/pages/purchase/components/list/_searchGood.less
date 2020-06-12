@@ -1,0 +1,30 @@
+.image {
+    width: 60px !important;
+    height: 60px !important;
+    margin-right: 10px;
+}
+.title {
+    color: rgba(0, 0, 0, 0.85);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 700px;
+}
+.skus {
+    margin-top: 0;
+}
+.sku {
+    display: inline-block;
+    color: rgba(0, 0, 0, 0.65);
+    & ~ & {
+        margin-left: 10px;
+    }
+    &-key {
+        color: rgba(0, 0, 0, 0.85);
+    }
+}
+
+.good {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

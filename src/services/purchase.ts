@@ -162,3 +162,36 @@ export function setPurchaseException(data: any) {
         data,
     });
 }
+
+export function createPurchase(data: {
+    purchase_manager: string;
+    purchase_platform: string;
+    purchase_merchant_name: string;
+    purchase_order_goods_sn: string;
+    warehouse_id: number;
+    product_id: string;
+    commodity_sku_id: string;
+    shop_price: number;
+    goods_number: number;
+}) {
+    return request.post(PurchaseApiPath.CreatePurchase, {
+        data: {
+            purchase_currency: 'RMB',
+            ...data,
+        },
+    });
+}
+
+export function cancelPurchaseByUser(purchase_order_goods_id: string) {
+    return request.delete(PurchaseApiPath.CancelPurchaseByUser, {
+        data: {
+            purchase_order_goods_id: purchase_order_goods_id,
+        },
+    });
+}
+
+export function endPurchaseByUser(purchase_order_goods_id: string) {
+    return request.post(PurchaseApiPath.EndPurchaseByUser, {
+        data: { purchase_order_goods_id },
+    });
+}

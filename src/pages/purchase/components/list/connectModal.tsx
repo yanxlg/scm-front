@@ -4,6 +4,9 @@ import { JsonForm } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import styles from '@/pages/purchase/_list.less';
 import { setCorrelateWaybill } from '@/services/purchase';
+import { carrierList } from '@/config/global';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import classNames from 'classnames';
 
 const fieldList: FormField[] = [
     {
@@ -11,12 +14,45 @@ const fieldList: FormField[] = [
         name: 'purchase_waybill_no',
         label: '运单号',
         className: styles.connectInput,
+        formItemClassName: classNames(formStyles.formItem, formStyles.formRequiredHide),
+        rules: [
+            {
+                required: true,
+                message: '请填写运单号',
+            },
+        ],
     },
     {
         type: 'number',
         name: 'goods_number',
         label: '应入库数量',
         className: styles.connectInput,
+        formItemClassName: classNames(formStyles.formItem, formStyles.formRequiredHide),
+        rules: [
+            {
+                required: true,
+                message: '请填写应入库数量',
+            },
+        ],
+    },
+    {
+        type: 'select',
+        name: 'purchase_shipping_name',
+        label: '物流商',
+        className: styles.connectInput,
+        formItemClassName: classNames(formStyles.formItem, formStyles.formRequiredHide),
+        optionList: carrierList.map(item => {
+            return {
+                name: item.name,
+                value: item.name,
+            };
+        }),
+        rules: [
+            {
+                required: true,
+                message: '请选择物流商',
+            },
+        ],
     },
 ];
 
@@ -60,6 +96,7 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
             >
                 <JsonForm
                     labelClassName={styles.connectLabel}
+                    className={formStyles.formHelpAbsolute}
                     containerClassName={''}
                     fieldList={fieldList}
                     layout="horizontal"
