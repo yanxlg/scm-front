@@ -13,6 +13,7 @@ import PanePendingReview from './components/PanePendingReview';
 import { getAllTabCount } from '@/services/order-manage';
 
 import '@/styles/order.less';
+import { PendingSign } from '@/pages/order/components/PendingSign';
 
 const { TabPane } = Tabs;
 
@@ -47,7 +48,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingCheckListCount: 0,
         };
         // console.log(11111, this.props);
-        this.defaultActiveKey = this.props.location?.query?.type || '1';
+        this.defaultActiveKey = this.props.location?.query?.type || '9';
     }
 
     componentDidMount() {
@@ -111,6 +112,11 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                         <TabPane tab={`待发货（${penddingShipingOrderCount}）`} key="4">
                             <div className="order-tab-content">
                                 <PaneWaitShip getAllTabCount={this.getAllTabCount} />
+                            </div>
+                        </TabPane>
+                        <TabPane tab={`待签收（pending）`} key="9">
+                            <div className="order-tab-content">
+                                <PendingSign updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`已采购未入库（${penddingPurchaseListCount}）`} key="5">

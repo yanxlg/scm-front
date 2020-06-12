@@ -1,6 +1,13 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { Button, notification } from 'antd';
-import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
+import {
+    JsonForm,
+    LoadingButton,
+    FitTable,
+    useModal,
+    AutoEnLargeImg,
+    PopConfirmLoadingButton,
+} from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import {
     defaultOptionItem,
@@ -8,7 +15,7 @@ import {
     defaultOptionItem1,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { IWaitShipSearch, IWaitShipOrderItem } from '@/interface/IOrder';
+import { IWaitShipSearch, IWaitShipOrderItem, IPendingOrderItem } from '@/interface/IOrder';
 import {
     getWaitShipList,
     delPurchaseOrders,
@@ -31,6 +38,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
 import styles from '@/pages/order/components/_pending.less';
+import { FormInstance } from 'antd/es/form';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -64,7 +72,7 @@ const formFields: FormField[] = [
     {
         type: 'textarea',
         name: 'order_goods_id',
-        label: <span>子订单ID</span>,
+        label: '子订单ID',
         className: 'order-input',
         placeholder: '请输入',
         formatter: 'multipleToArray',
@@ -95,14 +103,6 @@ const formFields: FormField[] = [
     },
     {
         type: 'dateRanger',
-        name: ['purchase_plan_create_time_start', 'purchase_plan_create_time_end'],
-        label: '供应商订单生成时间',
-        placeholder: '请选择订单时间',
-        formatter: ['start_date', 'end_date'],
-        className: 'order-date-picker',
-    },
-    {
-        type: 'dateRanger',
         name: ['pay_time_start', 'pay_time_end'],
         label: '支付时间',
         className: 'order-date-picker',
@@ -125,6 +125,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [loading, setLoading] = useState(false);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [orderList, setOrderList] = useState<IWaitShipOrderItem[]>([]);
+    const orderListRef = useRef<IWaitShipOrderItem[]>([]);
+    const searchRef2 = useRef<JsonFormRef>(null);
+    const cacheList = useRef<any[]>([]);
 
     let currentSearchParams: IWaitShipSearch | null = null;
 
@@ -149,7 +152,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         setPage(params.page as number);
                         setPageSize(params.page_count as number);
                         setTotal(total);
-                        setOrderList(handleOrderList(list));
+                        _setOrderList(handleOrderList(list));
                     }
                 })
                 .finally(() => {
@@ -160,37 +163,64 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     );
 
     const handleOrderList = useCallback(list => {
-        return list.map((current: any) => {
-            const {
-                platformOrderTime,
-                purchasePlatformOrderId,
-                purchaseAmount,
-                purchaseOrderStatus,
-                purchaseOrderShippingStatus,
-                purchasePlanId,
-                orderGoodsId,
-                productId,
-                // purchasewaybillNo,
-                orderGoods,
-                orderInfo,
-            } = current;
-            const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
-            const { channelSource } = orderInfo;
-            return {
-                platformOrderTime,
-                purchasePlatformOrderId,
-                purchaseAmount,
-                orderGoodsStatus,
-                purchaseOrderStatus,
-                purchaseOrderShippingStatus,
-                purchasePlanId,
-                orderGoodsId,
-                orderCreateTime,
-                productId,
-                // purchasewaybillNo,
-                channelSource,
-            } as IWaitShipOrderItem;
-        });
+        cacheList.current = list;
+        const { showRecreated } = searchRef2.current?.getFieldsValue() ?? {};
+        return list
+            .filter((item: any) => {
+                if (!showRecreated) {
+                    return item.purchaseOrderStatus !== 6;
+                } else {
+                    return true;
+                }
+            })
+            .map((current: any) => {
+                const {
+                    platformOrderTime,
+                    purchasePlatformOrderId,
+                    purchaseAmount,
+                    purchaseOrderStatus,
+                    purchaseOrderShippingStatus,
+                    purchasePlanId,
+                    orderGoodsId,
+                    productId,
+                    orderGoods,
+                    orderInfo,
+                    productImageUrl,
+                    productName,
+                    productPddMerchantName,
+                    payTime,
+                    productSkuStyle,
+                    reserveStatus,
+                } = current;
+                const { orderGoodsStatus, createTime: orderCreateTime, commodityId } = orderGoods;
+                const { channelSource } = orderInfo;
+                return {
+                    platformOrderTime,
+                    purchasePlatformOrderId,
+                    purchaseAmount,
+                    orderGoodsStatus,
+                    purchaseOrderStatus,
+                    purchaseOrderShippingStatus,
+                    purchasePlanId,
+                    orderGoodsId,
+                    orderCreateTime,
+                    productId,
+                    // purchasewaybillNo,
+                    channelSource,
+                    productImageUrl,
+                    productName,
+                    productPddMerchantName,
+                    payTime,
+                    productSkuStyle,
+                    reserveStatus,
+                    commodityId,
+                } as IWaitShipOrderItem;
+            });
+    }, []);
+
+    const _setOrderList = useCallback(list => {
+        orderListRef.current = list;
+        setOrderList(list);
     }, []);
 
     const handleClickSearch = useCallback(() => {
@@ -236,20 +266,23 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         [],
     );
 
-    const _cancelPurchaseOrder = useCallback(() => {
-        return delPurchaseOrders({
-            order_goods_ids: selectedRowKeys as string[],
-        }).then(res => {
-            onSearch();
-            const { success, failed } = res.data;
-            if (success!.length) {
-                batchOperateSuccess('取消采购单', success);
-            }
-            if (failed!.length) {
-                batchOperateFail('取消采购单', failed);
-            }
-        });
-    }, [selectedRowKeys]);
+    const _cancelPurchaseOrder = useCallback(
+        (orderGoodsIds?: string[]) => {
+            return delPurchaseOrders({
+                order_goods_ids: orderGoodsIds || (selectedRowKeys as string[]),
+            }).then(res => {
+                onSearch();
+                const { success, failed } = res.data;
+                if (success!.length) {
+                    batchOperateSuccess('取消采购单', success);
+                }
+                if (failed!.length) {
+                    batchOperateFail('取消采购单', failed);
+                }
+            });
+        },
+        [selectedRowKeys],
+    );
 
     const _postExportWaitShip = useCallback((values: any) => {
         return postExportWaitShip({
@@ -292,48 +325,120 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const columns = useMemo<TableProps<IWaitShipOrderItem>['columns']>(() => {
         return [
             {
-                key: 'platformOrderTime',
-                title: '采购时间',
-                dataIndex: 'platformOrderTime',
+                key: 'operation',
+                title: '操作',
+                dataIndex: 'operation',
+                align: 'center',
+                width: 150,
+                fixed: 'left',
+                render: (value: string, item) => {
+                    return (
+                        <>
+                            <PopConfirmLoadingButton
+                                popConfirmProps={{
+                                    title: '确定要取消该采购订单吗？',
+                                    onConfirm: () => _cancelPurchaseOrder([item.orderGoodsId]),
+                                }}
+                                buttonProps={{
+                                    type: 'link',
+                                    children: '取消采购订单',
+                                }}
+                            />
+                            <CancelOrder
+                                key={'2'}
+                                orderGoodsIds={[item.orderGoodsId]}
+                                onReload={onSearch}
+                                getAllTabCount={getAllTabCount}
+                            >
+                                <Button type="link">取消销售订单</Button>
+                            </CancelOrder>
+                        </>
+                    );
+                },
+            },
+            {
+                key: 'orderCreateTime',
+                title: '订单生成时间',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderGoodsId',
+                title: '子订单ID',
+                dataIndex: 'orderGoodsId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                key: 'commodityId',
+                title: 'Commodity ID',
+                dataIndex: 'commodityId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                key: 'productName',
+                title: '商品名称',
+                dataIndex: 'productName',
+                align: 'center',
+                width: 180,
+            },
+            {
+                key: 'productImageUrl',
+                title: 'SKU 图片',
+                dataIndex: 'productImageUrl',
+                align: 'center',
+                width: 150,
+                render: value => {
+                    return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+                },
+            },
+            {
+                key: 'productSkuStyle',
+                title: '商品规格',
+                dataIndex: 'productSkuStyle',
+                align: 'center',
+                width: 150,
+                render: (value: string) => {
+                    let child: any = null;
+                    if (value) {
+                        try {
+                            const styleInfo = JSON.parse(value);
+                            child = (
+                                <>
+                                    {Object.keys(styleInfo).map(key => (
+                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                    ))}
+                                </>
+                            );
+                        } catch (err) {}
+                    }
+                    return child;
+                },
+            },
+            {
+                key: 'purchasePlatformOrderId',
+                title: '供应商订单ID',
+                dataIndex: 'purchasePlatformOrderId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                key: 'payTime',
+                title: '支付时间',
+                dataIndex: 'payTime',
                 align: 'center',
                 width: 120,
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'purchasePlatformOrderId',
-                title: '采购平台订单ID',
-                dataIndex: 'purchasePlatformOrderId',
+                key: 'productPddMerchantName',
+                title: '销售店铺名称',
+                dataIndex: 'productPddMerchantName',
                 align: 'center',
                 width: 120,
-            },
-            {
-                key: 'purchaseAmount',
-                title: '采购价',
-                dataIndex: 'purchaseAmount',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'channelSource',
-                title: '销售渠道',
-                dataIndex: 'channelSource',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'productId',
-                title: '中台商品ID',
-                dataIndex: 'productId',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'orderGoodsStatus',
-                title: '中台订单状态',
-                dataIndex: 'orderGoodsStatus',
-                align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(orderStatusOptionList, value),
             },
             {
                 key: 'purchaseOrderStatus',
@@ -344,34 +449,14 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
             },
             {
-                key: 'purchaseOrderShippingStatus',
-                title: '采购配送状态',
-                dataIndex: 'purchaseOrderShippingStatus',
+                key: 'reserveStatus',
+                title: '仓库库存预定状态',
+                dataIndex: 'reserveStatus',
                 align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(purchaseShippingOptionList, value),
-            },
-            {
-                key: 'purchasePlanId',
-                title: '计划子项ID',
-                dataIndex: 'purchasePlanId',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'orderGoodsId',
-                title: '中台子订单ID',
-                dataIndex: 'orderGoodsId',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'orderCreateTime',
-                title: '订单时间',
-                dataIndex: 'orderCreateTime',
-                align: 'center',
-                width: 120,
-                render: (value: string) => utcToLocal(value, ''),
+                width: 160,
+                render: (value: string, row: IPendingOrderItem) => {
+                    return getStatusDesc(purchaseReserveOptionList, value);
+                },
             },
         ];
     }, []);
@@ -396,11 +481,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 type="primary"
                 disabled={disabled}
                 className={formStyles.formBtn}
-                onClick={_cancelPurchaseOrder}
+                onClick={_cancelPurchaseOrder as any}
             >
-                取消采购单
+                取消采购订单
             </LoadingButton>,
             <CancelOrder
+                key={'2'}
                 orderGoodsIds={selectedRowKeys as string[]}
                 onReload={onSearch}
                 getAllTabCount={getAllTabCount}
@@ -411,7 +497,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     className={formStyles.formBtn}
                     disabled={selectedRowKeys.length === 0}
                 >
-                    取消渠道订单
+                    取消销售订单
                 </Button>
             </CancelOrder>,
         ];
@@ -425,6 +511,44 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         return (
             <>
                 {search}
+                <JsonForm
+                    ref={searchRef2}
+                    enableCollapse={false}
+                    initialValues={{
+                        purchase_fail_filter_type: 3,
+                    }}
+                    fieldList={[
+                        {
+                            type: 'checkboxGroup',
+                            name: 'showRecreated',
+                            options: [
+                                {
+                                    label: '展示已重新生成',
+                                    value: true,
+                                },
+                            ],
+                            onChange: (name: string, form: FormInstance) => {
+                                _setOrderList(handleOrderList(cacheList.current));
+                            },
+                            formatter: 'join',
+                        },
+                        {
+                            type: 'checkboxGroup',
+                            name: 'showRecreated',
+                            options: [
+                                {
+                                    label: '48小时无状态更新',
+                                    value: true,
+                                },
+                            ],
+                            onChange: (name: string, form: FormInstance) => {
+                                alert('发请求');
+                                // _setOrderList(handleOrderList(cacheList.current));
+                            },
+                            formatter: 'join',
+                        },
+                    ]}
+                />
                 <FitTable
                     bordered={true}
                     rowKey="orderGoodsId"

@@ -49,6 +49,7 @@ export declare interface IWaitPayOrderItem {
     order_goods_id: string;
     _rowspan?: number;
     _checked?: boolean;
+    _childIds?: string[];
 }
 
 export interface IWaitShipSearch extends IPagination {
