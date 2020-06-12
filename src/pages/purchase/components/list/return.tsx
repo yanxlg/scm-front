@@ -9,7 +9,7 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, Typography } from 'antd';
+import { Button, Tag, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -18,7 +18,12 @@ import { IPurchaseItem } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
-import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateType,
+    PurchaseCreateTypeList,
+    PurchaseMap,
+} from '@/config/dictionaries/Purchase';
 import ReturnModal from './returnModal';
 import Export from '@/components/Export';
 import classNames from 'classnames';
@@ -27,7 +32,7 @@ const { Paragraph } = Typography;
 const fieldList: FormField[] = [
     {
         label: '采购单ID',
-        type: 'input',
+        type: 'positiveInteger',
         name: 'purchase_order_goods_id',
     },
     {
@@ -85,6 +90,19 @@ const fieldList: FormField[] = [
         label: '商品名称',
         type: 'input',
         name: 'purchase_goods_name',
+    },
+    {
+        label: '采购单类型',
+        type: 'select',
+        name: 'origin',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...PurchaseCreateTypeList,
+        ],
     },
 ];
 
@@ -147,6 +165,9 @@ const Return = () => {
                 ref={formRef}
                 enableCollapse={false}
                 labelClassName={styles.formItem}
+                initialValues={{
+                    origin: '',
+                }}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
@@ -178,9 +199,16 @@ const Return = () => {
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
+                className: 'break-all',
                 render: (value, row) => {
+                    const { origin = PurchaseCreateType.Auto } = row;
                     return {
-                        children: value,
+                        children: (
+                            <>
+                                {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                                {value}
+                            </>
+                        ),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },

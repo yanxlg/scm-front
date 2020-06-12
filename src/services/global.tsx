@@ -4,6 +4,7 @@ import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
+import { IGood } from '@/interface/ILocalGoods';
 
 // 1--品类预估模板下载，2---运费价卡模板下载
 type IDownloadFileType = '1' | '2';
@@ -103,3 +104,27 @@ export const queryGoodsSourceList = singlePromiseWrap(() => {
         return [];
     });
 });
+
+export const queryWarehourseById = (id: string) => {
+    return request.get<
+        IResponse<{
+            address1: string;
+            address2: string;
+            city: string;
+            consignee: string;
+            country: string;
+            country_code: string;
+            phone_number: string;
+            province: string;
+            zip_code: string;
+        }>
+    >(GlobalApiPath.QueryWarehourse.replace(':warehourse_id', id));
+};
+
+export const queryGoodBySkuId = (commodity_sku_id: string) => {
+    return request.post<IResponse<IGood>>(GlobalApiPath.QueryGoodBySkuId, {
+        data: {
+            commodity_sku_id: commodity_sku_id,
+        },
+    });
+};

@@ -5,19 +5,30 @@ import {
     FitTable,
     JsonForm,
     LoadingButton,
+    PopConfirmLoadingButton,
     useList,
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal, Typography } from 'antd';
+import { Button, message, Modal, Typography, Tag } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { applyReturn, exportPurchaseList, queryPurchaseList } from '@/services/purchase';
+import {
+    applyReturn,
+    cancelPurchaseByUser,
+    exportPurchaseList,
+    queryPurchaseList,
+} from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
-import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateType,
+    PurchaseCreateTypeList,
+    PurchaseMap,
+} from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from './connectModal';
 import Export from '@/components/Export';
@@ -29,7 +40,7 @@ const { Paragraph } = Typography;
 const fieldList: FormField[] = [
     {
         label: '采购单ID',
-        type: 'input',
+        type: 'positiveInteger',
         name: 'purchase_order_goods_id',
     },
     {
@@ -51,6 +62,19 @@ const fieldList: FormField[] = [
         label: '商品名称',
         type: 'input',
         name: 'purchase_goods_name',
+    },
+    {
+        label: '采购单类型',
+        type: 'select',
+        name: 'origin',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...PurchaseCreateTypeList,
+        ],
     },
 ];
 
@@ -129,6 +153,9 @@ const PendingShipped = () => {
                 ref={formRef}
                 enableCollapse={false}
                 labelClassName={styles.formItem}
+                initialValues={{
+                    origin: '',
+                }}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
@@ -171,6 +198,11 @@ const PendingShipped = () => {
         setConnect(false);
     }, []);
 
+    const onCancelPurchaseByUser = useCallback((purchaseOrderGoodsId: string) => {
+        return cancelPurchaseByUser(purchaseOrderGoodsId).then(() => {
+            onReload();
+        });
+    }, []);
     const columns = useMemo(() => {
         return [
             {
@@ -180,14 +212,29 @@ const PendingShipped = () => {
                 width: '150px',
                 align: 'center',
                 render: (_, item) => {
+                    const { origin = PurchaseCreateType.Auto, purchaseOrderGoodsId } = item;
                     return (
                         <>
                             <Button type="link" onClick={() => showConnect(item)}>
                                 关联运单号
                             </Button>
-                            <Button type="link" onClick={() => applyReturnService(item)}>
-                                申请退款
-                            </Button>
+                            {origin === PurchaseCreateType.Auto ? (
+                                <Button type="link" onClick={() => applyReturnService(item)}>
+                                    申请退款
+                                </Button>
+                            ) : (
+                                <PopConfirmLoadingButton
+                                    popConfirmProps={{
+                                        title: '确定要取消该采购单？',
+                                        onConfirm: () =>
+                                            onCancelPurchaseByUser(purchaseOrderGoodsId),
+                                    }}
+                                    buttonProps={{
+                                        type: 'link',
+                                        children: '取消采购单',
+                                    }}
+                                />
+                            )}
                         </>
                     );
                 },
@@ -197,6 +244,16 @@ const PendingShipped = () => {
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
+                className: 'break-all',
+                render: (_, item) => {
+                    const { origin = PurchaseCreateType.Auto } = item;
+                    return (
+                        <>
+                            {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                            {_}
+                        </>
+                    );
+                },
             },
             {
                 title: '采购单状态',

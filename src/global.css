@@ -24,3 +24,8 @@ body {
   max-height: 400px;
   overflow: auto;
 }
+
+
+.break-all{
+    word-break: break-all;
+}
