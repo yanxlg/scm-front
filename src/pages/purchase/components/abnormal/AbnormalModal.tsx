@@ -3,7 +3,7 @@ import { Modal, Form, Checkbox, InputNumber, Input, message, Select } from 'antd
 import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 import { setPurchaseException } from '@/services/purchase';
 
-import styles from '../_abnormal.less';
+import styles from '../../_abnormal.less';
 import { carrierList } from '@/config/global';
 
 const rules = [{ required: true, message: '请输入！' }];

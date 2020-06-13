@@ -1,25 +1,29 @@
-import React, { useMemo, useState, useCallback, useRef } from 'react';
-import { Button } from 'antd';
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
+import { Modal, Input, message, Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { useList, FitTable, JsonForm, LoadingButton, AutoEnLargeImg } from 'react-components';
-import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
+import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
+import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
-    IWaybillExceptionStatusKey,
     IWaybillExceptionTypeKey,
+    IWaybillExceptionStatusKey,
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
+import { AutoEnLargeImg } from 'react-components';
+import RelatedPurchaseModal from './RelatedPurchaseModal';
+import AbnormalModal from './AbnormalModal';
 import {
     waybillExceptionTypeList,
     defaultOptionItem,
-    waybillExceptionStatusMap,
     waybillExceptionTypeMap,
+    waybillExceptionStatusMap,
 } from '@/enums/PurchaseEnum';
-import { utcToLocal } from 'react-components/es/utils/date';
+import TextArea from 'antd/lib/input/TextArea';
+// import { utcToLocal } from 'react-components/es/utils/date';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import Export from '@/components/Export';
-import DetailModal from './DetailModal';
 
-import styles from '../_abnormal.less';
+import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 
 const fieldList: FormField[] = [
@@ -51,11 +55,19 @@ const fieldList: FormField[] = [
     },
 ];
 
-const PaneAbnormalEnd: React.FC = props => {
-    const formRef = useRef<JsonFormRef>(null);
-    const [exportStatus, setExportStatus] = useState(false);
-    const [detailStatus, setDetailStatus] = useState(false);
+interface IProps {
+    penddingCount: number;
+    getExceptionCount(): void;
+}
+
+const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCount }) => {
+    const formRef1 = useRef<JsonFormRef>(null);
+    const formRef2 = useRef<JsonFormRef>(null);
+    const textareaRef = useRef<TextArea>(null);
+    const [relatedPurchaseStatus, setRelatedPurchaseStatus] = useState(false);
+    const [abnormalStatus, setAbnormalStatus] = useState(false);
     const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
+    const [exportStatus, setExportStatus] = useState(false);
     const {
         loading,
         pageNumber,
@@ -67,26 +79,78 @@ const PaneAbnormalEnd: React.FC = props => {
         dataSource,
     } = useList<IPurchaseAbnormalItem>({
         queryList: getAbnormalAllList,
-        formRef: formRef,
+        formRef: [formRef1, formRef2],
         extraQuery: {
-            waybill_exception_status: 3,
+            waybill_exception_status: 1,
         },
     });
 
-    const showDetail = (row: IPurchaseAbnormalItem) => {
-        setDetailStatus(true);
-        setCurrentRecord(row);
+    const onRefresh = useCallback(() => {
+        getExceptionCount();
+        onReload();
+    }, []);
+
+    const showRelatedPurchase = () => {
+        setRelatedPurchaseStatus(true);
     };
 
-    const hideDetail = useCallback(() => {
-        setDetailStatus(false);
+    const hideRelatedPurchase = useCallback(() => {
+        setRelatedPurchaseStatus(false);
+    }, []);
+
+    const showAbnormal = (record: IPurchaseAbnormalItem) => {
+        setAbnormalStatus(true);
+        setCurrentRecord(record);
+    };
+
+    const hideAbnormal = useCallback(() => {
+        setAbnormalStatus(false);
+    }, []);
+
+    const showDiscardModal = useCallback((record: IPurchaseAbnormalItem) => {
+        const { waybillExceptionSn } = record;
+        Modal.confirm({
+            title: '废弃异常单',
+            icon: <QuestionCircleOutlined />,
+            content: (
+                <>
+                    <p>是否确认废弃异常单，通知仓库不做处理？</p>
+                    <Input.TextArea ref={textareaRef} placeholder="备注" />
+                </>
+            ),
+            onOk: () => {
+                // console.log(textareaRef.current?.state.value);
+                const remarks = textareaRef.current?.state.value;
+                if (!remarks) {
+                    message.error('请填写备注！！！');
+                    return Promise.reject();
+                }
+                return setDiscardAbnormalOrder({
+                    waybill_exception_sn: waybillExceptionSn,
+                    abnormal_operate_type: '废弃',
+                    remarks,
+                }).then(() => {
+                    onReload();
+                });
+            },
+        });
+    }, []);
+
+    // 显示关联采购单
+    const hasRelatedPurchase = useCallback((waybillExceptionType: string) => {
+        return ['101', '103'].indexOf(waybillExceptionType) > -1;
+    }, []);
+
+    const hasExceptionHandle = useCallback((waybillExceptionType: string) => {
+        return ['102', '104', '105'].indexOf(waybillExceptionType) > -1;
     }, []);
 
     const onExport = useCallback((values: any) => {
         return downloadExcel({
             query: {
-                ...formRef.current?.getFieldsValue(),
-                waybill_exception_status: 3,
+                ...formRef1.current?.getFieldsValue(),
+                ...formRef2.current?.getFieldsValue(),
+                waybill_exception_status: 1,
             },
             module: 5,
             ...values,
@@ -100,11 +164,26 @@ const PaneAbnormalEnd: React.FC = props => {
                 dataIndex: '_operate',
                 align: 'center',
                 width: 150,
-                render: (_, row) => {
+                render: (_, row: IPurchaseAbnormalItem) => {
+                    const { waybillExceptionType } = row;
                     return (
-                        <Button type="link" onClick={() => showDetail(row)}>
-                            查看详情
-                        </Button>
+                        <>
+                            <div>
+                                <a onClick={() => showDiscardModal(row)}>废弃</a>
+                            </div>
+                            {hasRelatedPurchase(waybillExceptionType) && (
+                                <div>
+                                    <a onClick={() => showRelatedPurchase()}>关联采购单</a>
+                                </div>
+                            )}
+                            {hasExceptionHandle(waybillExceptionType) && (
+                                <div>
+                                    <a type="link" onClick={() => showAbnormal(row)}>
+                                        异常处理
+                                    </a>
+                                </div>
+                            )}
+                        </>
                     );
                 },
             },
@@ -166,15 +245,23 @@ const PaneAbnormalEnd: React.FC = props => {
                 align: 'center',
                 width: 150,
             },
-            {
-                title: '完结时间',
-                dataIndex: 'finishedTime',
-                align: 'center',
-                width: 150,
-                render: val => utcToLocal(val),
-            },
         ];
     }, []);
+
+    const fieldCheckboxList = useMemo<FormField[]>(() => {
+        return [
+            {
+                type: 'checkbox',
+                name: 'exec_more_time',
+                label: `24小时未处理（${penddingCount}）`,
+                formItemClassName: '',
+                formatter: (val: boolean) => (val ? 24 : undefined),
+                onChange: () => {
+                    onSearch();
+                },
+            },
+        ];
+    }, [penddingCount]);
 
     const pagination = useMemo(() => {
         return {
@@ -185,6 +272,18 @@ const PaneAbnormalEnd: React.FC = props => {
             position: ['topRight', 'bottomRight'],
         } as any;
     }, [loading]);
+
+    const toolBarRender = useCallback(() => {
+        return [
+            <JsonForm
+                key="1"
+                containerClassName=""
+                enableCollapse={false}
+                fieldList={fieldCheckboxList}
+                ref={formRef2}
+            ></JsonForm>,
+        ];
+    }, [fieldCheckboxList]);
 
     const exportModalComponent = useMemo(() => {
         return (
@@ -204,7 +303,7 @@ const PaneAbnormalEnd: React.FC = props => {
                 <JsonForm
                     labelClassName={styles.label}
                     fieldList={fieldList}
-                    ref={formRef}
+                    ref={formRef1}
                     initialValues={{
                         waybill_exception_type: 100,
                     }}
@@ -222,23 +321,39 @@ const PaneAbnormalEnd: React.FC = props => {
                 <FitTable
                     bordered
                     rowKey="waybillExceptionSn"
+                    // className="order-table"
                     loading={loading}
                     columns={columns}
+                    // rowSelection={rowSelection}
                     dataSource={dataSource}
                     scroll={{ x: 'max-content' }}
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
+                    toolBarRender={toolBarRender}
                 />
-                <DetailModal
-                    visible={detailStatus}
-                    onCancel={hideDetail}
+                <RelatedPurchaseModal
+                    visible={relatedPurchaseStatus}
+                    onCancel={hideRelatedPurchase}
+                    onRefresh={onRefresh}
+                />
+                <AbnormalModal
                     currentRecord={currentRecord}
+                    visible={abnormalStatus}
+                    onCancel={hideAbnormal}
+                    onRefresh={onRefresh}
                 />
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, exportModalComponent, detailStatus, currentRecord]);
+    }, [
+        dataSource,
+        loading,
+        relatedPurchaseStatus,
+        abnormalStatus,
+        currentRecord,
+        exportModalComponent,
+    ]);
 };
 
-export default PaneAbnormalEnd;
+export default PaneAbnormalPending;

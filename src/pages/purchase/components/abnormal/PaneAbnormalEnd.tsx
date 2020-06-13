@@ -1,30 +1,26 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { Modal, Input, message, Button, Select } from 'antd';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
+import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
+import { useList, FitTable, JsonForm, LoadingButton, AutoEnLargeImg } from 'react-components';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
-    IWaybillExceptionTypeKey,
     IWaybillExceptionStatusKey,
+    IWaybillExceptionTypeKey,
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
-import { AutoEnLargeImg } from 'react-components';
 import {
     waybillExceptionTypeList,
     defaultOptionItem,
-    waybillExceptionTypeMap,
     waybillExceptionStatusMap,
+    waybillExceptionTypeMap,
 } from '@/enums/PurchaseEnum';
-import TextArea from 'antd/lib/input/TextArea';
-// import { utcToLocal } from 'react-components/es/utils/date';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { utcToLocal } from 'react-components/es/utils/date';
 import Export from '@/components/Export';
+import DetailModal from './DetailModal';
 
-import styles from '../_abnormal.less';
+import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-
-const { Option } = Select;
 
 const fieldList: FormField[] = [
     {
@@ -51,53 +47,46 @@ const fieldList: FormField[] = [
         type: 'input',
         name: 'waybill_no',
         label: '运单号',
-        placeholder: '请输入',
+        placeholder: '请输入运单号',
     },
 ];
 
-interface IProps {
-    penddingCount: number;
-    getExceptionCount(): void;
-}
-
-const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount }) => {
+const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
-    const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const [exportStatus, setExportStatus] = useState(false);
+    const [detailStatus, setDetailStatus] = useState(false);
+    const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const {
         loading,
         pageNumber,
         pageSize,
         total,
-        selectedRowKeys,
-        dataSource,
         onSearch,
         onReload,
         onChange,
-        setSelectedRowKeys,
+        dataSource,
     } = useList<IPurchaseAbnormalItem>({
         queryList: getAbnormalAllList,
         formRef: formRef,
         extraQuery: {
-            waybill_exception_status: 1,
+            waybill_exception_status: 3,
         },
     });
 
-    const onSelectedRowKeysChange = useCallback(keys => {
-        // console.log(111111, args);
-        setSelectedRowKeys(keys);
-    }, []);
+    const showDetail = (row: IPurchaseAbnormalItem) => {
+        setDetailStatus(true);
+        setCurrentRecord(row);
+    };
 
-    const onRefresh = useCallback(() => {
-        getExceptionCount();
-        onReload();
+    const hideDetail = useCallback(() => {
+        setDetailStatus(false);
     }, []);
 
     const onExport = useCallback((values: any) => {
         return downloadExcel({
             query: {
                 ...formRef.current?.getFieldsValue(),
-                waybill_exception_status: 1,
+                waybill_exception_status: 3,
             },
             module: 5,
             ...values,
@@ -111,16 +100,11 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 dataIndex: '_operate',
                 align: 'center',
                 width: 150,
-                render: (_, row: IPurchaseAbnormalItem) => {
+                render: (_, row) => {
                     return (
-                        <>
-                            <div>
-                                <a onClick={() => {}}>审核通过</a>
-                            </div>
-                            <div>
-                                <a onClick={() => {}}>审核驳回</a>
-                            </div>
-                        </>
+                        <Button type="link" onClick={() => showDetail(row)}>
+                            查看详情
+                        </Button>
                     );
                 },
             },
@@ -134,21 +118,8 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 title: '异常类型',
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
-                width: 180,
-                // render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
-                render: (val: IWaybillExceptionTypeKey) => {
-                    return val === '101' ? (
-                        waybillExceptionTypeMap[val]
-                    ) : (
-                        <Select defaultValue={Number(val)} className={styles.select}>
-                            {waybillExceptionTypeList.map(({ name, value }) => (
-                                <Option value={value} key={value}>
-                                    {name}
-                                </Option>
-                            ))}
-                        </Select>
-                    );
-                },
+                width: 150,
+                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
             },
             {
                 title: '异常单状态',
@@ -171,6 +142,12 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                     return <AutoEnLargeImg srcList={list} className={styles.imgCell} />;
                 },
             },
+            // {
+            //     title: '异常数量',
+            //     dataIndex: 'quantity',
+            //     align: 'center',
+            //     width: 150,
+            // },
             {
                 title: '异常描述',
                 dataIndex: 'waybillExceptionDescription',
@@ -184,16 +161,17 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 width: 150,
             },
             {
-                title: '供应商订单号',
-                dataIndex: 'xxx',
-                align: 'center',
-                width: 150,
-            },
-            {
                 title: '运单号',
                 dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
+            },
+            {
+                title: '完结时间',
+                dataIndex: 'finishedTime',
+                align: 'center',
+                width: 150,
+                render: val => utcToLocal(val),
             },
         ];
     }, []);
@@ -208,30 +186,6 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        const disabled = selectedRowKeys.length === 0;
-        return [
-            <LoadingButton
-                key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={onSearch}
-            >
-                审核通过
-            </LoadingButton>,
-            <LoadingButton
-                key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={onSearch}
-            >
-                审核驳回
-            </LoadingButton>,
-        ];
-    }, [selectedRowKeys]);
-
     const exportModalComponent = useMemo(() => {
         return (
             <Export
@@ -242,15 +196,6 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
             />
         );
     }, [exportStatus]);
-
-    const rowSelection = useMemo(() => {
-        return {
-            fixed: true,
-            columnWidth: '50px',
-            selectedRowKeys: selectedRowKeys,
-            onChange: onSelectedRowKeysChange,
-        };
-    }, [selectedRowKeys]);
 
     return useMemo(() => {
         // console.log('dataSource', dataSource);
@@ -277,21 +222,23 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 <FitTable
                     bordered
                     rowKey="waybillExceptionSn"
-                    // className="order-table"
                     loading={loading}
                     columns={columns}
-                    rowSelection={rowSelection}
                     dataSource={dataSource}
                     scroll={{ x: 'max-content' }}
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
-                    toolBarRender={toolBarRender}
+                />
+                <DetailModal
+                    visible={detailStatus}
+                    onCancel={hideDetail}
+                    currentRecord={currentRecord}
                 />
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, currentRecord, exportModalComponent, rowSelection]);
+    }, [dataSource, loading, exportModalComponent, detailStatus, currentRecord]);
 };
 
-export default PaneAbnormalReview;
+export default PaneAbnormalEnd;

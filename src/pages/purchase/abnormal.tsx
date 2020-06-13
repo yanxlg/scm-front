@@ -1,12 +1,12 @@
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import { Tabs } from 'antd';
 import Container from '@/components/Container';
-import PaneAbnormalAll from './components/PaneAbnormalAll';
-import PaneAbnormalPending from './components/PaneAbnormalPending';
-import PaneAbnormalProcessing from './components/PaneAbnormalProcessing';
-import PaneAbnormalEnd from './components/PaneAbnormalEnd';
+import PaneAbnormalAll from './components/abnormal/PaneAbnormalAll';
+import PaneAbnormalPending from './components/abnormal/PaneAbnormalPending';
+import PaneAbnormalProcessing from './components/abnormal/PaneAbnormalProcessing';
+import PaneAbnormalEnd from './components/abnormal/PaneAbnormalEnd';
 import { getExceptionCount } from '@/services/purchase';
-import PaneAbnormalReview from './components/PaneAbnormalReview';
+import PaneAbnormalReview from './components/abnormal/PaneAbnormalReview';
 
 const { TabPane } = Tabs;
 
@@ -44,7 +44,7 @@ const Purchase: React.FC = props => {
         const { penddingCount, allPenddingCount, execingCount, allExecingCount } = countInfo;
         return (
             <Container>
-                <Tabs defaultActiveKey="2" type="card" className="tabs-margin-none">
+                <Tabs defaultActiveKey="4" type="card" className="tabs-margin-none">
                     <TabPane tab="全部" key="1">
                         <PaneAbnormalAll getExceptionCount={getExceptionCount} />
                     </TabPane>

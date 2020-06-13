@@ -3,7 +3,7 @@ import { Modal } from 'antd';
 import { Icons } from '@/components/Icon';
 import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 
-import styles from '../_abnormal.less';
+import styles from '../../_abnormal.less';
 
 interface IProps {
     visible: boolean;
