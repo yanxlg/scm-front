@@ -775,6 +775,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
+                    minHeight={600}
                     pagination={
                         {
                             current: page,
