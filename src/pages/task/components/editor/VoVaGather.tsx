@@ -11,12 +11,102 @@ import { EmptyObject } from '@/config/global';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { dateToUnix } from 'react-components/es/utils/date';
-import { queryShopList } from '@/services/global';
 import { Store } from 'rc-field-form/es/interface';
 import { TaskChannelEnum } from '@/config/dictionaries/Task';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
-import { scrollToFirstError } from '@/utils/common';
 import { Button } from 'antd';
+import styles from '@/styles/_task.less';
+import classNames from 'classnames';
+
+const fdCountries = [
+    {
+        label: 'DE',
+        value: 'DE',
+    },
+    {
+        label: 'FR',
+        value: 'FR',
+    },
+    {
+        label: 'US',
+        value: 'US',
+    },
+    {
+        label: 'GB',
+        value: 'GB',
+    },
+    {
+        label: 'IT',
+        value: 'IT',
+    },
+    {
+        label: 'SE',
+        value: 'SE',
+    },
+    {
+        label: 'ES',
+        value: 'ES',
+    },
+    {
+        label: 'PL',
+        value: 'PL',
+    },
+    {
+        label: 'DK',
+        value: 'DK',
+    },
+    {
+        label: 'NO',
+        value: 'NO',
+    },
+    {
+        label: 'NA',
+        value: 'NA',
+    },
+    {
+        label: 'BE',
+        value: 'BE',
+    },
+    {
+        label: 'NL',
+        value: 'NL',
+    },
+    {
+        label: 'CH',
+        value: 'CH',
+    },
+    {
+        label: 'RO',
+        value: 'RO',
+    },
+];
+
+const VoVaCountries = [
+    {
+        label: 'FR',
+        value: 'FR',
+    },
+    {
+        label: 'DE',
+        value: 'DE',
+    },
+    {
+        label: 'IT',
+        value: 'IT',
+    },
+    {
+        label: 'GB',
+        value: 'GB',
+    },
+    {
+        label: 'ES',
+        value: 'ES',
+    },
+    {
+        label: 'US',
+        value: 'US',
+    },
+];
 
 const fieldList: FormField[] = [
     {
@@ -52,98 +142,83 @@ const fieldList: FormField[] = [
             },
         ],
         onChange: (name, form) => {
-            form.resetFields(['country_code']);
+            form.resetFields(['country_code', 'checkAll']);
         },
     },
     {
-        type: 'dynamic',
-        shouldUpdate: (prevValues: Store, nextValues: Store) => {
-            return prevValues.channel !== nextValues.channel;
-        },
-        dynamic: form => {
-            const channel = form.getFieldValue('channel');
-            return {
+        type: 'layout',
+        className: formStyles.formItem,
+        fieldList: [
+            {
                 type: 'checkboxGroup',
                 label: '爬取国家',
-                name: 'country_code',
-                options:
-                    channel === TaskChannelEnum.VOVA
-                        ? [
-                              {
-                                  label: 'FR',
-                                  value: 'FR',
-                              },
-                              {
-                                  label: 'DE',
-                                  value: 'DE',
-                              },
-                              {
-                                  label: 'IT',
-                                  value: 'IT',
-                              },
-                              {
-                                  label: 'GB',
-                                  value: 'GB',
-                              },
-                              {
-                                  label: 'ES',
-                                  value: 'ES',
-                              },
-                              {
-                                  label: 'US',
-                                  value: 'US',
-                              },
-                          ]
-                        : [
-                              {
-                                  label: 'DE',
-                                  value: 'DE',
-                              },
-                              {
-                                  label: 'FR',
-                                  value: 'FR',
-                              },
-                              {
-                                  label: 'US',
-                                  value: 'US',
-                              },
-                              {
-                                  label: 'GB',
-                                  value: 'GB',
-                              },
-                              {
-                                  label: 'IT',
-                                  value: 'IT',
-                              },
-                              {
-                                  label: 'SE',
-                                  value: 'SE',
-                              },
-                              {
-                                  label: 'ES',
-                                  value: 'ES',
-                              },
-                              {
-                                  label: 'PL',
-                                  value: 'PL',
-                              },
-                              {
-                                  label: 'DK',
-                                  value: 'DK',
-                              },
-                              {
-                                  label: 'NO',
-                                  value: 'NO',
-                              },
-                          ],
-                rules: [
+                name: 'checkAll',
+                required: true,
+                options: [
                     {
-                        required: true,
-                        message: '请选择爬取国家',
+                        label: '全选',
+                        value: 'all',
                     },
                 ],
-            };
-        },
+                formItemClassName: classNames(formStyles.formItem, styles.taskCheckAll),
+                onChange: (name, form) => {
+                    const checkedAll = form.getFieldValue('checkAll');
+                    const channel = form.getFieldValue('channel');
+                    if (checkedAll && checkedAll.indexOf('all') > -1) {
+                        form.setFieldsValue({
+                            country_code:
+                                channel === TaskChannelEnum.VOVA
+                                    ? VoVaCountries.map(item => item.value)
+                                    : fdCountries.map(item => item.value),
+                        });
+                    } else {
+                        form.setFieldsValue({
+                            country_code: [],
+                        });
+                    }
+                },
+            },
+            {
+                type: 'dynamic',
+                shouldUpdate: (prevValues: Store, nextValues: Store) => {
+                    return prevValues.channel !== nextValues.channel;
+                },
+                dynamic: form => {
+                    const channel = form.getFieldValue('channel');
+                    const options = channel === TaskChannelEnum.VOVA ? VoVaCountries : fdCountries;
+
+                    return {
+                        type: 'checkboxGroup',
+                        label: '爬取国家',
+                        name: 'country_code',
+                        options: options,
+                        formItemClassName: classNames(
+                            'form-hide-label',
+                            formStyles.formItem,
+                            styles.taskCheckAll,
+                        ),
+                        rules: [
+                            {
+                                required: true,
+                                message: '请选择爬取国家',
+                            },
+                        ],
+                        onChange: (name, form) => {
+                            const country_code = form.getFieldValue('country_code');
+                            if (country_code.length === options.length) {
+                                form.setFieldsValue({
+                                    checkAll: ['all'],
+                                });
+                            } else {
+                                form.setFieldsValue({
+                                    checkAll: [],
+                                });
+                            }
+                        },
+                    };
+                },
+            },
+        ],
     },
 
     {
