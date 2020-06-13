@@ -324,6 +324,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             defaultHide: true,
         },
+        {
+            key: 'purchasePlatform',
+            title: '商品渠道',
+            dataIndex: 'purchasePlatform',
+            align: 'center',
+            width: 120,
+        },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -428,13 +435,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 148,
             render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
-        },
-        {
-            key: 'purchasePlatform',
-            title: '采购平台',
-            dataIndex: 'purchasePlatform',
-            align: 'center',
-            width: 120,
         },
         // // 勾选展示 - 待补充
         // {

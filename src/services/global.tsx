@@ -1,6 +1,11 @@
 import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
-import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
+import {
+    IResponse,
+    ISHopList,
+    IExportExcelReqData,
+    IOnsaleInterceptStoreRes,
+} from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
@@ -127,4 +132,15 @@ export const queryGoodBySkuId = (commodity_sku_id: string) => {
             commodity_sku_id: commodity_sku_id,
         },
     });
+};
+
+export const queryOnsaleInterceptStore = (purchase_channel?: string) => {
+    return request.get<IResponse<IOnsaleInterceptStoreRes>>(
+        GlobalApiPath.QueryOnsaleInterceptStore,
+        {
+            params: {
+                purchase_channel,
+            },
+        },
+    );
 };
