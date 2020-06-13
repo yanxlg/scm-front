@@ -148,15 +148,34 @@ const columns: ColumnsType<object> = [
         align: 'center',
     },
     {
-        width: 120,
-        title: '在架商品数',
+        width: 150,
+        title: '平均在售商品数',
         dataIndex: 'onsaleGoodsNum',
         align: 'center',
     },
     {
-        width: 120,
-        title: '有销量商品数',
+        width: 150,
+        title: '平均有销量商品数',
         dataIndex: 'saledGoodsNum',
+        align: 'center',
+    },
+    {
+        width: 120,
+        title: '动销率',
+        dataIndex: 'pinRate',
+        align: 'center',
+        render: (val: string) => `${Number(val) * 100}%`,
+    },
+    {
+        width: 120,
+        title: '上架商品数',
+        dataIndex: 'publishedGoodsNum',
+        align: 'center',
+    },
+    {
+        width: 120,
+        title: '下架商品数',
+        dataIndex: 'unpublishedGoodsNum',
         align: 'center',
     },
 ];
@@ -484,7 +503,7 @@ const Overview: React.FC = props => {
                                 <Row className={styles.secondLine}>
                                     <Col span={6}>
                                         <Statistic
-                                            title="有销量的商品数"
+                                            title="平均在售商品数"
                                             value={saledGoodsNum}
                                             valueStyle={{
                                                 fontWeight: 'bold',
@@ -506,7 +525,7 @@ const Overview: React.FC = props => {
                                     </Col>
                                     <Col span={6}>
                                         <Statistic
-                                            title="在架商品数"
+                                            title="平均有销量商品数"
                                             value={onsaleGoodsNum}
                                             valueStyle={{
                                                 // fontSize: '44px',
