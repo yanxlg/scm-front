@@ -467,7 +467,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 140,
             render: (value: string) => {
-                return FinalCancelMap[value as FinalCancelStatus] || '未知原因';
+                return value === '0'
+                    ? ''
+                    : FinalCancelMap[value as FinalCancelStatus] || '未知原因';
             },
             defaultHide: true,
         },
