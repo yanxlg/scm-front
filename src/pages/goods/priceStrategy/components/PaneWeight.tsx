@@ -28,14 +28,11 @@ const _getCatagoryList = () =>
 
 const formFields: FormField[] = [
     {
-        type: 'select',
+        type: 'treeSelect',
         label: '一级品类',
         name: 'first_category',
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
         optionList: _getCatagoryList,
         onChange: (name, form) => {
             form.resetFields(['second_category']);
@@ -44,14 +41,11 @@ const formFields: FormField[] = [
         // formatter: 'join',
     },
     {
-        type: 'select',
+        type: 'treeSelect',
         label: '二级品类',
         name: 'second_category',
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
         optionListDependence: {
             name: 'first_category',
             key: 'children',
@@ -63,14 +57,11 @@ const formFields: FormField[] = [
         // formatter: 'join',
     },
     {
-        type: 'select',
+        type: 'treeSelect',
         label: '三级品类',
         name: 'third_category',
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
         optionListDependence: {
             name: ['first_category', 'second_category'],
             key: 'children',
