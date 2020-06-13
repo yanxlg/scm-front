@@ -523,7 +523,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         labelClassName="order-all-label"
                         initialValues={this.initialValues}
                         // enableCollapse={false}
-                        defaultCollapse={false}
+                        // defaultCollapse={false}
                     >
                         <div>
                             <LoadingButton
