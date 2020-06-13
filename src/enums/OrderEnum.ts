@@ -131,7 +131,21 @@ export const FinalCancelMap = {
     other_failed_reason: '未知原因',
 };
 
-export const finalCancelStatusList = transOptionList(FinalCancelMap);
+export const finalCancelStatusList = [
+    { name: 'sku已售罄', value: '410031' },
+    { name: '商品已售罄', value: '41003' },
+    { name: '采购价异常', value: '100' },
+    { name: '中台商品缺失', value: '888' },
+    { name: '预售商品', value: '10013' },
+    { name: '海淘商品', value: '10012' },
+    { name: '特殊商品无需拍单', value: '1001' },
+    { name: '不可合并', value: '10011' },
+    { name: '关键字拦截', value: '10014' },
+    { name: '未登录', value: '40001' },
+    { name: '待支付订单过多', value: '46024' },
+    { name: '拍单超时', value: '1002' },
+    { name: '未知原因', value: 'other_failed_reason' },
+];
 
 export type FinalCancelStatus = keyof typeof FinalCancelMap;
 
