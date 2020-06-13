@@ -45,7 +45,7 @@ const formFields2: FormField[] = [
         label: '店铺ID',
         placeholder: '请输入',
         formatter: 'multipleToArray',
-        rules: [{ required: true, message: '不能为空' }],
+        rules: [{ required: true, message: '请输入店铺ID' }],
     },
     {
         type: 'textarea',
@@ -53,7 +53,7 @@ const formFields2: FormField[] = [
         label: '拉给原因',
         placeholder: '请输入',
         className: styles.reason,
-        rules: [{ required: true, message: '不能为空' }],
+        rules: [{ required: true, message: '请输入拉黑店铺的原因' }],
     },
 ];
 
