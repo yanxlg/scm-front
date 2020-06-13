@@ -98,7 +98,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                                 <PanePendingReview getAllTabCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
-                        <TabPane tab={`拍单中（${penddingOrderCount}）`} key="2">
+                        <TabPane tab={`待拍单（${penddingOrderCount}）`} key="2">
                             <div className="order-tab-content">
                                 <PanePendingOrder getAllTabCount={this.getAllTabCount} />
                             </div>

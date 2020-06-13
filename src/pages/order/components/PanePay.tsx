@@ -335,7 +335,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchase_order_time',
-                title: '采购订单生成时间',
+                title: '采购计划生成时间',
                 dataIndex: 'purchase_order_time',
                 align: 'center',
                 width: 150,

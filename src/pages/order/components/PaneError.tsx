@@ -313,7 +313,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'platformSendOrderTime',
-            title: '采购订单生成时间',
+            title: '采购计划生成时间',
             dataIndex: 'platformSendOrderTime',
             align: 'center',
             width: 120,

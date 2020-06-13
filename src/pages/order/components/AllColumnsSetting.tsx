@@ -56,7 +56,7 @@ const purchaseGroupList = [
     // { key: '', name: '采购店铺名称' },
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },
-    { key: 'purchaseCreateTime', name: '采购订单生成时间' },
+    { key: 'purchaseCreateTime', name: '采购计划生成时间' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
     { key: 'purchasePlatformOrderId', name: '供应商订单ID' },
     // { key: '', name: '采购渠道订单ID' },
