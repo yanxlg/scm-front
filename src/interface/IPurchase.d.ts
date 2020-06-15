@@ -117,6 +117,7 @@ export declare interface IPurchaseItem {
         transportationInventory: number;
         warehouseId: string;
     };
+    returnNumber?: number;
 }
 
 export declare interface IReturnItem {
