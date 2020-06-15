@@ -137,7 +137,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     width: '150px',
                     dataIndex: 'inboundWeight',
                     align: 'center',
-                    render: (val: string) => (Number(val) || 0).toFixed(3),
+                    render: (val: string) => (Number(val) || 0).toFixed(2),
                 },
                 {
                     title: '入库时间',
@@ -299,10 +299,12 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 width: '150px',
                 dataIndex: 'totalWeight',
                 align: 'center',
-                render: (value, row) => {
+                render: (value = '0', row) => {
                     const { weightUnit = 'g', rowSpan = 0 } = row;
+                    const isKg = weightUnit.toLowerCase() === 'kg';
+                    const weight = isKg ? Number(value) * 1000 : Number(value);
                     return {
-                        children: (Number(value) || 0).toFixed(3) + ' ' + weightUnit,
+                        children: weight.toFixed(2) + ' ' + (isKg ? 'g' : weightUnit),
                         props: {
                             rowSpan: rowSpan,
                         },
