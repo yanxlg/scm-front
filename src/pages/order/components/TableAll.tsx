@@ -466,11 +466,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseFailCode',
             align: 'center',
             width: 140,
-            render: (value: string, row: IChildOrderItem) => {
-                const { purchaseOrderStatus } = row;
-                return purchaseOrderStatus === 7
-                    ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
-                    : '';
+            render: (value: string) => {
+                return value ? FinalCancelMap[value as FinalCancelStatus] || '未知原因' : '';
             },
             defaultHide: true,
         },
