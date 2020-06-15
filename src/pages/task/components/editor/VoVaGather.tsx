@@ -142,7 +142,7 @@ const fieldList: FormField[] = [
                     fieldList: [
                         {
                             type: 'radioGroup',
-                            label: '采集渠道',
+                            label: '商品渠道',
                             name: 'channel',
                             initialValue: initialValue,
                             options: options,

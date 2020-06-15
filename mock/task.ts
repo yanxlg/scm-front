@@ -41,7 +41,7 @@ export default {
             },
         });
     },
-    'GET /api/v1/vova_goods/store_list': async (req: Request, res: Response) => {
+    /*    'GET /api/v1/vova_goods/store_list': async (req: Request, res: Response) => {
         res.status(200).send({
             code: 200,
             message: 'By mock.js',
@@ -52,5 +52,5 @@ export default {
                 { merchant_id: '5', merchant_name: 'VogueFD', merchant_platform: 'vova' },
             ],
         });
-    },
+    },*/
 };
