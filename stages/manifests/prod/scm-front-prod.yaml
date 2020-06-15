@@ -22,21 +22,28 @@ data:
           '"remote_user":"$remote_user",'
           '"time_local":"$time_local",'
           '"request":"$request",'
-          '"status":"$status",'
-          '"body_bytes_sent":"$body_bytes_sent",'
+          '"status":$status,'
+          '"body_bytes_sent":$body_bytes_sent,'
           '"http_referer":"$http_referer",'
           '"http_user_agent":"$http_user_agent",'
           '"http_x_forwarded_for":"$http_x_forwarded_for",'
           '"host":"$host",'
           '"upstream_cache_status":"$upstream_cache_status",'
-          '"request_time":"$request_time"}';
+          '"request_time":$request_time}';
 
 
         access_log  /var/log/nginx/access.log  apache_format;
         sendfile        on;
         #tcp_nopush     on;
-        keepalive_timeout  65;
-        #gzip  on;
+        keepalive_timeout  120;
+        gzip on;
+        gzip_http_version 1.0;
+        gzip_proxied any;
+        gzip_min_length  1100;
+        gzip_buffers     4 8k;
+        gzip_types       text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript image/x-icon application/javascript;
+        gzip_vary on;
+        client_max_body_size 20m;
         include /etc/nginx/conf.d/*.conf;
     }
   trigram-scm-front-page.conf: |
@@ -51,6 +58,13 @@ data:
             root $prjroot/;
             add_header Content-Type text/plain;
         }
+
+        location ~.*\.(js|css|png|jpg)$
+        {
+            expires 30d;
+            try_files $uri $uri/ /index.html;
+        }
+
         location / {
             if ($cookie_jsessionid = "")
             {
@@ -105,7 +119,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: trigram-scm-front-page
-          image: 832373879023.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod
+          image: 512358210769.dkr.ecr.us-east-1.amazonaws.com/scm-front:page-prod
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -214,10 +228,11 @@ apiVersion: v1
 metadata:
   name: trigram-scm-front-page-external-prod-elb
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:832373879023:certificate/3f84bac5-ca0d-48a0-8da2-f4b9f7d1d03f
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:512358210769:certificate/cc03a721-5f47-4cec-95ed-bcba97e46952
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-    service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-1980996e
+    service.beta.kubernetes.io/aws-load-balancer-extra-security-groups: sg-0ac24f3c90dd52e38
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "120"
 spec:
   selector:
     name: trigram-scm-front-page-prod
@@ -237,3 +252,5 @@ spec:
     - 116.228.132.228/32
     - 180.169.144.154/32
     - 180.168.193.50/32
+    - 45.117.98.16/32 #11楼专线
+    - 183.129.215.82/32 #杭州财务

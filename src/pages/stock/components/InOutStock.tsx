@@ -1,120 +1,312 @@
-import React, { useCallback, useMemo, useRef } from 'react';
-import { FitTable } from 'react-components';
-import { goButton, showTotal } from 'react-components/es/FitTable';
-import { message, Pagination } from 'antd';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { FitTable, useModal, useList, AutoEnLargeImg } from 'react-components';
+import { Button } from 'antd';
 import '@/styles/index.less';
 import '@/styles/stock.less';
-import { ColumnProps } from 'antd/es/table';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { ColumnProps, TableProps } from 'antd/es/table';
+import { unixToStartDate, unixToEndDate, utcToLocal } from 'react-components/es/utils/date';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { exportInList, exportOutList, queryInList, queryOutList } from '@/services/stock';
+import {
+    exportInList,
+    exportOutList,
+    queryInList,
+    queryLogistics,
+    queryOutList,
+} from '@/services/stock';
 import CopyLink from '@/components/copyLink';
 import queryString from 'query-string';
-import { StockType } from '@/config/dictionaries/Stock';
+import {
+    InStockState,
+    InStockStateCode,
+    InStockStateList,
+    OutStockState,
+    OutStockStateCode,
+    OutStockStateList,
+    StockType,
+} from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
-import { defaultPageNumber, defaultPageSize, defaultPageSizeOptions } from '@/config/global';
-import { useList } from '@/utils/hooks';
+import { carrierList, defaultPageNumber, defaultPageSize } from '@/config/global';
 import { LoadingButton } from 'react-components';
-import { RequestPagination } from '@/interface/IGlobal';
-import { SearchOutlined } from '@ant-design/icons/lib';
-import { Icons } from '@/components/Icon';
-import { IStockINFormData, IStockInItem, IStockOutItem } from '@/interface/IStock';
+import { IStockInItem, IStockOutItem } from '@/interface/IStock';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import classNames from 'classnames';
+import Export from '@/components/Export';
+import { AddressModal } from './AddressModal';
 
 declare interface IInOutStockProps {
     type: typeof StockType[keyof typeof StockType]; //1:出库管理，2入库管理
 }
 
+const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
+    x: true,
+    scrollToFirstRowOnChange: true,
+};
+
 const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const formRef = useRef<JsonFormRef>(null);
 
-    const columns = useMemo<ColumnProps<IStockInItem | IStockOutItem>[]>(() => {
+    const logisticsMap = useRef<{ [key: string]: string }>({});
+
+    const { visible, setVisibleProps: setOrderVisible, onClose } = useModal<
+        IStockOutItem['orderAddress']
+    >();
+
+    const columns = useMemo(() => {
         if (type === StockType.In) {
             return [
                 {
-                    title: '入库时间',
+                    title: '创建时间',
                     width: '150px',
-                    dataIndex: 'inboundTime',
-                    align: 'center',
-                },
-                {
-                    title: '入库订单号',
-                    width: '180px',
-                    dataIndex: 'inboundOrderSn',
-                    align: 'center',
-                },
-                {
-                    title: '采购订单号',
-                    width: '180px',
-                    dataIndex: 'purchaseOrderSn',
-                    align: 'center',
-                },
-                {
-                    title: '首程运单号',
-                    width: '180px',
-                    dataIndex: 'firstWaybillNo',
-                    align: 'center',
-                },
-                {
-                    title: '计划入库数量',
-                    width: '100px',
-                    dataIndex: 'planedQuantity',
-                    align: 'center',
-                },
-                {
-                    title: '实际入库数量',
-                    width: '100px',
-                    dataIndex: 'quantity',
+                    dataIndex: 'createTime',
                     align: 'center',
                 },
                 {
                     title: '中台商品ID',
                     width: '150px',
-                    dataIndex: 'commodity_id',
+                    dataIndex: 'commodityId',
                     align: 'center',
                 },
-            ];
+                {
+                    title: '商品SKU ID',
+                    width: '150px',
+                    dataIndex: 'commoditySkuId',
+                    align: 'center',
+                },
+                {
+                    title: '商品主图',
+                    width: '150px',
+                    dataIndex: 'productImageUrl',
+                    align: 'center',
+                    render: _ => <AutoEnLargeImg className="stock-img" src={_} />,
+                },
+                {
+                    title: '入库单状态',
+                    width: '150px',
+                    dataIndex: 'boundStatus',
+                    align: 'center',
+                    render: (_: InStockStateCode) => InStockState[_],
+                },
+                {
+                    title: '采购运单ID',
+                    width: '150px',
+                    dataIndex: 'purchaseWaybillNo',
+                    align: 'center',
+                },
+                {
+                    title: '物流商',
+                    width: '150px',
+                    dataIndex: 'purchaseShippingName',
+                    align: 'center',
+                },
+                {
+                    title: '采购订单ID',
+                    width: '150px',
+                    dataIndex: 'purchaseOrderGoodsId',
+                    align: 'center',
+                },
+                {
+                    title: '预报商品数',
+                    width: '150px',
+                    dataIndex: 'purchaseGoodsNumber',
+                    align: 'center',
+                },
+                {
+                    title: '实际入库数',
+                    width: '150px',
+                    dataIndex: 'waybillNumber',
+                    align: 'center',
+                },
+                {
+                    title: '商品重量（g）',
+                    width: '150px',
+                    dataIndex: 'inboundWeight',
+                    align: 'center',
+                },
+                {
+                    title: '入库时间',
+                    width: '150px',
+                    dataIndex: 'inWarehouseTime',
+                    align: 'center',
+                    render: _ => utcToLocal(_),
+                },
+            ] as ColumnProps<IStockInItem>[];
         }
         return [
             {
+                title: '参考运单号',
+                width: '150px',
+                dataIndex: 'referWaybillNo',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '目的国',
+                width: '150px',
+                dataIndex: ['orderAddress', 'country'],
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '收货地址',
+                width: '150px',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: (
+                            <Button type="link" onClick={() => setOrderVisible(row.orderAddress)}>
+                                查看地址
+                            </Button>
+                        ),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '出库单状态',
+                width: '150px',
+                dataIndex: 'orderGoodsShippingStatus',
+                align: 'center',
+                render: (value: OutStockStateCode, row) => {
+                    return {
+                        children: OutStockState[value],
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '尾程运单ID',
+                width: '150px',
+                dataIndex: 'lastWaybillNo',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '物流商',
+                width: '150px',
+                dataIndex: 'carrierId',
+                align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: logisticsMap.current[value],
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '渠道订单ID',
+                width: '150px',
+                dataIndex: 'channelOrderGoodsSn',
+                align: 'center',
+            },
+            {
+                title: '中台订单ID',
+                width: '150px',
+                dataIndex: 'orderGoodsId',
+                align: 'center',
+            },
+            {
                 title: '中台商品ID',
                 width: '150px',
-                dataIndex: 'commodity_id',
+                dataIndex: 'commodityId',
                 align: 'center',
+            },
+            {
+                title: '商品SKU ID',
+                width: '150px',
+                dataIndex: 'skuId',
+                align: 'center',
+            },
+            {
+                title: '商品图片',
+                width: '150px',
+                dataIndex: 'productImage',
+                align: 'center',
+                render: _ => <AutoEnLargeImg className="stock-img" src={_} />,
+            },
+            {
+                title: '出库数',
+                width: '150px',
+                dataIndex: 'goodsNumber',
+                align: 'center',
+            },
+            {
+                title: '发送发货指令时间',
+                width: '150px',
+                dataIndex: 'deliveryCommandTime',
+                align: 'center',
+                render: value => (value ? utcToLocal(value) : ''),
+            },
+            {
+                title: '揽收重量',
+                width: '150px',
+                dataIndex: 'totalWeight',
+                align: 'center',
+                render: (value, row) => {
+                    const { weightUnit = 'g', rowSpan = 0 } = row;
+                    return {
+                        children: value + ' ' + weightUnit,
+                        props: {
+                            rowSpan: rowSpan,
+                        },
+                    };
+                },
             },
             {
                 title: '出库时间',
                 width: '150px',
-                dataIndex: 'outboundTime',
+                dataIndex: 'deliveryTime',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: utcToLocal(value),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
-                title: '出库单号',
-                width: '180px',
-                dataIndex: 'outboundOrderSn',
+                title: '揽收时间',
+                width: '150px',
+                dataIndex: 'collectTime',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value ? utcToLocal(value) : '',
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
-            {
-                title: '计划出库数量',
-                width: '100px',
-                dataIndex: 'planedQuantity',
-                align: 'center',
-            },
-            {
-                title: '实际出库数量',
-                width: '100px',
-                dataIndex: 'quantity',
-                align: 'center',
-            },
-            {
-                title: '尾程运单号',
-                width: '180px',
-                dataIndex: 'lastWaybillNo',
-                align: 'center',
-            },
-        ];
+        ] as ColumnProps<IStockOutItem>[];
     }, []);
 
     const fieldList = useMemo<FormField[]>(() => {
@@ -122,50 +314,148 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             return [
                 {
                     type: 'dateRanger',
-                    label: <span>入库&emsp;时间</span>,
-                    name: ['time_start', 'time_end'],
+                    label: '创建时间',
+                    name: ['create_start_time', 'create_end_time'],
                     className: 'stock-form-picker',
                     formatter: ['start_date', 'end_date'],
                 },
                 {
-                    type: 'input',
-                    label: '入库订单号',
-                    name: 'inbound_order_sn',
+                    type: 'dateRanger',
+                    label: '入库时间',
+                    name: ['in_warehouse_start_time', 'in_warehouse_end_time'],
+                    className: 'stock-form-picker',
+                    formatter: ['start_date', 'end_date'],
+                },
+                {
+                    type: 'select',
+                    label: '入库单状态',
+                    name: 'bound_status',
+                    defaultValue: '',
+                    optionList: [
+                        {
+                            name: '全部',
+                            value: '',
+                        },
+                        ...InStockStateList,
+                    ],
                 },
                 {
                     type: 'input',
-                    label: '采购订单号',
-                    name: 'purchase_order_sn',
+                    label: '采购订单ID',
+                    name: 'purchase_order_goods_id',
+                    formatter: 'multipleToArray',
+                },
+                /*       {
+                    type: 'input',
+                    label: '入库单ID',
+                    name: 'refer_waybill_no',
+                    formatter: 'multipleToArray',
+                },*/
+                {
+                    type: 'select',
+                    label: '物流商',
+                    name: 'purchase_shipping_name',
+                    defaultValue: '',
+                    optionList: [
+                        {
+                            name: '全部',
+                            value: '',
+                        },
+                        ...carrierList,
+                    ],
+                },
+                {
+                    type: 'input',
+                    label: '采购运单ID',
+                    name: 'purchase_waybill_no',
+                    formatter: 'multipleToArray',
                 },
                 {
                     type: 'input',
                     label: '中台商品ID',
                     name: 'commodity_id',
+                    formatter: 'multipleToArray',
+                },
+                {
+                    type: 'input',
+                    label: '商品SKU ID',
+                    name: 'commodity_sku_id',
+                    formatter: 'multipleToArray',
                 },
             ];
         }
         return [
             {
                 type: 'dateRanger',
-                label: <span>出库&emsp;时间</span>,
-                name: ['time_start', 'time_end'],
+                label: '出库时间',
+                name: ['delivery_time_start', 'delivery_time_end'],
                 className: 'stock-form-picker',
                 formatter: ['start_date', 'end_date'],
             },
             {
-                type: 'input',
-                label: '出库订单号',
-                name: 'outbound_order_sn',
+                type: 'dateRanger',
+                label: '发送出库指令时间',
+                name: ['delivery_command_time_start', 'delivery_command_time_end'],
+                className: 'stock-form-picker',
+                formatter: ['start_date', 'end_date'],
+            },
+            {
+                type: 'select',
+                label: '出库单状态',
+                name: 'order_goods_shipping_status',
+                formatter: 'number',
+                defaultValue: '',
+                optionList: [
+                    {
+                        name: '全部',
+                        value: '',
+                    },
+                    ...OutStockStateList,
+                ],
             },
             {
                 type: 'input',
-                label: '尾程运单号',
+                label: '渠道订单ID',
+                name: 'channel_order_goods_sn',
+                formatter: 'multipleToArray',
+            },
+            {
+                type: 'input',
+                label: '中台订单ID',
+                name: 'order_goods_id',
+            },
+            {
+                type: 'select',
+                label: '物流商',
+                name: 'carrier_id',
+                defaultValue: '',
+                syncDefaultOption: {
+                    value: '',
+                    name: '全部',
+                },
+                optionList: () =>
+                    queryLogistics().then(({ data = [] }) => {
+                        return data.map(({ carrier_name, carrier_id }) => {
+                            return { name: carrier_name, value: carrier_id };
+                        });
+                    }),
+            },
+            {
+                type: 'input',
+                label: '尾程运单ID',
                 name: 'last_waybill_no',
+                formatter: 'multipleToArray',
             },
             {
                 type: 'input',
                 label: '中台商品ID',
                 name: 'commodity_id',
+            },
+            {
+                type: 'input',
+                label: '商品SKU ID',
+                name: 'sku_id',
+                formatter: 'multipleToArray',
             },
         ];
     }, []);
@@ -190,103 +480,149 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            time_start: convertStartDate(Number(time_start)),
-            time_end: convertEndDate(Number(time_end)),
+            time_start: unixToStartDate(Number(time_start)),
+            time_end: unixToEndDate(Number(time_end)),
             ...extra,
         };
     }, []);
 
-    const { query, loading, pageNumber, pageSize, dataSource, total, onSearch, onChange } = useList<
-        IStockInItem | IStockOutItem,
-        IStockINFormData & RequestPagination
-    >({
+    const {
+        query,
+        loading,
+        pageNumber,
+        pageSize,
+        dataSource,
+        total,
+        onSearch,
+        onChange,
+        onReload,
+    } = useList<IStockInItem | IStockOutItem>({
         queryList: type === StockType.In ? queryInList : queryOutList,
         formRef: formRef,
         defaultState: {
             pageSize: page_size,
             pageNumber: page_number,
         },
+        autoQuery: false,
     });
+
+    useEffect(() => {
+        if (type === StockType.Out) {
+            queryLogistics().then(({ data = [] }) => {
+                data.map(({ carrier_name, carrier_id }) => {
+                    logisticsMap.current[carrier_id] = carrier_name;
+                });
+
+                onSearch();
+            });
+        } else {
+            onSearch();
+        }
+    }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
         return {
             ...query,
             tabKey: type === StockType.Out ? '2' : type === StockType.In ? '1' : '3',
         };
-    }, []);
+    }, [loading]);
 
-    const onExport = useCallback(() => {
+    const onExport = useCallback((extra: any) => {
         const values = formRef.current!.getFieldsValue();
         const exportService = type === StockType.In ? exportInList : exportOutList;
-        return exportService(values).catch(() => {
-            message.error('导出失败!');
-        });
+        return exportService({ ...values, ...extra });
     }, []);
 
-    const onPageChange = useCallback((page: number, pageSize?: number) => {
-        onChange({ current: page, pageSize }, {}, {});
+    const { visible: exportModal, onClose: closeExportModal, setVisibleProps } = useModal<
+        boolean
+    >();
+
+    const exportComponent = useMemo(() => {
+        return (
+            <Export
+                columns={columns}
+                visible={exportModal}
+                onOKey={onExport}
+                onCancel={closeExportModal}
+            />
+        );
+    }, [exportModal]);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
+
+    const toolBarRender = useCallback(() => {
+        return [
+            <Button
+                key="export"
+                onClick={() => setVisibleProps(true)}
+                className={formStyles.formBtn}
+            >
+                导出Excel表
+            </Button>,
+        ];
     }, []);
+
+    const table = useMemo(() => {
+        return (
+            <FitTable
+                rowKey={type === StockType.In ? 'purchaseOrderGoodsId' : 'skuId'}
+                bordered={true}
+                scroll={scroll}
+                bottom={150}
+                minHeight={400}
+                pagination={pagination}
+                toolBarRender={toolBarRender}
+                columns={columns as ColumnProps<any>[]}
+                dataSource={dataSource as any[]}
+                loading={loading}
+                onChange={onChange}
+            />
+        );
+    }, [loading]);
+
+    const form = useMemo(() => {
+        return (
+            <JsonForm
+                labelClassName="stock-form-label"
+                ref={formRef}
+                fieldList={fieldList}
+                initialValues={defaultInitialValues}
+            >
+                <div>
+                    <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
+                        查询
+                    </LoadingButton>
+                    <LoadingButton onClick={onReload} className={formStyles.formBtn}>
+                        刷新
+                    </LoadingButton>
+                </div>
+            </JsonForm>
+        );
+    }, []);
+
+    const addressModal = useMemo(() => {
+        return <AddressModal visible={visible} onClose={onClose} />;
+    }, [visible]);
 
     return useMemo(() => {
         return (
             <div>
-                <div className="float-clear">
-                    <JsonForm
-                        labelClassName="stock-form-label"
-                        ref={formRef}
-                        fieldList={fieldList}
-                        initialValues={defaultInitialValues}
-                        enableCollapse={false}
-                    />
-                    <LoadingButton
-                        onClick={onSearch}
-                        type="primary"
-                        className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                        icon={<SearchOutlined />}
-                    >
-                        查询
-                    </LoadingButton>
-                    <LoadingButton
-                        onClick={onExport}
-                        className={classNames(formStyles.formBtn, formStyles.verticalMiddle)}
-                        icon={<Icons type="scm-export" />}
-                    >
-                        导出Excel表
-                    </LoadingButton>
-                    <Pagination
-                        className="float-right"
-                        pageSize={pageSize}
-                        current={pageNumber}
-                        total={total}
-                        pageSizeOptions={defaultPageSizeOptions}
-                        onChange={onPageChange}
-                        onShowSizeChange={onPageChange}
-                        showSizeChanger={true}
-                        showQuickJumper={{
-                            goButton: goButton,
-                        }}
-                        showLessItems={true}
-                        showTotal={showTotal}
-                    />
-                </div>
-                <FitTable<IStockInItem | IStockOutItem>
-                    className={formStyles.formNextCard}
-                    rowKey={type === StockType.In ? 'inboundOrderSn' : 'outboundOrderSn'}
-                    bordered={true}
-                    columns={columns}
-                    dataSource={dataSource}
-                    pagination={false}
-                    loading={loading}
-                    scroll={{
-                        x: true,
-                        scrollToFirstRowOnChange: true,
-                    }}
-                    bottom={130}
-                />
+                {form}
+                {table}
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
+                {exportComponent}
+                {addressModal}
             </div>
         );
-    }, [loading]);
+    }, [loading, exportModal, visible]);
 };
 
 export { InOutStock };

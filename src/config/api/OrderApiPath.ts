@@ -23,13 +23,13 @@ export enum OrderApiPath {
     postExportWaitShip = '/api/v1/orders/exports/4',
 
     // 已采购未入库
-    getPurchasedNotStockList = '/api/v1/orders/list/5',
+    getPurchasedNotWarehouseList = '/api/v1/orders/list/5',
     // 导出已采购未入库
-    postExportPurchasedNotStock = '/api/v1/orders/exports/5',
+    postExportPurchasedNotWarehouse = '/api/v1/orders/exports/5',
 
     // 仓库未发货
-    getStockNotShipList = '/api/v1/orders/list/6',
-    postExportStockNotShip = '/api/v1/orders/exports/6',
+    getWarehouseNotShipList = '/api/v1/orders/list/6',
+    postExportWarehouseNotShip = '/api/v1/orders/exports/6',
 
     // 错误订单
     getErrorOrderList = '/api/v1/orders/list/7',
@@ -46,4 +46,18 @@ export enum OrderApiPath {
     putConfirmPay = '/api/v1/orders/confirm_pay',
     // 获取物流轨迹
     getOrderTrack = '/api/v1/orders/track',
+    // 代拍相似款
+    padSimilarGood = '/api/v1/orders/similar_goods_pat',
+    querySimilarInfo = '/api/v1/orders/similar_goods_info',
+    queryChannelSource = '/api/v1/orders/channel_source',
+
+    // 待审核
+    getReviewOrderList = '/api/v1/orders/list/8',
+    // 导出待支付
+    postExportReview = '/api/v1/orders/exports/8',
+    // 审核通过
+    postReviewPass = '/api/v1/orders/check/pass',
+    // 下架商品
+    postOrderOffsale = '/api/v1/orders/offsale',
+    QueryShopList = '/api/v1/vova_goods/store_list',
 }

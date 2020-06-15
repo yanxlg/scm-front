@@ -1,3 +1,4 @@
+@import '~antd/es/style/themes/default';
 @divisionSpacing: 6px;
 @btnSpacing: 12px;
 @inputWidth: 140px;
@@ -61,17 +62,26 @@
     &-input {
         width: @inputWidth !important;
     }
+    &-input-review {
+        width: 146px !important;
+    }
     &-date-picker {
         width: 192px;
     }
     &-pending-date-picker {
         width: 184px;
     }
+    &-all-date-picker {
+        width: 198px;
+    }
     &-error-date-picker {
         width: 184px;
     }
     &-label {
         width: @inputLabel;
+    }
+    &-all-label {
+        width: 112px;
     }
     &-pending-label {
         width: 84px;
@@ -137,5 +147,27 @@
             width: 300px;
             height: 300px;
         }
+    }
+    &-img-lazy {
+        width: 68px;
+        height: 68px;
+    }
+    &-tr.hover {
+        td {
+            background: @item-hover-bg !important;
+        }
+    }
+    &-link:hover {
+        text-decoration: underline;
+    }
+    &-text-ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        /* autoprefixer: ignore next */
+        -webkit-box-orient: vertical;
+        color: #1890ff;
+        word-break: break-all;
     }
 }

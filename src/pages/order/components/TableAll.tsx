@@ -1,20 +1,29 @@
 import React from 'react';
-import { Table, Checkbox } from 'antd';
+import { Checkbox } from 'antd';
+import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
 import { ColumnProps } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
-import { getOrderGoodsDetail } from '@/services/order-manage';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import {
     orderStatusOptionList,
     orderShippingOptionList,
     purchaseOrderOptionList,
     purchasePayOptionList,
-    purchaseShippingOptionList,
     purchaseReserveOptionList,
+    childrenOrderCancelOptionList,
+    purchasePlanCancelOptionList,
+    FinalCancelMap,
 } from '@/enums/OrderEnum';
+import AllColumnsSetting from './AllColumnsSetting';
+import Export from '@/components/Export';
+import { IFilterParams } from '@/services/order-manage';
+import { PaginationConfig } from 'antd/es/pagination';
+
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
 declare interface IProps {
     loading: boolean;
@@ -22,6 +31,19 @@ declare interface IProps {
     orderList: IChildOrderItem[];
     onCheckAllChange(status: boolean): void;
     onSelectedRow(row: IChildOrderItem): void;
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
+    page: number;
+    pageSize: number;
+    total: number;
+    onSearch(params?: IFilterParams): Promise<any>;
+    postOrdersPlace(ids: string[]): Promise<any>;
+    cancelPurchaseOrder(ids: string[]): Promise<any>;
+    cancelChannelOrder(ids: string[]): Promise<any>;
+    changeParentOrder(checked: boolean): void;
+    showParentStatus: boolean;
+    getOrderGoodsIdList(): string[];
 }
 
 declare interface IState {
@@ -34,142 +56,343 @@ declare interface IState {
 class OrderTableAll extends React.PureComponent<IProps, IState> {
     private allColumns: ColumnProps<IChildOrderItem>[] = [
         {
-            key: 'createTime',
-            title: '订单时间',
-            dataIndex: 'createTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+            fixed: true,
+            key: '_checked',
+            title: () => {
+                const { orderList, onCheckAllChange } = this.props;
+                const rowspanList = orderList.filter(item => item._rowspan);
+                const checkedListLen = rowspanList.filter(item => item._checked).length;
+                let indeterminate = false,
+                    checked = false;
+                if (rowspanList.length && rowspanList.length === checkedListLen) {
+                    checked = true;
+                } else if (checkedListLen) {
+                    indeterminate = true;
+                }
+                return (
+                    <Checkbox
+                        indeterminate={indeterminate}
+                        checked={checked}
+                        onChange={e => onCheckAllChange(e.target.checked)}
+                    />
+                );
             },
-        },
-        {
-            key: 'orderGoodsId',
-            title: '中台订单子ID',
-            dataIndex: 'orderGoodsId',
+            dataIndex: '_checked',
             align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'goodsDetail',
-            title: '商品详情',
-            dataIndex: 'goodsDetail',
-            align: 'center',
-            width: 120,
-            render: (value: any, row: IChildOrderItem) => {
+            width: 50,
+            className: 'colspan-cell',
+            render: (value: boolean, row: IChildOrderItem) => {
                 return {
                     children: (
-                        <a onClick={() => this.getOrderGoodsDetail(row.productId, row.skuId)}>
-                            查看商品详情
-                        </a>
+                        <Checkbox checked={value} onChange={() => this.props.onSelectedRow(row)} />
                     ),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
                 };
             },
+            hideInSetting: true,
         },
-        // {
-        //     key: 'channelOrderGoodsSn',
-        //     title: 'Product SN',
-        //     dataIndex: 'channelOrderGoodsSn',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell,
-        // },
         {
-            key: 'skuId',
-            title: 'SKU ID',
-            dataIndex: 'skuId',
+            key: 'createTime',
+            title: '订单生成时间',
+            dataIndex: 'createTime',
             align: 'center',
             width: 120,
-            render: this.mergeCell,
+            render: (value: string) => utcToLocal(value, ''),
         },
-        // 缺失
-        // {
-        //     key: 'channel_order_status',
-        //     title: '渠道订单状态',
-        //     dataIndex: 'channel_order_status',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
-        // 缺失
-        // {
-        //     key: 'channel_delivery_status',
-        //     title: '渠道发货状态',
-        //     dataIndex: 'channel_delivery_status',
-        //     align: 'center',
-        //     width: 120,
-        //     render: this.mergeCell
-        // },
         {
             key: 'orderGoodsStatus',
-            title: '中台订单状态',
+            title: '订单状态',
             dataIndex: 'orderGoodsStatus',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return {
-                    children: getStatusDesc(orderStatusOptionList, value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
+            render: (value: number) => getStatusDesc(orderStatusOptionList, value),
         },
         {
-            key: 'orderGoodsShippingStatus',
-            title: '中台订单配送状态',
-            dataIndex: 'orderGoodsShippingStatus',
+            key: 'orderGoodsShippingStatusShow',
+            title: '配送状态',
+            dataIndex: 'orderGoodsShippingStatusShow',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return {
-                    children: getStatusDesc(orderShippingOptionList, value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
+            render: (value: number) => getStatusDesc(orderShippingOptionList, value),
+        },
+        // 勾选展示
+        {
+            key: 'orderId',
+            title: '父订单ID',
+            dataIndex: 'orderId',
+            align: 'center',
+            width: 120,
+            defaultHide: true,
+        },
+        {
+            key: 'orderGoodsId',
+            title: '子订单ID',
+            dataIndex: 'orderGoodsId',
+            align: 'center',
+            width: 120,
         },
         {
             key: 'productId',
-            title: '中台商品ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
         },
+        // 勾选展示
         {
-            key: 'purchasePlanId',
-            title: '计划子项ID',
-            dataIndex: 'purchasePlanId',
+            key: 'skuId',
+            title: '中台SKU ID',
+            dataIndex: 'skuId',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
+            defaultHide: true,
+        },
+        // 勾选展示 - 待确认
+        // {
+        //     key: '',
+        //     title: '采购渠道Goods ID',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        // 勾选展示 - 待确认
+        // {
+        //     key: '',
+        //     title: '采购渠道SKU ID',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'productImage',
+            title: 'SKU图片',
+            dataIndex: 'productImage',
+            align: 'center',
+            width: 100,
+            render: (value: string) => {
+                return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+            },
+        },
+        // // 待补充
+        // {
+        //     key: '',
+        //     title: '商品名称',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'productStyle',
+            title: '商品规格',
+            dataIndex: 'productStyle',
+            align: 'center',
+            width: 180,
+            render: (value: string) => {
+                let child: any = null;
+                if (value) {
+                    try {
+                        const styleInfo = JSON.parse(value);
+                        child = (
+                            <>
+                                {Object.keys(styleInfo).map(key => (
+                                    <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                ))}
+                            </>
+                        );
+                    } catch (err) {}
+                }
+                return child;
+            },
         },
         {
-            key: 'purchaseNumber',
-            title: '采购数量',
-            dataIndex: 'purchaseNumber',
+            key: 'goodsAmount',
+            title: '销售商品单价',
+            dataIndex: 'goodsAmount',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
         },
+        {
+            key: 'goodsNumber',
+            title: '销售商品数量',
+            dataIndex: 'goodsNumber',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'freight',
+            title: '销售商品运费',
+            dataIndex: 'freight',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: '_goodsTotalAmount',
+            title: '销售商品总金额',
+            dataIndex: '_goodsTotalAmount',
+            align: 'center',
+            width: 140,
+            render: (_, row: IChildOrderItem) => {
+                const { goodsAmount, goodsNumber, freight } = row;
+                const total = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                return isNaN(total) ? '' : total.toFixed(2);
+            },
+        },
+        // 勾选展示
+        {
+            key: 'currency',
+            title: '销售金额货币',
+            dataIndex: 'currency',
+            align: 'center',
+            width: 120,
+            defaultHide: true,
+        },
+        // 勾选展示
         {
             key: 'purchaseAmount',
-            title: '采购单价',
+            title: '采购商品单价',
             dataIndex: 'purchaseAmount',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
+            defaultHide: true,
+            render: (_, row: IChildOrderItem) => {
+                const { purchaseNumber, purchaseAmount } = row;
+                const price = Number(purchaseAmount) / Number(purchaseNumber);
+                return isNaN(price) ? '' : price.toFixed(2);
+            },
+        },
+        {
+            key: 'purchaseNumber',
+            title: '采购商品数量',
+            dataIndex: 'purchaseNumber',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: '_purchaseTotalAmount',
+            title: '采购商品总金额',
+            dataIndex: '_purchaseTotalAmount',
+            align: 'center',
+            width: 140,
+            render: (_, row: IChildOrderItem) => row.purchaseAmount,
+        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '商品属性标签',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'channelSource',
+            title: '销售渠道',
+            dataIndex: 'channelSource',
+            align: 'center',
+            width: 120,
+        },
+        // 勾选展示 - 待补充
+        {
+            key: 'productShop',
+            title: '销售店铺名称',
+            dataIndex: 'productShop',
+            align: 'center',
+            width: 120,
+            defaultHide: true,
+        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '销售渠道二级分类',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        // // 待补充
+        // {
+        //     key: '',
+        //     title: '销售渠道Goods ID',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
+        {
+            key: 'confirmTime',
+            title: '销售订单确认时间',
+            dataIndex: 'confirmTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value, ''),
+        },
+        {
+            key: 'channelOrderGoodsSn',
+            title: '销售订单ID',
+            dataIndex: 'channelOrderGoodsSn',
+            align: 'center',
+            width: 120,
+        },
+        // 勾选展示
+        {
+            key: 'cancelTime',
+            title: '销售订单取消时间',
+            dataIndex: 'cancelTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'deliveryTime',
+            title: '销售订单出库时间',
+            dataIndex: 'deliveryTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'collectTime',
+            title: '销售订单揽收时间',
+            dataIndex: 'collectTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
+        },
+        {
+            key: 'lastWaybillNo',
+            title: '销售尾程运单ID',
+            dataIndex: 'lastWaybillNo',
+            align: 'center',
+            width: 136,
+        },
+        // 勾选展示
+        {
+            key: 'receiveTime',
+            title: '妥投时间',
+            dataIndex: 'receiveTime',
+            align: 'center',
+            width: 120,
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
+        },
+        {
+            key: 'purchasePlanId',
+            title: '采购计划ID',
+            dataIndex: 'purchasePlanId',
+            align: 'center',
+            width: 120,
+        },
+        {
+            key: 'reserveStatus',
+            title: '仓库库存预定状态',
+            dataIndex: 'reserveStatus',
+            align: 'center',
+            width: 148,
+            render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
         },
         {
             key: 'purchasePlatform',
@@ -177,27 +400,63 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchasePlatform',
             align: 'center',
             width: 120,
-            // render: this.mergeCell
         },
-        {
-            key: 'reserveStatus',
-            title: '库存预定状态',
-            dataIndex: 'reserveStatus',
-            align: 'center',
-            width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchaseReserveOptionList, value);
-            },
-        },
+        // // 勾选展示 - 待补充
+        // {
+        //     key: '',
+        //     title: '采购店铺名称',
+        //     dataIndex: '',
+        //     align: 'center',
+        //     width: 120,
+        // },
         {
             key: 'purchaseOrderStatus',
             title: '采购订单状态',
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
-            width: 120,
+            width: 140,
             render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchaseOrderOptionList, value);
+                const { reserveStatus, purchaseFailCode } = row;
+                if (reserveStatus === 3 && value === 1) {
+                    return '';
+                }
+                return (
+                    <>
+                        {getStatusDesc(purchaseOrderOptionList, value)}
+                        {value === 7 && (
+                            <div>({FinalCancelMap[purchaseFailCode as '40001'] || '未知原因'})</div>
+                        )}
+                    </>
+                );
             },
+        },
+        // 勾选展示
+        {
+            key: 'purchaseCreateTime',
+            title: '采购订单生成时间',
+            dataIndex: 'purchaseCreateTime',
+            align: 'center',
+            width: 146,
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'purchasePlatformParentOrderId',
+            title: '采购父订单ID',
+            dataIndex: 'purchasePlatformParentOrderId',
+            align: 'center',
+            width: 120,
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'purchasePlatformOrderId',
+            title: '采购订单ID',
+            dataIndex: 'purchasePlatformOrderId',
+            align: 'center',
+            width: 120,
+            defaultHide: true,
         },
         {
             key: 'purchaseOrderPayStatus',
@@ -206,60 +465,87 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchasePayOptionList, value);
+                const { purchasePlatformOrderId } = row;
+                return purchasePlatformOrderId ? getStatusDesc(purchasePayOptionList, value) : '';
             },
         },
+        // 勾选展示
         {
-            key: 'purchaseOrderShippingStatus',
-            title: '采购配送状态',
-            dataIndex: 'purchaseOrderShippingStatus',
+            key: 'payTime',
+            title: '采购支付时间',
+            dataIndex: 'payTime',
             align: 'center',
             width: 120,
-            render: (value: number, row: IChildOrderItem) => {
-                return getStatusDesc(purchaseShippingOptionList, value);
-            },
+            render: (value: string, row: IChildOrderItem) => utcToLocal(value, ''),
+            defaultHide: true,
         },
-        {
-            key: 'purchasePlatformOrderId',
-            title: '采购订单号',
-            dataIndex: 'purchasePlatformOrderId',
-            align: 'center',
-            width: 120,
-        },
+        // 勾选展示
         {
             key: 'purchaseWaybillNo',
-            title: '采购运单号',
+            title: '采购运单ID',
             dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
-
+        // 勾选展示
         {
             key: 'purchaseCancelReason',
             title: '采购取消原因',
             dataIndex: 'purchaseCancelReason',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
+        // 勾选展示
         {
-            key: 'purchaseCreateTime',
-            title: '采购时间',
-            dataIndex: 'purchaseCreateTime',
+            key: 'purchaseTime',
+            title: '采购签收时间',
+            dataIndex: 'purchaseTime',
             align: 'center',
             width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return utcToLocal(value);
-            },
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
         },
+        // 勾选展示
         {
-            key: 'payTime',
-            title: '支付时间',
-            dataIndex: 'payTime',
+            key: 'storageTime',
+            title: '采购入库时间',
+            dataIndex: 'storageTime',
             align: 'center',
             width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return utcToLocal(value);
-            },
+            render: (value: string) => utcToLocal(value, ''),
+            defaultHide: true,
+        },
+        // {
+        //     key: 'purchaseOrderShippingStatus',
+        //     title: '采购配送状态',
+        //     dataIndex: 'purchaseOrderShippingStatus',
+        //     align: 'center',
+        //     width: 120,
+        //     render: (value: number, row: IChildOrderItem) => {
+        //         return getStatusDesc(purchaseShippingOptionList, value);
+        //     },
+        // },
+        // 勾选展示
+        {
+            key: 'cancelType',
+            title: '子订单取消类型',
+            dataIndex: 'cancelType',
+            align: 'center',
+            width: 140,
+            render: (value: number) => getStatusDesc(childrenOrderCancelOptionList, value),
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'purchaseCancelType',
+            title: '采购单取消类型',
+            dataIndex: 'purchaseCancelType',
+            align: 'center',
+            width: 146,
+            render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
+            defaultHide: true,
         },
         {
             key: '_logisticsTrack',
@@ -268,224 +554,58 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: (value, row: IChildOrderItem) => {
-                return {
-                    children: <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>,
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                return <a onClick={() => this.showLogisticsTrack(row)}>物流轨迹</a>;
             },
         },
         {
-            key: 'confirmTime',
-            title: '订单确认时间',
-            dataIndex: 'confirmTime',
+            key: 'saleMinusPurchaseNormalPrice',
+            title: '销售-采购价差',
+            dataIndex: 'saleMinusPurchaseNormalPrice',
             align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'cancelTime',
-            title: '订单取消时间',
-            dataIndex: 'cancelTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'purchaseTime',
-            title: '采购完成时间',
-            dataIndex: 'purchaseTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'storageTime',
-            title: '入库时间',
-            dataIndex: 'storageTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'deliveryTime',
-            title: '出库时间',
-            dataIndex: 'deliveryTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'collectTime',
-            title: '揽收时间',
-            dataIndex: 'collectTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'receiveTime',
-            title: '收货时间',
-            dataIndex: 'receiveTime',
-            align: 'center',
-            width: 120,
-            render: (value: string, row: IChildOrderItem) => {
-                return {
-                    children: utcToLocal(value),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
-            },
-        },
-        {
-            key: 'channelOrderGoodsSn',
-            title: '渠道订单ID',
-            dataIndex: 'channelOrderGoodsSn',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'goodsAmount',
-            title: '价格',
-            dataIndex: 'goodsAmount',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'goodsNumber',
-            title: '商品数量',
-            dataIndex: 'goodsNumber',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'freight',
-            title: '商品运费',
-            dataIndex: 'freight',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: '_goodsTotalAmount',
-            title: '商品总金额',
-            dataIndex: '_goodsTotalAmount',
-            align: 'center',
-            width: 120,
+            width: 180,
             render: (value, row: IChildOrderItem) => {
-                // console.log(row);
-                const { goodsAmount, goodsNumber, freight } = row;
-                return {
-                    children: Number(goodsAmount) * goodsNumber + (Number(freight) || 0),
-                    props: {
-                        rowSpan: row._rowspan || 0,
-                    },
-                };
+                const { productPrice = 0, purchaseNormalPrice = 0, purchaseNumber = 0 } = row;
+                const purchasePrice = Number(purchaseNormalPrice);
+                if (purchasePrice === 0 || isNaN(purchasePrice)) {
+                    return '';
+                }
+                const result = (Number(productPrice) - purchasePrice) * Number(purchaseNumber);
+                return result < 0 ? <span style={{ color: 'red' }}>{result}</span> : result;
             },
         },
         {
-            key: 'channelSource',
-            title: '销售渠道',
-            dataIndex: 'channelSource',
+            key: 'orderAddress',
+            title: '用户地址信息',
+            dataIndex: 'orderAddress',
             align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'orderId',
-            title: '中台父订单ID',
-            dataIndex: 'orderId',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'currency',
-            title: '货币类型',
-            dataIndex: 'currency',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'productShop',
-            title: '渠道店铺名',
-            dataIndex: 'productShop',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-
-        {
-            key: 'a14',
-            title: '渠道订单状态',
-            dataIndex: 'a14',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'orderGoodsId',
-            title: '中台子订单ID',
-            dataIndex: 'orderGoodsId',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
-        },
-        {
-            key: 'lastWaybillNo',
-            title: '尾程运单号',
-            dataIndex: 'lastWaybillNo',
-            align: 'center',
-            width: 120,
-            render: this.mergeCell,
+            width: 180,
+            render: (value: any) => {
+                if (!value) {
+                    return '';
+                }
+                const {
+                    consignee = '',
+                    address1 = '',
+                    city = '',
+                    province = '',
+                    country = '',
+                    zipCode = '',
+                    tel = '',
+                } = value;
+                return (
+                    <div style={{ textAlign: 'left', wordBreak: 'break-all' }}>
+                        <div>{consignee}</div>
+                        <div>
+                            {address1},{city},{province},{country}
+                        </div>
+                        <div>
+                            {zipCode},{tel}
+                        </div>
+                    </div>
+                );
+            },
+            // render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
+            // defaultHide: true,
         },
     ];
 
@@ -498,54 +618,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             currentOrder: null,
         };
     }
-
-    private createColumns = (): ColumnProps<IChildOrderItem>[] => {
-        const { colList, orderList, onCheckAllChange, onSelectedRow } = this.props;
-        const rowspanList = orderList.filter(item => item._rowspan);
-        const checkedListLen = rowspanList.filter(item => item._checked).length;
-        let indeterminate = false,
-            checked = false;
-        if (rowspanList.length && rowspanList.length === checkedListLen) {
-            checked = true;
-        } else if (checkedListLen) {
-            indeterminate = true;
-        }
-        // console.log(111, colList);
-        const allColumns: ColumnProps<IChildOrderItem>[] = [
-            {
-                fixed: true,
-                key: '_checked',
-                title: () => (
-                    <Checkbox
-                        indeterminate={indeterminate}
-                        checked={checked}
-                        onChange={e => onCheckAllChange(e.target.checked)}
-                    />
-                ),
-                dataIndex: '_checked',
-                align: 'center',
-                width: 50,
-                render: (value: boolean, row: IChildOrderItem) => {
-                    return {
-                        children: <Checkbox checked={value} onChange={() => onSelectedRow(row)} />,
-                        props: {
-                            rowSpan: row._rowspan || 0,
-                        },
-                    };
-                },
-            },
-        ];
-        colList.forEach(key => {
-            const i = this.allColumns.findIndex(item => item.key === key);
-            // console.log('key', key, i);
-            if (i === -1) {
-                // console.log('colList没找到', key);
-            } else {
-                allColumns.push(this.allColumns[i]);
-            }
-        });
-        return allColumns;
-    };
 
     private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
         // console.log('showLogisticsTrack', purchaseWaybillNo);
@@ -562,16 +634,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    // 合并单元格
-    private mergeCell(value: string | number, row: IChildOrderItem) {
-        return {
-            children: value,
-            props: {
-                rowSpan: row._rowspan || 0,
-            },
-        };
-    }
-
     hideGoodsDetailDialog = () => {
         this.setState({
             detailDialogStatus: false,
@@ -579,55 +641,95 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    // 获取商品详情
-    private getOrderGoodsDetail = (productId: string, skuId: string) => {
-        this.setState({
-            detailDialogStatus: true,
-        });
-        getOrderGoodsDetail(productId).then(res => {
-            const { sku_info, product_id, goods_img, title } = res.data;
-            if (sku_info) {
-                const i = sku_info.findIndex((item: any) => item.commodity_sku_id === skuId);
-                const goodsDetail: IGoodsDetail = {
-                    product_id,
-                    goods_img,
-                    title,
-                };
-                if (i > -1) {
-                    const { sku_style, sku_sn, sku_img } = sku_info[i];
-                    Object.assign(goodsDetail, {
-                        sku_sn,
-                        sku_img,
-                        sku_style,
-                    });
-                }
-                this.setState({
-                    goodsDetail,
-                });
-            }
+    onChange = ({ current, pageSize }: PaginationConfig) => {
+        this.props.onSearch({
+            page: current,
+            page_count: pageSize,
         });
     };
 
+    toolBarRender = () => {
+        const {
+            postOrdersPlace,
+            cancelPurchaseOrder,
+            cancelChannelOrder,
+            changeParentOrder,
+            showParentStatus,
+            getOrderGoodsIdList,
+        } = this.props;
+        const orderGoodsIdList = getOrderGoodsIdList();
+        const disabled = orderGoodsIdList.length === 0;
+        return [
+            <Checkbox
+                onChange={e => changeParentOrder(e.target.checked)}
+                checked={showParentStatus}
+                key="0"
+            >
+                仅展示父订单ID
+            </Checkbox>,
+            <LoadingButton
+                key="1"
+                type="primary"
+                disabled={disabled}
+                className={formStyles.formBtn}
+                onClick={() => postOrdersPlace(orderGoodsIdList)}
+            >
+                一键拍单
+            </LoadingButton>,
+            <LoadingButton
+                key="2"
+                type="primary"
+                disabled={disabled}
+                className={formStyles.formBtn}
+                onClick={() => cancelPurchaseOrder(orderGoodsIdList)}
+            >
+                取消采购单
+            </LoadingButton>,
+            <LoadingButton
+                key="3"
+                type="primary"
+                disabled={disabled}
+                className={formStyles.formBtn}
+                onClick={() => cancelChannelOrder(orderGoodsIdList)}
+            >
+                取消渠道订单
+            </LoadingButton>,
+        ];
+    };
+
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;
         const { detailDialogStatus, trackDialogStatus, goodsDetail, currentOrder } = this.state;
-        const columns = this.createColumns();
+        // const columns = this.createColumns();
         return (
             <>
-                <Table
-                    key={columns.length}
-                    bordered={true}
-                    // "purchasePlanId"
+                <FitTable
+                    bordered
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}
-                    className="order-table"
+                    // className="order-table"
+                    rowClassName="order-tr"
                     loading={loading}
-                    columns={columns}
-                    // rowSelection={rowSelection}
+                    columns={this.allColumns}
                     dataSource={orderList}
-                    scroll={{ x: 'max-content', y: 500 }}
-                    pagination={false}
+                    scroll={{ x: 'max-content' }}
+                    autoFitY={true}
+                    pagination={{
+                        current: page,
+                        pageSize: pageSize,
+                        total: total,
+                        showSizeChanger: true,
+                        position: ['topRight', 'bottomRight'],
+                    }}
+                    columnsSettingRender={AllColumnsSetting}
+                    onChange={this.onChange}
+                    onRow={record => {
+                        return {
+                            'data-id': record.orderGoodsId,
+                        } as any;
+                    }}
+                    toolBarRender={this.toolBarRender}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}
@@ -639,6 +741,12 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     orderGoodsId={currentOrder ? currentOrder.orderGoodsId || '' : ''}
                     lastWaybillNo={currentOrder ? currentOrder.lastWaybillNo || '' : ''}
                     hideTrackDetail={this.hideTrackDetail}
+                />
+                <Export
+                    columns={this.allColumns}
+                    visible={visible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
                 />
             </>
         );

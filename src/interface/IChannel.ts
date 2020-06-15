@@ -242,19 +242,12 @@ export interface IEditSkuItem {
 export interface IEditSkuBody {
     sku_list: IEditSkuItem[];
     merchant_id: string;
+    commodity_id: string;
 }
 
 export interface IEditSkuResponse {
     execute_status: string;
 }
-
-export interface IShopItem {
-    merchant_id: string;
-    merchant_name: string;
-    merchant_platform: string;
-}
-
-export type ISHopList = IShopItem[];
 
 export declare interface ILogItem {
     id: string;

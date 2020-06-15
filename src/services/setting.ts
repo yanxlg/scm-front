@@ -2,15 +2,19 @@ import { transPaginationRequest } from '@/utils/utils';
 import request from '@/utils/request';
 import { IPaginationResponse, IResponse } from '@/interface/IGlobal';
 import {
-    ICookieItem,
     ICountryItem,
     ICustomItem,
     ICustomListQuery,
     ICookieBody,
+    ICookieResponse,
+    IPriceStrategy,
+    IPriceStrategyItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { api } from 'react-components';
+import { IPaginationResponse as PaginationResponse } from 'react-components/es/hooks/useList';
 
 export async function queryCustomList(query: ICustomListQuery) {
     const params = transPaginationRequest(query);
@@ -49,11 +53,92 @@ export async function updateCustom(data: ICustomItem) {
 }
 
 export async function queryCookies() {
-    return request.get<IResponse<ICookieItem[]>>(SettingApiPath.QueryCookie);
+    return request.get<IResponse<ICookieResponse>>(SettingApiPath.QueryCookie);
 }
 
 export async function saveCookie(data: ICookieBody) {
     return request.post(SettingApiPath.UpdateCookie, {
         data: data,
     });
+}
+
+export function queryDownloadList({
+    size,
+    id,
+    filename,
+    status,
+    ...extra
+}: {
+    size?: number;
+    id?: string;
+    filename?: string;
+    status?: number;
+}) {
+    return api.post(SettingApiPath.ExportList, {
+        data: {
+            page_size: size,
+            id,
+            filename,
+            status,
+            ...extra,
+        },
+    });
+}
+
+export function retryExport(id: string) {
+    return request.get(SettingApiPath.RetryExport, {
+        params: {
+            id,
+        },
+        skipResponseInterceptors: true,
+    });
+}
+
+export function deleteExport(id: string) {
+    return request.get(SettingApiPath.DeleteExport, {
+        params: {
+            id: id,
+        },
+        skipResponseInterceptors: true,
+    });
+}
+
+export function updateExport(id: string) {
+    return request.get(SettingApiPath.UpdateExport, {
+        params: {
+            id: id,
+        },
+        skipResponseInterceptors: true,
+    });
+}
+
+export function queryPriceStrategy(merchant_id: string) {
+    return request.get<IResponse<IPriceStrategy | null>>(SettingApiPath.QueryPriceStrategy, {
+        params: {
+            strategy_type: 1,
+            merchant_id: merchant_id,
+        },
+    });
+}
+
+export function updatePriceStrategy(data: {
+    merchant_id: number;
+    purchase_crawler_price_condition: number;
+    sale_crawler_price_value: number;
+    middle_condition: number;
+    purchase_minus_sale_crawler_price_condition: number;
+    fix_price_value: number;
+}) {
+    return request.post(SettingApiPath.UpdatePriceStrategy, {
+        data: data,
+    });
+}
+
+export function queryPriceStrategyHistory(params: any) {
+    return api.get<IResponse<PaginationResponse<IPriceStrategyItem>>>(
+        SettingApiPath.QueryPriceStrategyHistory,
+        {
+            params: params,
+        },
+    );
 }

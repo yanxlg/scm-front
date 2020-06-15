@@ -1,6 +1,23 @@
 import request from '@/utils/request';
 import { OrderApiPath } from '@/config/api/OrderApiPath';
-import { downloadExcel } from '@/utils/common';
+import { GlobalApiPath } from '@/config/api/GlobalApiPath';
+import {
+    IPadSimilarBody,
+    IWarehouseNotShipSearch,
+    INotWarehouseSearch,
+    IWaitShipSearch,
+    IWaitPaySearch,
+    IPendingOrderSearch,
+    ISimilarInfoResponse,
+    IChannelSourceResponse,
+    IReviewSearch,
+    IPlatformItem,
+} from '@/interface/IOrder';
+import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
+import { api } from 'react-components';
+import { IResponse } from '@/interface/IGlobal';
+// import { ISHopList } from '@/interface/IChannel';
+import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 
 export declare interface IFilterParams {
     page?: number;
@@ -36,39 +53,6 @@ export declare interface IFilterParams {
     only_p_order?: number;
 }
 
-export declare interface IPendingFilterParams {
-    page?: number;
-    page_count?: number;
-    order_start_time?: number;
-    order_end_time?: number;
-    order_goods_id?: string[];
-    product_id?: string[];
-    sku_id?: string[];
-    channel_source?: number[];
-    order_goods_status?: number[];
-}
-
-export declare interface IPayFilterParams {
-    page?: number;
-    page_count?: number;
-    purchase_order_stime?: number;
-    purchase_order_etime?: number;
-    purchase_platform?: number;
-    purchase_order_sn?: string;
-    purchase_parent_order_sn?: string;
-}
-
-export declare interface IWaitShipFilterParams {
-    page?: number;
-    page_count?: number;
-    order_goods_id?: string;
-    purchase_platform_order_id_list?: string[];
-    order_goods_status?: number;
-    purchase_order_status?: number;
-    platform_order_time_start?: number;
-    platform_order_time_end?: number;
-}
-
 export declare interface IErrFilterParams {
     page?: number;
     page_count?: number;
@@ -101,121 +85,94 @@ export async function getAllOrderList(data: IFilterParams) {
 }
 
 export async function postExportAll(data: IFilterParams) {
-    return request
-        .post(OrderApiPath.postExportAll, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportAll, {
+        data,
+    });
 }
 
 // 获取待拍单
-export async function getPendingOrderList(data: IPendingFilterParams) {
+export async function getPendingOrderList(data: IPendingOrderSearch) {
     return request.post(OrderApiPath.getPendingOrderList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPendingOrder(data: IPendingFilterParams) {
-    return request
-        .post(OrderApiPath.postExportPendingOrder, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function postExportPendingOrder(data: IPendingOrderSearch) {
+    return request.post(OrderApiPath.postExportPendingOrder, {
+        data,
+    });
 }
 
 // 获取待支付
-export async function getPayOrderList(data: IPayFilterParams) {
+export async function getPayOrderList(data: IWaitPaySearch) {
     return request.post(OrderApiPath.getPayOrderList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPay(data: IPayFilterParams) {
-    return request
-        .post(OrderApiPath.postExportPay, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function postExportPay(data: IWaitPaySearch) {
+    return request.post(OrderApiPath.postExportPay, {
+        data,
+    });
 }
 
 // 获取待发货
-export async function getWaitShipList(data: IWaitShipFilterParams) {
+export async function getWaitShipList(data: IWaitShipSearch) {
     return request.post(OrderApiPath.getWaitShipList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportWaitShip(data: IWaitShipFilterParams) {
-    return request
-        .post(OrderApiPath.postExportWaitShip, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function postExportWaitShip(data: IWaitShipSearch) {
+    return request.post(OrderApiPath.postExportWaitShip, {
+        data,
+    });
 }
 
 // 已采购未入库
-export async function getPurchasedNotStockList(data: IWaitShipFilterParams) {
-    return request.post(OrderApiPath.getPurchasedNotStockList, {
+export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
+    return request.post(OrderApiPath.getPurchasedNotWarehouseList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportPurchasedNotStock(data: IWaitShipFilterParams) {
-    return request
-        .post(OrderApiPath.postExportPurchasedNotStock, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
+    return request.post(OrderApiPath.postExportPurchasedNotWarehouse, {
+        data,
+    });
 }
 
 // 仓库未发货
-export async function getStockNotShipList(data: IFilterParams) {
-    return request.post(OrderApiPath.getStockNotShipList, {
+export async function getWarehouseNotShipList(data: IWarehouseNotShipSearch) {
+    return request.post(OrderApiPath.getWarehouseNotShipList, {
         requestType: 'json',
         data,
     });
 }
 
-export async function postExportStockNotShip(data: IFilterParams) {
-    return request
-        .post(OrderApiPath.postExportStockNotShip, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
+export async function postExportWarehouseNotShip(data: IWarehouseNotShipSearch) {
+    return request.post(OrderApiPath.postExportWarehouseNotShip, {
+        data,
+    });
+}
+
+export function getErrorOrderList(data: IErrFilterParams) {
+    return api
+        .post(OrderApiPath.getErrorOrderList, {
+            requestType: 'json',
+            data: data,
         })
-        .then(downloadExcel);
-}
-
-// 获取异常订单
-export async function getErrorOrderList(data: IErrFilterParams) {
-    return request.post(OrderApiPath.getErrorOrderList, {
-        requestType: 'json',
-        data,
-    });
+        .then(transPaginationResponse);
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
-    return request
-        .post(OrderApiPath.postExportErrOrder, {
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+    return request.post(OrderApiPath.postExportErrOrder, {
+        data,
+    });
 }
 
 // 获取商品详情
@@ -261,3 +218,78 @@ export async function getOrderTrack(params: { order_goods_id: string; last_waybi
         params,
     });
 }
+
+export async function patSimilarGoods(body: IPadSimilarBody) {
+    return request.post(OrderApiPath.padSimilarGood, {
+        data: body,
+    });
+}
+
+export async function querySimilarInfo(query: {
+    order_goods_id: string;
+    purchase_plan_id: string;
+}) {
+    return request.get<IResponse<ISimilarInfoResponse>>(OrderApiPath.querySimilarInfo, {
+        params: query,
+    });
+}
+
+export const queryChannelSource = singlePromiseWrap(() => {
+    return request.get<IResponse<IChannelSourceResponse>>(OrderApiPath.queryChannelSource);
+});
+
+export function getReviewOrderList(data: IReviewSearch) {
+    return api
+        .post(OrderApiPath.getReviewOrderList, {
+            requestType: 'json',
+            data: data,
+        })
+        .then(transPaginationResponse);
+}
+
+export async function postExportReview(data: any) {
+    return request.post(GlobalApiPath.downloadExcel, {
+        data,
+    });
+}
+
+export function postReviewPass(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postReviewPass, {
+        data,
+    });
+}
+
+export function postOrderOffsale(data: { order_goods_ids: string[] }) {
+    return request.post(OrderApiPath.postOrderOffsale, {
+        data,
+    });
+}
+
+export const queryShopList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.QueryShopList);
+});
+
+export const getPlatformAndStore = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.QueryShopList).then(res => {
+        const list: IPlatformItem[] = [];
+        const obj: any = {};
+        res.data?.forEach((item: any) => {
+            const { merchant_platform, merchant_name } = item;
+            const nameList = obj[merchant_platform];
+            !nameList && (obj[merchant_platform] = []);
+            obj[merchant_platform].push({
+                name: merchant_name,
+                value: merchant_name,
+            });
+        });
+        Object.keys(obj).forEach(platform => {
+            const item: IPlatformItem = {
+                name: platform,
+                value: platform,
+                children: obj[platform],
+            };
+            list.push(item);
+        });
+        return list;
+    });
+});

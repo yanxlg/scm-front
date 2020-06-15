@@ -19,7 +19,7 @@ import btnStyles from '@/styles/_btn.less';
 import URLGather from '@/pages/task/components/editor/URLGather';
 import HotGather from '@/pages/task/components/editor/HotGather';
 import TimerUpdate from '@/pages/task/components/editor/TimerUpdate';
-import { utcToLocal } from '@/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 declare interface TaskInfoProps {
     task_id: number;

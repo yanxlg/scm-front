@@ -1,6 +1,7 @@
 // wrap ()=>Promise to control it as single instance
 import { EmptyObject } from '@/config/global';
 import { IResponse } from '@/interface/IGlobal';
+import { parse, stringify } from 'querystring';
 
 function singlePromiseWrap<T, P = any>(promise: (params?: P) => Promise<T>) {
     let syncPromise: Promise<T>;
@@ -32,19 +33,20 @@ export const transPaginationRequest = ({
     };
 };
 
-export const transPaginationResponse = <T>({
+export const transPaginationResponse = <T = any>({
     data,
     ...others
 }: IResponse<{
     total?: number;
+    all_count?: number;
     list?: T[];
     task_info?: T[];
     [key: string]: any;
 }> = EmptyObject) => {
-    const { total = 0, list, task_info, fee, ...extra } = data || {};
+    const { total = 0, all_count = 0, list, task_info, fee, ...extra } = data || {};
     return {
         data: {
-            total,
+            total: total || all_count,
             list: list || task_info || fee || [],
             ...extra,
         },
@@ -86,3 +88,16 @@ export const formatRequestData = (data: any): any => {
     }
     return data;
 };
+
+export const parseJson = (value: any) => {
+    if (typeof value === 'object') {
+        return value;
+    }
+    let result = {};
+    try {
+        result = JSON.parse(value);
+    } catch (e) {}
+    return result;
+};
+
+export const getPageQuery = () => parse(window.location.href.split('?')[1]);

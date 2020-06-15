@@ -1,4 +1,4 @@
-import request, { errorHandlerFactory } from '@/utils/request';
+import request from '@/utils/request';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import {
     IChannelProductListBody,
@@ -8,9 +8,6 @@ import {
     IChannelShelveStateBody,
     IChannelProductVersionQuery,
     IChannelProductVersionResponse,
-    IChannelProductDetailQuery,
-    IChannelProductDetailResponse,
-    IEditChannelProductDetailBody,
     IActiveChannelProductVersionBody,
     IRegionShippingFeeBody,
     IRegionShippingFeeResponse,
@@ -20,7 +17,6 @@ import {
     IGoodsSkuResponse,
     IEditSkuBody,
     IEditSkuResponse,
-    ISHopList,
     ILogItem,
 } from '@/interface/IChannel';
 import { IResponse, RequestPagination } from '@/interface/IGlobal';
@@ -36,21 +32,6 @@ export async function queryChannelProductVersion(query?: IChannelProductVersionQ
             params: query,
         },
     );
-}
-
-export async function queryChannelProductDetail(query: IChannelProductDetailQuery) {
-    return request.get<IResponse<IChannelProductDetailResponse>>(
-        ChannelApiPath.QueryProductDetail,
-        {
-            params: query,
-        },
-    );
-}
-
-export async function editChannelProductDetail(body: IEditChannelProductDetailBody) {
-    return request.put<IResponse<null>>(ChannelApiPath.EditProductDetail, {
-        data: body,
-    });
 }
 
 export async function exportChannelProductVersion(data?: IChannelProductVersionQuery) {
@@ -112,18 +93,14 @@ export async function queryChannelChangedProperties() {
 export async function updateChannelShelveState(data: IChannelShelveStateBody) {
     return request.put<IResponse<null>>(ChannelApiPath.UpdateShelveState, {
         data,
-        errorHandler: errorHandlerFactory(true),
+        skipResponseInterceptors: true,
     });
 }
 
-export async function exportChannelProductList(data: IChannelProductListBody & RequestPagination) {
-    return request
-        .post(ChannelApiPath.ExportProductList, {
-            data: transPaginationRequest(data),
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(downloadExcel);
+export async function exportChannelProductList(data: IChannelProductListBody) {
+    return request.post(ChannelApiPath.ExportProductList, {
+        data: { ...data },
+    });
 }
 
 // 查询国家运费
@@ -156,14 +133,17 @@ export async function editSkuPrice(data: IEditSkuBody) {
     });
 }
 
-export const queryShopList = singlePromiseWrap(() => {
-    return request.get<IResponse<ISHopList>>(ChannelApiPath.QueryShopList);
-});
-
-export async function queryOnOffLog(product_ids: string) {
-    return request.get<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
-        params: {
+export async function queryOnOffLog({
+    merchant_id,
+    product_ids,
+}: {
+    product_ids: string;
+    merchant_id: string;
+}) {
+    return request.post<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
+        data: {
             product_ids,
+            merchant_id,
         },
     });
 }

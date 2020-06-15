@@ -6,16 +6,15 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { showFailureModal } from '@/pages/task/components/modal/GatherFailureModal';
 import { addPddHotTask, querySortCondition, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
-import { QuestionCircleOutlined } from '@ant-design/icons/lib';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
     HotTaskRange,
     TaskExecuteType,
     TaskIntervalConfigType,
     HotTaskFilterType,
 } from '@/enums/StatusEnum';
-import { IntegerInput, RichInput } from 'react-components';
+import { RichInput } from 'react-components';
 import { IHotTaskBody, IPDDSortItem, ITaskDetailInfo } from '@/interface/ITask';
-import { dateToUnix } from '@/utils/date';
 import { scrollToFirstError } from '@/utils/common';
 import { EmptyObject } from '@/config/global';
 import ReptileCondition, { ReptileConditionRef } from '../config/hot/ReptileCondition';
@@ -24,11 +23,12 @@ import TaskCycle from '@/pages/task/components/config/hot/TaskCycle';
 import PriceRange from '@/pages/task/components/config/hot/PriceRange';
 import SalesRange from '@/pages/task/components/config/hot/SalesRange';
 import { TaskChannelList, TaskChannelCode, TaskChannelEnum } from '@/config/dictionaries/Task';
-import moment from 'moment';
 import SortType from '@/pages/task/components/config/hot/SortType';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import { LoadingButton } from 'react-components';
 import classNames from 'classnames';
+import { dateToUnix } from 'react-components/es/utils/date';
+import dayjs from 'dayjs';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -124,14 +124,14 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
             shopId: shopId,
             task_end_time:
                 taskType === TaskExecuteType.interval && task_end_time
-                    ? moment(task_end_time * 1000)
+                    ? dayjs(task_end_time * 1000)
                     : undefined,
             taskIntervalType: task_interval_seconds
                 ? isDay
                     ? TaskIntervalConfigType.day
                     : TaskIntervalConfigType.second
                 : TaskIntervalConfigType.day,
-            task_start_time: task_start_time ? moment(task_start_time * 1000) : undefined,
+            task_start_time: task_start_time ? dayjs(task_start_time * 1000) : undefined,
             task_type: taskType,
             day: isDay ? task_interval_seconds! / 86400 : undefined,
             second: task_interval_seconds && !isDay ? task_interval_seconds : undefined,
@@ -335,10 +335,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     }}
                 >
                     <Form.Item
-                        className={classNames(
-                            edit ? '' : formStyles.formItem,
-                            formStyles.formInline,
-                        )}
+                        className={edit ? '' : formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="task_name"
                         label="任务名称"
@@ -352,7 +349,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Input className="picker-default" />
                     </Form.Item>
                     <Form.Item
-                        className={classNames(formStyles.formItem, formStyles.formInline)}
+                        className={formStyles.formItem}
                         validateTrigger={'onBlur'}
                         name="channel"
                         label="任务渠道"
@@ -384,11 +381,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                             validateTrigger={'onBlur'}
                             name="grab_page_count"
                             label="爬取页数"
-                            className={classNames(
-                                formStyles.formItem,
-                                formStyles.formHorizon,
-                                formStyles.formInline,
-                            )}
+                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
                             rules={[
                                 {
                                     required: true,
@@ -401,11 +394,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         <Form.Item
                             validateTrigger={'onBlur'}
                             name="grab_count_max"
-                            className={classNames(
-                                formStyles.formItem,
-                                formStyles.formHorizon,
-                                formStyles.formInline,
-                            )}
+                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
                             label={
                                 <span>
                                     爬取数量

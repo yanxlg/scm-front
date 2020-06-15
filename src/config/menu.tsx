@@ -1,13 +1,29 @@
 import React from 'react';
-import { DashboardOutlined } from '@ant-design/icons/lib';
+import { DashboardOutlined } from '@ant-design/icons';
 import { Icons } from '@/components/Icon';
 import '@/styles/menu.less';
 
 export default [
     {
         path: '/',
+        hideInMenu: true,
         name: '首页',
         icon: <DashboardOutlined className="menu-icon" />,
+    },
+    {
+        path: '/dashboard',
+        name: 'DashBoard',
+        icon: <DashboardOutlined className="menu-icon" />,
+        children: [
+            {
+                path: '/dashboard/overview',
+                name: '数据概览',
+            },
+            {
+                path: '/dashboard/order',
+                name: '订单分析',
+            },
+        ],
     },
     {
         path: '/task',
@@ -46,7 +62,7 @@ export default [
                 name: '本地产品库',
             },
             {
-                path: '/goods/local/version',
+                path: '/goods/local/:id',
                 name: '商品版本',
                 hideInMenu: true,
             },
@@ -72,13 +88,40 @@ export default [
         icon: <Icons type="scm-io" className="menu-icon" />,
     },
     {
+        path: '/purchase',
+        name: '采购管理',
+        icon: <Icons type="scm-purchase" className="menu-icon" />,
+        children: [
+            {
+                path: '/purchase/list',
+                name: '采购单列表',
+            },
+            {
+                path: '/purchase/return',
+                name: '采购退货',
+            },
+            {
+                path: '/purchase/abnormal',
+                name: '仓库异常处理',
+            },
+        ],
+    },
+    {
         path: '/setting',
         name: '基本设置',
         icon: <Icons type="scm-setting" className="menu-icon" />,
         children: [
             {
+                path: '/setting/store',
+                name: '店铺设置',
+            },
+            {
                 path: '/setting/account',
                 name: '账户管理',
+            },
+            {
+                path: '/setting/export',
+                name: '导出管理',
             },
             {
                 path: '/setting/goodsAttr',

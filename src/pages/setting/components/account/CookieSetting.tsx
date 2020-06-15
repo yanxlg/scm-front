@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useDataSet } from 'react-components/es/hooks';
 import { ICookieItem } from '@/interface/ISetting';
-import { Form, Button, Table, Input } from 'antd';
-import { FitTable, LoadingButton } from 'react-components';
+import { Form, Button, Input } from 'antd';
+import { FitTable, LoadingButton, useDataSet } from 'react-components';
 import { queryCookies, saveCookie } from '@/services/setting';
 import settingStyles from '@/styles/_setting.less';
 import { ColumnType } from 'antd/es/table/interface';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { EmptyObject } from '@/config/global';
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
     editing: boolean;
@@ -67,8 +67,8 @@ const CookieSetting: React.FC = () => {
         setLoading(true);
         setEditingKey(undefined);
         return queryCookies()
-            .then(({ data = [] }) => {
-                setDataSet(data);
+            .then(({ data: { list = [] } = EmptyObject }) => {
+                setDataSet(list);
             })
             .finally(() => {
                 setLoading(false);
@@ -104,7 +104,7 @@ const CookieSetting: React.FC = () => {
                 align: 'center',
                 width: '100px',
                 render: (status: any) => {
-                    return status === '1' ? '有效' : status === '2' ? '过期' : '默认';
+                    return status === '0' ? '有效' : status === '1' ? '过期' : '默认';
                 },
             },
             {
@@ -115,9 +115,18 @@ const CookieSetting: React.FC = () => {
                 render: (_: any, record: ICookieItem) => {
                     const editable = isEditing(record);
                     return editable ? (
-                        <LoadingButton type="link" onClick={() => save(record.account_id)}>
-                            保存
-                        </LoadingButton>
+                        <>
+                            <LoadingButton type="link" onClick={() => save(record.account_id)}>
+                                保存
+                            </LoadingButton>
+                            <Button
+                                type="link"
+                                danger={true}
+                                onClick={() => setEditingKey(undefined)}
+                            >
+                                取消
+                            </Button>
+                        </>
                     ) : (
                         <Button type="link" onClick={() => edit(record)}>
                             修改
@@ -164,7 +173,6 @@ const CookieSetting: React.FC = () => {
 
     const scroll = useMemo(() => {
         return {
-            y: 600,
             x: 'max-content',
         };
     }, []);
@@ -190,6 +198,7 @@ const CookieSetting: React.FC = () => {
                     columns={mergedColumns}
                     pagination={false}
                     scroll={scroll}
+                    bottom={100}
                 />
             </Form>
         );

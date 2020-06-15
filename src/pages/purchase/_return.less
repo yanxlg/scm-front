@@ -1,0 +1,123 @@
+.steps {
+    :global(.ant-steps-item-icon) {
+        border-radius: 100% !important;
+        background-color: #000000 !important;
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 12px !important;
+        border: none !important;
+
+        :global(.ant-steps-icon) {
+            color: #ffffff !important;
+            font-size: 12px !important;
+        }
+    }
+    :global(.ant-steps-item-wait) {
+        :global(.ant-steps-item-icon) {
+            background: rgba(9, 9, 9, 1) !important;
+            opacity: 0.3 !important;
+        }
+    }
+    :global(.ant-steps-item-tail) {
+        &:after {
+            background-color: #1c1c1c !important;
+            z-index: 100;
+            position: relative;
+            transition: height 300ms ease;
+        }
+        &:before {
+            position: absolute;
+            content: '';
+            width: 1px;
+            background-color: #b5b5b5 !important;
+            top: 30px;
+            bottom: 6px;
+        }
+    }
+    :global(.ant-steps-item-active) {
+        :global(.ant-steps-item-tail) {
+            &:after {
+                height: 50% !important;
+            }
+        }
+    }
+}
+
+.form-label {
+    width: 4em;
+    text-align: right;
+    &-disabled {
+        .form-label {
+            color: rgba(0, 0, 0, 0.45) !important;
+        }
+        :global(.ant-form-item-label) > label {
+            &:after {
+                color: rgba(0, 0, 0, 0.45) !important;
+            }
+        }
+    }
+}
+
+.form-input {
+    width: 200px !important;
+}
+
+.form-textarea {
+    width: 500px;
+    height: 100px !important;
+}
+
+.image {
+    width: 77px !important;
+    height: 77px !important;
+    min-width: 77px !important;
+    min-height: 77px !important;
+}
+
+.modal {
+    &-image {
+        width: 60px !important;
+        height: 60px !important;
+        margin-right: 10px;
+    }
+    &-title {
+        color: rgba(0, 0, 0, 0.85);
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 700px;
+    }
+    &-skus {
+        margin-top: 16px;
+    }
+    &-sku {
+        display: inline-block;
+        color: rgba(0, 0, 0, 0.85);
+        & ~ & {
+            margin-left: 10px;
+        }
+    }
+}
+
+.paragraph {
+    margin-bottom: 0 !important;
+}
+
+.product {
+    &-desc {
+        margin-left: 10px;
+        text-align: left;
+    }
+}
+
+.form-item {
+    width: 90px;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.text-center {
+    text-align: center !important;
+}

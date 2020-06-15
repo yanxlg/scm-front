@@ -1,9 +1,16 @@
 import request from '@/utils/request';
 import { LocalApiPath } from '@/config/api/LocalApiPath';
 import { IResponse, IPaginationResponse } from '@/interface/IGlobal';
-import { IGoodsList, ICatagoryItem } from '@/interface/ILocalGoods';
+import {
+    IGoodsList,
+    ICatagoryItem,
+    IGoodsVersionItem,
+    IGoodsLockItem,
+} from '@/interface/ILocalGoods';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ICountryItem } from '@/interface/ISetting';
+import { singlePromiseWrap, transPaginationResponse } from '@/utils/utils';
+import { api } from 'react-components';
 
 export declare interface IFilterParams {
     page?: number;
@@ -70,7 +77,9 @@ export declare interface IGoodsEditData {
     title: string;
     description: string;
     cat_id: number;
-    imgs: IGoodsEditImgItem[];
+    imgs?: IGoodsEditImgItem[];
+    has_zip?: 1 | 2;
+    zip_id?: number;
 }
 
 export declare interface ISkuParams {
@@ -82,36 +91,29 @@ export declare interface ISkuParams {
 
 // 兼容SearchForm数据结构 { name: '', value: '' }
 
-export async function getGoodsList(params: IFilterParams) {
-    return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
-        // requestType: 'form',
-        data: params,
-    });
+export function getGoodsList(params: IFilterParams) {
+    // return request.post<IResponse<IPaginationResponse<IGoodsList>>>(LocalApiPath.getGoodsList, {
+    //     // requestType: 'form',
+    //     data: params,
+    // });
+
+    return (
+        api
+            .post(LocalApiPath.getGoodsList, {
+                data: params,
+            })
+            // .then(res => {
+            //     console.log('getGoodsList', res);
+            //     return res
+            // })
+            .then(transPaginationResponse)
+    );
 }
 
 export async function postGoodsExports(data: IFilterParams) {
-    return request
-        .post(LocalApiPath.postGoodsExports, {
-            // requestType: 'form',
-            data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(LocalApiPath.postGoodsExports, {
+        data,
+    });
 }
 
 export async function putGoodsPicEdit(data: IImgEditData) {
@@ -136,8 +138,8 @@ export async function postGoodsOnsale(data: IOnsaleData) {
 }
 
 // 查询商品一键上架
-export async function getAllGoodsOnsale(data: IFilterParams) {
-    return request.post(LocalApiPath.getAllGoodsOnsale, {
+export async function postAllGoodsOnsale(data: IFilterParams) {
+    return request.post(LocalApiPath.postAllGoodsOnsale, {
         data,
     });
 }
@@ -176,21 +178,24 @@ function convertCategory(data: ICatagoryItem[]): IOptionItem[] {
 }
 
 // 获取所有
-export async function getCatagoryList() {
-    return request.get(LocalApiPath.getCatagoryList).then(res => {
+export const getCatagoryList = singlePromiseWrap(() => {
+    return request.get(LocalApiPath.getCatagoryList).then((res: any) => {
         const { data } = res;
         return {
             list: data,
             convertList: convertCategory(data),
         };
     });
-}
+});
 
 // 获取商品版本
 export async function getGoodsVersion(params: IGoodsVersionParams) {
-    return request.get(LocalApiPath.getGoodsVersion, {
-        params: params,
-    });
+    return request.get<IResponse<IPaginationResponse<IGoodsVersionItem>>>(
+        LocalApiPath.getGoodsVersion,
+        {
+            params: params,
+        },
+    );
 }
 
 // 下载商品版本excel
@@ -203,7 +208,7 @@ export async function postGoodsVersionExport(data: IGoodsVersionParams) {
             responseType: 'blob',
             parseResponse: false,
         })
-        .then(response => {
+        .then((response: any) => {
             const disposition = response.headers.get('content-disposition');
             const fileName = decodeURI(
                 disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
@@ -273,16 +278,59 @@ export async function putGoodsMergeAdd(data: { product_sn: string; commodity_ids
 // 获取所有
 export async function getGoodsStatusList() {
     return request.get(LocalApiPath.getGoodsStatusList).then((res: any) => {
-        // console.log('getGoodsStatusList', res);
-        // // const { data } = res;
-        // // return {
-        // //     list: data,
-        // //     convertList: convertCategory(data),
-        // // };
-        // return res
         return res.data.result.map((item: any) => ({
             name: item.msg,
             value: item.code,
         }));
     });
+}
+
+// 查询商品锁
+export function getGoodsLock(id: string) {
+    return request.get(LocalApiPath.getGoodsLock.replace(':commodity_id', id));
+}
+
+// 商品字段加解锁
+export function setGoodsLock(id: string, data: IGoodsLockItem) {
+    return request.post(LocalApiPath.setGoodsLock.replace(':commodity_id', id), {
+        data,
+    });
+}
+
+// 查询当前版本列表
+export function getGoodsCurrentList(id: string) {
+    return request.get(LocalApiPath.getGoodsCurrentList.replace(':commodity_id', id));
+}
+
+// 设置商品融合
+export function setGoodsMix(data: {
+    release_product_id: string;
+    new_product_id: string;
+    field: string[];
+    commodity_id: string;
+}) {
+    return request.post(LocalApiPath.setGoodsMix, {
+        data,
+    });
+}
+
+export function exportAllSkuImages(product_id: string) {
+    return request.post(LocalApiPath.exportAllSkuImages, {
+        data: {
+            module: 8,
+            filename: product_id,
+            query: { product_id },
+        },
+    });
+}
+
+export async function uploadGoodsPic(data: any, product_id: string) {
+    return request.post(LocalApiPath.uploadGoodsPic.replace(':product_id', product_id), {
+        data,
+        skipResponseInterceptors: true,
+    });
+}
+
+export function getGoodsDetail(product_id: string) {
+    return request.get(LocalApiPath.getGoodsDetail.replace(':product_id', product_id));
 }

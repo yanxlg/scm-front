@@ -1,18 +1,17 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import ExcelDialog from './components/ExcelDialog';
+import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { PopConfirmLoadingButton } from 'react-components';
+import { PopConfirmLoadingButton, FitTable } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
     updateChannelShelveState,
     queryChannelCategory,
-    queryShopList,
+    exportChannelProductList,
 } from '@/services/channel';
 import {
     ProductStatusMap,
@@ -20,12 +19,13 @@ import {
     ProductStatusList,
     checkLowerShelf,
     checkUpperShelf,
+    ProductStatusResponseMap,
 } from '@/config/dictionaries/Product';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
-import { convertEndDate, convertStartDate } from '@/utils/date';
+import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
 import ShipFeeModal from './components/ShipFeeModal';
@@ -34,14 +34,13 @@ import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
 import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
-import { SearchOutlined } from '@ant-design/icons';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
-import { Icons } from '@/components/Icon';
-import { ProColumns } from 'react-components/es/ProTable';
-import { ProTable } from 'react-components';
 import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
-import { useModal } from 'react-components/es/hooks';
+import { useModal } from 'react-components';
+import formStyles from 'react-components/es/JsonForm/_form.less';
+import Export from '@/components/Export';
+import { queryShopList } from '@/services/global';
 
 const salesVolumeList = [
     {
@@ -179,7 +178,10 @@ const ChannelList: React.FC = props => {
 
     const skuRef = useRef<SkuDialog>(null);
 
-    const { visible, onClose, setVisibleProps } = useModal<string>();
+    const { visible, onClose, setVisibleProps } = useModal<{
+        product_ids: string;
+        merchant_id: string;
+    }>();
 
     const {
         pageSize: page_size,
@@ -209,8 +211,8 @@ const ChannelList: React.FC = props => {
         return {
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
-            onshelf_time_start: convertStartDate(Number(onshelf_time_start)),
-            onshelf_time_end: convertEndDate(Number(onshelf_time_end)),
+            onshelf_time_start: unixToStartDate(Number(onshelf_time_start)),
+            onshelf_time_end: unixToEndDate(Number(onshelf_time_end)),
             commodity_id,
             vova_virtual_id,
             product_id,
@@ -233,6 +235,8 @@ const ChannelList: React.FC = props => {
         onSearch,
         onReload,
         onChange,
+        selectedRowKeys,
+        setSelectedRowKeys,
     } = useList({
         queryList: queryChannelGoodsList,
         formRef: searchRef,
@@ -249,12 +253,21 @@ const ChannelList: React.FC = props => {
         setExportDialog(false);
     }, []);
 
-    const getCopiedLinkQuery = useCallback(() => {
-        return query;
+    const onExportOKey = useCallback((extra: any) => {
+        // export
+        const values = searchRef.current!.getFieldsValue();
+        return exportChannelProductList({
+            ...values,
+            ...extra,
+        });
     }, []);
 
-    const showSkuDialog = useCallback((id: string, merchant_id: string) => {
-        skuRef.current!.showModal(id, merchant_id);
+    const getCopiedLinkQuery = useCallback(() => {
+        return query;
+    }, [loading]);
+
+    const showSkuDialog = useCallback((id: string, merchant_id: string, commodity_id: string) => {
+        skuRef.current!.showModal(id, merchant_id, commodity_id);
     }, []);
 
     const showCountryShipFee = useCallback((product_id: string, merchant_id: string) => {
@@ -386,10 +399,13 @@ const ChannelList: React.FC = props => {
     );
 
     const showLog = useCallback((record: IChannelProductListItem) => {
-        setVisibleProps(record.product_id);
+        setVisibleProps({
+            product_ids: record.product_id,
+            merchant_id: record.merchant_id,
+        });
     }, []);
 
-    const columns = useMemo<ProColumns<IChannelProductListItem>[]>(() => {
+    const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
         return [
             {
                 title: '操作',
@@ -507,10 +523,10 @@ const ChannelList: React.FC = props => {
                 dataIndex: 'product_status',
                 align: 'center',
                 width: 150,
-                render: (status: ProductStatusCode, record) => {
+                render: (status: ProductStatusCode = 0, record) => {
                     return (
                         <div>
-                            {ProductStatusMap[status]}
+                            {ProductStatusResponseMap[status]}
                             <Button type="link" onClick={() => showLog(record)}>
                                 上下架日志
                             </Button>
@@ -529,7 +545,9 @@ const ChannelList: React.FC = props => {
                             <div>{value}</div>
                             <Button
                                 type="link"
-                                onClick={() => showSkuDialog(row.id, row.merchant_id)}
+                                onClick={() =>
+                                    showSkuDialog(row.id, row.merchant_id, row.commodity_id)
+                                }
                             >
                                 查看sku详情
                             </Button>
@@ -556,29 +574,49 @@ const ChannelList: React.FC = props => {
         ];
     }, []);
 
+    const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
+        setSelectedRowKeys(selectedKeys as string[]);
+    }, []);
+
     const rowSelection = useMemo(() => {
         return {
             fixed: true,
             columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectedRowKeysChange,
         };
-    }, []);
+    }, [selectedRowKeys]);
+
+    const pagination = useMemo(() => {
+        return {
+            total: total,
+            current: pageNumber,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            position: ['topRight', 'bottomRight'],
+        } as any;
+    }, [loading]);
 
     const children = useMemo(() => {
         return (
-            <LoadingButton type="primary" icon={<SearchOutlined />} onClick={onSearch}>
-                查询
-            </LoadingButton>
+            <div>
+                <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
+                    查询
+                </LoadingButton>
+                <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                    刷新
+                </LoadingButton>
+                <Button
+                    disabled={total <= 0}
+                    // type="primary"
+                    className={formStyles.formBtn}
+                    onClick={showExcelDialog}
+                >
+                    导出
+                </Button>
+            </div>
         );
-    }, []);
-
-    const options = useMemo(() => {
-        return {
-            density: true,
-            fullScreen: true,
-            reload: onReload,
-            setting: true,
-        };
-    }, []);
+    }, [total]);
 
     const search = useMemo(() => {
         return (
@@ -591,88 +629,67 @@ const ChannelList: React.FC = props => {
                 {children}
             </JsonForm>
         );
-    }, []);
+    }, [children]);
 
-    const toolBarRender = useCallback(
-        (selectedRowKeys = []) => {
-            const size = selectedRowKeys.length;
-            return [
-                <LoadingButton
-                    key="on"
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    icon={<Icons type="scm-on-sale" />}
-                    onClick={() => onShelveList(selectedRowKeys)}
-                    disabled={size === 0}
-                >
-                    一键上架
-                </LoadingButton>,
-                <LoadingButton
-                    key={'of'}
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    icon={<Icons type="scm-of-sale" />}
-                    onClick={() => offShelveList(selectedRowKeys)}
-                    disabled={size === 0}
-                >
-                    一键下架
-                </LoadingButton>,
-                <Button
-                    key="export"
-                    disabled={total <= 0}
-                    type="primary"
-                    className="btn-group vertical-middle"
-                    onClick={showExcelDialog}
-                    icon={<Icons type="scm-export" />}
-                >
-                    导出
-                </Button>,
-            ];
-        },
-        [loading],
-    );
+    const toolBarRender = useCallback(() => {
+        const size = selectedRowKeys.length;
+        return [
+            <LoadingButton
+                key="on"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => onShelveList(selectedRowKeys)}
+                disabled={size === 0}
+            >
+                一键上架
+            </LoadingButton>,
+            <LoadingButton
+                key={'of'}
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => offShelveList(selectedRowKeys)}
+                disabled={size === 0}
+            >
+                一键下架
+            </LoadingButton>,
+        ];
+    }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
-            <ProTable<IChannelProductListItem>
-                headerTitle="查询表格"
+            <FitTable<IChannelProductListItem>
+                bordered
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 rowSelection={rowSelection}
-                toolBarRender={toolBarRender}
-                pagination={{
-                    total: total,
-                    current: pageNumber,
-                    pageSize: pageSize,
-                    showSizeChanger: true,
-                }}
-                tableAlertRender={false}
+                pagination={pagination}
                 columns={columns}
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                options={options}
+                columnsSettingRender={true}
+                toolBarRender={toolBarRender}
             />
         );
-    }, [loading]);
+    }, [loading, selectedRowKeys]);
 
     const body = useMemo(() => {
         return (
             <Container>
                 {search}
                 {table}
-                <ExcelDialog
+                <Export
                     visible={exportDialog}
-                    total={total}
-                    form={searchRef}
                     onCancel={closeExcelDialog}
+                    columns={columns as any}
+                    onOKey={onExportOKey}
                 />
                 <SkuEditModal ref={skuRef} />
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog]);
+    }, [loading, exportDialog, selectedRowKeys]);
 
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;

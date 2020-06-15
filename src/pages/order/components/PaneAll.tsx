@@ -1,14 +1,9 @@
 import React, { RefObject } from 'react';
 import { Pagination, Button, message, notification } from 'antd';
-
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
-
-import { LoadingButton } from 'react-components';
-import OptionalColumn, { IOptionalColItem } from './OptionalColumn';
+import { JsonForm, LoadingButton } from 'react-components';
 import TableAll from './TableAll';
 import TableParentAll from './TableParentAll';
-
 import {
     getAllOrderList,
     delChannelOrders,
@@ -18,17 +13,14 @@ import {
     IFilterParams,
 } from '@/services/order-manage';
 import {
-    childDefaultFieldList,
     childAllFieldList,
-    childOptionalColList,
-    parentDefaultFieldList,
     parentAllFieldList,
     defaultColChildList,
     defaultParentColList,
-    parentOptionalColList,
-    pageSizeOptions,
 } from '@/enums/OrderEnum';
 import { getCurrentPage } from '@/utils/common';
+
+import formStyles from 'react-components/es/JsonForm/_form.less';
 
 export declare interface IPurchaseStatus {
     status: number;
@@ -66,30 +58,29 @@ declare interface IState {
     pageCount: number;
     total: number;
     loading: boolean;
-    showFilterStatus: boolean;
-    showColStatus: boolean;
     showParentStatus: boolean;
     childOrderList: IChildOrderItem[];
     parentOrderList: IParentOrderItem[];
     fieldList: FormField[];
-    selectedColKeyList: string[];
     colChildList: string[];
     colParentList: string[];
-    childOptionalColList: IOptionalColItem[];
+    exportModal: boolean;
 }
 
 class PaneAll extends React.PureComponent<IProps, IState> {
     private formRef: RefObject<JsonFormRef> = React.createRef();
-    private optionalRef: RefObject<OptionalColumn> = React.createRef();
     private currentSearchParams: IFilterParams | null = null;
     private initialValues = {
-        channel_source: 100,
+        channel_source: '',
+        product_shop: '',
         order_goods_status: 100,
         order_goods_shipping_status: 100,
         non_purchase_plan: 100,
         purchase_order_pay_status: 100,
         purchase_order_status: 100,
         reserve_status: 100,
+        order_goods_cancel_type: 100,
+        purchase_plan_cancel_type: 100,
     };
 
     private endFieldItem: FormField = {
@@ -110,17 +101,15 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             pageCount: 50,
             total: 0,
             loading: false,
-            showFilterStatus: false,
-            showColStatus: false,
             showParentStatus: false,
             childOrderList: [],
             parentOrderList: [],
-            fieldList: [...childDefaultFieldList, this.endFieldItem],
-            selectedColKeyList: [],
-            childOptionalColList: childOptionalColList,
+            // , this.endFieldItem
+            fieldList: [...childAllFieldList],
             // 表格展示的列
             colChildList: defaultColChildList,
             colParentList: defaultParentColList,
+            exportModal: false,
         };
     }
 
@@ -146,7 +135,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         this.setState({
             loading: true,
         });
-        getAllOrderList(params)
+        return getAllOrderList(params)
             .then(res => {
                 this.currentSearchParams = params;
                 // console.log('getProductOrderList', res);
@@ -163,9 +152,14 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                             parentOrderList: this.getParentOrderData(list),
                         });
                     } else {
-                        this.setState({
-                            childOrderList: this.getChildOrderData(list),
-                        });
+                        this.setState(
+                            {
+                                childOrderList: this.getChildOrderData(list),
+                            },
+                            () => {
+                                this.bindMouseenter();
+                            },
+                        );
                     }
                 }
             })
@@ -178,10 +172,10 @@ class PaneAll extends React.PureComponent<IProps, IState> {
 
     // 获取查询数据
     private getFieldsValue = () => {
-        const { only_p_order, ...fields } = this.formRef.current!.getFieldsValue();
+        const { showParentStatus } = this.state;
         return {
-            only_p_order: only_p_order ? 1 : 0,
-            ...fields,
+            ...this.formRef.current!.getFieldsValue(),
+            only_p_order: showParentStatus ? 1 : 0,
         };
     };
 
@@ -192,7 +186,13 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         list.forEach((goodsItem: any) => {
             const { orderGoods, orderInfo } = goodsItem;
             const { orderGoodsPurchasePlan, ...orderRest } = orderGoods;
-            const { currency, confirmTime, channelOrderSn, channelSource } = orderInfo;
+            const {
+                currency,
+                confirmTime,
+                channelOrderSn,
+                channelSource,
+                orderAddress,
+            } = orderInfo;
             // console.log(111, orderGoodsPurchasePlan, orderGoods);
             if (orderGoodsPurchasePlan) {
                 // 生成采购计划
@@ -200,6 +200,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     const {
                         createTime: purchaseCreateTime,
                         lastUpdateTime: purchaseLastUpdateTime,
+                        cancelType: purchaseCancelType,
                         ...purchaseRest
                     } = purchaseItem;
                     const childOrderItem: any = {
@@ -207,10 +208,12 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                         ...purchaseRest,
                         purchaseCreateTime,
                         purchaseLastUpdateTime,
+                        purchaseCancelType,
                         currency,
                         confirmTime,
                         channelOrderSn,
                         channelSource,
+                        orderAddress,
                     };
                     if (index === 0) {
                         childOrderItem._rowspan = orderGoodsPurchasePlan.length;
@@ -226,6 +229,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     channelOrderSn,
                     channelSource,
                     ...orderRest,
+                    orderAddress,
                     _rowspan: 1,
                     _checked: false,
                 });
@@ -240,31 +244,36 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         const parentOrderList: IParentOrderItem[] = [];
         list.forEach(item => {
             const { orderGoods, ...parentRest } = item;
-            orderGoods.forEach((goodsItem: any, index: number) => {
-                const {
-                    // orderId,
-                    createTime: goodsCreateTime,
-                    lastUpdateTime: goodsLastUpdateTime,
-                    ...goodsRest
-                } = goodsItem;
-                const parentOrderItem: any = {
-                    goodsCreateTime,
-                    goodsLastUpdateTime,
+            if (orderGoods) {
+                orderGoods.forEach((goodsItem: any, index: number) => {
+                    const {
+                        // orderId,
+                        createTime: goodsCreateTime,
+                        lastUpdateTime: goodsLastUpdateTime,
+                        ...goodsRest
+                    } = goodsItem;
+                    const parentOrderItem: any = {
+                        goodsCreateTime,
+                        goodsLastUpdateTime,
+                        ...parentRest,
+                        ...goodsRest,
+                    };
+                    if (index === 0) {
+                        parentOrderItem._rowspan = orderGoods.length;
+                    }
+                    parentOrderList.push(parentOrderItem);
+                });
+            } else {
+                parentOrderList.push({
                     ...parentRest,
-                    ...goodsRest,
-                };
-                if (index === 0) {
-                    parentOrderItem._rowspan = orderGoods.length;
-                }
-                parentOrderList.push(parentOrderItem);
-            });
+                    _rowspan: 1,
+                });
+            }
         });
         return parentOrderList;
     }
 
     private changeParentOrder = (status: boolean) => {
-        // console.log('changeParentOrder', status);
-        const { showColStatus } = this.state;
         this.currentSearchParams = null;
         this.setState(
             {
@@ -272,81 +281,15 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                 page: 1,
                 pageCount: 50,
                 total: 0,
-                selectedColKeyList: [],
-                childOptionalColList: status ? parentOptionalColList : childOptionalColList,
                 childOrderList: [],
                 parentOrderList: [],
+                fieldList: status ? parentAllFieldList : childAllFieldList,
             },
             () => {
-                // 切换过滤条件
-                this.changeFilter();
-                if (showColStatus) {
-                    this.optionalRef.current!.cancelCheckAll();
-                }
                 this.onSearch();
                 this.props.getAllTabCount(status ? 1 : 2);
             },
         );
-    };
-
-    // 展示过滤条件
-    private changeFilter = () => {
-        const { showParentStatus, showFilterStatus } = this.state;
-        let fieldList: FormField[] = [];
-        if (showParentStatus && showFilterStatus) {
-            fieldList = parentAllFieldList;
-        } else if (showParentStatus && !showFilterStatus) {
-            fieldList = parentDefaultFieldList;
-        } else if (!showParentStatus && showFilterStatus) {
-            fieldList = childAllFieldList;
-        } else {
-            fieldList = childDefaultFieldList;
-        }
-        this.setState({
-            fieldList: [...fieldList, this.endFieldItem],
-        });
-    };
-
-    private changeShowFilterStatus = () => {
-        const { showFilterStatus } = this.state;
-        this.setState(
-            {
-                showFilterStatus: !showFilterStatus,
-            },
-            () => {
-                this.changeFilter();
-            },
-        );
-    };
-
-    private changeShowColStatus = () => {
-        const { showColStatus } = this.state;
-        this.setState({
-            showColStatus: !showColStatus,
-        });
-    };
-
-    private changeSelectedColList = (list: string[]) => {
-        const { showParentStatus } = this.state;
-        this.setState({
-            selectedColKeyList: list,
-            // colChildList: [...defaultColChildList, ...list]
-        });
-        if (showParentStatus) {
-            const colList = parentOptionalColList
-                .filter(item => list.indexOf(item.key) > -1)
-                .map(item => item.key);
-            this.setState({
-                colParentList: [...defaultParentColList, ...colList],
-            });
-        } else {
-            const colList = childOptionalColList
-                .filter(item => list.indexOf(item.key) > -1)
-                .map(item => item.key);
-            this.setState({
-                colChildList: [...defaultColChildList, ...colList],
-            });
-        }
     };
 
     // 全选
@@ -388,159 +331,162 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     };
 
     // 一键拍单
-    private postOrdersPlace = () => {
-        const orderGoodsIdList = this.getOrderGoodsIdList();
-        if (orderGoodsIdList.length) {
-            // console.log('orderGoodsIdList', orderGoodsIdList);
-            return postOrdersPlace({
-                order_goods_ids: orderGoodsIdList,
-            }).then(res => {
-                // console.log('delChannelOrders', res);
-                this.onSearch();
-                const { success, failed } = res.data;
-                if (success!.length) {
-                    notification.success({
-                        message: '拍单成功',
-                        description: (
-                            <div>
-                                {success.map((item: string) => (
-                                    <div key={item}>{item}</div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                }
-                if (failed!.length) {
-                    notification.error({
-                        message: '拍单失败',
-                        description: (
-                            <div>
-                                {failed.map((item: any) => (
-                                    <div>
-                                        {item.order_goods_id}: {item.result.slice(0, 50)}
-                                    </div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                }
-            });
-        } else {
-            message.error('请选择需要拍单的订单！');
-            return Promise.resolve();
-        }
-    };
-
-    // 取消采购订单
-    private cancelPurchaseOrder = () => {
-        const orderGoodsIdList = this.getOrderGoodsIdList();
-        if (orderGoodsIdList.length) {
-            return delPurchaseOrders({
-                order_goods_ids: orderGoodsIdList,
-            }).then(res => {
-                const { success, failed } = res.data;
-                // console.log(1111, failed);
-                this.onSearch();
-                if (success!.length) {
-                    notification.success({
-                        message: '取消采购单成功',
-                        description: (
-                            <div>
-                                {success.map((item: string) => (
-                                    <div key={item}>{item}</div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                }
-                if (failed!.length) {
-                    notification.error({
-                        message: '取消采购单失败',
-                        description: (
-                            <div>
-                                {failed.map((item: any) => (
-                                    <div key={item.order_goods_id}>
-                                        {item.order_goods_id}: {item.result.slice(0, 50)}
-                                    </div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                }
-            });
-        } else {
-            message.error('请选择需要取消的订单！');
-            return Promise.resolve();
-        }
-    };
-
-    // 取消渠道订单
-    private cancelChannelOrder = () => {
-        const orderGoodsIdList = this.getOrderGoodsIdList();
-        if (orderGoodsIdList.length) {
-            // console.log('orderGoodsIdList', orderGoodsIdList);
-            return delChannelOrders({
-                order_goods_ids: orderGoodsIdList,
-            }).then(res => {
-                // console.log('delChannelOrders', res);
-                const { success, failed } = res.data;
-                this.onSearch();
-                if (success!.length) {
-                    notification.success({
-                        message: '取消渠道订单成功',
-                        description: (
-                            <div>
-                                {success.map((item: string) => (
-                                    <div key={item}>{item}</div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                }
-                if (failed!.length) {
-                    notification.error({
-                        message: '取消渠道订单失败',
-                        description: (
-                            <div>
-                                {failed.map((item: any) => (
-                                    <div>
-                                        {item.order_goods_id}: {item.result.slice(0, 50)}
-                                    </div>
-                                ))}
-                            </div>
-                        ),
-                    });
-                }
-            });
-        } else {
-            message.error('请选择需要取消的订单！');
-            return Promise.resolve();
-        }
-    };
-
-    private onChangePage = (page: number) => {
-        this.onSearch({
-            page,
+    private postOrdersPlace = (idList: string[]) => {
+        return postOrdersPlace({
+            order_goods_ids: idList,
+        }).then(res => {
+            // console.log('delChannelOrders', res);
+            this.onSearch();
+            const { success, failed } = res.data;
+            if (success!.length) {
+                notification.success({
+                    message: '拍单成功',
+                    description: (
+                        <div>
+                            {success.map((item: string) => (
+                                <div key={item}>{item}</div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
+            if (failed!.length) {
+                notification.error({
+                    message: '拍单失败',
+                    description: (
+                        <div>
+                            {failed.map((item: any) => (
+                                <div>
+                                    {item.order_goods_id}: {item.result.slice(0, 50)}
+                                </div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
         });
     };
 
-    private pageCountChange = (current: number, size: number) => {
-        const { page, pageCount } = this.state;
-        this.onSearch({
-            page: getCurrentPage(size, (page - 1) * pageCount + 1),
-            page_count: size,
+    // 取消采购订单
+    private cancelPurchaseOrder = (idList: string[]) => {
+        return delPurchaseOrders({
+            order_goods_ids: idList,
+        }).then(res => {
+            const { success, failed } = res.data;
+            // console.log(1111, failed);
+            this.onSearch();
+            if (success!.length) {
+                notification.success({
+                    message: '取消采购单成功',
+                    description: (
+                        <div>
+                            {success.map((item: string) => (
+                                <div key={item}>{item}</div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
+            if (failed!.length) {
+                notification.error({
+                    message: '取消采购单失败',
+                    description: (
+                        <div>
+                            {failed.map((item: any) => (
+                                <div key={item.order_goods_id}>
+                                    {item.order_goods_id}: {item.result.slice(0, 50)}
+                                </div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
+        });
+    };
+
+    // 取消渠道订单
+    private cancelChannelOrder = (idList: string[]) => {
+        return delChannelOrders({
+            order_goods_ids: idList,
+        }).then(res => {
+            // console.log('delChannelOrders', res);
+            const { success, failed } = res.data;
+            this.onSearch();
+            if (success!.length) {
+                notification.success({
+                    message: '取消渠道订单成功',
+                    description: (
+                        <div>
+                            {success.map((item: string) => (
+                                <div key={item}>{item}</div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
+            if (failed!.length) {
+                notification.error({
+                    message: '取消渠道订单失败',
+                    description: (
+                        <div>
+                            {failed.map((item: any) => (
+                                <div>
+                                    {item.order_goods_id}: {item.result.slice(0, 50)}
+                                </div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
         });
     };
 
     // 导出excel
-    private postExportAll = () => {
-        const params = this.currentSearchParams
-            ? this.currentSearchParams
-            : {
-                  page: 1,
-                  page_count: 50,
-              };
-        return postExportAll(params);
+    private postExportAll = (value: any) => {
+        return postExportAll({
+            ...this.currentSearchParams,
+            ...value,
+        });
+    };
+
+    // 绑定事件，处理hover问题
+    private bindMouseenter = () => {
+        [...document.querySelectorAll('.colspan-cell')].forEach(item => {
+            // console.log(item);
+            item.addEventListener('mouseenter', function(e) {
+                // console.log(e.target?.parentNode);
+                const id = (e.target as any).parentNode.getAttribute('data-id');
+                [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
+                    node.classList.add('hover');
+                });
+            });
+
+            item.addEventListener('mouseleave', function(e) {
+                // console.log(e.target?.parentNode);
+                const id = (e.target as any).parentNode.getAttribute('data-id');
+                [...document.querySelectorAll(`.order-tr[data-id='${id}']`)].forEach(node => {
+                    node.classList.remove('hover');
+                });
+            });
+        });
+    };
+
+    private closeExport = () => {
+        this.setState({
+            exportModal: false,
+        });
+    };
+
+    private showExport = () => {
+        this.setState({
+            exportModal: true,
+        });
+    };
+
+    private handleClickSearch = () => {
+        return this.onSearch({
+            page: 1,
+        });
     };
 
     render() {
@@ -549,16 +495,13 @@ class PaneAll extends React.PureComponent<IProps, IState> {
             pageCount,
             total,
             loading,
-            showFilterStatus,
             showParentStatus,
-            showColStatus,
             childOrderList,
             parentOrderList,
             fieldList,
-            selectedColKeyList,
-            childOptionalColList,
             colChildList,
             colParentList,
+            exportModal,
         } = this.state;
 
         return (
@@ -567,19 +510,36 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                     <JsonForm
                         ref={this.formRef}
                         fieldList={fieldList}
-                        labelClassName="order-label"
+                        labelClassName="order-all-label"
                         initialValues={this.initialValues}
-                        enableCollapse={false}
-                    />
-                    <div className="order-operation">
-                        <Button
-                            type="primary"
-                            className="order-btn"
-                            loading={loading}
-                            onClick={() => this.onSearch()}
-                        >
-                            查询
-                        </Button>
+                        // enableCollapse={false}
+                        defaultCollapse={false}
+                    >
+                        <div>
+                            <LoadingButton
+                                type="primary"
+                                className={formStyles.formBtn}
+                                onClick={() => this.handleClickSearch()}
+                            >
+                                查询
+                            </LoadingButton>
+                            <LoadingButton
+                                className={formStyles.formBtn}
+                                onClick={() => this.onSearch()}
+                            >
+                                刷新
+                            </LoadingButton>
+                            <Button
+                                disabled={total <= 0}
+                                className={formStyles.formBtn}
+                                onClick={this.showExport}
+                            >
+                                导出
+                            </Button>
+                        </div>
+                    </JsonForm>
+                    {/* <div className="order-operation">
+                        
                         {!showParentStatus ? (
                             <LoadingButton
                                 type="primary"
@@ -607,57 +567,44 @@ class PaneAll extends React.PureComponent<IProps, IState> {
                                 取消渠道订单
                             </LoadingButton>
                         ) : null}
-                        <LoadingButton
-                            type="primary"
-                            className="order-btn"
-                            onClick={this.postExportAll}
-                        >
-                            导出数据
-                        </LoadingButton>
-                        <Button className="order-btn" onClick={this.changeShowFilterStatus}>
-                            {showFilterStatus ? '收起' : '展示'}搜索条件
-                        </Button>
-                        <Button className="order-btn" onClick={this.changeShowColStatus}>
-                            {showColStatus ? '收起' : '展示'}字段设置
-                        </Button>
-                    </div>
-                    {showColStatus ? (
-                        <OptionalColumn
-                            ref={this.optionalRef}
-                            optionalColList={childOptionalColList}
-                            selectedColKeyList={selectedColKeyList}
-                            changeSelectedColList={this.changeSelectedColList}
-                        />
-                    ) : null}
+                    </div> */}
                     {!showParentStatus ? (
                         <TableAll
                             loading={loading}
+                            page={page}
+                            pageSize={pageCount}
+                            total={total}
                             colList={colChildList}
                             orderList={childOrderList}
                             onCheckAllChange={this.onCheckAllChange}
                             onSelectedRow={this.onSelectedRow}
+                            visible={exportModal}
+                            onOKey={this.postExportAll}
+                            onCancel={this.closeExport}
+                            onSearch={this.onSearch}
+                            postOrdersPlace={this.postOrdersPlace}
+                            cancelPurchaseOrder={this.cancelPurchaseOrder}
+                            cancelChannelOrder={this.cancelChannelOrder}
+                            changeParentOrder={this.changeParentOrder}
+                            showParentStatus={showParentStatus}
+                            getOrderGoodsIdList={this.getOrderGoodsIdList}
                         />
                     ) : (
                         <TableParentAll
                             loading={loading}
+                            page={page}
+                            pageSize={pageCount}
+                            total={total}
                             colList={colParentList}
                             orderList={parentOrderList}
+                            visible={exportModal}
+                            onOKey={this.postExportAll}
+                            onCancel={this.closeExport}
+                            showParentStatus={showParentStatus}
+                            changeParentOrder={this.changeParentOrder}
+                            onSearch={this.onSearch}
                         />
                     )}
-
-                    <Pagination
-                        className="order-pagination"
-                        // size="small"
-                        total={total}
-                        current={page}
-                        pageSize={pageCount}
-                        showSizeChanger={true}
-                        showQuickJumper={true}
-                        pageSizeOptions={pageSizeOptions}
-                        onChange={this.onChangePage}
-                        onShowSizeChange={this.pageCountChange}
-                        showTotal={total => `共${total}条`}
-                    />
                 </div>
             </>
         );

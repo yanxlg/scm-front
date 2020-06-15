@@ -45,9 +45,18 @@ export const publishChannelStatusList = transOptionList(publishChannelStatusMap)
 
 // 上架状态
 export const publishStatusMap = {
-    0: 'publishing',
-    1: 'published',
-    2: 'unpublished',
+    0: '上架中',
+    1: '已上架',
+    2: '已下架',
+    3: '上架失败',
 };
 
 export type publishStatusCode = keyof typeof publishStatusMap;
+
+// 商品渠道来源 Commodity channel source
+export const goodsSourceMap = {
+    1: 'PDD',
+    2: 'VOVA',
+};
+
+export const goodsSourceList = transOptionList(goodsSourceMap);

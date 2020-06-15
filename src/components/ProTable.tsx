@@ -11,7 +11,7 @@ const ProTable = <
         [key: string]: any;
     } = {}
 >(
-    props: ProTableProps<T, U>,
+    props: ProTableProps<T>,
 ) => {
     return <DefaultProTable {...props} optimize={false} />;
 };

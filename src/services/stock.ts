@@ -1,7 +1,5 @@
 import request from '@/utils/request';
 import { StockApiPathEnum } from '@/config/api/StockApiPathEnum';
-import { IPaginationResponse, IResponse, RequestPagination } from '@/interface/IGlobal';
-import { transPaginationRequest } from '@/utils/utils';
 import {
     IStockINFormData,
     IStockInItem,
@@ -9,107 +7,81 @@ import {
     IStockOutItem,
     IStockRequest,
     IStockItem,
+    Ilogistic,
 } from '@/interface/IStock';
+import { IPaginationResponse, IResponse } from 'react-components/es/hooks/useList';
+import { IRequestPagination1 } from '@/interface/IGlobal';
+import { api } from 'react-components';
+import { singlePromiseWrap } from '@/utils/utils';
 
-export function queryInList(data: IStockINFormData & RequestPagination) {
-    return request.post<IResponse<IPaginationResponse<IStockInItem>>>(
-        StockApiPathEnum.QueryInList,
-        {
-            data: transPaginationRequest(data),
-        },
-    );
+export function queryInList(data: IStockINFormData & IRequestPagination1) {
+    return api.post<IResponse<IPaginationResponse<IStockInItem>>>(StockApiPathEnum.QueryInList, {
+        data: data,
+    });
 }
 
-export function queryOutList(data: IStockOUTFormData & RequestPagination) {
-    return request.post<IResponse<IPaginationResponse<IStockOutItem>>>(
-        StockApiPathEnum.QueryOutList,
-        {
-            data: transPaginationRequest(data),
-        },
-    );
+export function queryOutList(data: IStockOUTFormData & IRequestPagination1) {
+    return api
+        .post<IResponse<IPaginationResponse<IStockOutItem>>>(StockApiPathEnum.QueryOutList, {
+            data: data,
+        })
+        .then(({ data: { list = [], ...extra }, ...others }) => {
+            let _list: IStockOutItem[] = [];
+            list.forEach(source => {
+                const { orderGoods = [] } = source;
+                if (orderGoods && orderGoods.length > 0) {
+                    orderGoods.map((info, index) => {
+                        _list.push({
+                            ...source,
+                            ...info,
+                            rowSpan: index === 0 ? orderGoods.length : 0,
+                        });
+                    });
+                } else {
+                    _list.push({
+                        ...source,
+                        rowSpan: 1,
+                    });
+                }
+            });
+            return {
+                data: {
+                    list: _list,
+                    ...extra,
+                },
+                ...others,
+            };
+        });
 }
 
 export function exportInList(data: IStockINFormData) {
-    return request
-        .post(StockApiPathEnum.ExportInList, {
-            data: data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(StockApiPathEnum.ExportInList, {
+        data: data,
+    });
 }
 
 export function exportOutList(data: IStockOUTFormData) {
-    return request
-        .post(StockApiPathEnum.ExportOutList, {
-            data: data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(StockApiPathEnum.ExportOutList, {
+        data: data,
+    });
 }
 
-export function queryStockList(data: IStockRequest & RequestPagination) {
-    return request.post<IResponse<IPaginationResponse<IStockItem>>>(
-        StockApiPathEnum.QueryStockList,
-        {
-            data: transPaginationRequest(data),
-        },
-    );
+export function queryStockList(data: IStockRequest & IRequestPagination1) {
+    return api.post<IResponse<IPaginationResponse<IStockItem>>>(StockApiPathEnum.QueryStockList, {
+        data: data,
+    });
 }
 
 export function exportStockList(data: IStockRequest) {
-    return request
-        .post(StockApiPathEnum.ExportStockList, {
-            data: data,
-            responseType: 'blob',
-            parseResponse: false,
-        })
-        .then(response => {
-            const disposition = response.headers.get('content-disposition');
-            const fileName = decodeURI(
-                disposition.substring(disposition.indexOf('filename=') + 9, disposition.length),
-            );
-            response.blob().then((blob: Blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', fileName);
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-            });
-        });
+    return request.post(StockApiPathEnum.ExportStockList, {
+        data: data,
+    });
 }
 
 export function syncStock() {
     return request.post(StockApiPathEnum.SyncStock);
 }
+
+export const queryLogistics = singlePromiseWrap(() => {
+    return request.get<IResponse<Ilogistic[]>>(StockApiPathEnum.QueryLogistics);
+});

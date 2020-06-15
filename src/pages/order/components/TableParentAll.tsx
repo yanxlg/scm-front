@@ -1,18 +1,29 @@
 import React from 'react';
-import { Table, Checkbox } from 'antd';
+import { Checkbox } from 'antd';
 import { ColumnProps } from 'antd/es/table';
-
+import { FitTable } from 'react-components';
 import GoodsDetailDialog from './GoodsDetailDialog';
-import { IParentOrderItem, IGoodsDetail } from './PaneAll';
-import { getOrderGoodsDetail } from '@/services/order-manage';
-import { utcToLocal } from '@/utils/date';
+import { IParentOrderItem, IGoodsDetail, IChildOrderItem } from './PaneAll';
+import { getOrderGoodsDetail, IFilterParams } from '@/services/order-manage';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
 import { orderStatusOptionList, orderShippingOptionList } from '@/enums/OrderEnum';
+import Export from '@/components/Export';
+import { PaginationConfig } from 'antd/es/pagination';
 
 declare interface IProps {
     loading: boolean;
     colList: string[];
     orderList: IParentOrderItem[];
+    visible: boolean;
+    onCancel: () => void;
+    onOKey: (values: any) => Promise<any>;
+    page: number;
+    pageSize: number;
+    total: number;
+    showParentStatus: boolean;
+    changeParentOrder(checked: boolean): void;
+    onSearch(params?: IFilterParams): Promise<any>;
 }
 
 declare interface IState {
@@ -24,13 +35,13 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
     private allColumns: ColumnProps<IParentOrderItem>[] = [
         {
             key: 'createTime',
-            title: '订单时间',
+            title: '订单生成时间',
             dataIndex: 'createTime',
             align: 'center',
             width: 120,
             render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
@@ -39,7 +50,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         },
         {
             key: 'orderId',
-            title: '中台订单父订单ID',
+            title: '父订单ID',
             dataIndex: 'orderId',
             align: 'center',
             width: 120,
@@ -74,7 +85,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'productId',
-            title: '中台商品ID',
+            title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
             width: 120,
@@ -154,6 +165,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     </a>
                 );
             },
+            defaultHide: true,
         },
         {
             key: 'productShop',
@@ -161,6 +173,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'productShop',
             align: 'center',
             width: 120,
+            defaultHide: true,
         },
         {
             key: 'confirmTime',
@@ -170,12 +183,13 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string, row: IParentOrderItem) => {
                 return {
-                    children: utcToLocal(value),
+                    children: utcToLocal(value, ''),
                     props: {
                         rowSpan: row._rowspan || 0,
                     },
                 };
             },
+            defaultHide: true,
         },
         {
             key: 'channelSource',
@@ -184,7 +198,17 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
+        // {
+        //     key: 'productShop',
+        //     title: '销售店铺名称',
+        //     dataIndex: 'productShop',
+        //     align: 'center',
+        //     width: 120,
+        //     render: this.mergeCell,
+        //     defaultHide: true,
+        // },
         {
             key: 'currency',
             title: '货币类型',
@@ -192,6 +216,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
         {
             key: 'orderAmount',
@@ -200,6 +225,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 120,
             render: this.mergeCell,
+            defaultHide: true,
         },
     ];
 
@@ -210,23 +236,6 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
             goodsDetail: null,
         };
     }
-
-    private createColumns = (): ColumnProps<IParentOrderItem>[] => {
-        const { colList } = this.props;
-        // console.log(111, colList);
-        // const allColumns: ColumnProps<IParentOrderItem>[]  = [];
-        return colList.map(key => {
-            const i = this.allColumns.findIndex(item => item.key === key);
-            // console.log('key', key, i);
-            // if (i === -1) {
-            //     console.log('colList没找到', key);
-            // } else {
-            //     return this.allColumns[i];
-            // }
-            return this.allColumns[i];
-        });
-        // return allColumns;
-    };
 
     // 合并单元格
     private mergeCell(value: string | number, row: IParentOrderItem) {
@@ -272,28 +281,61 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         });
     };
 
+    toolBarRender = () => {
+        const { changeParentOrder, showParentStatus } = this.props;
+        return [
+            <Checkbox
+                onChange={e => changeParentOrder(e.target.checked)}
+                checked={showParentStatus}
+                key="0"
+            >
+                仅展示父订单ID
+            </Checkbox>,
+        ];
+    };
+
+    onChange = ({ current, pageSize }: PaginationConfig) => {
+        this.props.onSearch({
+            page: current,
+            page_count: pageSize,
+        });
+    };
+
     render() {
-        const { loading, orderList } = this.props;
+        const { loading, orderList, visible, onCancel, onOKey, page, pageSize, total } = this.props;
         const { detailDialogStatus, goodsDetail } = this.state;
-        const columns = this.createColumns();
         return (
             <>
-                <Table
+                <FitTable
                     bordered
-                    key={columns.length}
                     rowKey="orderGoodsId"
-                    className="order-table"
+                    // className="order-table"
                     loading={loading}
-                    columns={columns}
-                    // rowSelection={rowSelection}
+                    columns={this.allColumns}
                     dataSource={orderList}
-                    scroll={{ x: 'max-content', y: 600 }}
-                    pagination={false}
+                    scroll={{ x: 'max-content' }}
+                    autoFitY={true}
+                    pagination={{
+                        current: page,
+                        pageSize: pageSize,
+                        total: total,
+                        showSizeChanger: true,
+                        position: ['topRight', 'bottomRight'],
+                    }}
+                    columnsSettingRender={true}
+                    toolBarRender={this.toolBarRender}
+                    onChange={this.onChange}
                 />
                 <GoodsDetailDialog
                     visible={detailDialogStatus}
                     goodsDetail={goodsDetail}
                     hideGoodsDetailDialog={this.hideGoodsDetailDialog}
+                />
+                <Export
+                    columns={this.allColumns}
+                    visible={visible}
+                    onOKey={onOKey}
+                    onCancel={onCancel}
                 />
             </>
         );
