@@ -156,7 +156,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     </div>
                     <div className={classnames(styles.item, styles.customLabel)}>
                         <MultipleSelect
-                            label="采购渠道"
+                            label="商品渠道"
                             name="enable_source"
                             // className={styles.select}
                             form={form}

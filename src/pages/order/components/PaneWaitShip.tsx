@@ -24,6 +24,7 @@ import { TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
+import { queryGoodsSourceList } from '@/services/global';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -55,11 +56,20 @@ const formFields: FormField[] = [
     {
         type: 'select',
         name: 'channel_source',
-        label: '销售渠道',
+        label: '销售店铺名称',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
         syncDefaultOption: defaultOptionItem1,
         optionList: () => getPlatformAndStore(),
+    },
+    {
+        type: 'select',
+        name: 'xxx',
+        label: '采购渠道',
+        className: 'order-input',
+        // optionList: [defaultOptionItem, ...channelOptionList],
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'select',
@@ -297,8 +307,15 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'channelSource',
-                title: '销售渠道',
+                title: '销售店铺名称',
                 dataIndex: 'channelSource',
+                align: 'center',
+                width: 120,
+            },
+            {
+                key: 'xxx',
+                title: '采购渠道',
+                dataIndex: 'xxx',
                 align: 'center',
                 width: 120,
             },

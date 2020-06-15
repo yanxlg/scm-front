@@ -151,7 +151,7 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
             },
             {
-                title: '采购渠道',
+                title: '商品渠道',
                 dataIndex: 'enable_source',
                 align: 'center',
                 width: 120,

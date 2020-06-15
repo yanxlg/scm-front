@@ -67,7 +67,7 @@ const formFields: FormField[] = [
     {
         type: 'select',
         name: 'channel_source',
-        label: '销售渠道',
+        label: '销售店铺名称',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
         syncDefaultOption: defaultOptionItem1,
@@ -362,7 +362,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'channelSource',
-                title: '销售渠道',
+                title: '销售店铺名称',
                 dataIndex: 'channelSource',
                 align: 'center',
                 width: 120,
