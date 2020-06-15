@@ -5,6 +5,8 @@ import { FormInstance } from 'antd/lib/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
 import { TreeSelectProps } from 'antd/es/tree-select';
 
+import formStyles from 'react-components/es/JsonForm/_form.less';
+
 type IProps = {
     // label: string;
     name: string;
@@ -28,6 +30,7 @@ const MultipleSelect: React.FC<IProps> = ({
     maxTagCount = 6,
     treeNodeLabelProp = 'name',
     placeholder = '请选择',
+    dropdownClassName = formStyles.customTreeSelect,
     onChange,
     ...resetProps
 }) => {
@@ -111,6 +114,7 @@ const MultipleSelect: React.FC<IProps> = ({
                             maxTagCount={maxTagCount}
                             treeDefaultExpandAll={treeDefaultExpandAll}
                             placeholder={placeholder}
+                            dropdownClassName={dropdownClassName}
                             {...eventProps}
                             {...resetProps}
                         />

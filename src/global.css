@@ -21,6 +21,6 @@ body {
 }
 
 .ant-pro-table .ant-popover-inner-content {
-  max-height: 400px;
-  overflow: auto;
+    max-height: 400px;
+    overflow: auto;
 }
