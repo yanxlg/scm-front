@@ -150,13 +150,13 @@ const columns: ColumnsType<object> = [
     {
         width: 150,
         title: '平均在售商品数',
-        dataIndex: 'onsaleGoodsNum',
+        dataIndex: 'saledGoodsNum',
         align: 'center',
     },
     {
         width: 150,
         title: '平均有销量商品数',
-        dataIndex: 'saledGoodsNum',
+        dataIndex: 'onsaleGoodsNum',
         align: 'center',
     },
     {
@@ -164,7 +164,7 @@ const columns: ColumnsType<object> = [
         title: '动销率',
         dataIndex: 'pinRate',
         align: 'center',
-        render: (val: string) => `${Number(val) * 100}%`,
+        render: (val: string) => `${formatTwodecimal(val)}%`,
     },
     {
         width: 120,
@@ -206,7 +206,7 @@ const Overview: React.FC = props => {
         saledGoodsNumRatio: 0,
         onsaleGoodsNum: '0',
         onsaleGoodsNumRatio: 0,
-        pinRate: '0',
+        pinRate: 0,
         pinRateRatio: 0,
     });
 
@@ -265,7 +265,7 @@ const Overview: React.FC = props => {
                         saledGoodsNumRatio: formatTwodecimal(saledGoodsNumRatio),
                         onsaleGoodsNum,
                         onsaleGoodsNumRatio: formatTwodecimal(onsaleGoodsNumRatio),
-                        pinRate,
+                        pinRate: formatTwodecimal(pinRate),
                         pinRateRatio: formatTwodecimal(pinRateRatio),
                     });
                     setDetailList(detail);
