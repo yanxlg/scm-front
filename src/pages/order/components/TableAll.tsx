@@ -464,9 +464,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseFailCode',
             align: 'center',
             width: 140,
-            render: (value: string, row: IChildOrderItem) => {
-                const { purchaseOrderStatus } = row;
-                return purchaseOrderStatus === 7
+            render: (value: string) => {
+                return value && value !== '0'
                     ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
                     : '';
             },
@@ -776,6 +775,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
+                    minHeight={600}
                     pagination={
                         {
                             current: page,
