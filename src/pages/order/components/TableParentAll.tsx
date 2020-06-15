@@ -1,6 +1,6 @@
 import React from 'react';
 import { Checkbox } from 'antd';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TablePaginationConfig } from 'antd/es/table';
 import { FitTable } from 'react-components';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import { IParentOrderItem, IGoodsDetail, IChildOrderItem } from './PaneAll';
@@ -306,7 +306,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         ];
     };
 
-    onChange = ({ current, pageSize }: PaginationConfig) => {
+    onChange = ({ current, pageSize }: TablePaginationConfig) => {
         this.props.onSearch({
             page: current,
             page_count: pageSize,
@@ -319,7 +319,7 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="orderGoodsId"
                     // className="order-table"
                     loading={loading}

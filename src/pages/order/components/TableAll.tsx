@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox, Button } from 'antd';
 import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TablePaginationConfig } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
@@ -21,10 +21,8 @@ import {
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
 import { IFilterParams } from '@/services/order-manage';
-import { PaginationConfig } from 'antd/es/pagination';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import CancelOrder from './CancelOrder';
 
 declare interface IProps {
@@ -686,7 +684,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    onChange = ({ current, pageSize }: PaginationConfig) => {
+    onChange = ({ current, pageSize }: TablePaginationConfig) => {
         this.props.onSearch({
             page: current,
             page_count: pageSize,
@@ -744,6 +742,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 orderGoodsIds={orderGoodsIdList}
                 onReload={onSearch}
                 getAllTabCount={_getAllTabCount}
+                key="4"
             >
                 <Button
                     key="4"
@@ -765,7 +764,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}

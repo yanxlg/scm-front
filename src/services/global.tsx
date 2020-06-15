@@ -92,7 +92,12 @@ export function exportExcel(data: IExportExcelReqData) {
     });
 }
 
-export const queryGoodsSourceList = singlePromiseWrap(() => {
+export const queryGoodsSourceList = singlePromiseWrap<
+    Array<{
+        name: string;
+        value: string;
+    }>
+>(() => {
     return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1')).then(res => {
         const { data } = res;
         if (data) {
