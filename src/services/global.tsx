@@ -135,12 +135,13 @@ export const queryGoodBySkuId = (commodity_sku_id: string) => {
 };
 
 export const queryOnsaleInterceptStore = (purchase_channel?: string) => {
-    return request.get<IResponse<IOnsaleInterceptStoreRes>>(
-        GlobalApiPath.QueryOnsaleInterceptStore,
-        {
+    return request
+        .get<IResponse<IOnsaleInterceptStoreRes[]>>(GlobalApiPath.QueryOnsaleInterceptStore, {
             params: {
                 purchase_channel,
             },
-        },
-    );
+        })
+        .then(({ data }) => {
+            return (data[0]?.support_merchant_id ?? []).map(val => String(val));
+        });
 };
