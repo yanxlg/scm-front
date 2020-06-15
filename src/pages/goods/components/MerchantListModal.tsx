@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Checkbox, Form, Modal, Divider, Spin } from 'antd';
 import { IShopItem } from '@/interface/IGlobal';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -11,6 +11,7 @@ declare interface MerchantListModalProps {
     onOKey: (merchant_ids: string[]) => Promise<any>;
     onCancel: () => void;
     disabledChannelList?: string[]; // vova、florynight
+    disabledShopList?: string[];
 }
 
 const MerchantListModal: React.FC<MerchantListModalProps> = ({
@@ -18,11 +19,13 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
     onCancel,
     onOKey,
     disabledChannelList = [],
+    disabledShopList,
 }) => {
     const [list, setList] = useState<IShopItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [form] = Form.useForm();
+
     useEffect(() => {
         if (visible) {
             setLoading(true);
@@ -60,12 +63,15 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                         <Divider orientation="left">{merchant_platform}</Divider>
                         <div>
                             {_list.map(({ merchant_id, merchant_name }) => {
+                                const _disabled =
+                                    disabled ||
+                                    (disabledShopList || []).indexOf(merchant_name) > -1;
                                 return (
                                     <Checkbox
                                         key={merchant_id}
                                         value={merchant_id}
                                         className={formStyles.formCheckbox}
-                                        disabled={disabled}
+                                        disabled={_disabled}
                                     >
                                         {merchant_name}
                                     </Checkbox>
@@ -78,7 +84,12 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
             }
         }
         return platformArr;
-    }, [list, loading]);
+    }, [list, loading, disabledChannelList, disabledShopList]);
+
+    const onCancelFunc = useCallback(() => {
+        onCancel();
+        form.resetFields();
+    }, []);
 
     const onOKeyFunc = useCallback(() => {
         form.validateFields().then(({ merchant_ids }) => {
@@ -100,7 +111,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                 title="请选择上架店铺"
                 className={styles.merchantModal}
                 onOk={onOKeyFunc}
-                onCancel={onCancel}
+                onCancel={onCancelFunc}
                 confirmLoading={confirmLoading}
             >
                 <Spin spinning={loading} tip="加载中...">
@@ -117,7 +128,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                 </Spin>
             </Modal>
         );
-    }, [loading, confirmLoading, visible]);
+    }, [loading, confirmLoading, visible, disabledChannelList, disabledShopList]);
 };
 
 export default MerchantListModal;

@@ -178,10 +178,13 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     const channel = record.channel;
                     return (
                         <>
-                            {(taskType === TaskTypeEnum.Gather && String(channel) !== '3') ||
+                            {(taskType === TaskTypeEnum.Gather &&
+                                String(channel) !== '3' &&
+                                String(channel) !== '4') ||
                             taskType === TaskTypeEnum.Grounding ||
                             (taskType === TaskTypeEnum.GatherGrounding &&
-                                String(channel) !== '3') ? (
+                                String(channel) !== '3' &&
+                                String(channel) !== '4') ? (
                                 <Button type="link" onClick={() => viewTaskDetail(task_id)}>
                                     查看详情
                                 </Button>
