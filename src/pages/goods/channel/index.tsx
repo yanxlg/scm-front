@@ -119,9 +119,9 @@ const formFields: FormField[] = [
     },
     {
         type: 'select',
-        label: '店铺名称',
+        label: '销售店铺名称',
         name: 'merchant_ids',
-        placeholder: '多个逗号隔开',
+        // placeholder: '请选择',
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -456,7 +456,7 @@ const ChannelList: React.FC = props => {
                 },
             },
             {
-                title: '店铺名称',
+                title: '销售店铺名称',
                 dataIndex: 'shop_name',
                 align: 'center',
                 width: 130,

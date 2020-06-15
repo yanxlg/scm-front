@@ -338,10 +338,7 @@ const VoVaGather = () => {
                 visible={merchantModal}
                 onOKey={onGatherOnOKey}
                 onCancel={closeMerchantModal}
-                disabledChannelList={
-                    channel ? (channel === TaskChannelEnum.VOVA ? ['vova'] : ['florynight']) : []
-                }
-                disabledShopList={!channel || channel === TaskChannelEnum.VOVA ? [] : ['SuperAC']}
+                sourceChannel={channel}
             />
         );
     }, [merchantModal]);
