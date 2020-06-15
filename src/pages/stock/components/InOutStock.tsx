@@ -139,6 +139,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     width: '150px',
                     dataIndex: 'inboundWeight',
                     align: 'center',
+                    render: (val: string) => (Number(val) || 0).toFixed(3),
                 },
                 {
                     title: '入库时间',
@@ -303,7 +304,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 render: (value, row) => {
                     const { weightUnit = 'g', rowSpan = 0 } = row;
                     return {
-                        children: value + ' ' + weightUnit,
+                        children: (Number(value) || 0).toFixed(3) + ' ' + weightUnit,
                         props: {
                             rowSpan: rowSpan,
                         },
