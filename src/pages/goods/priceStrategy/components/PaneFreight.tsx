@@ -229,14 +229,11 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
             //     optionList: () => getAllGoodsTagList(),
             // },
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '运费价卡',
                 name: 'card_name',
-                isShortcut: true,
                 placeholder: '请选择',
-                mode: 'multiple',
                 className: styles.select,
-                maxTagCount: 4,
                 optionList: cartNameList,
             },
             // {

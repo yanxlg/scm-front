@@ -171,13 +171,11 @@ const PaneFreightCalc: React.FC = props => {
     const formFields = useMemo<FormField[]>(() => {
         return [
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '运费价卡',
                 name: 'card_name',
                 placeholder: '请选择',
                 mode: 'multiple',
-                isShortcut: true,
-                maxTagCount: 4,
                 className: styles.select,
                 optionList: nameList,
                 formatter: 'join',
@@ -189,13 +187,10 @@ const PaneFreightCalc: React.FC = props => {
                 },
             },
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '国家',
                 name: 'country_code',
                 placeholder: '请选择',
-                mode: 'multiple',
-                isShortcut: true,
-                maxTagCount: 4,
                 className: styles.select,
                 optionList: countryCodeList,
                 formatter: 'join',
