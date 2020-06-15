@@ -13,6 +13,7 @@ export const PurchaseReturnMap = {
     '4': '取消中',
     '5': '已完结-取消',
     '6': '已完结-签收',
+    '7': '待出库',
 };
 
 export type PurchaseReturnCode = keyof typeof PurchaseReturnMap;
