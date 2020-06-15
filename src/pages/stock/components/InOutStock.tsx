@@ -85,6 +85,12 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     align: 'center',
                 },
                 {
+                    title: '入库单ID',
+                    width: '150px',
+                    dataIndex: 'referWaybillNo',
+                    align: 'center',
+                },
+                {
                     title: '商品主图',
                     width: '150px',
                     dataIndex: 'productImageUrl',
@@ -133,6 +139,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     width: '150px',
                     dataIndex: 'inboundWeight',
                     align: 'center',
+                    render: (val: string) => (Number(val) || 0).toFixed(2),
                 },
                 {
                     title: '入库时间',
@@ -290,14 +297,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 render: value => (value ? utcToLocal(value) : ''),
             },
             {
-                title: '揽收重量',
+                title: '出库重量',
                 width: '150px',
                 dataIndex: 'totalWeight',
                 align: 'center',
-                render: (value, row) => {
+                render: (value = '0', row) => {
                     const { weightUnit = 'g', rowSpan = 0 } = row;
+                    const isKg = weightUnit.toLowerCase() === 'kg';
+                    const weight = isKg ? Number(value) * 1000 : Number(value);
                     return {
-                        children: value + ' ' + weightUnit,
+                        children: weight.toFixed(2) + ' ' + (isKg ? 'g' : weightUnit),
                         props: {
                             rowSpan: rowSpan,
                         },
@@ -366,7 +375,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     ],
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '采购订单ID',
                     name: 'purchase_order_goods_id',
                     formatter: 'multipleToArray',
@@ -391,21 +400,27 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     ],
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '采购运单ID',
                     name: 'purchase_waybill_no',
                     formatter: 'multipleToArray',
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '中台商品ID',
                     name: 'commodity_id',
                     formatter: 'multipleToArray',
                 },
                 {
-                    type: 'input',
+                    type: 'textarea',
                     label: '商品SKU ID',
                     name: 'commodity_sku_id',
+                    formatter: 'multipleToArray',
+                },
+                {
+                    type: 'textarea',
+                    label: '入库单ID',
+                    name: 'refer_waybill_no',
                     formatter: 'multipleToArray',
                 },
                 {
@@ -453,15 +468,16 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 ],
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '渠道订单ID',
                 name: 'channel_order_goods_sn',
                 formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '中台订单ID',
                 name: 'order_goods_id',
+                formatter: 'multipleToArray',
             },
             {
                 type: 'select',
@@ -480,20 +496,27 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     }),
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '尾程运单ID',
                 name: 'last_waybill_no',
                 formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '中台商品ID',
                 name: 'commodity_id',
+                formatter: 'multipleToArray',
             },
             {
-                type: 'input',
+                type: 'textarea',
                 label: '商品SKU ID',
                 name: 'sku_id',
+                formatter: 'multipleToArray',
+            },
+            {
+                type: 'textarea',
+                label: '参考运单号',
+                name: 'refer_waybill_no',
                 formatter: 'multipleToArray',
             },
             {
