@@ -1,0 +1,44 @@
+@labelWidth: 120px;
+
+.title {
+    font-size: 14px;
+    color: #000;
+    margin-bottom: 20px;
+}
+
+.second {
+    margin-top: 20px;
+}
+
+.container {
+    :global {
+        .ant-form-item-label {
+            width: @labelWidth !important;
+        }
+    }
+}
+
+.select {
+    width: 206px !important;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+}
+
+.none-margin {
+    :global {
+        .ant-form-item {
+            margin-bottom: 0 !important;
+        }
+    }
+}
+
+.gutter {
+    margin: 0 10px;
+}
+
+.extra {
+    margin-left: 6px;
+}

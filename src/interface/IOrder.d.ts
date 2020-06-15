@@ -127,6 +127,9 @@ export interface ISimilarInfoResponse {
         skuId: string;
         productSkuStyle: string;
         purchaseFailCode: failureReasonCode;
+        orderGoods: {
+            commodityId: string;
+        };
     };
     originOrderInfo: {
         skuImageUrl: string;
@@ -134,6 +137,7 @@ export interface ISimilarInfoResponse {
         skuId: string;
         productTitle: string;
         productOptionValue: string;
+        commodityId: string;
     };
     historySimilarGoodsInfo: Array<IHistorySimilar>;
 }
@@ -162,10 +166,21 @@ export interface IReviewOrderItem {
     channelOrderGoodsSn: string;
     productName: string;
     productId: string;
+    commodityId: string;
 }
 
 export declare interface IPlatformItem {
     name: string;
     value: string;
     children?: IPlatformItem[];
+}
+
+export interface IPurchaseLog {
+    taskTime: string;
+    status: string;
+    allPurchase: string;
+    needPurchase: string;
+    effePurchase: string;
+    succPurchase: string;
+    failPurchase: string;
 }

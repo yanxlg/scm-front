@@ -10,6 +10,8 @@ import useSkuModal from '../hooks/useSkuModal';
 
 import styles from '../_version.less';
 import SkuModal from './SkuModal/SkuModal';
+import CountryFreightModal from './CountryFreightModal/CountryFreightModal';
+import useCountryFreightModal from '../hooks/useCountryFreightModal';
 
 interface IProps {
     commodityId: string;
@@ -20,7 +22,14 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
     const [goodsList, setGoodsList] = useState<IGoodsVersionAndSkuItem[]>([]);
     const { page, setPage, pageSize, setPageSize, total, setTotal } = usePagination();
     // 查看sku信息
-    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
+    const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
+    // 查看国家运费
+    const {
+        countryFreightStatus,
+        countryFreightId,
+        showCountryFreight,
+        hideCountryFreight,
+    } = useCountryFreightModal();
 
     const _getGoodsVersion = useCallback(
         (params = { page, page_count: pageSize }) => {
@@ -159,13 +168,23 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                 width: 120,
                 align: 'center',
                 render: (_: string, row: IGoodsVersionAndSkuItem) => {
-                    const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                    const {
+                        price_min,
+                        price_max,
+                        shipping_fee_min,
+                        shipping_fee_max,
+                        source_channel,
+                        product_id,
+                    } = row;
                     return (
                         <>
                             {price_min}~{price_max}
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
+                            {source_channel !== 'pdd' ? (
+                                <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
+                            ) : null}
                         </>
                     );
                 },
@@ -211,12 +230,18 @@ const HistoryPane: React.FC<IProps> = ({ commodityId }) => {
                 />
                 <SkuModal
                     visible={skuStatus}
+                    channelSource={channelSource}
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />
+                <CountryFreightModal
+                    visible={countryFreightStatus}
+                    productId={countryFreightId}
+                    onCancel={hideCountryFreight}
+                />
             </>
         );
-    }, [loading, goodsList, skuStatus, currentSkuInfo]);
+    }, [loading, goodsList, skuStatus, currentSkuInfo, countryFreightStatus]);
 };
 
 export default HistoryPane;

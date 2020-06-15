@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -8,19 +8,9 @@ import {
     inventoryStatusList,
     versionStatusList,
     publishChannelStatusList,
-    goodsSourceList,
 } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
-import {
-    getGoodsList,
-    postGoodsExports,
-    postGoodsOnsale,
-    getGoodsDelete,
-    IFilterParams,
-    getCatagoryList,
-    postAllGoodsOnsale,
-    getGoodsStatusList,
-} from '@/services/goods';
+import { getGoodsList, getCatagoryList, getGoodsStatusList } from '@/services/goods';
 import { IGoodsList, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
 import GoodsTable from './components/GoodsTable/GoodsTable';
 
@@ -38,186 +28,10 @@ const initialValues = {
     source_channel: '',
 };
 
-const formFields: FormField[] = [
-    {
-        type: 'input',
-        label: '爬虫任务 ID',
-        name: 'task_number',
-        placeholder: '多个逗号隔开',
-        className: styles.input,
-        formatter: 'number_str_arr',
-    },
-    {
-        type: 'input',
-        label: '店铺 ID',
-        name: 'store_id',
-        placeholder: '多个逗号隔开',
-        className: styles.input,
-        formatter: 'str_arr',
-    },
-    {
-        type: 'input',
-        label: 'Commodity ID',
-        name: 'commodity_id',
-        placeholder: '多个逗号隔开',
-        className: styles.input,
-        formatter: 'str_arr',
-    },
-    {
-        type: 'input',
-        label: '商品名称',
-        name: 'title',
-        placeholder: '请输入商品名称',
-        className: styles.input,
-        // formatter: 'str_arr',
-    },
-    {
-        type: 'select',
-        label: '上架渠道',
-        name: 'publish_channel',
-        className: styles.input,
-        formatter: 'number',
-        optionList: [defaultOption, ...publishChannelStatusList],
-    },
-    {
-        type: 'select',
-        label: '商品渠道来源',
-        name: 'source_channel',
-        className: styles.input,
-        syncDefaultOption: defaultOption,
-        optionList: () => queryGoodsSourceList(),
-    },
-    {
-        type: 'select',
-        label: '销售状态',
-        name: 'inventory_status',
-        className: styles.input,
-        formatter: 'number',
-        optionList: [defaultOption, ...inventoryStatusList],
-    },
-    {
-        type: 'select',
-        label: '请选择版本状态',
-        name: 'product_status',
-        className: styles.input,
-        formatter: 'join',
-        placeholder: '请选择版本状态',
-        mode: 'multiple',
-        maxTagCount: 2,
-        optionList: () => getGoodsStatusList(),
-    },
-    {
-        type: 'select',
-        label: '版本更新',
-        name: 'version_status',
-        className: styles.input,
-        formatter: 'number',
-        optionList: [defaultOption, ...versionStatusList],
-    },
-    {
-        type: 'select',
-        label: '一级类目',
-        name: 'first_catagory',
-        className: styles.input,
-        formatter: 'number',
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
-        optionList: () =>
-            getCatagoryList()
-                .then(({ convertList = [] } = EmptyObject) => {
-                    return convertList;
-                })
-                .catch(() => {
-                    return [];
-                }),
-        onChange: (name, form) => {
-            form.resetFields(['second_catagory']);
-            form.resetFields(['third_catagory']);
-        },
-    },
-    {
-        type: 'select',
-        label: '二级类目',
-        name: 'second_catagory',
-        className: styles.input,
-        formatter: 'number',
-        optionListDependence: {
-            name: 'first_catagory',
-            key: 'children',
-        },
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
-        optionList: () =>
-            getCatagoryList()
-                .then(({ convertList = [] } = EmptyObject) => {
-                    return convertList;
-                })
-                .catch(() => {
-                    return [];
-                }),
-        onChange: (name, form) => {
-            form.resetFields(['third_catagory']);
-        },
-    },
-    {
-        type: 'select',
-        label: '三级类目',
-        name: 'third_catagory',
-        className: styles.input,
-        formatter: 'number',
-        optionListDependence: {
-            name: ['first_catagory', 'second_catagory'],
-            key: 'children',
-        },
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
-        optionList: () =>
-            getCatagoryList()
-                .then(({ convertList = [] } = EmptyObject) => {
-                    return convertList;
-                })
-                .catch(() => {
-                    return [];
-                }),
-    },
-    {
-        type: 'inputRange',
-        label: 'sku数量',
-        name: ['min_sku', 'max_sku'],
-        className: styles.inputMin,
-    },
-    {
-        type: 'inputRange',
-        label: '价格范围（￥）',
-        name: ['min_price', 'max_price'],
-        className: styles.inputMin,
-        precision: 2,
-    },
-    {
-        type: 'inputRange',
-        label: '销量',
-        name: ['min_sale', 'max_sale'],
-        className: styles.inputMin,
-    },
-    {
-        type: 'positiveInteger',
-        label: '评论数量>=',
-        name: 'min_comment',
-        // placeholder: '多个逗号隔开',
-        className: styles.inputMin,
-        formatter: 'number',
-    },
-];
-
 const LocalPage: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
     const [exportStatus, setExportStatus] = useState(false);
+    const [sourceChannel, setSourceChannel] = useState('');
     const {
         loading,
         pageNumber,
@@ -235,7 +49,7 @@ const LocalPage: React.FC = props => {
         queryList: getGoodsList,
     });
 
-    let goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
+    const goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
         return (dataSource as IGoodsList[])?.map(item => {
             const { sku_info } = item;
             if (sku_info.length > 0) {
@@ -247,6 +61,189 @@ const LocalPage: React.FC = props => {
             return item;
         });
     }, [dataSource]);
+
+    const formFields = useMemo<FormField[]>(() => {
+        return [
+            {
+                type: 'input',
+                label: '爬虫任务 ID',
+                name: 'task_number',
+                placeholder: '多个逗号隔开',
+                className: styles.input,
+                formatter: 'number_str_arr',
+            },
+            {
+                type: 'input',
+                label: '店铺 ID',
+                name: 'store_id',
+                placeholder: '多个逗号隔开',
+                className: styles.input,
+                formatter: 'str_arr',
+            },
+            {
+                type: 'input',
+                label: 'Commodity ID',
+                name: 'commodity_id',
+                placeholder: '多个逗号隔开',
+                className: styles.input,
+                formatter: 'str_arr',
+            },
+            {
+                type: 'input',
+                label: '商品名称',
+                name: 'title',
+                placeholder: '请输入商品名称',
+                className: styles.input,
+                // formatter: 'str_arr',
+            },
+            {
+                type: 'select',
+                label: '上架渠道',
+                name: 'publish_channel',
+                className: styles.input,
+                formatter: 'number',
+                optionList: [defaultOption, ...publishChannelStatusList],
+            },
+            {
+                type: 'select',
+                label: '商品渠道',
+                name: 'source_channel',
+                className: styles.input,
+                syncDefaultOption: defaultOption,
+                optionList: () => queryGoodsSourceList(),
+                onChange: (name, form) => {
+                    // console.log(form.getFieldValue(name));
+                    setSourceChannel(form.getFieldValue(name));
+                },
+            },
+            {
+                type: 'select',
+                label: '销售状态',
+                name: 'inventory_status',
+                className: styles.input,
+                formatter: 'number',
+                optionList: [defaultOption, ...inventoryStatusList],
+            },
+            {
+                type: 'select',
+                label: '请选择版本状态',
+                name: 'product_status',
+                className: styles.input,
+                formatter: 'join',
+                placeholder: '请选择版本状态',
+                mode: 'multiple',
+                maxTagCount: 2,
+                optionList: () => getGoodsStatusList(),
+            },
+            {
+                type: 'select',
+                label: '版本更新',
+                name: 'version_status',
+                className: styles.input,
+                formatter: 'number',
+                optionList: [defaultOption, ...versionStatusList],
+            },
+            {
+                type: 'select',
+                label: '一级类目',
+                name: 'first_catagory',
+                className: styles.input,
+                formatter: 'number',
+                syncDefaultOption: {
+                    value: '',
+                    name: '全部',
+                },
+                optionList: () =>
+                    getCatagoryList()
+                        .then(({ convertList = [] } = EmptyObject) => {
+                            return convertList;
+                        })
+                        .catch(() => {
+                            return [];
+                        }),
+                onChange: (name, form) => {
+                    form.resetFields(['second_catagory']);
+                    form.resetFields(['third_catagory']);
+                },
+            },
+            {
+                type: 'select',
+                label: '二级类目',
+                name: 'second_catagory',
+                className: styles.input,
+                formatter: 'number',
+                optionListDependence: {
+                    name: 'first_catagory',
+                    key: 'children',
+                },
+                syncDefaultOption: {
+                    value: '',
+                    name: '全部',
+                },
+                optionList: () =>
+                    getCatagoryList()
+                        .then(({ convertList = [] } = EmptyObject) => {
+                            return convertList;
+                        })
+                        .catch(() => {
+                            return [];
+                        }),
+                onChange: (name, form) => {
+                    form.resetFields(['third_catagory']);
+                },
+            },
+            {
+                type: 'select',
+                label: '三级类目',
+                name: 'third_catagory',
+                className: styles.input,
+                formatter: 'number',
+                optionListDependence: {
+                    name: ['first_catagory', 'second_catagory'],
+                    key: 'children',
+                },
+                syncDefaultOption: {
+                    value: '',
+                    name: '全部',
+                },
+                optionList: () =>
+                    getCatagoryList()
+                        .then(({ convertList = [] } = EmptyObject) => {
+                            return convertList;
+                        })
+                        .catch(() => {
+                            return [];
+                        }),
+            },
+            {
+                type: 'inputRange',
+                label: 'sku数量',
+                name: ['min_sku', 'max_sku'],
+                className: styles.inputMin,
+            },
+            {
+                type: 'inputRange',
+                label: '价格范围（￥）',
+                name: ['min_price', 'max_price'],
+                className: styles.inputMin,
+                precision: 2,
+            },
+            {
+                type: 'inputRange',
+                label: '销量',
+                name: ['min_sale', 'max_sale'],
+                className: styles.inputMin,
+            },
+            {
+                type: 'positiveInteger',
+                label: '评论数量>=',
+                name: 'min_comment',
+                // placeholder: '多个逗号隔开',
+                className: styles.inputMin,
+                formatter: 'number',
+            },
+        ];
+    }, []);
 
     return useMemo(() => {
         return (
@@ -285,6 +282,7 @@ const LocalPage: React.FC = props => {
                     pageNumber={pageNumber}
                     pageSize={pageSize}
                     total={total}
+                    sourceChannel={sourceChannel}
                     selectedRowKeys={selectedRowKeys}
                     goodsList={goodsList}
                     queryRef={queryRef}
@@ -296,7 +294,7 @@ const LocalPage: React.FC = props => {
                 />
             </Container>
         );
-    }, [loading, selectedRowKeys, exportStatus]);
+    }, [loading, selectedRowKeys, exportStatus, sourceChannel]);
 };
 
 export default LocalPage;

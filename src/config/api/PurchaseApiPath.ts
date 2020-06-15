@@ -22,4 +22,7 @@ export enum PurchaseApiPath {
     QueryReturnInfo = '/api/v1/purchase/refund_info',
     AddWaybill = '/api/v1/purchase/waybill',
     setPurchaseException = '/api/v1/purchase/exception/exec',
+    CreatePurchase = '/api/v1/purchase/purchase_order',
+    CancelPurchaseByUser = '/api/v1/purchase/purchase_order',
+    EndPurchaseByUser = '/api/v1/purchase/finish_purchase_order',
 }

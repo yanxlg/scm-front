@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DatePicker, Input, Radio, Form, Spin, Checkbox } from 'antd';
+import { DatePicker, Input, Radio, Form, Spin, Checkbox, Select } from 'antd';
 import '@/styles/config.less';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
@@ -19,12 +19,15 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 import { dateToUnix } from 'react-components/es/utils/date';
 import dayjs, { Dayjs } from 'dayjs';
+import { queryGoodsSourceList } from '@/services/global';
+import { EmptyArray } from 'react-components/es/utils';
 
 declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
     day: number;
     second: number;
     update_item: UpdateItemType;
+    channel: string;
 }
 
 declare interface ITimerUpdateProps {
@@ -33,7 +36,7 @@ declare interface ITimerUpdateProps {
 
 const convertDetail = (info: ITaskDetailInfo) => {
     const {
-        update_type = PUTaskRangeType.AllOnShelves,
+        update_type = [PUTaskRangeType.AllOnShelves],
         task_end_time,
         task_start_time,
         time_interval,
@@ -41,7 +44,7 @@ const convertDetail = (info: ITaskDetailInfo) => {
     } = info;
     const isDay = time_interval && time_interval % 86400 === 0;
     return {
-        range: update_type,
+        ranges: update_type,
         taskIntervalType: time_interval
             ? isDay
                 ? TaskIntervalConfigType.day
@@ -65,8 +68,10 @@ const convertFormData = (values: IFormData) => {
         task_start_time,
         task_name,
         update_item,
+        channel,
     } = values;
     return {
+        channel,
         task_name,
         ranges: ranges,
         update_item,
@@ -85,6 +90,22 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
     const [status, setStatus] = useState<TaskStatusCode>(); // 详情保留字段
     const [successTimes, setSuccessTimes] = useState<number>(); // 详情保留字段
     const [failTimes, setFailTimes] = useState<number>(); // 详情保留字段
+
+    const [channelList, setChannelList] = useState<
+        Array<{
+            name: string;
+            value: string;
+        }>
+    >([]);
+
+    useEffect(() => {
+        queryGoodsSourceList().then((list = EmptyArray) => {
+            setChannelList(list);
+            form.setFieldsValue({
+                channel: list[0].value,
+            }); // 初始值
+        });
+    }, []);
 
     useEffect(() => {
         if (taskId !== void 0) {
@@ -113,6 +134,9 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                 return addPDDTimerUpdateTask(params)
                     .then(({ data = EmptyObject } = EmptyObject) => {
                         form.resetFields();
+                        form.setFieldsValue({
+                            channel: channelList[0]?.value,
+                        });
                         showSuccessModal(data);
                     })
                     .catch(() => {
@@ -122,7 +146,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
             .catch(({ errorFields }) => {
                 scrollToFirstError(form, errorFields);
             });
-    }, []);
+    }, [channelList]);
 
     const checkStartDate = useCallback((type: any, value: Dayjs) => {
         if (!value) {
@@ -212,6 +236,27 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         ]}
                     >
                         <Input className="picker-default" />
+                    </Form.Item>
+                    <Form.Item
+                        className={formStyles.formItem}
+                        validateTrigger={'onBlur'}
+                        name="channel"
+                        label="商品渠道"
+                        validateFirst={true}
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择商品渠道',
+                            },
+                        ]}
+                    >
+                        <Select className="picker-default">
+                            {channelList.map(({ name, value }) => (
+                                <Select.Option key={value} value={value}>
+                                    {name}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
                     <Form.Item
                         validateTrigger={'onBlur'}
@@ -442,7 +487,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                 </Form>
             </Spin>
         );
-    }, [queryLoading, edit]);
+    }, [queryLoading, edit, channelList]);
 };
 
 export default TimerUpdate;

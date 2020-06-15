@@ -5,28 +5,44 @@ import {
     FitTable,
     JsonForm,
     LoadingButton,
+    PopConfirmLoadingButton,
     useList,
     useModal,
+    useModal2,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
-import { exportPurchaseList, queryPurchaseList } from '@/services/purchase';
+import {
+    applyReturn,
+    cancelPurchaseByUser,
+    endPurchaseByUser,
+    exportPurchaseList,
+    queryPurchaseList,
+} from '@/services/purchase';
 import { IPurchaseItem } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
-import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateType,
+    PurchaseCreateTypeList,
+    PurchaseMap,
+} from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import CreatePurchaseModal from '@/pages/purchase/components/list/createPurchase';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import ConnectModal from '@/pages/purchase/components/list/connectModal';
 
 const { Paragraph } = Typography;
 
 const fieldList: FormField[] = [
     {
         label: '采购单ID',
-        type: 'input',
+        type: 'positiveInteger',
         name: 'purchase_order_goods_id',
     },
     {
@@ -48,6 +64,19 @@ const fieldList: FormField[] = [
         label: '商品名称',
         type: 'input',
         name: 'purchase_goods_name',
+    },
+    {
+        label: '采购单类型',
+        type: 'select',
+        name: 'origin',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...PurchaseCreateTypeList,
+        ],
     },
 ];
 
@@ -126,6 +155,9 @@ const AllList = () => {
                 ref={formRef}
                 enableCollapse={false}
                 labelClassName={styles.formItem}
+                initialValues={{
+                    origin: '',
+                }}
             >
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
@@ -142,16 +174,197 @@ const AllList = () => {
         );
     }, []);
 
+    const [connect, setConnect] = useState<string | false>(false);
+    const showConnect = useCallback((item: IPurchaseItem) => {
+        setConnect(item.purchaseOrderGoodsId);
+    }, []);
+
+    const applyReturnService = useCallback((item: IPurchaseItem) => {
+        Modal.confirm({
+            title: '申请退款',
+            content: '是否确认申请退款？',
+            icon: <ExclamationCircleOutlined />,
+            okText: '确定',
+            cancelText: '取消',
+            onOk: () => {
+                return applyReturn(item.purchaseOrderGoodsId)
+                    .request()
+                    .then(() => {
+                        message.success('申请成功！');
+                        onReload();
+                    });
+            },
+        });
+    }, []);
+
+    const onCancelPurchaseByUser = useCallback((purchaseOrderGoodsId: string) => {
+        return cancelPurchaseByUser(purchaseOrderGoodsId).then(() => {
+            onReload();
+        });
+    }, []);
+
+    const onEndPurchaseByUser = useCallback((purchaseOrderGoodsId: string) => {
+        return endPurchaseByUser(purchaseOrderGoodsId).then(() => {
+            onReload();
+        });
+    }, []);
+
+    const closeConnect = useCallback(() => {
+        setConnect(false);
+    }, []);
+
     const columns = useMemo(() => {
         return [
+            {
+                title: '操作',
+                dataIndex: 'operation',
+                fixed: 'left',
+                width: '150px',
+                align: 'center',
+                render: (_, item) => {
+                    const {
+                        origin = PurchaseCreateType.Auto,
+                        purchaseOrderGoodsId,
+                        purchaseGoodsStatus,
+                    } = item;
+                    const status = String(purchaseGoodsStatus);
+                    let child: React.ReactNode;
+
+                    switch (status) {
+                        case '1': // 待发货
+                            child = (
+                                <>
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
+                                    </Button>
+                                    {origin === PurchaseCreateType.Auto ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    ) : (
+                                        <PopConfirmLoadingButton
+                                            popConfirmProps={{
+                                                title: '确定要取消该采购单？',
+                                                onConfirm: () =>
+                                                    onCancelPurchaseByUser(purchaseOrderGoodsId),
+                                            }}
+                                            buttonProps={{
+                                                type: 'link',
+                                                children: '取消采购单',
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            );
+                            break;
+                        case '2':
+                            child = (
+                                <>
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
+                                    </Button>
+                                    <Button type="link" onClick={() => applyReturnService(item)}>
+                                        申请退款
+                                    </Button>
+                                </>
+                            );
+                            break;
+                        case '3':
+                            child = (
+                                <>
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
+                                    </Button>
+                                    {origin === PurchaseCreateType.Auto ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    ) : null /*(
+                                        <PopConfirmLoadingButton
+                                            popConfirmProps={{
+                                                title: '确定要取消该采购单？',
+                                                onConfirm: () =>
+                                                    onCancelPurchaseByUser(purchaseOrderGoodsId),
+                                            }}
+                                            buttonProps={{
+                                                type: 'link',
+                                                children: '取消采购单',
+                                            }}
+                                        />
+                                    )*/}
+                                </>
+                            );
+                            break;
+                        case '4':
+                            child = (
+                                <>
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
+                                    </Button>
+                                    {origin === PurchaseCreateType.Auto ? (
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    ) : null}
+                                    <PopConfirmLoadingButton
+                                        popConfirmProps={{
+                                            title: '确定要完结该采购单？',
+                                            onConfirm: () =>
+                                                onEndPurchaseByUser(purchaseOrderGoodsId),
+                                        }}
+                                        buttonProps={{
+                                            type: 'link',
+                                            children: '完结采购单',
+                                        }}
+                                    />
+                                </>
+                            );
+                            break;
+                        case '5': // 已完结 + 已取消
+                            child = (
+                                <>
+                                    <Button type="link" onClick={() => applyReturnService(item)}>
+                                        申请退款
+                                    </Button>
+                                </>
+                            );
+                            break;
+                        default:
+                            child = null;
+                            break;
+                    }
+                    return {
+                        children: child,
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
+                },
+            },
             {
                 title: '采购单ID',
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
+                className: 'break-all',
                 render: (value, row) => {
+                    const { origin = PurchaseCreateType.Auto } = row;
                     return {
-                        children: value,
+                        children: (
+                            <>
+                                {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                                {value}
+                            </>
+                        ),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -343,6 +556,16 @@ const AllList = () => {
         } as any;
     }, [loading]);
 
+    const [createModal, showCreateModal, closeCreateModal] = useModal2<true>();
+
+    const toolBarRender = useCallback(() => {
+        return [
+            <Button type="primary" key="1" onClick={() => showCreateModal(true)}>
+                创建采购单
+            </Button>,
+        ];
+    }, []);
+
     const table = useMemo(() => {
         // 处理合并单元格
         const dataSet = colSpanDataSource(dataSource);
@@ -358,6 +581,7 @@ const AllList = () => {
                 dataSource={dataSet}
                 loading={loading}
                 onChange={onChange}
+                toolBarRender={toolBarRender}
             />
         );
     }, [loading]);
@@ -374,9 +598,15 @@ const AllList = () => {
                     onOKey={onExport}
                     onCancel={closeExportFn}
                 />
+                <CreatePurchaseModal
+                    visible={createModal}
+                    onClose={closeCreateModal}
+                    onReload={onReload}
+                />
+                <ConnectModal visible={connect} onCancel={closeConnect} />
             </>
         );
-    }, [loading, visible, showExport]);
+    }, [loading, visible, showExport, createModal, connect]);
 };
 
 export default AllList;

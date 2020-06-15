@@ -2,12 +2,12 @@ import React, { useMemo } from 'react';
 import { Button } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
 import classnames from 'classnames';
-import { IPublishInterceptItem } from '@/interface/IGoodsAttr';
+import { ICheckedBtnItem } from '@/interface/IGlobal';
 
 import styles from './_index.less';
 
 declare interface IProps extends ButtonProps {
-    item: IPublishInterceptItem;
+    item: ICheckedBtnItem;
 }
 
 const Index: React.FC<IProps> = ({ item, className = '', ...restProps }) => {

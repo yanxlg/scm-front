@@ -1,6 +1,7 @@
 import { FormField } from 'react-components/es/JsonForm';
-import { transStatusList } from '@/utils/transform';
+import { transStatusList, transOptionList } from '@/utils/transform';
 import { queryChannelSource, getPlatformAndStore } from '@/services/order-manage';
+import { queryGoodsSourceList } from '@/services/global';
 
 declare interface optionItem {
     name: string;
@@ -110,6 +111,21 @@ export const failureReasonMap = {
     '888': '中台商品缺失',
 };
 
+export const FinalCancelMap = {
+    '40001': '未登录',
+    '46024': '待支付订单过多',
+    '410031': 'sku已售罄',
+    '41003': '商品已售罄',
+    '1001': '特殊商品无需拍单',
+    '1002': '拍单超时',
+    '888': '中台商品缺失',
+    '-100': '采购价异常',
+};
+
+export const finalCancelStatusList = transOptionList(FinalCancelMap);
+
+export type FinalCancelStatus = keyof typeof FinalCancelMap;
+
 export const failureReasonList = transStatusList(failureReasonMap);
 export type failureReasonCode = keyof typeof failureReasonMap;
 
@@ -198,13 +214,21 @@ export const childDefaultFieldList: FormField[] = [
         type: 'select',
         name: 'product_shop',
         label: '销售店铺名称',
-        className: 'order-input-review',
+        className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
         optionListDependence: {
             name: 'channel_source',
             key: 'children',
         },
         optionList: () => getPlatformAndStore(),
+    },
+    {
+        type: 'select',
+        name: 'xxx',
+        label: '商品渠道',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => queryGoodsSourceList(),
     },
 ];
 
@@ -287,10 +311,22 @@ export const childAllFieldList: FormField[] = [
     {
         type: 'select',
         name: 'purchase_order_status',
-        label: '采购订单状态',
+        label: '采购计划状态',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'select',
+        name: 'purchase_fail_code',
+        label: '失败原因',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        formatter: 'join',
+        placeholder: '请选择失败原因',
+        mode: 'multiple',
+        maxTagCount: 2,
+        optionList: [...finalCancelStatusList],
     },
     {
         type: 'select',
@@ -454,7 +490,7 @@ export const defaultColChildList = [
     'purchasePlanId', // 采购计划ID
     'reserveStatus', // 仓库库存预定状态
     'purchasePlatform', // 采购平台
-    'purchaseOrderStatus', // 采购订单状态
+    'purchaseOrderStatus', // 采购计划状态
     'purchaseOrderPayStatus', // 采购支付状态
 ];
 
@@ -619,15 +655,3 @@ export const stockNotShipOptionalColList = [
         name: '发货剩余时间',
     },
 ];
-
-export const FinalCancelMap = {
-    '40001': '未登录',
-    '46024': '待支付订单过多',
-    '410031': '已售罄',
-    '41003': '已售罄',
-    '1001': '特殊商品无需拍单',
-    '1002': '拍单超时',
-    '888': '中台商品缺失',
-    '-100': '采购价异常',
-    // 未知原因
-};

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Checkbox } from 'antd';
+import { Checkbox, Button } from 'antd';
 import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TablePaginationConfig } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
@@ -16,14 +16,14 @@ import {
     childrenOrderCancelOptionList,
     purchasePlanCancelOptionList,
     FinalCancelMap,
+    FinalCancelStatus,
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
 import { IFilterParams } from '@/services/order-manage';
-import { PaginationConfig } from 'antd/es/pagination';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import CancelOrder from './CancelOrder';
 
 declare interface IProps {
     loading: boolean;
@@ -44,6 +44,8 @@ declare interface IProps {
     changeParentOrder(checked: boolean): void;
     showParentStatus: boolean;
     getOrderGoodsIdList(): string[];
+    getAllTabCount(type: number): void;
+    changeRegenerate(status: boolean): void;
 }
 
 declare interface IState {
@@ -134,11 +136,30 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
         },
         {
+            key: 'commodityId',
+            title: 'Commodity ID',
+            dataIndex: 'commodityId',
+            align: 'center',
+            width: 130,
+        },
+        {
             key: 'productId',
             title: 'Product ID',
             dataIndex: 'productId',
             align: 'center',
-            width: 120,
+            width: 200,
+            render: (value: string, record) => {
+                return (
+                    <>
+                        {value}
+                        <div style={{ color: 'red' }}>
+                            {String(record?.orderGods?.isReplaceDelivery) === '1'
+                                ? '（替换成其他商品出库）'
+                                : ''}
+                        </div>
+                    </>
+                );
+            },
         },
         // 勾选展示
         {
@@ -301,6 +322,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             defaultHide: true,
         },
+        {
+            key: 'purchasePlatform',
+            title: '商品渠道',
+            dataIndex: 'purchasePlatform',
+            align: 'center',
+            width: 120,
+        },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -385,6 +413,18 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchasePlanId',
             align: 'center',
             width: 120,
+            render: (value: string, record) => {
+                return (
+                    <>
+                        {value}
+                        <div style={{ color: 'red' }}>
+                            {String(record?.orderGods?.isOfflinePurchase) === '1'
+                                ? '（线下采购，无需拍单）'
+                                : ''}
+                        </div>
+                    </>
+                );
+            },
         },
         {
             key: 'reserveStatus',
@@ -393,13 +433,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 148,
             render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
-        },
-        {
-            key: 'purchasePlatform',
-            title: '采购平台',
-            dataIndex: 'purchasePlatform',
-            align: 'center',
-            width: 120,
         },
         // // 勾选展示 - 待补充
         // {
@@ -411,29 +444,36 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // },
         {
             key: 'purchaseOrderStatus',
-            title: '采购订单状态',
+            title: '采购计划状态',
             dataIndex: 'purchaseOrderStatus',
             align: 'center',
-            width: 140,
+            width: 120,
             render: (value: number, row: IChildOrderItem) => {
-                const { reserveStatus, purchaseFailCode } = row;
+                const { reserveStatus } = row;
                 if (reserveStatus === 3 && value === 1) {
-                    return '';
+                    return '无需拍单'; // feature_4170
                 }
-                return (
-                    <>
-                        {getStatusDesc(purchaseOrderOptionList, value)}
-                        {value === 7 && (
-                            <div>({FinalCancelMap[purchaseFailCode as '40001'] || '未知原因'})</div>
-                        )}
-                    </>
-                );
+                return getStatusDesc(purchaseOrderOptionList, value);
             },
+        },
+        {
+            key: 'purchaseFailCode',
+            title: '失败原因',
+            dataIndex: 'purchaseFailCode',
+            align: 'center',
+            width: 140,
+            render: (value: string, row: IChildOrderItem) => {
+                const { purchaseOrderStatus } = row;
+                return purchaseOrderStatus === 7
+                    ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
+                    : '';
+            },
+            defaultHide: true,
         },
         // 勾选展示
         {
             key: 'purchaseCreateTime',
-            title: '采购订单生成时间',
+            title: '采购计划生成时间',
             dataIndex: 'purchaseCreateTime',
             align: 'center',
             width: 146,
@@ -569,7 +609,10 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 if (purchasePrice === 0 || isNaN(purchasePrice)) {
                     return '';
                 }
-                const result = (Number(productPrice) - purchasePrice) * Number(purchaseNumber);
+                const result =
+                    ((Number(productPrice) * 1000 - purchasePrice * 1000) *
+                        Number(purchaseNumber)) /
+                    1000;
                 return result < 0 ? <span style={{ color: 'red' }}>{result}</span> : result;
             },
         },
@@ -641,24 +684,31 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    onChange = ({ current, pageSize }: PaginationConfig) => {
+    onChange = ({ current, pageSize }: TablePaginationConfig) => {
         this.props.onSearch({
             page: current,
             page_count: pageSize,
         });
     };
 
+    handleChangeRegenerate = (status: boolean) => {
+        // console.log(1111111, status);
+        this.props.changeRegenerate(status);
+    };
+
     toolBarRender = () => {
         const {
             postOrdersPlace,
             cancelPurchaseOrder,
-            cancelChannelOrder,
             changeParentOrder,
             showParentStatus,
             getOrderGoodsIdList,
+            onSearch,
+            getAllTabCount,
         } = this.props;
         const orderGoodsIdList = getOrderGoodsIdList();
         const disabled = orderGoodsIdList.length === 0;
+        const _getAllTabCount = () => getAllTabCount(2);
         return [
             <Checkbox
                 onChange={e => changeParentOrder(e.target.checked)}
@@ -667,8 +717,11 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             >
                 仅展示父订单ID
             </Checkbox>,
+            <Checkbox onChange={e => this.handleChangeRegenerate(e.target.checked)} key="1">
+                展示已重新生成
+            </Checkbox>,
             <LoadingButton
-                key="1"
+                key="2"
                 type="primary"
                 disabled={disabled}
                 className={formStyles.formBtn}
@@ -677,7 +730,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 一键拍单
             </LoadingButton>,
             <LoadingButton
-                key="2"
+                key="3"
                 type="primary"
                 disabled={disabled}
                 className={formStyles.formBtn}
@@ -685,15 +738,22 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             >
                 取消采购单
             </LoadingButton>,
-            <LoadingButton
-                key="3"
-                type="primary"
-                disabled={disabled}
-                className={formStyles.formBtn}
-                onClick={() => cancelChannelOrder(orderGoodsIdList)}
+            <CancelOrder
+                orderGoodsIds={orderGoodsIdList}
+                onReload={onSearch}
+                getAllTabCount={_getAllTabCount}
+                key="4"
             >
-                取消渠道订单
-            </LoadingButton>,
+                <Button
+                    key="4"
+                    type="primary"
+                    disabled={disabled}
+                    className={formStyles.formBtn}
+                    // onClick={() => cancelChannelOrder(orderGoodsIdList)}
+                >
+                    取消渠道订单
+                </Button>
+            </CancelOrder>,
         ];
     };
 
@@ -704,7 +764,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}
@@ -715,18 +775,21 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
-                    pagination={{
-                        current: page,
-                        pageSize: pageSize,
-                        total: total,
-                        showSizeChanger: true,
-                        position: ['topRight', 'bottomRight'],
-                    }}
+                    pagination={
+                        {
+                            current: page,
+                            pageSize: pageSize,
+                            total: total,
+                            showSizeChanger: true,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
                     columnsSettingRender={AllColumnsSetting}
                     onChange={this.onChange}
                     onRow={record => {
                         return {
                             'data-id': record.orderGoodsId,
+                            // hidden: false,
                         } as any;
                     }}
                     toolBarRender={this.toolBarRender}

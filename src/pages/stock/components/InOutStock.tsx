@@ -24,6 +24,9 @@ import {
     OutStockStateCode,
     OutStockStateList,
     StockType,
+    WarehouseList,
+    WarehouseMap,
+    WarehouseMapCode,
 } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
 import { carrierList, defaultPageNumber, defaultPageSize } from '@/config/global';
@@ -54,6 +57,15 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const columns = useMemo(() => {
         if (type === StockType.In) {
             return [
+                {
+                    title: '仓库名',
+                    width: '150px',
+                    dataIndex: 'warehouseId',
+                    align: 'center',
+                    render: (value: WarehouseMapCode, row) => {
+                        return WarehouseMap[value];
+                    },
+                },
                 {
                     title: '创建时间',
                     width: '150px',
@@ -132,6 +144,20 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             ] as ColumnProps<IStockInItem>[];
         }
         return [
+            {
+                title: '仓库名',
+                width: '150px',
+                dataIndex: 'warehouseId',
+                align: 'center',
+                render: (value: WarehouseMapCode, row) => {
+                    return {
+                        children: WarehouseMap[value],
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
             {
                 title: '参考运单号',
                 width: '150px',
@@ -382,6 +408,19 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     name: 'commodity_sku_id',
                     formatter: 'multipleToArray',
                 },
+                {
+                    type: 'select',
+                    label: '仓库名',
+                    name: 'warehouse_id',
+                    defaultValue: '',
+                    optionList: [
+                        {
+                            name: '全部',
+                            value: '',
+                        },
+                        ...WarehouseList,
+                    ],
+                },
             ];
         }
         return [
@@ -456,6 +495,19 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 label: '商品SKU ID',
                 name: 'sku_id',
                 formatter: 'multipleToArray',
+            },
+            {
+                type: 'select',
+                label: '仓库名',
+                name: 'warehouse_id',
+                defaultValue: '',
+                optionList: [
+                    {
+                        name: '全部',
+                        value: '',
+                    },
+                    ...WarehouseList,
+                ],
             },
         ];
     }, []);
@@ -558,18 +610,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
         } as any;
     }, [loading]);
 
-    const toolBarRender = useCallback(() => {
-        return [
-            <Button
-                key="export"
-                onClick={() => setVisibleProps(true)}
-                className={formStyles.formBtn}
-            >
-                导出Excel表
-            </Button>,
-        ];
-    }, []);
-
     const table = useMemo(() => {
         return (
             <FitTable
@@ -579,7 +619,6 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 bottom={150}
                 minHeight={400}
                 pagination={pagination}
-                toolBarRender={toolBarRender}
                 columns={columns as ColumnProps<any>[]}
                 dataSource={dataSource as any[]}
                 loading={loading}
@@ -603,6 +642,9 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                         刷新
                     </LoadingButton>
+                    <Button onClick={() => setVisibleProps(true)} className={formStyles.formBtn}>
+                        导出
+                    </Button>
                 </div>
             </JsonForm>
         );

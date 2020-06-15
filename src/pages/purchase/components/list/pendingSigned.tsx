@@ -9,7 +9,7 @@ import {
     useModal,
 } from 'react-components';
 import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -18,7 +18,12 @@ import { IPurchaseItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
-import { PurchaseCode, PurchaseMap } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateType,
+    PurchaseCreateTypeList,
+    PurchaseMap,
+} from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
@@ -30,7 +35,7 @@ const { Paragraph } = Typography;
 const fieldList: FormField[] = [
     {
         label: '采购单ID',
-        type: 'input',
+        type: 'positiveInteger',
         name: 'purchase_order_goods_id',
     },
     {
@@ -52,6 +57,19 @@ const fieldList: FormField[] = [
         label: '商品名称',
         type: 'input',
         name: 'purchase_goods_name',
+    },
+    {
+        label: '采购单类型',
+        type: 'select',
+        name: 'origin',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...PurchaseCreateTypeList,
+        ],
     },
 ];
 
@@ -138,6 +156,9 @@ const PendingSigned = () => {
         return (
             <JsonForm
                 fieldList={fieldList}
+                initialValues={{
+                    origin: '',
+                }}
                 ref={formRef}
                 enableCollapse={false}
                 labelClassName={styles.formItem}
@@ -214,9 +235,16 @@ const PendingSigned = () => {
                 dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: '150px',
+                className: 'break-all',
                 render: (value, row) => {
+                    const { origin = PurchaseCreateType.Auto } = row;
                     return {
-                        children: value,
+                        children: (
+                            <>
+                                {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                                {value}
+                            </>
+                        ),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },

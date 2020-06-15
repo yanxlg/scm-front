@@ -22,7 +22,6 @@ import { JsonForm } from 'react-components';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
 import { history } from '@@/core/history';
-import { SearchOutlined } from '@ant-design/icons';
 import { LoadingButton } from 'react-components';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
@@ -33,16 +32,18 @@ import TaskStatus from './TaskStatus';
 import {
     isOnceTask,
     TaskChannelCode,
-    TaskChannelList,
+    TaskChannelEnum,
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 import { ColumnType, TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { queryGoodsSourceList } from '@/services/global';
+import { EmptyArray } from 'react-components/es/utils';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
-    initialValues?: ITaskListQuery;
+    initialValues?: Partial<ITaskListQuery>;
     setCountArr: (count: number[]) => void;
 }
 
@@ -60,8 +61,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
         }
-
-        const routeInitialValues = initialValues ?? {};
+        const routeInitialValues = initialValues ?? {}; // 路由初始参数
         const {
             pageNumber = defaultPageNumber,
             pageSize = defaultPageSize,
@@ -74,7 +74,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             task_end_time = 0,
         } = query;
         return {
-            ...routeInitialValues,
             pageNumber: Number(pageNumber),
             pageSize: Number(pageSize),
             task_id,
@@ -84,6 +83,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
             task_type,
             task_begin_time: unixToStartDate(Number(task_begin_time)),
             task_end_time: unixToEndDate(Number(task_end_time)),
+            ...routeInitialValues,
         };
     }, []);
 
@@ -177,12 +177,14 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     const task_id = record.task_id;
                     const onceTask = isOnceTask(record.execute_count);
                     const taskType = record.task_type;
-
+                    const channel = record.channel;
                     return (
                         <>
-                            {taskType === TaskTypeEnum.Gather ||
+                            {(taskType === TaskTypeEnum.Gather &&
+                                String(channel) === TaskChannelEnum.PDD) ||
                             taskType === TaskTypeEnum.Grounding ||
-                            taskType === TaskTypeEnum.GatherGrounding ? (
+                            (taskType === TaskTypeEnum.GatherGrounding &&
+                                String(channel) === TaskChannelEnum.PDD) ? (
                                 <Button type="link" onClick={() => viewTaskDetail(task_id)}>
                                     查看详情
                                 </Button>
@@ -363,19 +365,19 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     type: 'select',
                     name: 'channel',
                     formatter: 'number',
-                    optionList: [
-                        {
-                            name: '全部',
-                            value: '',
-                        },
-                    ].concat(
-                        TaskChannelList.map(({ id, name }) => {
-                            return {
-                                name,
-                                value: id,
-                            };
+                    syncDefaultOption: {
+                        name: '全部',
+                        value: '',
+                    },
+                    optionList: () =>
+                        queryGoodsSourceList().then((list = EmptyArray) => {
+                            return list.map(({ name, value }) => {
+                                return {
+                                    name,
+                                    value,
+                                };
+                            });
                         }),
-                    ),
                 },
                 {
                     label: '任务类型',
@@ -441,19 +443,19 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     type: 'select',
                     name: 'channel',
                     formatter: 'number',
-                    optionList: [
-                        {
-                            name: '全部',
-                            value: '',
-                        },
-                    ].concat(
-                        TaskChannelList.map(({ id, name }) => {
-                            return {
-                                name,
-                                value: id,
-                            };
+                    syncDefaultOption: {
+                        name: '全部',
+                        value: '',
+                    },
+                    optionList: () =>
+                        queryGoodsSourceList().then((list = EmptyArray) => {
+                            return list.map(({ name, value }) => {
+                                return {
+                                    name,
+                                    value,
+                                };
+                            });
                         }),
-                    ),
                 },
                 {
                     label: '任务类型',

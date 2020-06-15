@@ -3,6 +3,7 @@ import { IResponse, IPaginationResponse, RequestPagination } from '@/interface/I
 import { PaginationConfig } from 'antd/es/pagination';
 import { defaultPageNumber, defaultPageSize, EmptyObject } from '@/config/global';
 import { JsonFormRef } from 'react-components/es/JsonForm';
+import { TablePaginationConfig } from 'antd/es/table';
 
 const EmptyArray: string[] = [];
 
@@ -91,21 +92,24 @@ function useList<T, Q extends RequestPagination = any, S = any>({
         [],
     );
 
-    const onChange = useCallback(({ current, pageSize }: PaginationConfig, filters, sorter) => {
-        const sorterConfig =
-            sorter && sorter.field
-                ? {
-                      sort_by: sorter.field,
-                      sort_order: sorter.order,
-                  }
-                : {};
-        getListData({
-            page: current,
-            page_count: pageSize,
-            ...sorterConfig,
-            ...extraQueryRef.current,
-        });
-    }, []);
+    const onChange = useCallback(
+        ({ current, pageSize }: TablePaginationConfig, filters, sorter) => {
+            const sorterConfig =
+                sorter && sorter.field
+                    ? {
+                          sort_by: sorter.field,
+                          sort_order: sorter.order,
+                      }
+                    : {};
+            getListData({
+                page: current,
+                page_count: pageSize,
+                ...sorterConfig,
+                ...extraQueryRef.current,
+            });
+        },
+        [],
+    );
 
     useEffect(() => {
         if (autoQuery) {

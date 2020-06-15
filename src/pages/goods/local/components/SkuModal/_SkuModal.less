@@ -6,6 +6,7 @@
     position: relative;
     padding-left: 112px;
     min-height: 100px;
+
     .main-img {
         position: absolute;
         left: 0;
@@ -13,6 +14,7 @@
         width: 100px;
         height: 100px;
     }
+
     .desc {
         position: relative;
         display: inline-block;
@@ -23,6 +25,7 @@
         white-space: nowrap;
         overflow: hidden;
     }
+
     .link {
         position: absolute;
         top: 0;
@@ -32,15 +35,18 @@
 
 .filter-section {
     margin-top: 20px;
+
     .input-wrap {
         position: relative;
         padding-left: 52px !important;
     }
+
     .label {
         position: absolute;
         left: 0;
         top: 5px;
     }
+
     .btn {
         width: 100%;
     }
@@ -57,4 +63,20 @@
 
 .tag-btn {
     margin: 0 4px 4px 0;
+}
+
+.pop-table {
+    display: block;
+
+    :global {
+        .ant-table {
+            background: transparent !important;
+        }
+
+        th,
+        td {
+            background: transparent !important;
+            color: #fff !important;
+        }
+    }
 }

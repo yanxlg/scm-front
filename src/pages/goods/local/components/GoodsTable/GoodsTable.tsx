@@ -1,13 +1,12 @@
-import React, { useMemo, useCallback, ReactText, useState, RefObject } from 'react';
-import { FitTable, AutoEnLargeImg, LoadingButton, message } from 'react-components';
+import React, { useMemo, useCallback, ReactText, useState, RefObject, useEffect } from 'react';
+import { FitTable, AutoEnLargeImg, LoadingButton, message, useModal2 } from 'react-components';
 import { Button } from 'antd';
 import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILocalGoods';
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
 import { utcToLocal } from 'react-components/lib/utils/date';
-import { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import { PaginationConfig } from 'antd/es/pagination';
+import { ColumnsType } from 'antd/es/table';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
     postGoodsExports,
@@ -27,7 +26,9 @@ import CountryFreightModal from '../CountryFreightModal/CountryFreightModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { GoodsSourceEnum } from '@/enums/GlobalEnum';
+import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
+import { PaginationConfig } from 'react-components/es/FitTable';
+import useCountryFreightModal from '../../hooks/useCountryFreightModal';
 
 interface IProps {
     loading: boolean;
@@ -35,6 +36,7 @@ interface IProps {
     pageNumber: number;
     pageSize: number;
     total: number;
+    sourceChannel: string;
     goodsList: IGoodsAndSkuItem[];
     selectedRowKeys: string[];
     formRef: RefObject<JsonFormRef>;
@@ -51,6 +53,7 @@ const GoodsTable: React.FC<IProps> = ({
     pageNumber,
     pageSize,
     total,
+    sourceChannel,
     goodsList,
     selectedRowKeys,
     formRef,
@@ -65,17 +68,27 @@ const GoodsTable: React.FC<IProps> = ({
     // 上架商品
     const [merchantStatus, setMerchantStatus] = useState(false);
     const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
-    const [disabledChannelList, setDisabledChannelList] = useState<string[]>([]);
     // 关联商品
     const [mergeStatus, setMergeStatus] = useState(false);
     const [commodityId, setCommodityId] = useState('');
     const [productSn, setProductSn] = useState('');
     // 编辑商品
-    const { editGoodsStatus, showEditGoods, hideEditGoods, productId } = useGoodsEditModal();
+    const {
+        editGoodsStatus,
+        showEditGoods,
+        hideEditGoods,
+        productId,
+        setProductId,
+    } = useGoodsEditModal();
     // 查看sku信息
-    const { skuStatus, currentSkuInfo, showSkuModal, hideSkuModal } = useSkuModal();
+    const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
     // 查看国家运费
-    const [countryFreightStatus, setCountryFreightStatus] = useState(false);
+    const {
+        countryFreightStatus,
+        countryFreightId,
+        showCountryFreight,
+        hideCountryFreight,
+    } = useCountryFreightModal();
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -138,8 +151,8 @@ const GoodsTable: React.FC<IProps> = ({
         setMerchantStatus(true);
         // console.log('111111', formRef.current?.getFieldsValue());
         const { source_channel } = formRef.current?.getFieldsValue() as any;
-        if (!source_channel || source_channel === GoodsSourceEnum.VOVA) {
-            setDisabledChannelList(['vova']);
+        if (!source_channel) {
+            return;
         }
     }, []);
 
@@ -148,9 +161,10 @@ const GoodsTable: React.FC<IProps> = ({
     }, []);
 
     const onSelectedRowKeysChange = useCallback((selectedKeys: ReactText[]) => {
-        // console.log('selectedKeys', selectedKeys);
         setSelectedRowKeys(selectedKeys as string[]);
     }, []);
+
+    const [modal, showModal, closeModal] = useModal2<Array<string>>();
 
     const toolBarRender = useCallback(() => {
         const handleClickOnsale = () => {
@@ -169,18 +183,30 @@ const GoodsTable: React.FC<IProps> = ({
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={handleClickOnsale}
-                disabled={disabled}
+                disabled={disabled || !sourceChannel}
             >
                 一键上架
             </Button>,
             <Button
+                ghost
                 key="2"
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={handleClickAllOnsale}
+                disabled={!sourceChannel}
             >
                 查询商品一键上架
             </Button>,
+            <Button
+                key="4"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={() => showModal(selectedRowKeys)}
+                disabled={disabled}
+            >
+                修改商品属性
+            </Button>,
+
             <LoadingButton
                 key="3"
                 className={formStyles.formBtn}
@@ -190,7 +216,7 @@ const GoodsTable: React.FC<IProps> = ({
                 删除
             </LoadingButton>,
         ];
-    }, [selectedRowKeys, _getGoodsDelete]);
+    }, [selectedRowKeys, sourceChannel, _getGoodsDelete]);
 
     const handleExportOkey = useCallback(values => {
         return postGoodsExports({
@@ -232,14 +258,6 @@ const GoodsTable: React.FC<IProps> = ({
         setMergeStatus(false);
         setCommodityId('');
         setProductSn('');
-    }, []);
-
-    const showCountryFreight = useCallback(() => {
-        setCountryFreightStatus(true);
-    }, []);
-
-    const hideCountryFreight = useCallback(() => {
-        setCountryFreightStatus(false);
     }, []);
 
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
@@ -408,16 +426,23 @@ const GoodsTable: React.FC<IProps> = ({
                 dataIndex: 'price_min',
                 align: 'center',
                 render: (value: number, row: IGoodsAndSkuItem) => {
-                    const { price_min, price_max, shipping_fee_min, shipping_fee_max } = row;
+                    const {
+                        price_min,
+                        price_max,
+                        shipping_fee_min,
+                        shipping_fee_max,
+                        source_channel,
+                        product_id,
+                    } = row;
                     return (
                         <div>
                             {price_min}~{price_max}
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
-                            <div>
-                                <a onClick={showCountryFreight}>更多国家价格</a>
-                            </div>
+                            {source_channel !== 'pdd' ? (
+                                <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
+                            ) : null}
                         </div>
                     );
                 },
@@ -530,22 +555,22 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                title: '商品渠道来源',
-                dataIndex: 'a1',
+                title: '商品渠道',
+                dataIndex: 'source_channel',
                 align: 'center',
                 width: 120,
             },
         ];
     }, []);
 
-    const pagination = useMemo<TablePaginationConfig>(() => {
+    const pagination = useMemo<any>(() => {
         return {
             current: pageNumber,
             pageSize: pageSize,
             total: total,
             showSizeChanger: true,
             position: ['topRight', 'bottomRight'],
-        };
+        } as any;
     }, [loading]);
 
     const rowSelection = useMemo(() => {
@@ -557,12 +582,25 @@ const GoodsTable: React.FC<IProps> = ({
         };
     }, [selectedRowKeys]);
 
+    const GoodsTagsUpdateModal = useMemo(() => {
+        return (
+            <GoodsTagsModal
+                visible={
+                    modal === false
+                        ? false
+                        : goodsList.filter(({ product_id }) => modal.indexOf(product_id) > -1)
+                }
+                onClose={closeModal}
+                onReload={onReload}
+            />
+        );
+    }, [modal]);
+
     return useMemo(() => {
-        // console.log('selectedRowKeys-1111111', selectedRowKeys);
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="product_id"
                     loading={loading}
                     columns={columns}
@@ -576,6 +614,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <MerchantListModal
                     visible={merchantStatus}
+                    sourceChannel={sourceChannel}
                     onOKey={merchantOkey}
                     onCancel={merchantCancel}
                 />
@@ -593,6 +632,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <SkuModal
                     visible={skuStatus}
+                    channelSource={channelSource}
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />
@@ -609,7 +649,12 @@ const GoodsTable: React.FC<IProps> = ({
                     onCancel={hideEditGoods}
                     onReload={onReload}
                 />
-                <CountryFreightModal visible={countryFreightStatus} onCancel={hideCountryFreight} />
+                <CountryFreightModal
+                    visible={countryFreightStatus}
+                    productId={countryFreightId}
+                    onCancel={hideCountryFreight}
+                />
+                {GoodsTagsUpdateModal}
             </>
         );
     }, [
@@ -623,6 +668,9 @@ const GoodsTable: React.FC<IProps> = ({
         mergeStatus,
         editGoodsStatus,
         countryFreightStatus,
+        modal,
+        toolBarRender,
+        sourceChannel,
     ]);
 };
 

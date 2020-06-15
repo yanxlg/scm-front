@@ -65,8 +65,13 @@ export async function getInterceptTagList() {
     return request.get<IResponse<any>>(GoodsAttrApiPath.getInterceptTagList);
 }
 
-export async function setInterceptTagList(data: { keywords: string }) {
+export async function setInterceptTagList(
+    data: Array<{
+        keywords: string;
+        type?: 0 | 1 | 2;
+    }>,
+) {
     return request.post<IResponse<any>>(GoodsAttrApiPath.setInterceptTagList, {
-        data,
+        data: data,
     });
 }

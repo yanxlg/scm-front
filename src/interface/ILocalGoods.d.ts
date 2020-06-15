@@ -34,7 +34,7 @@ export interface ISkuItem {
     sku_inventory?: string;
     sku_price?: string;
     sku_sn?: string;
-    sku_style?: ISkuStyleItem[];
+    sku_style?: any[];
     sku_weight?: string;
 }
 
@@ -89,6 +89,8 @@ export interface IGoodsList {
     shipping_fee_min: number;
     shipping_fee_max: number;
     tags: string[];
+    multiple_price: string;
+    source_channel: string;
     _type?: string;
     origin?: string;
 }
@@ -107,7 +109,7 @@ export interface IGoodsVersionSkuItem {
     sku_id?: string;
     sku_inventory?: string;
     sku_price?: string;
-    sku_style?: ISkuStyleItem[];
+    sku_style?: any[];
     sku_weight?: string;
 }
 
@@ -140,6 +142,7 @@ export interface IGoodsVersionItem {
     shipping_fee_max: string;
     commodity_id?: string;
     _update_time?: string;
+    source_channel: string;
 }
 
 export type IGoodsVersionAndSkuItem = IGoodsVersionItem & IGoodsVersionSkuItem;
@@ -191,4 +194,28 @@ export interface ISkuInfo {
 
 export interface ICurrentGoodsItem {
     [key: string]: any;
+}
+
+export interface IGood {
+    commodityId: string;
+    commoditySkuId: string;
+    price: string;
+    productId: string;
+    productTitle: string;
+    quantity: string;
+    shippingFee: string;
+    sku: string;
+    skuImage: {
+        url: string;
+    };
+    tags: string[];
+    topCatId: string;
+    variantId: string;
+    weight: string;
+    productOptionValue: Array<{
+        option: { text: string };
+        value: {
+            text: string;
+        };
+    }>;
 }

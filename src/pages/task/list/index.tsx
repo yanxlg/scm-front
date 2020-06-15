@@ -10,7 +10,7 @@ import Container from '@/components/Container';
 
 const { TabPane } = Tabs;
 
-type LocalPageProps = RouteComponentProps<{}, any, ITaskListQuery>;
+type LocalPageProps = RouteComponentProps<{}, any, Partial<ITaskListQuery>>;
 
 const Index: React.FC<LocalPageProps> = props => {
     const [countArr, setCountArr] = useState<number[]>([]);
@@ -19,6 +19,7 @@ const Index: React.FC<LocalPageProps> = props => {
 
     return useMemo(() => {
         const initialValues = props.location.state;
+        props.history.replace(window.location.pathname, {}); // 重置state
         const [count1, count2, count3, count4, count5, count6] = countArr;
         return (
             <Container>

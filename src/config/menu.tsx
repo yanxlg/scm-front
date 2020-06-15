@@ -75,6 +75,10 @@ export default [
                 name: '商品版本更新',
                 hideInMenu: true,
             },
+            {
+                path: '/goods/priceStrategy',
+                name: '定价策略',
+            },
         ],
     },
     {
@@ -137,7 +141,7 @@ export default [
             },
             {
                 path: '/setting/info',
-                name: '重要报关信息映射',
+                name: '重量报关信息映射',
             },
         ],
     },

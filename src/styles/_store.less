@@ -6,9 +6,11 @@
     :global(.ant-input-affix-wrapper-disabled) {
         background-color: #f4faff;
     }
+
     :global(.ant-input[disabled]) {
         background-color: #f4faff !important;
     }
+
     :global(.ant-select-disabled.ant-select-single:not(.ant-select-customize-input)) {
         :global(.ant-select-selector) {
             background-color: #f4faff;
@@ -39,4 +41,36 @@
 
 .price-after {
     margin-left: 30px;
+}
+
+.form-as-label {
+    :global .ant-form-item-label {
+        display: none !important;
+    }
+
+    margin-right: 0 !important;
+}
+
+.label-select {
+    width: 210px !important;
+}
+
+.purchase-input {
+    width: 300px !important;
+}
+
+.abs-btn {
+    position: absolute;
+    bottom: 10px;
+}
+
+.good-img {
+    width: 80px;
+    height: 80px;
+    max-width: 80px;
+    max-height: 80px;
+}
+
+.select-type {
+    width: 200px !important;
 }
