@@ -106,7 +106,7 @@ const LocalPage: React.FC = props => {
             },
             {
                 type: 'select',
-                label: '商品渠道来源',
+                label: '商品渠道',
                 name: 'source_channel',
                 className: styles.input,
                 syncDefaultOption: defaultOption,

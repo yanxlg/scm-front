@@ -203,12 +203,6 @@ export async function addVoVaTask(params: IVoVaTaskBody) {
         data: {
             ...params,
             version: '1.0',
-            platform:
-                params.channel === TaskChannelEnum.VOVA
-                    ? 'VOVA'
-                    : params.channel === TaskChannelEnum.FD
-                    ? 'FLORYDAY'
-                    : '',
         },
     });
 }

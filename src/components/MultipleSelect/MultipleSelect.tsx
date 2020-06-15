@@ -1,11 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
-import { Select, Radio, Form } from 'antd';
+import { Select, Radio, Form, TreeSelect } from 'antd';
 import { SelectProps } from 'antd/es/select';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { FormInstance, FormItemProps } from 'antd/lib/form';
 import { FormItemLabelProps } from 'antd/es/form/FormItemLabel';
-
-const { Option } = Select;
+import { TreeSelectProps } from 'antd/es/tree-select';
 
 type IProps = {
     // label: string;
@@ -15,7 +14,7 @@ type IProps = {
     form: FormInstance;
     onChange?(): void;
     rules?: any[];
-} & SelectProps<string> &
+} & TreeSelectProps<string> &
     FormItemLabelProps;
 
 const MultipleSelect: React.FC<IProps> = ({
@@ -25,9 +24,11 @@ const MultipleSelect: React.FC<IProps> = ({
     form,
     dependencies,
     rules,
-    maxTagCount = 4,
+    treeCheckable = true,
+    treeDefaultExpandAll = true,
+    maxTagCount = 6,
+    treeNodeLabelProp = 'name',
     placeholder = '请选择',
-    mode = 'multiple',
     onChange,
     ...resetProps
 }) => {
@@ -64,46 +65,21 @@ const MultipleSelect: React.FC<IProps> = ({
         return parentList;
     }, [optionList, dependencies]);
 
-    const dropdownRender = useCallback(
-        (menu: React.ReactElement): React.ReactElement => {
-            const list = getOptionList();
-            if (list.length) {
-                return (
-                    <div>
-                        <Radio.Group style={{ display: 'flex', padding: '5px 0' }} value="">
-                            <Radio.Button
-                                value="1"
-                                style={{ flex: 1, textAlign: 'center' }}
-                                onClick={() => {
-                                    form?.setFieldsValue({
-                                        [name]: list.map(item => item.value),
-                                    });
-                                    onChange && onChange();
-                                }}
-                            >
-                                全选
-                            </Radio.Button>
-                            <Radio.Button
-                                value="0"
-                                style={{ flex: 1, textAlign: 'center' }}
-                                onClick={() => {
-                                    form?.setFieldsValue({
-                                        [name]: [],
-                                    });
-                                    onChange && onChange();
-                                }}
-                            >
-                                取消全选
-                            </Radio.Button>
-                        </Radio.Group>
-                        {menu}
-                    </div>
-                );
-            }
-            return menu;
-        },
-        [getOptionList, name],
-    );
+    const getTreeData = useCallback((optionList: IOptionItem[]) => {
+        if (optionList.length === 0) {
+            return [];
+        }
+        return [
+            {
+                name: '全部',
+                value: 'all',
+                children: optionList.map(({ name, value }) => ({
+                    name,
+                    value,
+                })),
+            },
+        ];
+    }, []);
 
     return (
         <Form.Item
@@ -126,22 +102,19 @@ const MultipleSelect: React.FC<IProps> = ({
         >
             {() => {
                 const list = getOptionList();
+                const treeData = getTreeData(list);
                 return (
-                    <Form.Item label={label} name={name} rules={rules}>
-                        <Select
-                            mode={mode}
+                    <Form.Item name={name} label={label} rules={rules}>
+                        <TreeSelect
+                            treeNodeLabelProp="name"
+                            treeData={treeData}
+                            treeCheckable={treeCheckable}
                             maxTagCount={maxTagCount}
+                            treeDefaultExpandAll={treeDefaultExpandAll}
                             placeholder={placeholder}
-                            dropdownRender={dropdownRender}
                             {...eventProps}
                             {...resetProps}
-                        >
-                            {list.map(({ name, value }) => (
-                                <Option key={value} value={value}>
-                                    {name}
-                                </Option>
-                            ))}
-                        </Select>
+                        />
                     </Form.Item>
                 );
             }}

@@ -26,10 +26,6 @@ const SortType: React.FC<SortTypeProps> = ({ form, listSort, merchantSort, sortL
                 }
             >
                 {({ getFieldValue }) => {
-                    const channel = getFieldValue('channel');
-                    if (channel === TaskChannelEnum['1688']) {
-                        return null;
-                    }
                     return (
                         <Form.Item
                             noStyle={true}

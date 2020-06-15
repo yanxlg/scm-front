@@ -1,6 +1,11 @@
 import { singlePromiseWrap } from '@/utils/utils';
 import request from '@/utils/request';
-import { IResponse, ISHopList, IExportExcelReqData } from '@/interface/IGlobal';
+import {
+    IResponse,
+    ISHopList,
+    IExportExcelReqData,
+    IOnsaleInterceptStoreRes,
+} from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
@@ -92,7 +97,12 @@ export function exportExcel(data: IExportExcelReqData) {
     });
 }
 
-export const queryGoodsSourceList = singlePromiseWrap(() => {
+export const queryGoodsSourceList = singlePromiseWrap<
+    Array<{
+        name: string;
+        value: string;
+    }>
+>(() => {
     return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1')).then(res => {
         const { data } = res;
         if (data) {
@@ -127,4 +137,16 @@ export const queryGoodBySkuId = (commodity_sku_id: string) => {
             commodity_sku_id: commodity_sku_id,
         },
     });
+};
+
+export const queryOnsaleInterceptStore = (purchase_channel?: string) => {
+    return request
+        .get<IResponse<IOnsaleInterceptStoreRes[]>>(GlobalApiPath.QueryOnsaleInterceptStore, {
+            params: {
+                purchase_channel,
+            },
+        })
+        .then(({ data }) => {
+            return (data[0]?.support_merchant_id ?? []).map(val => String(val));
+        });
 };

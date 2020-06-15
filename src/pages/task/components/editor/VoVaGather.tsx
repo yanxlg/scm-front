@@ -17,6 +17,8 @@ import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import { Button } from 'antd';
 import styles from '@/styles/_task.less';
 import classNames from 'classnames';
+import { queryGoodsSourceList } from '@/services/global';
+import { EmptyArray } from 'react-components/es/utils';
 
 const fdCountries = [
     {
@@ -122,105 +124,124 @@ const fieldList: FormField[] = [
         ],
     },
     {
-        type: 'radioGroup',
-        label: '采集渠道',
-        name: 'channel',
-        options: [
-            {
-                label: 'VOVA',
-                value: TaskChannelEnum.VOVA,
-            },
-            {
-                label: 'FD',
-                value: TaskChannelEnum.FD,
-            },
-        ],
-        rules: [
-            {
-                required: true,
-                message: '请选择采集渠道',
-            },
-        ],
-        onChange: (name, form) => {
-            form.resetFields(['country_code', 'checkAll']);
-        },
-    },
-    {
-        type: 'layout',
-        className: formStyles.formItem,
-        fieldList: [
-            {
-                type: 'checkboxGroup',
-                label: '爬取国家',
-                name: 'checkAll',
-                required: true,
-                options: [
-                    {
-                        label: '全选',
-                        value: 'all',
-                    },
-                ],
-                formItemClassName: classNames(formStyles.formItem, styles.taskCheckAll),
-                onChange: (name, form) => {
-                    const checkedAll = form.getFieldValue('checkAll');
-                    const channel = form.getFieldValue('channel');
-                    if (checkedAll && checkedAll.indexOf('all') > -1) {
-                        form.setFieldsValue({
-                            country_code:
-                                channel === TaskChannelEnum.VOVA
-                                    ? VoVaCountries.map(item => item.value)
-                                    : fdCountries.map(item => item.value),
-                        });
-                    } else {
-                        form.setFieldsValue({
-                            country_code: [],
-                        });
-                    }
-                },
-            },
-            {
-                type: 'dynamic',
-                shouldUpdate: (prevValues: Store, nextValues: Store) => {
-                    return prevValues.channel !== nextValues.channel;
-                },
-                dynamic: form => {
-                    const channel = form.getFieldValue('channel');
-                    const options = channel === TaskChannelEnum.VOVA ? VoVaCountries : fdCountries;
-
-                    return {
-                        type: 'checkboxGroup',
-                        label: '爬取国家',
-                        name: 'country_code',
-                        options: options,
-                        formItemClassName: classNames(
-                            'form-hide-label',
-                            formStyles.formItem,
-                            styles.taskCheckAll,
-                        ),
-                        rules: [
-                            {
-                                required: true,
-                                message: '请选择爬取国家',
-                            },
-                        ],
-                        onChange: (name, form) => {
-                            const country_code = form.getFieldValue('country_code');
-                            if (country_code.length === options.length) {
+        type: 'loading',
+        loading: () => {
+            return queryGoodsSourceList().then((list = EmptyArray) => {
+                const options = list
+                    .filter(({ value }) => {
+                        return value !== TaskChannelEnum.PDD; // 排除PDD
+                    })
+                    .map(({ name, value }) => ({
+                        label: name,
+                        value: value,
+                    }));
+                const initialValue = options[0].value; // 第一个值
+                return {
+                    type: 'layout',
+                    className: '',
+                    fieldList: [
+                        {
+                            type: 'radioGroup',
+                            label: '采集渠道',
+                            name: 'channel',
+                            initialValue: initialValue,
+                            options: options,
+                            rules: [
+                                {
+                                    required: true,
+                                    message: '请选择采集渠道',
+                                },
+                            ],
+                            onChange: (name, form) => {
+                                const channel = form.getFieldValue('channel');
                                 form.setFieldsValue({
                                     checkAll: ['all'],
+                                    country_code: (channel === TaskChannelEnum.VOVA
+                                        ? VoVaCountries
+                                        : fdCountries
+                                    ).map(item => item.value),
                                 });
-                            } else {
-                                form.setFieldsValue({
-                                    checkAll: [],
-                                });
-                            }
+                            },
                         },
-                    };
-                },
-            },
-        ],
+                        {
+                            type: 'checkboxGroup',
+                            label: '爬取国家',
+                            name: 'checkAll',
+                            required: true,
+                            initialValue: ['all'],
+                            options: [
+                                {
+                                    label: '全选',
+                                    value: 'all',
+                                },
+                            ],
+                            formItemClassName: classNames(formStyles.formItem, styles.taskCheckAll),
+                            onChange: (name, form) => {
+                                const checkedAll = form.getFieldValue('checkAll');
+                                const channel = form.getFieldValue('channel');
+                                if (checkedAll && checkedAll.indexOf('all') > -1) {
+                                    form.setFieldsValue({
+                                        country_code:
+                                            channel === TaskChannelEnum.VOVA
+                                                ? VoVaCountries.map(item => item.value)
+                                                : fdCountries.map(item => item.value),
+                                    });
+                                } else {
+                                    form.setFieldsValue({
+                                        country_code: [],
+                                    });
+                                }
+                            },
+                        },
+                        {
+                            type: 'dynamic',
+                            shouldUpdate: (prevValues: Store, nextValues: Store) => {
+                                return prevValues.channel !== nextValues.channel;
+                            },
+                            dynamic: form => {
+                                const channel = form.getFieldValue('channel') || initialValue;
+                                const options =
+                                    channel === TaskChannelEnum.VOVA ? VoVaCountries : fdCountries;
+                                return {
+                                    initialValue: options.map(item => item.value),
+                                    type: 'checkboxGroup',
+                                    label: '爬取国家',
+                                    name: 'country_code',
+                                    options: options,
+                                    formItemClassName: classNames(
+                                        'form-hide-label',
+                                        formStyles.formItem,
+                                        styles.taskCheckAll,
+                                    ),
+                                    rules: [
+                                        {
+                                            required: true,
+                                            message: '请选择爬取国家',
+                                        },
+                                    ],
+                                    onChange: (name, form) => {
+                                        const country_code = form.getFieldValue('country_code');
+                                        if (country_code.length === options.length) {
+                                            form.setFieldsValue({
+                                                checkAll: ['all'],
+                                            });
+                                        } else {
+                                            form.setFieldsValue({
+                                                checkAll: [],
+                                            });
+                                        }
+                                    },
+                                };
+                            },
+                        },
+                    ],
+                };
+            });
+        },
+        placeholder: {
+            label: '采集渠道',
+        },
     },
-
     {
         type: 'component',
         Component: TaskCycle,
@@ -268,7 +289,7 @@ const VoVaGather = () => {
     }, []);
 
     const onGather = useCallback(() => {
-        return formRef.current!.validateFields().then(values => {
+        return formRef.current!.validateFields().then(({ checkedAll, ...values }) => {
             const params = convertFormData(values);
             return addVoVaTask({
                 ...params,
@@ -285,7 +306,7 @@ const VoVaGather = () => {
     }, []);
 
     const onGatherOnOKey = useCallback((merchant_ids: string[]) => {
-        return formRef.current!.validateFields().then(values => {
+        return formRef.current!.validateFields().then(({ checkedAll, ...values }) => {
             const params = convertFormData(values);
             return addVoVaTask({
                 ...params,
@@ -317,10 +338,7 @@ const VoVaGather = () => {
                 visible={merchantModal}
                 onOKey={onGatherOnOKey}
                 onCancel={closeMerchantModal}
-                disabledChannelList={
-                    channel ? (channel === TaskChannelEnum.VOVA ? ['vova'] : ['florynight']) : []
-                }
-                disabledShopList={!channel || channel === TaskChannelEnum.VOVA ? [] : ['SuperAC']}
+                sourceChannel={channel}
             />
         );
     }, [merchantModal]);
@@ -335,7 +353,6 @@ const VoVaGather = () => {
                         task_type: TaskExecuteType.once,
                         day: 1,
                         taskIntervalType: TaskIntervalConfigType.day,
-                        channel: TaskChannelEnum.VOVA,
                     }}
                     layout="horizontal"
                     className={formStyles.formHelpAbsolute}

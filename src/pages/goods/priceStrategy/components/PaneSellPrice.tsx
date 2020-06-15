@@ -1,16 +1,19 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
-import { queryShopList, queryShopFilterList, getPurchasePlatform } from '@/services/global';
-import { getGoodsList } from '@/services/goods';
+import {
+    queryShopList,
+    queryShopFilterList,
+    getPurchasePlatform,
+    queryGoodsSourceList,
+} from '@/services/global';
 import { getAllGoodsTagList, getSalePriceList } from '@/services/price-strategy';
 import { ColumnsType } from 'antd/lib/table';
 import { ISellItem, IEdiyKey } from '@/interface/IPriceStrategy';
 import { EditEnum } from '@/enums/PriceStrategyEnum';
 import SellConfig from './SellConfig/SellConfig';
 import UpdateRangeModal from './UpdateRangeModal/UpdateRangeModal';
-import useUpdateRecord from '@/pages/goods/priceStrategy/hooks/useUpdateRecord';
 import useSellChannel from '../hooks/useSellChannel';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -19,25 +22,19 @@ import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLo
 
 const formFields: FormField[] = [
     {
-        type: 'select',
-        label: '采购渠道',
+        type: 'treeSelect',
+        label: '商品渠道',
         name: 'enable_source',
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
-        optionList: () => getPurchasePlatform(),
+        optionList: () => queryGoodsSourceList(),
     },
     {
-        type: 'select',
+        type: 'treeSelect',
         label: '销售渠道',
         name: 'enable_platform',
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
         optionList: () => queryShopFilterList(),
         onChange: (name, form) => {
             form.resetFields(['enable_merchant']);
@@ -45,27 +42,21 @@ const formFields: FormField[] = [
         formatter: 'join',
     },
     {
-        type: 'select',
-        label: '销售店铺',
+        type: 'treeSelect',
+        label: '销售店铺名称',
         name: 'enable_merchant',
         optionListDependence: { name: 'enable_platform', key: 'children' },
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
         optionList: () => queryShopFilterList(),
         formatter: 'join',
     },
     {
-        type: 'select',
+        type: 'treeSelect',
         label: '商品标签',
         name: 'product_tags',
-        isShortcut: true,
         placeholder: '请选择',
-        mode: 'multiple',
         className: styles.select,
-        maxTagCount: 4,
         optionList: () => getAllGoodsTagList(),
         formatter: 'join',
     },
@@ -177,7 +168,7 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
             },
             {
-                title: '销售店铺',
+                title: '销售店铺名称',
                 dataIndex: 'enable_merchant',
                 align: 'center',
                 width: 120,

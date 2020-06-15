@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox, Button } from 'antd';
 import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TablePaginationConfig } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
@@ -326,6 +326,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             defaultHide: true,
         },
+        {
+            key: 'purchasePlatform',
+            title: '商品渠道',
+            dataIndex: 'purchasePlatform',
+            align: 'center',
+            width: 120,
+        },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -430,13 +437,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 148,
             render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
-        },
-        {
-            key: 'purchasePlatform',
-            title: '采购平台',
-            dataIndex: 'purchasePlatform',
-            align: 'center',
-            width: 120,
         },
         // // 勾选展示 - 待补充
         // {
@@ -744,7 +744,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    onChange = ({ current, pageSize }: PaginationConfig) => {
+    onChange = ({ current, pageSize }: TablePaginationConfig) => {
         this.props.onSearch({
             page: current,
             page_count: pageSize,
@@ -803,6 +803,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 onReload={onSearch}
                 getAllTabCount={_getAllTabCount}
                 offShelfChecked={false}
+                key="4"
             >
                 <Button
                     key="4"
@@ -824,7 +825,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}

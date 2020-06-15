@@ -11,7 +11,7 @@ import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { validateRange } from '@/utils/validate';
 import { saveSalePriceRule, getSalePriceRuleConfig } from '@/services/price-strategy';
 import { numberToStr } from '@/utils/common';
-import { getPurchasePlatform } from '@/services/global';
+import { getPurchasePlatform, queryGoodsSourceList } from '@/services/global';
 
 import styles from '../../_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -96,7 +96,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
     }, [type, checkedGoodsTagList, id]);
 
     useEffect(() => {
-        getPurchasePlatform().then(list => {
+        queryGoodsSourceList().then(list => {
             // console.log(1111, list);
             setPurchasePlatformList(list);
         });
@@ -179,7 +179,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     </div>
                     <div className={classnames(styles.item, styles.customLabel)}>
                         <MultipleSelect
-                            label="销售店铺"
+                            label="销售店铺名称"
                             name="enable_merchant"
                             // className={styles.select}
                             form={form}
