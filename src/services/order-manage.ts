@@ -137,11 +137,25 @@ export async function postExportWaitShip(data: IWaitShipSearch) {
 }
 
 // 已采购未入库
-export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
-    return request.post(OrderApiPath.getPurchasedNotWarehouseList, {
-        requestType: 'json',
-        data,
-    });
+export function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
+    return api
+        .post<IResponse<IPaginationResponse<IOrderItem>>>(
+            OrderApiPath.getPurchasedNotWarehouseList,
+            {
+                data,
+            },
+        )
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
 }
 
 export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
@@ -355,4 +369,10 @@ export const queryPendingSignList = (data: any) => {
                 },
             };
         });
+};
+
+export const exportPendingSignList = (data: any) => {
+    return api.post(OrderApiPath.exportPendingSignList, {
+        data,
+    });
 };

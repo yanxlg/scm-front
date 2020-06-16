@@ -48,7 +48,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingCheckListCount: 0,
         };
         // console.log(11111, this.props);
-        this.defaultActiveKey = this.props.location?.query?.type || '9';
+        this.defaultActiveKey = this.props.location?.query?.type || '5';
     }
 
     componentDidMount() {
@@ -119,9 +119,9 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                                 <PendingSign updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
-                        <TabPane tab={`已采购未入库（${penddingPurchaseListCount}）`} key="5">
+                        <TabPane tab={`待入库（${penddingPurchaseListCount}）`} key="5">
                             <div className="order-tab-content">
-                                <PaneNotWarehouse getAllTabCount={this.getAllTabCount} />
+                                <PaneNotWarehouse updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`仓库未发货（${penddingWarehousingListCount}）`} key="6">

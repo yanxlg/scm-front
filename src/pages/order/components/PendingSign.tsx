@@ -3,10 +3,17 @@ import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import {
     defaultOptionItem,
     defaultOptionItem1,
+    purchaseOrderOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { queryPendingSignList, queryShopList } from '@/services/order-manage';
 import {
+    exportPendingSignList,
+    getOrderGoodsDetail,
+    queryPendingSignList,
+    queryShopList,
+} from '@/services/order-manage';
+import {
+    AutoEnLargeImg,
     FitTable,
     JsonForm,
     LoadingButton,
@@ -14,121 +21,17 @@ import {
     useList,
     useModal2,
 } from 'react-components';
-import { Button, Checkbox } from 'antd';
+import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { getGoodsList } from '@/services/goods';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { CombineRowItem, IFlatOrderItem, IOrderItem, IPendingOrderItem } from '@/interface/IOrder';
-import { ColumnType, TableProps } from 'antd/es/table';
-import { ITaskListItem } from '@/interface/ITask';
-
-const allFormFields: FormField[] = [
-    {
-        type: 'select',
-        key: 'product_shop',
-        name: 'product_shop',
-        label: '销售店铺名称',
-        className: 'order-input',
-        syncDefaultOption: defaultOptionItem1,
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map((item: any) => {
-                    const { merchant_name } = item;
-                    return {
-                        name: merchant_name,
-                        value: merchant_name,
-                    };
-                });
-            }),
-    },
-    {
-        type: 'select',
-        key: 'reserve_status',
-        name: 'reserve_status',
-        label: '仓库库存预定状态',
-        className: 'order-input',
-        optionList: [defaultOptionItem, ...purchaseReserveOptionList],
-    },
-    {
-        type: 'textarea',
-        key: 'order_goods_id',
-        name: 'order_goods_id',
-        label: '子订单ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'textarea',
-        key: 'commodity_id',
-        name: 'commodity_id',
-        label: 'Commodity ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'textarea',
-        key: 'purchase_platform_order_id',
-        name: 'purchase_platform_order_id',
-        label: '供应商订单ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'textarea',
-        key: 'purchase_parent_order_sn',
-        name: 'purchase_parent_order_sn',
-        label: '采购父订单ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        key: 'purchase_order_time',
-        type: 'dateRanger',
-        name: ['purchase_order_stime', 'purchase_order_etime'],
-        label: '采购订单生成时间',
-        className: 'order-date-picker',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'textarea',
-        key: 'purchase_waybill_no',
-        name: 'purchase_waybill_no',
-        label: '采购运单ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'dateRanger',
-        key: 'order_create_time',
-        name: ['order_create_time_start', 'order_create_time_end'],
-        label: '订单生成时间',
-        className: 'order-date-picker',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'dateRanger',
-        key: 'pay_time',
-        name: ['pay_time_start', 'pay_time_end'],
-        label: '支付时间',
-        className: 'order-date-picker',
-        formatter: ['start_date', 'end_date'],
-    },
-    {
-        type: 'dateRanger',
-        key: 'collect_time',
-        name: ['collect_time_start', 'collect_time_end'],
-        label: '采购签收时间',
-        className: 'order-date-picker',
-        formatter: ['start_date', 'end_date'],
-    },
-];
+import { ColumnType } from 'antd/es/table';
+import { getStatusDesc } from '@/utils/transform';
+import { useCancelPurchase } from '@/pages/order/components/hooks';
+import { FormInstance } from 'antd/es/form';
+import { filterFieldsList } from './utils';
 
 const configFields = [
     'product_shop',
@@ -142,26 +45,17 @@ const configFields = [
     'collect_time',
 ];
 
-// 后续写算法
-const fieldsList = allFormFields.filter(({ key }) => {
-    return configFields.indexOf(key as string) > -1;
-});
+const fieldsList = filterFieldsList(configFields);
 
 declare interface PendingSignProps {
     updateCount: () => void;
 }
 
-const combineRows = <T extends CombineRowItem>(record: T, originNode: React.ReactNode) => {
-    return {
-        children: originNode,
-        props: {
-            rowSpan: record.__rowspan || 1,
-        },
-    };
-};
-
 const PendingSign = ({ updateCount }: PendingSignProps) => {
     const formRef = useRef<JsonFormRef>(null);
+    const formRef1 = useRef<JsonFormRef>(null);
+    const [update, setUpdate] = useState(0);
+
     const {
         loading,
         pageNumber,
@@ -174,17 +68,22 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
         onSearch,
         onChange,
     } = useList<IOrderItem>({
-        formRef: formRef,
+        formRef: [formRef, formRef1],
         queryList: queryPendingSignList, // 获取订单列表
     });
 
-    console.log(dataSource);
-
-    const [regenerate, setRegenerate] = useState(false); // 控制强制更新数据
+    const startUpdate = useCallback(() => {
+        setUpdate(update => update + 1);
+    }, []);
 
     const [exportModal, showExportModal, closeExportModal] = useModal2<boolean>();
 
-    const cancelPurchaseOrder = useCallback(() => {}, []);
+    const openOrderGoodsDetailUrl = useCallback((productId: string) => {
+        return getOrderGoodsDetail(productId).then(res => {
+            const { worm_goodsinfo_link } = res.data;
+            window.open(worm_goodsinfo_link);
+        });
+    }, []);
 
     const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
         return [
@@ -196,13 +95,12 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
                 width: 150,
                 fixed: 'left',
                 render: (value: string, item) => {
-                    return combineRows(
-                        item,
+                    return (
                         <>
                             <PopConfirmLoadingButton
                                 popConfirmProps={{
                                     title: '确定要取消该采购订单吗？',
-                                    onConfirm: () => cancelPurchaseOrder([item.orderGoodsId]),
+                                    onConfirm: () => cancelSingle([item.orderGoodsId]),
                                 }}
                                 buttonProps={{
                                     type: 'link',
@@ -217,7 +115,7 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
                             >
                                 <Button type="link">取消销售订单</Button>
                             </CancelOrder>
-                        </>,
+                        </>
                     );
                 },
             },
@@ -227,103 +125,123 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
                 dataIndex: 'orderCreateTime',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value: string, item) => utcToLocal(item.createTime, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'orderGoodsId',
                 title: '子订单ID',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'orderGoodsId',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'commodityId',
                 title: 'Commodity ID',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'commodityId',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'productName',
                 title: '商品名称',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'productName',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value, item) => (
+                    <a onClick={() => openOrderGoodsDetailUrl(item.productId)}>{value}</a>
+                ),
             },
             {
-                key: 'orderCreateTime',
+                key: 'productImageUrl',
                 title: 'SKU图片',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'productImageUrl',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value: string) => {
+                    return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+                },
             },
             {
-                key: 'orderCreateTime',
+                key: 'productSkuStyle',
                 title: '商品规格',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'productSkuStyle',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value: string) => {
+                    let child: any = null;
+                    if (value) {
+                        try {
+                            const styleInfo = JSON.parse(value);
+                            child = (
+                                <>
+                                    {Object.keys(styleInfo).map(key => (
+                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                    ))}
+                                </>
+                            );
+                        } catch (err) {}
+                    }
+                    return child;
+                },
             },
             {
-                key: 'orderCreateTime',
+                key: 'purchaseOrderGoodsId',
                 title: '供应商订单ID',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'payTime',
                 title: '支付时间',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'payTime',
                 align: 'center',
                 width: 150,
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'productShop',
                 title: '销售店铺名称',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'productShop',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'purchaseWaybillNo',
                 title: '采购运单ID',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'collectTime',
                 title: '采购签收时间',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'collectTime',
                 align: 'center',
                 width: 150,
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'orderCreateTime',
+                key: 'purchaseOrderStatus',
                 title: '采购计划状态',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'purchaseOrderStatus',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value: number, row) => {
+                    const { reserveStatus } = row;
+                    if (reserveStatus === 3 && value === 1) {
+                        return '无需拍单'; // feature_4170
+                    }
+                    return getStatusDesc(purchaseOrderOptionList, value);
+                },
             },
             {
-                key: 'orderCreateTime',
+                key: 'reserveStatus',
                 title: '仓库库存预定状态',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'reserveStatus',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
     }, []);
@@ -350,8 +268,43 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
         );
     }, []);
 
-    const toggleRegenerate = useCallback(() => {
-        setRegenerate(regenerate => !regenerate);
+    const formComponent1 = useMemo(() => {
+        return (
+            <JsonForm
+                ref={formRef1}
+                fieldList={[
+                    {
+                        type: 'checkboxGroup',
+                        name: 'regenerate',
+                        options: [
+                            {
+                                label: '展示已重新生成',
+                                value: true,
+                            },
+                        ],
+                        onChange: (name: string, form: FormInstance) => {
+                            startUpdate();
+                        },
+                        formatter: 'join',
+                    },
+                    {
+                        type: 'checkboxGroup',
+                        name: 'showRecreated',
+                        options: [
+                            {
+                                label: '72小时无状态更新',
+                                value: true,
+                            },
+                        ],
+                        onChange: (name: string, form: FormInstance) => {
+                            onSearch();
+                        },
+                        formatter: 'join',
+                    },
+                ]}
+                labelClassName="order-label"
+            />
+        );
     }, []);
 
     const pagination = useMemo(() => {
@@ -367,8 +320,11 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
     // filter  + flat list
     const flatList = useMemo(() => {
         const flatOrderList: (IFlatOrderItem & CombineRowItem)[] = [];
+        const { regenerate } = formRef1.current
+            ? formRef1.current.getFieldsValue()
+            : { regenerate: false };
         dataSource.forEach(order => {
-            const { orderGoods, orderInfo, orderGods } = order;
+            const { orderGoods, orderInfo, orderGods, ...extra } = order;
             const { orderGoodsPurchasePlan = [], ...others } = orderGoods;
             const purchaseList = regenerate
                 ? orderGoodsPurchasePlan
@@ -378,16 +334,19 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
             if (purchaseList.length) {
                 purchaseList.forEach((plan, index) => {
                     const childOrderItem = {
+                        ...extra,
                         ...orderInfo,
                         ...orderGods,
                         ...others,
                         ...plan,
-                        __rowspan: index === 0 ? purchaseList.length : 0,
+                        __rowspan: 1,
+                        // __rowspan: index === 0 ? purchaseList.length : 0,
                     };
                     flatOrderList.push(childOrderItem);
                 });
             } else {
                 flatOrderList.push({
+                    ...extra,
                     ...orderInfo,
                     ...orderGods,
                     ...others,
@@ -396,9 +355,9 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
             }
         });
         return flatOrderList;
-    }, [dataSource, regenerate]);
+    }, [dataSource]);
 
-    console.log(flatList);
+    const { cancelSingle, cancelList } = useCancelPurchase(selectedRowKeys, onSearch, updateCount);
 
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0;
@@ -408,6 +367,7 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
                 type="primary"
                 className={formStyles.formBtn}
                 disabled={disabled}
+                onClick={cancelList}
             >
                 取消采购订单
             </LoadingButton>,
@@ -453,22 +413,21 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
         };
     }, [selectedRowKeys]);
 
+    const onExport = useCallback((data: any) => {
+        return exportPendingSignList({
+            ...data,
+            ...formRef.current!.getFieldsValue(),
+        }).request();
+    }, []);
+
     return useMemo(() => {
         return (
             <div>
                 {formComponent}
-                <div className={formStyles.formContainer}>
-                    <div className={formStyles.formItem}>
-                        <Checkbox value={regenerate} onChange={toggleRegenerate}>
-                            展示已重新生成
-                        </Checkbox>
-                    </div>
-                </div>
+                {formComponent1}
                 <FitTable
                     bordered={true}
-                    rowKey={record => {
-                        return record.purchasePlanId || record.orderId;
-                    }}
+                    rowKey={'orderGoodsId'}
                     loading={loading}
                     columns={columns}
                     dataSource={flatList}
@@ -482,12 +441,12 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
                 <Export
                     columns={columns as any}
                     visible={exportModal}
-                    onOKey={() => {}}
+                    onOKey={onExport}
                     onCancel={closeExportModal}
                 />
             </div>
         );
-    }, [regenerate, flatList, loading]);
+    }, [update, flatList, loading, selectedRowKeys]);
 };
 
 export { PendingSign };

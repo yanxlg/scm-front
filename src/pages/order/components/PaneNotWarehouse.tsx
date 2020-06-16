@@ -1,320 +1,219 @@
-import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { Button, notification } from 'antd';
-import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
-import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
-import { INotWarehouseSearch, INotWarehouseOrderItem } from '@/interface/IOrder';
+import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import { JsonFormRef } from 'react-components/es/JsonForm';
+import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
 import {
+    exportPendingSignList,
+    getOrderGoodsDetail,
     getPurchasedNotWarehouseList,
-    postExportPurchasedNotWarehouse,
-    delChannelOrders,
-    queryChannelSource,
-    getPlatformAndStore,
+    queryPendingSignList,
 } from '@/services/order-manage';
-import { utcToLocal } from 'react-components/es/utils/date';
-import { getStatusDesc } from '@/utils/transform';
 import {
-    purchaseOrderOptionList,
-    purchaseShippingOptionList,
-    orderStatusOptionList,
-    purchasePayOptionList,
-} from '@/enums/OrderEnum';
-import { TableProps } from 'antd/es/table';
-
+    AutoEnLargeImg,
+    FitTable,
+    JsonForm,
+    LoadingButton,
+    PopConfirmLoadingButton,
+    useList,
+    useModal2,
+} from 'react-components';
+import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
-import CancelOrder from './CancelOrder';
+import CancelOrder from '@/pages/order/components/CancelOrder';
+import { utcToLocal } from 'react-components/es/utils/date';
+import { CombineRowItem, IFlatOrderItem, IOrderItem } from '@/interface/IOrder';
+import { ColumnType } from 'antd/es/table';
+import { getStatusDesc } from '@/utils/transform';
+import { useCancelPurchase } from '@/pages/order/components/hooks';
+import { FormInstance } from 'antd/es/form';
+import { filterFieldsList } from './utils';
 
-declare interface IProps {
-    getAllTabCount(): void;
-}
-
-const formFields: FormField[] = [
-    {
-        type: 'textarea',
-        name: 'order_goods_id',
-        label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'textarea',
-        name: 'purchase_platform_order_id_list',
-        label: '采购平台订单ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'textarea',
-        name: 'product_id',
-        label: '中台商品ID',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'textarea',
-        name: 'purchase_waybill_no',
-        label: '采购运单号',
-        className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
-    },
-    {
-        type: 'select',
-        name: 'channel_source',
-        label: '销售渠道',
-        className: 'order-input',
-        // optionList: [defaultOptionItem, ...channelOptionList],
-        syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
-    },
-    {
-        type: 'select',
-        name: 'order_goods_status',
-        label: '中台订单状态',
-        className: 'order-input',
-        optionList: [defaultOptionItem, ...orderStatusOptionList],
-    },
-    {
-        type: 'select',
-        name: 'purchase_order_status',
-        label: '采购计划状态',
-        className: 'order-input',
-        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
-    },
-    {
-        type: 'dateRanger',
-        name: ['platform_order_time_start', 'platform_order_time_end'],
-        label: <span>采&nbsp;购&nbsp;时&nbsp;间</span>,
-        className: 'order-date-picker',
-        placeholder: '请选择订单时间',
-        formatter: ['start_date', 'end_date'],
-    },
+const configFields = [
+    'product_shop',
+    'reserve_status',
+    'order_goods_id',
+    'commodity_id',
+    'purchase_platform_order_id',
+    'purchase_waybill_no',
+    'order_create_time',
+    'pay_time',
+    'collect_time',
 ];
 
-const defaultInitialValues = {
-    channel_source: '',
-    order_goods_status: 100,
-    purchase_order_status: 100,
-};
+const fieldsList = filterFieldsList(configFields);
 
-const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
-    const searchRef = useRef<JsonFormRef>(null);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(50);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [orderList, setOrderList] = useState<INotWarehouseOrderItem[]>([]);
+declare interface PaddingInStoreProps {
+    updateCount: () => void;
+}
 
-    let currentSearchParams: INotWarehouseSearch | null = null;
+const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
+    const formRef = useRef<JsonFormRef>(null);
+    const formRef1 = useRef<JsonFormRef>(null);
+    const [update, setUpdate] = useState(0);
 
-    const onSearch = useCallback(
-        (paginationParams = { page, page_count: pageSize }) => {
-            const params: INotWarehouseSearch = Object.assign(
-                {
-                    page,
-                    page_count: pageSize,
-                },
-                paginationParams,
-                searchRef.current?.getFieldsValue(),
-            );
-            setLoading(true);
-            return getPurchasedNotWarehouseList(params)
-                .then(res => {
-                    currentSearchParams = params;
-                    const { all_count: total, list } = res.data;
-                    // const { page, page_count } = params;
-                    setSelectedRowKeys([]);
-                    if (list) {
-                        setPage(params.page as number);
-                        setPageSize(params.page_count as number);
-                        setTotal(total);
-                        setOrderList(handleOrderList(list));
-                    }
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-        },
-        [page, pageSize],
-    );
+    const {
+        loading,
+        pageNumber,
+        pageSize,
+        total,
+        dataSource,
+        selectedRowKeys,
+        setSelectedRowKeys,
+        onReload,
+        onSearch,
+        onChange,
+    } = useList<IOrderItem>({
+        formRef: [formRef, formRef1],
+        queryList: getPurchasedNotWarehouseList, // 获取订单列表
+    });
 
-    const handleOrderList = useCallback(list => {
-        return list.map((current: any) => {
-            const {
-                orderGoodsId,
-                purchasePlanId,
-                productId,
-                purchasePlatform,
-                purchaseNumber,
-                purchaseOrderStatus,
-                purchaseOrderShippingStatus,
-                purchaseOrderPayStatus,
-                purchasePlatformOrderId,
-                purchaseWaybillNo,
-                // platformOrderTime,
-                payTime,
-                platformSendOrderTime,
+    const startUpdate = useCallback(() => {
+        setUpdate(update => update + 1);
+    }, []);
 
-                orderGoods,
-                orderInfo,
-            } = current;
-            const { confirmTime, channelOrderSn, channelSource } = orderInfo;
-            const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
+    const [exportModal, showExportModal, closeExportModal] = useModal2<boolean>();
 
-            return {
-                orderGoodsId,
-                purchasePlanId,
-                productId,
-                purchasePlatform,
-                purchaseNumber,
-                purchaseOrderStatus,
-                purchaseOrderShippingStatus,
-                purchaseOrderPayStatus,
-                purchasePlatformOrderId,
-                purchaseWaybillNo,
-                // platformOrderTime,
-                payTime,
-                platformSendOrderTime,
-
-                confirmTime,
-                channelOrderSn,
-                channelSource,
-
-                orderGoodsStatus,
-                orderCreateTime,
-            } as INotWarehouseOrderItem;
+    const openOrderGoodsDetailUrl = useCallback((productId: string) => {
+        return getOrderGoodsDetail(productId).then(res => {
+            const { worm_goodsinfo_link } = res.data;
+            window.open(worm_goodsinfo_link);
         });
     }, []);
 
-    const handleClickSearch = useCallback(() => {
-        return onSearch({ page: 1 });
-    }, []);
-
-    const onChange = useCallback(({ current, pageSize }) => {
-        onSearch({
-            page_count: pageSize,
-            page: current,
-        });
-    }, []);
-
-    const _postExportPurchasedNotWarehouse = useCallback((values: any) => {
-        return postExportPurchasedNotWarehouse({
-            ...currentSearchParams,
-            ...values,
-        });
-    }, []);
-
-    const search = useMemo(() => {
-        return (
-            <JsonForm
-                ref={searchRef}
-                fieldList={formFields}
-                labelClassName="order-label"
-                initialValues={defaultInitialValues}
-            >
-                <div>
-                    <LoadingButton
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={handleClickSearch}
-                    >
-                        查询
-                    </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={() => onSearch()}>
-                        刷新
-                    </LoadingButton>
-                    <Button
-                        disabled={total <= 0}
-                        className={formStyles.formBtn}
-                        onClick={() => setVisibleProps(true)}
-                    >
-                        导出
-                    </Button>
-                </div>
-            </JsonForm>
-        );
-    }, [loading]);
-
-    const columns = useMemo<TableProps<INotWarehouseOrderItem>['columns']>(() => {
+    const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
         return [
             {
-                key: 'orderGoodsId',
-                title: '中台订单ID',
-                dataIndex: 'orderGoodsId',
+                key: 'operation',
+                title: '操作',
+                dataIndex: 'operation',
                 align: 'center',
-                width: 120,
-                hideInSetting: true,
+                width: 150,
+                fixed: 'left',
+                render: (value: string, item) => {
+                    return (
+                        <>
+                            <PopConfirmLoadingButton
+                                popConfirmProps={{
+                                    title: '确定要取消该采购订单吗？',
+                                    onConfirm: () => cancelSingle([item.orderGoodsId]),
+                                }}
+                                buttonProps={{
+                                    type: 'link',
+                                    children: '取消采购订单',
+                                }}
+                            />
+                            <CancelOrder
+                                key={'2'}
+                                orderGoodsIds={[item.orderGoodsId]}
+                                onReload={onSearch}
+                                getAllTabCount={updateCount}
+                            >
+                                <Button type="link">取消销售订单</Button>
+                            </CancelOrder>
+                        </>
+                    );
+                },
             },
             {
                 key: 'orderCreateTime',
-                title: '订单时间',
+                title: '订单生成时间',
                 dataIndex: 'orderCreateTime',
                 align: 'center',
-                width: 120,
-                render: (value: string) => utcToLocal(value, ''),
+                width: 150,
+                render: (value: string, item) => utcToLocal(item.createTime, ''),
             },
             {
-                key: 'productId',
-                title: '中台商品ID',
-                dataIndex: 'productId',
+                key: 'orderGoodsId',
+                title: '子订单ID',
+                dataIndex: 'orderGoodsId',
                 align: 'center',
-                width: 120,
+                width: 150,
             },
             {
-                key: 'orderGoodsStatus',
-                title: '中台订单状态',
-                dataIndex: 'orderGoodsStatus',
+                key: 'commodityId',
+                title: 'Commodity ID',
+                dataIndex: 'commodityId',
                 align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(orderStatusOptionList, value),
+                width: 150,
             },
             {
-                key: 'purchasePlanId',
-                title: '计划子项ID',
-                dataIndex: 'purchasePlanId',
+                key: 'productName',
+                title: '商品名称',
+                dataIndex: 'productName',
                 align: 'center',
-                width: 120,
+                width: 150,
+                render: (value, item) => (
+                    <a onClick={() => openOrderGoodsDetailUrl(item.productId)}>{value}</a>
+                ),
             },
             {
-                key: 'purchasePlatform',
-                title: '采购平台',
-                dataIndex: 'purchasePlatform',
+                key: 'productImageUrl',
+                title: 'SKU图片',
+                dataIndex: 'productImageUrl',
                 align: 'center',
-                width: 120,
+                width: 150,
+                render: (value: string) => {
+                    return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+                },
             },
             {
-                key: 'purchaseNumber',
-                title: '采购数量',
-                dataIndex: 'purchaseNumber',
+                key: 'productSkuStyle',
+                title: '商品规格',
+                dataIndex: 'productSkuStyle',
                 align: 'center',
-                width: 120,
+                width: 150,
+                render: (value: string) => {
+                    let child: any = null;
+                    if (value) {
+                        try {
+                            const styleInfo = JSON.parse(value);
+                            child = (
+                                <>
+                                    {Object.keys(styleInfo).map(key => (
+                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
+                                    ))}
+                                </>
+                            );
+                        } catch (err) {}
+                    }
+                    return child;
+                },
             },
             {
                 key: 'purchasePlatformOrderId',
-                title: '采购订单号',
+                title: '供应商订单ID',
                 dataIndex: 'purchasePlatformOrderId',
                 align: 'center',
-                width: 120,
+                width: 150,
+            },
+            {
+                key: 'payTime',
+                title: '支付时间',
+                dataIndex: 'payTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'productShop',
+                title: '销售店铺名称',
+                dataIndex: 'productShop',
+                align: 'center',
+                width: 150,
             },
             {
                 key: 'purchaseWaybillNo',
-                title: '采购运单号',
+                title: '采购运单ID',
                 dataIndex: 'purchaseWaybillNo',
                 align: 'center',
-                width: 120,
+                width: 150,
             },
-
             {
-                key: 'platformSendOrderTime',
-                title: '采购生成时间',
-                dataIndex: 'platformSendOrderTime',
+                key: 'collectTime',
+                title: '采购签收时间',
+                dataIndex: 'collectTime',
                 align: 'center',
-                width: 120,
+                width: 150,
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
@@ -322,128 +221,227 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 title: '采购计划状态',
                 dataIndex: 'purchaseOrderStatus',
                 align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
+                width: 150,
+                render: (value: number, row) => {
+                    const { reserveStatus } = row;
+                    if (reserveStatus === 3 && value === 1) {
+                        return '无需拍单'; // feature_4170
+                    }
+                    return getStatusDesc(purchaseOrderOptionList, value);
+                },
             },
             {
-                key: 'purchaseOrderPayStatus',
-                title: '采购支付状态',
-                dataIndex: 'purchaseOrderPayStatus',
+                key: 'reserveStatus',
+                title: '仓库库存预定状态',
+                dataIndex: 'reserveStatus',
                 align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(purchasePayOptionList, value),
-            },
-            {
-                key: 'payTime',
-                title: '采购支付时间',
-                dataIndex: 'payTime',
-                align: 'center',
-                width: 120,
-                render: (value: string) => utcToLocal(value, ''),
-            },
-            {
-                key: 'purchaseOrderShippingStatus',
-                title: '采购配送状态',
-                dataIndex: 'purchaseOrderShippingStatus',
-                align: 'center',
-                width: 120,
-                render: (value: number) => getStatusDesc(purchaseShippingOptionList, value),
-            },
-
-            {
-                key: 'confirmTime',
-                title: '订单确认时间',
-                dataIndex: 'confirmTime',
-                align: 'center',
-                width: 120,
-                render: (value: string) => utcToLocal(value, ''),
-            },
-            {
-                key: 'channelSource',
-                title: '销售渠道',
-                dataIndex: 'channelSource',
-                align: 'center',
-                width: 120,
-            },
-            {
-                key: 'channelOrderSn',
-                title: '渠道订单ID',
-                dataIndex: 'channelOrderSn',
-                align: 'center',
-                width: 120,
+                width: 150,
+                render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
+    }, []);
+
+    const formComponent = useMemo(() => {
+        return (
+            <JsonForm ref={formRef} fieldList={fieldsList} labelClassName="order-label">
+                <div>
+                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
+                        查询
+                    </LoadingButton>
+                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                        刷新
+                    </LoadingButton>
+                    <Button
+                        disabled={total <= 0}
+                        className={formStyles.formBtn}
+                        onClick={() => showExportModal(true)}
+                    >
+                        导出
+                    </Button>
+                </div>
+            </JsonForm>
+        );
+    }, []);
+
+    const formComponent1 = useMemo(() => {
+        return (
+            <JsonForm
+                ref={formRef1}
+                fieldList={[
+                    {
+                        type: 'checkboxGroup',
+                        name: 'regenerate',
+                        options: [
+                            {
+                                label: '展示已重新生成',
+                                value: true,
+                            },
+                        ],
+                        onChange: (name: string, form: FormInstance) => {
+                            startUpdate();
+                        },
+                        formatter: 'join',
+                    },
+                    {
+                        type: 'checkboxGroup',
+                        name: 'showRecreated',
+                        options: [
+                            {
+                                label: '72小时无状态更新',
+                                value: true,
+                            },
+                        ],
+                        onChange: (name: string, form: FormInstance) => {
+                            onSearch();
+                        },
+                        formatter: 'join',
+                    },
+                ]}
+                labelClassName="order-label"
+            />
+        );
     }, []);
 
     const pagination = useMemo(() => {
         return {
             total: total,
-            current: page,
+            current: pageNumber,
             pageSize: pageSize,
             showSizeChanger: true,
             position: ['topRight', 'bottomRight'],
         } as any;
     }, [loading]);
 
-    const { visible, setVisibleProps, onClose } = useModal<boolean>();
+    // filter  + flat list
+    const flatList = useMemo(() => {
+        const flatOrderList: (IFlatOrderItem & CombineRowItem)[] = [];
+        const { regenerate } = formRef1.current
+            ? formRef1.current.getFieldsValue()
+            : { regenerate: false };
+        dataSource.forEach(order => {
+            const { orderGoods, orderInfo, orderGods, ...extra } = order;
+            const { orderGoodsPurchasePlan = [], ...others } = orderGoods;
+            const purchaseList = regenerate
+                ? orderGoodsPurchasePlan
+                : (orderGoodsPurchasePlan || []).filter(plan => {
+                      return plan.purchaseOrderStatus !== 6;
+                  });
+            if (purchaseList.length) {
+                purchaseList.forEach((plan, index) => {
+                    const childOrderItem = {
+                        ...extra,
+                        ...orderInfo,
+                        ...orderGods,
+                        ...others,
+                        ...plan,
+                        __rowspan: 1,
+                        // __rowspan: index === 0 ? purchaseList.length : 0,
+                    };
+                    flatOrderList.push(childOrderItem);
+                });
+            } else {
+                flatOrderList.push({
+                    ...extra,
+                    ...orderInfo,
+                    ...orderGods,
+                    ...others,
+                    __rowspan: 1,
+                });
+            }
+        });
+        return flatOrderList;
+    }, [dataSource]);
+
+    const { cancelSingle, cancelList } = useCancelPurchase(selectedRowKeys, onSearch, updateCount);
 
     const toolBarRender = useCallback(() => {
-        const disabled = selectedRowKeys.length === 0 ? true : false;
+        const disabled = selectedRowKeys.length === 0;
         return [
+            <LoadingButton
+                key="purchase_order"
+                type="primary"
+                className={formStyles.formBtn}
+                disabled={disabled}
+                onClick={cancelList}
+            >
+                取消采购订单
+            </LoadingButton>,
             <CancelOrder
-                orderGoodsIds={selectedRowKeys as string[]}
+                key="2"
+                orderGoodsIds={selectedRowKeys}
                 onReload={onSearch}
-                getAllTabCount={getAllTabCount}
+                getAllTabCount={updateCount}
             >
                 <Button
                     key="channel_order"
                     type="primary"
-                    disabled={disabled}
                     className={formStyles.formBtn}
+                    disabled={disabled}
                 >
-                    取消渠道订单
+                    取消销售订单
                 </Button>
             </CancelOrder>,
         ];
     }, [selectedRowKeys]);
 
-    useEffect(() => {
-        onSearch();
+    const rowSelection = useMemo(() => {
+        return {
+            fixed: true,
+            columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: (selectedKeys: ReactText[]) => {
+                setSelectedRowKeys(selectedKeys as string[]);
+            },
+            renderCell: (
+                checked: boolean,
+                record: IFlatOrderItem & CombineRowItem,
+                index: number,
+                originNode: React.ReactNode,
+            ) => {
+                return {
+                    children: originNode,
+                    props: {
+                        rowSpan: record.__rowspan,
+                    },
+                };
+            },
+        };
+    }, [selectedRowKeys]);
+
+    const onExport = useCallback((data: any) => {
+        return exportPendingSignList({
+            ...data,
+            ...formRef.current!.getFieldsValue(),
+        }).request();
     }, []);
 
     return useMemo(() => {
         return (
-            <>
-                {search}
+            <div>
+                {formComponent}
+                {formComponent1}
                 <FitTable
                     bordered={true}
-                    rowKey="orderGoodsId"
-                    // className="order-table"
+                    rowKey={'orderGoodsId'}
                     loading={loading}
                     columns={columns}
-                    rowSelection={{
-                        fixed: true,
-                        columnWidth: 60,
-                        selectedRowKeys: selectedRowKeys,
-                        onChange: (selectedRowKeys: React.Key[]) =>
-                            setSelectedRowKeys(selectedRowKeys),
-                    }}
-                    dataSource={orderList}
-                    scroll={{ x: 'max-content' }}
+                    dataSource={flatList}
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
                     toolBarRender={toolBarRender}
+                    rowSelection={rowSelection}
                 />
                 <Export
                     columns={columns as any}
-                    visible={visible}
-                    onOKey={_postExportPurchasedNotWarehouse}
-                    onCancel={onClose}
+                    visible={exportModal}
+                    onOKey={onExport}
+                    onCancel={closeExportModal}
                 />
-            </>
+            </div>
         );
-    }, [page, pageSize, total, loading, orderList, selectedRowKeys, visible]);
+    }, [update, flatList, loading, selectedRowKeys]);
 };
 
-export default PaneWarehouseNotShip;
+export default PaddingInStore;

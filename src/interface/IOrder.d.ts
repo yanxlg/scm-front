@@ -210,7 +210,41 @@ interface IPurchasePlan {
     taskId: string;
 }
 
-export interface IOrderItem {
+interface IOrderItemExtend {
+    commoditySkuId?: string;
+    createTime?: string;
+    inInventoryStatus?: number;
+    orderGoodsId?: string;
+    payTime?: string;
+    platformOrderTime?: string;
+    platformSendOrderTime?: string;
+    productCatId?: string;
+    productId?: string;
+    productImageUrl?: string;
+    productName?: string;
+    productPddMerchantName?: string;
+    productPrice?: string;
+    productSkuStyle?: string;
+    purchaseAmount?: string;
+    purchaseCancelStatus?: number;
+    purchaseFailCode?: string;
+    purchaseFailReason?: string;
+    purchaseNumber?: number;
+    purchaseOrderPayStatus?: number;
+    purchaseOrderShippingStatus?: number;
+    purchaseOrderStatus?: number;
+    purchasePlanId?: string;
+    purchasePlatform?: string;
+    purchasePlatformGoodsId?: string;
+    purchasePlatformGoodsName?: string;
+    purchasePlatformGroupId?: string;
+    purchasePlatformMerchantId?: string;
+    purchasePlatformOrderId?: string;
+    purchasePlatformSku?: string;
+    reserveStatus?: number;
+}
+
+export interface IOrderItem extends IOrderItemExtend {
     orderGods: {
         isOfflinePurchase: 0 | 1;
         isReplaceDelivery: 0 | 1;
@@ -266,7 +300,8 @@ export interface IOrderItem {
 export type IFlatOrderItem = IOrderItem['orderGods'] &
     IOrderItem['orderGoods'] &
     IOrderItem['orderInfo'] &
-    Partial<IPurchasePlan>;
+    Partial<IPurchasePlan> &
+    IOrderItemExtend;
 
 export type CombineRowItem = {
     __rowspan: number;
