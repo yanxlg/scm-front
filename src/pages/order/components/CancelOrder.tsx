@@ -14,7 +14,7 @@ interface IProps {
 }
 
 const CancelOrder: React.FC<IProps> = ({
-    offShelfChecked = true,
+    offShelfChecked = false,
     children,
     orderGoodsIds,
     onReload,
