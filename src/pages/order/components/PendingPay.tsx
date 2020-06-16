@@ -10,6 +10,7 @@ import {
     exportPendingSignList,
     getOrderGoodsDetail,
     getPayOrderList,
+    putConfirmPay,
     queryPendingSignList,
     queryShopList,
 } from '@/services/order-manage';
@@ -27,12 +28,21 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { CombineRowItem, IFlatOrderItem, IOrderItem } from '@/interface/IOrder';
+import {
+    CombineRowItem,
+    IFlatOrderItem,
+    IOrderItem,
+    IPurchasePlan,
+    IWaitPayOrderItem,
+    PayOrderPurchase,
+} from '@/interface/IOrder';
 import { ColumnType } from 'antd/es/table';
 import { getStatusDesc } from '@/utils/transform';
 import { useCancelPurchase } from '@/pages/order/components/hooks';
 import { FormInstance } from 'antd/es/form';
-import { filterFieldsList } from './utils';
+import { filterFieldsList, combineRows } from './utils';
+import { EmptyObject } from 'react-components/es/utils';
+import QRCode from 'qrcode.react';
 
 const configFields = [
     'product_shop',
@@ -84,6 +94,22 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
         });
     }, []);
 
+    const confirmPay = useCallback(
+        (id: string) => {
+            const planIdList = dataSource
+                .filter(item => item.purchase_parent_order_sn === id)
+                .map(item => item.purchase_plan_id);
+            putConfirmPay({
+                purchase_platform_parent_order_id: id,
+                purchase_plan_id: planIdList,
+            }).then(() => {
+                // console.log('putConfirmPay', res);
+                onSearch();
+            });
+        },
+        [dataSource],
+    );
+
     const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
         return [
             {
@@ -119,19 +145,83 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 },
             },
             {
-                key: 'orderCreateTime',
-                title: '订单生成时间',
-                dataIndex: 'orderCreateTime',
+                key: 'purchaseOrderTime',
+                title: '采购订单生成时间',
+                dataIndex: 'purchaseOrderTime',
                 align: 'center',
                 width: 150,
-                render: (value: string, item) => utcToLocal(item.createTime, ''),
+                render: (value: string, item) => combineRows(item, utcToLocal(value, '')),
             },
             {
-                key: 'orderGoodsId',
-                title: '子订单ID',
-                dataIndex: 'orderGoodsId',
+                key: 'purchaseParentOrderSn',
+                title: '供应商父订单ID',
+                dataIndex: 'purchaseParentOrderSn',
                 align: 'center',
                 width: 150,
+                render: (value: string, item) => combineRows(item, value),
+            },
+            {
+                key: 'purchasePayUrl',
+                title: '支付二维码',
+                dataIndex: 'purchasePayUrl',
+                align: 'center',
+                width: 140,
+                render: (value: string = '', item) => {
+                    const { purchaseParentOrderSn, purchasePayStatusDesc } = item;
+                    return combineRows(
+                        item,
+                        purchasePayStatusDesc !== '已支付' ? (
+                            <div>
+                                <AutoEnLargeImg
+                                    enlargeContent={
+                                        <QRCode
+                                            value={value}
+                                            size={300}
+                                            className="order-qr-enlarge"
+                                        />
+                                    }
+                                >
+                                    <QRCode value={value} size={40} className="order-qr-small" />
+                                </AutoEnLargeImg>
+                                <div>
+                                    <Button
+                                        ghost={true}
+                                        size="small"
+                                        type="primary"
+                                        style={{ marginTop: 6 }}
+                                        onClick={() => confirmPay(purchaseParentOrderSn)}
+                                    >
+                                        确认支付
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            purchasePayStatusDesc
+                        ),
+                    );
+                },
+            },
+            {
+                key: 'purchase_total_amount',
+                title: '采购总金额($)',
+                dataIndex: 'purchase_total_amount',
+                align: 'center',
+                width: 150,
+                render: (value: string, item) => combineRows(item, value),
+            },
+            {
+                key: 'parent_purchase_pay_status_desc',
+                title: '订单生成时间',
+                dataIndex: 'parent_purchase_pay_status_desc',
+                align: 'center',
+                width: 120,
+            },
+            {
+                key: 'purchase_order_sn',
+                title: '子订单ID',
+                dataIndex: 'purchase_order_sn',
+                align: 'center',
+                width: 140,
             },
             {
                 key: 'commodityId',
@@ -151,39 +241,6 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 ),
             },
             {
-                key: 'productImageUrl',
-                title: 'SKU图片',
-                dataIndex: 'productImageUrl',
-                align: 'center',
-                width: 150,
-                render: (value: string) => {
-                    return <AutoEnLargeImg src={value} className="order-img-lazy" />;
-                },
-            },
-            {
-                key: 'productSkuStyle',
-                title: '商品规格',
-                dataIndex: 'productSkuStyle',
-                align: 'center',
-                width: 150,
-                render: (value: string) => {
-                    let child: any = null;
-                    if (value) {
-                        try {
-                            const styleInfo = JSON.parse(value);
-                            child = (
-                                <>
-                                    {Object.keys(styleInfo).map(key => (
-                                        <div key={key}>{`${key}: ${styleInfo[key]}`}</div>
-                                    ))}
-                                </>
-                            );
-                        } catch (err) {}
-                    }
-                    return child;
-                },
-            },
-            {
                 key: 'purchaseOrderGoodsId',
                 title: '供应商订单ID',
                 dataIndex: 'purchaseOrderGoodsId',
@@ -191,12 +248,39 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 width: 150,
             },
             {
-                key: 'payTime',
-                title: '支付时间',
-                dataIndex: 'payTime',
+                key: 'purchaseOrderGoodsId',
+                title: '销售商品数量',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'purchaseOrderGoodsId',
+                title: '销售商品运费($)',
+                dataIndex: 'purchaseOrderGoodsId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                key: 'purchaseOrderGoodsId',
+                title: '销售商品总金额($)',
+                dataIndex: 'purchaseOrderGoodsId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                key: 'purchaseOrderGoodsId',
+                title: '采购商品数量',
+                dataIndex: 'purchaseOrderGoodsId',
+                align: 'center',
+                width: 150,
+            },
+            {
+                key: 'purchaseOrderGoodsId',
+                title: '采购商品总金额(￥)',
+                dataIndex: 'purchaseOrderGoodsId',
+                align: 'center',
+                width: 150,
             },
             {
                 key: 'productShop',
@@ -204,21 +288,6 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 dataIndex: 'productShop',
                 align: 'center',
                 width: 150,
-            },
-            {
-                key: 'purchaseWaybillNo',
-                title: '采购运单ID',
-                dataIndex: 'purchaseWaybillNo',
-                align: 'center',
-                width: 150,
-            },
-            {
-                key: 'collectTime',
-                title: '采购签收时间',
-                dataIndex: 'collectTime',
-                align: 'center',
-                width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
                 key: 'purchaseOrderStatus',
@@ -330,10 +399,13 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 orderGods,
                 ...extra
             } = order;
-            const { orderGoodsPurchasePlan = [], ...others } = orderGoods;
+            // purchasePlan 可能在orderGoods下，可能在unpaidPurchaseOrderGoodsResult中
+            const { orderGoodsPurchasePlan = [], ...others } = orderGoods || EmptyObject;
+            const planList: Array<PayOrderPurchase | IPurchasePlan> =
+                unpaidPurchaseOrderGoodsResult || orderGoodsPurchasePlan;
             const purchaseList = regenerate
-                ? orderGoodsPurchasePlan
-                : (orderGoodsPurchasePlan || []).filter(plan => {
+                ? planList
+                : planList.filter(plan => {
                       return plan.purchaseOrderStatus !== 6;
                   });
             if (purchaseList.length) {
@@ -344,8 +416,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                         ...orderGods,
                         ...others,
                         ...plan,
-                        __rowspan: 1,
-                        // __rowspan: index === 0 ? purchaseList.length : 0,
+                        __rowspan: index === 0 ? purchaseList.length : 0,
                     };
                     flatOrderList.push(childOrderItem);
                 });
