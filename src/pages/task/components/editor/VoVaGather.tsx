@@ -135,7 +135,6 @@ const fieldList: FormField[] = [
                         label: name,
                         value: value,
                     }));
-                const initialValue = options[0].value; // 第一个值
                 return {
                     type: 'layout',
                     className: '',
@@ -144,7 +143,6 @@ const fieldList: FormField[] = [
                             type: 'radioGroup',
                             label: '商品渠道',
                             name: 'channel',
-                            initialValue: initialValue,
                             options: options,
                             rules: [
                                 {
@@ -164,73 +162,116 @@ const fieldList: FormField[] = [
                             },
                         },
                         {
-                            type: 'checkboxGroup',
-                            label: '爬取国家',
-                            name: 'checkAll',
-                            required: true,
-                            initialValue: ['all'],
-                            options: [
-                                {
-                                    label: '全选',
-                                    value: 'all',
-                                },
-                            ],
-                            formItemClassName: classNames(formStyles.formItem, styles.taskCheckAll),
-                            onChange: (name, form) => {
-                                const checkedAll = form.getFieldValue('checkAll');
-                                const channel = form.getFieldValue('channel');
-                                if (checkedAll && checkedAll.indexOf('all') > -1) {
-                                    form.setFieldsValue({
-                                        country_code:
-                                            channel === TaskChannelEnum.VOVA
-                                                ? VoVaCountries.map(item => item.value)
-                                                : fdCountries.map(item => item.value),
-                                    });
-                                } else {
-                                    form.setFieldsValue({
-                                        country_code: [],
-                                    });
-                                }
-                            },
-                        },
-                        {
                             type: 'dynamic',
                             shouldUpdate: (prevValues: Store, nextValues: Store) => {
                                 return prevValues.channel !== nextValues.channel;
                             },
                             dynamic: form => {
-                                const channel = form.getFieldValue('channel') || initialValue;
-                                const options =
-                                    channel === TaskChannelEnum.VOVA ? VoVaCountries : fdCountries;
+                                const channel = form.getFieldValue('channel');
                                 return {
-                                    initialValue: options.map(item => item.value),
-                                    type: 'checkboxGroup',
-                                    label: '爬取国家',
-                                    name: 'country_code',
-                                    options: options,
-                                    formItemClassName: classNames(
-                                        'form-hide-label',
-                                        formStyles.formItem,
-                                        styles.taskCheckAll,
-                                    ),
-                                    rules: [
-                                        {
-                                            required: true,
-                                            message: '请选择爬取国家',
-                                        },
-                                    ],
-                                    onChange: (name, form) => {
-                                        const country_code = form.getFieldValue('country_code');
-                                        if (country_code.length === options.length) {
-                                            form.setFieldsValue({
-                                                checkAll: ['all'],
-                                            });
-                                        } else {
-                                            form.setFieldsValue({
-                                                checkAll: [],
-                                            });
-                                        }
-                                    },
+                                    type: 'layout',
+                                    className: channel ? formStyles.formItem : '',
+                                    fieldList: channel
+                                        ? [
+                                              {
+                                                  type: 'checkboxGroup',
+                                                  label: '爬取国家',
+                                                  name: 'checkAll',
+                                                  required: true,
+                                                  initialValue: ['all'],
+                                                  options: [
+                                                      {
+                                                          label: '全选',
+                                                          value: 'all',
+                                                      },
+                                                  ],
+                                                  formItemClassName: classNames(
+                                                      formStyles.formItem,
+                                                      styles.taskCheckAll,
+                                                  ),
+                                                  onChange: (name, form) => {
+                                                      const checkedAll = form.getFieldValue(
+                                                          'checkAll',
+                                                      );
+                                                      const channel = form.getFieldValue('channel');
+                                                      if (
+                                                          checkedAll &&
+                                                          checkedAll.indexOf('all') > -1
+                                                      ) {
+                                                          form.setFieldsValue({
+                                                              country_code:
+                                                                  channel === TaskChannelEnum.VOVA
+                                                                      ? VoVaCountries.map(
+                                                                            item => item.value,
+                                                                        )
+                                                                      : fdCountries.map(
+                                                                            item => item.value,
+                                                                        ),
+                                                          });
+                                                      } else {
+                                                          form.setFieldsValue({
+                                                              country_code: [],
+                                                          });
+                                                      }
+                                                  },
+                                              },
+                                              {
+                                                  type: 'dynamic',
+                                                  shouldUpdate: (
+                                                      prevValues: Store,
+                                                      nextValues: Store,
+                                                  ) => {
+                                                      return (
+                                                          prevValues.channel !== nextValues.channel
+                                                      );
+                                                  },
+                                                  dynamic: form => {
+                                                      const channel = form.getFieldValue('channel');
+                                                      const options =
+                                                          channel === TaskChannelEnum.VOVA
+                                                              ? VoVaCountries
+                                                              : fdCountries;
+                                                      return {
+                                                          initialValue: options.map(
+                                                              item => item.value,
+                                                          ),
+                                                          type: 'checkboxGroup',
+                                                          label: '爬取国家',
+                                                          name: 'country_code',
+                                                          options: options,
+                                                          formItemClassName: classNames(
+                                                              'form-hide-label',
+                                                              formStyles.formItem,
+                                                              styles.taskCheckAll,
+                                                          ),
+                                                          rules: [
+                                                              {
+                                                                  required: true,
+                                                                  message: '请选择爬取国家',
+                                                              },
+                                                          ],
+                                                          onChange: (name, form) => {
+                                                              const country_code = form.getFieldValue(
+                                                                  'country_code',
+                                                              );
+                                                              if (
+                                                                  country_code.length ===
+                                                                  options.length
+                                                              ) {
+                                                                  form.setFieldsValue({
+                                                                      checkAll: ['all'],
+                                                                  });
+                                                              } else {
+                                                                  form.setFieldsValue({
+                                                                      checkAll: [],
+                                                                  });
+                                                              }
+                                                          },
+                                                      };
+                                                  },
+                                              },
+                                          ]
+                                        : [],
                                 };
                             },
                         },
@@ -289,7 +330,7 @@ const VoVaGather = () => {
     }, []);
 
     const onGather = useCallback(() => {
-        return formRef.current!.validateFields().then(({ checkedAll, ...values }) => {
+        return formRef.current!.validateFields().then(({ checkAll, ...values }) => {
             const params = convertFormData(values);
             return addVoVaTask({
                 ...params,
@@ -306,7 +347,7 @@ const VoVaGather = () => {
     }, []);
 
     const onGatherOnOKey = useCallback((merchant_ids: string[]) => {
-        return formRef.current!.validateFields().then(({ checkedAll, ...values }) => {
+        return formRef.current!.validateFields().then(({ checkAll, ...values }) => {
             const params = convertFormData(values);
             return addVoVaTask({
                 ...params,
