@@ -77,7 +77,7 @@ const CancelOrder: React.FC<IProps> = ({
         return delChannelOrders({
             order_goods_ids: orderGoodsIds,
         }).then(res => {
-            checkRef.current = true;
+            checkRef.current = offShelfChecked;
             onReload();
             getAllTabCount();
             const { success, failed } = res.data;
@@ -126,7 +126,8 @@ const CancelOrder: React.FC<IProps> = ({
             ),
             onOk: handleOk,
             onCancel: () => {
-                checkRef.current = true;
+                checkRef.current = offShelfChecked;
+                // console.log('onCancel', checkRef.current);
             },
         });
     };
