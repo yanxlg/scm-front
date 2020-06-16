@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormInstance } from 'antd/es/form';
 import { Form, Radio } from 'antd';
 import { HotTaskRange } from '@/enums/StatusEnum';
-import { IntegerInput } from 'react-components';
+import { IntegerInput, RichInput } from 'react-components';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
@@ -75,8 +75,8 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                                     },
                                 ]}
                             >
-                                <IntegerInput
-                                    min={0}
+                                <RichInput
+                                    richType="numberSplit"
                                     placeholder={'请输入'}
                                     className={classNames(formStyles.formItemDefault)}
                                     disabled={!required}
