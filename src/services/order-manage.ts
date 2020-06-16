@@ -13,6 +13,7 @@ import {
     IReviewSearch,
     IPlatformItem,
     IPurchaseLog,
+    IOrderItem,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
@@ -20,6 +21,7 @@ import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 // import { ISHopList } from '@/interface/IChannel';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import Order from '@/pages/order';
+import { IPaginationResponse } from 'react-components/es/hooks/useList';
 
 export declare interface IFilterParams {
     page?: number;
@@ -336,3 +338,21 @@ export const getWarehouseList = singlePromiseWrap(() => {
         }));
     });
 });
+
+export const queryPendingSignList = (data: any) => {
+    return api
+        .post<IResponse<IPaginationResponse<IOrderItem>>>(OrderApiPath.queryPendingSignList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
+};

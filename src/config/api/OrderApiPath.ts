@@ -64,4 +64,7 @@ export enum OrderApiPath {
     QueryTakeOrders = '/api/v1/orders/purchase_log',
     getPurchaseUidList = '/api/v1/orders/get_purchase_uid_list',
     getWarehouseList = '/api/v1/orders/get_warhouse_list',
+
+    queryPendingSignList = '/api/v1/orders/list/1',
+    exportPendingSignList = '/api/v1/orders/list/10',
 }

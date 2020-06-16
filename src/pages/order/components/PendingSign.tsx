@@ -1,11 +1,11 @@
-import React, { ReactText, useCallback, useMemo, useRef } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import {
     defaultOptionItem,
     defaultOptionItem1,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { queryShopList } from '@/services/order-manage';
+import { queryPendingSignList, queryShopList } from '@/services/order-manage';
 import {
     FitTable,
     JsonForm,
@@ -14,12 +14,15 @@ import {
     useList,
     useModal2,
 } from 'react-components';
-import { Button } from 'antd';
+import { Button, Checkbox } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { getGoodsList } from '@/services/goods';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { CombineRowItem, IFlatOrderItem, IOrderItem, IPendingOrderItem } from '@/interface/IOrder';
+import { ColumnType, TableProps } from 'antd/es/table';
+import { ITaskListItem } from '@/interface/ITask';
 
 const allFormFields: FormField[] = [
     {
@@ -119,9 +122,9 @@ const allFormFields: FormField[] = [
     },
     {
         type: 'dateRanger',
-        key: 'purchase_time',
-        name: ['purchase_time_start', 'purchase_time_end'],
-        label: '采购签收时间(1)',
+        key: 'collect_time',
+        name: ['collect_time_start', 'collect_time_end'],
+        label: '采购签收时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
@@ -136,7 +139,7 @@ const configFields = [
     'purchase_waybill_no',
     'order_create_time',
     'pay_time',
-    'purchase_time',
+    'collect_time',
 ];
 
 // 后续写算法
@@ -148,6 +151,15 @@ declare interface PendingSignProps {
     updateCount: () => void;
 }
 
+const combineRows = <T extends CombineRowItem>(record: T, originNode: React.ReactNode) => {
+    return {
+        children: originNode,
+        props: {
+            rowSpan: record.__rowspan || 1,
+        },
+    };
+};
+
 const PendingSign = ({ updateCount }: PendingSignProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const {
@@ -157,155 +169,164 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
         total,
         dataSource,
         selectedRowKeys,
-        queryRef,
         setSelectedRowKeys,
         onReload,
         onSearch,
         onChange,
-    } = useList({
+    } = useList<IOrderItem>({
         formRef: formRef,
-        queryList: getGoodsList, // 获取订单列表
+        queryList: queryPendingSignList, // 获取订单列表
     });
+
+    console.log(dataSource);
+
+    const [regenerate, setRegenerate] = useState(false); // 控制强制更新数据
+
     const [exportModal, showExportModal, closeExportModal] = useModal2<boolean>();
 
-    const columns = [
-        {
-            key: 'operation',
-            title: '操作',
-            dataIndex: 'operation',
-            align: 'center',
-            width: 150,
-            fixed: 'left',
-            render: (value: string, item) => {
-                return (
-                    <>
-                        <PopConfirmLoadingButton
-                            popConfirmProps={{
-                                title: '确定要取消该采购订单吗？',
-                                onConfirm: () => _cancelPurchaseOrder([item.orderGoodsId]),
-                            }}
-                            buttonProps={{
-                                type: 'link',
-                                children: '取消采购订单',
-                            }}
-                        />
-                        <CancelOrder
-                            key={'2'}
-                            orderGoodsIds={[item.orderGoodsId]}
-                            onReload={onSearch}
-                            getAllTabCount={getAllTabCount}
-                        >
-                            <Button type="link">取消销售订单</Button>
-                        </CancelOrder>
-                    </>
-                );
+    const cancelPurchaseOrder = useCallback(() => {}, []);
+
+    const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
+        return [
+            {
+                key: 'operation',
+                title: '操作',
+                dataIndex: 'operation',
+                align: 'center',
+                width: 150,
+                fixed: 'left',
+                render: (value: string, item) => {
+                    return combineRows(
+                        item,
+                        <>
+                            <PopConfirmLoadingButton
+                                popConfirmProps={{
+                                    title: '确定要取消该采购订单吗？',
+                                    onConfirm: () => cancelPurchaseOrder([item.orderGoodsId]),
+                                }}
+                                buttonProps={{
+                                    type: 'link',
+                                    children: '取消采购订单',
+                                }}
+                            />
+                            <CancelOrder
+                                key={'2'}
+                                orderGoodsIds={[item.orderGoodsId]}
+                                onReload={onSearch}
+                                getAllTabCount={updateCount}
+                            >
+                                <Button type="link">取消销售订单</Button>
+                            </CancelOrder>
+                        </>,
+                    );
+                },
             },
-        },
-        {
-            key: 'orderCreateTime',
-            title: '订单生成时间',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '子订单ID',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: 'Commodity ID',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '商品名称',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: 'SKU图片',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '商品规格',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '供应商订单ID',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '支付时间',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '销售店铺名称',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '采购运单ID',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '采购签收时间',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '采购计划状态',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-        {
-            key: 'orderCreateTime',
-            title: '仓库库存预定状态',
-            dataIndex: 'orderCreateTime',
-            align: 'center',
-            width: 150,
-            render: (value: string) => utcToLocal(value, ''),
-        },
-    ];
+            {
+                key: 'orderCreateTime',
+                title: '订单生成时间',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '子订单ID',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: 'Commodity ID',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '商品名称',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: 'SKU图片',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '商品规格',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '供应商订单ID',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '支付时间',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '销售店铺名称',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '采购运单ID',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '采购签收时间',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '采购计划状态',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'orderCreateTime',
+                title: '仓库库存预定状态',
+                dataIndex: 'orderCreateTime',
+                align: 'center',
+                width: 150,
+                render: (value: string) => utcToLocal(value, ''),
+            },
+        ];
+    }, []);
 
     const formComponent = useMemo(() => {
         return (
@@ -329,6 +350,10 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
         );
     }, []);
 
+    const toggleRegenerate = useCallback(() => {
+        setRegenerate(regenerate => !regenerate);
+    }, []);
+
     const pagination = useMemo(() => {
         return {
             total: total,
@@ -338,6 +363,42 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
             position: ['topRight', 'bottomRight'],
         } as any;
     }, [loading]);
+
+    // filter  + flat list
+    const flatList = useMemo(() => {
+        const flatOrderList: (IFlatOrderItem & CombineRowItem)[] = [];
+        dataSource.forEach(order => {
+            const { orderGoods, orderInfo, orderGods } = order;
+            const { orderGoodsPurchasePlan = [], ...others } = orderGoods;
+            const purchaseList = regenerate
+                ? orderGoodsPurchasePlan
+                : (orderGoodsPurchasePlan || []).filter(plan => {
+                      return plan.purchaseOrderStatus !== 6;
+                  });
+            if (purchaseList.length) {
+                purchaseList.forEach((plan, index) => {
+                    const childOrderItem = {
+                        ...orderInfo,
+                        ...orderGods,
+                        ...others,
+                        ...plan,
+                        __rowspan: index === 0 ? purchaseList.length : 0,
+                    };
+                    flatOrderList.push(childOrderItem);
+                });
+            } else {
+                flatOrderList.push({
+                    ...orderInfo,
+                    ...orderGods,
+                    ...others,
+                    __rowspan: 1,
+                });
+            }
+        });
+        return flatOrderList;
+    }, [dataSource, regenerate]);
+
+    console.log(flatList);
 
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0;
@@ -376,6 +437,19 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
             onChange: (selectedKeys: ReactText[]) => {
                 setSelectedRowKeys(selectedKeys as string[]);
             },
+            renderCell: (
+                checked: boolean,
+                record: IFlatOrderItem & CombineRowItem,
+                index: number,
+                originNode: React.ReactNode,
+            ) => {
+                return {
+                    children: originNode,
+                    props: {
+                        rowSpan: record.__rowspan,
+                    },
+                };
+            },
         };
     }, [selectedRowKeys]);
 
@@ -383,14 +457,22 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
         return (
             <div>
                 {formComponent}
+                <div className={formStyles.formContainer}>
+                    <div className={formStyles.formItem}>
+                        <Checkbox value={regenerate} onChange={toggleRegenerate}>
+                            展示已重新生成
+                        </Checkbox>
+                    </div>
+                </div>
                 <FitTable
                     bordered={true}
-                    rowKey="purchase_plan_id"
+                    rowKey={record => {
+                        return record.purchasePlanId || record.orderId;
+                    }}
                     loading={loading}
                     columns={columns}
-                    // rowSelection={rowSelection}
-                    dataSource={dataSource}
-                    scroll={{ x: 'max-content' }}
+                    dataSource={flatList}
+                    scroll={{ x: true, scrollToFirstRowOnChange: true }}
                     columnsSettingRender={true}
                     pagination={pagination}
                     onChange={onChange}
@@ -405,7 +487,7 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
                 />
             </div>
         );
-    }, []);
+    }, [regenerate, flatList, loading]);
 };
 
 export { PendingSign };

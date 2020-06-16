@@ -185,3 +185,89 @@ export interface IPurchaseLog {
     succPurchase: string;
     failPurchase: string;
 }
+
+interface IPurchasePlan {
+    commoditySkuId: string;
+    createTime: string;
+    lastUpdateTime: string;
+    orderGoodsId: string;
+    payUrl: string;
+    platformOrderTime: string;
+    productPrice: string;
+    purchaseAmount: string;
+    purchaseFailCode: string;
+    purchaseFailReason: string;
+    purchaseNormalPrice: string;
+    purchaseNumber: number;
+    purchaseOrderPayStatus: number;
+    purchaseOrderShippingStatus: number;
+    purchaseOrderStatus: number;
+    purchasePlanId: string;
+    purchasePlatform: string;
+    purchasePlatformOrderId: string;
+    purchasePlatformParentOrderId: string;
+    reserveStatus: number;
+    taskId: string;
+}
+
+export interface IOrderItem {
+    orderGods: {
+        isOfflinePurchase: 0 | 1;
+        isReplaceDelivery: 0 | 1;
+    };
+    orderGoods: {
+        channelMerchantId: string;
+        channelOrderGoodsSn: string;
+        commodityId: string;
+        createTime: string;
+        freight: string;
+        goodsAmount: string;
+        goodsNumber: number;
+        lastUpdateTime: string;
+        orderAddressUpdatedStatus: number;
+        orderGoodsId: string;
+        orderGoodsShippingStatus: number;
+        orderGoodsPurchasePlan?: Array<IPurchasePlan>;
+        orderGoodsStatus: number;
+        orderId: string;
+        productId: string;
+        productImage: string;
+        productName: string;
+        productPlatform: string;
+        productShop: string;
+        productStyle: string;
+        skuId: string;
+    };
+    orderInfo: {
+        channelMerchantId: string;
+        channelMerchantName: string;
+        channelOrderSn: string;
+        channelSource: string;
+        confirmTime: string;
+        createTime: string;
+        currency: string;
+        freight: string;
+        lastUpdateTime: string;
+        orderAddress: {
+            orderId: string;
+            consignee: string;
+            country: string;
+            province: string;
+            tel: string;
+            zipCode: string;
+        };
+        orderAmount: string;
+        orderId: string;
+        orderStatus: number;
+        orderTime: string;
+    };
+}
+
+export type IFlatOrderItem = IOrderItem['orderGods'] &
+    IOrderItem['orderGoods'] &
+    IOrderItem['orderInfo'] &
+    Partial<IPurchasePlan>;
+
+export type CombineRowItem = {
+    __rowspan: number;
+};
