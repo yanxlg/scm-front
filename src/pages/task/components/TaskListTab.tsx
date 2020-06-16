@@ -278,8 +278,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 width: '182px',
                 align: 'center',
                 render: (text: TaskRangeCode, record) => {
+                    const _range = record.range;
                     const range = isGoodsUpdateType(text)
                         ? record.update_type?.map(code => PUTaskRangeTypeMap[code])?.join(';')
+                        : _range === 'all'
+                        ? '全部店铺'
                         : TaskRangeMap[text];
                     return range || '--';
                 },
