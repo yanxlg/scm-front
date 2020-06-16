@@ -242,6 +242,33 @@ interface IOrderItemExtend {
     purchasePlatformOrderId?: string;
     purchasePlatformSku?: string;
     reserveStatus?: number;
+
+    // 待支付中新增属性
+    purchaseOrderTime?: string;
+    purchaseParentOrderSn?: string;
+    purchasePayStatusDesc?: string;
+    purchasePayUrl?: string;
+    purchaseTotalAmount?: string;
+}
+
+interface PayOrderPurchase {
+    purchasePlanId: string;
+    purchaseOrderSn: string;
+    purchaseOrderStatus: number;
+    purchaseOrderStatusDesc: string;
+    purchasePayStatusDesc: string;
+    purchasePayStatus: number;
+    orderCreateTime: string;
+    commodityId: string;
+    productName: string;
+    saleGoodsNumber: number;
+    freight: string;
+    saleGoodsAmount: string;
+    purchaseGoodsNumber: number;
+    purchaseGoodsAmount: string;
+    productShop: string;
+    reserveStatus: number;
+    purchasePlanStatus: number;
 }
 
 export interface IOrderItem extends IOrderItemExtend {
@@ -295,12 +322,16 @@ export interface IOrderItem extends IOrderItemExtend {
         orderStatus: number;
         orderTime: string;
     };
+
+    // 待支付
+    unpaidPurchaseOrderGoodsResult?: Array<PayOrderPurchase>;
 }
 
 export type IFlatOrderItem = IOrderItem['orderGods'] &
     IOrderItem['orderGoods'] &
     IOrderItem['orderInfo'] &
     Partial<IPurchasePlan> &
+    Partial<PayOrderPurchase> &
     IOrderItemExtend;
 
 export type CombineRowItem = {

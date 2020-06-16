@@ -323,7 +323,13 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
             ? formRef1.current.getFieldsValue()
             : { regenerate: false };
         dataSource.forEach(order => {
-            const { orderGoods, orderInfo, orderGods, ...extra } = order;
+            const {
+                orderGoods,
+                unpaidPurchaseOrderGoodsResult,
+                orderInfo,
+                orderGods,
+                ...extra
+            } = order;
             const { orderGoodsPurchasePlan = [], ...others } = orderGoods;
             const purchaseList = regenerate
                 ? orderGoodsPurchasePlan
