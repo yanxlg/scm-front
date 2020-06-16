@@ -24,6 +24,8 @@ import { validateRange } from '@/utils/validate';
 import useGoodsTag from '../../hooks/useGoodsTag';
 import { IOptionItem } from 'react-components/src/JsonForm/items/Select';
 import { numberToStr } from '@/utils/common';
+import useGoodsCatagory from '../../hooks/useGoodsCatagory';
+import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -41,6 +43,7 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [saveLoading, setSaveLoading] = useState(false);
+    const { catagoryList } = useGoodsCatagory();
     const {
         goodsTagList,
         checkedGoodsTagList,
@@ -135,6 +138,47 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                             />
                         </Form.Item>
                     </div>
+                    <div className={styles.flex}>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="一级品类"
+                                name="first_cat"
+                                // className={styles.select}
+                                form={form}
+                                optionList={catagoryList}
+                                placeholder="全部"
+                                onChange={() => {
+                                    form.resetFields(['second_cat']);
+                                    form.resetFields(['third_cat']);
+                                }}
+                            />
+                        </div>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="二级品类"
+                                name="second_cat"
+                                // className={styles.select}
+                                form={form}
+                                optionList={catagoryList}
+                                placeholder="全部"
+                                dependencies={['first_cat']}
+                                onChange={() => {
+                                    form.resetFields(['third_cat']);
+                                }}
+                            />
+                        </div>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="三级品类"
+                                name="third_cat"
+                                // className={styles.select}
+                                form={form}
+                                optionList={catagoryList}
+                                placeholder="全部"
+                                dependencies={['first_cat', 'second_cat']}
+                            />
+                        </div>
+                    </div>
                     <Form.Item label="商品标签" className={styles.customLabel}>
                         <div>
                             {goodsTagList.length > 0
@@ -185,7 +229,7 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                             <>
                                 排序等级
                                 <Tooltip placement="bottomLeft" title="排序等级越高，优先级越高">
-                                    <QuestionCircleOutlined />
+                                    <QuestionCircleOutlined style={{ marginLeft: 6 }} />
                                 </Tooltip>
                             </>
                         }
@@ -254,7 +298,7 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                 </Form>
                 <div className={styles.btnContainer}>
                     <Popconfirm
-                        title="返回数据将清空，确认返回吗？"
+                        title="返回将不保存此次更新内容，确认返回吗？"
                         onConfirm={handleCancel}
                         okText="确认"
                         cancelText="取消"

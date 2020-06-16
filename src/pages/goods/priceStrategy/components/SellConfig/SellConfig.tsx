@@ -15,6 +15,7 @@ import { getPurchasePlatform, queryGoodsSourceList } from '@/services/global';
 
 import styles from '../../_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import useGoodsCatagory from '../../hooks/useGoodsCatagory';
 
 const { TextArea } = Input;
 
@@ -30,6 +31,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [purchasePlatformList, setPurchasePlatformList] = useState<IOptionItem[]>([]);
+    const { catagoryList } = useGoodsCatagory();
     const {
         goodsTagList,
         checkedGoodsTagList,
@@ -164,29 +166,72 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                             rules={[requiredRule]}
                         />
                     </div>
-                    <div className={classnames(styles.item, styles.customLabel)}>
-                        <MultipleSelect
-                            label="销售渠道"
-                            name="enable_platform"
-                            // className={styles.select}
-                            form={form}
-                            optionList={sellChannelList}
-                            rules={[requiredRule]}
-                            onChange={() => {
-                                form.resetFields(['enable_merchant']);
-                            }}
-                        />
+                    <div className={styles.flex}>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="销售渠道"
+                                name="enable_platform"
+                                // className={styles.select}
+                                form={form}
+                                optionList={sellChannelList}
+                                rules={[requiredRule]}
+                                onChange={() => {
+                                    form.resetFields(['enable_merchant']);
+                                }}
+                            />
+                        </div>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="销售店铺名称"
+                                name="enable_merchant"
+                                // className={styles.select}
+                                form={form}
+                                optionList={sellChannelList}
+                                dependencies={['enable_platform']}
+                                rules={[requiredRule]}
+                            />
+                        </div>
                     </div>
-                    <div className={classnames(styles.item, styles.customLabel)}>
-                        <MultipleSelect
-                            label="销售店铺名称"
-                            name="enable_merchant"
-                            // className={styles.select}
-                            form={form}
-                            optionList={sellChannelList}
-                            dependencies={['enable_platform']}
-                            rules={[requiredRule]}
-                        />
+                    <div className={styles.flex}>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="一级品类"
+                                name="first_cat"
+                                // className={styles.select}
+                                form={form}
+                                optionList={catagoryList}
+                                placeholder="全部"
+                                onChange={() => {
+                                    form.resetFields(['second_cat']);
+                                    form.resetFields(['third_cat']);
+                                }}
+                            />
+                        </div>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="二级品类"
+                                name="second_cat"
+                                // className={styles.select}
+                                form={form}
+                                optionList={catagoryList}
+                                placeholder="全部"
+                                dependencies={['first_cat']}
+                                onChange={() => {
+                                    form.resetFields(['third_cat']);
+                                }}
+                            />
+                        </div>
+                        <div className={classnames(styles.item, styles.customLabel)}>
+                            <MultipleSelect
+                                label="三级品类"
+                                name="third_cat"
+                                // className={styles.select}
+                                form={form}
+                                optionList={catagoryList}
+                                placeholder="全部"
+                                dependencies={['first_cat', 'second_cat']}
+                            />
+                        </div>
                     </div>
                     <Form.Item label="商品标签" className={styles.customLabel}>
                         <div>
@@ -293,7 +338,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                 </Form>
                 <div className={styles.btnContainer}>
                     <Popconfirm
-                        title="返回数据将清空，确认返回吗？"
+                        title="返回将不保存此次更新内容，确认返回吗？"
                         onConfirm={onCancel}
                         okText="确认"
                         cancelText="取消"
