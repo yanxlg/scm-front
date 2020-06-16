@@ -41,4 +41,16 @@ export default {
             },
         });
     },
+    /*    'GET /api/v1/vova_goods/store_list': async (req: Request, res: Response) => {
+        res.status(200).send({
+            code: 200,
+            message: 'By mock.js',
+            data: [
+                { merchant_id: '1', merchant_name: 'SuperAC', merchant_platform: 'vova' },
+                { merchant_id: '2', merchant_name: 'florynight', merchant_platform: 'florynight' },
+                { merchant_id: '3', merchant_name: 'Airyclub', merchant_platform: 'vova_old' },
+                { merchant_id: '5', merchant_name: 'VogueFD', merchant_platform: 'vova' },
+            ],
+        });
+    },*/
 };

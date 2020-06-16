@@ -8,6 +8,7 @@ export const multipleToArray = (value?: string) => {
         .replace(/\n/g, ',')
         .replace(/,{2,}/g, ',')
         .replace(/\s+/g, ',')
+        .replace(/\;/g, ',')
         .split(',');
     if (arr.length === 0) {
         return undefined;

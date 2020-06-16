@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox, Button } from 'antd';
 import { AutoEnLargeImg, FitTable, LoadingButton } from 'react-components';
-import { ColumnProps } from 'antd/es/table';
+import { ColumnProps, TablePaginationConfig } from 'antd/es/table';
 import GoodsDetailDialog from './GoodsDetailDialog';
 import TrackDialog from './TrackDialog';
 import { IChildOrderItem, IGoodsDetail } from './PaneAll';
@@ -20,12 +20,12 @@ import {
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
-import { IFilterParams } from '@/services/order-manage';
+import { IFilterParams, getWarehouseList, getPurchaseUidList } from '@/services/order-manage';
 import { PaginationConfig } from 'antd/es/pagination';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import CancelOrder from './CancelOrder';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 declare interface IProps {
     loading: boolean;
@@ -55,6 +55,8 @@ declare interface IState {
     trackDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
     currentOrder: IChildOrderItem | null;
+    warehouseList: IOptionItem[];
+    purchaseUidList: IOptionItem[];
 }
 
 class OrderTableAll extends React.PureComponent<IProps, IState> {
@@ -324,6 +326,13 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             defaultHide: true,
         },
+        {
+            key: 'purchasePlatform',
+            title: '商品渠道',
+            dataIndex: 'purchasePlatform',
+            align: 'center',
+            width: 120,
+        },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -429,13 +438,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 148,
             render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
         },
-        {
-            key: 'purchasePlatform',
-            title: '采购平台',
-            dataIndex: 'purchasePlatform',
-            align: 'center',
-            width: 120,
-        },
         // // 勾选展示 - 待补充
         // {
         //     key: '',
@@ -465,7 +467,9 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             align: 'center',
             width: 140,
             render: (value: string) => {
-                return value ? FinalCancelMap[value as FinalCancelStatus] || '未知原因' : '';
+                return value && value !== '0'
+                    ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
+                    : '';
             },
             defaultHide: true,
         },
@@ -491,7 +495,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // 勾选展示
         {
             key: 'purchasePlatformOrderId',
-            title: '采购订单ID',
+            title: '供应商订单ID',
             dataIndex: 'purchasePlatformOrderId',
             align: 'center',
             width: 120,
@@ -649,6 +653,39 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             // render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
             // defaultHide: true,
         },
+        {
+            key: 'lastWaybillNo',
+            title: '供应商订单号',
+            dataIndex: 'lastWaybillNo',
+            align: 'center',
+            width: 130,
+        },
+        // 勾选展示
+        {
+            key: 'warehouseId',
+            title: '仓库名称',
+            dataIndex: 'warehouseId',
+            align: 'center',
+            width: 130,
+            render: (value: string) => {
+                const { warehouseList } = this.state;
+                return getStatusDesc(warehouseList, value);
+            },
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'platformUid',
+            title: '下单账号',
+            dataIndex: 'platformUid',
+            align: 'center',
+            width: 130,
+            render: (value: string) => {
+                const { purchaseUidList } = this.state;
+                return getStatusDesc(purchaseUidList, value);
+            },
+            defaultHide: true,
+        },
     ];
 
     constructor(props: IProps) {
@@ -658,8 +695,31 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             trackDialogStatus: false,
             goodsDetail: null,
             currentOrder: null,
+            warehouseList: [],
+            purchaseUidList: [],
         };
     }
+
+    componentDidMount = () => {
+        this.getWarehouseList();
+        this.getPurchaseUidList();
+    };
+
+    private getWarehouseList = () => {
+        getWarehouseList().then(list =>
+            this.setState({
+                warehouseList: list,
+            }),
+        );
+    };
+
+    private getPurchaseUidList = () => {
+        getPurchaseUidList().then(list =>
+            this.setState({
+                purchaseUidList: list,
+            }),
+        );
+    };
 
     private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
         // console.log('showLogisticsTrack', purchaseWaybillNo);
@@ -683,7 +743,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         });
     };
 
-    onChange = ({ current, pageSize }: PaginationConfig) => {
+    onChange = ({ current, pageSize }: TablePaginationConfig) => {
         this.props.onSearch({
             page: current,
             page_count: pageSize,
@@ -741,6 +801,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 orderGoodsIds={orderGoodsIdList}
                 onReload={onSearch}
                 getAllTabCount={_getAllTabCount}
+                offShelfChecked={false}
+                key="4"
             >
                 <Button
                     key="4"
@@ -762,7 +824,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         return (
             <>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey={record => {
                         return record.purchasePlanId || record.orderGoodsId;
                     }}

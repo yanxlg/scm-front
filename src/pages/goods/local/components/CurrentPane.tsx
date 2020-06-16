@@ -13,6 +13,8 @@ import SkuModal from './SkuModal/SkuModal';
 import useSkuModal from '../hooks/useSkuModal';
 import GoodsEditModal from './GoodsEditModal/GoodsEditModal';
 import useGoodsEditModal from '../hooks/useGoodsEditModal';
+import useCountryFreightModal from '../hooks/useCountryFreightModal';
+import CountryFreightModal from './CountryFreightModal/CountryFreightModal';
 
 interface IProps {
     commodityId: string;
@@ -34,6 +36,13 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
     const { editGoodsStatus, productId, showEditGoods, hideEditGoods } = useGoodsEditModal();
     // 查看sku信息
     const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
+    // 查看国家运费
+    const {
+        countryFreightStatus,
+        countryFreightId,
+        showCountryFreight,
+        hideCountryFreight,
+    } = useCountryFreightModal();
 
     const conversionData = useCallback(record => {
         const { sku_info, update_time } = record;
@@ -537,7 +546,15 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                 width: 120,
                 align: 'center',
                 render: (_: string, row: IGoodsAndSkuItem) => {
-                    const { price_min, price_max, shipping_fee_min, shipping_fee_max, _type } = row;
+                    const {
+                        price_min,
+                        price_max,
+                        shipping_fee_min,
+                        shipping_fee_max,
+                        _type,
+                        source_channel,
+                        product_id,
+                    } = row;
                     const isCrawlerProduct = _type === 'new';
                     const isApply = applyList.indexOf('price') > -1;
                     const applyText = isApply ? '取消应用' : '应用';
@@ -547,6 +564,9 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
+                            {source_channel !== 'pdd' ? (
+                                <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
+                            ) : null}
                         </>
                     );
                     return isCrawlerProduct ? (
@@ -629,9 +649,23 @@ const CurrentPane: React.FC<IProps> = ({ commodityId }) => {
                     currentSkuInfo={currentSkuInfo}
                     onCancel={hideSkuModal}
                 />
+                <CountryFreightModal
+                    visible={countryFreightStatus}
+                    productId={countryFreightId}
+                    onCancel={hideCountryFreight}
+                />
             </>
         );
-    }, [goodsList, loading, skuStatus, currentSkuInfo, columns, applyList, editGoodsStatus]);
+    }, [
+        goodsList,
+        loading,
+        skuStatus,
+        currentSkuInfo,
+        columns,
+        applyList,
+        editGoodsStatus,
+        countryFreightStatus,
+    ]);
 };
 
 export default CurrentPane;

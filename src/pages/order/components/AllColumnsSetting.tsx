@@ -31,11 +31,14 @@ const baseGroupList = [
     { key: 'saleMinusPurchaseNormalPrice', name: '销售-采购价差' },
     { key: 'cancelType', name: '子订单取消类型' },
     { key: 'orderAddress', name: '用户地址信息' },
+    { key: 'warehouseId', name: '仓库名称' },
+    { key: 'platformUid', name: '下单账号' },
 ];
 
 const saleGroupList = [
     { key: 'channelSource', name: '销售渠道' },
     { key: 'productShop', name: '销售店铺名称' },
+    { key: 'purchasePlatform', name: '商品渠道' },
     // { key: '', name: '二级分类' },
     // { key: '', name: '销售渠道Goods ID' },
     { key: 'confirmTime', name: '销售订单确认时间' },
@@ -50,13 +53,12 @@ const saleGroupList = [
 const purchaseGroupList = [
     { key: 'purchasePlanId', name: '采购计划ID' },
     { key: 'reserveStatus', name: '仓库库存预定状态' },
-    { key: 'purchasePlatform', name: '采购平台' },
     // { key: '', name: '采购店铺名称' },
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },
     { key: 'purchaseCreateTime', name: '采购计划生成时间' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
-    { key: 'purchasePlatformOrderId', name: '采购订单ID' },
+    { key: 'purchasePlatformOrderId', name: '供应商订单ID' },
     // { key: '', name: '采购渠道订单ID' },
     { key: 'purchaseOrderPayStatus', name: '采购支付状态' },
     { key: 'payTime', name: '采购支付时间' },

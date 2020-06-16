@@ -7,4 +7,5 @@ export enum GlobalApiPath {
     QuerySelectList = '/api/v1/select/:id',
     QueryWarehourse = '/api/v1/common/warehourse_addr/:warehourse_id',
     QueryGoodBySkuId = '/api/v1/goods/purchase_sku_info',
+    QueryOnsaleInterceptStore = '/api/v1/strategy/onsale_intercept_store',
 }
