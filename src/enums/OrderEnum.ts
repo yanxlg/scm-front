@@ -6,6 +6,7 @@ import {
     getPurchaseUidList,
     getWarehouseList,
 } from '@/services/order-manage';
+import { queryGoodsSourceList } from '@/services/global';
 
 declare interface optionItem {
     name: string;
@@ -244,6 +245,14 @@ export const childDefaultFieldList: FormField[] = [
             key: 'children',
         },
         optionList: () => getPlatformAndStore(),
+    },
+    {
+        type: 'select',
+        name: 'product_platform',
+        label: '商品渠道',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => queryGoodsSourceList(),
     },
 ];
 

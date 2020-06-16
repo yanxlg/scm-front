@@ -38,6 +38,7 @@ const baseGroupList = [
 const saleGroupList = [
     { key: 'channelSource', name: '销售渠道' },
     { key: 'productShop', name: '销售店铺名称' },
+    { key: 'purchasePlatform', name: '商品渠道' },
     // { key: '', name: '二级分类' },
     // { key: '', name: '销售渠道Goods ID' },
     { key: 'confirmTime', name: '销售订单确认时间' },
@@ -52,7 +53,6 @@ const saleGroupList = [
 const purchaseGroupList = [
     { key: 'purchasePlanId', name: '采购计划ID' },
     { key: 'reserveStatus', name: '仓库库存预定状态' },
-    { key: 'purchasePlatform', name: '采购平台' },
     // { key: '', name: '采购店铺名称' },
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },

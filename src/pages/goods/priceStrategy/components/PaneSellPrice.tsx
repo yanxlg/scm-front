@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
-import { queryShopFilterList, getPurchasePlatform } from '@/services/global';
+import { queryShopFilterList, queryGoodsSourceList } from '@/services/global';
 import { getAllGoodsTagList, getSalePriceList } from '@/services/price-strategy';
 import { ColumnsType } from 'antd/lib/table';
 import { ISellItem, IEdiyKey } from '@/interface/IPriceStrategy';
@@ -18,11 +18,11 @@ import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLo
 const formFields: FormField[] = [
     {
         type: 'treeSelect',
-        label: '采购渠道',
+        label: '商品渠道',
         name: 'enable_source',
         placeholder: '请选择',
         className: styles.select,
-        optionList: () => getPurchasePlatform(),
+        optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'treeSelect',
@@ -38,7 +38,7 @@ const formFields: FormField[] = [
     },
     {
         type: 'treeSelect',
-        label: '销售店铺',
+        label: '销售店铺名称',
         name: 'enable_merchant',
         optionListDependence: { name: 'enable_platform', key: 'children' },
         placeholder: '请选择',
@@ -151,7 +151,7 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
             },
             {
-                title: '采购渠道',
+                title: '商品渠道',
                 dataIndex: 'enable_source',
                 align: 'center',
                 width: 120,
@@ -163,7 +163,7 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
             },
             {
-                title: '销售店铺',
+                title: '销售店铺名称',
                 dataIndex: 'enable_merchant',
                 align: 'center',
                 width: 120,
