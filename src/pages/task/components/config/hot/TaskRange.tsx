@@ -16,7 +16,7 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
     const taskRangeChange = useCallback(
         (e: RadioChangeEvent) => {
             const value = e.target.value;
-            if (value === HotTaskRange.fullStack) {
+            if (value !== HotTaskRange.store) {
                 form.resetFields(['shopId']);
             } else {
                 form.resetFields([
