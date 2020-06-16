@@ -42,6 +42,7 @@ export interface ITaskListItem {
     execute_count: number;
     update_type?: PUTaskRangeTypeCode[];
     channel: '1' | '2' | '3';
+    range?: number | string;
 }
 
 export interface ITaskListExtraData {
