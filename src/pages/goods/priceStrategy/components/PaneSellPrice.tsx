@@ -68,7 +68,7 @@ const formFields: FormField[] = [
 const PaneSellPrice: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const [logStatus, setLogStatus] = useState(false);
-    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // ADD
+    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.ADD); // ADD DEFAULT
     const [updateRangeStatus, setUpdateRangeStatus] = useState(false);
     const [currentId, setCurrentId] = useState('');
     const {
