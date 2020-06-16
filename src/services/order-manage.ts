@@ -314,3 +314,25 @@ export const queryTakeOrders = () => {
         }>
     >(OrderApiPath.QueryTakeOrders);
 };
+
+export const getPurchaseUidList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.getPurchaseUidList).then(({ data: { data } }) => {
+        if (data && data.length) {
+            return data.map(({ name, platform_uid }: any) => ({
+                name,
+                value: platform_uid,
+            }));
+        }
+
+        return [];
+    });
+});
+
+export const getWarehouseList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.getWarehouseList).then(({ data }) => {
+        return Object.keys(data).map(key => ({
+            name: data[key],
+            value: key,
+        }));
+    });
+});
