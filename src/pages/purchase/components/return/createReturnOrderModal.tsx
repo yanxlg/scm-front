@@ -64,10 +64,9 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                             ...item,
                         });
                         setCurrent(1);
-
                         const return_number = Math.min(
                             item?.inventory?.availableInventory ?? 0,
-                            (goods?.realInStorageNumber ?? 0) - (goods?.returnNumber ?? 0),
+                            (item?.realInStorageNumber ?? 0) - (item?.returnNumber ?? 0),
                         );
                         maxReturnNumber.current = return_number;
                         form2.current!.setFieldsValue({
