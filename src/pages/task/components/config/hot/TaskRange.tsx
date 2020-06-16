@@ -45,6 +45,7 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                 >
                     <Radio.Group onChange={taskRangeChange}>
                         <Radio value={HotTaskRange.fullStack}>全站</Radio>
+                        <Radio value={HotTaskRange.all}>全部店铺</Radio>
                         <Radio value={HotTaskRange.store}>指定店铺</Radio>
                     </Radio.Group>
                 </Form.Item>
