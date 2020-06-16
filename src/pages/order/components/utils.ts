@@ -66,7 +66,7 @@ const allFormFields: FormField[] = [
         type: 'textarea',
         key: 'purchase_parent_order_sn',
         name: 'purchase_parent_order_sn',
-        label: '采购父订单ID',
+        label: '供应商父订单ID',
         className: 'order-input',
         placeholder: '请输入',
         formatter: 'multipleToArray',

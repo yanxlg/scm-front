@@ -109,11 +109,22 @@ export async function postExportPendingOrder(data: IPendingOrderSearch) {
 }
 
 // 获取待支付
-export async function getPayOrderList(data: IWaitPaySearch) {
-    return request.post(OrderApiPath.getPayOrderList, {
-        requestType: 'json',
-        data,
-    });
+export function getPayOrderList(data: IWaitPaySearch) {
+    return api
+        .post(OrderApiPath.getPayOrderList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
 }
 
 export async function postExportPay(data: IWaitPaySearch) {
