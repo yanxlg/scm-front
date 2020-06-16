@@ -95,7 +95,7 @@ const columns: ColumnsType<object> = [
     },
     {
         width: 120,
-        title: '实际采购成本',
+        title: '当日采购成本',
         dataIndex: 'actualPurchaseCost',
         align: 'center',
     },
@@ -479,7 +479,7 @@ const Overview: React.FC = props => {
                                     </Col>
                                     <Col span={6}>
                                         <Statistic
-                                            title="实际采购成本"
+                                            title="当日采购成本"
                                             value={actualPurchaseCost}
                                             valueStyle={{
                                                 fontWeight: 'bold',
@@ -504,28 +504,6 @@ const Overview: React.FC = props => {
                                     <Col span={6}>
                                         <Statistic
                                             title="平均在售商品数"
-                                            value={saledGoodsNum}
-                                            valueStyle={{
-                                                fontWeight: 'bold',
-                                                color: '#333',
-                                            }}
-                                        />
-                                        <div className={styles.affix}>
-                                            环比
-                                            {saledGoodsNumRatio >= 0 ? (
-                                                <span className={styles.increase}>
-                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
-                                                </span>
-                                            ) : (
-                                                <span className={styles.decrease}>
-                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
-                                                </span>
-                                            )}
-                                        </div>
-                                    </Col>
-                                    <Col span={6}>
-                                        <Statistic
-                                            title="平均有销量商品数"
                                             value={onsaleGoodsNum}
                                             valueStyle={{
                                                 // fontSize: '44px',
@@ -542,6 +520,28 @@ const Overview: React.FC = props => {
                                             ) : (
                                                 <span className={styles.decrease}>
                                                     {onsaleGoodsNumRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <Statistic
+                                            title="平均有销量商品数"
+                                            value={saledGoodsNum}
+                                            valueStyle={{
+                                                fontWeight: 'bold',
+                                                color: '#333',
+                                            }}
+                                        />
+                                        <div className={styles.affix}>
+                                            环比
+                                            {saledGoodsNumRatio >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
                                                 </span>
                                             )}
                                         </div>

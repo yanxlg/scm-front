@@ -368,13 +368,15 @@ const ReplaceStoreOut = () => {
                     columns={mergedColumns}
                     dataSource={dataSource}
                     onChange={onChange}
-                    pagination={{
-                        total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                        position: ['topRight', 'bottomRight'],
-                    }}
+                    pagination={
+                        {
+                            total: total,
+                            current: pageNumber,
+                            pageSize: pageSize,
+                            showSizeChanger: true,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
                 />
             </Form>
         );
