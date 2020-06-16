@@ -224,7 +224,7 @@ export const childDefaultFieldList: FormField[] = [
     },
     {
         type: 'select',
-        name: 'xxx',
+        name: 'product_platform',
         label: '商品渠道',
         className: 'order-input',
         syncDefaultOption: defaultOptionItem1,

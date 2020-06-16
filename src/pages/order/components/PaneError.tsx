@@ -89,7 +89,7 @@ const PaneErrTab = () => {
             },
             {
                 type: 'select',
-                name: 'xxx',
+                name: 'product_platform',
                 label: '采购渠道',
                 className: 'order-input',
                 // optionList: [defaultOptionItem, ...channelOptionList],
@@ -427,6 +427,7 @@ const PaneErrTab = () => {
                     ref={formRef}
                     initialValues={{
                         channel_source: '',
+                        product_platform: '',
                         abnormal_type: 1,
                     }}
                 >

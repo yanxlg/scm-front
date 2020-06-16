@@ -250,7 +250,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     >
                         导出
                     </Button>
-                    ,
                 </div>
             </JsonForm>
         );

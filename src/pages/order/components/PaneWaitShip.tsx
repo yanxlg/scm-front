@@ -64,7 +64,7 @@ const formFields: FormField[] = [
     },
     {
         type: 'select',
-        name: 'xxx',
+        name: 'purchase_platform',
         label: '采购渠道',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
@@ -105,6 +105,7 @@ const formFields: FormField[] = [
 
 const defaultInitialValues = {
     channel_source: '',
+    purchase_platform: '',
     order_goods_status: 100,
     purchase_order_status: 100,
 };
@@ -165,6 +166,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 // purchasewaybillNo,
                 orderGoods,
                 orderInfo,
+                purchasePlatform,
             } = current;
             const { orderGoodsStatus, createTime: orderCreateTime } = orderGoods;
             const { channelSource } = orderInfo;
@@ -181,6 +183,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 productId,
                 // purchasewaybillNo,
                 channelSource,
+                purchasePlatform,
             } as IWaitShipOrderItem;
         });
     }, []);
@@ -313,9 +316,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 width: 120,
             },
             {
-                key: 'xxx',
+                key: 'purchasePlatform',
                 title: '采购渠道',
-                dataIndex: 'xxx',
+                dataIndex: 'purchasePlatform',
                 align: 'center',
                 width: 120,
             },

@@ -76,6 +76,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
     private initialValues = {
         channel_source: '',
         product_shop: '',
+        product_platform: '',
         // purchase_fail_code: '',
         order_goods_status: 100,
         order_goods_shipping_status: 100,
