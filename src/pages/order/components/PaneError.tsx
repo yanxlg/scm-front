@@ -29,6 +29,7 @@ import { ITaskListItem } from '@/interface/ITask';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
 import Export from '@/components/Export';
+import { queryGoodsSourceList } from '@/services/global';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -41,6 +42,8 @@ export declare interface IErrorOrderItem {
     lastWaybillNo: string; // 尾程运单号
     abnormalDetailType: number;
     abnormalType: number;
+    productShop: string;
+    productPlatform: string;
 
     purchasePlanId?: string;
     platformSendOrderTime?: string; // 采购订单生成时间
@@ -79,11 +82,20 @@ const PaneErrTab = () => {
             {
                 type: 'select',
                 name: 'channel_source',
-                label: '销售渠道',
+                label: '销售店铺名称',
                 className: 'order-input',
                 // optionList: [defaultOptionItem, ...channelOptionList],
                 syncDefaultOption: defaultOptionItem1,
                 optionList: () => getPlatformAndStore(),
+            },
+            {
+                type: 'select',
+                name: 'product_platform',
+                label: '采购渠道',
+                className: 'order-input',
+                // optionList: [defaultOptionItem, ...channelOptionList],
+                syncDefaultOption: defaultOptionItem1,
+                optionList: () => queryGoodsSourceList(),
             },
             {
                 type: 'select',
@@ -170,6 +182,22 @@ const PaneErrTab = () => {
             key: 'channelOrderGoodsSn',
             title: '渠道订单号',
             dataIndex: 'channelOrderGoodsSn',
+            align: 'center',
+            width: 120,
+            render: mergeCell,
+        },
+        {
+            key: 'productShop',
+            title: '销售店铺名称',
+            dataIndex: 'productShop',
+            align: 'center',
+            width: 120,
+            render: mergeCell,
+        },
+        {
+            key: 'productPlatform',
+            title: '采购渠道',
+            dataIndex: 'productPlatform',
             align: 'center',
             width: 120,
             render: mergeCell,
@@ -400,6 +428,7 @@ const PaneErrTab = () => {
                     ref={formRef}
                     initialValues={{
                         channel_source: '',
+                        product_platform: '',
                         abnormal_type: 1,
                     }}
                 >
@@ -587,6 +616,8 @@ const PaneErrTab = () => {
                     deliveryCommandTime,
                     lastWaybillNo,
                     orderGoodsPurchasePlan,
+                    productShop,
+                    productPlatform,
                 } = orderGoods;
                 const { confirmTime } = orderInfo;
                 if (orderGoodsPurchasePlan) {
@@ -619,6 +650,8 @@ const PaneErrTab = () => {
                             lastWaybillNo, // 尾程运单号
                             abnormalDetailType,
                             abnormalType,
+                            productShop,
+                            productPlatform,
 
                             purchasePlanId,
                             platformSendOrderTime,
@@ -648,6 +681,8 @@ const PaneErrTab = () => {
                         abnormalDetailType,
                         abnormalType,
                         _rowspan: 1,
+                        productShop,
+                        productPlatform,
                     });
                 }
             });

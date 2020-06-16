@@ -77,6 +77,7 @@ export interface IWaitShipOrderItem {
     productId: string;
     // purchasewaybillNo: string;
     channelSource: string;
+    purchasePlatform: string;
 }
 
 export interface INotWarehouseSearch extends IPagination {
