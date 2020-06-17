@@ -4,7 +4,7 @@ import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/Orde
 import {
     exportPendingSignList,
     getOrderGoodsDetail,
-    queryPendingSignList,
+    getWaitShipList,
 } from '@/services/order-manage';
 import {
     AutoEnLargeImg,
@@ -31,9 +31,8 @@ import { ColumnType } from 'antd/es/table';
 import { getStatusDesc } from '@/utils/transform';
 import { useCancelPurchase, useSplitSelectKeys } from '@/pages/order/components/hooks';
 import { FormInstance } from 'antd/es/form';
-import { filterFieldsList } from './utils';
+import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
-import TrackDialog from '@/pages/order/components/TrackDialog';
 
 const configFields = [
     'product_shop',
@@ -41,19 +40,16 @@ const configFields = [
     'order_goods_id',
     'commodity_id',
     'purchase_platform_order_id',
-    'purchase_waybill_no',
     'order_create_time',
-    'pay_time',
-    'collect_time',
 ];
 
 const fieldsList = filterFieldsList(configFields);
 
-declare interface PendingSign {
+declare interface PendingShipProps {
     updateCount: () => void;
 }
 
-const PendingSign = ({ updateCount }: PendingSign) => {
+const PendingShip = ({ updateCount }: PendingShipProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
@@ -71,7 +67,7 @@ const PendingSign = ({ updateCount }: PendingSign) => {
         onChange,
     } = useList<IOrderItem>({
         formRef: [formRef, formRef1],
-        queryList: queryPendingSignList, // 获取订单列表
+        queryList: getWaitShipList, // 获取订单列表
     });
 
     const selectedKeys = useSplitSelectKeys(selectedRowKeys);
@@ -81,7 +77,6 @@ const PendingSign = ({ updateCount }: PendingSign) => {
     }, []);
 
     const [exportModal, showExportModal, closeExportModal] = useModal2<boolean>();
-    const [trackModal, showTrackModal, closeTRackModal] = useModal2<IFlatOrderItem | undefined>();
 
     const openOrderGoodsDetailUrl = useCallback((productId: string) => {
         return getOrderGoodsDetail(productId).then(res => {
@@ -100,7 +95,8 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 width: 150,
                 fixed: 'left',
                 render: (value: string, item) => {
-                    return (
+                    return combineRows(
+                        item,
                         <>
                             <PopConfirmLoadingButton
                                 popConfirmProps={{
@@ -115,32 +111,29 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                             <CancelOrder
                                 key={'2'}
                                 orderGoodsIds={[item.orderGoodsId]}
-                                onReload={onSearch}
+                                onReload={onReload}
                                 getAllTabCount={updateCount}
                             >
                                 <Button type="link">取消销售订单</Button>
                             </CancelOrder>
-                            <Button type="link" onClick={() => showTrackModal(item)}>
-                                查看物流轨迹
-                            </Button>
-                        </>
+                        </>,
                     );
                 },
             },
             {
-                key: 'orderCreateTime',
+                key: 'createTime',
                 title: '订单生成时间',
-                dataIndex: 'orderCreateTime',
+                dataIndex: 'createTime',
                 align: 'center',
                 width: 150,
-                render: (value: string, item) => utcToLocal(item.createTime, ''),
+                render: (value: string) => utcToLocal(value, ''),
             },
             {
                 key: 'orderGoodsId',
                 title: '子订单ID',
                 dataIndex: 'orderGoodsId',
                 align: 'center',
-                width: 150,
+                width: 140,
             },
             {
                 key: 'commodityId',
@@ -204,30 +197,15 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 title: '支付时间',
                 dataIndex: 'payTime',
                 align: 'center',
-                width: 150,
+                width: 120,
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'productShop',
+                key: 'productPddMerchantName',
                 title: '销售店铺名称',
-                dataIndex: 'productShop',
+                dataIndex: 'productPddMerchantName',
                 align: 'center',
-                width: 150,
-            },
-            {
-                key: 'purchaseWaybillNo',
-                title: '采购运单ID',
-                dataIndex: 'purchaseWaybillNo',
-                align: 'center',
-                width: 150,
-            },
-            {
-                key: 'collectTime',
-                title: '采购签收时间',
-                dataIndex: 'collectTime',
-                align: 'center',
-                width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                width: 120,
             },
             {
                 key: 'purchaseOrderStatus',
@@ -297,10 +275,10 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                     },
                     {
                         type: 'checkboxGroup',
-                        name: '72',
+                        name: '48',
                         options: [
                             {
-                                label: '72小时无状态更新',
+                                label: '48小时无状态更新',
                                 value: true,
                             },
                         ],
@@ -468,15 +446,9 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                     onOKey={onExport}
                     onCancel={closeExportModal}
                 />
-                <TrackDialog
-                    visible={!!trackModal}
-                    orderGoodsId={trackModal ? trackModal.orderGoodsId || '' : ''}
-                    lastWaybillNo={trackModal ? trackModal.lastWaybillNo || '' : ''}
-                    hideTrackDetail={closeTRackModal}
-                />
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys, trackModal]);
+    }, [update, flatList, loading, selectedRowKeys]);
 };
 
-export default PendingSign;
+export default PendingShip;

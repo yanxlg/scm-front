@@ -1,18 +1,11 @@
 import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
-import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
-import {
-    defaultOptionItem,
-    defaultOptionItem1,
-    purchaseOrderOptionList,
-    purchaseReserveOptionList,
-} from '@/enums/OrderEnum';
+import { JsonFormRef } from 'react-components/es/JsonForm';
+import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
 import {
     exportPendingSignList,
     getOrderGoodsDetail,
     getPayOrderList,
     putConfirmPay,
-    queryPendingSignList,
-    queryShopList,
 } from '@/services/order-manage';
 import {
     AutoEnLargeImg,
@@ -33,7 +26,6 @@ import {
     IFlatOrderItem,
     IOrderItem,
     IPurchasePlan,
-    IWaitPayOrderItem,
     PayOrderPurchase,
 } from '@/interface/IOrder';
 import { ColumnType } from 'antd/es/table';
@@ -101,7 +93,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
             const planList = dataSource.find(item => item.purchaseParentOrderSn === id)!
                 .unpaidPurchaseOrderGoodsResult;
             const planIdList = planList!.map(item => item.purchasePlanId!);
-            putConfirmPay({
+            return putConfirmPay({
                 purchase_platform_parent_order_id: id,
                 purchase_plan_id: planIdList,
             }).then(() => {
@@ -137,7 +129,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                             <CancelOrder
                                 key={'2'}
                                 orderGoodsIds={[item.orderGoodsId]}
-                                onReload={onSearch}
+                                onReload={onReload}
                                 getAllTabCount={updateCount}
                             >
                                 <Button type="link">取消销售订单</Button>
@@ -186,7 +178,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                                     <QRCode value={value} size={40} className="order-qr-small" />
                                 </AutoEnLargeImg>
                                 <div>
-                                    <Button
+                                    <LoadingButton
                                         ghost={true}
                                         size="small"
                                         type="primary"
@@ -194,7 +186,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                                         onClick={() => confirmPay(purchaseParentOrderSn!)}
                                     >
                                         确认支付
-                                    </Button>
+                                    </LoadingButton>
                                 </div>
                             </div>
                         ) : (
@@ -440,7 +432,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
             <CancelOrder
                 key="2"
                 orderGoodsIds={selectedKeys}
-                onReload={onSearch}
+                onReload={onReload}
                 getAllTabCount={updateCount}
             >
                 <Button

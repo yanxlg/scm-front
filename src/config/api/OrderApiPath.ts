@@ -65,6 +65,6 @@ export enum OrderApiPath {
     getPurchaseUidList = '/api/v1/orders/get_purchase_uid_list',
     getWarehouseList = '/api/v1/orders/get_warhouse_list',
 
-    queryPendingSignList = '/api/v1/orders/list/1',
+    queryPendingSignList = '/api/v1/orders/list/10',
     exportPendingSignList = '/api/v1/orders/list/10',
 }

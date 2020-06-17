@@ -4,8 +4,10 @@ import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/Orde
 import {
     exportPendingSignList,
     getOrderGoodsDetail,
+    getPayOrderList,
     getPurchasedNotWarehouseList,
-    queryPendingSignList,
+    getWaitShipList,
+    putConfirmPay,
 } from '@/services/order-manage';
 import {
     AutoEnLargeImg,
@@ -21,12 +23,20 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { CombineRowItem, IFlatOrderItem, IOrderItem } from '@/interface/IOrder';
+import {
+    CombineRowItem,
+    IFlatOrderItem,
+    IOrderItem,
+    IPurchasePlan,
+    PayOrderPurchase,
+} from '@/interface/IOrder';
 import { ColumnType } from 'antd/es/table';
 import { getStatusDesc } from '@/utils/transform';
-import { useCancelPurchase } from '@/pages/order/components/hooks';
+import { useCancelPurchase, useSplitSelectKeys } from '@/pages/order/components/hooks';
 import { FormInstance } from 'antd/es/form';
-import { filterFieldsList } from './utils';
+import { filterFieldsList, combineRows } from './utils';
+import { EmptyObject } from 'react-components/es/utils';
+import TrackDialog from '@/pages/order/components/TrackDialog';
 
 const configFields = [
     'product_shop',
@@ -42,11 +52,11 @@ const configFields = [
 
 const fieldsList = filterFieldsList(configFields);
 
-declare interface PaddingInStoreProps {
+declare interface PendingInStoreProps {
     updateCount: () => void;
 }
 
-const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
+const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
@@ -67,11 +77,14 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
         queryList: getPurchasedNotWarehouseList, // 获取订单列表
     });
 
+    const selectedKeys = useSplitSelectKeys(selectedRowKeys);
+
     const startUpdate = useCallback(() => {
         setUpdate(update => update + 1);
     }, []);
 
     const [exportModal, showExportModal, closeExportModal] = useModal2<boolean>();
+    const [trackModal, showTrackModal, closeTRackModal] = useModal2<IFlatOrderItem | undefined>();
 
     const openOrderGoodsDetailUrl = useCallback((productId: string) => {
         return getOrderGoodsDetail(productId).then(res => {
@@ -110,6 +123,9 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                             >
                                 <Button type="link">取消销售订单</Button>
                             </CancelOrder>
+                            <Button type="link" onClick={() => showTrackModal(item)}>
+                                查看物流轨迹
+                            </Button>
                         </>
                     );
                 },
@@ -239,7 +255,7 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                 render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
-    }, []);
+    }, [dataSource]);
 
     const formComponent = useMemo(() => {
         return (
@@ -284,7 +300,7 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                     },
                     {
                         type: 'checkboxGroup',
-                        name: 'showRecreated',
+                        name: '72',
                         options: [
                             {
                                 label: '72小时无状态更新',
@@ -319,13 +335,22 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
             ? formRef1.current.getFieldsValue()
             : { regenerate: false };
         dataSource.forEach(order => {
-            const { orderGoods, orderInfo, orderGods, ...extra } = order;
-            const { orderGoodsPurchasePlan = [], ...others } = orderGoods;
+            const {
+                orderGoods,
+                unpaidPurchaseOrderGoodsResult,
+                orderInfo,
+                orderGods,
+                ...extra
+            } = order;
+            // purchasePlan 可能在orderGoods下，可能在unpaidPurchaseOrderGoodsResult中
+            const { orderGoodsPurchasePlan = [], ...others } = orderGoods || EmptyObject;
+            const planList: Array<PayOrderPurchase | IPurchasePlan> =
+                unpaidPurchaseOrderGoodsResult || orderGoodsPurchasePlan;
             const purchaseList = regenerate
-                ? orderGoodsPurchasePlan
-                : (orderGoodsPurchasePlan || []).filter(plan => {
+                ? planList
+                : planList.filter(plan => {
                       return plan.purchaseOrderStatus !== 6;
-                  });
+                  }); // 子订单级别
             if (purchaseList.length) {
                 purchaseList.forEach((plan, index) => {
                     const childOrderItem = {
@@ -335,7 +360,9 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                         ...others,
                         ...plan,
                         __rowspan: 1,
+                        __key: plan.orderGoodsId,
                         // __rowspan: index === 0 ? purchaseList.length : 0,
+                        // __key: purchaseList.map(item => item.orderGoodsId).join(','),
                     };
                     flatOrderList.push(childOrderItem);
                 });
@@ -346,16 +373,21 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                     ...orderGods,
                     ...others,
                     __rowspan: 1,
+                    __key: extra.orderGoodsId,
                 });
             }
         });
-        return flatOrderList;
-    }, [dataSource]);
+        return regenerate
+            ? flatOrderList
+            : flatOrderList.filter(item => {
+                  return item.purchaseOrderStatus !== 6; // 采购单级别
+              });
+    }, [dataSource, update]);
 
-    const { cancelSingle, cancelList } = useCancelPurchase(selectedRowKeys, onSearch, updateCount);
+    const { cancelSingle, cancelList } = useCancelPurchase(selectedKeys, onReload, updateCount);
 
     const toolBarRender = useCallback(() => {
-        const disabled = selectedRowKeys.length === 0;
+        const disabled = selectedKeys.length === 0;
         return [
             <LoadingButton
                 key="purchase_order"
@@ -368,8 +400,8 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
             </LoadingButton>,
             <CancelOrder
                 key="2"
-                orderGoodsIds={selectedRowKeys}
-                onReload={onSearch}
+                orderGoodsIds={selectedKeys}
+                onReload={onReload}
                 getAllTabCount={updateCount}
             >
                 <Button
@@ -382,7 +414,7 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                 </Button>
             </CancelOrder>,
         ];
-    }, [selectedRowKeys]);
+    }, [selectedKeys]);
 
     const rowSelection = useMemo(() => {
         return {
@@ -422,7 +454,7 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                 {formComponent1}
                 <FitTable
                     bordered={true}
-                    rowKey={'orderGoodsId'}
+                    rowKey={'__key'}
                     loading={loading}
                     columns={columns}
                     dataSource={flatList}
@@ -439,9 +471,15 @@ const PaddingInStore = ({ updateCount }: PaddingInStoreProps) => {
                     onOKey={onExport}
                     onCancel={closeExportModal}
                 />
+                <TrackDialog
+                    visible={!!trackModal}
+                    orderGoodsId={trackModal ? trackModal.orderGoodsId || '' : ''}
+                    lastWaybillNo={trackModal ? trackModal.lastWaybillNo || '' : ''}
+                    hideTrackDetail={closeTRackModal}
+                />
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys]);
+    }, [update, flatList, loading, selectedRowKeys, trackModal]);
 };
 
-export default PaddingInStore;
+export default PendingInStore;

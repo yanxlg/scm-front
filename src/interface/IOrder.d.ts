@@ -270,6 +270,7 @@ interface PayOrderPurchase {
     reserveStatus: number;
     purchasePlanStatus: number;
     orderGoodsId: string;
+    lastWaybillNo: string;
 }
 
 export interface IOrderItem extends IOrderItemExtend {

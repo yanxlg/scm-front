@@ -134,11 +134,22 @@ export async function postExportPay(data: IWaitPaySearch) {
 }
 
 // 获取待发货
-export async function getWaitShipList(data: IWaitShipSearch) {
-    return request.post(OrderApiPath.getWaitShipList, {
-        requestType: 'json',
-        data,
-    });
+export function getWaitShipList(data: IWaitShipSearch) {
+    return api
+        .post(OrderApiPath.getWaitShipList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
 }
 
 export async function postExportWaitShip(data: IWaitShipSearch) {
