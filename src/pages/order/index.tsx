@@ -14,6 +14,7 @@ import '@/styles/order.less';
 import PendingSign from '@/pages/order/components/PendingSign';
 import PendingPay from '@/pages/order/components/PendingPay';
 import PendingShip from './components/PendingShip';
+import AllOrder from '@/pages/order/components/AllOrder';
 
 const { TabPane } = Tabs;
 
@@ -30,6 +31,7 @@ declare interface IOrderState {
     penddingWarehousingListCount: number;
     errorOrderCount: number;
     penddingCheckListCount: number;
+    penddingSignListCount: number;
 }
 
 class Order extends React.PureComponent<IProps, IOrderState> {
@@ -46,9 +48,10 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
             penddingCheckListCount: 0,
+            penddingSignListCount: 0,
         };
         // console.log(11111, this.props);
-        this.defaultActiveKey = this.props.location?.query?.type || '5';
+        this.defaultActiveKey = this.props.location?.query?.type || '1';
     }
 
     componentDidMount() {
@@ -80,6 +83,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingPurchaseListCount,
             penddingWarehousingListCount,
             penddingCheckListCount,
+            penddingSignListCount,
         } = this.state;
         return (
             <Container>
@@ -91,7 +95,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                     >
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <div className="order-tab-content">
-                                <PaneAll getAllTabCount={this.getAllTabCount} />
+                                <AllOrder updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`待审核（${penddingCheckListCount}）`} key="8">
@@ -114,7 +118,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                                 <PendingShip updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
-                        <TabPane tab={`待签收（pending）`} key="9">
+                        <TabPane tab={`待签收（${penddingSignListCount}）`} key="9">
                             <div className="order-tab-content">
                                 <PendingSign updateCount={this.getAllTabCount} />
                             </div>

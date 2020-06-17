@@ -273,34 +273,36 @@ interface PayOrderPurchase {
     lastWaybillNo: string;
 }
 
+export interface IOrderGood {
+    channelMerchantId: string;
+    channelOrderGoodsSn: string;
+    commodityId: string;
+    createTime: string;
+    freight: string;
+    goodsAmount: string;
+    goodsNumber: number;
+    lastUpdateTime: string;
+    orderAddressUpdatedStatus: number;
+    orderGoodsId: string;
+    orderGoodsShippingStatus: number;
+    orderGoodsPurchasePlan?: Array<IPurchasePlan>;
+    orderGoodsStatus: number;
+    orderId: string;
+    productId: string;
+    productImage: string;
+    productName: string;
+    productPlatform: string;
+    productShop: string;
+    productStyle: string;
+    skuId: string;
+}
+
 export interface IOrderItem extends IOrderItemExtend {
     orderGods: {
         isOfflinePurchase: 0 | 1;
         isReplaceDelivery: 0 | 1;
     };
-    orderGoods: {
-        channelMerchantId: string;
-        channelOrderGoodsSn: string;
-        commodityId: string;
-        createTime: string;
-        freight: string;
-        goodsAmount: string;
-        goodsNumber: number;
-        lastUpdateTime: string;
-        orderAddressUpdatedStatus: number;
-        orderGoodsId: string;
-        orderGoodsShippingStatus: number;
-        orderGoodsPurchasePlan?: Array<IPurchasePlan>;
-        orderGoodsStatus: number;
-        orderId: string;
-        productId: string;
-        productImage: string;
-        productName: string;
-        productPlatform: string;
-        productShop: string;
-        productStyle: string;
-        skuId: string;
-    };
+    orderGoods: IOrderGood | IOrderGood[]; // 父订单时是数组
     orderInfo: {
         channelMerchantId: string;
         channelMerchantName: string;
@@ -330,8 +332,8 @@ export interface IOrderItem extends IOrderItemExtend {
 }
 
 export type IFlatOrderItem = IOrderItem['orderGods'] &
-    IOrderItem['orderGoods'] &
-    IOrderItem['orderInfo'] &
+    Partial<IOrderGood> &
+    Partial<IOrderItem['orderInfo']> &
     Partial<IPurchasePlan> &
     Partial<PayOrderPurchase> &
     IOrderItemExtend;

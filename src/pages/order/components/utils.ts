@@ -1,17 +1,24 @@
 import { FormField } from 'react-components/es/JsonForm';
 import {
+    childrenOrderCancelOptionList,
     defaultOptionItem,
     defaultOptionItem1,
+    finalCancelStatusList,
+    orderShippingOptionList,
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    purchasePayOptionList,
+    purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { queryShopList } from '@/services/order-manage';
+import { getPlatformAndStore, queryShopList } from '@/services/order-manage';
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
 
 const allFormFields: FormField[] = [
     {
         type: 'select',
-        key: 'product_shop',
+        key: 'product_shop1',
         name: 'product_shop',
         label: '销售店铺名称',
         className: 'order-input',
@@ -108,21 +115,254 @@ const allFormFields: FormField[] = [
     },
     {
         type: 'dateRanger',
+        key: 'purchase_time',
+        name: ['purchase_time_start', 'purchase_time_end'],
+        label: '采购签收时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'select',
+        key: 'order_goods_status',
+        name: 'order_goods_status',
+        label: '订单状态',
+        initialValue: 100,
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...orderStatusOptionList],
+    },
+    {
+        type: 'select',
+        key: 'purchase_order_status',
+        initialValue: 100,
+        name: 'purchase_order_status',
+        label: '采购计划状态',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...purchaseOrderOptionList],
+    },
+    {
+        type: 'select',
+        initialValue: 100,
+        key: 'purchase_order_pay_status',
+        name: 'purchase_order_pay_status',
+        label: '采购支付状态',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...purchasePayOptionList],
+    },
+    {
+        type: 'select',
+        initialValue: 100,
+        key: 'order_goods_shipping_status',
+        name: 'order_goods_shipping_status',
+        label: '配送状态',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...orderShippingOptionList],
+    },
+    {
+        type: 'select',
+        initialValue: '',
+        key: 'channel_source',
+        name: 'channel_source',
+        label: '销售渠道',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPlatformAndStore(),
+        onChange: (_, form) => {
+            form.resetFields(['product_shop']);
+        },
+    },
+    {
+        type: 'select',
+        initialValue: '',
+        key: 'product_shop',
+        name: 'product_shop',
+        label: '销售店铺名称',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionListDependence: {
+            name: 'channel_source',
+            key: 'children',
+        },
+        optionList: () => getPlatformAndStore(),
+    },
+    {
+        type: 'select',
+        initialValue: 100,
+        key: 'order_goods_cancel_type',
+        name: 'order_goods_cancel_type',
+        label: '子订单取消类型',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...childrenOrderCancelOptionList],
+    },
+    {
+        type: 'select',
+        initialValue: 100,
+        key: 'purchase_plan_cancel_type',
+        name: 'purchase_plan_cancel_type',
+        label: '采购单取消类型',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...purchasePlanCancelOptionList],
+    },
+    {
+        type: 'select',
+        key: 'purchase_fail_code',
+        name: 'purchase_fail_code',
+        label: '拍单失败原因',
+        className: 'order-input',
+        formatter: 'join',
+        placeholder: '请选择失败原因',
+        mode: 'multiple',
+        maxTagCount: 2,
+        optionList: [...finalCancelStatusList],
+    },
+    {
+        type: 'textarea',
+        key: 'purchase_plan_id',
+        name: 'purchase_plan_id',
+        label: '采购计划ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'channel_order_goods_sn',
+        name: 'channel_order_goods_sn',
+        label: '销售订单ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'order_id',
+        name: 'order_id',
+        label: '父订单ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'purchase_waybill_no',
+        name: 'purchase_waybill_no',
+        label: '采购运单ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'last_waybill_no',
+        name: 'last_waybill_no',
+        label: '销售尾程运单ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'product_id',
+        name: 'product_id',
+        label: 'Product ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'sku_id',
+        name: 'sku_id',
+        label: '中台SKU ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        key: 'purchase_platform_order_id',
+        name: 'purchase_platform_order_id',
+        label: '供应商订单ID',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'dateRanger',
+        key: 'confirm_time',
+        name: ['confirm_time_start', 'confirm_time_end'],
+        label: '销售订单确认时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
+        key: 'cancel_time',
+        name: ['cancel_time_start', 'cancel_time_end'],
+        label: '销售订单取消时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
+        key: 'delivery_time',
+        name: ['delivery_time_start', 'delivery_time_end'],
+        label: '销售订单出库时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
         key: 'collect_time',
         name: ['collect_time_start', 'collect_time_end'],
-        label: '采购签收时间',
+        label: '销售订单揽收时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
+        key: 'receive_time',
+        name: ['receive_time_start', 'receive_time_end'],
+        label: '妥投时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
+        key: 'pay_time',
+        name: ['pay_time_start', 'pay_time_end'],
+        label: '采购支付时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
+        key: 'storage_time',
+        name: ['storage_time_start', 'storage_time_end'],
+        label: '采购入库时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
 ];
 
+const fieldMap = new Map();
+allFormFields.forEach(item => {
+    fieldMap.set(item.key, item);
+});
+
 export const filterFieldsList = (config: string[]) => {
-    return allFormFields.filter(({ key }) => {
-        return config.indexOf(key as string) > -1;
-    });
+    return config.map(key => fieldMap.get(key));
 };
 
 export const combineRows = <T extends CombineRowItem>(record: T, originNode: React.ReactNode) => {
+    return {
+        children: originNode,
+        props: {
+            rowSpan: record.__rowspan || 0,
+        },
+    };
+};
+
+export const combineRowsT = <T extends CombineRowItem>(originNode: React.ReactNode, record: T) => {
     return {
         children: originNode,
         props: {

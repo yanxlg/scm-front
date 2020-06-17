@@ -88,6 +88,24 @@ export async function getAllOrderList(data: IFilterParams) {
     });
 }
 
+export function queryAllOrderList(data: IFilterParams) {
+    return api
+        .post(OrderApiPath.getAllOrderList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
+}
+
 export async function postExportAll(data: IFilterParams) {
     return request.post(OrderApiPath.postExportAll, {
         data,
@@ -127,8 +145,8 @@ export function getPayOrderList(data: IWaitPaySearch) {
         });
 }
 
-export async function postExportPay(data: IWaitPaySearch) {
-    return request.post(OrderApiPath.postExportPay, {
+export function postExportPay(data: IWaitPaySearch) {
+    return api.post(OrderApiPath.postExportPay, {
         data,
     });
 }
@@ -152,8 +170,8 @@ export function getWaitShipList(data: IWaitShipSearch) {
         });
 }
 
-export async function postExportWaitShip(data: IWaitShipSearch) {
-    return request.post(OrderApiPath.postExportWaitShip, {
+export function postExportWaitShip(data: IWaitShipSearch) {
+    return api.post(OrderApiPath.postExportWaitShip, {
         data,
     });
 }
@@ -180,8 +198,8 @@ export function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
         });
 }
 
-export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
-    return request.post(OrderApiPath.postExportPurchasedNotWarehouse, {
+export function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
+    return api.post(OrderApiPath.postExportPurchasedNotWarehouse, {
         data,
     });
 }

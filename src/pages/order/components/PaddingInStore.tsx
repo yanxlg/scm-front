@@ -7,6 +7,7 @@ import {
     getPayOrderList,
     getPurchasedNotWarehouseList,
     getWaitShipList,
+    postExportPurchasedNotWarehouse,
     putConfirmPay,
 } from '@/services/order-manage';
 import {
@@ -26,6 +27,7 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import {
     CombineRowItem,
     IFlatOrderItem,
+    IOrderGood,
     IOrderItem,
     IPurchasePlan,
     PayOrderPurchase,
@@ -39,7 +41,7 @@ import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 
 const configFields = [
-    'product_shop',
+    'product_shop1',
     'reserve_status',
     'order_goods_id',
     'commodity_id',
@@ -47,7 +49,7 @@ const configFields = [
     'purchase_waybill_no',
     'order_create_time',
     'pay_time',
-    'collect_time',
+    'purchase_time',
 ];
 
 const fieldsList = filterFieldsList(configFields);
@@ -108,7 +110,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                             <PopConfirmLoadingButton
                                 popConfirmProps={{
                                     title: '确定要取消该采购订单吗？',
-                                    onConfirm: () => cancelSingle([item.orderGoodsId]),
+                                    onConfirm: () => cancelSingle([item.orderGoodsId!]),
                                 }}
                                 buttonProps={{
                                     type: 'link',
@@ -117,7 +119,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                             />
                             <CancelOrder
                                 key={'2'}
-                                orderGoodsIds={[item.orderGoodsId]}
+                                orderGoodsIds={[item.orderGoodsId!]}
                                 onReload={onSearch}
                                 getAllTabCount={updateCount}
                             >
@@ -159,7 +161,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId)}>{value}</a>
+                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
                 ),
             },
             {
@@ -196,11 +198,12 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 },
             },
             {
-                key: 'purchasePlatformOrderId',
+                key: 'purchaseOrderGoodsId',
                 title: '供应商订单ID',
-                dataIndex: 'purchasePlatformOrderId',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
+                render: (value, item) => item.purchasePlatformOrderId,
             },
             {
                 key: 'payTime',
@@ -277,7 +280,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const formComponent1 = useMemo(() => {
         return (
@@ -300,17 +303,17 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                     },
                     {
                         type: 'checkboxGroup',
-                        name: '72',
+                        name: 'more_shipping_time',
                         options: [
                             {
                                 label: '72小时无状态更新',
-                                value: true,
+                                value: 72,
                             },
                         ],
                         onChange: (name: string, form: FormInstance) => {
                             onSearch();
                         },
-                        formatter: 'join',
+                        formatter: 'firstNumber',
                     },
                 ]}
                 labelClassName="order-label"
@@ -343,7 +346,8 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 ...extra
             } = order;
             // purchasePlan 可能在orderGoods下，可能在unpaidPurchaseOrderGoodsResult中
-            const { orderGoodsPurchasePlan = [], ...others } = orderGoods || EmptyObject;
+            const { orderGoodsPurchasePlan = [], ...others } =
+                (orderGoods as IOrderGood) || EmptyObject;
             const planList: Array<PayOrderPurchase | IPurchasePlan> =
                 unpaidPurchaseOrderGoodsResult || orderGoodsPurchasePlan;
             const purchaseList = regenerate
@@ -441,7 +445,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
     }, [selectedRowKeys]);
 
     const onExport = useCallback((data: any) => {
-        return exportPendingSignList({
+        return postExportPurchasedNotWarehouse({
             ...data,
             ...formRef.current!.getFieldsValue(),
         }).request();
@@ -479,7 +483,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 />
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys, trackModal]);
+    }, [update, flatList, loading, selectedRowKeys, trackModal, exportModal]);
 };
 
 export default PendingInStore;

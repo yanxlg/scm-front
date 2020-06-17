@@ -5,6 +5,7 @@ import {
     exportPendingSignList,
     getOrderGoodsDetail,
     getPayOrderList,
+    postExportPay,
     putConfirmPay,
 } from '@/services/order-manage';
 import {
@@ -24,6 +25,7 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import {
     CombineRowItem,
     IFlatOrderItem,
+    IOrderGood,
     IOrderItem,
     IPurchasePlan,
     PayOrderPurchase,
@@ -37,7 +39,7 @@ import { EmptyObject } from 'react-components/es/utils';
 import QRCode from 'qrcode.react';
 
 const configFields = [
-    'product_shop',
+    'product_shop1',
     'reserve_status',
     'order_goods_id',
     'commodity_id',
@@ -119,7 +121,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                             <PopConfirmLoadingButton
                                 popConfirmProps={{
                                     title: '确定要取消该采购订单吗？',
-                                    onConfirm: () => cancelSingle([item.orderGoodsId]),
+                                    onConfirm: () => cancelSingle([item.orderGoodsId!]),
                                 }}
                                 buttonProps={{
                                     type: 'link',
@@ -128,7 +130,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                             />
                             <CancelOrder
                                 key={'2'}
-                                orderGoodsIds={[item.orderGoodsId]}
+                                orderGoodsIds={[item.orderGoodsId!]}
                                 onReload={onReload}
                                 getAllTabCount={updateCount}
                             >
@@ -231,7 +233,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId)}>{value}</a>
+                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
                 ),
             },
             {
@@ -284,9 +286,9 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 width: 150,
             },
             {
-                key: 'purchaseOrderStatus',
+                key: 'purchasePlanStatus',
                 title: '采购计划状态',
-                dataIndex: 'purchaseOrderStatus',
+                dataIndex: 'purchasePlanStatus',
                 align: 'center',
                 width: 150,
                 render: (value: number, row) => {
@@ -328,7 +330,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const formComponent1 = useMemo(() => {
         return (
@@ -380,14 +382,15 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 ...extra
             } = order;
             // purchasePlan 可能在orderGoods下，可能在unpaidPurchaseOrderGoodsResult中
-            const { orderGoodsPurchasePlan = [], ...others } = orderGoods || EmptyObject;
+            const { orderGoodsPurchasePlan = [], ...others } =
+                (orderGoods as IOrderGood) || EmptyObject;
             const planList: Array<PayOrderPurchase | IPurchasePlan> =
                 unpaidPurchaseOrderGoodsResult || orderGoodsPurchasePlan;
             const purchaseList = regenerate
                 ? planList
                 : planList.filter(plan => {
                       return plan.purchaseOrderStatus !== 6;
-                  });
+                  }); // 子订单级别
             if (purchaseList.length) {
                 purchaseList.forEach((plan, index) => {
                     const childOrderItem = {
@@ -412,7 +415,11 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 });
             }
         });
-        return flatOrderList;
+        return regenerate
+            ? flatOrderList
+            : flatOrderList.filter(item => {
+                  return item.purchaseOrderStatus !== 6; // 采购单级别
+              });
     }, [dataSource, update]);
 
     const { cancelSingle, cancelList } = useCancelPurchase(selectedKeys, onReload, updateCount);
@@ -472,7 +479,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
     }, [selectedRowKeys]);
 
     const onExport = useCallback((data: any) => {
-        return exportPendingSignList({
+        return postExportPay({
             ...data,
             ...formRef.current!.getFieldsValue(),
         }).request();
@@ -504,7 +511,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 />
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys]);
+    }, [update, flatList, loading, selectedRowKeys, exportModal]);
 };
 
 export default PendingPay;

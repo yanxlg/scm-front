@@ -5,6 +5,7 @@ import {
     exportPendingSignList,
     getOrderGoodsDetail,
     getWaitShipList,
+    postExportWaitShip,
 } from '@/services/order-manage';
 import {
     AutoEnLargeImg,
@@ -23,6 +24,7 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import {
     CombineRowItem,
     IFlatOrderItem,
+    IOrderGood,
     IOrderItem,
     IPurchasePlan,
     PayOrderPurchase,
@@ -35,7 +37,7 @@ import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 
 const configFields = [
-    'product_shop',
+    'product_shop1',
     'reserve_status',
     'order_goods_id',
     'commodity_id',
@@ -101,7 +103,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                             <PopConfirmLoadingButton
                                 popConfirmProps={{
                                     title: '确定要取消该采购订单吗？',
-                                    onConfirm: () => cancelSingle([item.orderGoodsId]),
+                                    onConfirm: () => cancelSingle([item.orderGoodsId!]),
                                 }}
                                 buttonProps={{
                                     type: 'link',
@@ -110,7 +112,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                             />
                             <CancelOrder
                                 key={'2'}
-                                orderGoodsIds={[item.orderGoodsId]}
+                                orderGoodsIds={[item.orderGoodsId!]}
                                 onReload={onReload}
                                 getAllTabCount={updateCount}
                             >
@@ -121,12 +123,12 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 },
             },
             {
-                key: 'createTime',
+                key: 'orderCreateTime',
                 title: '订单生成时间',
-                dataIndex: 'createTime',
+                dataIndex: 'orderCreateTime',
                 align: 'center',
                 width: 150,
-                render: (value: string) => utcToLocal(value, ''),
+                render: (value: string, item) => utcToLocal(item.createTime, ''),
             },
             {
                 key: 'orderGoodsId',
@@ -149,13 +151,13 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId)}>{value}</a>
+                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
                 ),
             },
             {
-                key: 'productImageUrl',
+                key: 'productImage',
                 title: 'SKU图片',
-                dataIndex: 'productImageUrl',
+                dataIndex: 'productImage',
                 align: 'center',
                 width: 150,
                 render: (value: string) => {
@@ -163,9 +165,9 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 },
             },
             {
-                key: 'productSkuStyle',
+                key: 'productStyle',
                 title: '商品规格',
-                dataIndex: 'productSkuStyle',
+                dataIndex: 'productStyle',
                 align: 'center',
                 width: 150,
                 render: (value: string) => {
@@ -186,11 +188,12 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 },
             },
             {
-                key: 'purchasePlatformOrderId',
+                key: 'purchaseOrderGoodsId',
                 title: '供应商订单ID',
-                dataIndex: 'purchasePlatformOrderId',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
+                render: (value, item) => item.purchasePlatformOrderId,
             },
             {
                 key: 'payTime',
@@ -201,9 +204,9 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
-                key: 'productPddMerchantName',
+                key: 'productShop',
                 title: '销售店铺名称',
-                dataIndex: 'productPddMerchantName',
+                dataIndex: 'productShop',
                 align: 'center',
                 width: 120,
             },
@@ -252,7 +255,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 </div>
             </JsonForm>
         );
-    }, []);
+    }, [loading]);
 
     const formComponent1 = useMemo(() => {
         return (
@@ -275,17 +278,17 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                     },
                     {
                         type: 'checkboxGroup',
-                        name: '48',
+                        name: 'more_pay_time',
                         options: [
                             {
                                 label: '48小时无状态更新',
-                                value: true,
+                                value: 48,
                             },
                         ],
                         onChange: (name: string, form: FormInstance) => {
                             onSearch();
                         },
-                        formatter: 'join',
+                        formatter: 'firstNumber',
                     },
                 ]}
                 labelClassName="order-label"
@@ -318,7 +321,8 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 ...extra
             } = order;
             // purchasePlan 可能在orderGoods下，可能在unpaidPurchaseOrderGoodsResult中
-            const { orderGoodsPurchasePlan = [], ...others } = orderGoods || EmptyObject;
+            const { orderGoodsPurchasePlan = [], ...others } =
+                (orderGoods as IOrderGood) || EmptyObject;
             const planList: Array<PayOrderPurchase | IPurchasePlan> =
                 unpaidPurchaseOrderGoodsResult || orderGoodsPurchasePlan;
             const purchaseList = regenerate
@@ -416,7 +420,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
     }, [selectedRowKeys]);
 
     const onExport = useCallback((data: any) => {
-        return exportPendingSignList({
+        return postExportWaitShip({
             ...data,
             ...formRef.current!.getFieldsValue(),
         }).request();
@@ -448,7 +452,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 />
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys]);
+    }, [update, flatList, loading, selectedRowKeys, exportModal]);
 };
 
 export default PendingShip;
