@@ -161,19 +161,19 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 ),
             },
             {
-                key: 'productImageUrl',
+                key: 'productImage',
                 title: 'SKU图片',
-                dataIndex: 'productImageUrl',
+                dataIndex: 'productImage',
                 align: 'center',
                 width: 150,
-                render: (value: string) => {
+                render: (value: string, item) => {
                     return <AutoEnLargeImg src={value} className="order-img-lazy" />;
                 },
             },
             {
-                key: 'productSkuStyle',
+                key: 'productStyle',
                 title: '商品规格',
-                dataIndex: 'productSkuStyle',
+                dataIndex: 'productStyle',
                 align: 'center',
                 width: 150,
                 render: (value: string) => {
@@ -194,11 +194,12 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 },
             },
             {
-                key: 'purchasePlatformOrderId',
+                key: 'purchaseOrderGoodsId',
                 title: '供应商订单ID',
-                dataIndex: 'purchasePlatformOrderId',
+                dataIndex: 'purchaseOrderGoodsId',
                 align: 'center',
                 width: 150,
+                render: (value, item) => item.purchasePlatformOrderId,
             },
             {
                 key: 'payTime',
@@ -356,8 +357,8 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                         ...extra,
                         ...orderInfo,
                         ...orderGods,
-                        ...others,
                         ...plan,
+                        ...others, // 订单时间
                         __rowspan: 1,
                         __key: plan.orderGoodsId,
                         // __rowspan: index === 0 ? purchaseList.length : 0,
