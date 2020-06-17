@@ -8,12 +8,12 @@ const shajs = require('sha.js');
 const dev = process.env.NODE_ENV !== 'production';
 
 const config = defineConfig({
-    /*    forkTSCheker: {
+    forkTSCheker: {
         formatter: 'codeframe',
         async: false,
         checkSyntacticErrors: true,
-        reportFiles: ['!src/.umi/!**', '!node_modules', 'src/!**!/!*.{ts,tsx}'],
-    },*/
+        reportFiles: ['!src/.umi/**', '!node_modules', 'src/!**/!*.{ts,tsx}'],
+    },
     hash: true,
     devtool: dev ? 'source-map' : false,
     antd: {},
@@ -122,12 +122,13 @@ const config = defineConfig({
         config.plugin('antd-dayjs-webpack-plugin').use(require('antd-dayjs-webpack-plugin')); // dayjs代替moment
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         if (dev) {
+            console.log('chedk');
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
                 {
                     formatter: 'codeframe',
                     async: true,
                     checkSyntacticErrors: true,
-                    reportFiles: ['!src/.umi/**', '!node_modules', 'src/**/*.{ts,tsx}'],
+                    reportFiles: ['!src/.umi/**', '!node_modules', 'src/!**/!*.{ts,tsx}'],
                 },
             ]);
         }

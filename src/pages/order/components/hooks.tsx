@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { delPurchaseOrders } from '@/services/order-manage';
 import { notification } from 'antd';
 
@@ -42,7 +42,7 @@ export const useBatch = (updateCount: () => void) => {
 
 export const useCancelPurchase = (
     selectedRowKeys: string[],
-    onSearch: () => void,
+    onReload: () => void,
     updateCount: () => void,
 ) => {
     const { batchSuccess, batchFail } = useBatch(updateCount);
@@ -50,7 +50,7 @@ export const useCancelPurchase = (
         return delPurchaseOrders({
             order_goods_ids: orderGoodsIds,
         }).then(res => {
-            onSearch();
+            onReload();
             const { success, failed } = res.data;
             if (success!.length) {
                 batchSuccess('取消采购单', success);
@@ -69,4 +69,14 @@ export const useCancelPurchase = (
         cancelSingle,
         cancelList,
     };
+};
+
+export const useSplitSelectKeys = (selectedKeys: string[]) => {
+    return useMemo(() => {
+        const keys = selectedKeys
+            .join(',')
+            .split(',')
+            .filter(Boolean);
+        return Array.from(new Set(keys));
+    }, [selectedKeys]);
 };

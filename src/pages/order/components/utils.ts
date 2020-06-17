@@ -15,6 +15,7 @@ const allFormFields: FormField[] = [
         name: 'product_shop',
         label: '销售店铺名称',
         className: 'order-input',
+        initialValue: '',
         syncDefaultOption: defaultOptionItem1,
         optionList: () =>
             queryShopList().then(({ data = [] }) => {
@@ -33,6 +34,7 @@ const allFormFields: FormField[] = [
         name: 'reserve_status',
         label: '仓库库存预定状态',
         className: 'order-input',
+        initialValue: 100,
         optionList: [defaultOptionItem, ...purchaseReserveOptionList],
     },
     {
@@ -124,7 +126,7 @@ export const combineRows = <T extends CombineRowItem>(record: T, originNode: Rea
     return {
         children: originNode,
         props: {
-            rowSpan: record.__rowspan || 1,
+            rowSpan: record.__rowspan || 0,
         },
     };
 };

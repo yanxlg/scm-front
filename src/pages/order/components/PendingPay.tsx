@@ -38,7 +38,7 @@ import {
 } from '@/interface/IOrder';
 import { ColumnType } from 'antd/es/table';
 import { getStatusDesc } from '@/utils/transform';
-import { useCancelPurchase } from '@/pages/order/components/hooks';
+import { useCancelPurchase, useSplitSelectKeys } from '@/pages/order/components/hooks';
 import { FormInstance } from 'antd/es/form';
 import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
@@ -81,6 +81,8 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
         queryList: getPayOrderList, // 获取订单列表
     });
 
+    const selectedKeys = useSplitSelectKeys(selectedRowKeys);
+
     const startUpdate = useCallback(() => {
         setUpdate(update => update + 1);
     }, []);
@@ -96,15 +98,14 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
 
     const confirmPay = useCallback(
         (id: string) => {
-            const planIdList = dataSource
-                .filter(item => item.purchase_parent_order_sn === id)
-                .map(item => item.purchase_plan_id);
+            const planList = dataSource.find(item => item.purchaseParentOrderSn === id)!
+                .unpaidPurchaseOrderGoodsResult;
+            const planIdList = planList!.map(item => item.purchasePlanId!);
             putConfirmPay({
                 purchase_platform_parent_order_id: id,
                 purchase_plan_id: planIdList,
             }).then(() => {
-                // console.log('putConfirmPay', res);
-                onSearch();
+                onReload();
             });
         },
         [dataSource],
@@ -120,7 +121,8 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 width: 150,
                 fixed: 'left',
                 render: (value: string, item) => {
-                    return (
+                    return combineRows(
+                        item,
                         <>
                             <PopConfirmLoadingButton
                                 popConfirmProps={{
@@ -140,7 +142,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                             >
                                 <Button type="link">取消销售订单</Button>
                             </CancelOrder>
-                        </>
+                        </>,
                     );
                 },
             },
@@ -189,7 +191,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                                         size="small"
                                         type="primary"
                                         style={{ marginTop: 6 }}
-                                        onClick={() => confirmPay(purchaseParentOrderSn)}
+                                        onClick={() => confirmPay(purchaseParentOrderSn!)}
                                     >
                                         确认支付
                                     </Button>
@@ -202,24 +204,24 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 },
             },
             {
-                key: 'purchase_total_amount',
+                key: 'purchaseTotalAmount',
                 title: '采购总金额($)',
-                dataIndex: 'purchase_total_amount',
+                dataIndex: 'purchaseTotalAmount',
                 align: 'center',
                 width: 150,
                 render: (value: string, item) => combineRows(item, value),
             },
             {
-                key: 'parent_purchase_pay_status_desc',
+                key: 'orderCreateTime',
                 title: '订单生成时间',
-                dataIndex: 'parent_purchase_pay_status_desc',
+                dataIndex: 'orderCreateTime',
                 align: 'center',
                 width: 120,
             },
             {
-                key: 'purchase_order_sn',
+                key: 'orderGoodsId',
                 title: '子订单ID',
-                dataIndex: 'purchase_order_sn',
+                dataIndex: 'orderGoodsId',
                 align: 'center',
                 width: 140,
             },
@@ -241,46 +243,46 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 ),
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'purchaseOrderSn',
                 title: '供应商订单ID',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'purchaseOrderSn',
                 align: 'center',
                 width: 150,
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'saleGoodsNumber',
                 title: '销售商品数量',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'saleGoodsNumber',
                 align: 'center',
                 width: 150,
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'freight',
                 title: '销售商品运费($)',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'freight',
                 align: 'center',
                 width: 150,
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'saleGoodsAmount',
                 title: '销售商品总金额($)',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'saleGoodsAmount',
                 align: 'center',
-                width: 150,
+                width: 180,
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'purchaseGoodsNumber',
                 title: '采购商品数量',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'purchaseGoodsNumber',
                 align: 'center',
                 width: 150,
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'purchaseGoodsAmount',
                 title: '采购商品总金额(￥)',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'purchaseGoodsAmount',
                 align: 'center',
-                width: 150,
+                width: 180,
             },
             {
                 key: 'productShop',
@@ -312,7 +314,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
-    }, []);
+    }, [dataSource]);
 
     const formComponent = useMemo(() => {
         return (
@@ -352,20 +354,6 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                         ],
                         onChange: (name: string, form: FormInstance) => {
                             startUpdate();
-                        },
-                        formatter: 'join',
-                    },
-                    {
-                        type: 'checkboxGroup',
-                        name: 'showRecreated',
-                        options: [
-                            {
-                                label: '72小时无状态更新',
-                                value: true,
-                            },
-                        ],
-                        onChange: (name: string, form: FormInstance) => {
-                            onSearch();
                         },
                         formatter: 'join',
                     },
@@ -417,6 +405,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                         ...others,
                         ...plan,
                         __rowspan: index === 0 ? purchaseList.length : 0,
+                        __key: purchaseList.map(item => item.orderGoodsId).join(','),
                     };
                     flatOrderList.push(childOrderItem);
                 });
@@ -427,16 +416,17 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                     ...orderGods,
                     ...others,
                     __rowspan: 1,
+                    __key: extra.orderGoodsId,
                 });
             }
         });
         return flatOrderList;
-    }, [dataSource]);
+    }, [dataSource, update]);
 
-    const { cancelSingle, cancelList } = useCancelPurchase(selectedRowKeys, onSearch, updateCount);
+    const { cancelSingle, cancelList } = useCancelPurchase(selectedKeys, onReload, updateCount);
 
     const toolBarRender = useCallback(() => {
-        const disabled = selectedRowKeys.length === 0;
+        const disabled = selectedKeys.length === 0;
         return [
             <LoadingButton
                 key="purchase_order"
@@ -449,7 +439,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
             </LoadingButton>,
             <CancelOrder
                 key="2"
-                orderGoodsIds={selectedRowKeys}
+                orderGoodsIds={selectedKeys}
                 onReload={onSearch}
                 getAllTabCount={updateCount}
             >
@@ -463,7 +453,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 </Button>
             </CancelOrder>,
         ];
-    }, [selectedRowKeys]);
+    }, [selectedKeys]);
 
     const rowSelection = useMemo(() => {
         return {
@@ -503,7 +493,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 {formComponent1}
                 <FitTable
                     bordered={true}
-                    rowKey={'orderGoodsId'}
+                    rowKey={'__key'}
                     loading={loading}
                     columns={columns}
                     dataSource={flatList}

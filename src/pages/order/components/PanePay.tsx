@@ -147,21 +147,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 searchRef.current?.getFieldsValue(),
             );
             setLoading(true);
-            return getPayOrderList(params)
-                .then(res => {
-                    currentSearchParams = params;
-                    const { all_count: total, list } = res.data;
-                    // const { page, page_count } = params;
-                    if (list) {
-                        setPage(params.page as number);
-                        setPageSize(params.page_count as number);
-                        setTotal(total);
-                        _setOrderList(getOrderList(list));
-                    }
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
         },
         [page, pageSize],
     );

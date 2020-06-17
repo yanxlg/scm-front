@@ -355,7 +355,7 @@ const PendingSign = ({ updateCount }: PendingSignProps) => {
             }
         });
         return flatOrderList;
-    }, [dataSource]);
+    }, [dataSource, update]);
 
     const { cancelSingle, cancelList } = useCancelPurchase(selectedRowKeys, onSearch, updateCount);
 

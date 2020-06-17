@@ -269,6 +269,7 @@ interface PayOrderPurchase {
     productShop: string;
     reserveStatus: number;
     purchasePlanStatus: number;
+    orderGoodsId: string;
 }
 
 export interface IOrderItem extends IOrderItemExtend {
@@ -336,4 +337,5 @@ export type IFlatOrderItem = IOrderItem['orderGods'] &
 
 export type CombineRowItem = {
     __rowspan: number;
+    __key?: any;
 };
