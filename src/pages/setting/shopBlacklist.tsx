@@ -50,7 +50,7 @@ const formFields2: FormField[] = [
     {
         type: 'textarea',
         name: 'black_store_reason',
-        label: '拉给原因',
+        label: '拉黑原因',
         placeholder: '请输入',
         className: styles.reason,
         rules: [{ required: true, message: '请输入拉黑店铺的原因' }],
