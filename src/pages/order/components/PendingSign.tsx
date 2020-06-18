@@ -444,6 +444,7 @@ const PendingSign = ({ updateCount }: PendingSign) => {
         return exportPendingSignList({
             ...data,
             ...formRef.current!.getFieldsValue(),
+            ...formRef1.current!.getFieldsValue(),
         }).request();
     }, []);
 

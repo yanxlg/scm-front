@@ -423,6 +423,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
         return postExportWaitShip({
             ...data,
             ...formRef.current!.getFieldsValue(),
+            ...formRef1.current!.getFieldsValue(),
         }).request();
     }, []);
 

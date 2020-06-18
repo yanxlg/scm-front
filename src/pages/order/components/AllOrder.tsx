@@ -253,7 +253,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       title: '商品详情',
                       dataIndex: 'goodsDetail',
                       align: 'center',
-                      width: 120,
+                      width: 150,
                       render: (value: any, row) => {
                           return (
                               <LoadingButton
@@ -264,7 +264,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                               </LoadingButton>
                           );
                       },
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
                   {
                       key: 'productShop',
@@ -272,7 +272,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'productShop',
                       align: 'center',
                       width: 120,
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
                   {
                       key: 'confirmTime',
@@ -280,15 +280,10 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'confirmTime',
                       align: 'center',
                       width: 120,
-                      render: (value: string, row: IParentOrderItem) => {
-                          return {
-                              children: utcToLocal(value, ''),
-                              props: {
-                                  rowSpan: row._rowspan || 0,
-                              },
-                          };
+                      render: (value: string, row) => {
+                          return combineRows(row, utcToLocal(value, ''));
                       },
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
                   {
                       key: 'channelSource',
@@ -297,7 +292,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: combineRowsT,
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
                   {
                       key: 'currency',
@@ -306,7 +301,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: combineRowsT,
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
                   {
                       key: 'orderAmount',
@@ -315,7 +310,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: combineRowsT,
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
               ]
             : [
@@ -469,7 +464,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: '_purchaseTotalAmount',
                       align: 'center',
                       width: 140,
-                      defaultHide: true,
+                      // defaultHide: true,
                       render: (_, row) => row.purchaseAmount,
                   },
 
@@ -479,7 +474,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'productShop',
                       align: 'center',
                       width: 120,
-                      defaultHide: true,
+                      // defaultHide: true,
                   },
                   {
                       key: 'channelOrderGoodsSn',
@@ -827,6 +822,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
         return exportPendingSignList({
             ...data,
             ...formRef.current!.getFieldsValue(),
+            ...formRef1.current!.getFieldsValue(),
         }).request();
     }, []);
 

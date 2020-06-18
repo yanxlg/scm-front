@@ -482,6 +482,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
         return postExportPay({
             ...data,
             ...formRef.current!.getFieldsValue(),
+            ...formRef1.current!.getFieldsValue(),
         }).request();
     }, []);
 

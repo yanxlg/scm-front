@@ -448,6 +448,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
         return postExportPurchasedNotWarehouse({
             ...data,
             ...formRef.current!.getFieldsValue(),
+            ...formRef1.current!.getFieldsValue(),
         }).request();
     }, []);
 
