@@ -453,6 +453,11 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'goodsAmount',
                       align: 'center',
                       width: 180,
+                      render: (_, item) => {
+                          const { goodsNumber = 0, goodsAmount } = item;
+                          const amount = Number(goodsAmount);
+                          return goodsNumber ? (amount / goodsNumber).toFixed(2) : '';
+                      },
                   },
                   {
                       key: 'goodsNumber',
@@ -475,8 +480,8 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 140,
                       render: (_, row) => {
-                          const { goodsAmount, goodsNumber = 0, freight } = row;
-                          const total = Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                          const { goodsAmount, freight } = row;
+                          const total = (Number(goodsAmount) || 0) + (Number(freight) || 0);
                           return isNaN(total) ? '' : total.toFixed(2);
                       },
                   },
