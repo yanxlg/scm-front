@@ -181,6 +181,7 @@ const ChannelList: React.FC = props => {
     const { visible, onClose, setVisibleProps } = useModal<{
         product_ids: string;
         merchant_id: string;
+        commodity_ids: string;
     }>();
 
     const {
@@ -398,12 +399,16 @@ const ChannelList: React.FC = props => {
         [dataSource],
     );
 
-    const showLog = useCallback((record: IChannelProductListItem) => {
-        setVisibleProps({
-            product_ids: record.product_id,
-            merchant_id: record.merchant_id,
-        });
-    }, []);
+    const showLog = useCallback(
+        ({ product_id, merchant_id, commodity_id }: IChannelProductListItem) => {
+            setVisibleProps({
+                product_ids: product_id,
+                merchant_id: merchant_id,
+                commodity_ids: commodity_id,
+            });
+        },
+        [],
+    );
 
     const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
         return [
