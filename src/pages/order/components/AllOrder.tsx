@@ -1106,7 +1106,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedKeys.length === 0;
         return [
-            <Button
+            <LoadingButton
                 key="buy"
                 type="primary"
                 className={formStyles.formBtn}
@@ -1114,7 +1114,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                 onClick={() => postOrdersPlaceCallback(selectedKeys)}
             >
                 一键拍单
-            </Button>,
+            </LoadingButton>,
             <LoadingButton
                 key="purchase_order"
                 type="primary"
