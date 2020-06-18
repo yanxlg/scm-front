@@ -260,6 +260,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'goodsDetail',
                       align: 'center',
                       width: 150,
+                      defaultHide: true,
                       render: (value: any, row) => {
                           return (
                               <LoadingButton
@@ -270,7 +271,6 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                               </LoadingButton>
                           );
                       },
-                      // defaultHide: true,
                   },
                   {
                       key: 'productShop',
@@ -278,7 +278,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'productShop',
                       align: 'center',
                       width: 120,
-                      // defaultHide: true,
+                      defaultHide: true,
                   },
                   {
                       key: 'confirmTime',
@@ -289,7 +289,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       render: (value: string, row) => {
                           return combineRows(row, utcToLocal(value, ''));
                       },
-                      // defaultHide: true,
+                      defaultHide: true,
                   },
                   {
                       key: 'channelSource',
@@ -298,7 +298,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: combineRowsT,
-                      // defaultHide: true,
+                      defaultHide: true,
                   },
                   {
                       key: 'currency',
@@ -307,7 +307,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: combineRowsT,
-                      // defaultHide: true,
+                      defaultHide: true,
                   },
                   {
                       key: 'orderAmount',
@@ -316,7 +316,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: combineRowsT,
-                      // defaultHide: true,
+                      defaultHide: true,
                   },
               ]
             : [
@@ -1112,7 +1112,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                     columns={columns}
                     dataSource={flatList}
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                    columnsSettingRender={AllColumnsSetting}
+                    columnsSettingRender={onlyParent ? true : AllColumnsSetting}
                     pagination={pagination}
                     onChange={onChange}
                     toolBarRender={onlyParent ? undefined : toolBarRender}
