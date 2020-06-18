@@ -155,22 +155,23 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 ),
             },
             {
-                key: 'productImage',
+                key: 'productImageUrl',
                 title: 'SKU图片',
-                dataIndex: 'productImage',
+                dataIndex: 'productImageUrl',
                 align: 'center',
                 width: 150,
-                render: (value: string) => {
-                    return <AutoEnLargeImg src={value} className="order-img-lazy" />;
+                render: (value: string, item) => {
+                    return <AutoEnLargeImg src={item.productImage} className="order-img-lazy" />;
                 },
             },
             {
-                key: 'productStyle',
+                key: 'productSkuStyle',
                 title: '商品规格',
-                dataIndex: 'productStyle',
+                dataIndex: 'productSkuStyle',
                 align: 'center',
                 width: 150,
-                render: (value: string) => {
+                render: (_: string, item) => {
+                    const value = item.productStyle;
                     let child: any = null;
                     if (value) {
                         try {
@@ -188,12 +189,11 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 },
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'purchasePlatformOrderId',
                 title: '供应商订单ID',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'purchasePlatformOrderId',
                 align: 'center',
                 width: 150,
-                render: (value, item) => item.purchasePlatformOrderId,
             },
             {
                 key: 'payTime',
