@@ -466,9 +466,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseFailCode',
             align: 'center',
             width: 140,
-            render: (value: string, row: IChildOrderItem) => {
-                const { purchaseOrderStatus } = row;
-                return purchaseOrderStatus === 7
+            render: (value: string) => {
+                return value && value !== '0'
                     ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
                     : '';
             },
@@ -477,7 +476,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // 勾选展示
         {
             key: 'purchaseCreateTime',
-            title: '采购订单生成时间',
+            title: '采购计划生成时间',
             dataIndex: 'purchaseCreateTime',
             align: 'center',
             width: 146,
@@ -802,7 +801,6 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                 orderGoodsIds={orderGoodsIdList}
                 onReload={onSearch}
                 getAllTabCount={_getAllTabCount}
-                offShelfChecked={false}
             >
                 <Button
                     key="4"
@@ -835,6 +833,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
+                    minHeight={600}
                     pagination={
                         {
                             current: page,

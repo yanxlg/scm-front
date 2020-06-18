@@ -142,6 +142,7 @@ export interface IGoodsVersionItem {
     shipping_fee_max: string;
     commodity_id?: string;
     _update_time?: string;
+    source_channel: string;
 }
 
 export type IGoodsVersionAndSkuItem = IGoodsVersionItem & IGoodsVersionSkuItem;
@@ -193,4 +194,28 @@ export interface ISkuInfo {
 
 export interface ICurrentGoodsItem {
     [key: string]: any;
+}
+
+export interface IGood {
+    commodityId: string;
+    commoditySkuId: string;
+    price: string;
+    productId: string;
+    productTitle: string;
+    quantity: string;
+    shippingFee: string;
+    sku: string;
+    skuImage: {
+        url: string;
+    };
+    tags: string[];
+    topCatId: string;
+    variantId: string;
+    weight: string;
+    productOptionValue: Array<{
+        option: { text: string };
+        value: {
+            text: string;
+        };
+    }>;
 }

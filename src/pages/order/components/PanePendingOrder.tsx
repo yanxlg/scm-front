@@ -783,7 +783,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '商品名称',
                         dataIndex: 'productName',
                         align: 'center',
-                        width: 120,
+                        width: 200,
                         render: (value, row) => {
                             const { productId } = row;
                             return {
@@ -898,7 +898,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         key: 'purchaseCreateTime',
-                        title: '采购订单生成时间',
+                        title: '采购计划生成时间',
                         dataIndex: 'purchaseCreateTime',
                         align: 'center',
                         width: 180,
@@ -1014,7 +1014,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                             const purchaseOrderStatus = row.purchaseOrderStatus;
                             return (
                                 <div>
-                                    <div>{reasonStr}</div>
+                                    <div>{reasonStr || '未知原因'}</div>
                                     {purchaseOrderStatus === 7 && (
                                         <div>
                                             {status === 0 ? (
@@ -1066,7 +1066,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '商品名称',
                         dataIndex: 'productName',
                         align: 'center',
-                        width: 120,
+                        width: 200,
                         render: (value, row) => {
                             const { productId } = row;
                             return {
@@ -1139,7 +1139,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         key: 'purchaseCreateTime',
-                        title: '采购订单生成时间',
+                        title: '采购计划生成时间',
                         dataIndex: 'purchaseCreateTime',
                         align: 'center',
                         width: 180,
@@ -1238,7 +1238,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '商品名称',
                         dataIndex: 'productName',
                         align: 'center',
-                        width: 120,
+                        width: 200,
                         render: (value, row) => {
                             const { productId } = row;
                             return {
@@ -1345,7 +1345,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         key: 'purchaseCreateTime',
-                        title: '采购订单生成时间',
+                        title: '采购计划生成时间',
                         dataIndex: 'purchaseCreateTime',
                         align: 'center',
                         width: 180,
@@ -1389,7 +1389,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         onClick={_postOrdersPlace}
                         disabled={disabled}
                     >
-                        一键重拍
+                        一键拍单
                     </LoadingButton>,
                     <CancelOrder
                         key={'cancel'}

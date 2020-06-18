@@ -15,6 +15,7 @@ import {
     PUTaskRangeTypeCode,
 } from '@/enums/StatusEnum';
 import { RequestPagination } from '@/interface/IGlobal';
+import { TaskChannelCode, TaskChannelEnum } from '@/config/dictionaries/Task';
 
 export type ITaskListQuery = {
     task_id?: string;
@@ -41,6 +42,7 @@ export interface ITaskListItem {
     execute_count: number;
     update_type?: PUTaskRangeTypeCode[];
     channel: '1' | '2' | '3';
+    range?: number | string;
 }
 
 export interface ITaskListExtraData {
@@ -258,4 +260,5 @@ export interface IVoVaTaskBody {
     task_end_time?: number;
     task_interval_seconds?: number;
     is_upper_shelf?: boolean;
+    channel: TaskChannelCode;
 }

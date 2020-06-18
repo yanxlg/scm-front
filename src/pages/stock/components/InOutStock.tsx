@@ -48,8 +48,6 @@ const scroll: TableProps<IStockInItem | IStockOutItem>['scroll'] = {
 const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
     const formRef = useRef<JsonFormRef>(null);
 
-    const logisticsMap = useRef<{ [key: string]: string }>({});
-
     const { visible, setVisibleProps: setOrderVisible, onClose } = useModal<
         IStockOutItem['orderAddress']
     >();
@@ -139,6 +137,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     width: '150px',
                     dataIndex: 'inboundWeight',
                     align: 'center',
+                    render: (val: string) => (Number(val) || 0).toFixed(2),
                 },
                 {
                     title: '入库时间',
@@ -240,11 +239,11 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 title: '物流商',
                 width: '150px',
-                dataIndex: 'carrierId',
+                dataIndex: 'carrierName',
                 align: 'center',
                 render: (value, row) => {
                     return {
-                        children: logisticsMap.current[value],
+                        children: value,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -300,10 +299,12 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 width: '150px',
                 dataIndex: 'totalWeight',
                 align: 'center',
-                render: (value, row) => {
+                render: (value = '0', row) => {
                     const { weightUnit = 'g', rowSpan = 0 } = row;
+                    const isKg = weightUnit.toLowerCase() === 'kg';
+                    const weight = isKg ? Number(value) * 1000 : Number(value);
                     return {
-                        children: value + ' ' + weightUnit,
+                        children: weight.toFixed(2) + ' ' + (isKg ? 'g' : weightUnit),
                         props: {
                             rowSpan: rowSpan,
                         },
@@ -575,22 +576,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             pageSize: page_size,
             pageNumber: page_number,
         },
-        autoQuery: false,
     });
-
-    useEffect(() => {
-        if (type === StockType.Out) {
-            queryLogistics().then(({ data = [] }) => {
-                data.map(({ carrier_name, carrier_id }) => {
-                    logisticsMap.current[carrier_id] = carrier_name;
-                });
-
-                onSearch();
-            });
-        } else {
-            onSearch();
-        }
-    }, []);
 
     const getCopiedLinkQuery = useCallback(() => {
         return {

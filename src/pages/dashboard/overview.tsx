@@ -95,7 +95,7 @@ const columns: ColumnsType<object> = [
     },
     {
         width: 120,
-        title: '实际采购成本',
+        title: '当日采购成本',
         dataIndex: 'actualPurchaseCost',
         align: 'center',
     },
@@ -148,15 +148,34 @@ const columns: ColumnsType<object> = [
         align: 'center',
     },
     {
-        width: 120,
-        title: '在架商品数',
+        width: 150,
+        title: '平均在售商品数',
         dataIndex: 'onsaleGoodsNum',
         align: 'center',
     },
     {
-        width: 120,
-        title: '有销量商品数',
+        width: 150,
+        title: '平均有销量商品数',
         dataIndex: 'saledGoodsNum',
+        align: 'center',
+    },
+    {
+        width: 120,
+        title: '动销率',
+        dataIndex: 'pinRate',
+        align: 'center',
+        render: (val: string) => `${formatTwodecimal(val)}%`,
+    },
+    {
+        width: 120,
+        title: '上架商品数',
+        dataIndex: 'publishedGoodsNum',
+        align: 'center',
+    },
+    {
+        width: 120,
+        title: '下架商品数',
+        dataIndex: 'unpublishedGoodsNum',
         align: 'center',
     },
 ];
@@ -187,7 +206,7 @@ const Overview: React.FC = props => {
         saledGoodsNumRatio: 0,
         onsaleGoodsNum: '0',
         onsaleGoodsNumRatio: 0,
-        pinRate: '0',
+        pinRate: 0,
         pinRateRatio: 0,
     });
 
@@ -246,7 +265,7 @@ const Overview: React.FC = props => {
                         saledGoodsNumRatio: formatTwodecimal(saledGoodsNumRatio),
                         onsaleGoodsNum,
                         onsaleGoodsNumRatio: formatTwodecimal(onsaleGoodsNumRatio),
-                        pinRate,
+                        pinRate: formatTwodecimal(pinRate),
                         pinRateRatio: formatTwodecimal(pinRateRatio),
                     });
                     setDetailList(detail);
@@ -460,7 +479,7 @@ const Overview: React.FC = props => {
                                     </Col>
                                     <Col span={6}>
                                         <Statistic
-                                            title="实际采购成本"
+                                            title="当日采购成本"
                                             value={actualPurchaseCost}
                                             valueStyle={{
                                                 fontWeight: 'bold',
@@ -484,29 +503,7 @@ const Overview: React.FC = props => {
                                 <Row className={styles.secondLine}>
                                     <Col span={6}>
                                         <Statistic
-                                            title="有销量的商品数"
-                                            value={saledGoodsNum}
-                                            valueStyle={{
-                                                fontWeight: 'bold',
-                                                color: '#333',
-                                            }}
-                                        />
-                                        <div className={styles.affix}>
-                                            环比
-                                            {saledGoodsNumRatio >= 0 ? (
-                                                <span className={styles.increase}>
-                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
-                                                </span>
-                                            ) : (
-                                                <span className={styles.decrease}>
-                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
-                                                </span>
-                                            )}
-                                        </div>
-                                    </Col>
-                                    <Col span={6}>
-                                        <Statistic
-                                            title="在架商品数"
+                                            title="平均在售商品数"
                                             value={onsaleGoodsNum}
                                             valueStyle={{
                                                 // fontSize: '44px',
@@ -523,6 +520,28 @@ const Overview: React.FC = props => {
                                             ) : (
                                                 <span className={styles.decrease}>
                                                     {onsaleGoodsNumRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <Statistic
+                                            title="平均有销量商品数"
+                                            value={saledGoodsNum}
+                                            valueStyle={{
+                                                fontWeight: 'bold',
+                                                color: '#333',
+                                            }}
+                                        />
+                                        <div className={styles.affix}>
+                                            环比
+                                            {saledGoodsNumRatio >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
                                                 </span>
                                             )}
                                         </div>

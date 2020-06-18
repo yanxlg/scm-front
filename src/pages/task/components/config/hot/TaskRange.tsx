@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormInstance } from 'antd/es/form';
 import { Form, Radio } from 'antd';
 import { HotTaskRange } from '@/enums/StatusEnum';
-import { IntegerInput } from 'react-components';
+import { IntegerInput, RichInput } from 'react-components';
 import { RadioChangeEvent } from 'antd/lib/radio/interface';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
@@ -16,7 +16,7 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
     const taskRangeChange = useCallback(
         (e: RadioChangeEvent) => {
             const value = e.target.value;
-            if (value === HotTaskRange.fullStack) {
+            if (value !== HotTaskRange.store) {
                 form.resetFields(['shopId']);
             } else {
                 form.resetFields([
@@ -45,6 +45,7 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                 >
                     <Radio.Group onChange={taskRangeChange}>
                         <Radio value={HotTaskRange.fullStack}>全站</Radio>
+                        <Radio value={HotTaskRange.all}>全部店铺</Radio>
                         <Radio value={HotTaskRange.store}>指定店铺</Radio>
                     </Radio.Group>
                 </Form.Item>
@@ -74,8 +75,8 @@ const TaskRange: React.FC<TaskRangeProps> = ({ form, onTaskRangeChange }) => {
                                     },
                                 ]}
                             >
-                                <IntegerInput
-                                    min={0}
+                                <RichInput
+                                    richType="numberSplit"
                                     placeholder={'请输入'}
                                     className={classNames(formStyles.formItemDefault)}
                                     disabled={!required}

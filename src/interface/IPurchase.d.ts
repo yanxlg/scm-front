@@ -1,3 +1,5 @@
+import { PurchaseCode, PurchaseCreateTypeCode } from '@/config/dictionaries/Purchase';
+
 export interface IWaybillExceptionType {
     '101': string;
     '102': string;
@@ -96,7 +98,7 @@ export declare interface IPurchaseItem {
     }>;
     productImageUrl: string;
     productSkuStyle: string;
-
+    purchaseGoodsStatus: PurchaseCode;
     referWaybillNo?: string; // flat
     purchaseTrackingNumber?: string; // flat
     waybillNumber?: string;
@@ -104,6 +106,18 @@ export declare interface IPurchaseItem {
     rowSpan?: number;
     boundStatus?: string;
     realInStorageNumber?: number;
+    origin: PurchaseCreateTypeCode;
+    inventory?: {
+        availableInventory: number;
+        commodityId: string;
+        lastUpdateTime: string;
+        productImage: string;
+        productStyle: string;
+        sku: string;
+        transportationInventory: number;
+        warehouseId: string;
+    };
+    returnNumber?: number;
 }
 
 export declare interface IReturnItem {
