@@ -111,6 +111,7 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ task_id, setTaskType }) => {
             task_end_time,
             time_interval,
             task_channel,
+            range,
         } = detail;
         if (task_type === TaskTypeEnum.Gather || task_type === TaskTypeEnum.GatherGrounding) {
             return (
@@ -125,7 +126,7 @@ const TaskInfo: React.FC<TaskInfoProps> = ({ task_id, setTaskType }) => {
                         {task_channel || '--'}
                     </Descriptions.Item>
                     <Descriptions.Item label="任务范围" span={1}>
-                        {TaskRangeMap[sub_cat_id] || '--'}
+                        {range === 'all' ? '全部店铺' : TaskRangeMap[sub_cat_id] || '--'}
                     </Descriptions.Item>
                     <Descriptions.Item label="任务排序" span={1}>
                         {sort_type_name || '--'}

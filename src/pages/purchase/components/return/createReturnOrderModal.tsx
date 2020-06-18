@@ -9,6 +9,7 @@ import { addReturn, queryPurchaseList } from '@/services/purchase';
 import { EmptyObject } from '@/config/global';
 import classNames from 'classnames';
 import similarStyles from '@/pages/order/components/similarStyle/_similar.less';
+import { RuleObject, StoreValue } from 'rc-field-form/lib/interface';
 
 declare interface ICreateReturnOrderModalProps {
     visible: boolean;
@@ -35,6 +36,7 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
     const [goods, setGoods] = useState<IPurchaseItem>();
     const [current, setCurrent] = useState(0);
     const [submitting, setSubmitting] = useState(false);
+    const maxReturnNumber = useRef<number | undefined>();
 
     useMemo(() => {
         if (visible) {
@@ -46,6 +48,8 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
     }, [visible]);
 
     const onSearch = useCallback(() => {
+        setGoods(undefined);
+        setCurrent(0);
         return form1.current!.validateFields().then(values => {
             const { purchase_order_goods_id } = values;
             return queryPurchaseList({
@@ -60,8 +64,13 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                             ...item,
                         });
                         setCurrent(1);
+                        const return_number = Math.min(
+                            item?.inventory?.availableInventory ?? 0,
+                            (item?.realInStorageNumber ?? 0) - (item?.returnNumber ?? 0),
+                        );
+                        maxReturnNumber.current = return_number;
                         form2.current!.setFieldsValue({
-                            return_number: item.purchaseGoodsNumber,
+                            return_number: return_number,
                             receiver_name: item.platformUid,
                         });
                     } else {
@@ -78,7 +87,28 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                 label: '退货数量',
                 type: 'positiveInteger',
                 name: 'return_number',
-                rules: [{ required: true, message: '请输入退货数量' }],
+                rules: [
+                    { required: true, message: '请输入退货数量' },
+                    {
+                        validator: (
+                            rule: RuleObject,
+                            value: StoreValue,
+                            callback: (error?: string) => void,
+                        ) => {
+                            if (maxReturnNumber.current !== void 0) {
+                                if (Number(value) > maxReturnNumber.current) {
+                                    return Promise.reject(
+                                        `不可大于${maxReturnNumber.current}（退货数不可大于仓库可用库存数或采购单可退数）`,
+                                    );
+                                } else {
+                                    return Promise.resolve();
+                                }
+                            } else {
+                                return Promise.resolve();
+                            }
+                        },
+                    },
+                ],
                 className: styles.formInput,
                 formatter: 'number',
                 disabled,
@@ -242,12 +272,35 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                                             >
                                                 {goods?.purchaseGoodsName}
                                             </div>
+                                            <div
+                                                className={classNames(
+                                                    styles.modalSkus,
+                                                    styles.modalSkuValue,
+                                                )}
+                                            >
+                                                {skuComponent}
+                                            </div>
                                             <div className={styles.modalSkus}>
                                                 <div className={styles.modalSku}>
-                                                    入库数量:{goods?.realInStorageNumber ?? 0}/
-                                                    {goods?.purchaseGoodsNumber ?? 0}
+                                                    入库数量:
+                                                    <span className={styles.modalSkuValue}>
+                                                        {goods?.realInStorageNumber ?? 0}/
+                                                        {goods?.purchaseGoodsNumber ?? 0}
+                                                    </span>
                                                 </div>
-                                                {skuComponent}
+                                                <div className={styles.modalSku}>
+                                                    仓库可用库存数量:
+                                                    <span className={styles.modalSkuValue}>
+                                                        {goods?.inventory?.availableInventory ?? 0}
+                                                    </span>
+                                                </div>
+                                                <div className={styles.modalSku}>
+                                                    采购单可退数量:
+                                                    <span className={styles.modalSkuValue}>
+                                                        {(goods?.realInStorageNumber ?? 0) -
+                                                            (goods?.returnNumber ?? 0)}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
