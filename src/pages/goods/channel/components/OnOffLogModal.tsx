@@ -13,6 +13,7 @@ declare interface OnOffLogModalProps {
         | {
               product_ids: string;
               merchant_id: string;
+              commodity_ids: string;
           }
         | false;
     onClose: () => void;
