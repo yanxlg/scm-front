@@ -74,6 +74,10 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
         formRef: [formRef, formRef1],
         queryList: getPayOrderList, // 获取订单列表
     });
+    const dataSourceRef = useRef<IOrderItem[]>(dataSource);
+    useMemo(() => {
+        dataSourceRef.current = dataSource;
+    }, [dataSource]);
 
     const selectedKeys = useSplitSelectKeys(selectedRowKeys);
 
@@ -90,20 +94,18 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
         });
     }, []);
 
-    const confirmPay = useCallback(
-        (id: string) => {
-            const planList = dataSource.find(item => item.purchaseParentOrderSn === id)!
-                .unpaidPurchaseOrderGoodsResult;
-            const planIdList = planList!.map(item => item.purchasePlanId!);
-            return putConfirmPay({
-                purchase_platform_parent_order_id: id,
-                purchase_plan_id: planIdList,
-            }).then(() => {
-                onReload();
-            });
-        },
-        [dataSource],
-    );
+    const confirmPay = useCallback((id: string) => {
+        const planList =
+            dataSourceRef.current.find(item => item.purchaseParentOrderSn === id)
+                ?.unpaidPurchaseOrderGoodsResult ?? [];
+        const planIdList = planList.map(item => item.purchasePlanId!);
+        return putConfirmPay({
+            purchase_platform_parent_order_id: id,
+            purchase_plan_id: Array.from(new Set(planIdList)),
+        }).then(() => {
+            onReload();
+        });
+    }, []);
 
     const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
         return [
@@ -308,7 +310,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
-    }, [dataSource]);
+    }, []);
 
     const formComponent = useMemo(() => {
         return (

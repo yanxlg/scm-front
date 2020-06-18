@@ -819,7 +819,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       },
                   },
               ];
-    }, [dataSource, onlyParent]);
+    }, [onlyParent]);
 
     const fieldList = onlyParent ? parentFieldsList : fieldsList;
 

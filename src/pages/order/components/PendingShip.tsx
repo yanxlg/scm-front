@@ -233,7 +233,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
-    }, [dataSource]);
+    }, []);
 
     const formComponent = useMemo(() => {
         return (

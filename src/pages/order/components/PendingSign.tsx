@@ -253,7 +253,7 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
         ];
-    }, [dataSource]);
+    }, []);
 
     const formComponent = useMemo(() => {
         return (
