@@ -20,6 +20,7 @@ const baseGroupList = [
     { key: 'freight', name: '销售商品运费' },
     { key: '_goodsTotalAmount', name: '销售商品总金额' },
     { key: 'currency', name: '销售金额货币' },
+    { key: 'platformUid', name: '下单账号' },
     { key: 'purchaseAmount', name: '采购商品单价' },
     { key: 'purchaseNumber', name: '采购商品数量' },
     { key: '_purchaseTotalAmount', name: '采购商品总金额' },
@@ -28,7 +29,7 @@ const baseGroupList = [
     // { key: '', name: '商品属性标签' },
     // { key: 'cancelType', name: '中台订单取消原因' }, // 带补充
     { key: 'orderAddress', name: '用户地址信息' },
-    { key: 'platformUid', name: '下单账号' },
+
     { key: '_logisticsTrack', name: '物流轨迹' },
     // { key: 'warehouseId', name: '仓库名称' },
     // { key: 'platformUid', name: '下单账号' },
@@ -55,6 +56,7 @@ const purchaseGroupList = [
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },
     { key: 'purchasePlatform', name: '采购平台' },
+    { key: 'productPlatform', name: '商品渠道' },
     // { key: '', name: '采购店铺名称' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
     { key: 'purchasePlatformOrderId', name: '供应商订单ID' },

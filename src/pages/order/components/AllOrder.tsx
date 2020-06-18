@@ -707,6 +707,25 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       width: 120,
                   },
                   {
+                      key: 'productPlatform',
+                      title: '商品渠道',
+                      dataIndex: 'productPlatform',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                  },
+                  {
+                      key: 'platformUid',
+                      title: '下单账号',
+                      dataIndex: 'platformUid',
+                      align: 'center',
+                      width: 130,
+                      render: (value: string) => {
+                          return getStatusDesc(purchaseUidList, value);
+                      },
+                      defaultHide: true,
+                  },
+                  {
                       key: 'purchasePlatformParentOrderId',
                       title: '采购父订单ID',
                       dataIndex: 'purchasePlatformParentOrderId',
@@ -819,17 +838,6 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                               </div>
                           );
                       },
-                  },
-                  {
-                      key: 'platformUid',
-                      title: '下单账号',
-                      dataIndex: 'platformUid',
-                      align: 'center',
-                      width: 130,
-                      render: (value: string) => {
-                          return getStatusDesc(purchaseUidList, value);
-                      },
-                      defaultHide: true,
                   },
                   {
                       key: '_logisticsTrack',
