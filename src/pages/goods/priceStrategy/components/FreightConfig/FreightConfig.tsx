@@ -78,6 +78,9 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
             rule_name,
             min_weight,
             max_weight,
+            first_cat,
+            second_cat,
+            third_cat,
             _,
             // order,
             // lower_shipping_card,
@@ -90,6 +93,9 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
             product_tags: checkedGoodsTagList.join(','),
             min_weight: numberToStr(min_weight),
             max_weight: numberToStr(max_weight),
+            first_cat: first_cat?.join(','),
+            second_cat: second_cat?.join(','),
+            third_cat: third_cat?.join(','),
             ...reset,
         };
         if (type === EditEnum.ADD) {
@@ -106,14 +112,20 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
             getShippingFeeRuleConfig(id).then(res => {
                 // console.log('getShippingFeeRuleConfig', res);
                 const { shipping_fee_rule } = res.data;
-                if (shipping_fee_rule.min_weight === '0') {
-                    shipping_fee_rule.min_weight = '';
+                const { first_cat, second_cat, third_cat, ...reset } = shipping_fee_rule;
+                if (reset.min_weight === '0') {
+                    reset.min_weight = '';
                 }
-                if (shipping_fee_rule.max_weight === '0') {
-                    shipping_fee_rule.max_weight = '';
+                if (reset.max_weight === '0') {
+                    reset.max_weight = '';
                 }
                 setLoading(false);
-                form.setFieldsValue(shipping_fee_rule);
+                form.setFieldsValue({
+                    ...reset,
+                    first_cat: first_cat ? first_cat.split(',') : undefined,
+                    second_cat: second_cat ? second_cat.split(',') : undefined,
+                    third_cat: third_cat ? third_cat.split(',') : undefined,
+                });
                 setCheckedGoodsTagList(shipping_fee_rule.product_tags?.split(',') ?? []);
             });
         }
@@ -240,11 +252,11 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                         <InputNumber precision={0} min={1} className={styles.inputNumber} />
                     </Form.Item>
                     <Form.Item label="售价阈值($)" className={styles.customLabel}>
-                        10
+                        5
                     </Form.Item>
                     <div className={styles.item}>
                         <Form.Item
-                            label="$10以下运费价卡"
+                            label="$5以下运费价卡"
                             name="lower_shipping_card"
                             className={styles.customLabel}
                             rules={[requiredRule]}
@@ -260,7 +272,7 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                     </div>
                     <div className={styles.item}>
                         <Form.Item
-                            label="$10以上运费价卡"
+                            label="$5以上运费价卡"
                             name="upper_shipping_card"
                             className={styles.customLabel}
                             rules={[requiredRule]}

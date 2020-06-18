@@ -22,7 +22,7 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
     const searchRef = useRef<JsonFormRef>(null);
     const [deliveryCountryStatus, setDeliveryCountryStatus] = useState(false);
     const [logStatus, setLogStatus] = useState(false);
-    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.ADD); // EditEnum.ADD DEFAULT
+    const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // EditEnum.ADD
     // const [updateData, setUpdateData] = useState<ISaveShippingFeeRuleReq | null>(null);
     const [cartNameList, setCardNameList] = useState<IOptionItem[]>([]);
     const [currentId, setCurrentId] = useState('');

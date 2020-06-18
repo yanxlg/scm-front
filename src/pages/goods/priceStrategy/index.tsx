@@ -19,7 +19,7 @@ const PriceStrategyPage: React.FC = props => {
 
     return (
         <Container>
-            <Tabs type="card" defaultActiveKey="2" onChange={onChange}>
+            <Tabs type="card" defaultActiveKey="1" onChange={onChange}>
                 <TabPane tab="售价调整" key="1">
                     <div className={styles.paneContent}>
                         <PaneSellPrice />

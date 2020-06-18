@@ -1,6 +1,21 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Form, Input, Button, InputNumber, Radio, Tooltip, Popconfirm, Spin, message } from 'antd';
-import { IEdiyKey, ISaveSalePriceRuleReq } from '@/interface/IPriceStrategy';
+import {
+    Form,
+    Input,
+    Button,
+    InputNumber,
+    Radio,
+    Tooltip,
+    Popconfirm,
+    Spin,
+    message,
+    Modal,
+} from 'antd';
+import {
+    IEdiyKey,
+    ISaveSalePriceRuleReq,
+    IStartStrategyUpdateReq,
+} from '@/interface/IPriceStrategy';
 import { EditEnum, requiredRule, maxLengthRule } from '@/enums/PriceStrategyEnum';
 import CheckedBtn from '@/components/CheckedBtn';
 import classnames from 'classnames';
@@ -9,9 +24,14 @@ import useGoodsTag from '../../hooks/useGoodsTag';
 import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 import { validateRange } from '@/utils/validate';
-import { saveSalePriceRule, getSalePriceRuleConfig } from '@/services/price-strategy';
+import {
+    saveSalePriceRule,
+    getSalePriceRuleConfig,
+    startPriceStrategyUpdate,
+} from '@/services/price-strategy';
 import { numberToStr } from '@/utils/common';
 import { getPurchasePlatform, queryGoodsSourceList } from '@/services/global';
+import { LoadingButton } from 'react-components';
 
 import styles from '../../_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -44,6 +64,14 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
         setLoading(false);
     }, []);
 
+    const _startPriceStrategyUpdate = useCallback(async (data: IStartStrategyUpdateReq) => {
+        return startPriceStrategyUpdate(data).then(res => {
+            goBack();
+            onReload();
+            message.success('更新范围确认成功。');
+        });
+    }, []);
+
     const handleSave = useCallback(async () => {
         const data = await form.validateFields();
         // console.log('handleSave', data);
@@ -53,6 +81,9 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
             enable_source,
             enable_platform,
             enable_merchant,
+            first_cat,
+            second_cat,
+            third_cat,
             min_origin_price,
             max_origin_price,
             order,
@@ -76,6 +107,9 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
             param_price_multiply: numberToStr(param_price_multiply),
             param_price_add: numberToStr(param_price_add),
             param_shipping_fee_multiply: numberToStr(param_shipping_fee_multiply),
+            first_cat: first_cat?.join(','),
+            second_cat: second_cat?.join(','),
+            third_cat: third_cat?.join(','),
         };
         if (EditEnum.ADD === type) {
             postData.action = 'new';
@@ -84,17 +118,32 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
             postData.action = 'update';
             postData.rule_id = id;
         }
-        setLoading(true);
-        saveSalePriceRule(postData)
-            .then(res => {
-                // console.log('saveSalePriceRule', res);
-                goBack();
-                onReload();
-                message.success(`${EditEnum.ADD === type ? '新增' : '更新'}成功。`);
-            })
-            .finally(() => {
-                setLoading(false);
+        return saveSalePriceRule(postData).then(res => {
+            // console.log('saveSalePriceRule', res);
+            // goBack();
+
+            message.success(`${EditEnum.ADD === type ? '新增' : '更新'}成功。`);
+            Modal.confirm({
+                content: '是否需要立即执行任务？',
+                okText: '是',
+                cancelText: '否',
+                onOk: () =>
+                    _startPriceStrategyUpdate({
+                        min_origin_price: numberToStr(min_origin_price),
+                        max_origin_price: numberToStr(max_origin_price),
+                        product_tags: checkedGoodsTagList?.join(','),
+                        enable_platform: enable_platform?.join(','),
+                        enable_merchant: enable_merchant?.join(','),
+                        first_cat: first_cat?.join(','),
+                        second_cat: second_cat?.join(','),
+                        third_cat: third_cat?.join(','),
+                    }),
+                onCancel: () => {
+                    goBack();
+                    onReload();
+                },
             });
+        });
     }, [type, checkedGoodsTagList, id]);
 
     useEffect(() => {
@@ -115,6 +164,9 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     enable_platform,
                     enable_merchant,
                     product_tags,
+                    first_cat,
+                    second_cat,
+                    third_cat,
                     ...reset
                 } = sale_price_rule;
                 if (reset.min_origin_price === '0') {
@@ -129,6 +181,9 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                     enable_source: enable_source?.split(',') ?? [],
                     enable_platform: enable_platform?.split(',') ?? [],
                     enable_merchant: enable_merchant?.split(',') ?? [],
+                    first_cat: first_cat ? first_cat.split(',') : undefined,
+                    second_cat: second_cat ? second_cat.split(',') : undefined,
+                    third_cat: third_cat ? third_cat.split(',') : undefined,
                 });
                 setCheckedGoodsTagList(sale_price_rule.product_tags?.split(',') ?? []);
             });
@@ -351,7 +406,14 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                             返回
                         </Button>
                     </Popconfirm>
-                    <Popconfirm
+                    <LoadingButton
+                        type="primary"
+                        className={formStyles.formBtn}
+                        onClick={handleSave}
+                    >
+                        保存
+                    </LoadingButton>
+                    {/* <Popconfirm
                         title="确认保存吗？"
                         onConfirm={handleSave}
                         okText="确认"
@@ -360,7 +422,7 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                         <Button type="primary" loading={loading} className={formStyles.formBtn}>
                             保存
                         </Button>
-                    </Popconfirm>
+                    </Popconfirm> */}
                 </div>
             </Spin>
         </div>
