@@ -1,10 +1,14 @@
 import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
+    childrenOrderCancelOptionList,
+    FinalCancelMap,
+    FinalCancelStatus,
     orderShippingOptionList,
     orderStatusOptionList,
     purchaseOrderOptionList,
     purchasePayOptionList,
+    purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 import {
@@ -45,6 +49,7 @@ import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 import { IChildOrderItem, IGoodsDetail, IParentOrderItem } from '@/pages/order/components/PaneAll';
 import GoodsDetailDialog from '@/pages/order/components/GoodsDetailDialog';
+import AllColumnsSetting from '@/pages/order/components/AllColumnsSetting';
 
 const configFields = [
     'order_goods_status',
@@ -332,6 +337,16 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       render: (value: number) => getStatusDesc(orderStatusOptionList, value),
                   },
                   {
+                      key: 'cancelType',
+                      title: '子订单取消类型',
+                      dataIndex: 'cancelType',
+                      align: 'center',
+                      width: 140,
+                      defaultHide: true,
+                      render: (value: number) =>
+                          getStatusDesc(childrenOrderCancelOptionList, value),
+                  },
+                  {
                       key: 'orderGoodsShippingStatusShow',
                       title: '配送状态',
                       dataIndex: 'orderGoodsShippingStatusShow',
@@ -340,13 +355,20 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       render: (value: number) => getStatusDesc(orderShippingOptionList, value),
                   },
                   {
+                      key: 'orderId',
+                      title: '父订单ID',
+                      dataIndex: 'orderId',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                  },
+                  {
                       key: 'orderGoodsId',
                       title: '子订单ID',
                       dataIndex: 'orderGoodsId',
                       align: 'center',
                       width: 150,
                   },
-
                   {
                       key: 'commodityId',
                       title: 'Commodity ID',
@@ -373,6 +395,14 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                               </>
                           );
                       },
+                  },
+                  {
+                      key: 'skuId',
+                      title: '中台SKU ID',
+                      dataIndex: 'skuId',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
                   },
                   {
                       key: 'productName',
@@ -450,7 +480,27 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                           return isNaN(total) ? '' : total.toFixed(2);
                       },
                   },
-
+                  {
+                      key: 'currency',
+                      title: '销售金额货币',
+                      dataIndex: 'currency',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                  },
+                  {
+                      key: 'purchaseAmount',
+                      title: '采购商品单价',
+                      dataIndex: 'purchaseAmount',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                      render: (_, row: IChildOrderItem) => {
+                          const { purchaseNumber, purchaseAmount } = row;
+                          const price = Number(purchaseAmount) / Number(purchaseNumber);
+                          return isNaN(price) ? '' : price.toFixed(2);
+                      },
+                  },
                   {
                       key: 'purchaseNumber',
                       title: '采购商品数量',
@@ -468,7 +518,42 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       // defaultHide: true,
                       render: (_, row) => row.purchaseAmount,
                   },
-
+                  {
+                      key: 'saleMinusPurchaseNormalPrice',
+                      title: '销售-采购价差',
+                      dataIndex: 'saleMinusPurchaseNormalPrice',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 180,
+                      render: (value, row: IChildOrderItem) => {
+                          const {
+                              productPrice = 0,
+                              purchaseNormalPrice = 0,
+                              purchaseNumber = 0,
+                          } = row;
+                          const purchasePrice = Number(purchaseNormalPrice);
+                          if (purchasePrice === 0 || isNaN(purchasePrice)) {
+                              return '';
+                          }
+                          const result =
+                              ((Number(productPrice) * 1000 - purchasePrice * 1000) *
+                                  Number(purchaseNumber)) /
+                              1000;
+                          return result < 0 ? (
+                              <span style={{ color: 'red' }}>{result}</span>
+                          ) : (
+                              result
+                          );
+                      },
+                  },
+                  {
+                      key: 'channelSource',
+                      title: '销售渠道',
+                      dataIndex: 'channelSource',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                  },
                   {
                       key: 'productShop',
                       title: '销售店铺',
@@ -478,11 +563,73 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       // defaultHide: true,
                   },
                   {
+                      key: 'confirmTime',
+                      title: '销售订单确认时间',
+                      dataIndex: 'confirmTime',
+                      defaultHide: true,
+                      align: 'center',
+                      width: 146,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
                       key: 'channelOrderGoodsSn',
                       title: '销售订单ID',
                       dataIndex: 'channelOrderGoodsSn',
                       align: 'center',
                       width: 120,
+                  },
+                  {
+                      key: 'cancelTime',
+                      title: '销售订单取消时间',
+                      dataIndex: 'cancelTime',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 146,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'deliveryTime',
+                      title: '销售订单出库时间',
+                      dataIndex: 'deliveryTime',
+                      defaultHide: true,
+                      align: 'center',
+                      width: 146,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'collectTime',
+                      title: '销售订单揽收时间',
+                      dataIndex: 'collectTime',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 146,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'lastWaybillNo',
+                      title: '销售尾程运单ID',
+                      dataIndex: 'lastWaybillNo',
+                      defaultHide: true,
+                      align: 'center',
+                      width: 136,
+                  },
+                  {
+                      key: 'receiveTime',
+                      title: '妥投时间',
+                      dataIndex: 'receiveTime',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'purchaseCreateTime',
+                      title: '采购订单生成时间',
+                      dataIndex: 'purchaseCreateTime',
+                      align: 'center',
+                      width: 146,
+                      defaultHide: true,
+                      render: (value: string) => utcToLocal(value, ''),
                   },
                   {
                       key: 'purchasePlanId',
@@ -526,16 +673,139 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       },
                   },
                   {
+                      key: 'purchaseFailCode',
+                      title: '失败原因',
+                      dataIndex: 'purchaseFailCode',
+                      align: 'center',
+                      width: 140,
+                      defaultHide: true,
+                      render: (value: string, row: IChildOrderItem) => {
+                          const { purchaseOrderStatus } = row;
+                          return purchaseOrderStatus === 7
+                              ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
+                              : '';
+                      },
+                  },
+                  {
+                      key: 'purchasePlatform',
+                      title: '采购平台',
+                      dataIndex: 'purchasePlatform',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                  },
+                  {
+                      key: 'purchasePlatformParentOrderId',
+                      title: '采购父订单ID',
+                      dataIndex: 'purchasePlatformParentOrderId',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                  },
+                  {
+                      key: 'purchasePlatformOrderId',
+                      title: '采购订单ID',
+                      dataIndex: 'purchasePlatformOrderId',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                  },
+                  {
+                      key: 'payTime',
+                      title: '采购支付时间',
+                      dataIndex: 'payTime',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                      render: (value: string, row: IChildOrderItem) => utcToLocal(value, ''),
+                  },
+                  {
                       key: 'purchaseOrderPayStatus',
                       title: '采购支付状态',
                       dataIndex: 'purchaseOrderPayStatus',
                       align: 'center',
                       width: 120,
-                      render: (value: number, row) => {
+                      render: (value: number, row: IChildOrderItem) => {
                           const { purchasePlatformOrderId } = row;
                           return purchasePlatformOrderId
                               ? getStatusDesc(purchasePayOptionList, value)
                               : '';
+                      },
+                  },
+                  {
+                      key: 'purchaseWaybillNo',
+                      title: '采购运单ID',
+                      dataIndex: 'purchaseWaybillNo',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                  },
+                  {
+                      key: 'purchaseCancelReason',
+                      title: '采购取消原因',
+                      dataIndex: 'purchaseCancelReason',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                  },
+                  {
+                      key: 'purchaseTime',
+                      title: '采购签收时间',
+                      dataIndex: 'purchaseTime',
+                      align: 'center',
+                      defaultHide: true,
+                      width: 120,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'storageTime',
+                      title: '采购入库时间',
+                      dataIndex: 'storageTime',
+                      align: 'center',
+                      width: 120,
+                      defaultHide: true,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'purchaseCancelType',
+                      title: '采购单取消类型',
+                      dataIndex: 'purchaseCancelType',
+                      align: 'center',
+                      width: 146,
+                      defaultHide: true,
+                      render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
+                  },
+                  {
+                      key: 'orderAddress',
+                      title: '用户地址信息',
+                      dataIndex: 'orderAddress',
+                      align: 'center',
+                      width: 180,
+                      defaultHide: true,
+                      render: (value: any) => {
+                          if (!value) {
+                              return '';
+                          }
+                          const {
+                              consignee = '',
+                              address1 = '',
+                              city = '',
+                              province = '',
+                              country = '',
+                              zipCode = '',
+                              tel = '',
+                          } = value;
+                          return (
+                              <div style={{ textAlign: 'left', wordBreak: 'break-all' }}>
+                                  <div>{consignee}</div>
+                                  <div>
+                                      {address1},{city},{province},{country}
+                                  </div>
+                                  <div>
+                                      {zipCode},{tel}
+                                  </div>
+                              </div>
+                          );
                       },
                   },
                   {
@@ -735,6 +1005,9 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                             ...orderInfo,
                             ...orderGods,
                             ...plan,
+                            purchaseCreateTime: plan.createTime,
+                            purchaseLastUpdateTime: plan.lastUpdateTime,
+                            purchaseCancelType: plan.cancelType,
                             ...others, // 顺序决定覆盖优先级，此处要显示订单时间，不能被采购单覆盖
                             __rowspan: index === 0 ? purchaseList.length : 0,
                             __key: purchaseList.map(item => item.orderGoodsId).join(','),
@@ -839,7 +1112,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                     columns={columns}
                     dataSource={flatList}
                     scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                    columnsSettingRender={true}
+                    columnsSettingRender={AllColumnsSetting}
                     pagination={pagination}
                     onChange={onChange}
                     toolBarRender={onlyParent ? undefined : toolBarRender}

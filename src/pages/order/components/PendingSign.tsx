@@ -194,12 +194,11 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 },
             },
             {
-                key: 'purchaseOrderGoodsId',
+                key: 'purchasePlatformOrderId',
                 title: '供应商订单ID',
-                dataIndex: 'purchaseOrderGoodsId',
+                dataIndex: 'purchasePlatformOrderId',
                 align: 'center',
                 width: 150,
-                render: (value, item) => item.purchasePlatformOrderId,
             },
             {
                 key: 'payTime',
