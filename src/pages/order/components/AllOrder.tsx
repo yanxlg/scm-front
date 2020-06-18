@@ -14,6 +14,7 @@ import {
 import {
     exportPendingSignList,
     getOrderGoodsDetail,
+    getPurchaseUidList,
     postExportAll,
     queryAllOrderList,
     queryPendingSignList,
@@ -61,6 +62,8 @@ const configFields = [
     'product_shop',
     'order_goods_cancel_type',
     'purchase_plan_cancel_type',
+    'product_platform',
+    'platform_uid',
     'purchase_fail_code',
     'order_goods_id',
     'purchase_plan_id',
@@ -163,6 +166,12 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
             const { worm_goodsinfo_link } = res.data;
             window.open(worm_goodsinfo_link);
         });
+    }, []);
+
+    const [purchaseUidList, setPurchaseUidList] = useState([]);
+
+    useEffect(() => {
+        getPurchaseUidList().then(list => setPurchaseUidList(list));
     }, []);
 
     const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
@@ -530,20 +539,18 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       defaultHide: true,
                       width: 180,
-                      render: (value, row: IChildOrderItem) => {
+                      render: (value, row) => {
                           const {
                               productPrice = 0,
                               purchaseNormalPrice = 0,
-                              purchaseNumber = 0,
+                              // purchaseNumber = 0,
                           } = row;
                           const purchasePrice = Number(purchaseNormalPrice);
                           if (purchasePrice === 0 || isNaN(purchasePrice)) {
                               return '';
                           }
                           const result =
-                              ((Number(productPrice) * 1000 - purchasePrice * 1000) *
-                                  Number(purchaseNumber)) /
-                              1000;
+                              (Number(productPrice) * 1000 - purchasePrice * 1000) / 1000;
                           return result < 0 ? (
                               <span style={{ color: 'red' }}>{result}</span>
                           ) : (
@@ -814,6 +821,17 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       },
                   },
                   {
+                      key: 'platformUid',
+                      title: '下单账号',
+                      dataIndex: 'platformUid',
+                      align: 'center',
+                      width: 130,
+                      render: (value: string) => {
+                          return getStatusDesc(purchaseUidList, value);
+                      },
+                      defaultHide: true,
+                  },
+                  {
                       key: '_logisticsTrack',
                       title: '物流轨迹',
                       dataIndex: '_logisticsTrack',
@@ -824,7 +842,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       },
                   },
               ];
-    }, [onlyParent]);
+    }, [onlyParent, purchaseUidList]);
 
     const fieldList = onlyParent ? parentFieldsList : fieldsList;
 
@@ -929,7 +947,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                                   name: 'non_purchase_plan',
                                   options: [
                                       {
-                                          label: '展示无采购计划',
+                                          label: '仅展示无采购计划',
                                           value: 2,
                                       },
                                   ],

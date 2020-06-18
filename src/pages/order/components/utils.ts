@@ -11,9 +11,10 @@ import {
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { getPlatformAndStore, queryShopList } from '@/services/order-manage';
+import { getPlatformAndStore, getPurchaseUidList, queryShopList } from '@/services/order-manage';
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
+import { queryGoodsSourceList } from '@/services/global';
 
 const allFormFields: FormField[] = [
     {
@@ -341,6 +342,26 @@ const allFormFields: FormField[] = [
         label: '采购入库时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'select',
+        key: 'platform_uid',
+        name: 'platform_uid',
+        label: '下单账号',
+        className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPurchaseUidList(),
+    },
+    {
+        type: 'select',
+        key: 'product_platform',
+        initialValue: '',
+        name: 'product_platform',
+        label: '商品渠道',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => queryGoodsSourceList(),
     },
 ];
 
