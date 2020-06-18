@@ -18,6 +18,7 @@ import {
     postExportAll,
     queryAllOrderList,
     queryPendingSignList,
+    postOrdersPlace,
 } from '@/services/order-manage';
 import {
     AutoEnLargeImg,
@@ -28,7 +29,7 @@ import {
     useList,
     useModal2,
 } from 'react-components';
-import { Button } from 'antd';
+import { Button, notification } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
@@ -1066,10 +1067,52 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
 
     const { cancelList } = useCancelPurchase(selectedKeys, onReload, updateCount);
 
+    const postOrdersPlaceCallback = useCallback((idList: string[]) => {
+        return postOrdersPlace({
+            order_goods_ids: idList,
+        }).then(res => {
+            // console.log('delChannelOrders', res);
+            onReload();
+            const { success, failed } = res.data;
+            if (success!.length) {
+                notification.success({
+                    message: '拍单成功',
+                    description: (
+                        <div>
+                            {success.map((item: string) => (
+                                <div key={item}>{item}</div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
+            if (failed!.length) {
+                notification.error({
+                    message: '拍单失败',
+                    description: (
+                        <div>
+                            {failed.map((item: any) => (
+                                <div>
+                                    {item.order_goods_id}: {item.result.slice(0, 50)}
+                                </div>
+                            ))}
+                        </div>
+                    ),
+                });
+            }
+        });
+    }, []);
+
     const toolBarRender = useCallback(() => {
         const disabled = selectedKeys.length === 0;
         return [
-            <Button key="buy" type="primary" className={formStyles.formBtn} disabled={disabled}>
+            <Button
+                key="buy"
+                type="primary"
+                className={formStyles.formBtn}
+                disabled={disabled}
+                onClick={() => postOrdersPlaceCallback(selectedKeys)}
+            >
                 一键拍单
             </Button>,
             <LoadingButton
