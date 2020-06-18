@@ -655,13 +655,13 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                                   options: [
                                       {
                                           label: '展示无采购计划',
-                                          value: 0,
+                                          value: 2,
                                       },
                                   ],
                                   onChange: (name: string, form: FormInstance) => {
-                                      alert('展示无采购计划');
+                                      onSearch();
                                   },
-                                  formatter: 'join',
+                                  formatter: 'firstNumber',
                               },
                           ]
                 }
