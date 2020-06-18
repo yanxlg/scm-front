@@ -300,7 +300,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                         },
                         formatter: 'join',
                     },
-                    {
+                    /*   {
                         type: 'checkboxGroup',
                         name: 'more_shipping_time',
                         options: [
@@ -313,7 +313,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                             onSearch();
                         },
                         formatter: 'firstNumber',
-                    },
+                    },*/
                 ]}
                 labelClassName="order-label"
             />
