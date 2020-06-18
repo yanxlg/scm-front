@@ -110,6 +110,7 @@ export enum TaskTypeEnum {
 export enum HotTaskRange {
     fullStack,
     store,
+    all = 'all',
 }
 
 //======================= 任务执行类型 ======================//
