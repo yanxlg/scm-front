@@ -38,7 +38,6 @@ const baseGroupList = [
 const saleGroupList = [
     { key: 'channelSource', name: '销售渠道' },
     { key: 'productShop', name: '销售店铺名称' },
-    { key: 'purchasePlatform', name: '商品渠道' },
     // { key: '', name: '二级分类' },
     // { key: '', name: '销售渠道Goods ID' },
     { key: 'confirmTime', name: '销售订单确认时间' },
