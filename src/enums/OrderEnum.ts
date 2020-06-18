@@ -30,15 +30,15 @@ export const orderStatusOptionList = [
 ];
 
 export const orderShippingOptionList = [
-    { name: '未配送', value: 1 },
-    { name: '头程已配送', value: 2 },
-    { name: '已妥投未入库', value: 3 },
-    { name: '已入库', value: 4 },
+    { name: '采购待配送', value: 1 },
+    { name: '采购已配送', value: 2 },
+    { name: '采购已签收', value: 3 },
+    { name: '采购已入库', value: 4 },
     { name: '出库中', value: 5 },
     { name: '出库失败', value: 6 },
     { name: '取消出库', value: 7 },
     { name: '已出库', value: 8 },
-    { name: '尾程已揽收', value: 9 },
+    { name: '已揽收', value: 9 },
     { name: '已妥投', value: 10 },
 ];
 
