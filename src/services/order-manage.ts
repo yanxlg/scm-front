@@ -106,8 +106,8 @@ export function queryAllOrderList(data: IFilterParams) {
         });
 }
 
-export async function postExportAll(data: IFilterParams) {
-    return request.post(OrderApiPath.postExportAll, {
+export function postExportAll(data: IFilterParams) {
+    return api.post(OrderApiPath.postExportAll, {
         data,
     });
 }
