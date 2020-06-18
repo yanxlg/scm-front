@@ -10,6 +10,7 @@ import {
 import {
     exportPendingSignList,
     getOrderGoodsDetail,
+    postExportAll,
     queryAllOrderList,
     queryPendingSignList,
 } from '@/services/order-manage';
@@ -819,7 +820,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     }, [selectedRowKeys]);
 
     const onExport = useCallback((data: any) => {
-        return exportPendingSignList({
+        return postExportAll({
             ...data,
             ...formRef.current!.getFieldsValue(),
             ...formRef1.current!.getFieldsValue(),
