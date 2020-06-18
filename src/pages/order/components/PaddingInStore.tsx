@@ -1,14 +1,14 @@
 import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
 import {
-    exportPendingSignList,
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    purchaseReserveOptionList,
+} from '@/enums/OrderEnum';
+import {
     getOrderGoodsDetail,
-    getPayOrderList,
     getPurchasedNotWarehouseList,
-    getWaitShipList,
     postExportPurchasedNotWarehouse,
-    putConfirmPay,
 } from '@/services/order-manage';
 import {
     AutoEnLargeImg,
@@ -36,11 +36,12 @@ import { ColumnType } from 'antd/es/table';
 import { getStatusDesc } from '@/utils/transform';
 import { useCancelPurchase, useSplitSelectKeys } from '@/pages/order/components/hooks';
 import { FormInstance } from 'antd/es/form';
-import { filterFieldsList, combineRows } from './utils';
+import { filterFieldsList } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 
 const configFields = [
+    'order_goods_status',
     'product_shop1',
     'reserve_status',
     'order_goods_id',
@@ -139,6 +140,14 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 align: 'center',
                 width: 150,
                 render: (value: string, item) => utcToLocal(item.createTime, ''),
+            },
+            {
+                key: 'orderGoodsStatus',
+                title: '订单状态',
+                dataIndex: 'orderGoodsStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number) => getStatusDesc(orderStatusOptionList, value),
             },
             {
                 key: 'orderGoodsId',

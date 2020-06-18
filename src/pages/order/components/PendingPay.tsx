@@ -1,8 +1,11 @@
 import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
 import {
-    exportPendingSignList,
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    purchaseReserveOptionList,
+} from '@/enums/OrderEnum';
+import {
     getOrderGoodsDetail,
     getPayOrderList,
     postExportPay,
@@ -39,6 +42,7 @@ import { EmptyObject } from 'react-components/es/utils';
 import QRCode from 'qrcode.react';
 
 const configFields = [
+    'order_goods_status',
     'product_shop1',
     'reserve_status',
     'order_goods_id',
@@ -213,6 +217,14 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 dataIndex: 'orderCreateTime',
                 align: 'center',
                 width: 120,
+            },
+            {
+                key: 'orderGoodsStatus',
+                title: '订单状态',
+                dataIndex: 'orderGoodsStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number) => getStatusDesc(orderStatusOptionList, value),
             },
             {
                 key: 'orderGoodsId',
