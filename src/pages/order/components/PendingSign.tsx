@@ -1,6 +1,10 @@
 import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
-import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
+import {
+    orderStatusOptionList,
+    purchaseOrderOptionList,
+    purchaseReserveOptionList,
+} from '@/enums/OrderEnum';
 import {
     exportPendingSignList,
     getOrderGoodsDetail,
@@ -37,6 +41,7 @@ import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 
 const configFields = [
+    'order_goods_status',
     'product_shop1',
     'reserve_status',
     'order_goods_id',
@@ -135,6 +140,14 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 align: 'center',
                 width: 150,
                 render: (value: string, item) => utcToLocal(item.createTime, ''),
+            },
+            {
+                key: 'orderGoodsStatus',
+                title: '订单状态',
+                dataIndex: 'orderGoodsStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number) => getStatusDesc(orderStatusOptionList, value),
             },
             {
                 key: 'orderGoodsId',
