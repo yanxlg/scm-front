@@ -46,8 +46,8 @@ const configFields = [
     'order_goods_status1',
     'product_shop1',
     'reserve_status',
-    'order_goods_id',
     'purchase_order_pay_status1', // 局部选项
+    'order_goods_id',
     'commodity_id',
     'purchase_platform_order_id',
     'purchase_waybill_no',
