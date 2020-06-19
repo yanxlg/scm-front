@@ -3,6 +3,7 @@ import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     orderStatusOptionList,
     purchaseOrderOptionList,
+    purchasePayOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 import {
@@ -39,18 +40,19 @@ import { FormInstance } from 'antd/es/form';
 import { filterFieldsList } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 
 const configFields = [
-    'order_goods_status',
+    'order_goods_status1',
     'product_shop1',
     'reserve_status',
     'order_goods_id',
+    'purchase_order_pay_status1', // 局部选项
     'commodity_id',
     'purchase_platform_order_id',
     'purchase_waybill_no',
     'order_create_time',
     'pay_time',
-    'purchase_time',
 ];
 
 const fieldsList = filterFieldsList(configFields);
@@ -222,6 +224,19 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 render: (value: string) => utcToLocal(value, ''),
             },
             {
+                key: 'purchaseOrderPayStatus',
+                title: '采购支付状态',
+                dataIndex: 'purchaseOrderPayStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IChildOrderItem) => {
+                    const { purchasePlatformOrderId } = row;
+                    return purchasePlatformOrderId
+                        ? getStatusDesc(purchasePayOptionList, value)
+                        : '';
+                },
+            },
+            {
                 key: 'productShop',
                 title: '销售店铺名称',
                 dataIndex: 'productShop',
@@ -234,14 +249,6 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
-            },
-            {
-                key: 'collectTime',
-                title: '采购签收时间',
-                dataIndex: 'collectTime',
-                align: 'center',
-                width: 150,
-                render: (value: string) => utcToLocal(value, ''),
             },
             {
                 key: 'purchaseOrderStatus',

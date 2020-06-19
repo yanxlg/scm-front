@@ -3,6 +3,7 @@ import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     orderStatusOptionList,
     purchaseOrderOptionList,
+    purchasePayOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 import {
@@ -39,12 +40,14 @@ import { useCancelPurchase, useSplitSelectKeys } from '@/pages/order/components/
 import { FormInstance } from 'antd/es/form';
 import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 
 const configFields = [
-    'order_goods_status',
+    'order_goods_status1',
     'product_shop1',
     'reserve_status',
     'order_goods_id',
+    'purchase_order_pay_status1', // 局部选项
     'commodity_id',
     'purchase_platform_order_id',
     'order_create_time',
@@ -215,6 +218,19 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 align: 'center',
                 width: 120,
                 render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'purchaseOrderPayStatus',
+                title: '采购支付状态',
+                dataIndex: 'purchaseOrderPayStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IChildOrderItem) => {
+                    const { purchasePlatformOrderId } = row;
+                    return purchasePlatformOrderId
+                        ? getStatusDesc(purchasePayOptionList, value)
+                        : '';
+                },
             },
             {
                 key: 'productShop',

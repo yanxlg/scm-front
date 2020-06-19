@@ -28,6 +28,10 @@ export const orderStatusOptionList = [
     { name: '已取消', value: 2 },
     { name: '待审核', value: 3 },
 ];
+export const orderStatusOptionList1 = [
+    { name: '已确认', value: 1 },
+    { name: '已取消', value: 2 },
+];
 
 export const orderShippingOptionList = [
     { name: '采购待配送', value: 1 },
@@ -61,6 +65,12 @@ export const purchasePayOptionList = [
     { name: '未支付', value: 1 },
     { name: '已支付', value: 2 },
     { name: '已退款', value: 3 },
+    { name: '待退款', value: 4 },
+    { name: '审核不通过', value: 5 },
+    { name: '待审核', value: 6 },
+];
+export const purchasePayOptionList1 = [
+    { name: '已支付', value: 2 },
     { name: '待退款', value: 4 },
     { name: '审核不通过', value: 5 },
     { name: '待审核', value: 6 },

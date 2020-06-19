@@ -6,8 +6,10 @@ import {
     finalCancelStatusList,
     orderShippingOptionList,
     orderStatusOptionList,
+    orderStatusOptionList1,
     purchaseOrderOptionList,
     purchasePayOptionList,
+    purchasePayOptionList1,
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
@@ -133,6 +135,15 @@ const allFormFields: FormField[] = [
     },
     {
         type: 'select',
+        key: 'order_goods_status1',
+        name: 'order_goods_status',
+        label: '订单状态',
+        initialValue: 100,
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...orderStatusOptionList1],
+    },
+    {
+        type: 'select',
         key: 'purchase_order_status',
         initialValue: 100,
         name: 'purchase_order_status',
@@ -148,6 +159,15 @@ const allFormFields: FormField[] = [
         label: '采购支付状态',
         className: 'order-input',
         optionList: [defaultOptionItem, ...purchasePayOptionList],
+    },
+    {
+        type: 'select',
+        initialValue: 100,
+        key: 'purchase_order_pay_status1',
+        name: 'purchase_order_pay_status',
+        label: '采购支付状态',
+        className: 'order-input',
+        optionList: [defaultOptionItem, ...purchasePayOptionList1],
     },
     {
         type: 'select',
