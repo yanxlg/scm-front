@@ -100,12 +100,7 @@ const AllList: React.FC<AllListProps> = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm
-                fieldList={fieldList}
-                ref={formRef}
-                enableCollapse={false}
-                labelClassName={styles.formItem}
-            >
+            <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formItem}>
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         搜索

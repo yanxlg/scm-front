@@ -97,12 +97,7 @@ const ReturnModal: React.FC<IReturnModalProps> = ({ visible, onCancel }) => {
                 onOk={onSubmit}
                 confirmLoading={submitting}
             >
-                <JsonForm
-                    fieldList={fieldList}
-                    layout="horizontal"
-                    ref={formRef}
-                    enableCollapse={false}
-                />
+                <JsonForm fieldList={fieldList} layout="horizontal" ref={formRef} />
                 <Divider />
                 <Spin spinning={loading}>
                     <Descriptions title="退货地址" column={1}>

@@ -513,7 +513,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 {search}
                 <JsonForm
                     ref={searchRef2}
-                    enableCollapse={false}
                     initialValues={{
                         purchase_fail_filter_type: 3,
                     }}

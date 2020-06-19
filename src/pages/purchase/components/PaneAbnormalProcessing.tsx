@@ -200,7 +200,6 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
             <JsonForm
                 key="2"
                 containerClassName=""
-                enableCollapse={false}
                 fieldList={fieldCheckboxList}
                 ref={formRef2}
             ></JsonForm>,

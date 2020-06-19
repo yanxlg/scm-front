@@ -84,12 +84,7 @@ const PendingSigned = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm
-                fieldList={fieldList}
-                ref={formRef}
-                enableCollapse={false}
-                labelClassName={styles.formItem}
-            >
+            <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formItem}>
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
@@ -243,7 +238,6 @@ const PendingSigned = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

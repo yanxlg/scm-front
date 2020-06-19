@@ -273,7 +273,6 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
             <JsonForm
                 key="1"
                 containerClassName=""
-                enableCollapse={false}
                 fieldList={fieldCheckboxList}
                 ref={formRef2}
             ></JsonForm>,

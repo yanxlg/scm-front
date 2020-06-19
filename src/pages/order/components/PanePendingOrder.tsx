@@ -569,7 +569,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         purchase_order_combine_status: 1,
                     }}
                     fieldList={statusFormFields}
-                    enableCollapse={false}
                 />
                 <JsonForm
                     ref={searchRef}
@@ -612,7 +611,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 layout={status === 4 ? 'inline' : 'horizontal'}
                 key={'form1'}
                 ref={searchRef2}
-                enableCollapse={false}
                 containerClassName={status === 4 ? '' : undefined}
                 initialValues={{
                     purchase_fail_filter_type: 3,
