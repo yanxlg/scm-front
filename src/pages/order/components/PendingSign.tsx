@@ -3,6 +3,7 @@ import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     orderStatusOptionList,
     purchaseOrderOptionList,
+    purchasePayOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 import {
@@ -39,12 +40,14 @@ import { FormInstance } from 'antd/es/form';
 import { filterFieldsList } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
+import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 
 const configFields = [
-    'order_goods_status',
+    'order_goods_status1',
     'product_shop1',
     'reserve_status',
     'order_goods_id',
+    'purchase_order_pay_status1',
     'commodity_id',
     'purchase_platform_order_id',
     'purchase_waybill_no',
@@ -220,6 +223,19 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 align: 'center',
                 width: 150,
                 render: (value: string) => utcToLocal(value, ''),
+            },
+            {
+                key: 'purchaseOrderPayStatus',
+                title: '采购支付状态',
+                dataIndex: 'purchaseOrderPayStatus',
+                align: 'center',
+                width: 120,
+                render: (value: number, row: IChildOrderItem) => {
+                    const { purchasePlatformOrderId } = row;
+                    return purchasePlatformOrderId
+                        ? getStatusDesc(purchasePayOptionList, value)
+                        : '';
+                },
             },
             {
                 key: 'productShop',
