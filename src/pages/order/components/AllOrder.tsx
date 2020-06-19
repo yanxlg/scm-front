@@ -862,9 +862,29 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
         }
     }, [onlyParent]);
 
+    const collapseItems = useMemo(() => {
+        return onlyParent
+            ? undefined
+            : [
+                  'order_goods_status',
+                  'reserve_status',
+                  'purchase_order_status',
+                  'purchase_order_pay_status',
+                  'order_goods_shipping_status',
+                  'channel_source',
+                  'product_shop',
+              ];
+    }, [onlyParent]);
+
     const formComponent = useMemo(() => {
         return (
-            <JsonForm ref={formRef} fieldList={fieldList} labelClassName="order-label">
+            <JsonForm
+                ref={formRef}
+                fieldList={fieldList}
+                labelClassName="order-label"
+                collapseItems={collapseItems}
+                defaultCollapse={false}
+            >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
