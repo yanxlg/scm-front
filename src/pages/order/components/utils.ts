@@ -138,9 +138,9 @@ const allFormFields: FormField[] = [
         key: 'order_goods_status1',
         name: 'order_goods_status',
         label: '订单状态',
-        initialValue: 100,
+        initialValue: '',
         className: 'order-input',
-        optionList: [defaultOptionItem, ...orderStatusOptionList1],
+        optionList: [defaultOptionItem1, ...orderStatusOptionList1],
     },
     {
         type: 'select',
@@ -162,12 +162,12 @@ const allFormFields: FormField[] = [
     },
     {
         type: 'select',
-        initialValue: 100,
+        initialValue: '',
         key: 'purchase_order_pay_status1',
         name: 'purchase_order_pay_status',
         label: '采购支付状态',
         className: 'order-input',
-        optionList: [defaultOptionItem, ...purchasePayOptionList1],
+        optionList: [defaultOptionItem1, ...purchasePayOptionList1],
     },
     {
         type: 'select',
