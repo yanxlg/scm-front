@@ -449,7 +449,6 @@ const PaneErrTab = () => {
                 <JsonForm
                     ref={formRef1}
                     labelClassName="order-error-label"
-                    enableCollapse={false}
                     layout="horizontal"
                     fieldList={[
                         {

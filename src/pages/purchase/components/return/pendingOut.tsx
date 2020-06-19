@@ -89,7 +89,6 @@ const PendingOut = () => {
             <JsonForm
                 fieldList={fieldList.slice(0, 4)}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
             >
                 <div>
@@ -256,7 +255,6 @@ const PendingOut = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

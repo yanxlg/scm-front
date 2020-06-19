@@ -389,7 +389,6 @@ const VoVaGather = () => {
             <>
                 <JsonForm
                     ref={formRef}
-                    enableCollapse={false}
                     initialValues={{
                         task_type: TaskExecuteType.once,
                         day: 1,
