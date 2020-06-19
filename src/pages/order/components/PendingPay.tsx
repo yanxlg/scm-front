@@ -44,6 +44,7 @@ const configFields = [
     'commodity_id',
     'purchase_platform_order_id',
     'purchase_parent_order_sn',
+    'order_create_time',
     'purchase_order_time',
 ];
 
