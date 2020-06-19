@@ -108,6 +108,17 @@ export declare interface IPurchaseItem {
     boundStatus?: string;
     realInStorageNumber?: number;
     origin: PurchaseCreateTypeCode;
+    inventory?: {
+        availableInventory: number;
+        commodityId: string;
+        lastUpdateTime: string;
+        productImage: string;
+        productStyle: string;
+        sku: string;
+        transportationInventory: number;
+        warehouseId: string;
+    };
+    returnNumber?: number;
 }
 
 export declare interface IReturnItem {

@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, ReactText, useState, RefObject } from 'react';
+import React, { useMemo, useCallback, ReactText, useState, RefObject, useEffect } from 'react';
 import { FitTable, AutoEnLargeImg, LoadingButton, message, useModal2 } from 'react-components';
 import { Button } from 'antd';
 import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILocalGoods';
@@ -29,6 +29,9 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { GoodsSourceEnum } from '@/enums/GlobalEnum';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
 import { PaginationConfig } from 'react-components/es/FitTable';
+import useCountryFreightModal from '../../hooks/useCountryFreightModal';
+import { queryShopList } from '@/services/global';
+import { ISHopList } from '@/interface/IGlobal';
 
 interface IProps {
     loading: boolean;
@@ -36,6 +39,7 @@ interface IProps {
     pageNumber: number;
     pageSize: number;
     total: number;
+    sourceChannel: string;
     goodsList: IGoodsAndSkuItem[];
     selectedRowKeys: string[];
     formRef: RefObject<JsonFormRef>;
@@ -52,6 +56,7 @@ const GoodsTable: React.FC<IProps> = ({
     pageNumber,
     pageSize,
     total,
+    sourceChannel,
     goodsList,
     selectedRowKeys,
     formRef,
@@ -67,6 +72,7 @@ const GoodsTable: React.FC<IProps> = ({
     const [merchantStatus, setMerchantStatus] = useState(false);
     const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
     const [disabledChannelList, setDisabledChannelList] = useState<string[]>([]);
+    const [disabledShopList, setDisabledShopList] = useState<string[]>([]);
     // 关联商品
     const [mergeStatus, setMergeStatus] = useState(false);
     const [commodityId, setCommodityId] = useState('');
@@ -82,7 +88,14 @@ const GoodsTable: React.FC<IProps> = ({
     // 查看sku信息
     const { skuStatus, currentSkuInfo, channelSource, showSkuModal, hideSkuModal } = useSkuModal();
     // 查看国家运费
-    const [countryFreightStatus, setCountryFreightStatus] = useState(false);
+    const {
+        countryFreightStatus,
+        countryFreightId,
+        showCountryFreight,
+        hideCountryFreight,
+    } = useCountryFreightModal();
+    // 店铺列表
+    const [shopList, setShopList] = useState<ISHopList>([]);
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -131,6 +144,13 @@ const GoodsTable: React.FC<IProps> = ({
         });
     }, [selectedRowKeys, goodsList]);
 
+    const _queryShopList = useCallback(() => {
+        return queryShopList().then(res => {
+            // console.log('111111', res);
+            setShopList(res.data);
+        });
+    }, []);
+
     const merchantOkey = useCallback(
         (merchants_id: string[]) => {
             return onsaleType === 'default'
@@ -145,12 +165,24 @@ const GoodsTable: React.FC<IProps> = ({
         setMerchantStatus(true);
         // console.log('111111', formRef.current?.getFieldsValue());
         const { source_channel } = formRef.current?.getFieldsValue() as any;
-        if (!source_channel || source_channel === String(GoodsSourceEnum.VOVA)) {
+        if (!source_channel) {
+            return;
+        }
+        if (source_channel === GoodsSourceEnum.VOVA) {
             setDisabledChannelList(['vova']);
+            setDisabledShopList([]);
+        } else if (source_channel === GoodsSourceEnum.FD) {
+            setDisabledChannelList([]);
+            setDisabledShopList(
+                shopList
+                    .filter(item => item.merchant_name !== 'VogueFD')
+                    .map(item => item.merchant_name),
+            );
         } else {
             setDisabledChannelList([]);
+            setDisabledShopList([]);
         }
-    }, []);
+    }, [shopList]);
 
     const merchantCancel = useCallback(() => {
         setMerchantStatus(false);
@@ -179,15 +211,17 @@ const GoodsTable: React.FC<IProps> = ({
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={handleClickOnsale}
-                disabled={disabled}
+                disabled={disabled || !sourceChannel}
             >
                 一键上架
             </Button>,
             <Button
+                ghost
                 key="2"
                 type="primary"
                 className={formStyles.formBtn}
                 onClick={handleClickAllOnsale}
+                disabled={!sourceChannel}
             >
                 查询商品一键上架
             </Button>,
@@ -200,6 +234,7 @@ const GoodsTable: React.FC<IProps> = ({
             >
                 修改商品属性
             </Button>,
+
             <LoadingButton
                 key="3"
                 className={formStyles.formBtn}
@@ -209,7 +244,7 @@ const GoodsTable: React.FC<IProps> = ({
                 删除
             </LoadingButton>,
         ];
-    }, [selectedRowKeys, _getGoodsDelete]);
+    }, [selectedRowKeys, sourceChannel, _getGoodsDelete]);
 
     const handleExportOkey = useCallback(values => {
         return postGoodsExports({
@@ -251,16 +286,6 @@ const GoodsTable: React.FC<IProps> = ({
         setMergeStatus(false);
         setCommodityId('');
         setProductSn('');
-    }, []);
-
-    const showCountryFreight = useCallback(productId => {
-        setCountryFreightStatus(true);
-        setProductId(productId);
-    }, []);
-
-    const hideCountryFreight = useCallback(() => {
-        setCountryFreightStatus(false);
-        setProductId('');
     }, []);
 
     const columns = useMemo<ColumnsType<IGoodsAndSkuItem>>(() => {
@@ -434,7 +459,7 @@ const GoodsTable: React.FC<IProps> = ({
                         price_max,
                         shipping_fee_min,
                         shipping_fee_max,
-                        multiple_price,
+                        source_channel,
                         product_id,
                     } = row;
                     return (
@@ -443,7 +468,7 @@ const GoodsTable: React.FC<IProps> = ({
                             <div>
                                 (含运费{shipping_fee_min}~{shipping_fee_max})
                             </div>
-                            {multiple_price ? (
+                            {source_channel !== 'pdd' ? (
                                 <a onClick={() => showCountryFreight(product_id)}>更多国家价格</a>
                             ) : null}
                         </div>
@@ -599,6 +624,10 @@ const GoodsTable: React.FC<IProps> = ({
         );
     }, [modal]);
 
+    useEffect(() => {
+        _queryShopList();
+    }, []);
+
     return useMemo(() => {
         return (
             <>
@@ -618,6 +647,7 @@ const GoodsTable: React.FC<IProps> = ({
                 <MerchantListModal
                     visible={merchantStatus}
                     disabledChannelList={disabledChannelList}
+                    disabledShopList={disabledShopList}
                     onOKey={merchantOkey}
                     onCancel={merchantCancel}
                 />
@@ -654,7 +684,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <CountryFreightModal
                     visible={countryFreightStatus}
-                    productId={productId}
+                    productId={countryFreightId}
                     onCancel={hideCountryFreight}
                 />
                 {GoodsTagsUpdateModal}
@@ -672,6 +702,7 @@ const GoodsTable: React.FC<IProps> = ({
         editGoodsStatus,
         countryFreightStatus,
         modal,
+        toolBarRender,
     ]);
 };
 

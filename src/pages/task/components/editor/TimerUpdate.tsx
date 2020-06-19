@@ -233,6 +233,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         <Select className="picker-default">
                             <Select.Option value="PDD">PDD</Select.Option>
                             <Select.Option value="VOVA">VOVA</Select.Option>
+                            <Select.Option value="FLORYDAY">FD</Select.Option>
                         </Select>
                     </Form.Item>
                     <Form.Item

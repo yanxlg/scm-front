@@ -42,7 +42,7 @@ export interface IOverviewInfo {
     saledGoodsNumRatio: number; // 有销量商品数量环比
     onsaleGoodsNum: string; // 在架商品数量
     onsaleGoodsNumRatio: number; // 在架商品数量环比
-    pinRate: string; // 动销率
+    pinRate: number; // 动销率
     pinRateRatio: number; // 动销率环比
 }
 

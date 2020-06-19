@@ -9,7 +9,7 @@ import styles from '@/styles/_index.less';
 import { Col, Row } from 'antd';
 
 const SimilarGoods = (props: ISimilarInfoResponse['purchaseInfo']) => {
-    const { productImageUrl, productName, productId, commoditySkuId, productSkuStyle } = props;
+    const { productImageUrl, productName, orderGoods, commoditySkuId, productSkuStyle } = props;
     const productStyle = parseJson(productSkuStyle);
 
     let styleArray: string[] = [];
@@ -36,8 +36,12 @@ const SimilarGoods = (props: ISimilarInfoResponse['purchaseInfo']) => {
                         {productName}
                     </div>
                     <Row gutter={[15, 0]}>
-                        <Col span={8} className={styles.textEllipse} title={productId}>
-                            Product ID:{productId}
+                        <Col
+                            span={8}
+                            className={styles.textEllipse}
+                            title={orderGoods?.commodityId}
+                        >
+                            Commodity ID:{orderGoods?.commodityId}
                         </Col>
                         <Col span={8} className={styles.textEllipse} title={commoditySkuId}>
                             Commodity SKU ID:{commoditySkuId}

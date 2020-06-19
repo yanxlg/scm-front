@@ -25,18 +25,20 @@ declare interface IProps {
 
 const formFields: FormField[] = [
     {
-        type: 'input',
+        type: 'textarea',
         name: 'purchase_parent_order_sn',
         label: '采购父订单ID',
         className: 'order-input',
-        placeholder: '请输入采购父订单ID',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'purchase_order_sn',
         label: '采购子订单ID',
         className: 'order-input',
-        placeholder: '请输入中台订单ID',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
         type: 'select',
@@ -333,7 +335,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchase_order_time',
-                title: '采购订单生成时间',
+                title: '采购计划生成时间',
                 dataIndex: 'purchase_order_time',
                 align: 'center',
                 width: 150,

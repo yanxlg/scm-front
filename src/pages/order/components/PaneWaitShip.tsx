@@ -31,26 +31,28 @@ declare interface IProps {
 
 const formFields: FormField[] = [
     {
-        type: 'input',
+        type: 'textarea',
         name: 'order_goods_id',
         label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
         className: 'order-input',
-        placeholder: '请输入中台订单ID',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'purchase_platform_order_id_list',
         label: '采购平台订单ID',
         className: 'order-input',
-        placeholder: '请输入采购平台订单ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'product_id',
         label: '中台商品ID',
         className: 'order-input',
-        placeholder: '请输入中台商品ID',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
         type: 'select',

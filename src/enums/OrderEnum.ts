@@ -1,6 +1,11 @@
 import { FormField } from 'react-components/es/JsonForm';
 import { transStatusList, transOptionList } from '@/utils/transform';
-import { queryChannelSource, getPlatformAndStore } from '@/services/order-manage';
+import {
+    queryChannelSource,
+    getPlatformAndStore,
+    getPurchaseUidList,
+    getWarehouseList,
+} from '@/services/order-manage';
 
 declare interface optionItem {
     name: string;
@@ -111,17 +116,36 @@ export const failureReasonMap = {
 };
 
 export const FinalCancelMap = {
-    '40001': '未登录',
-    '46024': '待支付订单过多',
     '410031': 'sku已售罄',
     '41003': '商品已售罄',
-    '1001': '特殊商品无需拍单',
-    '1002': '拍单超时',
-    '888': '中台商品缺失',
     '-100': '采购价异常',
+    '888': '中台商品缺失',
+    '10013': '预售商品',
+    '10012': '海淘商品',
+    '1001': '特殊商品无需拍单',
+    '10011': '不可合并',
+    '10014': '关键字拦截',
+    '40001': '未登录',
+    '46024': '待支付订单过多',
+    '1002': '拍单超时',
+    other_failed_reason: '未知原因',
 };
 
-export const finalCancelStatusList = transOptionList(FinalCancelMap);
+export const finalCancelStatusList = [
+    { name: 'sku已售罄', value: '410031' },
+    { name: '商品已售罄', value: '41003' },
+    { name: '采购价异常', value: '100' },
+    { name: '中台商品缺失', value: '888' },
+    { name: '预售商品', value: '10013' },
+    { name: '海淘商品', value: '10012' },
+    { name: '特殊商品无需拍单', value: '1001' },
+    { name: '不可合并', value: '10011' },
+    { name: '关键字拦截', value: '10014' },
+    { name: '未登录', value: '40001' },
+    { name: '待支付订单过多', value: '46024' },
+    { name: '拍单超时', value: '1002' },
+    { name: '未知原因', value: 'other_failed_reason' },
+];
 
 export type FinalCancelStatus = keyof typeof FinalCancelMap;
 
@@ -173,22 +197,22 @@ export const childDefaultFieldList: FormField[] = [
         formatter: ['start_date', 'end_date'],
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'order_goods_id',
         label: '子订单ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入子订单ID',
-        formatter: 'number_str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'channel_order_goods_sn',
         label: '销售订单ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入销售订单ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     // {
     //     type: 'input',
@@ -227,58 +251,67 @@ export const childAllFieldList: FormField[] = [
     ...childDefaultFieldList,
 
     {
-        type: 'input',
+        type: 'textarea',
         name: 'order_id',
         label: '父订单ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入父订单ID',
-        formatter: 'number_str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'purchase_plan_id',
         label: '采购计划ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入采购计划ID',
-        formatter: 'number_str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'purchase_waybill_no',
         label: '采购运单ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入采购运单ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'last_waybill_no',
         label: '销售尾程运单ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入销售尾程运单ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'product_id',
         label: 'Product ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入Product ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'sku_id',
         label: '中台SKU ID',
         className: 'order-input',
         // formItemClassName: 'order-form-item',
-        placeholder: '请输入中台SKU ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        name: 'purchase_platform_order_id',
+        label: '供应商订单ID',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     // {
     //     type: 'select',
@@ -291,6 +324,25 @@ export const childAllFieldList: FormField[] = [
     //         ...orderStatusOptionList
     //     ],
     // },
+    {
+        type: 'select',
+        name: 'platform_uid',
+        label: '下单账号',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getPurchaseUidList(),
+    },
+    {
+        type: 'select',
+        name: 'warehouse_id',
+        label: '仓库名称',
+        className: 'order-input',
+        // formItemClassName: 'order-form-item',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getWarehouseList(),
+    },
+
     {
         type: 'select',
         name: 'reserve_status',
