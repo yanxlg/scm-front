@@ -235,7 +235,9 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    <div className="order-text-ellipsis">
+                        <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    </div>
                 ),
             },
             {

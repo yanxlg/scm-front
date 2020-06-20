@@ -29,7 +29,7 @@ import {
     useList,
     useModal2,
 } from 'react-components';
-import { Button, notification } from 'antd';
+import { Button, notification, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
@@ -84,7 +84,7 @@ const configFields = [
     'receive_time',
     'purchase_order_time',
     'pay_time',
-    'purchase_time',
+    // 'purchase_time',
     'storage_time',
 ];
 
@@ -421,7 +421,11 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 150,
                       render: (value, item) => (
-                          <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                          <div className="order-text-ellipsis">
+                              <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>
+                                  {value}
+                              </a>
+                          </div>
                       ),
                   },
                   {
@@ -429,7 +433,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       title: 'SKU图片',
                       dataIndex: 'productImage',
                       align: 'center',
-                      width: 150,
+                      width: 100,
                       render: (value: string) => {
                           return <AutoEnLargeImg src={value} className="order-img-lazy" />;
                       },
@@ -780,7 +784,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       width: 120,
                       defaultHide: true,
                   },
-                  {
+                  /*    {
                       key: 'purchaseTime',
                       title: '采购签收时间',
                       dataIndex: 'purchaseTime',
@@ -788,7 +792,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       defaultHide: true,
                       width: 120,
                       render: (value: string) => utcToLocal(value, ''),
-                  },
+                  },*/
                   {
                       key: 'storageTime',
                       title: '采购入库时间',

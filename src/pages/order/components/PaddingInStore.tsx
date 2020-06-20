@@ -172,7 +172,9 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    <div className="order-text-ellipsis">
+                        <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    </div>
                 ),
             },
             {
@@ -180,7 +182,7 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 title: 'SKU图片',
                 dataIndex: 'productImageUrl',
                 align: 'center',
-                width: 150,
+                width: 100,
                 render: (value: string) => {
                     return <AutoEnLargeImg src={value} className="order-img-lazy" />;
                 },

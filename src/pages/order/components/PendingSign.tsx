@@ -53,7 +53,7 @@ const configFields = [
     'purchase_waybill_no',
     'order_create_time',
     'pay_time',
-    'purchase_time',
+    // 'purchase_time',
 ];
 
 const fieldsList = filterFieldsList(configFields);
@@ -173,7 +173,9 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    <div className="order-text-ellipsis">
+                        <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    </div>
                 ),
             },
             {
@@ -181,7 +183,7 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 title: 'SKU图片',
                 dataIndex: 'productImage',
                 align: 'center',
-                width: 150,
+                width: 100,
                 render: (value: string, item) => {
                     return <AutoEnLargeImg src={value} className="order-img-lazy" />;
                 },
@@ -251,14 +253,14 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 align: 'center',
                 width: 150,
             },
-            {
+            /*  {
                 key: 'collectTime',
                 title: '采购签收时间',
                 dataIndex: 'collectTime',
                 align: 'center',
                 width: 150,
                 render: (value: string) => utcToLocal(value, ''),
-            },
+            },*/
             {
                 key: 'purchaseOrderStatus',
                 title: '采购计划状态',

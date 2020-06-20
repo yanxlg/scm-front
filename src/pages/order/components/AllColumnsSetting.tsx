@@ -65,7 +65,7 @@ const purchaseGroupList = [
     { key: 'purchaseOrderPayStatus', name: '采购支付状态' },
     { key: 'purchaseWaybillNo', name: '采购运单ID' },
     { key: 'purchaseCancelReason', name: '采购取消原因' },
-    { key: 'purchaseTime', name: '采购签收时间' },
+    // { key: 'purchaseTime', name: '采购签收时间' },
     { key: 'storageTime', name: '采购入库时间' },
     { key: 'purchaseCancelType', name: '采购单取消类型' },
 ];
