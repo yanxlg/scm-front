@@ -243,7 +243,6 @@ const StockControl: React.FC = () => {
                 initialValues={defaultInitialValues}
                 fieldList={fieldsList}
                 ref={formRef}
-                enableCollapse={false}
             >
                 <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                     查询

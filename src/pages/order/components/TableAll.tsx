@@ -541,7 +541,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             defaultHide: true,
         },
         // 勾选展示
-        {
+        /*     {
             key: 'purchaseTime',
             title: '采购签收时间',
             dataIndex: 'purchaseTime',
@@ -549,7 +549,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string) => utcToLocal(value, ''),
             defaultHide: true,
-        },
+        },*/
         // 勾选展示
         {
             key: 'storageTime',

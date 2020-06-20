@@ -151,7 +151,6 @@ const PendingShipped = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
@@ -371,7 +370,6 @@ const PendingShipped = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

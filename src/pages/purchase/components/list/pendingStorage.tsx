@@ -151,7 +151,6 @@ const PendingStorage = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
@@ -458,7 +457,6 @@ const PendingStorage = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

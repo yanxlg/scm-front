@@ -244,7 +244,6 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                                 <JsonForm
                                     ref={form1}
                                     fieldList={fieldList}
-                                    enableCollapse={false}
                                     className={formStyles.formHelpAbsolute}
                                 >
                                     <LoadingButton
@@ -317,7 +316,6 @@ const CreateReturnOrderModal: React.FC<ICreateReturnOrderModalProps> = ({
                                     formStyles.formHelpAbsolute,
                                     current === 0 ? styles.formLabelDisabled : undefined,
                                 )}
-                                enableCollapse={false}
                                 layout="horizontal"
                                 fieldList={fieldList1}
                                 labelClassName={styles.formLabel}

@@ -124,7 +124,6 @@ const Over = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',

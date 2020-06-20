@@ -15,3 +15,7 @@ export const multipleToArray = (value?: string) => {
     }
     return arr;
 };
+
+export const firstNumber = (value?: number[]) => {
+    return value ? value[0] : undefined;
+};

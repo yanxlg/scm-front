@@ -147,7 +147,6 @@ const PendingSigned = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);
@@ -160,7 +159,6 @@ const PendingSigned = () => {
                     origin: '',
                 }}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
             >
                 <div>

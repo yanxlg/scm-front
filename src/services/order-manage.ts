@@ -13,6 +13,7 @@ import {
     IReviewSearch,
     IPlatformItem,
     IPurchaseLog,
+    IOrderItem,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
@@ -20,6 +21,7 @@ import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 // import { ISHopList } from '@/interface/IChannel';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import Order from '@/pages/order';
+import { IPaginationResponse } from 'react-components/es/hooks/useList';
 
 export declare interface IFilterParams {
     page?: number;
@@ -86,8 +88,26 @@ export async function getAllOrderList(data: IFilterParams) {
     });
 }
 
-export async function postExportAll(data: IFilterParams) {
-    return request.post(OrderApiPath.postExportAll, {
+export function queryAllOrderList(data: IFilterParams) {
+    return api
+        .post(OrderApiPath.getAllOrderList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
+}
+
+export function postExportAll(data: IFilterParams) {
+    return api.post(OrderApiPath.postExportAll, {
         data,
     });
 }
@@ -107,43 +127,79 @@ export async function postExportPendingOrder(data: IPendingOrderSearch) {
 }
 
 // 获取待支付
-export async function getPayOrderList(data: IWaitPaySearch) {
-    return request.post(OrderApiPath.getPayOrderList, {
-        requestType: 'json',
-        data,
-    });
+export function getPayOrderList(data: IWaitPaySearch) {
+    return api
+        .post(OrderApiPath.getPayOrderList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
 }
 
-export async function postExportPay(data: IWaitPaySearch) {
-    return request.post(OrderApiPath.postExportPay, {
+export function postExportPay(data: IWaitPaySearch) {
+    return api.post(OrderApiPath.postExportPay, {
         data,
     });
 }
 
 // 获取待发货
-export async function getWaitShipList(data: IWaitShipSearch) {
-    return request.post(OrderApiPath.getWaitShipList, {
-        requestType: 'json',
-        data,
-    });
+export function getWaitShipList(data: IWaitShipSearch) {
+    return api
+        .post(OrderApiPath.getWaitShipList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
 }
 
-export async function postExportWaitShip(data: IWaitShipSearch) {
-    return request.post(OrderApiPath.postExportWaitShip, {
+export function postExportWaitShip(data: IWaitShipSearch) {
+    return api.post(OrderApiPath.postExportWaitShip, {
         data,
     });
 }
 
 // 已采购未入库
-export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
-    return request.post(OrderApiPath.getPurchasedNotWarehouseList, {
-        requestType: 'json',
-        data,
-    });
+export function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
+    return api
+        .post<IResponse<IPaginationResponse<IOrderItem>>>(
+            OrderApiPath.getPurchasedNotWarehouseList,
+            {
+                data,
+            },
+        )
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
 }
 
-export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
-    return request.post(OrderApiPath.postExportPurchasedNotWarehouse, {
+export function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
+    return api.post(OrderApiPath.postExportPurchasedNotWarehouse, {
         data,
     });
 }
@@ -336,3 +392,27 @@ export const getWarehouseList = singlePromiseWrap(() => {
         }));
     });
 });
+
+export const queryPendingSignList = (data: any) => {
+    return api
+        .post<IResponse<IPaginationResponse<IOrderItem>>>(OrderApiPath.queryPendingSignList, {
+            data,
+        })
+        .then(({ data, ...extra }) => {
+            return {
+                ...extra,
+                data: {
+                    ...Object.assign({}, data, {
+                        // @ts-ignore
+                        total: data.all_count || data.total,
+                    }),
+                },
+            };
+        });
+};
+
+export const exportPendingSignList = (data: any) => {
+    return api.post(OrderApiPath.exportPendingSignList, {
+        data,
+    });
+};
