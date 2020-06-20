@@ -169,7 +169,7 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
                         }}
                     />
                     <MultipleSelect
-                        label="销售店铺"
+                        label="销售店铺名称"
                         name="enable_merchant"
                         className={styles.select}
                         form={form}

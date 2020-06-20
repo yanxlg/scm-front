@@ -1,21 +1,20 @@
-import { transStatusList } from '@/utils/transform';
-
+// 对应前台展示
 export const TaskChannelMap = {
     '1': '拼多多',
-    '2': '1688',
-    '3': 'VOVA',
-    '4': 'FD',
+    '2': 'VOVA',
+    '3': 'FD',
+    '4': 'AD',
 };
 
+// 写死逻辑要用
 export const TaskChannelEnum = {
     PDD: '1',
-    1688: '2',
-    VOVA: '3',
-    FD: '4',
+    VOVA: '2',
+    FD: '3',
+    AD: '4',
 };
 
 export type TaskChannelCode = keyof typeof TaskChannelMap;
-export const TaskChannelList = transStatusList(TaskChannelMap);
 
 export const isOnceTask = function(execute_count: string | number) {
     return Number(execute_count) === 1;

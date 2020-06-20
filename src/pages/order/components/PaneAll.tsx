@@ -78,6 +78,7 @@ class PaneAll extends React.PureComponent<IProps, IState> {
         product_shop: '',
         platform_uid: '',
         warehouse_id: '',
+        product_platform: '',
         // purchase_fail_code: '',
         order_goods_status: 100,
         order_goods_shipping_status: 100,

@@ -51,3 +51,8 @@ export interface IExportExcelReqData {
     type?: number;
     filename?: string;
 }
+
+export interface IOnsaleInterceptStoreRes {
+    purchase_channel: string;
+    support_merchant_id: string[];
+}

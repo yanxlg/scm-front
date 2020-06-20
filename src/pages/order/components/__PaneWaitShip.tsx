@@ -27,17 +27,12 @@ import {
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
-import {
-    purchaseOrderOptionList,
-    purchaseShippingOptionList,
-    orderStatusOptionList,
-} from '@/enums/OrderEnum';
+import { purchaseOrderOptionList } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
-import styles from '@/pages/order/components/_pending.less';
 import { FormInstance } from 'antd/es/form';
 
 declare interface IProps {
@@ -113,6 +108,7 @@ const formFields: FormField[] = [
 
 const defaultInitialValues = {
     channel_source: '',
+    purchase_platform: '',
     order_goods_status: 100,
     purchase_order_status: 100,
 };

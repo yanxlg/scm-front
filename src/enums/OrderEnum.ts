@@ -1,11 +1,7 @@
 import { FormField } from 'react-components/es/JsonForm';
-import { transStatusList, transOptionList } from '@/utils/transform';
-import {
-    queryChannelSource,
-    getPlatformAndStore,
-    getPurchaseUidList,
-    getWarehouseList,
-} from '@/services/order-manage';
+import { transStatusList } from '@/utils/transform';
+import { getPlatformAndStore, getPurchaseUidList, getWarehouseList } from '@/services/order-manage';
+import { queryGoodsSourceList } from '@/services/global';
 
 declare interface optionItem {
     name: string;
@@ -254,6 +250,14 @@ export const childDefaultFieldList: FormField[] = [
             key: 'children',
         },
         optionList: () => getPlatformAndStore(),
+    },
+    {
+        type: 'select',
+        name: 'product_platform',
+        label: '商品渠道',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => queryGoodsSourceList(),
     },
 ];
 
