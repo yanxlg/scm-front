@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
-import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { ColumnsType } from 'antd/lib/table';
 import { IShippingCardListRes } from '@/interface/IPriceStrategy';
 import FreightModal from './FreightModal/FreightModal';
@@ -10,7 +10,7 @@ import {
     getShippingCardNameList,
     getShippingCardCountry,
 } from '@/services/price-strategy';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';

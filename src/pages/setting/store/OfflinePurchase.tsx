@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { Button, Form, Input, message } from 'antd';
 import classNames from 'classnames';
-import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { FormInstance } from 'antd/lib/form';
 import { JsonForm, LoadingButton, FitTable, useList } from 'react-components';
 import { ColumnType } from 'antd/lib/table';

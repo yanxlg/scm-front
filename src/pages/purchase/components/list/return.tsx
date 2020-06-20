@@ -8,8 +8,8 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
 import { Button, Tag, Typography } from 'antd';
+import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';

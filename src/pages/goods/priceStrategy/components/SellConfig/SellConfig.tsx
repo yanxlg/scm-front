@@ -7,7 +7,7 @@ import classnames from 'classnames';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import useGoodsTag from '../../hooks/useGoodsTag';
 import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { validateRange } from '@/utils/validate';
 import { saveSalePriceRule, getSalePriceRuleConfig } from '@/services/price-strategy';
 import { numberToStr } from '@/utils/common';

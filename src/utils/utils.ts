@@ -2,7 +2,7 @@
 import { EmptyObject } from '@/config/global';
 import { IResponse } from '@/interface/IGlobal';
 import { parse, stringify } from 'querystring';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 function singlePromiseWrap<T, P = any>(promise: (params?: P) => Promise<T>) {
     let syncPromise: Promise<T>;

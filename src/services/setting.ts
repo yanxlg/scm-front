@@ -21,6 +21,10 @@ import {
     IReplaceBody,
     IReplaceStoreOutItem,
     ReplaceItem,
+    IStoreBlacklistItem,
+    IGetStoreBlacklistReq,
+    ISaveBlackStoreReq,
+    IDeleteBlackStoreReq,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -236,4 +240,26 @@ export function updateOfflinePurchase(id: string, data: IOfflinePurchaseReqData)
 
 export function delOfflinePurchase(id: string) {
     return request.delete(SettingApiPath.DelOfflinePurchase.replace(':id', id));
+}
+
+/*** 采购店铺黑名单 ***/
+export function getStoreBlacklist(data: IGetStoreBlacklistReq) {
+    return api.post<IResponse<PaginationResponse<IStoreBlacklistItem>>>(
+        SettingApiPath.getStoreBlacklist,
+        {
+            data,
+        },
+    );
+}
+
+export function saveBlackStore(data: ISaveBlackStoreReq) {
+    return request.post(SettingApiPath.saveBlackStore, {
+        data,
+    });
+}
+
+export function deleteBlackStore(data: IDeleteBlackStoreReq) {
+    return request.post(SettingApiPath.deleteBlackStore, {
+        data,
+    });
 }

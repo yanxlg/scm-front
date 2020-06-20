@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonForm, LoadingButton, useModal2 } from 'react-components';
-import { FormField } from 'react-components/lib/JsonForm';
+import { FormField } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { TaskExecuteType, TaskIntervalConfigType } from '@/enums/StatusEnum';
 import TaskCycle from '@/pages/task/components/config/hot/TaskCycle';
