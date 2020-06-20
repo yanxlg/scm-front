@@ -134,10 +134,6 @@
         width: 100%;
     }
 
-    .label {
-        width: 56px;
-    }
-
     .section-box {
         margin-top: 20px;
         border-bottom: 1px dashed #e8e8e8;
@@ -145,6 +141,10 @@
 
     .remark {
         margin-top: 20px;
+    }
+
+    :global .ant-form-item-label {
+        width: 86px;
     }
 }
 
@@ -178,20 +178,24 @@
         font-size: 26px;
     }
 
-    .desc-item {
-        margin: 6px 0;
-        overflow: hidden;
+    .form {
+        position: relative;
+
+        :global {
+            .ant-form-item {
+                width: 60%;
+            }
+
+            .ant-form-item-label {
+                width: 86px;
+            }
+        }
     }
 
-    .label {
-        float: left;
-        margin-right: 10px;
-        width: 86px;
-        text-align: right;
-    }
-
-    .text {
-        overflow: hidden;
+    .edit {
+        position: absolute;
+        top: 0;
+        right: 0;
     }
 }
 

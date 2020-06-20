@@ -2,13 +2,16 @@ import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import { Tabs } from 'antd';
 import Container from '@/components/Container';
 import PaneAbnormalAll from './components/abnormal/PaneAbnormalAll';
-import PaneAbnormalPending from './components/abnormal/PaneAbnormalPending';
+import PaneAbnormalWaitProcess from './components/abnormal/PaneAbnormalWaitProcess';
 import PaneAbnormalProcessing from './components/abnormal/PaneAbnormalProcessing';
 import PaneAbnormalEnd from './components/abnormal/PaneAbnormalEnd';
-import { getExceptionCount } from '@/services/purchase';
+import { getExceptionCount, queryStrategyException } from '@/services/purchase';
 import PaneAbnormalReview from './components/abnormal/PaneAbnormalReview';
+import { IAbnormalContext } from '@/interface/IPurchase';
 
 const { TabPane } = Tabs;
+
+export const AbnormalContext = React.createContext<IAbnormalContext>({});
 
 const Purchase: React.FC = props => {
     const [countInfo, setCountInfo] = useState({
@@ -17,6 +20,7 @@ const Purchase: React.FC = props => {
         execingCount: 0,
         allExecingCount: 0,
     });
+    const [context, setContext] = useState<IAbnormalContext>({});
 
     const _getExceptionCount = useCallback(() => {
         getExceptionCount().then(res => {
@@ -36,40 +40,47 @@ const Purchase: React.FC = props => {
         });
     }, []);
 
+    const _queryStrategyException = useCallback(() => {
+        queryStrategyException().then(data => setContext(data));
+    }, []);
+
     useEffect(() => {
         _getExceptionCount();
+        _queryStrategyException();
     }, []);
 
     return useMemo(() => {
         const { penddingCount, allPenddingCount, execingCount, allExecingCount } = countInfo;
         return (
             <Container>
-                <Tabs defaultActiveKey="4" type="card" className="tabs-margin-none">
-                    <TabPane tab="全部" key="1">
-                        <PaneAbnormalAll getExceptionCount={getExceptionCount} />
-                    </TabPane>
-                    <TabPane tab={`待审核（xxx）`} key="2">
-                        <PaneAbnormalReview
-                            penddingCount={penddingCount}
-                            getExceptionCount={getExceptionCount}
-                        />
-                    </TabPane>
-                    <TabPane tab={`待处理（${allPenddingCount}）`} key="3">
-                        <PaneAbnormalPending
-                            penddingCount={penddingCount}
-                            getExceptionCount={getExceptionCount}
-                        />
-                    </TabPane>
-                    <TabPane tab={`处理中（${allExecingCount}）`} key="4">
-                        <PaneAbnormalProcessing execingCount={execingCount} />
-                    </TabPane>
-                    <TabPane tab="已完结" key="5">
-                        <PaneAbnormalEnd />
-                    </TabPane>
-                </Tabs>
+                <AbnormalContext.Provider value={context}>
+                    <Tabs defaultActiveKey="4" type="card" className="tabs-margin-none">
+                        <TabPane tab="全部" key="1">
+                            <PaneAbnormalAll getExceptionCount={getExceptionCount} />
+                        </TabPane>
+                        <TabPane tab={`待审核（xxx）`} key="2">
+                            <PaneAbnormalReview
+                                penddingCount={penddingCount}
+                                getExceptionCount={getExceptionCount}
+                            />
+                        </TabPane>
+                        <TabPane tab={`待处理（${allPenddingCount}）`} key="3">
+                            <PaneAbnormalWaitProcess
+                                penddingCount={penddingCount}
+                                getExceptionCount={getExceptionCount}
+                            />
+                        </TabPane>
+                        <TabPane tab={`处理中（${allExecingCount}）`} key="4">
+                            <PaneAbnormalProcessing execingCount={execingCount} />
+                        </TabPane>
+                        <TabPane tab="已完结" key="5">
+                            <PaneAbnormalEnd />
+                        </TabPane>
+                    </Tabs>
+                </AbnormalContext.Provider>
             </Container>
         );
-    }, [countInfo]);
+    }, [countInfo, context]);
 };
 
 export default Purchase;

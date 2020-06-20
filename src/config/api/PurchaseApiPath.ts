@@ -21,8 +21,9 @@ export enum PurchaseApiPath {
     ApplyReturn = '/api/v1/purchase/refund',
     QueryReturnInfo = '/api/v1/purchase/refund_info',
     AddWaybill = '/api/v1/purchase/waybill',
-    setPurchaseException = '/api/v1/purchase/exception/exec',
     CreatePurchase = '/api/v1/purchase/purchase_order',
     CancelPurchaseByUser = '/api/v1/purchase/purchase_order',
     EndPurchaseByUser = '/api/v1/purchase/finish_purchase_order',
+    QueryStrategyException = '/v1/strategy/waybill_exception',
+    FinishPurchaseExceptionOrder = '/api/v1/purchase/finish_waybill_exception_order',
 }

@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Modal } from 'antd';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { Modal, Form, Input, Button } from 'antd';
 import { Icons } from '@/components/Icon';
 import { IPurchaseAbnormalItem } from '@/interface/IPurchase';
 
@@ -12,12 +12,34 @@ interface IProps {
 }
 
 const DetailModal: React.FC<IProps> = ({ visible, onCancel, currentRecord }) => {
+    const [form] = Form.useForm();
+    const [isEdit, setIsEdit] = useState(false);
     const { remark } = (currentRecord as IPurchaseAbnormalItem) || {};
     let info: any = {};
     try {
         info = JSON.parse(remark);
     } catch (err) {}
     // console.log(111111, info);
+
+    const handleEdit = useCallback(() => {
+        setIsEdit(!isEdit);
+    }, [isEdit]);
+
+    const handleOk = useCallback(() => {
+        console.log('onOk', form.getFieldsValue());
+    }, []);
+
+    const handleCancel = useCallback(() => {
+        setIsEdit(false);
+        onCancel();
+    }, []);
+
+    useEffect(() => {
+        if (isEdit) {
+            form.setFieldsValue(info);
+        }
+    }, [isEdit]);
+
     return useMemo(() => {
         if (!visible) {
             return null;
@@ -38,14 +60,16 @@ const DetailModal: React.FC<IProps> = ({ visible, onCancel, currentRecord }) => 
         const isRefund = operateList.indexOf('退款') > -1;
         const isReject = operateList.indexOf('拒收') > -1;
         const isReplenishment = operateList.indexOf('补货') > -1;
+
         return (
             <Modal
                 title="查看详情"
                 width={720}
                 visible={visible}
-                onCancel={onCancel}
-                footer={null}
+                onCancel={handleCancel}
+                footer={isEdit ? undefined : null}
                 className={styles.detailModal}
+                onOk={handleOk}
             >
                 <div className={styles.iconSection}>
                     {isRefund && (
@@ -67,49 +91,44 @@ const DetailModal: React.FC<IProps> = ({ visible, onCancel, currentRecord }) => 
                         </div>
                     )}
                 </div>
-                {isReject && (
-                    <>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>拒收数量</div>
-                            <p className={styles.text}>{reject_count}</p>
-                        </div>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>收货人</div>
-                            <p className={styles.text}>{receive_name}</p>
-                        </div>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>手机号</div>
-                            <p className={styles.text}>{receive_tel}</p>
-                        </div>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>地址信息</div>
-                            <p className={styles.text}>{receive_address}</p>
-                        </div>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>详细地址</div>
-                            <p className={styles.text}>{receive_address_detail}</p>
-                        </div>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>邮政编码</div>
-                            <p className={styles.text}>{zip_code}</p>
-                        </div>
-                    </>
-                )}
-                {isReplenishment && (
-                    <>
-                        <div className={styles.descItem}>
-                            <div className={styles.label}>补发运单号</div>
-                            <p className={styles.text}>{waybill_no}</p>
-                        </div>
-                    </>
-                )}
-                <div className={styles.descItem}>
-                    <div className={styles.label}>备注</div>
-                    <p className={styles.text}>{remarks}</p>
-                </div>
+                <Form form={form} className={styles.form}>
+                    {isReject && (
+                        <>
+                            <Form.Item label="拒收数量" name="reject_count">
+                                {isEdit ? <Input /> : <div>{reject_count}</div>}
+                            </Form.Item>
+                            <Form.Item label="收货人" name="receive_name">
+                                {isEdit ? <Input /> : <div>{receive_name}</div>}
+                            </Form.Item>
+                            <Form.Item label="手机号" name="receive_tel">
+                                {isEdit ? <Input /> : <div>{receive_tel}</div>}
+                            </Form.Item>
+                            <Form.Item label="地址信息" name="receive_address">
+                                {isEdit ? <Input /> : <div>{receive_address}</div>}
+                            </Form.Item>
+                            <Form.Item label="详细地址" name="receive_address_detail">
+                                {isEdit ? <Input /> : <div>{receive_address_detail}</div>}
+                            </Form.Item>
+                            <Form.Item label="邮政编码" name="zip_code">
+                                {isEdit ? <Input /> : <div>{zip_code}</div>}
+                            </Form.Item>
+                        </>
+                    )}
+                    {isReplenishment && (
+                        <Form.Item label="补发运单号">
+                            <div>{waybill_no}</div>
+                        </Form.Item>
+                    )}
+                    <Form.Item label="备注" name="remarks">
+                        {isEdit ? <Input /> : <div>{remarks}</div>}
+                    </Form.Item>
+                    <a className={styles.edit} onClick={handleEdit}>
+                        {isEdit ? '取消修改' : '修改'}
+                    </a>
+                </Form>
             </Modal>
         );
-    }, [visible]);
+    }, [visible, isEdit]);
 };
 
 export default DetailModal;

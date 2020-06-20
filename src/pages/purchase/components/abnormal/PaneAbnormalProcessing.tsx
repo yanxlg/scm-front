@@ -1,8 +1,12 @@
 import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
+import {
+    getAbnormalAllList,
+    downloadExcel,
+    finishPurchaseExceptionOrder,
+} from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -71,6 +75,8 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         onReload,
         onChange,
         dataSource,
+        selectedRowKeys,
+        setSelectedRowKeys,
     } = useList<IPurchaseAbnormalItem>({
         queryList: getAbnormalAllList,
         formRef: [formRef1, formRef2],
@@ -88,6 +94,11 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         setDetailStatus(false);
     }, []);
 
+    const onSelectedRowKeysChange = useCallback(keys => {
+        // console.log(111111, args);
+        setSelectedRowKeys(keys);
+    }, []);
+
     const onExport = useCallback((values: any) => {
         return downloadExcel({
             query: {
@@ -99,6 +110,12 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
             ...values,
         });
     }, []);
+
+    const _finishPurchaseExceptionOrder = useCallback(() => {
+        return finishPurchaseExceptionOrder(selectedRowKeys).then(() => {
+            message.success('完结采购单成功');
+        });
+    }, [selectedRowKeys]);
 
     const columns = useMemo<ColumnProps<IPurchaseAbnormalItem>[]>(() => {
         return [
@@ -185,6 +202,15 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         ];
     }, []);
 
+    const rowSelection = useMemo(() => {
+        return {
+            fixed: true,
+            columnWidth: '50px',
+            selectedRowKeys: selectedRowKeys,
+            onChange: onSelectedRowKeysChange,
+        };
+    }, [selectedRowKeys]);
+
     const pagination = useMemo(() => {
         return {
             total: total,
@@ -212,15 +238,17 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <JsonForm
-                key="2"
-                containerClassName=""
-                enableCollapse={false}
-                fieldList={fieldCheckboxList}
-                ref={formRef2}
-            ></JsonForm>,
+            <LoadingButton
+                key="1"
+                type="primary"
+                className={formStyles.formBtn}
+                onClick={_finishPurchaseExceptionOrder}
+                disabled={selectedRowKeys.length === 0}
+            >
+                完结采购单
+            </LoadingButton>,
         ];
-    }, [fieldCheckboxList]);
+    }, [selectedRowKeys]);
 
     const exportModalComponent = useMemo(() => {
         return (
@@ -242,7 +270,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                     fieldList={fieldList}
                     ref={formRef1}
                     initialValues={{
-                        waybill_exception_type: 100,
+                        waybill_exception_type: '',
                     }}
                 >
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
@@ -255,13 +283,19 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                         导出
                     </Button>
                 </JsonForm>
+                <JsonForm
+                    // key="2"
+                    // containerClassName=""
+                    enableCollapse={false}
+                    fieldList={fieldCheckboxList}
+                    ref={formRef2}
+                ></JsonForm>
                 <FitTable
                     bordered
                     rowKey="waybillExceptionSn"
-                    // className="order-table"
                     loading={loading}
                     columns={columns}
-                    // rowSelection={rowSelection}
+                    rowSelection={rowSelection}
                     dataSource={dataSource}
                     scroll={{ x: 'max-content' }}
                     columnsSettingRender={true}
@@ -277,7 +311,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, detailStatus, exportModalComponent]);
+    }, [dataSource, loading, detailStatus, exportModalComponent, rowSelection]);
 };
 
 export default PaneAbnormalProcessing;
