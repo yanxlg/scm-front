@@ -116,14 +116,14 @@ const allFormFields: FormField[] = [
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
-    {
+    /*    {
         type: 'dateRanger',
         key: 'purchase_time',
         name: ['purchase_time_start', 'purchase_time_end'],
         label: '采购签收时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
-    },
+    },*/
     {
         type: 'select',
         key: 'order_goods_status',
@@ -224,7 +224,7 @@ const allFormFields: FormField[] = [
         optionList: [defaultOptionItem, ...purchasePlanCancelOptionList],
     },
     {
-        type: 'select',
+        type: 'treeSelect',
         key: 'purchase_fail_code',
         name: 'purchase_fail_code',
         label: '拍单失败原因',

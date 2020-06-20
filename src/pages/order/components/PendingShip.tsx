@@ -168,7 +168,9 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 align: 'center',
                 width: 150,
                 render: (value, item) => (
-                    <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    <div className="order-text-ellipsis">
+                        <a onClick={() => openOrderGoodsDetailUrl(item.productId!)}>{value}</a>
+                    </div>
                 ),
             },
             {
@@ -176,7 +178,7 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
                 title: 'SKU图片',
                 dataIndex: 'productImageUrl',
                 align: 'center',
-                width: 150,
+                width: 100,
                 render: (value: string, item) => {
                     return <AutoEnLargeImg src={item.productImage} className="order-img-lazy" />;
                 },
