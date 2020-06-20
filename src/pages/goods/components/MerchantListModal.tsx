@@ -78,7 +78,10 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                                         key={merchant_id}
                                         value={merchant_id}
                                         className={formStyles.formCheckbox}
-                                        disabled={enabledMerchantIds.indexOf(merchant_id) === -1}
+                                        disabled={
+                                            sourceChannel !== void 0 &&
+                                            enabledMerchantIds.indexOf(merchant_id) === -1
+                                        }
                                     >
                                         {merchant_name}
                                     </Checkbox>
@@ -90,7 +93,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
             }
         }
         return platformArr;
-    }, [list, loading, enabledMerchantIds]);
+    }, [list, loading, enabledMerchantIds, sourceChannel]);
 
     const onCancelFunc = useCallback(() => {
         onCancel();
@@ -134,7 +137,7 @@ const MerchantListModal: React.FC<MerchantListModalProps> = ({
                 </Spin>
             </Modal>
         );
-    }, [loading, confirmLoading, visible]);
+    }, [loading, confirmLoading, visible, sourceChannel]);
 };
 
 export default MerchantListModal;
