@@ -144,7 +144,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
             },
             {
                 key: 'purchaseOrderTime',
-                title: '采购订单生成时间',
+                title: '采购计划生成时间',
                 dataIndex: 'purchaseOrderTime',
                 align: 'center',
                 width: 150,

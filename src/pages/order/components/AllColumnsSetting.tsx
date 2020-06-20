@@ -50,7 +50,7 @@ const saleGroupList = [
 ];
 
 const purchaseGroupList = [
-    { key: 'purchaseCreateTime', name: '采购订单生成时间' },
+    { key: 'purchaseCreateTime', name: '采购计划生成时间' },
     { key: 'purchasePlanId', name: '采购计划ID' },
     { key: 'reserveStatus', name: '仓库库存预定状态' },
 
