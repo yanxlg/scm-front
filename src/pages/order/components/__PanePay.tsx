@@ -96,7 +96,7 @@ const formFields: FormField[] = [
     {
         type: 'dateRanger',
         name: ['purchase_order_stime', 'purchase_order_etime'],
-        label: '采购订单生成时间',
+        label: '采购计划生成时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
@@ -416,7 +416,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'purchase_order_time',
-                title: '采购订单生成时间',
+                title: '采购计划生成时间',
                 dataIndex: 'purchase_order_time',
                 align: 'center',
                 width: 150,

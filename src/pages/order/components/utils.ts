@@ -87,7 +87,7 @@ const allFormFields: FormField[] = [
         key: 'purchase_order_time',
         type: 'dateRanger',
         name: ['purchase_order_stime', 'purchase_order_etime'],
-        label: '采购订单生成时间',
+        label: '采购计划生成时间',
         className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },

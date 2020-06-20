@@ -477,7 +477,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // 勾选展示
         {
             key: 'purchaseCreateTime',
-            title: '采购订单生成时间',
+            title: '采购计划生成时间',
             dataIndex: 'purchaseCreateTime',
             align: 'center',
             width: 146,

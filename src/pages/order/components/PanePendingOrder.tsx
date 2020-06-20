@@ -896,7 +896,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         key: 'purchaseCreateTime',
-                        title: '采购订单生成时间',
+                        title: '采购计划生成时间',
                         dataIndex: 'purchaseCreateTime',
                         align: 'center',
                         width: 180,
@@ -1137,7 +1137,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         key: 'purchaseCreateTime',
-                        title: '采购订单生成时间',
+                        title: '采购计划生成时间',
                         dataIndex: 'purchaseCreateTime',
                         align: 'center',
                         width: 180,
@@ -1343,7 +1343,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                     {
                         key: 'purchaseCreateTime',
-                        title: '采购订单生成时间',
+                        title: '采购计划生成时间',
                         dataIndex: 'purchaseCreateTime',
                         align: 'center',
                         width: 180,
