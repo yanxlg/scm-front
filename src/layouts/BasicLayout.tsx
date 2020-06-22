@@ -5,7 +5,6 @@ import ProLayout, {
 import React, { useCallback, useMemo } from 'react';
 import { Link } from 'umi';
 import { Dispatch } from 'redux';
-import { connect } from 'umi';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.png';

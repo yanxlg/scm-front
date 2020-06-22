@@ -3,10 +3,6 @@ import { firstNumber, multipleToArray } from '@/utils/formatter';
 
 const logger = require('dva-logger');
 
-// const _ = require('lodash/lodash.js');
-//
-// console.log(_);
-
 export const dva = {
     config: {
         onError(err: ErrorEvent) {
@@ -88,3 +84,21 @@ formatter.extend({
     multipleToArray: multipleToArray,
     firstNumber: firstNumber,
 });
+
+export function onRouteChange({
+    location,
+    routes,
+    action,
+}: {
+    location: Location;
+    routes: any[];
+    action: string;
+}) {
+    console.log(location, routes, action);
+    console.log('11111', Date.now());
+}
+
+export function render(oldRender: any) {
+    oldRender();
+    console.log('22222', Date.now());
+}
