@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal, Spin } from 'antd';
-
-import { IGoodsDetail } from './PaneAll';
+import { IGoodsDetail } from '@/interface/IOrder';
 
 declare interface IGoodsDetailDialogProps {
     visible: boolean;

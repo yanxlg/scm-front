@@ -33,6 +33,10 @@ body {
     visibility: hidden;
 }
 
+.form-hide-label .ant-form-item-label {
+    visibility: hidden;
+}
+
 .ant-tabs-tab {
     font-weight: 400 !important;
 }

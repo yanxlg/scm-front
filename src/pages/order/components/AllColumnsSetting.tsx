@@ -53,7 +53,6 @@ const purchaseGroupList = [
     { key: 'purchaseCreateTime', name: '采购计划生成时间' },
     { key: 'purchasePlanId', name: '采购计划ID' },
     { key: 'reserveStatus', name: '仓库库存预定状态' },
-
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },
     { key: 'purchasePlatform', name: '采购平台' },

@@ -2,12 +2,7 @@ import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
-import {
-    queryShopList,
-    queryShopFilterList,
-    getPurchasePlatform,
-    queryGoodsSourceList,
-} from '@/services/global';
+import { queryShopFilterList, queryGoodsSourceList } from '@/services/global';
 import { getAllGoodsTagList, getSalePriceList } from '@/services/price-strategy';
 import { ColumnsType } from 'antd/lib/table';
 import { ISellItem, IEdiyKey } from '@/interface/IPriceStrategy';

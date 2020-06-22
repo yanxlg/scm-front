@@ -21,7 +21,6 @@ import {
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
 import { IFilterParams, getWarehouseList, getPurchaseUidList } from '@/services/order-manage';
-import { PaginationConfig } from 'antd/es/pagination';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import CancelOrder from './CancelOrder';
