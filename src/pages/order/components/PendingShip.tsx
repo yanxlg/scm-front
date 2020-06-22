@@ -50,7 +50,7 @@ const configFields = [
     'order_goods_id',
     'commodity_id',
     'purchase_platform_order_id',
-    'order_create_time',
+    'order_create_time1',
     'pay_time',
 ];
 
