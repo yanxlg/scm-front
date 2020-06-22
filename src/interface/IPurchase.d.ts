@@ -40,6 +40,7 @@ export interface IPurchaseAbnormalItem {
     // platformUid: string;
     // purchasePlatform: string;
     remark: string;
+    remarkTime: string;
     packageImageUrl?: string;
     waybillExceptionHandle?: IHandleItem[];
 }

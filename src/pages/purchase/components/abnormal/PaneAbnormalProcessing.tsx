@@ -31,6 +31,7 @@ import useDetail from '../../hooks/useDetail';
 
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 interface IProps {
     execingCount: number;
@@ -114,7 +115,16 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
-                width: 150,
+                width: 180,
+                render: (val: string, row: IPurchaseAbnormalItem) => {
+                    const { remarkTime } = row;
+                    return (
+                        <>
+                            {val}
+                            <div>{utcToLocal(remarkTime)}</div>
+                        </>
+                    );
+                },
             },
             {
                 title: '异常类型',
