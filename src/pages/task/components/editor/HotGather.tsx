@@ -22,13 +22,15 @@ import TaskRange from '@/pages/task/components/config/hot/TaskRange';
 import TaskCycle from '@/pages/task/components/config/hot/TaskCycle';
 import PriceRange from '@/pages/task/components/config/hot/PriceRange';
 import SalesRange from '@/pages/task/components/config/hot/SalesRange';
-import { TaskChannelList, TaskChannelCode, TaskChannelEnum } from '@/config/dictionaries/Task';
+import { TaskChannelCode, TaskChannelEnum } from '@/config/dictionaries/Task';
 import SortType from '@/pages/task/components/config/hot/SortType';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import { LoadingButton } from 'react-components';
 import classNames from 'classnames';
 import { dateToUnix } from 'react-components/es/utils/date';
 import dayjs from 'dayjs';
+import { queryGoodsSourceList } from '@/services/global';
+import { EmptyArray } from 'react-components/es/utils';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -50,11 +52,28 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
     const reptileRef = useRef<ReptileConditionRef>(null);
     const [isUpperShelf, setIsUpperShelf] = useState<boolean | undefined>(undefined);
 
+    const [channelList, setChannelList] = useState<
+        Array<{
+            name: string;
+            value: string;
+        }>
+    >([]);
+
     const [merchantModal, setMerchantModal] = useState(false);
 
     const [form] = Form.useForm();
 
     const edit = taskId !== void 0;
+
+    useEffect(() => {
+        queryGoodsSourceList().then((list = EmptyArray) => {
+            const _list = list.filter(({ value }) => value === TaskChannelEnum.PDD);
+            setChannelList(_list);
+            form.setFieldsValue({
+                channel: _list[0].value,
+            });
+        });
+    }, []);
 
     useEffect(() => {
         if (edit) {
@@ -252,6 +271,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         reptileRef.current!.reset();
                         form.setFieldsValue({
                             sort_type: listSort[0]?.value ?? '',
+                            channel: channelList[0]?.value,
                         });
                         showSuccessModal(data);
                     })
@@ -262,7 +282,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
             .catch(({ errorFields }) => {
                 scrollToFirstError(form, errorFields);
             });
-    }, []);
+    }, [channelList, listSort]);
 
     const onGatherOn = useCallback(() => {
         form.validateFields()
@@ -278,32 +298,36 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
         setMerchantModal(false);
     }, []);
 
-    const onGatherOnOKey = useCallback((merchant_ids: string[]) => {
-        const values = form.getFieldsValue() as IFormData;
-        const params = convertFormData(values);
-        return addPddHotTask(
-            Object.assign(
-                {
-                    merchants_id: merchant_ids.join(','),
-                },
-                params,
-                {
-                    is_upper_shelf: true,
-                },
-            ),
-        )
-            .then(({ data = EmptyObject } = EmptyObject) => {
-                form.resetFields();
-                reptileRef.current!.reset();
-                form.setFieldsValue({
-                    sort_type: listSort[0]?.value ?? '',
+    const onGatherOnOKey = useCallback(
+        (merchant_ids: string[]) => {
+            const values = form.getFieldsValue() as IFormData;
+            const params = convertFormData(values);
+            return addPddHotTask(
+                Object.assign(
+                    {
+                        merchants_id: merchant_ids.join(','),
+                    },
+                    params,
+                    {
+                        is_upper_shelf: true,
+                    },
+                ),
+            )
+                .then(({ data = EmptyObject } = EmptyObject) => {
+                    form.resetFields();
+                    reptileRef.current!.reset();
+                    form.setFieldsValue({
+                        sort_type: listSort[0]?.value ?? '',
+                        channel: channelList[0]?.value,
+                    });
+                    showSuccessModal(data);
+                })
+                .catch(() => {
+                    showFailureModal();
                 });
-                showSuccessModal(data);
-            })
-            .catch(() => {
-                showFailureModal();
-            });
-    }, []);
+        },
+        [listSort, channelList],
+    );
 
     const modals = useMemo(() => {
         return (
@@ -313,7 +337,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                 onCancel={closeMerChantModal}
             />
         );
-    }, [merchantModal]);
+    }, [merchantModal, listSort, channelList]);
 
     const body = useMemo(() => {
         return (
@@ -331,7 +355,6 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         day: 1,
                         grab_page_count: 20,
                         grab_count_max: 10000,
-                        channel: TaskChannelList[0].id,
                     }}
                 >
                     <Form.Item
@@ -361,12 +384,9 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                         ]}
                     >
                         <Select className="picker-default" onChange={taskChannelChange}>
-                            {TaskChannelList.map(({ name, id }) => {
-                                if (id === '3') {
-                                    return null;
-                                }
+                            {channelList.map(({ name, value }) => {
                                 return (
-                                    <Select.Option value={id} key={id}>
+                                    <Select.Option value={value} key={value}>
                                         {name}
                                     </Select.Option>
                                 );
@@ -461,7 +481,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                 </Form>
             </Spin>
         );
-    }, [queryLoading, sortLoading]);
+    }, [queryLoading, sortLoading, channelList]);
 
     return (
         <>

@@ -24,7 +24,7 @@ const Config: React.FC = () => {
                         <TabPane tab="PDD热销款采集" key="1">
                             <HotGather />
                         </TabPane>,
-                        <TabPane tab="vova/FD商品采集" key="2">
+                        <TabPane tab="VoVa/FD/AD商品采集" key="2">
                             <VoVaGather />
                         </TabPane>,
                         <TabPane tab="定时商品更新" key="3">
