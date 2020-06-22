@@ -1,6 +1,5 @@
 import React from 'react';
 import { Tabs } from 'antd';
-import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
 import PaneError from './components/PaneError';
 import PaddingInStore from './components/PaddingInStore';

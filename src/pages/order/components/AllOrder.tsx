@@ -37,6 +37,7 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import {
     CombineRowItem,
     IFlatOrderItem,
+    IGoodsDetail,
     IOrderGood,
     IOrderItem,
     IPurchasePlan,
@@ -49,7 +50,6 @@ import { FormInstance } from 'antd/es/form';
 import { combineRows, combineRowsT, filterFieldsList } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
-import { IChildOrderItem, IGoodsDetail, IParentOrderItem } from '@/pages/order/components/PaneAll';
 import GoodsDetailDialog from '@/pages/order/components/GoodsDetailDialog';
 import AllColumnsSetting from '@/pages/order/components/AllColumnsSetting';
 
@@ -514,7 +514,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       defaultHide: true,
                       width: 120,
-                      render: (_, row: IChildOrderItem) => {
+                      render: (_, row) => {
                           const { purchaseNumber, purchaseAmount } = row;
                           const price = Number(purchaseAmount) / Number(purchaseNumber);
                           return isNaN(price) ? '' : price.toFixed(2);
@@ -659,7 +659,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                               <>
                                   {value}
                                   <div style={{ color: 'red' }}>
-                                      {String(record?.orderGods?.isOfflinePurchase) === '1'
+                                      {String(record?.isOfflinePurchase) === '1'
                                           ? '（线下采购，无需拍单）'
                                           : ''}
                                   </div>
@@ -696,7 +696,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 140,
                       defaultHide: true,
-                      render: (value: string, row: IChildOrderItem) => {
+                      render: (value: string, row) => {
                           const { purchaseOrderStatus } = row;
                           return purchaseOrderStatus === 7
                               ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
@@ -753,7 +753,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       defaultHide: true,
                       width: 120,
-                      render: (value: string, row: IChildOrderItem) => utcToLocal(value, ''),
+                      render: (value: string, row) => utcToLocal(value, ''),
                   },
                   {
                       key: 'purchaseOrderPayStatus',
@@ -761,7 +761,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       dataIndex: 'purchaseOrderPayStatus',
                       align: 'center',
                       width: 120,
-                      render: (value: number, row: IChildOrderItem) => {
+                      render: (value: number, row) => {
                           const { purchasePlatformOrderId } = row;
                           return purchasePlatformOrderId
                               ? getStatusDesc(purchasePayOptionList, value)
