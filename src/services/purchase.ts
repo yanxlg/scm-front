@@ -16,7 +16,7 @@ import {
 } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
 import { IPurchaseItem, IPurchasePlain } from '@/interface/IPurchase';
-import { IPaginationResponse } from 'react-components/lib/hooks/useList';
+import { IPaginationResponse } from 'react-components/es/hooks/useList';
 
 export function getAbnormalAllList(data: IPurchaseAbnormalReq & IRequestPagination1) {
     // <IResponse<IPurchaseAbnormalItem>>

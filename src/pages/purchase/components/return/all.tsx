@@ -8,7 +8,7 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { Button, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -100,12 +100,7 @@ const AllList: React.FC<AllListProps> = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm
-                fieldList={fieldList}
-                ref={formRef}
-                enableCollapse={false}
-                labelClassName={styles.formItem}
-            >
+            <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formItem}>
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         搜索

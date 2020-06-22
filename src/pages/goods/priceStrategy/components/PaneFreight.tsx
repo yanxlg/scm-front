@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
-import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { ColumnsType } from 'antd/lib/table';
 import { IShippingFeeRuleRes, IEdiyKey } from '@/interface/IPriceStrategy';
 import { EditEnum } from '@/enums/PriceStrategyEnum';
@@ -11,7 +11,7 @@ import { getShippingCardNameList, getShippingFeeRuleList } from '@/services/pric
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
 
 interface IProps {
@@ -229,14 +229,11 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
             //     optionList: () => getAllGoodsTagList(),
             // },
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '运费价卡',
                 name: 'card_name',
-                isShortcut: true,
                 placeholder: '请选择',
-                mode: 'multiple',
                 className: styles.select,
-                maxTagCount: 4,
                 optionList: cartNameList,
             },
             // {

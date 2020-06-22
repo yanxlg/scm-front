@@ -3,7 +3,7 @@ import { Modal, Form, Input, Upload, Select, notification, message } from 'antd'
 import { LoadingButton } from 'react-components';
 import { UploadOutlined, FileExcelOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { requiredRule } from '@/enums/PriceStrategyEnum';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 import styles from './_FreightModal.less';
 import { saveShippingCard, getShippingCartDetail } from '@/services/price-strategy';

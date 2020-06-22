@@ -136,14 +136,17 @@ export async function editSkuPrice(data: IEditSkuBody) {
 export async function queryOnOffLog({
     merchant_id,
     product_ids,
+    commodity_ids,
 }: {
     product_ids: string;
     merchant_id: string;
+    commodity_ids: string;
 }) {
     return request.post<IResponse<ILogItem[]>>(ChannelApiPath.QueryOnOffLog, {
         data: {
             product_ids,
             merchant_id,
+            commodity_ids,
         },
     });
 }

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
-import { FormField, JsonFormRef } from 'react-components/lib/JsonForm';
+import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { ColumnsType } from 'antd/lib/table';
 import { IShippingCardListRes } from '@/interface/IPriceStrategy';
 import FreightModal from './FreightModal/FreightModal';
@@ -10,7 +10,7 @@ import {
     getShippingCardNameList,
     getShippingCardCountry,
 } from '@/services/price-strategy';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
@@ -171,13 +171,11 @@ const PaneFreightCalc: React.FC = props => {
     const formFields = useMemo<FormField[]>(() => {
         return [
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '运费价卡',
                 name: 'card_name',
                 placeholder: '请选择',
                 mode: 'multiple',
-                isShortcut: true,
-                maxTagCount: 4,
                 className: styles.select,
                 optionList: nameList,
                 formatter: 'join',
@@ -189,13 +187,10 @@ const PaneFreightCalc: React.FC = props => {
                 },
             },
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '国家',
                 name: 'country_code',
                 placeholder: '请选择',
-                mode: 'multiple',
-                isShortcut: true,
-                maxTagCount: 4,
                 className: styles.select,
                 optionList: countryCodeList,
                 formatter: 'join',

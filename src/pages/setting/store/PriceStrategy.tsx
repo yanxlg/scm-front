@@ -113,7 +113,7 @@ const PriceStrategy = () => {
                 fieldList={[
                     {
                         type: 'select',
-                        label: '渠道',
+                        label: '销售渠道',
                         name: 'channel',
                         placeholder: '请选择渠道',
                         optionList: () => queryShopFilterList(),
@@ -129,7 +129,7 @@ const PriceStrategy = () => {
                     },
                     {
                         type: 'select',
-                        label: '店铺名',
+                        label: '销售店铺名称',
                         name: 'merchant_id',
                         placeholder: '请选择店铺',
                         optionListDependence: {

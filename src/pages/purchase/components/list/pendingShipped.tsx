@@ -9,8 +9,8 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
 import { Button, message, Modal, Typography, Tag } from 'antd';
+import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -151,7 +151,6 @@ const PendingShipped = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
@@ -371,7 +370,6 @@ const PendingShipped = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

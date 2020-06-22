@@ -1,14 +1,12 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { Button, notification } from 'antd';
+import { Button } from 'antd';
 import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
+import { defaultOptionItem, defaultOptionItem1 } from '@/enums/OrderEnum';
 import { INotWarehouseSearch, INotWarehouseOrderItem } from '@/interface/IOrder';
 import {
     getPurchasedNotWarehouseList,
     postExportPurchasedNotWarehouse,
-    delChannelOrders,
-    queryChannelSource,
     getPlatformAndStore,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
@@ -31,41 +29,43 @@ declare interface IProps {
 
 const formFields: FormField[] = [
     {
-        type: 'textarea',
+        type: 'input',
         name: 'order_goods_id',
         label: <span>中&nbsp;台&nbsp;订&nbsp;单&nbsp;ID</span>,
         className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
+        // formItemClassName: 'form-item',
+        placeholder: '请输入中台订单ID',
+        // numberStrArr
+        // formatter: 'strArr',
     },
     {
-        type: 'textarea',
+        type: 'input',
         name: 'purchase_platform_order_id_list',
         label: '采购平台订单ID',
         className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
+        placeholder: '请输入采购平台订单ID',
+        formatter: 'str_arr',
     },
     {
-        type: 'textarea',
+        type: 'input',
         name: 'product_id',
         label: '中台商品ID',
         className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
+        placeholder: '请输入中台商品ID',
+        // formatter: 'strArr',
     },
     {
-        type: 'textarea',
+        type: 'input',
         name: 'purchase_waybill_no',
         label: '采购运单号',
         className: 'order-input',
-        placeholder: '请输入',
-        formatter: 'multipleToArray',
+        placeholder: '请输入采购运单号',
+        // formatter: 'strArr',
     },
     {
         type: 'select',
         name: 'channel_source',
-        label: '销售渠道',
+        label: '销售店铺名称',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
         syncDefaultOption: defaultOptionItem1,
@@ -360,7 +360,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'channelSource',
-                title: '销售渠道',
+                title: '销售店铺名称',
                 dataIndex: 'channelSource',
                 align: 'center',
                 width: 120,

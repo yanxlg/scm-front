@@ -451,7 +451,6 @@ const EditTab: React.FC = () => {
                     itemCol={{ xl: 8, lg: 12, xs: 24 }}
                     itemRow={{ gutter: 60 }}
                     labelCol={{ xl: 8 }}
-                    enableCollapse={false}
                     initialValues={{
                         is_electricity: false,
                         is_metal: false,

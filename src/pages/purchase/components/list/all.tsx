@@ -10,8 +10,8 @@ import {
     useModal,
     useModal2,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
 import { Button, message, Modal, Tag, Typography } from 'antd';
+import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -153,7 +153,6 @@ const AllList = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
