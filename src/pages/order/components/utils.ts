@@ -103,6 +103,14 @@ const allFormFields: FormField[] = [
     {
         type: 'dateRanger',
         key: 'order_create_time',
+        name: ['order_time_start', 'order_time_end'],
+        label: '订单生成时间',
+        className: 'order-date-picker',
+        formatter: ['start_date', 'end_date'],
+    },
+    {
+        type: 'dateRanger',
+        key: 'order_create_time1',
         name: ['order_create_time_start', 'order_create_time_end'],
         label: '订单生成时间',
         className: 'order-date-picker',
