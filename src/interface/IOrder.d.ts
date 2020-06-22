@@ -209,6 +209,7 @@ interface IPurchasePlan {
     purchasePlatformParentOrderId: string;
     reserveStatus: number;
     taskId: string;
+    cancelType: string;
 }
 
 interface IOrderItemExtend {
@@ -272,6 +273,9 @@ interface PayOrderPurchase {
     purchasePlanStatus: number;
     orderGoodsId: string;
     lastWaybillNo: string;
+    createTime: string;
+    lastUpdateTime: string;
+    cancelType: string;
 }
 
 export interface IOrderGood {
@@ -343,3 +347,17 @@ export type CombineRowItem = {
     __rowspan: number;
     __key?: any;
 };
+
+export declare interface ISkuStyle {
+    [key: string]: string;
+}
+
+export declare interface IGoodsDetail {
+    product_id: string;
+    goods_img: string;
+    title: string;
+    sku_style?: ISkuStyle[];
+    sku_sn?: string;
+    sku_img?: string;
+    commodity_sku_id?: string;
+}
