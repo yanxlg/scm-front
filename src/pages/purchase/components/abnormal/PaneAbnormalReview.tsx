@@ -30,6 +30,7 @@ import { AbnormalContext } from '../../abnormal';
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import useReview from '../../hooks/useReview';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const { Option } = Select;
 
@@ -177,7 +178,16 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
-                width: 150,
+                width: 180,
+                render: (val: string, row: IPurchaseAbnormalItem) => {
+                    const { remarkTime } = row;
+                    return (
+                        <>
+                            {val}
+                            <div>{utcToLocal(remarkTime)}</div>
+                        </>
+                    );
+                },
             },
             {
                 title: '异常类型',

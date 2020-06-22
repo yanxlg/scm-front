@@ -25,8 +25,6 @@ import {
     IExceptionHandle,
 } from '@/enums/PurchaseEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { QuestionCircleOutlined } from '@ant-design/icons';
-// import TextArea from 'antd/lib/input/TextArea';
 import Export from '@/components/Export';
 import DetailModal from './DetailModal';
 import { AbnormalContext } from '../../abnormal';
@@ -178,7 +176,16 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
-                width: 150,
+                width: 180,
+                render: (val: string, row: IPurchaseAbnormalItem) => {
+                    const { remarkTime } = row;
+                    return (
+                        <>
+                            {val}
+                            <div>{utcToLocal(remarkTime)}</div>
+                        </>
+                    );
+                },
             },
             {
                 title: '异常类型',

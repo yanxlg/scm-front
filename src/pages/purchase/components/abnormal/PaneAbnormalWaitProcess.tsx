@@ -27,6 +27,7 @@ import Export from '@/components/Export';
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import useWaitProcess from '../../hooks/useWaitProcess';
+import { utcToLocal } from 'react-components/lib/utils/date';
 
 interface IProps {
     penddingCount: number;
@@ -149,7 +150,16 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 title: '异常单ID',
                 dataIndex: 'waybillExceptionSn',
                 align: 'center',
-                width: 150,
+                width: 180,
+                render: (val: string, row: IPurchaseAbnormalItem) => {
+                    const { remarkTime } = row;
+                    return (
+                        <>
+                            {val}
+                            <div>{utcToLocal(remarkTime)}</div>
+                        </>
+                    );
+                },
             },
             {
                 title: '异常类型',
