@@ -19,6 +19,11 @@ export interface IWaybillExceptionStatus {
 
 export type IWaybillExceptionStatusKey = keyof IWaybillExceptionStatus;
 
+export interface IHandleItem {
+    handleType: number;
+    handleStatus?: number;
+}
+
 export interface IPurchaseAbnormalItem {
     waybillExceptionSn: string; // 异常订单编号
     waybillExceptionType: IWaybillExceptionTypeKey; // 异常类型 101扫码失败，102拒收 103多发货 104货不对版 105货品不合规
@@ -36,6 +41,7 @@ export interface IPurchaseAbnormalItem {
     // purchasePlatform: string;
     remark: string;
     packageImageUrl?: string;
+    waybillExceptionHandle?: IHandleItem[];
 }
 
 export interface IPurchaseAbnormalReq {
@@ -74,7 +80,7 @@ export interface IDiscardAbnormalOrderReq {
     waybill_exception_sn: string;
     handle_type: IExceptionHandleType[];
     remarks: string;
-    reject_count?: number;
+    reject_count?: string;
     receive_name?: string;
     receive_tel?: string;
     receive_address?: string;
@@ -248,4 +254,21 @@ export interface IAbnormalContext {
 export interface IQueryStrategyExceptionRes {
     exception_code?: IExceptionCodeItem[];
     exception_strategy?: IExceptionStrategyItem[];
+}
+
+export interface IUpdateWaybillExceptionPregressReq {
+    waybill_exception_sn: string;
+    handle_status: number[];
+}
+
+export interface IReviewExceptionOrderItem {
+    waybill_exception_sn: string;
+    review_result: 1 | 2; // 1--通过，2--驳回
+    waybill_exception_type: string;
+}
+
+export interface IReviewExceptionOrderResItem {
+    code: number;
+    msg: string;
+    waybillExceptionSn: string;
 }

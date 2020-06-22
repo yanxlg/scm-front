@@ -2,7 +2,12 @@ import React, { useMemo, useEffect, useState, useCallback, useRef, useContext } 
 import { Modal, Input, message, Button, Select, Form } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
+import {
+    getAbnormalAllList,
+    setDiscardAbnormalOrder,
+    downloadExcel,
+    reviewExceptionOrder,
+} from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -24,6 +29,7 @@ import { AbnormalContext } from '../../abnormal';
 
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import useReview from '../../hooks/useReview';
 
 const { Option } = Select;
 
@@ -53,20 +59,26 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
         queryList: getAbnormalAllList,
         formRef: formRef,
         extraQuery: {
-            waybill_exception_status: 1,
+            waybill_exception_status: 4,
         },
     });
+
+    const onRefresh = useCallback(() => {
+        getExceptionCount();
+        return onReload();
+    }, []);
+
+    const { reviewPass, reviewReject, batchReviewPass, batchReviewReject } = useReview(
+        form,
+        onRefresh,
+        selectedRowKeys,
+    );
 
     const { exception_code = [], exception_strategy = [] } = abnormalContext;
 
     const onSelectedRowKeysChange = useCallback(keys => {
         // console.log(111111, args);
         setSelectedRowKeys(keys);
-    }, []);
-
-    const onRefresh = useCallback(() => {
-        getExceptionCount();
-        onReload();
     }, []);
 
     const onExport = useCallback((values: any) => {
@@ -88,7 +100,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 type="primary"
                 className={formStyles.formBtn}
                 disabled={disabled}
-                onClick={onSearch}
+                onClick={batchReviewPass}
             >
                 审核通过
             </LoadingButton>,
@@ -97,7 +109,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 type="primary"
                 className={formStyles.formBtn}
                 disabled={disabled}
-                onClick={onSearch}
+                onClick={batchReviewReject}
             >
                 审核驳回
             </LoadingButton>,
@@ -132,6 +144,12 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 label: '运单号',
                 placeholder: '请输入',
             },
+            {
+                type: 'input',
+                name: 'purchase_order_goods_sn',
+                label: '供应商订单号',
+                placeholder: '请输入',
+            },
         ];
     }, [abnormalContext]);
 
@@ -146,16 +164,10 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                     return (
                         <>
                             <div>
-                                <a
-                                    onClick={() => {
-                                        console.log(111111, form.getFieldsValue());
-                                    }}
-                                >
-                                    审核通过
-                                </a>
+                                <a onClick={() => reviewPass(row)}>审核通过</a>
                             </div>
                             <div>
-                                <a onClick={() => {}}>审核驳回</a>
+                                <a onClick={() => reviewReject(row)}>审核驳回</a>
                             </div>
                         </>
                     );
@@ -178,7 +190,11 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                     return val === '101' ? (
                         waybillExceptionTypeMap[val]
                     ) : (
-                        <Form.Item name={waybillExceptionSn} initialValue={val}>
+                        <Form.Item
+                            name={waybillExceptionSn}
+                            initialValue={val}
+                            className={styles.tableFormItem}
+                        >
                             <Select className={styles.select}>
                                 {waybillExceptionTypeList.map(({ name, value }) => (
                                     <Option value={value} key={value}>
@@ -224,14 +240,14 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 width: 150,
             },
             {
-                title: '供应商订单号',
-                dataIndex: 'xxx',
+                title: '运单号',
+                dataIndex: 'purchaseWaybillNo',
                 align: 'center',
                 width: 150,
             },
             {
-                title: '运单号',
-                dataIndex: 'purchaseWaybillNo',
+                title: '供应商订单号',
+                dataIndex: 'purchaseOrderGoodsSn',
                 align: 'center',
                 width: 150,
             },
@@ -280,15 +296,24 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                         waybill_exception_type: '',
                     }}
                 >
-                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
-                        查询
-                    </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
-                        刷新
-                    </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
-                        导出
-                    </Button>
+                    <div>
+                        <LoadingButton
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={onSearch}
+                        >
+                            查询
+                        </LoadingButton>
+                        <LoadingButton className={formStyles.formBtn} onClick={onRefresh}>
+                            刷新
+                        </LoadingButton>
+                        <Button
+                            className={formStyles.formBtn}
+                            onClick={() => setExportStatus(true)}
+                        >
+                            导出
+                        </Button>
+                    </div>
                 </JsonForm>
                 <Form form={form}>
                     <FitTable

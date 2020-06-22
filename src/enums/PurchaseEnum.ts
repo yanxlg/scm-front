@@ -32,3 +32,14 @@ export enum AbnormalType {
     pendingReview = 4, // 待审核
     reviewRejected = 5, // 审核驳回
 }
+
+export const waybillExceptionHandleMap = {
+    1: '关联采购单',
+    2: '退款',
+    3: '退货',
+    4: '补发',
+    5: '废弃',
+    6: '审核驳回',
+};
+
+export type IExceptionHandle = keyof typeof waybillExceptionHandleMap;

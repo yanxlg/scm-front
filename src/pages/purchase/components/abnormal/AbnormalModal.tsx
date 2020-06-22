@@ -52,20 +52,20 @@ const AbnormalModal: React.FC<IProps> = ({ visible, currentRecord, onCancel, onR
         setConfirmLoading(true);
         return setDiscardAbnormalOrder({
             ...rest,
-            reject_count: reject_count,
+            reject_count: (reject_count || '') + '',
             in_storage_count: (in_storage_count || '') + '',
             purchase_order_goods_id: purchaseOrderGoodsId,
             waybill_exception_sn: waybillExceptionSn,
             handle_type: checkedList,
         } as IDiscardAbnormalOrderReq)
             .then((res: any) => {
-                for (const key in res.data) {
-                    const val = res.data[key];
-                    if (!Array.isArray(val) && val?.type === 'failed') {
-                        setConfirmLoading(false);
-                        return message.error(val.res);
-                    }
-                }
+                // for (const key in res.data) {
+                //     const val = res.data[key];
+                //     if (!Array.isArray(val) && val?.type === 'failed') {
+                //         setConfirmLoading(false);
+                //         return message.error(val.res);
+                //     }
+                // }
                 message.success('操作成功');
                 setConfirmLoading(false);
                 onCancel();

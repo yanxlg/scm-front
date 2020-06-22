@@ -15,6 +15,9 @@ import {
     IReturnItem,
     IAbnormalContext,
     IQueryStrategyExceptionRes,
+    IUpdateWaybillExceptionPregressReq,
+    IReviewExceptionOrderItem,
+    IReviewExceptionOrderResItem,
 } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
 import { IPurchaseItem, IPurchasePlain } from '@/interface/IPurchase';
@@ -41,8 +44,13 @@ export function setRejectAbnormalOrder(data: IRejectAbnormalOrderReq) {
 }
 
 export function setDiscardAbnormalOrder(data: IDiscardAbnormalOrderReq) {
+    const { in_storage_count, reject_count, ...rest } = data;
     return request.post(PurchaseApiPath.setDiscardAbnormalOrder, {
-        data,
+        data: {
+            in_storage_count: typeof in_storage_count === 'number' ? String(in_storage_count) : '',
+            reject_count: typeof reject_count === 'number' ? String(reject_count) : '',
+            ...rest,
+        },
     });
 }
 
@@ -214,4 +222,19 @@ export function finishPurchaseExceptionOrder(waybill_exception_sn: string[]) {
             waybill_exception_sn,
         },
     });
+}
+
+export function updateWaybillExceptionPregress(data: IUpdateWaybillExceptionPregressReq) {
+    return request.post(PurchaseApiPath.UpdateWaybillExceptionPregress, {
+        data,
+    });
+}
+
+export function reviewExceptionOrder(data: IReviewExceptionOrderItem[]) {
+    return request.post<IResponse<IReviewExceptionOrderResItem[]>>(
+        PurchaseApiPath.ReviewExceptionOrder,
+        {
+            data,
+        },
+    );
 }

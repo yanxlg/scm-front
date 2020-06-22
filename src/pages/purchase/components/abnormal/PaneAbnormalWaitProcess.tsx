@@ -109,7 +109,13 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 type: 'input',
                 name: 'waybill_no',
                 label: '运单号',
-                placeholder: '请输入运单号',
+                placeholder: '请输入',
+            },
+            {
+                type: 'input',
+                name: 'purchase_order_goods_sn',
+                label: '供应商订单号',
+                placeholder: '请输入',
             },
         ];
     }, [exception_code]);
@@ -197,6 +203,12 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 align: 'center',
                 width: 150,
             },
+            {
+                title: '供应商订单号',
+                dataIndex: 'purchaseOrderGoodsSn',
+                align: 'center',
+                width: 150,
+            },
         ];
     }, [abnormalContext]);
 
@@ -260,15 +272,24 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                         waybill_exception_type: '',
                     }}
                 >
-                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
-                        查询
-                    </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
-                        刷新
-                    </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
-                        导出
-                    </Button>
+                    <div>
+                        <LoadingButton
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={onSearch}
+                        >
+                            查询
+                        </LoadingButton>
+                        <LoadingButton className={formStyles.formBtn} onClick={onReload}>
+                            刷新
+                        </LoadingButton>
+                        <Button
+                            className={formStyles.formBtn}
+                            onClick={() => setExportStatus(true)}
+                        >
+                            导出
+                        </Button>
+                    </div>
                 </JsonForm>
                 <FitTable
                     bordered

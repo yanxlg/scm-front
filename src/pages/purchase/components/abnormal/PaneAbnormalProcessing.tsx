@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useEffect, useState, useCallback, useRef, useContext } from 'react';
 import { Button, message } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
@@ -11,6 +11,7 @@ import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
     IWaybillExceptionStatusKey,
+    IHandleItem,
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
@@ -19,51 +20,27 @@ import {
     defaultOptionItem,
     waybillExceptionTypeMap,
     waybillExceptionStatusMap,
+    waybillExceptionHandleMap,
+    IExceptionHandle,
 } from '@/enums/PurchaseEnum';
 import DetailModal from './DetailModal';
 import Export from '@/components/Export';
 import PopSetProgress from './PopSetProgress/PopSetProgress';
+import { AbnormalContext } from '../../abnormal';
+import useDetail from '../../hooks/useDetail';
 
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 
-const fieldList: FormField[] = [
-    {
-        type: 'input',
-        name: 'waybill_exception_sn',
-        label: '异常单id',
-        placeholder: '请输入异常单id',
-        formatter: 'str_arr',
-    },
-    {
-        type: 'select',
-        name: 'waybill_exception_type',
-        label: '异常类型',
-        optionList: [defaultOptionItem, ...waybillExceptionTypeList],
-    },
-    {
-        type: 'input',
-        name: 'purchase_order_id',
-        label: '采购单id',
-        placeholder: '请输入采购单id',
-        formatter: 'str_arr',
-    },
-    {
-        type: 'input',
-        name: 'waybill_no',
-        label: '运单号',
-        placeholder: '请输入运单号',
-    },
-];
-
 interface IProps {
     execingCount: number;
+    getExceptionCount(): void;
 }
 
-const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
+const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCount }) => {
     const formRef1 = useRef<JsonFormRef>(null);
     const formRef2 = useRef<JsonFormRef>(null);
-    const [detailStatus, setDetailStatus] = useState(false);
+    const abnormalContext = useContext(AbnormalContext);
     const [exportStatus, setExportStatus] = useState(false);
     const [currentRecord, setCurrentRecord] = useState<IPurchaseAbnormalItem | null>(null);
     const {
@@ -85,14 +62,14 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         },
     });
 
-    const showDetail = (row: IPurchaseAbnormalItem) => {
-        setDetailStatus(true);
-        setCurrentRecord(row);
-    };
+    const { detailStatus, showDetail, hideDetail } = useDetail(setCurrentRecord);
 
-    const hideDetail = useCallback(() => {
-        setDetailStatus(false);
+    const onRefresh = useCallback(() => {
+        getExceptionCount();
+        return onReload();
     }, []);
+
+    const { exception_code = [], exception_strategy = [] } = abnormalContext;
 
     const onSelectedRowKeysChange = useCallback(keys => {
         // console.log(111111, args);
@@ -113,6 +90,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
 
     const _finishPurchaseExceptionOrder = useCallback(() => {
         return finishPurchaseExceptionOrder(selectedRowKeys).then(() => {
+            onRefresh();
             message.success('完结采购单成功');
         });
     }, [selectedRowKeys]);
@@ -146,12 +124,38 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                 render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
             },
             {
-                title: '处理方式/进度',
-                dataIndex: 'a1',
+                title: '处理方式',
+                dataIndex: 'waybillExceptionHandle',
                 align: 'center',
                 width: 150,
-                render: () => {
-                    return <PopSetProgress onReload={onReload} />;
+                render: (val: IHandleItem[] | undefined, row: IPurchaseAbnormalItem) => {
+                    const { waybillExceptionSn } = row;
+                    let handleList: number[] = [];
+                    let handleStatusList: number[] = [];
+                    let hasUpdate = false;
+                    val?.forEach(({ handleType, handleStatus }) => {
+                        if (!hasUpdate && [2, 3, 4].indexOf(handleType) > -1) {
+                            hasUpdate = true;
+                        }
+                        handleList.push(handleType);
+                        handleStatus && handleStatusList.push(handleStatus);
+                    });
+                    return (
+                        <>
+                            {handleList.map(handle => (
+                                <div key={handle}>
+                                    {waybillExceptionHandleMap[handle as IExceptionHandle]}
+                                </div>
+                            ))}
+                            {hasUpdate && (
+                                <PopSetProgress
+                                    waybillExceptionSn={waybillExceptionSn}
+                                    handle={val as IHandleItem[]}
+                                    onReload={onReload}
+                                />
+                            )}
+                        </>
+                    );
                 },
             },
             {
@@ -175,12 +179,6 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                     return <AutoEnLargeImg srcList={list} className={styles.imgCell} />;
                 },
             },
-            // {
-            //     title: '异常数量',
-            //     dataIndex: 'quantity',
-            //     align: 'center',
-            //     width: 150,
-            // },
             {
                 title: '异常描述',
                 dataIndex: 'waybillExceptionDescription',
@@ -196,6 +194,12 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
             {
                 title: '运单号',
                 dataIndex: 'purchaseWaybillNo',
+                align: 'center',
+                width: 150,
+            },
+            {
+                title: '供应商订单号',
+                dataIndex: 'purchaseOrderGoodsSn',
                 align: 'center',
                 width: 150,
             },
@@ -261,6 +265,43 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
         );
     }, [exportStatus]);
 
+    const fieldList = useMemo<FormField[]>(() => {
+        return [
+            {
+                type: 'input',
+                name: 'waybill_exception_sn',
+                label: '异常单ID',
+                placeholder: '请输入',
+                formatter: 'str_arr',
+            },
+            {
+                type: 'select',
+                name: 'waybill_exception_type',
+                label: '异常类型',
+                optionList: [defaultOptionItem, ...exception_code],
+            },
+            {
+                type: 'input',
+                name: 'purchase_order_id',
+                label: '采购单ID',
+                placeholder: '请输入',
+                formatter: 'str_arr',
+            },
+            {
+                type: 'input',
+                name: 'waybill_no',
+                label: '运单号',
+                placeholder: '请输入',
+            },
+            {
+                type: 'input',
+                name: 'purchase_order_goods_sn',
+                label: '供应商订单号',
+                placeholder: '请输入',
+            },
+        ];
+    }, [abnormalContext]);
+
     return useMemo(() => {
         // console.log('dataSource', dataSource);
         return (
@@ -273,15 +314,24 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                         waybill_exception_type: '',
                     }}
                 >
-                    <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
-                        查询
-                    </LoadingButton>
-                    <LoadingButton className={formStyles.formBtn} onClick={onReload}>
-                        刷新
-                    </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={() => setExportStatus(true)}>
-                        导出
-                    </Button>
+                    <div>
+                        <LoadingButton
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={onSearch}
+                        >
+                            查询
+                        </LoadingButton>
+                        <LoadingButton className={formStyles.formBtn} onClick={onRefresh}>
+                            刷新
+                        </LoadingButton>
+                        <Button
+                            className={formStyles.formBtn}
+                            onClick={() => setExportStatus(true)}
+                        >
+                            导出
+                        </Button>
+                    </div>
                 </JsonForm>
                 <JsonForm
                     // key="2"
@@ -307,6 +357,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount }) => {
                     currentRecord={currentRecord}
                     visible={detailStatus}
                     onCancel={hideDetail}
+                    onRefresh={onRefresh}
                 />
                 {exportModalComponent}
             </>
