@@ -193,10 +193,9 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                 align: 'center',
                 width: 150,
                 render: (val: IWaybillExceptionTypeKey, record: IPurchaseAbnormalItem) => {
-                    const { waybillExceptionSn } = record;
-                    return val === '101' ? (
-                        waybillExceptionTypeMap[val]
-                    ) : (
+                    const { waybillExceptionSn, waybillExceptionStatus } = record;
+                    return waybillExceptionStatus === AbnormalType.pendingReview &&
+                        val !== '101' ? (
                         <Form.Item
                             name={waybillExceptionSn}
                             initialValue={val}
@@ -210,6 +209,8 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                                 ))}
                             </Select>
                         </Form.Item>
+                    ) : (
+                        waybillExceptionTypeMap[val]
                     );
                 },
             },
