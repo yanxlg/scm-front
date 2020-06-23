@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import { AutoEnLargeImg, FitTable, JsonForm, LoadingButton, useList } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { Button, message, Modal, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -89,7 +89,6 @@ const PendingOut = () => {
             <JsonForm
                 fieldList={fieldList.slice(0, 4)}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
             >
                 <div>
@@ -256,7 +255,6 @@ const PendingOut = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

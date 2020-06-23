@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Modal, Form, InputNumber, message } from 'antd';
 import CheckedBtn from '@/components/CheckedBtn';
 import classnames from 'classnames';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { validateRange } from '@/utils/validate';
 import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
 import useGoodsCatagory from '../../hooks/useGoodsCatagory';
@@ -169,7 +169,7 @@ const UpdateRange: React.FC<IProps> = ({ visible, sellChannelList, onCancel }) =
                         }}
                     />
                     <MultipleSelect
-                        label="销售店铺"
+                        label="销售店铺名称"
                         name="enable_merchant"
                         className={styles.select}
                         form={form}

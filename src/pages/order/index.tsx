@@ -1,11 +1,8 @@
 import React from 'react';
 import { Tabs } from 'antd';
-import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
-import PanePay from './components/PanePay';
-import PaneWaitShip from './components/PaneWaitShip';
 import PaneError from './components/PaneError';
-import PaneNotWarehouse from './components/PaneNotWarehouse';
+import PaddingInStore from './components/PaddingInStore';
 import PaneWarehouseNotShip from './components/PaneWarehouseNotShip';
 import Container from '@/components/Container';
 import PanePendingReview from './components/PanePendingReview';
@@ -13,6 +10,10 @@ import PanePendingReview from './components/PanePendingReview';
 import { getAllTabCount } from '@/services/order-manage';
 
 import '@/styles/order.less';
+import PendingSign from '@/pages/order/components/PendingSign';
+import PendingPay from '@/pages/order/components/PendingPay';
+import PendingShip from './components/PendingShip';
+import AllOrder from '@/pages/order/components/AllOrder';
 
 const { TabPane } = Tabs;
 
@@ -29,6 +30,7 @@ declare interface IOrderState {
     penddingWarehousingListCount: number;
     errorOrderCount: number;
     penddingCheckListCount: number;
+    penddingSignListCount: number;
 }
 
 class Order extends React.PureComponent<IProps, IOrderState> {
@@ -45,6 +47,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
             penddingCheckListCount: 0,
+            penddingSignListCount: 0,
         };
         // console.log(11111, this.props);
         this.defaultActiveKey = this.props.location?.query?.type || '1';
@@ -79,6 +82,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingPurchaseListCount,
             penddingWarehousingListCount,
             penddingCheckListCount,
+            penddingSignListCount,
         } = this.state;
         return (
             <Container>
@@ -90,7 +94,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                     >
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <div className="order-tab-content">
-                                <PaneAll getAllTabCount={this.getAllTabCount} />
+                                <AllOrder updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`待审核（${penddingCheckListCount}）`} key="8">
@@ -105,17 +109,22 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                         </TabPane>
                         <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
                             <div className="order-tab-content">
-                                <PanePay getAllTabCount={this.getAllTabCount} />
+                                <PendingPay updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`待发货（${penddingShipingOrderCount}）`} key="4">
                             <div className="order-tab-content">
-                                <PaneWaitShip getAllTabCount={this.getAllTabCount} />
+                                <PendingShip updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
-                        <TabPane tab={`已采购未入库（${penddingPurchaseListCount}）`} key="5">
+                        <TabPane tab={`待签收（${penddingSignListCount}）`} key="9">
                             <div className="order-tab-content">
-                                <PaneNotWarehouse getAllTabCount={this.getAllTabCount} />
+                                <PendingSign updateCount={this.getAllTabCount} />
+                            </div>
+                        </TabPane>
+                        <TabPane tab={`待入库（${penddingPurchaseListCount}）`} key="5">
+                            <div className="order-tab-content">
+                                <PaddingInStore updateCount={this.getAllTabCount} />
                             </div>
                         </TabPane>
                         <TabPane tab={`仓库未发货（${penddingWarehousingListCount}）`} key="6">

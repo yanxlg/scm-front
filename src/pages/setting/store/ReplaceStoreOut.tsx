@@ -8,7 +8,7 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { FormInstance } from 'antd/es/form';
 import styles from '@/styles/_store.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -368,13 +368,15 @@ const ReplaceStoreOut = () => {
                     columns={mergedColumns}
                     dataSource={dataSource}
                     onChange={onChange}
-                    pagination={{
-                        total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                        position: ['topRight', 'bottomRight'],
-                    }}
+                    pagination={
+                        {
+                            total: total,
+                            current: pageNumber,
+                            pageSize: pageSize,
+                            showSizeChanger: true,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
                 />
             </Form>
         );

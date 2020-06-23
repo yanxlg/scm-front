@@ -1,11 +1,7 @@
 import { FormField } from 'react-components/es/JsonForm';
-import { transStatusList, transOptionList } from '@/utils/transform';
-import {
-    queryChannelSource,
-    getPlatformAndStore,
-    getPurchaseUidList,
-    getWarehouseList,
-} from '@/services/order-manage';
+import { transStatusList } from '@/utils/transform';
+import { getPlatformAndStore, getPurchaseUidList, getWarehouseList } from '@/services/order-manage';
+import { queryGoodsSourceList } from '@/services/global';
 
 declare interface optionItem {
     name: string;
@@ -28,17 +24,21 @@ export const orderStatusOptionList = [
     { name: '已取消', value: 2 },
     { name: '待审核', value: 3 },
 ];
+export const orderStatusOptionList1 = [
+    { name: '已确认', value: 1 },
+    { name: '已取消', value: 2 },
+];
 
 export const orderShippingOptionList = [
-    { name: '未配送', value: 1 },
-    { name: '头程已配送', value: 2 },
-    { name: '已妥投未入库', value: 3 },
-    { name: '已入库', value: 4 },
+    { name: '采购待配送', value: 1 },
+    { name: '采购已配送', value: 2 },
+    { name: '采购已签收', value: 3 },
+    { name: '采购已入库', value: 4 },
     { name: '出库中', value: 5 },
     { name: '出库失败', value: 6 },
     { name: '取消出库', value: 7 },
     { name: '已出库', value: 8 },
-    { name: '尾程已揽收', value: 9 },
+    { name: '已揽收', value: 9 },
     { name: '已妥投', value: 10 },
 ];
 
@@ -61,6 +61,12 @@ export const purchasePayOptionList = [
     { name: '未支付', value: 1 },
     { name: '已支付', value: 2 },
     { name: '已退款', value: 3 },
+    { name: '待退款', value: 4 },
+    { name: '审核不通过', value: 5 },
+    { name: '待审核', value: 6 },
+];
+export const purchasePayOptionList1 = [
+    { name: '已支付', value: 2 },
     { name: '待退款', value: 4 },
     { name: '审核不通过', value: 5 },
     { name: '待审核', value: 6 },
@@ -244,6 +250,14 @@ export const childDefaultFieldList: FormField[] = [
             key: 'children',
         },
         optionList: () => getPlatformAndStore(),
+    },
+    {
+        type: 'select',
+        name: 'product_platform',
+        label: '商品渠道',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => queryGoodsSourceList(),
     },
 ];
 

@@ -32,12 +32,14 @@ import TaskStatus from './TaskStatus';
 import {
     isOnceTask,
     TaskChannelCode,
-    TaskChannelList,
+    TaskChannelEnum,
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
 import { ColumnType, TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { queryGoodsSourceList } from '@/services/global';
+import { EmptyArray } from 'react-components/es/utils';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -179,12 +181,10 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     return (
                         <>
                             {(taskType === TaskTypeEnum.Gather &&
-                                String(channel) !== '3' &&
-                                String(channel) !== '4') ||
+                                String(channel) === TaskChannelEnum.PDD) ||
                             taskType === TaskTypeEnum.Grounding ||
                             (taskType === TaskTypeEnum.GatherGrounding &&
-                                String(channel) !== '3' &&
-                                String(channel) !== '4') ? (
+                                String(channel) === TaskChannelEnum.PDD) ? (
                                 <Button type="link" onClick={() => viewTaskDetail(task_id)}>
                                     查看详情
                                 </Button>
@@ -278,8 +278,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 width: '182px',
                 align: 'center',
                 render: (text: TaskRangeCode, record) => {
+                    const _range = record.range;
                     const range = isGoodsUpdateType(text)
                         ? record.update_type?.map(code => PUTaskRangeTypeMap[code])?.join(';')
+                        : _range === 'all'
+                        ? '全部店铺'
                         : TaskRangeMap[text];
                     return range || '--';
                 },
@@ -365,19 +368,19 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     type: 'select',
                     name: 'channel',
                     formatter: 'number',
-                    optionList: [
-                        {
-                            name: '全部',
-                            value: '',
-                        },
-                    ].concat(
-                        TaskChannelList.map(({ id, name }) => {
-                            return {
-                                name,
-                                value: id,
-                            };
+                    syncDefaultOption: {
+                        name: '全部',
+                        value: '',
+                    },
+                    optionList: () =>
+                        queryGoodsSourceList().then((list = EmptyArray) => {
+                            return list.map(({ name, value }) => {
+                                return {
+                                    name,
+                                    value,
+                                };
+                            });
                         }),
-                    ),
                 },
                 {
                     label: '任务类型',
@@ -443,19 +446,19 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                     type: 'select',
                     name: 'channel',
                     formatter: 'number',
-                    optionList: [
-                        {
-                            name: '全部',
-                            value: '',
-                        },
-                    ].concat(
-                        TaskChannelList.map(({ id, name }) => {
-                            return {
-                                name,
-                                value: id,
-                            };
+                    syncDefaultOption: {
+                        name: '全部',
+                        value: '',
+                    },
+                    optionList: () =>
+                        queryGoodsSourceList().then((list = EmptyArray) => {
+                            return list.map(({ name, value }) => {
+                                return {
+                                    name,
+                                    value,
+                                };
+                            });
                         }),
-                    ),
                 },
                 {
                     label: '任务类型',

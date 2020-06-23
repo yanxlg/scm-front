@@ -142,6 +142,10 @@ export default [
                 name: '价格上浮设置',
             },
             {
+                path: '/setting/shopBlacklist',
+                name: '采购店铺黑名单',
+            },
+            {
                 path: '/setting/address',
                 name: '中转仓地址设置',
             },

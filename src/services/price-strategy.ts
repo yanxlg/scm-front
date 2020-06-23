@@ -19,7 +19,7 @@ import {
     ISalePriceListReq,
 } from '@/interface/IPriceStrategy';
 import { api } from 'react-components';
-import { IResponse, IPaginationResponse } from 'react-components/lib/hooks/useList';
+import { IResponse, IPaginationResponse } from 'react-components/es/hooks/useList';
 import { getCatagoryList } from './goods';
 
 // 获取所有的商品标签

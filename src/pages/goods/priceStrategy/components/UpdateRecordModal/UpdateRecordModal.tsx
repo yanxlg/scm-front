@@ -3,7 +3,7 @@ import { Modal, Table, Pagination } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import { getCatagoryWeightLog } from '@/services/price-strategy';
 import { ICatagoryWeightLogReq, IUpdateRecoreItem } from '@/interface/IPriceStrategy';
-import { utcToLocal } from 'react-components/lib/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 interface IProps {
     visible: boolean;

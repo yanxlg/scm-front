@@ -119,9 +119,9 @@ const formFields: FormField[] = [
     },
     {
         type: 'select',
-        label: '店铺名称',
+        label: '销售店铺名称',
         name: 'merchant_ids',
-        placeholder: '多个逗号隔开',
+        // placeholder: '请选择',
         syncDefaultOption: {
             value: '',
             name: '全部',
@@ -181,6 +181,7 @@ const ChannelList: React.FC = props => {
     const { visible, onClose, setVisibleProps } = useModal<{
         product_ids: string;
         merchant_id: string;
+        commodity_ids: string;
     }>();
 
     const {
@@ -398,12 +399,16 @@ const ChannelList: React.FC = props => {
         [dataSource],
     );
 
-    const showLog = useCallback((record: IChannelProductListItem) => {
-        setVisibleProps({
-            product_ids: record.product_id,
-            merchant_id: record.merchant_id,
-        });
-    }, []);
+    const showLog = useCallback(
+        ({ product_id, merchant_id, commodity_id }: IChannelProductListItem) => {
+            setVisibleProps({
+                product_ids: product_id,
+                merchant_id: merchant_id,
+                commodity_ids: commodity_id,
+            });
+        },
+        [],
+    );
 
     const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
         return [
@@ -456,7 +461,7 @@ const ChannelList: React.FC = props => {
                 },
             },
             {
-                title: '店铺名称',
+                title: '销售店铺名称',
                 dataIndex: 'shop_name',
                 align: 'center',
                 width: 130,

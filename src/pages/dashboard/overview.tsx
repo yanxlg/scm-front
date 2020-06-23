@@ -150,13 +150,13 @@ const columns: ColumnsType<object> = [
     {
         width: 150,
         title: '平均在售商品数',
-        dataIndex: 'saledGoodsNum',
+        dataIndex: 'onsaleGoodsNum',
         align: 'center',
     },
     {
         width: 150,
         title: '平均有销量商品数',
-        dataIndex: 'onsaleGoodsNum',
+        dataIndex: 'saledGoodsNum',
         align: 'center',
     },
     {

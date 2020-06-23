@@ -5,7 +5,7 @@ import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILoca
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
-import { utcToLocal } from 'react-components/lib/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
@@ -15,7 +15,7 @@ import {
     postAllGoodsOnsale,
 } from '@/services/goods';
 import Export from '@/components/Export';
-import { JsonFormRef } from 'react-components/lib/JsonForm';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 import ShelvesModal from '../ShelvesModal/ShelvesModal';
 import SkuModal from '../SkuModal/SkuModal';
 import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal';
@@ -26,12 +26,9 @@ import CountryFreightModal from '../CountryFreightModal/CountryFreightModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { GoodsSourceEnum } from '@/enums/GlobalEnum';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
 import { PaginationConfig } from 'react-components/es/FitTable';
 import useCountryFreightModal from '../../hooks/useCountryFreightModal';
-import { queryShopList } from '@/services/global';
-import { ISHopList } from '@/interface/IGlobal';
 
 interface IProps {
     loading: boolean;
@@ -71,8 +68,6 @@ const GoodsTable: React.FC<IProps> = ({
     // 上架商品
     const [merchantStatus, setMerchantStatus] = useState(false);
     const [onsaleType, setOnsaleType] = useState<'default' | 'all'>('default');
-    const [disabledChannelList, setDisabledChannelList] = useState<string[]>([]);
-    const [disabledShopList, setDisabledShopList] = useState<string[]>([]);
     // 关联商品
     const [mergeStatus, setMergeStatus] = useState(false);
     const [commodityId, setCommodityId] = useState('');
@@ -94,8 +89,6 @@ const GoodsTable: React.FC<IProps> = ({
         showCountryFreight,
         hideCountryFreight,
     } = useCountryFreightModal();
-    // 店铺列表
-    const [shopList, setShopList] = useState<ISHopList>([]);
 
     // 一键上架
     const _postGoodsOnsale = useCallback((merchants_id: string[], selectedRowKeys: string[]) => {
@@ -144,13 +137,6 @@ const GoodsTable: React.FC<IProps> = ({
         });
     }, [selectedRowKeys, goodsList]);
 
-    const _queryShopList = useCallback(() => {
-        return queryShopList().then(res => {
-            // console.log('111111', res);
-            setShopList(res.data);
-        });
-    }, []);
-
     const merchantOkey = useCallback(
         (merchants_id: string[]) => {
             return onsaleType === 'default'
@@ -168,21 +154,7 @@ const GoodsTable: React.FC<IProps> = ({
         if (!source_channel) {
             return;
         }
-        if (source_channel === GoodsSourceEnum.VOVA) {
-            setDisabledChannelList(['vova']);
-            setDisabledShopList([]);
-        } else if (source_channel === GoodsSourceEnum.FD) {
-            setDisabledChannelList([]);
-            setDisabledShopList(
-                shopList
-                    .filter(item => item.merchant_name !== 'VogueFD')
-                    .map(item => item.merchant_name),
-            );
-        } else {
-            setDisabledChannelList([]);
-            setDisabledShopList([]);
-        }
-    }, [shopList]);
+    }, []);
 
     const merchantCancel = useCallback(() => {
         setMerchantStatus(false);
@@ -583,7 +555,7 @@ const GoodsTable: React.FC<IProps> = ({
                 },
             },
             {
-                title: '商品渠道来源',
+                title: '商品渠道',
                 dataIndex: 'source_channel',
                 align: 'center',
                 width: 120,
@@ -624,10 +596,6 @@ const GoodsTable: React.FC<IProps> = ({
         );
     }, [modal]);
 
-    useEffect(() => {
-        _queryShopList();
-    }, []);
-
     return useMemo(() => {
         return (
             <>
@@ -646,8 +614,7 @@ const GoodsTable: React.FC<IProps> = ({
                 />
                 <MerchantListModal
                     visible={merchantStatus}
-                    disabledChannelList={disabledChannelList}
-                    disabledShopList={disabledShopList}
+                    sourceChannel={sourceChannel}
                     onOKey={merchantOkey}
                     onCancel={merchantCancel}
                 />
@@ -703,6 +670,7 @@ const GoodsTable: React.FC<IProps> = ({
         countryFreightStatus,
         modal,
         toolBarRender,
+        sourceChannel,
     ]);
 };
 

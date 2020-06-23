@@ -121,13 +121,17 @@ export async function queryTaskDetail(task_id: number): Promise<IResponse<ITaskD
                     data: {
                         task_detail_info: {
                             sub_cat_id: subCatId,
-                            shopId: isZero(range) ? undefined : range,
+                            shopId: isZero(range) || range === 'all' ? undefined : range,
                             task_cycle:
                                 executeCount === 1
                                     ? TaskExecuteType.once
                                     : TaskExecuteType.interval,
                             execute_count: executeCount,
-                            range: isZero(range) ? HotTaskRange.fullStack : HotTaskRange.store,
+                            range: isZero(range)
+                                ? HotTaskRange.fullStack
+                                : range === 'all'
+                                ? HotTaskRange.all
+                                : HotTaskRange.store,
                             ...extra,
                         },
                     },
@@ -203,12 +207,6 @@ export async function addVoVaTask(params: IVoVaTaskBody) {
         data: {
             ...params,
             version: '1.0',
-            platform:
-                params.channel === TaskChannelEnum.VOVA
-                    ? 'VOVA'
-                    : params.channel === TaskChannelEnum.FD
-                    ? 'FLORYDAY'
-                    : '',
         },
     });
 }

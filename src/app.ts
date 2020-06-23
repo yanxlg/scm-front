@@ -1,5 +1,5 @@
 import formatter from 'react-components/es/utils/formatter';
-import { multipleToArray } from '@/utils/formatter';
+import { firstNumber, multipleToArray } from '@/utils/formatter';
 
 const logger = require('dva-logger');
 
@@ -81,8 +81,10 @@ window.addEventListener('load', function() {
 declare module 'react-components' {
     interface Formatters {
         multipleToArray: typeof multipleToArray;
+        firstNumber: typeof firstNumber;
     }
 }
 formatter.extend({
     multipleToArray: multipleToArray,
+    firstNumber: firstNumber,
 });

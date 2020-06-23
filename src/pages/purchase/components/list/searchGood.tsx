@@ -88,7 +88,6 @@ const SearchGood = ({ formRef, containerClassName, onDataChange }: SearchGoodPro
                     containerClassName={containerClassName}
                     ref={formRef1}
                     fieldList={fieldList}
-                    enableCollapse={false}
                     className={formStyles.formHelpAbsolute}
                 >
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
