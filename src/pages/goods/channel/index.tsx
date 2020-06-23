@@ -1,4 +1,4 @@
-import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
@@ -270,6 +270,10 @@ const ChannelList: React.FC = props => {
     const showSkuDialog = useCallback((id: string, merchant_id: string, commodity_id: string) => {
         skuRef.current!.showModal(id, merchant_id, commodity_id);
     }, []);
+
+    // useEffect(() => {
+    //     showSkuDialog('39612', '1', 'c800d87f4d0a9401faa8f7cdcfd35be9');
+    // }, []);
 
     const showCountryShipFee = useCallback((product_id: string, merchant_id: string) => {
         Modal.info({

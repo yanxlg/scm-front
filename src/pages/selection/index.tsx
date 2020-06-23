@@ -12,6 +12,7 @@ import classnames from 'classnames';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_index.less';
 import { DeleteOutlined } from '@ant-design/icons';
+import GoodsDetailModal from './components/GoodsDetailModal';
 
 const { RangePicker } = DatePicker;
 
@@ -145,6 +146,7 @@ const goodsLayout = {
 
 const Selection: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
+    const [goodsDetailStatus, setGoodsDetailStatus] = useState(false);
     const [goodsList, setGoodsList] = useState<any[]>([
         {
             onShelf: true,
@@ -191,6 +193,14 @@ const Selection: React.FC = () => {
         console.log('onChangeGoodsType', vals);
     }, []);
 
+    const showGoodsModal = useCallback(() => {
+        setGoodsDetailStatus(true);
+    }, []);
+
+    const hideGoodsModal = useCallback(() => {
+        setGoodsDetailStatus(false);
+    }, []);
+
     const onSearch = useCallback(async () => {
         // console.log('onSearch', formRef.current?.getFieldsValue());
         const data = await formRef.current?.validateFields();
@@ -217,7 +227,11 @@ const Selection: React.FC = () => {
                 {goodsList.map(item => {
                     const { imgUrl, onShelf, types, price, tags } = item;
                     return (
-                        <Col {...goodsLayout} className={styles.goodsContainer}>
+                        <Col
+                            {...goodsLayout}
+                            className={styles.goodsContainer}
+                            onClick={() => showGoodsModal()}
+                        >
                             <div className={styles.imgContainer}>
                                 <img src={imgUrl} className={styles.goodsImg} />
                                 {onShelf ? (
@@ -349,6 +363,7 @@ const Selection: React.FC = () => {
             </div>
             {goodsNode}
             {paginationNode}
+            <GoodsDetailModal visible={goodsDetailStatus} onCancel={hideGoodsModal} />
         </Container>
     );
 };
