@@ -4,6 +4,7 @@ import { Popconfirm, Button, message, Form, Radio } from 'antd';
 import styles from './_PopSetProgress.less';
 import { updateWaybillExceptionPregress } from '@/services/purchase';
 import { IHandleItem } from '@/interface/IPurchase';
+import { refundStatusList, reissueStatusList, returnStatusList } from '@/enums/PurchaseEnum';
 
 declare interface IProps {
     waybillExceptionSn: string;
@@ -76,9 +77,11 @@ const PopSetProgress: React.FC<IProps> = ({ waybillExceptionSn, handle, onReload
                                     initialValue={handleStatus}
                                 >
                                     <Radio.Group>
-                                        <Radio value={1}>退款申请</Radio>
-                                        <Radio value={2}>商家驳回</Radio>
-                                        <Radio value={3}>退款成功</Radio>
+                                        {refundStatusList.map(({ name, value }) => (
+                                            <Radio value={value} key={value}>
+                                                {name}
+                                            </Radio>
+                                        ))}
                                     </Radio.Group>
                                 </Form.Item>
                             );
@@ -90,9 +93,11 @@ const PopSetProgress: React.FC<IProps> = ({ waybillExceptionSn, handle, onReload
                                     initialValue={handleStatus}
                                 >
                                     <Radio.Group>
-                                        <Radio value={11}>待退货</Radio>
-                                        <Radio value={12}>确认退货地址</Radio>
-                                        <Radio value={13}>已退货</Radio>
+                                        {returnStatusList.map(({ name, value }) => (
+                                            <Radio value={value} key={value}>
+                                                {name}
+                                            </Radio>
+                                        ))}
                                     </Radio.Group>
                                 </Form.Item>
                             );
@@ -104,8 +109,11 @@ const PopSetProgress: React.FC<IProps> = ({ waybillExceptionSn, handle, onReload
                                     initialValue={handleStatus}
                                 >
                                     <Radio.Group>
-                                        <Radio value={21}>待入库</Radio>
-                                        <Radio value={22}>已入库</Radio>
+                                        {reissueStatusList.map(({ name, value }) => (
+                                            <Radio value={value} key={value}>
+                                                {name}
+                                            </Radio>
+                                        ))}
                                     </Radio.Group>
                                 </Form.Item>
                             );

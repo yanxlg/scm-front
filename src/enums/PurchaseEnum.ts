@@ -41,5 +41,32 @@ export const waybillExceptionHandleMap = {
     5: '废弃',
     6: '审核驳回',
 };
-
 export type IExceptionHandle = keyof typeof waybillExceptionHandleMap;
+
+export const refundStatus = {
+    1: '退款申请',
+    2: '商家驳回',
+    3: '退款成功',
+};
+export const refundStatusList = transOptionList(refundStatus, true);
+
+export type IRefundStatusCode = keyof typeof refundStatus;
+
+export const returnStatus = {
+    11: '待退货',
+    12: '确认退货地址',
+    13: '已退货',
+};
+
+export const returnStatusList = transOptionList(returnStatus, true);
+
+export type IReturnStatusCode = keyof typeof returnStatus;
+
+export const reissueStatus = {
+    21: '待入库',
+    22: '已入库',
+};
+
+export const reissueStatusList = transOptionList(reissueStatus, true);
+
+export type IReissueStatusCode = keyof typeof reissueStatus;

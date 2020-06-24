@@ -23,6 +23,12 @@ import {
     AbnormalType,
     waybillExceptionHandleMap,
     IExceptionHandle,
+    refundStatus,
+    IRefundStatusCode,
+    returnStatus,
+    IReturnStatusCode,
+    reissueStatus,
+    IReissueStatusCode,
 } from '@/enums/PurchaseEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import Export from '@/components/Export';
@@ -215,28 +221,36 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                 },
             },
             {
-                title: '处理方式',
+                title: '处理方式/进度',
                 dataIndex: 'waybillExceptionHandle',
                 align: 'center',
                 width: 150,
                 render: (val: IHandleItem[] | undefined, row: IPurchaseAbnormalItem) => {
                     const { waybillExceptionSn } = row;
-                    let handleList: number[] = [];
+                    let progressList: string[] = [];
                     let handleStatusList: number[] = [];
                     let hasUpdate = false;
                     val?.forEach(({ handleType, handleStatus }) => {
                         if (!hasUpdate && [2, 3, 4].indexOf(handleType) > -1) {
                             hasUpdate = true;
                         }
-                        handleList.push(handleType);
+                        progressList.push(
+                            handleStatus
+                                ? handleType === 2
+                                    ? refundStatus[handleStatus as IRefundStatusCode]
+                                    : handleType === 3
+                                    ? returnStatus[handleStatus as IReturnStatusCode]
+                                    : handleType === 4
+                                    ? reissueStatus[handleStatus as IReissueStatusCode]
+                                    : waybillExceptionHandleMap[handleType as IExceptionHandle]
+                                : waybillExceptionHandleMap[handleType as IExceptionHandle],
+                        );
                         handleStatus && handleStatusList.push(handleStatus);
                     });
                     return (
                         <>
-                            {handleList.map(handle => (
-                                <div key={handle}>
-                                    {waybillExceptionHandleMap[handle as IExceptionHandle]}
-                                </div>
+                            {progressList.map(handle => (
+                                <div key={handle}>{handle}</div>
                             ))}
                             {hasUpdate && (
                                 <PopSetProgress

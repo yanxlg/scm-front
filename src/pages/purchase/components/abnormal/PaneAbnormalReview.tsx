@@ -206,11 +206,13 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                             className={styles.tableFormItem}
                         >
                             <Select className={styles.select}>
-                                {waybillExceptionTypeList.map(({ name, value }) => (
-                                    <Option value={value} key={value}>
-                                        {name}
-                                    </Option>
-                                ))}
+                                {waybillExceptionTypeList.map(({ name, value }) =>
+                                    value === '101' ? null : (
+                                        <Option value={value} key={value}>
+                                            {name}
+                                        </Option>
+                                    ),
+                                )}
                             </Select>
                         </Form.Item>
                     );
