@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, LoadingButton, useList } from 'react-components';
+import { FitTable, JsonForm, LoadingButton, useList, useModal2 } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryAccountList } from '@/services/setting';
 import { Button, Switch } from 'antd';
@@ -63,6 +63,8 @@ const Account = () => {
         queryList: queryAccountList,
     });
 
+    const [addModal, showAddModal, closeAddModal] = useModal2<boolean>();
+
     const form = useMemo(() => {
         return (
             <JsonForm ref={formRef} fieldList={fieldsList} labelClassName={styles.formLabel}>
@@ -120,7 +122,7 @@ const Account = () => {
             {
                 title: '创建时间',
                 dataIndex: 'create_time',
-                width: '130px',
+                width: '180px',
                 align: 'center',
                 render: _ => utcToLocal(_),
             },
@@ -130,10 +132,11 @@ const Account = () => {
                 width: '130px',
                 align: 'center',
                 render: (value, row) => {
+                    const active = Boolean(Number(value));
                     return (
                         <>
-                            启用
-                            <Switch />
+                            {active ? '启用' : '禁用'}
+                            <Switch checked={active} />
                         </>
                     );
                 },
@@ -153,7 +156,13 @@ const Account = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button type="primary" key="1" onClick={() => {}}>
+            <Button
+                type="primary"
+                key="1"
+                onClick={() => {
+                    showAddModal(true);
+                }}
+            >
                 <PlusOutlined />
                 添加账号
             </Button>,
@@ -183,10 +192,10 @@ const Account = () => {
             <>
                 {form}
                 {table}
-                <AddAccountModal visible={false} />
+                <AddAccountModal visible={addModal} onClose={closeAddModal} />
             </>
         );
-    }, [loading]);
+    }, [loading, addModal]);
 };
 
 export { Account };

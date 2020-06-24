@@ -329,10 +329,11 @@ const pTree = [
 
 declare interface AddAccountModalProps {
     visible: boolean;
+    onClose: () => void;
 }
-const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible }) => {
+const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
     return (
-        <Modal title="添加账号" width={800} visible={visible}>
+        <Modal title="添加账号" width={800} visible={visible} onCancel={onClose}>
             <JsonForm
                 layout="horizontal"
                 labelClassName={styles.formModalLabel}
