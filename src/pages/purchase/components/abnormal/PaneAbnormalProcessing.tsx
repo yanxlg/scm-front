@@ -145,7 +145,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
                 align: 'center',
                 width: 150,
                 render: (val: IHandleItem[] | undefined, row: IPurchaseAbnormalItem) => {
-                    const { waybillExceptionSn } = row;
+                    const { waybillExceptionSn, waybillExceptionStatus } = row;
                     let progressList: string[] = [];
                     let handleStatusList: number[] = [];
                     let hasUpdate = false;
@@ -171,7 +171,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
                             {progressList.map(handle => (
                                 <div key={handle}>{handle}</div>
                             ))}
-                            {hasUpdate && (
+                            {hasUpdate && String(waybillExceptionStatus) !== '3' && (
                                 <PopSetProgress
                                     waybillExceptionSn={waybillExceptionSn}
                                     handle={val as IHandleItem[]}
