@@ -147,6 +147,10 @@ export default [
                 path: '/setting/info',
                 name: '重量报关信息映射',
             },
+            {
+                path: '/setting/permission',
+                name: '账号权限',
+            },
         ],
     },
 ];

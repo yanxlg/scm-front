@@ -9,12 +9,9 @@ import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
-import 'nprogress/nprogress.css';
 import '@/styles/menu.less';
 import '@/styles/index.less';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
-import { Modal } from 'antd';
-import NProgress from 'nprogress';
 import { shallowEqual } from 'react-redux';
 
 export interface BasicLayoutProps extends ProLayoutProps {
@@ -29,10 +26,6 @@ const MenuDataList = MenuData.map(item => {
     return item as any;
 });
 
-NProgress.configure({ showSpinner: false });
-
-let timer: number | undefined = undefined;
-
 const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const dispatch = useDispatch();
     const collapsed = useSelector((state: ConnectState) => state.global.collapsed, shallowEqual);
@@ -44,26 +37,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         });
     }, []);
 
-    const onPageChange = useCallback(() => {
-        Modal.destroyAll();
-        // 滚动条自动滚动到顶部
-        if (timer) {
-            clearTimeout(timer);
-            timer = undefined;
-            NProgress.remove();
-        }
-        NProgress.start();
-        NProgress.inc();
-        timer = window.setTimeout(() => {
-            NProgress.done();
-            timer = undefined;
-        }, 200 + Math.floor(Math.random() * 300));
-    }, []);
-
     return useMemo(() => {
         return (
             <ProLayout
-                onPageChange={onPageChange}
                 collapsed={collapsed}
                 multiple={false}
                 menu={{ locale: false }}

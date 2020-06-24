@@ -1,7 +1,13 @@
 import formatter from 'react-components/es/utils/formatter';
 import { firstNumber, multipleToArray } from '@/utils/formatter';
+import 'nprogress/nprogress.css';
+import NProgress from 'nprogress';
+import { Modal } from 'antd';
+import { loadingConfig } from '@/loading';
 
-const logger = require('dva-logger');
+NProgress.configure({ showSpinner: false });
+
+const develop = process.env.NODE_ENV !== 'production';
 
 export const dva = {
     config: {
@@ -9,7 +15,7 @@ export const dva = {
             err.preventDefault();
         },
     },
-    plugins: [logger()],
+    plugins: develop ? [require('dva-logger')()] : [],
 };
 
 // performance
@@ -85,6 +91,7 @@ formatter.extend({
     firstNumber: firstNumber,
 });
 
+// 进度条精度优化
 export function onRouteChange({
     location,
     routes,
@@ -94,11 +101,28 @@ export function onRouteChange({
     routes: any[];
     action: string;
 }) {
-    console.log(location, routes, action);
-    console.log('11111', Date.now());
+    Modal.destroyAll();
+    // 滚动条自动滚动到顶部
+    if (loadingConfig.timer) {
+        clearTimeout(loadingConfig.timer);
+        loadingConfig.timer = undefined;
+        NProgress.remove();
+    }
+    NProgress.start();
+    NProgress.inc();
+    loadingConfig.timer = window.setTimeout(() => {
+        NProgress.done();
+        loadingConfig.timer = undefined;
+    }, 200 + Math.floor(Math.random() * 300));
 }
 
-export function render(oldRender: any) {
-    oldRender();
-    console.log('22222', Date.now());
+// 动态权限路由配置
+/*let extraRoutes;
+export function patchRoutes({ routes }) {
+    merge(routes, extraRoutes);
 }
+export function render() {
+    fetch('/api/routes').then(res => {
+        extraRoutes = res.routes;
+    });
+}*/

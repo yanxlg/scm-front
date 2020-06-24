@@ -29,4 +29,5 @@ export enum SettingApiPath {
     getStoreBlacklist = '/api/v1/strategy/black_store_list',
     saveBlackStore = '/api/v1/strategy/black_store_save',
     deleteBlackStore = '/api/v1/strategy/black_store_delete',
+    queryAccount = '/api/v1/users/list',
 }

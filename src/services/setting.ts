@@ -1,11 +1,6 @@
 import { transPaginationRequest } from '@/utils/utils';
 import request from '@/utils/request';
-import {
-    IPaginationResponse,
-    IRequestPagination,
-    IRequestPagination1,
-    IResponse,
-} from '@/interface/IGlobal';
+import { IPaginationResponse, IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import {
     ICountryItem,
     ICustomItem,
@@ -25,6 +20,7 @@ import {
     IGetStoreBlacklistReq,
     ISaveBlackStoreReq,
     IDeleteBlackStoreReq,
+    IAccount,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -260,6 +256,22 @@ export function saveBlackStore(data: ISaveBlackStoreReq) {
 
 export function deleteBlackStore(data: IDeleteBlackStoreReq) {
     return request.post(SettingApiPath.deleteBlackStore, {
+        data,
+    });
+}
+
+export function queryAccountList(data: {
+    user_id?: string;
+    username?: string;
+    role_id?: number;
+    create_user?: string;
+    status?: number;
+    create_time_start?: number;
+    create_time_end?: number;
+    page: number;
+    page_count: number;
+}) {
+    return api.post<IResponse<PaginationResponse<IAccount>>>(SettingApiPath.queryAccount, {
         data,
     });
 }

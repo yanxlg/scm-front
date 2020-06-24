@@ -208,3 +208,13 @@ export interface IDeleteBlackStoreReq {
     purchase_channel: string;
     merchant_id: string[];
 }
+
+export interface IAccount {
+    id: string;
+    username: string;
+    real_name: string;
+    create_user: string;
+    create_time: string;
+    status: '0' | '1';
+    roles: string[];
+}

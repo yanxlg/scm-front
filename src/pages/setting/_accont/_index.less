@@ -1,0 +1,95 @@
+.form {
+    &-label {
+        width: 58px;
+    }
+    &-date {
+        width: 181px;
+    }
+    &-modal {
+        &-label {
+            width: 40px;
+        }
+        &-role {
+            :global .ant-checkbox-group-item {
+                width: 115px;
+                padding: 5px 0;
+            }
+            &-item {
+                padding: 5px 0 !important;
+            }
+        }
+        &-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.85);
+        }
+    }
+    &-tree {
+        :global .ant-form-item-control-input {
+            min-height: 0 !important;
+        }
+        &-horizon {
+            :global .ant-tree-list-holder-inner {
+                display: block !important;
+                :global .ant-tree-treenode {
+                    display: inline-block !important;
+                }
+                > :global(.ant-tree-treenode:nth-child(1)) {
+                    display: block !important;
+                }
+                :global .ant-tree-switcher {
+                    display: inline-block !important;
+                    vertical-align: middle;
+                }
+                :global .ant-tree-checkbox {
+                    margin-top: 0 !important;
+                    vertical-align: middle;
+                }
+                :global .ant-tree-node-content-wrapper {
+                    vertical-align: middle;
+                }
+            }
+        }
+        &-container {
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+        &-child {
+            padding: 0 !important;
+            width: 180px;
+            &-first {
+                margin-left: 30px;
+            }
+        }
+    }
+    &-collapse {
+        &-icon {
+            font-size: 10px !important;
+            color: rgba(0, 0, 0, 0.65) !important;
+            left: 6px !important;
+        }
+        :global .ant-collapse-content-box {
+            padding: 0 !important;
+        }
+        :global .ant-collapse-header {
+            padding-left: 24px !important;
+            :global .ant-checkbox-wrapper:hover {
+                :global .ant-checkbox-inner {
+                    border-color: #d9d9d9;
+                }
+            }
+            :global .ant-checkbox:hover {
+                :global .ant-checkbox-inner {
+                    border-color: #1890ff !important;
+                }
+            }
+            :global .ant-checkbox ~ span {
+                padding: 0 4px !important;
+                margin-left: 8px;
+                &:hover {
+                    background-color: #f5f5f5;
+                }
+            }
+        }
+    }
+}
