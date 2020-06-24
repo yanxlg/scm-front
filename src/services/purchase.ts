@@ -13,10 +13,16 @@ import {
     IReturnStatics,
     IReturnInfo,
     IReturnItem,
+    IAbnormalContext,
+    IQueryStrategyExceptionRes,
+    IUpdateWaybillExceptionPregressReq,
+    IReviewExceptionOrderItem,
+    IReviewExceptionOrderResItem,
 } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
 import { IPurchaseItem, IPurchasePlain } from '@/interface/IPurchase';
-import { IPaginationResponse } from 'react-components/es/hooks/useList';
+import { IPaginationResponse } from 'react-components/lib/hooks/useList';
+import { singlePromiseWrap } from '@/utils/utils';
 
 export function getAbnormalAllList(data: IPurchaseAbnormalReq & IRequestPagination1) {
     // <IResponse<IPurchaseAbnormalItem>>
@@ -38,8 +44,13 @@ export function setRejectAbnormalOrder(data: IRejectAbnormalOrderReq) {
 }
 
 export function setDiscardAbnormalOrder(data: IDiscardAbnormalOrderReq) {
+    const { in_storage_count, reject_count, ...rest } = data;
     return request.post(PurchaseApiPath.setDiscardAbnormalOrder, {
-        data,
+        data: {
+            in_storage_count: typeof in_storage_count === 'number' ? String(in_storage_count) : '',
+            reject_count: typeof reject_count === 'number' ? String(reject_count) : '',
+            ...rest,
+        },
     });
 }
 
@@ -157,12 +168,6 @@ export function addWaybill(data: any) {
     });
 }
 
-export function setPurchaseException(data: any) {
-    return request.post(PurchaseApiPath.setPurchaseException, {
-        data,
-    });
-}
-
 export function createPurchase(data: {
     purchase_manager: string;
     purchase_platform: string;
@@ -194,4 +199,42 @@ export function endPurchaseByUser(purchase_order_goods_id: string) {
     return request.post(PurchaseApiPath.EndPurchaseByUser, {
         data: { purchase_order_goods_id },
     });
+}
+
+export const queryStrategyException = singlePromiseWrap(() => {
+    return request
+        .get<IResponse<IQueryStrategyExceptionRes>>(PurchaseApiPath.QueryStrategyException)
+        .then(({ data }) => {
+            const { exception_code, ...rest } = data;
+            return {
+                exception_code: exception_code?.map(({ name, code }) => ({
+                    name,
+                    value: code,
+                })),
+                ...rest,
+            };
+        });
+});
+
+export function finishPurchaseExceptionOrder(waybill_exception_sn: string[]) {
+    return request.post(PurchaseApiPath.FinishPurchaseExceptionOrder, {
+        data: {
+            waybill_exception_sn,
+        },
+    });
+}
+
+export function updateWaybillExceptionPregress(data: IUpdateWaybillExceptionPregressReq) {
+    return request.post(PurchaseApiPath.UpdateWaybillExceptionPregress, {
+        data,
+    });
+}
+
+export function reviewExceptionOrder(data: IReviewExceptionOrderItem[]) {
+    return request.post<IResponse<IReviewExceptionOrderResItem[]>>(
+        PurchaseApiPath.ReviewExceptionOrder,
+        {
+            data,
+        },
+    );
 }
