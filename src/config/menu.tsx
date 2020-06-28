@@ -23,6 +23,10 @@ export default [
                 path: '/dashboard/order',
                 name: '订单分析',
             },
+            {
+                path: '/dashboard/timeStatistics',
+                name: '时效统计',
+            },
         ],
     },
     {

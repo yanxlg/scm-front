@@ -1,0 +1,280 @@
+import React, {
+    useState,
+    useCallback,
+    useMemo,
+    useEffect,
+    useRef,
+    forwardRef,
+    ForwardRefRenderFunction,
+    useImperativeHandle,
+} from 'react';
+import { DatePicker, Table } from 'antd';
+import { getUTCDate } from '@/utils/date';
+import { ECharts } from 'echarts';
+import echarts from 'echarts/lib/echarts';
+import 'echarts/lib/chart/line';
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
+import 'echarts/lib/component/legend';
+import dayjs, { Dayjs } from 'dayjs';
+
+import styles from '../../_timeStatistics.less';
+import { ColumnsType } from 'antd/es/table';
+
+const { RangePicker } = DatePicker;
+
+export interface IOutStockRef {
+    onSearch(): Promise<void>;
+}
+
+interface IOutStockProps {}
+
+const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = (props, ref) => {
+    const chartRef = useRef<ECharts | null>(null);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([
+        getUTCDate().add(-10, 'day'),
+        getUTCDate(),
+    ]);
+
+    const disabledDate = useCallback(currentDate => {
+        return currentDate.valueOf() > getUTCDate().valueOf();
+    }, []);
+
+    const handleRangePicker = useCallback(values => {
+        // console.log(values);
+        setDates(values);
+    }, []);
+
+    const onSearch = useCallback(() => {
+        console.log('出库搜索');
+        return Promise.resolve();
+    }, []);
+
+    useImperativeHandle(
+        ref,
+        () => ({
+            onSearch: onSearch,
+        }),
+        [],
+    );
+
+    const renderChart = useCallback(() => {
+        chartRef.current?.setOption({
+            title: {
+                text: '出库率',
+                subtext: '（最近更新时间：2020-6-12 06：00）',
+                left: 'center',
+                bottom: 0,
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: info => {
+                    // console.log('formatter', info);
+                    return `
+                        <div style="padding: 8px 20px 8px 10px;">
+                            <div style="margin-bottom: 4px;">
+                                <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
+                                总订单: 
+                            </div>
+                            <div style="margin-bottom: 4px;">
+                                <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
+                                已出库: 
+                            </div>
+                            <div>
+                                <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: red; vertical-align: 2px;"></span>
+                                已取消: 
+                            </div>
+                            <div style="margin-bottom: 4px;">
+                                <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: yellow; vertical-align: 2px;"></span>
+                                出库率: 
+                            </div>
+                        </div>
+                    `;
+                },
+            },
+            legend: {
+                data: ['1天', '2天', '3天', '4天', '5天'],
+            },
+            grid: {
+                left: '4%',
+                right: '8%',
+                bottom: '10%',
+                containLabel: true,
+            },
+            // toolbox: {
+            //     feature: {
+            //         saveAsImage: {}
+            //     }
+            // },
+            xAxis: {
+                type: 'category',
+                name: '确认订单时间',
+                boundaryGap: false,
+                data: [
+                    '2020/06/22',
+                    '2020/06/23',
+                    '2020/06/24',
+                    '2020/06/25',
+                    '2020/06/26',
+                    '2020/06/27',
+                    '2020/06/28',
+                ],
+            },
+            yAxis: {
+                type: 'value',
+                name: '出库率（%）',
+            },
+            series: [
+                {
+                    name: '1天',
+                    type: 'line',
+                    data: [120, 132, 101, 134, 90, 230, 210],
+                },
+                {
+                    name: '2天',
+                    type: 'line',
+                    data: [220, 182, 191, 234, 290, 330, 310],
+                },
+                {
+                    name: '3天',
+                    type: 'line',
+                    data: [150, 232, 201, 154, 190, 330, 410],
+                },
+                {
+                    name: '4天',
+                    type: 'line',
+                    data: [320, 332, 301, 334, 390, 330, 320],
+                },
+                {
+                    name: '5天',
+                    type: 'line',
+                    data: [820, 932, 901, 934, 1290, 1330, 1320],
+                },
+            ],
+        });
+    }, []);
+
+    useEffect(() => {
+        !chartRef.current &&
+            (chartRef.current = echarts.init(
+                document.getElementById('out-stock') as HTMLDivElement,
+            ));
+        // if (loading) {
+        //     chartRef.current.showLoading();
+        // } else {
+        //     chartRef.current.hideLoading();
+        //     renderChart(orderInfo);
+        // }
+        renderChart();
+    }, []);
+
+    const columns = useMemo<ColumnsType<object>>(() => {
+        return [
+            {
+                title: '时间',
+                dataIndex: 'label',
+                align: 'center',
+            },
+            {
+                title: '2020/06/22',
+                dataIndex: '2020/06/22',
+                align: 'center',
+            },
+            {
+                title: '2020/06/23',
+                dataIndex: '2020/06/23',
+                align: 'center',
+            },
+            {
+                title: '2020/06/24',
+                dataIndex: '2020/06/24',
+                align: 'center',
+            },
+            {
+                title: '2020/06/25',
+                dataIndex: '2020/06/25',
+                align: 'center',
+            },
+            {
+                title: '2020/06/26',
+                dataIndex: '2020/06/26',
+                align: 'center',
+            },
+            {
+                title: '2020/06/27',
+                dataIndex: '2020/06/27',
+                align: 'center',
+            },
+            {
+                title: '2020/06/28',
+                dataIndex: '2020/06/28',
+                align: 'center',
+            },
+        ];
+    }, []);
+
+    const dataSource = useMemo(() => {
+        return [
+            {
+                label: '总订单',
+                '2020/06/22': 100,
+                '2020/06/23': 200,
+                '2020/06/24': 300,
+                '2020/06/25': 400,
+                '2020/06/26': 500,
+                '2020/06/27': 600,
+                '2020/06/28': 700,
+            },
+            {
+                label: '已出库',
+                '2020/06/22': 100,
+                '2020/06/23': 200,
+                '2020/06/24': 300,
+                '2020/06/25': 400,
+                '2020/06/26': 500,
+                '2020/06/27': 600,
+                '2020/06/28': 700,
+            },
+            {
+                label: '已取消',
+                '2020/06/22': 100,
+                '2020/06/23': 200,
+                '2020/06/24': 300,
+                '2020/06/25': 400,
+                '2020/06/26': 500,
+                '2020/06/27': 600,
+                '2020/06/28': 700,
+            },
+            {
+                label: '出库率',
+                '2020/06/22': 100,
+                '2020/06/23': 200,
+                '2020/06/24': 300,
+                '2020/06/25': 400,
+                '2020/06/26': 500,
+                '2020/06/27': 600,
+                '2020/06/28': 700,
+            },
+        ];
+    }, []);
+
+    return useMemo(() => {
+        return (
+            <>
+                <div className={styles.dateSection}>
+                    <span className={styles.label}>日期：</span>
+                    <RangePicker
+                        allowClear={false}
+                        value={dates}
+                        disabledDate={disabledDate}
+                        onChange={handleRangePicker}
+                    />
+                </div>
+                <div id="out-stock" className={styles.chartSection}></div>
+                <Table bordered columns={columns} dataSource={dataSource} pagination={false} />
+            </>
+        );
+    }, [columns]);
+};
+
+export default forwardRef(OutStock);
