@@ -174,7 +174,7 @@ const FreightModal: React.FC<IProps> = ({ visible, freightType, onCancel, nameLi
                     )}
                 </Form.Item>
                 <Form.Item label="备注" name="comment" className={styles.item}>
-                    <TextArea placeholder="此规则仅适用于VOVA-新店铺运营1个月内" />
+                    <TextArea />
                 </Form.Item>
                 <div className={styles.btnSave}>
                     <LoadingButton
