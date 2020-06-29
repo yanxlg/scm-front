@@ -68,6 +68,13 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
         });
     }, [type]);
 
+    const footerRef = useRef<null>();
+    useMemo(() => {
+        if (type) {
+            footerRef.current = type === 'view' ? null : undefined;
+        }
+    }, [type]);
+
     const formFields = useMemo(() => {
         return [
             {
@@ -118,6 +125,7 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
             case 'edit':
             case 'view':
                 const { detail } = visible as VisibleProps;
+                console.log(detail);
                 formRef.current?.setFieldsValue({
                     name: detail?.name,
                     description: detail?.description,
@@ -131,23 +139,26 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
         }
     }, [visible]);
 
-    return (
-        <Modal
-            title="添加账号"
-            width={800}
-            visible={!!visible}
-            onCancel={onClose}
-            confirmLoading={submitting}
-            onOk={onOKey}
-        >
-            <JsonForm
-                ref={formRef}
-                layout="horizontal"
-                labelClassName={styles.formModalLabel}
-                fieldList={formFields}
-            />
-        </Modal>
-    );
+    return useMemo(() => {
+        return (
+            <Modal
+                title={type === 'add' ? '添加角色' : type === 'view' ? '查看角色' : '修改角色'}
+                width={800}
+                visible={!!visible}
+                onCancel={onClose}
+                confirmLoading={submitting}
+                onOk={onOKey}
+                footer={footerRef.current}
+            >
+                <JsonForm
+                    ref={formRef}
+                    layout="horizontal"
+                    labelClassName={styles.formModalLabel}
+                    fieldList={formFields}
+                />
+            </Modal>
+        );
+    }, [submitting, visible]);
 };
 
 export { AddRoleModal };
