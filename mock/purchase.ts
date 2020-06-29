@@ -47,4 +47,54 @@ export default {
             },
         });
     },
+    'GET /v1/strategy/waybill_exception': async (req: Request, res: Response) => {
+        await sleep(1);
+        res.status(200).send({
+            code: 200,
+            message: 'By mock.js',
+            data: {
+                exception_strategy: [
+                    {
+                        exception_operation_id: 1,
+                        exception_operation_name: '废弃',
+                        show_exception_type: ['101', '102', '103', '104', '105'],
+                    },
+                    {
+                        exception_operation_id: 2,
+                        exception_operation_name: '关联采购单',
+                        show_exception_type: ['101', '103'],
+                    },
+                    {
+                        exception_operation_id: 3,
+                        exception_operation_name: '异常处理',
+                        show_exception_type: ['102', '104', '105'],
+                        exception_operation_detail: [
+                            {
+                                second_exception_operation_id: 1,
+                                second_exception_operation_name: '退款',
+                                second_show_exception_type: ['102', '104', '105'],
+                            },
+                            {
+                                second_exception_operation_id: 2,
+                                second_exception_operation_name: '补发货',
+                                second_show_exception_type: ['104', '105'],
+                            },
+                            {
+                                second_exception_operation_id: 3,
+                                second_exception_operation_name: '退货',
+                                second_show_exception_type: ['104', '105'],
+                            },
+                        ],
+                    },
+                ],
+                exception_code: [
+                    { code: '101', name: '扫码失败' },
+                    { code: '102', name: '拒收' },
+                    { code: '103', name: '多发货' },
+                    { code: '104', name: '货不对版' },
+                    { code: '105', name: '货品不合规' },
+                ],
+            },
+        });
+    },
 };
