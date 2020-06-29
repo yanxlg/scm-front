@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import styles from './_index.less';
 import { Breadcrumb, Button, Dropdown, Menu } from 'antd';
@@ -8,6 +8,8 @@ import { getCookie } from '@/utils/common';
 import { ChangePwdModal } from '../ChangePwd/ChangePwdModal';
 import { useModal2 } from 'react-components';
 import { Icons } from '@/components/Icon';
+import { logout } from '@/services/global';
+import { history } from '@@/core/history';
 
 export type SiderTheme = 'light' | 'dark';
 export interface GlobalHeaderRightProps extends BasicLayoutProps {
@@ -29,6 +31,12 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
     );
 
     const userName = getCookie('USERNAME') || '--';
+
+    const onLogout = useCallback(() => {
+        logout().then(() => {
+            history.replace('/login');
+        });
+    }, []);
 
     const [pwdModal, showPwdModal, closePwdModal] = useModal2<boolean>();
     return (
@@ -52,21 +60,19 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
                             >
                                 修改密码
                             </Menu.Item>
+                            <Menu.Item
+                                key="1"
+                                onClick={onLogout}
+                                icon={<Icons type="scm-pwd" />}
+                                className={styles.menu}
+                            >
+                                退出登陆
+                            </Menu.Item>
                         </Menu>
                     }
                 >
                     <span className={styles.user}>{userName}</span>
                 </Dropdown>
-                ,
-                <Button
-                    type="link"
-                    className="padding-none"
-                    onClick={() => {
-                        // alert('退出');
-                    }}
-                >
-                    退出
-                </Button>
             </div>
             <ChangePwdModal visible={pwdModal} onClose={closePwdModal} />
         </div>

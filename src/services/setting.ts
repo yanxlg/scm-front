@@ -1,4 +1,4 @@
-import { transPaginationRequest } from '@/utils/utils';
+import { singlePromiseWrap, transPaginationRequest } from '@/utils/utils';
 import request from '@/utils/request';
 import { IPaginationResponse, IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import {
@@ -21,6 +21,10 @@ import {
     ISaveBlackStoreReq,
     IDeleteBlackStoreReq,
     IAccount,
+    IPermissionItem,
+    IPermissionTree,
+    IRole,
+    IAccountDetail,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -28,6 +32,7 @@ import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { api } from 'react-components';
 import { IPaginationResponse as PaginationResponse } from 'react-components/es/hooks/useList';
 import { FetchFactory } from '@/hooks/useFetch';
+import { GlobalApiPath } from '@/config/api/Global';
 
 export async function queryCustomList(query: ICustomListQuery) {
     const params = transPaginationRequest(query);
@@ -271,7 +276,143 @@ export function queryAccountList(data: {
     page: number;
     page_count: number;
 }) {
-    return api.post<IResponse<PaginationResponse<IAccount>>>(SettingApiPath.queryAccount, {
+    return api.post<IResponse<PaginationResponse<IAccount>>>(SettingApiPath.queryAccountList, {
         data,
     });
 }
+
+export function addAccount(data: {
+    username: string;
+    real_name: string;
+    password: string;
+    status: 0 | 1;
+    roles: number[];
+}) {
+    return request.post(SettingApiPath.addAccount, {
+        data: data,
+    });
+}
+
+const parsePermissionTree = (
+    item: IPermissionItem,
+    keysList?: string[],
+    pArray?: string[],
+    parentMap?: Map<string | number, (string | number)[]>,
+): IPermissionTree => {
+    const { data, children } = item;
+    if (keysList) {
+        keysList.push(data.id);
+    }
+    if (parentMap && pArray && pArray.length > 0) {
+        parentMap.set(data.id, Array.from(pArray));
+    }
+    if (pArray) {
+        pArray = ([] as string[]).concat(pArray).concat(data.id);
+    }
+    return {
+        title: data.name,
+        key: data.id,
+        children: children.map(child => parsePermissionTree(child, keysList, pArray, parentMap)),
+    };
+};
+
+export function queryPermissionTree() {
+    let flatKeys: string[] = [];
+    return request
+        .get<
+            IResponse<{
+                pageTree: { [key: string]: IPermissionItem };
+                dataTree: { [key: string]: IPermissionItem };
+            }>
+        >(SettingApiPath.queryPermissionTree)
+        .then(({ data: { pageTree, dataTree } }) => {
+            let treeArr: IPermissionTree[] = [];
+            let keysArr: Array<string[]> = [];
+            let parentMap = new Map<string | number, (string | number)[]>();
+            for (let index in pageTree) {
+                let keysList: string[] = [];
+                treeArr.push(parsePermissionTree(pageTree[index], keysList, [], parentMap));
+                keysArr.push(keysList);
+                flatKeys.push(...keysList);
+            }
+
+            let dataList: IPermissionTree[] = [];
+            for (let index in dataTree) {
+                dataList.push(parsePermissionTree(dataTree[index].children[0]));
+            }
+            return { pTree: treeArr, flatKeys, keysArr, dataTree: dataList, parentMap };
+        });
+}
+
+export function updateAccount(
+    id: string,
+    data: { real_name: string; password: string; status: 1 | 0; roles: number[] },
+) {
+    return request.put(SettingApiPath.updateAccount.replace('{id}', id), {
+        data: data,
+    });
+}
+
+export function queryAccount(id: string) {
+    return request.get<IResponse<IAccountDetail>>(SettingApiPath.queryAccount.replace('{id}', id));
+}
+
+export function queryRoleList(data: {
+    name?: string;
+    create_user?: string;
+    status?: number;
+    create_time_start?: number;
+    create_time_end?: number;
+    page: number;
+    page_count: number;
+}) {
+    return api.post<IResponse<PaginationResponse<IRole>>>(SettingApiPath.queryRoleList, {
+        data,
+    });
+}
+
+export function addRole(data: { name: string; description: string; role_auths: number[] }) {
+    return request.post(SettingApiPath.addRole, {
+        data,
+    });
+}
+
+export const queryAccountCreator = singlePromiseWrap(() => {
+    return request
+        .get<
+            IResponse<
+                Array<{
+                    id: string;
+                    name: string;
+                }>
+            >
+        >(SettingApiPath.queryAccountCreator.replace('{type}', '1'))
+        .then(({ data }) => {
+            return data.map(({ id, name }) => ({
+                name: name,
+                value: id,
+            }));
+        });
+});
+
+export const queryRoleCreator = singlePromiseWrap(() => {
+    return request
+        .get<
+            IResponse<
+                Array<{
+                    id: string;
+                    name: string;
+                }>
+            >
+        >(SettingApiPath.queryAccountCreator.replace('{type}', '2'))
+        .then(({ data }) => {
+            return data.map(({ id, name }) => ({
+                name: name,
+                value: id,
+            }));
+        });
+});
+
+export const queryRolePermission = (roles: (number | string)[]) => {
+    return request.get(SettingApiPath.queryRolePermission.replace('{role_ids}', roles.join(',')));
+};

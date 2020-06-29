@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { FitTable, JsonForm, LoadingButton, useList, useModal2 } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { queryAccountList } from '@/services/setting';
+import { queryAccountCreator, queryAccountList } from '@/services/setting';
 import { Button, Switch } from 'antd';
 import { scroll } from '@/config/global';
 import { PlusOutlined } from '@ant-design/icons';
@@ -11,6 +11,8 @@ import styles from './_index.less';
 import { AddAccountModal } from './components/AddAccountModal';
 import { IAccount } from '@/interface/ISetting';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 const fieldsList: FormField[] = [
     {
@@ -28,16 +30,48 @@ const fieldsList: FormField[] = [
         type: 'select',
         label: '角色',
         name: 'role_id',
+        initialValue: '',
+        syncDefaultOption: {
+            name: '全部',
+            value: '',
+        },
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.account?.roleSimpleList;
+            },
+        },
     },
     {
         type: 'select',
         label: '创建人',
         name: 'create_user',
+        initialValue: '',
+        syncDefaultOption: {
+            name: '全部',
+            value: '',
+        },
+        optionList: () => queryAccountCreator(),
     },
     {
         type: 'select',
         label: '状态',
         name: 'status',
+        initialValue: '',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            {
+                name: '启用',
+                value: 1,
+            },
+            {
+                name: '禁用',
+                value: 0,
+            },
+        ],
     },
     {
         type: 'dateRanger',
@@ -63,7 +97,19 @@ const Account = () => {
         queryList: queryAccountList,
     });
 
-    const [addModal, showAddModal, closeAddModal] = useModal2<boolean>();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        // 获取角色列表
+        dispatch({
+            type: 'account/queryRoleSimpleList',
+        });
+    }, []);
+
+    const [addModal, showAddModal, closeAddModal] = useModal2<{
+        type: 'add' | 'view' | 'edit';
+        id?: string;
+    }>();
 
     const form = useMemo(() => {
         return (
@@ -78,7 +124,7 @@ const Account = () => {
         );
     }, []);
 
-    const columns = useMemo<ColumnType<any>[]>(() => {
+    const columns = useMemo<ColumnType<IAccount>[]>(() => {
         return [
             {
                 title: '账号ID',
@@ -92,11 +138,31 @@ const Account = () => {
                 dataIndex: 'operations',
                 align: 'center',
                 width: '150px',
-                render: () => {
+                render: (_, item) => {
                     return (
                         <>
-                            <Button type="link">查看</Button>
-                            <Button type="link">修改</Button>
+                            <Button
+                                type="link"
+                                onClick={() => {
+                                    showAddModal({
+                                        type: 'view',
+                                        id: item.id,
+                                    });
+                                }}
+                            >
+                                查看
+                            </Button>
+                            <Button
+                                type="link"
+                                onClick={() => {
+                                    showAddModal({
+                                        type: 'edit',
+                                        id: item.id,
+                                    });
+                                }}
+                            >
+                                修改
+                            </Button>
                         </>
                     );
                 },
@@ -112,6 +178,7 @@ const Account = () => {
                 width: '150px',
                 dataIndex: 'roles',
                 align: 'center',
+                render: _ => _.join(','),
             },
             {
                 title: '创建人',
@@ -160,7 +227,9 @@ const Account = () => {
                 type="primary"
                 key="1"
                 onClick={() => {
-                    showAddModal(true);
+                    showAddModal({
+                        type: 'add',
+                    });
                 }}
             >
                 <PlusOutlined />

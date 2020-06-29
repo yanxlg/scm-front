@@ -1,4 +1,5 @@
 import { RequestPagination, IRequestPagination } from '@/interface/IGlobal';
+import React from 'react';
 
 export type ICustomListQuery = {
     one_cat_id?: string;
@@ -217,4 +218,39 @@ export interface IAccount {
     create_time: string;
     status: '0' | '1';
     roles: string[];
+}
+
+export interface IPermissionItem {
+    data: {
+        id: string;
+        name: string;
+        pid: string;
+    };
+    children: Array<IPermissionItem>;
+}
+
+export interface IPermissionTree {
+    title: string;
+    key: string;
+    children: IPermissionTree[];
+}
+
+export interface IRole {
+    create_time: string;
+    create_user: string;
+    description: string;
+    id: string;
+    name: string;
+    status: '0' | '1';
+    users: string[];
+}
+
+export interface IAccountDetail {
+    create_time: string;
+    create_user: string;
+    id: string;
+    real_name: string;
+    role_ids: string[];
+    status: '0' | '1';
+    username: string;
 }

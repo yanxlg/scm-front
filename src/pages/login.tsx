@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { loginUser } from '@/services/global';
+import { history } from '@@/core/history';
 
 declare interface ILoginState {
     remember: boolean;
@@ -20,8 +22,8 @@ declare interface ILoginState {
 const Login = () => {
     const [userName, setUserName] = useState(User.userName);
     const [password, setPassword] = useState(User.password || '');
-    const [userNameError, setUserNameError] = useState();
-    const [passwordError, setPasswordError] = useState();
+    const [userNameError, setUserNameError] = useState<string>();
+    const [passwordError, setPasswordError] = useState<string>();
     const [userNameActive, setUserNameActive] = useState(!!User.userName);
     const [passwordActive, setPasswordActive] = useState(!!User.password);
     const [login, setLogin] = useState(false);
@@ -55,18 +57,32 @@ const Login = () => {
     }, []);
 
     const onLogin = () => {
+        if (!userName) {
+            setUserNameError('请输入用户名');
+            return;
+        }
+        if (!password) {
+            setPasswordError('请输入密码');
+            return;
+        }
         setLogin(true);
+        loginUser({
+            username: userName,
+            password: password,
+        })
+            .then(({ data }) => {
+                User.setUser({
+                    password,
+                    userName,
+                    token: data,
+                });
+                history.replace('/');
+            })
+            .finally(() => {
+                setLogin(false);
+            });
     };
 
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const onLoaded = useCallback(e => {
-        // 读取url
-    }, []);
-
-    const iframe = useMemo(() => {
-        // 有可能会直接访问中台页面，如果直接是中台页面说明登陆状态仍然存在，否则才走登陆
-        return null;
-    }, []);
     return useMemo(() => {
         return (
             <main className="main login-bg">
@@ -128,10 +144,9 @@ const Login = () => {
                         登录
                     </Button>
                 </div>
-                {iframe}
             </main>
         );
-    }, [password, userName]);
+    }, [password, userName, passwordActive, userNameActive, login]);
 };
 
 export default Login;

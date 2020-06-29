@@ -10,6 +10,7 @@ import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
 import { IGood } from '@/interface/ILocalGoods';
+import { ISimpleRole } from '@/models/account';
 
 // 1--品类预估模板下载，2---运费价卡模板下载
 type IDownloadFileType = '1' | '2';
@@ -150,3 +151,31 @@ export const queryOnsaleInterceptStore = (purchase_channel?: string) => {
             return (data[0]?.support_merchant_id ?? []).map(val => String(val));
         });
 };
+
+export function queryRoleSimpleList() {
+    return request
+        .get<
+            IResponse<
+                Array<{
+                    id: string;
+                    name: string;
+                }>
+            >
+        >(GlobalApiPath.querySimpleRoleList)
+        .then(({ data }) => {
+            return data.map(({ id, name }) => ({
+                name: name,
+                value: id,
+            }));
+        });
+}
+
+export function loginUser(data: { username: string; password: string }) {
+    return request.post(GlobalApiPath.login, {
+        data: data,
+    });
+}
+
+export function logout() {
+    return request.post(GlobalApiPath.logout);
+}

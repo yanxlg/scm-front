@@ -5,13 +5,16 @@
     &-date {
         width: 181px;
     }
+    &-input {
+        width: 160px !important;
+    }
     &-modal {
         &-label {
             width: 40px;
         }
         &-role {
             :global .ant-checkbox-group-item {
-                width: 115px;
+                min-width: 115px;
                 padding: 5px 0;
             }
             &-item {
@@ -57,38 +60,15 @@
         &-child {
             padding: 0 !important;
             width: 180px;
-            &-first {
-                margin-left: 30px;
-            }
         }
-    }
-    &-collapse {
-        &-icon {
-            font-size: 10px !important;
-            color: rgba(0, 0, 0, 0.65) !important;
-            left: 6px !important;
-        }
-        :global .ant-collapse-content-box {
-            padding: 0 !important;
-        }
-        :global .ant-collapse-header {
-            padding-left: 24px !important;
-            :global .ant-checkbox-wrapper:hover {
-                :global .ant-checkbox-inner {
-                    border-color: #d9d9d9;
-                }
-            }
-            :global .ant-checkbox:hover {
-                :global .ant-checkbox-inner {
-                    border-color: #1890ff !important;
-                }
-            }
-            :global .ant-checkbox ~ span {
-                padding: 0 4px !important;
-                margin-left: 8px;
-                &:hover {
-                    background-color: #f5f5f5;
-                }
+        &-layout {
+            width: 100%;
+            :global .ant-tree-node-content-wrapper {
+                padding-left: 0 !important;
+                background-color: transparent !important;
+                cursor: default !important;
+                flex: 1;
+                overflow-x: auto;
             }
         }
     }

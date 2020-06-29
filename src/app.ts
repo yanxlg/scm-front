@@ -1,5 +1,5 @@
 import formatter from 'react-components/es/utils/formatter';
-import { firstNumber, multipleToArray } from '@/utils/formatter';
+import { arrayNumber, firstNumber, multipleToArray } from '@/utils/formatter';
 import 'nprogress/nprogress.css';
 import NProgress from 'nprogress';
 import { Modal } from 'antd';
@@ -84,11 +84,13 @@ declare module 'react-components' {
     interface Formatters {
         multipleToArray: typeof multipleToArray;
         firstNumber: typeof firstNumber;
+        arrayNumber: typeof arrayNumber;
     }
 }
 formatter.extend({
     multipleToArray: multipleToArray,
     firstNumber: firstNumber,
+    arrayNumber: arrayNumber,
 });
 
 // 进度条精度优化
