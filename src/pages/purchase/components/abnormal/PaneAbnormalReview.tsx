@@ -180,11 +180,11 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 align: 'center',
                 width: 180,
                 render: (val: string, row: IPurchaseAbnormalItem) => {
-                    const { remarkTime } = row;
+                    const { createTime } = row;
                     return (
                         <>
                             {val}
-                            <div>{utcToLocal(remarkTime)}</div>
+                            <div>{utcToLocal(createTime)}</div>
                         </>
                     );
                 },
