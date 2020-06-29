@@ -6,9 +6,9 @@ import { getTagsList, putBatchUpdateTags, getBatchUpdateProgress } from '@/servi
 import { ITagItem, IGetTagsListRequest } from '@/interface/IGoodsAttr';
 import { PlusOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { FitTable } from 'react-components';
-
 import { ColumnsType } from 'antd/lib/table/interface';
 import PublishIntercept from './components/PublishIntercept';
+import PaneOrderReview from './components/goodsAttr/PaneOrderReview';
 
 import styles from './_goodsAttr.less';
 
@@ -313,7 +313,7 @@ const GoodsAttr: React.FC = props => {
         // console.log('attrList', attrList);
         return (
             <Container>
-                <Tabs defaultActiveKey="1" type="card">
+                <Tabs defaultActiveKey="3" type="card">
                     <TabPane tab="商品属性配置" key="1">
                         <div className={styles.tableContainer}>
                             {pending && (
@@ -391,6 +391,9 @@ const GoodsAttr: React.FC = props => {
                             </div>
                         )}
                         <PublishIntercept pending={pending} />
+                    </TabPane>
+                    <TabPane tab="订单审核配置" key="3">
+                        <PaneOrderReview />
                     </TabPane>
                 </Tabs>
             </Container>
