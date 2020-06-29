@@ -43,6 +43,7 @@ export interface IPurchaseAbnormalItem {
     remarkTime: string;
     packageImageUrl?: string;
     waybillExceptionHandle?: IHandleItem[];
+    createTime: string;
 }
 
 export interface IPurchaseAbnormalReq {
