@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
-import { Button, Pagination, Checkbox, DatePicker, Row, Col } from 'antd';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { Button, Pagination, Checkbox, DatePicker, Row, Col, Popconfirm } from 'antd';
 import Container from '@/components/Container';
 import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -13,129 +13,12 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_index.less';
 import { DeleteOutlined } from '@ant-design/icons';
 import GoodsDetailModal from './components/GoodsDetailModal';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { getUTCDate } from '@/utils/date';
+import { Dayjs } from 'dayjs';
+import { deleteGoodsSelection, onsaleGoodsSelection } from '@/services/selection';
 
 const { RangePicker } = DatePicker;
-
-const initialValues = {
-    enable_platform: 'vova',
-};
-
-const _getCatagoryList = () =>
-    getCatagoryList()
-        .then(({ convertList = [] } = EmptyObject) => {
-            return convertList;
-        })
-        .catch(() => {
-            return [];
-        });
-
-const formFields: FormField[] = [
-    {
-        type: 'input',
-        label: 'Commodity ID',
-        name: 'commodity_id',
-        placeholder: '请输入',
-        // className: styles.input,
-        formatter: 'number_str_arr',
-    },
-    {
-        type: 'treeSelect',
-        label: '一级品类',
-        name: 'first_category',
-        optionList: _getCatagoryList,
-        placeholder: '请选择',
-        onChange: (name, form) => {
-            form.resetFields(['second_category']);
-            form.resetFields(['third_category']);
-        },
-        formatter: 'join',
-    },
-    {
-        type: 'treeSelect',
-        label: '二级品类',
-        name: 'second_category',
-        optionListDependence: {
-            name: 'first_category',
-            key: 'children',
-        },
-        placeholder: '请选择',
-        optionList: _getCatagoryList,
-        onChange: (name, form) => {
-            form.resetFields(['third_category']);
-        },
-        formatter: 'join',
-    },
-    {
-        type: 'treeSelect',
-        label: '三级品类',
-        name: 'third_category',
-        optionListDependence: {
-            name: ['first_category', 'second_category'],
-            key: 'children',
-        },
-        placeholder: '请选择',
-        optionList: _getCatagoryList,
-        formatter: 'join',
-    },
-    {
-        type: 'select',
-        label: '销售渠道',
-        name: 'enable_platform',
-        placeholder: '请选择',
-        optionList: () => queryShopFilterList(),
-        onChange: (name, form) => {
-            form.resetFields(['enable_merchant']);
-        },
-        // formatter: 'join',
-    },
-    {
-        type: 'select',
-        label: '销售店铺',
-        name: 'enable_merchant',
-        placeholder: '请选择',
-        optionListDependence: { name: 'enable_platform', key: 'children' },
-        optionList: () => queryShopFilterList(),
-        formatter: 'join',
-    },
-    {
-        type: 'treeSelect',
-        label: '商品标签',
-        name: 'product_tags',
-        placeholder: '请选择',
-        optionList: () => getAllGoodsTagList(),
-        formatter: 'join',
-    },
-    {
-        type: 'positiveIntegerRange',
-        label: '销售价格',
-        name: ['a1', 'a2'],
-
-        // placeholder: '请输入',
-        // // className: styles.input,
-        // formatter: 'number_str_arr',
-    },
-    // {
-    //     type: 'inputRange',
-    //     label: '价格范围（￥）',
-    //     name: ['min_price', 'max_price'],
-    //     className: styles.inputMin,
-    //     precision: 2,
-    // },
-    // {
-    //     type: 'inputRange',
-    //     label: '销量',
-    //     name: ['min_sale', 'max_sale'],
-    //     className: styles.inputMin,
-    // },
-    // {
-    //     type: 'positiveInteger',
-    //     label: '评论数量>=',
-    //     name: 'min_comment',
-    //     // placeholder: '多个逗号隔开',
-    //     className: styles.inputMin,
-    //     formatter: 'number',
-    // },
-];
 
 const goodsLayout = {
     xs: { span: 12 },
@@ -147,6 +30,11 @@ const goodsLayout = {
 const Selection: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
     const [goodsDetailStatus, setGoodsDetailStatus] = useState(false);
+    const [channelList, setChannelList] = useState<IOptionItem[]>([]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([
+        getUTCDate().add(-1, 'day'),
+        getUTCDate().add(-1, 'day'),
+    ]);
     const [goodsList, setGoodsList] = useState<any[]>([
         {
             onShelf: true,
@@ -188,6 +76,8 @@ const Selection: React.FC = () => {
         },
     ]);
 
+    // console.log(channelList);
+
     const onChangePagination = useCallback(() => {}, []);
     const onChangeGoodsType = useCallback(vals => {
         console.log('onChangeGoodsType', vals);
@@ -205,7 +95,70 @@ const Selection: React.FC = () => {
         // console.log('onSearch', formRef.current?.getFieldsValue());
         const data = await formRef.current?.validateFields();
         console.log('onSearch', data);
+        const { first_cate, second_cate, third_cate } = data as any;
         return Promise.resolve();
+    }, []);
+
+    const disabledDate = useCallback(currentDate => {
+        return (
+            currentDate.valueOf() > getUTCDate().valueOf() ||
+            currentDate.valueOf() <
+                getUTCDate()
+                    .add(-60, 'day')
+                    .valueOf()
+        );
+    }, []);
+
+    const handleRangePicker = useCallback(values => {
+        // console.log(args);
+        setDates(values);
+    }, []);
+
+    // 获取所有的cat_id
+    const getAllCategoryIds = useCallback(() => {}, []);
+
+    const _queryShopFilterList = useCallback(() => {
+        queryShopFilterList().then(res => {
+            setChannelList(res);
+            if (res.length > 0) {
+                let sales_store: string = '';
+                res.forEach(({ name, children }) => {
+                    if (name.toLowerCase() === 'vova') {
+                        sales_store = children[0]?.value ?? '';
+                    }
+                });
+                formRef.current?.setFieldsValue({
+                    sales_channel: 'vova',
+                    sales_store,
+                });
+            }
+        });
+    }, []);
+
+    const _getCatagoryList = useCallback(() => {
+        return getCatagoryList()
+            .then(({ convertList = [] } = EmptyObject) => {
+                return convertList;
+            })
+            .catch(() => {
+                return [];
+            });
+    }, []);
+
+    // e,
+    const _deleteGoodsSelection = useCallback((commodity_id, merchant_id) => {
+        // e.stopPropagation();
+        deleteGoodsSelection({
+            commodity_id,
+            merchant_id,
+        }).then(() => {});
+    }, []);
+
+    const _onsaleGoodsSelection = useCallback((commodity_id, merchant_id) => {
+        onsaleGoodsSelection({
+            commodity_id,
+            merchant_id,
+        }).then(() => {});
     }, []);
 
     const paginationNode = useMemo(() => {
@@ -245,19 +198,41 @@ const Selection: React.FC = () => {
                                         >
                                             已下架
                                         </div>
-                                        <div className={classnames(styles.arc, styles.arcShow)}>
-                                            <DeleteOutlined className={styles.del} />
+                                        <div
+                                            className={classnames(styles.arc, styles.arcShow)}
+                                            onClick={e => e.stopPropagation()}
+                                        >
+                                            <Popconfirm
+                                                placement="bottom"
+                                                title="确定要从选品模型中剔除此商品吗？"
+                                                onConfirm={() => _deleteGoodsSelection('1', '2')}
+                                                okText="确定"
+                                                cancelText="取消"
+                                            >
+                                                <DeleteOutlined className={styles.del} />
+                                            </Popconfirm>
                                         </div>
                                     </>
                                 ) : (
-                                    <div
-                                        className={classnames(
-                                            styles.shelf,
-                                            styles.onShelf,
-                                            styles.show,
-                                        )}
-                                    >
-                                        去上架
+                                    <div onClick={e => e.stopPropagation()}>
+                                        <Popconfirm
+                                            placement="bottom"
+                                            title="重新上架该商品？"
+                                            onConfirm={() => _onsaleGoodsSelection('1', '2')}
+                                            okText="确定"
+                                            cancelText="取消"
+                                            //
+                                        >
+                                            <div
+                                                className={classnames(
+                                                    styles.shelf,
+                                                    styles.onShelf,
+                                                    styles.show,
+                                                )}
+                                            >
+                                                去上架
+                                            </div>
+                                        </Popconfirm>
                                     </div>
                                 )}
                                 <div className={styles.typeList}>
@@ -325,13 +300,113 @@ const Selection: React.FC = () => {
         );
     }, [goodsList]);
 
-    return (
-        <Container>
+    const formFields = useMemo<FormField[]>(() => {
+        return [
+            {
+                type: 'input',
+                label: 'Commodity ID',
+                name: 'commodity_id',
+                placeholder: '请输入',
+                className: styles.input,
+            },
+            {
+                type: 'treeSelect',
+                label: '一级品类',
+                name: 'first_cate',
+                optionList: _getCatagoryList,
+                placeholder: '请选择',
+                className: styles.input,
+                onChange: (name, form) => {
+                    form.resetFields(['second_cate']);
+                    form.resetFields(['third_cate']);
+                },
+            },
+            {
+                type: 'treeSelect',
+                label: '二级品类',
+                name: 'second_cate',
+                optionListDependence: {
+                    name: 'first_cate',
+                    key: 'children',
+                },
+                placeholder: '请选择',
+                className: styles.input,
+                optionList: _getCatagoryList,
+                onChange: (name, form) => {
+                    form.resetFields(['third_cate']);
+                },
+            },
+            {
+                type: 'treeSelect',
+                label: '三级品类',
+                name: 'third_cate',
+                optionListDependence: {
+                    name: ['first_cate', 'second_cate'],
+                    key: 'children',
+                },
+                placeholder: '请选择',
+                className: styles.input,
+                optionList: _getCatagoryList,
+            },
+            {
+                type: 'select',
+                label: '销售渠道',
+                name: 'sales_channel',
+                placeholder: '请选择',
+                className: styles.input,
+                optionList: channelList,
+                onChange: (nameField, form) => {
+                    let sales_store: string = '';
+                    channelList.forEach(({ name, children }) => {
+                        if (name.toLowerCase() === form.getFieldValue(nameField).toLowerCase()) {
+                            sales_store = children[0]?.value ?? '';
+                        }
+                    });
+                    form.setFieldsValue({
+                        sales_store,
+                    });
+                },
+            },
+            {
+                type: 'select',
+                label: '销售店铺',
+                name: 'sales_store',
+                placeholder: '请选择',
+                className: styles.input,
+                optionListDependence: { name: 'sales_channel', key: 'children' },
+                optionList: () => queryShopFilterList(),
+            },
+            {
+                type: 'treeSelect',
+                label: '商品标签',
+                name: 'tags',
+                placeholder: '请选择',
+                className: styles.input,
+                optionList: () => getAllGoodsTagList(),
+                formatter: 'join',
+            },
+            {
+                type: 'numberRange',
+                label: '销售价格',
+                className: styles.inputNumber,
+                name: ['min_sales_price', 'max_sales_price'],
+            },
+            {
+                type: 'positiveIntegerRange',
+                label: '累计销量',
+                className: styles.inputNumber,
+                name: ['min_sales_num', 'max_sales_num'],
+            },
+        ];
+    }, [channelList]);
+
+    const searchNode = useMemo(() => {
+        return (
             <JsonForm
                 className={styles.wrapper}
                 ref={formRef}
                 fieldList={formFields}
-                initialValues={initialValues}
+                // initialValues={initialValues}
             >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
@@ -349,23 +424,46 @@ const Selection: React.FC = () => {
                     </Button>
                 </div>
             </JsonForm>
-            {paginationNode}
-            <div className={styles.goodsHeader}>
-                <Checkbox.Group onChange={onChangeGoodsType}>
-                    <Checkbox value="1">爆款</Checkbox>
-                    <Checkbox value="2">畅销款</Checkbox>
-                    <Checkbox value="3">潜力款</Checkbox>
-                </Checkbox.Group>
-                <div>
-                    时间：
-                    <RangePicker />
+        );
+    }, [channelList]);
+
+    useEffect(() => {
+        _queryShopFilterList();
+    }, []);
+
+    // useEffect(() => {
+
+    // }, [channelList]);
+
+    return useMemo(() => {
+        return (
+            <Container>
+                {searchNode}
+                {paginationNode}
+                <div className={styles.goodsHeader}>
+                    <Checkbox.Group onChange={onChangeGoodsType} defaultValue={['explosion']}>
+                        <Checkbox value="explosion">爆款</Checkbox>
+                        <Checkbox value="best_seller">畅销款</Checkbox>
+                        <Checkbox value="potential">潜力款</Checkbox>
+                    </Checkbox.Group>
+                    <div>
+                        时间：
+                        <RangePicker
+                            allowClear={false}
+                            value={dates}
+                            disabledDate={disabledDate}
+                            onChange={handleRangePicker}
+                        />
+                    </div>
                 </div>
-            </div>
-            {goodsNode}
-            {paginationNode}
-            <GoodsDetailModal visible={goodsDetailStatus} onCancel={hideGoodsModal} />
-        </Container>
-    );
+                {goodsNode}
+                {paginationNode}
+                <GoodsDetailModal visible={goodsDetailStatus} onCancel={hideGoodsModal} />
+            </Container>
+        );
+    }, [goodsDetailStatus, searchNode, dates]);
 };
 
-export default React.memo(Selection);
+// export default React.memo(Selection);
+
+export default Selection;

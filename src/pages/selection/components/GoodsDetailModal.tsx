@@ -9,19 +9,31 @@ import 'echarts/lib/component/legend';
 // import classnames from 'classnames';
 
 import styles from '../_index.less';
+import { queryGoodsSelectionDetail } from '@/services/selection';
 
 interface IProps {
     visible: boolean;
+    commodity_id: string;
+    merchant_id: string;
     onCancel(): void;
 }
 
-const GoodsDetailModal: React.FC<IProps> = ({ visible, onCancel }) => {
+const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id, onCancel }) => {
     const chartRef = useRef<ECharts | null>(null);
     const [loading, setLoading] = useState(false);
 
     const onOk = useCallback(() => {
         console.log('onOk');
     }, []);
+
+    const _queryGoodsSelectionDetail = useCallback(() => {
+        queryGoodsSelectionDetail({
+            commodity_id,
+            merchant_id,
+        }).then(res => {
+            console.log('queryGoodsSelectionDetail', res);
+        });
+    }, [visible]);
 
     const renderChart = useCallback(() => {
         // 绘制图表
@@ -147,6 +159,7 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, onCancel }) => {
 
     useEffect(() => {
         if (visible) {
+            _queryGoodsSelectionDetail();
             // console.log(111111, document.getElementById('goods-line'));
             setLoading(true);
             setTimeout(() => {
