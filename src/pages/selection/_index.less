@@ -38,6 +38,10 @@
             transition: transform 0.4s;
             transform: translateY(0);
         }
+
+        .off-shelf {
+            display: none;
+        }
     }
 
     .img-container {
@@ -70,6 +74,7 @@
     .off-shelf {
         color: #1c1c1c;
         background: #fff;
+        opacity: 0.85 !important;
     }
 
     .arc {
@@ -118,7 +123,7 @@
 
         .price {
             display: flex;
-            align-items: center;
+            // align-items: center;
         }
 
         .profit {
@@ -141,7 +146,7 @@
 
         .sales-change {
             margin-right: 10px;
-            color: #52c41a;
+            // color: #52c41a;
         }
 
         .tag-list {
@@ -156,6 +161,21 @@
             border: 1px solid rgba(217, 217, 217);
             border-radius: 4px;
             background: rgb(245, 245, 245);
+        }
+
+        .increase {
+            color: #52c41a;
+        }
+
+        .decrease {
+            color: #ff4d4f;
+        }
+
+        .arrow {
+            margin-top: -2px;
+            margin-left: 4px;
+            font-size: 20px;
+            line-height: 1;
         }
     }
 
@@ -230,9 +250,9 @@
 }
 
 .input {
-    width: 188px !important;
+    width: 172px !important;
 }
 
 .input-number {
-    width: 80px !important;
+    width: 72px !important;
 }

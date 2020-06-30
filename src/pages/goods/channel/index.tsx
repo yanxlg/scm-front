@@ -174,6 +174,7 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
+    const urlQueryRef = useRef<any>(null);
     const [exportDialog, setExportDialog] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
@@ -193,6 +194,7 @@ const ChannelList: React.FC = props => {
         const { query, url } = queryString.parseUrl(window.location.href);
         if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
+            urlQueryRef.current = query;
         }
         const {
             pageNumber = defaultPageNumber,
@@ -270,10 +272,6 @@ const ChannelList: React.FC = props => {
     const showSkuDialog = useCallback((id: string, merchant_id: string, commodity_id: string) => {
         skuRef.current!.showModal(id, merchant_id, commodity_id);
     }, []);
-
-    // useEffect(() => {
-    //     showSkuDialog('39612', '1', 'c800d87f4d0a9401faa8f7cdcfd35be9');
-    // }, []);
 
     const showCountryShipFee = useCallback((product_id: string, merchant_id: string) => {
         Modal.info({
@@ -703,6 +701,22 @@ const ChannelList: React.FC = props => {
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;
     }, [visible]);
+
+    useEffect(() => {
+        if (urlQueryRef.current && urlQueryRef.current?.from === 'selection') {
+            const { commodity_id, merchant_ids, vova_virtual_id } = urlQueryRef.current;
+            if (
+                commodity_id &&
+                merchant_ids &&
+                vova_virtual_id &&
+                dataSource &&
+                dataSource.length
+            ) {
+                showSkuDialog(dataSource[0].id, merchant_ids as string, commodity_id as string);
+                urlQueryRef.current = null;
+            }
+        }
+    }, [dataSource]);
 
     return (
         <>

@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import { Modal, Button } from 'antd';
+import { Modal, Button, Spin } from 'antd';
 import { ECharts } from 'echarts';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -7,37 +7,67 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import 'echarts/lib/component/legend';
 // import classnames from 'classnames';
+import { Link } from 'umi';
 
 import styles from '../_index.less';
 import { queryGoodsSelectionDetail } from '@/services/selection';
 
 interface IProps {
     visible: boolean;
-    commodity_id: string;
-    merchant_id: string;
+    commodityId: string;
+    merchantId: string;
+    salePlatformCommodityId: string;
     onCancel(): void;
 }
 
-const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id, onCancel }) => {
+const GoodsDetailModal: React.FC<IProps> = ({
+    visible,
+    commodityId,
+    merchantId,
+    salePlatformCommodityId,
+    onCancel,
+}) => {
     const chartRef = useRef<ECharts | null>(null);
     const [loading, setLoading] = useState(false);
+    const [explosionDays, setExplosionDays] = useState<string[]>([]);
 
-    const onOk = useCallback(() => {
-        console.log('onOk');
+    const handleCancel = useCallback(() => {
+        setLoading(false);
+        setExplosionDays([]);
+        onCancel();
     }, []);
 
     const _queryGoodsSelectionDetail = useCallback(() => {
+        setLoading(true);
         queryGoodsSelectionDetail({
-            commodity_id,
-            merchant_id,
-        }).then(res => {
-            console.log('queryGoodsSelectionDetail', res);
-        });
+            commodity_id: commodityId,
+            merchant_id: merchantId,
+        })
+            .then(({ data }) => {
+                const { explosion_day, history_detail } = data;
+                setExplosionDays(explosion_day);
+                history_detail && renderChart(history_detail);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [visible]);
 
-    const renderChart = useCallback(() => {
+    const renderChart = useCallback(chartData => {
+        // console.log('renderChart', chartData, );
+        const dates = Object.keys(chartData).sort();
+        const salePriceList: number[] = [];
+        const profitList: number[] = [];
+        const saleOrderList: number[] = [];
+        dates.forEach(date => {
+            const item = chartData[date];
+            const { sale_order, sale_price, profit } = item;
+            salePriceList.push(Number(sale_price));
+            profitList.push(Number(profit));
+            saleOrderList.push(Number(sale_order));
+        });
         // 绘制图表
-        const colors = ['#26DAD0', '#5584FF'];
+        const colors = ['#26DAD0', '#5584FF', '#C95FF2'];
         chartRef.current?.setOption({
             color: colors,
             tooltip: {
@@ -51,13 +81,6 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
                 right: 80,
                 top: 80,
             },
-            // toolbox: {
-            //     feature: {
-            //         dataView: { show: false, readOnly: false },
-            //         restore: { show: false },
-            //         saveAsImage: { show: false },
-            //     },
-            // },
             legend: {
                 top: 0,
                 right: 40,
@@ -67,7 +90,11 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
                         icon: 'circle',
                     },
                     {
-                        name: '售价',
+                        name: '销售价',
+                        icon: 'circle',
+                    },
+                    {
+                        name: '利润额',
                         icon: 'circle',
                     },
                 ],
@@ -88,21 +115,13 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
                         },
                     },
                     // color: '#C4C6CF',
-                    data: [
-                        '2020-02-24',
-                        '2020-02-25',
-                        '2020-02-26',
-                        '2020-02-27',
-                        '2020-02-28',
-                        '2020-02-29',
-                        '2020-03-01',
-                    ],
+                    data: dates,
                 },
             ],
             yAxis: [
                 {
                     type: 'value',
-                    name: '售价',
+                    name: '金额',
                     position: 'left',
                     axisLine: {
                         show: false,
@@ -143,15 +162,18 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
                 {
                     name: '销量',
                     type: 'line',
-                    // smooth: true,
-                    data: [124, 165, 61, 126, 142, 122, 132],
+                    yAxisIndex: 1,
+                    data: saleOrderList,
                 },
                 {
-                    name: '售价',
+                    name: '销售价',
                     type: 'line',
-                    // smooth: true,
-                    yAxisIndex: 1,
-                    data: [132, 115, 148, 108, 126, 125, 149],
+                    data: salePriceList,
+                },
+                {
+                    name: '利润额',
+                    type: 'line',
+                    data: profitList,
                 },
             ],
         });
@@ -160,11 +182,6 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
     useEffect(() => {
         if (visible) {
             _queryGoodsSelectionDetail();
-            // console.log(111111, document.getElementById('goods-line'));
-            setLoading(true);
-            setTimeout(() => {
-                setLoading(false);
-            }, 500);
         }
 
         // if (loading) {
@@ -177,12 +194,11 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
 
     useEffect(() => {
         const lineDom = document.getElementById('goods-line');
-        if (!loading && lineDom) {
-            !chartRef.current &&
-                (chartRef.current = echarts.init(
-                    document.getElementById('goods-line') as HTMLDivElement,
-                ));
-            renderChart();
+        // !loading &&
+        if (lineDom && !chartRef.current) {
+            chartRef.current = echarts.init(
+                document.getElementById('goods-line') as HTMLDivElement,
+            );
         }
     }, [loading]);
 
@@ -192,33 +208,42 @@ const GoodsDetailModal: React.FC<IProps> = ({ visible, commodity_id, merchant_id
                 title="商品数据详情"
                 visible={visible}
                 width={880}
-                onCancel={onCancel}
-                onOk={onOk}
+                onCancel={handleCancel}
                 className={styles.goodsModal}
                 footer={null}
             >
-                <div className={styles.header}>
-                    <div className={styles.left}>
-                        <div className={styles.tag}>爆款日期</div>
+                <Spin spinning={loading}>
+                    <div className={styles.header}>
+                        <div className={styles.left}>
+                            <div className={styles.tag}>爆款日期</div>
+                            <div>
+                                {explosionDays?.map(item => (
+                                    <span className={styles.date} key={item}>
+                                        {item}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                         <div>
-                            <span className={styles.date}>06.11</span>
-                            <span className={styles.date}>06.12</span>
-                            <span className={styles.date}>06.13</span>
-                            <span className={styles.date}>06.14</span>
+                            <a
+                                target="_blank"
+                                href={`/goods/channel?commodity_id=${commodityId}&merchant_ids=${merchantId}&vova_virtual_id=${salePlatformCommodityId}&from=selection`}
+                            >
+                                <Button type="primary">更改售价</Button>
+                            </a>
+                            <a target="_blank" href={`/goods/local/${commodityId}`}>
+                                <Button className={styles.btn}>查看商品版本信息</Button>
+                            </a>
                         </div>
                     </div>
-                    <div>
-                        <Button type="primary">更改售价</Button>
-                        <Button className={styles.btn}>查看商品版本信息</Button>
+                    <div className={styles.chartContainer}>
+                        <div className={styles.title}>商品数据</div>
+                        <div id="goods-line" style={{ height: 500 }}></div>
                     </div>
-                </div>
-                <div className={styles.chartContainer}>
-                    <div className={styles.title}>近七日商品数据</div>
-                    <div id="goods-line" style={{ height: 500 }}></div>
-                </div>
+                </Spin>
             </Modal>
         );
-    }, [visible]);
+    }, [visible, loading, explosionDays]);
 };
 
 export default GoodsDetailModal;
