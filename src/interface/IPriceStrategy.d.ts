@@ -31,9 +31,6 @@ export interface ISellItem {
 }
 
 export interface ISaveSalePriceRuleReq {
-    rule_id?: string;
-    rule_name?: string;
-    action?: 'new' | 'update';
     enable_source: string;
     enable_platform: string;
     enable_merchant: string;
@@ -46,6 +43,12 @@ export interface ISaveSalePriceRuleReq {
     param_shipping_fee_multiply: string;
     is_enable: '1' | '0'; // 1-启用，0-禁用
     comment: string;
+    rule_id?: string;
+    rule_name?: string;
+    action?: 'new' | 'update';
+    first_cat?: string;
+    second_cat?: string;
+    third_cat?: string;
 }
 
 export interface IWeightConfigItem {
@@ -101,9 +104,6 @@ export type IShippingCardListRes = {
 };
 
 export type IStartStrategyUpdateReq = {
-    first_cat: string;
-    second_cat: string;
-    third_cat: string;
     enable_platform: string;
     enable_merchant: string;
     // shipping_fee_country: string;
@@ -111,6 +111,9 @@ export type IStartStrategyUpdateReq = {
     product_tags?: string;
     min_origin_price?: string;
     max_origin_price?: string;
+    first_cat?: string;
+    second_cat?: string;
+    third_cat?: string;
 };
 
 export type ICatagoryWeightListReq = {

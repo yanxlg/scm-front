@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { setCorrelateWaybill, getPurchaseGoodsInfo } from '@/services/purchase';
 import { ICorrelateWaybillReq } from '@/interface/IPurchase';
 
-import styles from '../_abnormal.less';
+import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { carrierList } from '@/config/global';
 
