@@ -7,6 +7,7 @@ import PaneFreightCalc from './components/PaneFreightCalc';
 import PaneWeight from './components/PaneWeight';
 
 import styles from './_index.less';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -45,4 +46,7 @@ const PriceStrategyPage: React.FC = props => {
     );
 };
 
-export default React.memo(PriceStrategyPage);
+export default PermissionRouterWrap(React.memo(PriceStrategyPage), {
+    login: true,
+    pid: 'goods/price_strategy',
+});

@@ -5,6 +5,7 @@ import '@/styles/index.less';
 import PriceStrategy from '@/pages/setting/store/PriceStrategy';
 import ReplaceStoreOut from '@/pages/setting/store/ReplaceStoreOut';
 import OfflinePurchase from '@/pages/setting/store/OfflinePurchase';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -32,5 +33,7 @@ const Store = () => {
         );
     }, []);
 };
-
-export default Store;
+export default PermissionRouterWrap(Store, {
+    login: true,
+    pid: 'setting/store',
+});

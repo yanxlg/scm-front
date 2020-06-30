@@ -10,6 +10,7 @@ import { useModal2 } from 'react-components';
 import { Icons } from '@/components/Icon';
 import { logout } from '@/services/global';
 import { history } from '@@/core/history';
+import User from '@/storage/User';
 
 export type SiderTheme = 'light' | 'dark';
 export interface GlobalHeaderRightProps extends BasicLayoutProps {
@@ -30,7 +31,7 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
         }),
     );
 
-    const userName = getCookie('USERNAME') || '--';
+    const userName = User.userName || '--';
 
     const onLogout = useCallback(() => {
         logout().then(() => {

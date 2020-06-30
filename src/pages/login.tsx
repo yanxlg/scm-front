@@ -1,11 +1,13 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
-import { loginUser } from '@/services/global';
+import { loginUser, queryUserPermission } from '@/services/global';
 import { history } from '@@/core/history';
+import { IPermissionTree } from 'rc-permission/es/Provider';
+import { PermissionContext } from 'rc-permission';
 
 declare interface ILoginState {
     remember: boolean;
@@ -28,6 +30,7 @@ const Login = () => {
     const [passwordActive, setPasswordActive] = useState(!!User.password);
     const [login, setLogin] = useState(false);
     const [remember, setRemember] = useState(!!User.password);
+    const { updateTree } = useContext(PermissionContext);
 
     const onUserNameFocus = useCallback(() => {
         setUserNameActive(true);
@@ -70,13 +73,22 @@ const Login = () => {
             username: userName,
             password: password,
         })
-            .then(({ data }) => {
-                User.setUser({
-                    password,
-                    userName,
-                    token: data,
+            .then(({ data: token }) => {
+                // 获取权限数组
+                queryUserPermission().then(({ data }) => {
+                    const pData: IPermissionTree = {};
+                    data.forEach(item => {
+                        pData[item.data] = {};
+                    });
+                    updateTree(pData);
+                    User.setUser({
+                        password,
+                        userName,
+                        token: token,
+                        pData: pData,
+                    });
+                    history.replace('/');
                 });
-                history.replace('/');
             })
             .finally(() => {
                 setLogin(false);

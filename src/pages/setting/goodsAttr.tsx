@@ -11,6 +11,7 @@ import { ColumnsType } from 'antd/lib/table/interface';
 import PublishIntercept from './components/PublishIntercept';
 
 import styles from './_goodsAttr.less';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
@@ -398,4 +399,7 @@ const GoodsAttr: React.FC = props => {
     }, [attrList, columns, page, total, loading, pending, saveLoading]);
 };
 
-export default GoodsAttr;
+export default PermissionRouterWrap(GoodsAttr, {
+    login: true,
+    pid: 'setting/goods_attr',
+});

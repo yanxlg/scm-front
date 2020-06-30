@@ -14,6 +14,7 @@ import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/util
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const formFields: FormField[] = [
     {
@@ -218,4 +219,7 @@ const OrderAnalysis: React.FC = props => {
     ]);
 };
 
-export default OrderAnalysis;
+export default PermissionRouterWrap(OrderAnalysis, {
+    login: true,
+    pid: 'dashboard/order',
+});

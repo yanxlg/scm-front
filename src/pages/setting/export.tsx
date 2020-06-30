@@ -15,6 +15,7 @@ import { deleteExport, queryDownloadList, retryExport, updateExport } from '@/se
 import { IFileItem } from '@/interface/ISetting';
 import { ExportFileStatus } from '@/enums/SettingEnum';
 import { downloadFile } from '@/services/global';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const fieldList: FormField[] = [
     {
@@ -458,4 +459,7 @@ const Export = () => {
     );
 };
 
-export default Export;
+export default PermissionRouterWrap(Export, {
+    login: true,
+    pid: 'setting/export',
+});

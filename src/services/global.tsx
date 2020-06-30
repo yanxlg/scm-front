@@ -176,6 +176,31 @@ export function loginUser(data: { username: string; password: string }) {
     });
 }
 
+declare interface IItem {
+    data: string;
+    id: string;
+    method: string;
+    name: string;
+    pid: string;
+    type: string; // 1:数据权限，2：页面权限
+    children?: IItem[];
+}
+
+export function queryUserPermission() {
+    return request.get<
+        IResponse<
+            Array<{
+                data: string;
+                id: string;
+                method: string;
+                name: string;
+                pid: string;
+                type: string; // 1:数据权限，2：页面权限
+            }>
+        >
+    >(GlobalApiPath.queryPermissionList);
+}
+
 export function logout() {
     return request.post(GlobalApiPath.logout);
 }

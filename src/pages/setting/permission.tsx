@@ -3,10 +3,11 @@ import { Tabs } from 'antd';
 import Container from '@/components/Container';
 import { Account } from './_accont';
 import { Role } from './_role';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
-export default () => {
+const Page = () => {
     return useMemo(() => {
         return (
             <Container>
@@ -27,3 +28,8 @@ export default () => {
         );
     }, []);
 };
+
+export default PermissionRouterWrap(Page, {
+    login: true,
+    pid: 'setting/permission',
+});

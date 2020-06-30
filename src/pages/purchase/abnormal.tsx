@@ -8,6 +8,7 @@ import PaneAbnormalEnd from './components/abnormal/PaneAbnormalEnd';
 import { getExceptionCount, queryStrategyException } from '@/services/purchase';
 import PaneAbnormalReview from './components/abnormal/PaneAbnormalReview';
 import { IAbnormalContext } from '@/interface/IPurchase';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -94,4 +95,7 @@ const Purchase: React.FC = props => {
     }, [countInfo, context]);
 };
 
-export default Purchase;
+export default PermissionRouterWrap(Purchase, {
+    login: true,
+    pid: 'purchase/abnormal',
+});

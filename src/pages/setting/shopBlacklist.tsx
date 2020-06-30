@@ -14,6 +14,7 @@ import { ISaveBlackStoreReq } from '@/interface/ISetting';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getStatusDesc } from '@/utils/transform';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const formFields1: FormField[] = [
     {
@@ -256,4 +257,7 @@ const ShopBlacklist: React.FC = props => {
     );
 };
 
-export default React.memo(ShopBlacklist);
+export default PermissionRouterWrap(React.memo(ShopBlacklist), {
+    login: true,
+    pid: 'setting/shop_black_list',
+});

@@ -11,4 +11,5 @@ export enum GlobalApiPath {
     querySimpleRoleList = '/api/v1/roles/all_name',
     login = '/api/v1/users/login',
     logout = '/api/v1/users/logout',
+    queryPermissionList = '/api/v1/auth/front/list',
 }

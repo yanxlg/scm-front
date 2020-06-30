@@ -10,6 +10,7 @@ import Over from './components/list/over';
 import Return from './components/list/return';
 import { IPurchaseStatics, IReturnStatics } from '@/interface/IPurchase';
 import { queryPurchaseStatic, queryReturnStatic } from '@/services/purchase';
+import { PermissionRouterWrap } from 'rc-permission';
 const TabPane = Tabs.TabPane;
 
 const List = () => {
@@ -78,4 +79,7 @@ const List = () => {
     }, [statics]);
 };
 
-export default List;
+export default PermissionRouterWrap(List, {
+    login: true,
+    pid: 'purchase/list',
+});

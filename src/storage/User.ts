@@ -1,7 +1,10 @@
+import { IPermissionTree } from 'rc-permission/es/Provider';
+
 declare interface IUser {
     userName?: string;
     password?: string;
     token?: string;
+    pData?: IPermissionTree;
 }
 /**
  * 用户信息管理类，跟localStorage进行绑定
@@ -31,6 +34,9 @@ class User {
     }
     public static get token() {
         return this.localUser.token;
+    }
+    public static get pData() {
+        return this.localUser.pData;
     }
     public static clear() {
         this._user = (undefined as unknown) as IUser;

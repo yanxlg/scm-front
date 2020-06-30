@@ -41,6 +41,7 @@ import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import { queryShopList } from '@/services/global';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const salesVolumeList = [
     {
@@ -708,4 +709,7 @@ const ChannelList: React.FC = props => {
     );
 };
 
-export default ChannelList;
+export default PermissionRouterWrap(ChannelList, {
+    login: true,
+    pid: 'goods/channel',
+});

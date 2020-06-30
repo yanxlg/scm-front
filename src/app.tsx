@@ -4,6 +4,11 @@ import 'nprogress/nprogress.css';
 import NProgress from 'nprogress';
 import { Modal } from 'antd';
 import { loadingConfig } from '@/loading';
+import React from 'react';
+import { PermissionProvider } from 'rc-permission';
+import User from '@/storage/User';
+import { history } from '@@/core/history';
+import Page from '@/pages/403';
 
 NProgress.configure({ showSpinner: false });
 
@@ -116,6 +121,20 @@ export function onRouteChange({
         NProgress.done();
         loadingConfig.timer = undefined;
     }, 200 + Math.floor(Math.random() * 300));
+}
+
+export function rootContainer(container: any) {
+    return React.createElement(
+        PermissionProvider,
+        {
+            format: 'flat',
+            checkLogin: () => !!User.token,
+            history: history,
+            Page_403: <Page />,
+            pTree: User.pData, // 缓存权限列表
+        },
+        container,
+    );
 }
 
 // 动态权限路由配置

@@ -14,6 +14,7 @@ import PendingSign from '@/pages/order/components/PendingSign';
 import PendingPay from '@/pages/order/components/PendingPay';
 import PendingShip from './components/PendingShip';
 import AllOrder from '@/pages/order/components/AllOrder';
+import { Permission } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -33,6 +34,7 @@ declare interface IOrderState {
     penddingSignListCount: number;
 }
 
+@Permission({ pid: 'order', login: true, router: true })
 class Order extends React.PureComponent<IProps, IOrderState> {
     private type: number = 2;
     private defaultActiveKey: string = '1';

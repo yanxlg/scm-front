@@ -132,16 +132,8 @@ export default [
                 name: '商品属性',
             },
             {
-                path: '/setting/price',
-                name: '价格上浮设置',
-            },
-            {
                 path: '/setting/shopBlacklist',
                 name: '采购店铺黑名单',
-            },
-            {
-                path: '/setting/address',
-                name: '中转仓地址设置',
             },
             {
                 path: '/setting/info',

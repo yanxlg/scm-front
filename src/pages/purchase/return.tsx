@@ -7,6 +7,7 @@ import PendingOut from '@/pages/purchase/components/return/pendingOut';
 import Over from '@/pages/purchase/components/return/over';
 import { queryReturnStatic } from '@/services/purchase';
 import { IReturnStatics } from '@/interface/IPurchase';
+import { PermissionRouterWrap } from 'rc-permission';
 const TabPane = Tabs.TabPane;
 
 const List = () => {
@@ -58,4 +59,7 @@ const List = () => {
     }, [statics]);
 };
 
-export default List;
+export default PermissionRouterWrap(List, {
+    login: true,
+    pid: 'purchase/return',
+});

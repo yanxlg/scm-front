@@ -7,6 +7,7 @@ import { ITaskListQuery } from '@/interface/ITask';
 import queryString from 'query-string';
 import TaskListTab from '@/pages/task/components/TaskListTab';
 import Container from '@/components/Container';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -68,4 +69,7 @@ const Index: React.FC<LocalPageProps> = props => {
     }, [props, countArr]);
 };
 
-export default Index;
+export default PermissionRouterWrap(Index, {
+    login: true,
+    pid: 'task/list',
+});

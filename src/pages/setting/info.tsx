@@ -4,6 +4,7 @@ import { Tabs } from 'antd';
 import tabStyles from '@/styles/_tabs.less';
 import EditTab from '@/pages/setting/components/info/EditTab';
 import ListTab from '@/pages/setting/components/info/ListTab';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -31,4 +32,7 @@ const CustomDeclarationInfoPage: React.FC = () => {
     }, [activeKey]);
 };
 
-export default CustomDeclarationInfoPage;
+export default PermissionRouterWrap(CustomDeclarationInfoPage, {
+    login: true,
+    pid: 'setting/customs',
+});

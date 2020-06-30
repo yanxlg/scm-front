@@ -5,6 +5,7 @@ import { StockControl } from './components/StockControl';
 import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import Container from '@/components/Container';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -35,4 +36,7 @@ const Stock: React.FC = (props: any) => {
     }, []);
 };
 
-export default Stock;
+export default PermissionRouterWrap(Stock, {
+    login: true,
+    pid: 'stock',
+});

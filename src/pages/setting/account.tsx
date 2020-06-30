@@ -1,6 +1,7 @@
 import React from 'react';
 import CookieSetting from '@/pages/setting/components/account/CookieSetting';
 import Container from '@/components/Container';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const AccountPage: React.FC = () => {
     return (
@@ -10,4 +11,7 @@ const AccountPage: React.FC = () => {
     );
 };
 
-export default AccountPage;
+export default PermissionRouterWrap(AccountPage, {
+    login: true,
+    pid: 'setting/account',
+});

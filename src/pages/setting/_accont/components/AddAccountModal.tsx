@@ -54,7 +54,7 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         real_name: real_name,
                         status: status,
                         roles: role_ids,
-                        password: '********',
+                        password: '', // 密码不能显示
                     });
                     setRoleIds(role_ids && role_ids.length ? role_ids : undefined);
                 });
@@ -85,11 +85,12 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         disabled: disabled,
                     },
                     {
-                        type: 'input',
+                        type: 'password',
                         label: '密码',
                         name: 'password',
                         className: styles.formInput,
                         disabled: disabled,
+                        defaultVisible: true,
                     },
                     {
                         type: 'radioGroup',
@@ -198,7 +199,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     const { password, ...extra } = values;
                     updateAccount(id!, {
                         ...extra,
-                        password: password === '********' ? undefined : password,
                     })
                         .then(() => {
                             message.success('修改账号成功');
