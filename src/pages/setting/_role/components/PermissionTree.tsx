@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FormInstance } from 'antd/es/form';
 import { Checkbox, Form, Tree } from 'antd';
 import styles from '@/pages/setting/_accont/_index.less';
-import { IPermissionTree } from '@/interface/ISetting';
+import { IPermissionItem, IPermissionTree } from '@/interface/ISetting';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import classNames from 'classnames';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { queryPermissionTree } from '@/services/setting';
+import { queryPermissionTree, queryRolePermission } from '@/services/setting';
 import { DataNode } from 'rc-tree/lib/interface';
 import { Store } from 'antd/es/form/interface';
 
@@ -14,28 +14,17 @@ const { TreeNode } = Tree;
 
 declare interface PermissionTreeProps {
     form: FormInstance;
+    roleIds?: (number | string)[];
+    disabled?: boolean;
 }
 
-const checkedAll = (flatKeys: string[], checkedKeys: string[]) => {
-    let checkedAll = true,
-        i = 0;
-    while (checkedAll && i < flatKeys.length) {
-        const key = flatKeys[i];
-        if (checkedKeys.indexOf(key) > -1) {
-            i++;
-        } else {
-            checkedAll = false;
-        }
-    }
-    return checkedAll;
-};
-
-const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
-    const [pageChecked, setPageChecked] = useState<'checked' | 'indeterminate'>();
-    const [allCheckedState, setAllCheckedState] = useState<'checked' | 'indeterminate'>();
-
+const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled }) => {
     const flatKeysRef = useRef<string[]>([]);
     const keysArrayRef = useRef<Array<string[]>>([]);
+    const pTreeRef = useRef<IPermissionTree[]>([]);
+    const dataTreeRef = useRef<IPermissionTree[]>([]);
+
+    const queryPermissionTreePromise = useRef<Promise<any>>();
 
     const parentMapRef = useRef<Map<string | number, (string | number)[]>>(new Map());
 
@@ -46,38 +35,6 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
         page: [],
         data: [],
     });
-    const updatePageCheckedState = useCallback(() => {
-        const formValue = form.getFieldsValue();
-        const pageTree: Array<string[]> = formValue.page_tree;
-        const selectedKeys = pageTree.flat().filter(Boolean);
-        const checkAll = checkedAll(flatKeysRef.current, selectedKeys);
-        if (selectedKeys.length === 0) {
-            setPageChecked(undefined);
-        } else if (checkAll) {
-            setPageChecked('checked');
-        } else {
-            setPageChecked('indeterminate');
-        }
-        updateAllCheckedState();
-    }, []);
-
-    const updateAllCheckedState = useCallback(() => {
-        const values = form.getFieldsValue();
-        const dataKeys = values.data || [];
-        const pKeys = values.page_tree || [];
-
-        const selectedKeys = pKeys.flat().filter(Boolean);
-        const checkAll = checkedAll(flatKeysRef.current, selectedKeys);
-
-        const dataChecked = dataKeys.indexOf('data') > -1;
-        if (dataChecked && checkAll) {
-            setAllCheckedState('checked');
-        } else if (dataKeys.length > 0 || selectedKeys.length > 0) {
-            setAllCheckedState('indeterminate');
-        } else {
-            setAllCheckedState(undefined);
-        }
-    }, []);
 
     const onCheckAll = useCallback(
         (e: CheckboxChangeEvent) => {
@@ -97,39 +54,75 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
         [pTreeArr],
     );
 
-    const clearPagePermission = useCallback((e: CheckboxChangeEvent) => {
-        const checked = e.target.checked;
-        if (checked) {
-            setPageChecked('checked');
-            form.setFieldsValue({
-                page_tree: keysArrayRef.current,
-            });
-        } else {
-            setPageChecked(undefined);
-            form.setFieldsValue({
-                page_tree: [],
-            });
-        }
-        updateAllCheckedState();
-    }, []);
-
     const queryTree = useCallback(() => {
-        queryPermissionTree().then(({ pTree, flatKeys, keysArr, dataTree, parentMap }) => {
-            flatKeysRef.current = flatKeys;
-            keysArrayRef.current = keysArr;
-            parentMapRef.current = parentMap;
-            setPTreeArr({
-                page: pTree,
-                data: dataTree,
-            });
-        });
+        queryPermissionTreePromise.current = queryPermissionTree();
+        return queryPermissionTreePromise.current.then(
+            ({ pTree, flatKeys, keysArr, dataTree, parentMap }) => {
+                flatKeysRef.current = flatKeys; // 所有的id
+                keysArrayRef.current = keysArr; // 所有分组id
+                parentMapRef.current = parentMap; // 所有的父节点
+                pTreeRef.current = pTree;
+                dataTreeRef.current = dataTree;
+                setPTreeArr({
+                    page: pTree,
+                    data: dataTree,
+                });
+            },
+        );
     }, []);
 
     useEffect(() => {
-        queryTree();
-    }, []);
+        console.log('--------');
+        if (roleIds && queryPermissionTreePromise.current) {
+            queryPermissionTreePromise.current.then(() => {
+                queryRolePermission(roleIds).then(({ data }) => {
+                    const keyMap = new Map<string | number, true>();
+                    data.map((item: IPermissionItem['data']) => {
+                        keyMap.set(item.id, true);
+                    });
+                    form.setFieldsValue({
+                        page_tree: keysArrayRef.current.map(keys => {
+                            return keys.filter(key => keyMap.get(key));
+                        }),
+                        data: dataTreeRef.current
+                            .filter(item => {
+                                return keyMap.get(item.key);
+                            })
+                            .map(item => {
+                                return item.key;
+                            }),
+                    });
+                });
+            });
+        }
+    }, [roleIds]);
 
-    // 选中状态，子影响父，父影响子
+    useEffect(() => {
+        console.log('recreate', roleIds);
+        if (roleIds) {
+            Promise.all([queryTree(), queryRolePermission(roleIds)]).then(([_, { data }]) => {
+                const keyMap = new Map<string | number, true>();
+                data.map((item: IPermissionItem['data']) => {
+                    keyMap.set(item.id, true);
+                });
+                form.setFieldsValue({
+                    page_tree: keysArrayRef.current.map(keys => {
+                        return keys.filter(key => keyMap.get(key));
+                    }),
+                    data: dataTreeRef.current
+                        .filter(item => {
+                            return keyMap.get(item.key);
+                        })
+                        .map(item => {
+                            return item.key;
+                        }),
+                });
+            });
+        } else {
+            console.log('+++++++++');
+            queryTree();
+        }
+    }, []);
 
     const childIterator = useCallback((node: DataNode, callback: (node: DataNode) => void) => {
         node.children?.forEach(node => {
@@ -242,7 +235,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                             treeArr.length && treeArr.length === flatKeysRef.current.length;
 
                         const data = getFieldValue('data') || [];
-                        const isDataAll = data.indexOf('all') > -1;
+                        const isDataAll = data.length && data.length >= dataTreeRef.current.length; //
                         const checked = pageAllChecked && isDataAll;
                         const indeterminate = (data.length || treeArr.length) && !checked;
                         return (
@@ -250,6 +243,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                                 checked={checked}
                                 indeterminate={indeterminate}
                                 onChange={onCheckAll}
+                                disabled={disabled}
                             >
                                 全选
                             </Checkbox>
@@ -269,6 +263,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                         autoExpandParent={true}
                         defaultExpandAll={true}
                         virtual={false}
+                        disabled={disabled}
                         treeData={[
                             {
                                 title: '数据权限',
@@ -276,7 +271,6 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                                 children: pTreeArr.data,
                             },
                         ]}
-                        onCheck={updateAllCheckedState}
                     />
                 </Form.Item>
                 <Form.Item
@@ -298,17 +292,19 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                                 autoExpandParent={true}
                                 defaultExpandAll={true}
                                 virtual={false}
+                                disabled={disabled}
                                 checkedKeys={{
                                     checked: checked ? ['_1'] : [],
                                     halfChecked: treeArr.length && !checked ? ['_1'] : [],
                                 }}
                                 onCheck={onPageCheckAll}
                             >
-                                <TreeNode title="页面和操作" key="_1">
+                                <TreeNode title="页面和操作" key="_1" disabled={disabled}>
                                     <TreeNode
                                         checkable={false}
                                         selectable={false}
                                         className={styles.formTreeLayout}
+                                        disabled={disabled}
                                         title={
                                             <div className={styles.formTreeContainer}>
                                                 {pTreeArr.page.map((item, index) => {
@@ -331,6 +327,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                                                                 autoExpandParent={true}
                                                                 defaultExpandAll={true}
                                                                 treeData={[item]}
+                                                                disabled={disabled}
                                                                 onCheck={onTreeCheck.bind(
                                                                     undefined,
                                                                     index,
@@ -343,7 +340,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                                                 })}
                                             </div>
                                         }
-                                        key="page_permission_content"
+                                        key="_2"
                                     />
                                 </TreeNode>
                             </Tree>
@@ -352,7 +349,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form }) => {
                 </Form.Item>
             </>
         );
-    }, [pTreeArr, pageChecked, allCheckedState]);
+    }, [pTreeArr]);
 };
 
 export default PermissionTree;

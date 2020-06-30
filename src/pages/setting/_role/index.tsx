@@ -1,9 +1,16 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
-import { FitTable, JsonForm, LoadingButton, useList, useModal2 } from 'react-components';
+import {
+    FitTable,
+    JsonForm,
+    LoadingButton,
+    PopConfirmLoadingButton,
+    useList,
+    useModal2,
+} from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { queryAccountCreator, queryRoleCreator, queryRoleList } from '@/services/setting';
-import { Button, Switch } from 'antd';
+import { queryRoleCreator, queryRoleList, deleteRole, updateRoleStatus } from '@/services/setting';
+import { Button, message, Switch } from 'antd';
 import { scroll } from '@/config/global';
 import { PlusOutlined } from '@ant-design/icons';
 import { ColumnType } from 'antd/es/table';
@@ -12,6 +19,7 @@ import { AddRoleModal } from './components/AddRoleModal';
 import { ConnectState } from '@/models/connect';
 import { IRole } from '@/interface/ISetting';
 import { utcToLocal } from 'react-components/es/utils/date';
+import LoadingSwitch from '@/pages/setting/_role/components/LoadingSwitch';
 
 const fieldsList: FormField[] = [
     {
@@ -62,7 +70,7 @@ const fieldsList: FormField[] = [
             },
             {
                 name: '禁用',
-                value: 0,
+                value: 2,
             },
         ],
     },
@@ -90,14 +98,12 @@ const Role = () => {
         queryList: queryRoleList,
     });
 
-    const onExport = useCallback(() => {}, []);
-
     const [addModal, showAddModal, closeAddModal] = useModal2<{
         type: 'add' | 'view' | 'edit';
         detail?: {
             name: string;
             description: string;
-            status: '0' | '1';
+            status: '1' | '2';
             id: string;
         };
     }>();
@@ -111,11 +117,22 @@ const Role = () => {
                 <LoadingButton onClick={onReload} className={formStyles.formBtn}>
                     刷新
                 </LoadingButton>
-                <Button onClick={onExport} className={formStyles.formBtn}>
-                    导出
-                </Button>
             </JsonForm>
         );
+    }, []);
+
+    const rmRole = useCallback((id: string) => {
+        return deleteRole(id).then(() => {
+            message.success('删除成功!');
+            onReload();
+        });
+    }, []);
+
+    const updateStatus = useCallback((id: string, status: number, row: IRole) => {
+        return updateRoleStatus(id, status).then(() => {
+            row.status = String(status) as '1' | '2';
+            return status === 1;
+        });
     }, []);
 
     const columns = useMemo<ColumnType<IRole>[]>(() => {
@@ -157,7 +174,16 @@ const Role = () => {
                             >
                                 修改
                             </Button>
-                            <Button type="link">删除</Button>
+                            <PopConfirmLoadingButton
+                                popConfirmProps={{
+                                    title: '确定要阐述改角色吗？',
+                                    onConfirm: () => rmRole(item.id),
+                                }}
+                                buttonProps={{
+                                    type: 'link',
+                                    children: '删除',
+                                }}
+                            />
                         </>
                     );
                 },
@@ -199,12 +225,16 @@ const Role = () => {
                 dataIndex: 'status',
                 width: '130px',
                 align: 'center',
-                render: (value, row) => {
-                    const active = Boolean(Number(value));
+                render: (_, row) => {
+                    const value = Number(_);
+                    const active = value === 1;
                     return (
                         <>
-                            {active ? '启用' : '禁用'}
-                            <Switch checked={active} />
+                            <span className={styles.statusLabel}>{active ? '启用' : '禁用'}</span>
+                            <LoadingSwitch
+                                checked={active}
+                                onChange={() => updateStatus(row.id, active ? 2 : 1, row)}
+                            />
                         </>
                     );
                 },
@@ -262,7 +292,12 @@ const Role = () => {
             <>
                 {form}
                 {table}
-                <AddRoleModal visible={addModal} onClose={closeAddModal} />
+                <AddRoleModal
+                    visible={addModal}
+                    onClose={closeAddModal}
+                    onReload={onReload}
+                    onSearch={onSearch}
+                />
             </>
         );
     }, [addModal, loading]);

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { message, Modal } from 'antd';
 import { JsonForm } from 'react-components';
 import styles from '../_index.less';
@@ -10,6 +10,7 @@ import PermissionTree from '@/pages/setting/_role/components/PermissionTree';
 import {
     addAccount,
     addRole,
+    editRole,
     queryAccount,
     queryRolePermission,
     updateAccount,
@@ -20,13 +21,15 @@ declare interface VisibleProps {
     detail?: {
         name: string;
         description: string;
-        status: '0' | '1';
+        status: '1' | '2';
         id: string;
     };
 }
 declare interface AddAccountModalProps {
     visible: VisibleProps | false; // 新增｜查看｜编辑
     onClose: () => void;
+    onSearch: () => void;
+    onReload: () => void;
 }
 
 const formatterFormValues = (values: any) => {
@@ -40,10 +43,94 @@ const formatterFormValues = (values: any) => {
     };
 };
 
-const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
+declare interface AddRoleModalContent extends VisibleProps {
+    originFormRef: RefObject<JsonFormRef>;
+}
+
+const AddRoleModalContent: React.FC<AddRoleModalContent> = ({ originFormRef, type, detail }) => {
+    const disabled = type === 'view';
+    const formFields = useMemo(() => {
+        const roleIds = detail ? [detail.id] : undefined;
+        return [
+            {
+                type: 'layout',
+                header: <span className={styles.formModalTitle}>基本信息</span>,
+                fieldList: [
+                    {
+                        type: 'input',
+                        label: '角色名称',
+                        name: 'name',
+                        disabled: disabled,
+                    },
+                    {
+                        type: 'input',
+                        label: '角色描述',
+                        name: 'description',
+                        disabled: disabled,
+                    },
+                    {
+                        type: 'radioGroup',
+                        name: 'status',
+                        label: '角色状态',
+                        initialValue: '1',
+                        formatter: 'number',
+                        disabled: disabled,
+                        options: [
+                            {
+                                label: '启用',
+                                value: '1',
+                            },
+                            {
+                                label: '禁用',
+                                value: '2',
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                type: 'component',
+                Component: PermissionTree,
+                names: ['data', 'page_tree'], // 不收集参数
+                props: {
+                    roleIds: roleIds,
+                    disabled: disabled,
+                },
+            },
+        ] as FormField<any>[];
+    }, []);
+
+    return useMemo(() => {
+        return (
+            <JsonForm
+                initialValues={{
+                    name: detail?.name,
+                    description: detail?.description,
+                    status: detail?.status,
+                }}
+                ref={originFormRef}
+                layout="horizontal"
+                labelClassName={styles.formModalLabel}
+                fieldList={formFields}
+            />
+        );
+    }, []);
+};
+
+const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose, onReload, onSearch }) => {
     const { type } = visible || {};
     const formRef = useRef<JsonFormRef>(null);
     const [submitting, setSubmitting] = useState(false);
+    const visibleProps = useRef<VisibleProps>({
+        type: 'view',
+    });
+    useMemo(() => {
+        if (visible) {
+            visibleProps.current = visible;
+        }
+    }, [visible]);
+
+    const _visible = visibleProps.current;
 
     const onOKey = useCallback(() => {
         formRef.current!.validateFields().then((values: any) => {
@@ -55,6 +142,7 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
                         .then(() => {
                             message.success('添加角色成功');
                             onClose();
+                            onSearch();
                         })
                         .finally(() => {
                             setSubmitting(false);
@@ -62,82 +150,22 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
                     break;
                 case 'view':
                     break;
+                case 'edit':
+                    editRole((visible as VisibleProps).detail!.id, data)
+                        .then(() => {
+                            message.success('编辑角色成功');
+                            onClose();
+                            onReload();
+                        })
+                        .finally(() => {
+                            setSubmitting(false);
+                        });
+                    break;
                 default:
                     break;
             }
         });
     }, [type]);
-
-    const footerRef = useRef<null>();
-    useMemo(() => {
-        if (type) {
-            footerRef.current = type === 'view' ? null : undefined;
-        }
-    }, [type]);
-
-    const formFields = useMemo(() => {
-        return [
-            {
-                type: 'layout',
-                header: <span className={styles.formModalTitle}>基本信息</span>,
-                fieldList: [
-                    {
-                        type: 'input',
-                        label: '角色名称',
-                        name: 'name',
-                    },
-                    {
-                        type: 'input',
-                        label: '角色描述',
-                        name: 'description',
-                    },
-                    {
-                        type: 'radioGroup',
-                        name: 'status',
-                        label: '角色状态',
-                        initialValue: 1,
-                        options: [
-                            {
-                                label: '启用',
-                                value: 1,
-                            },
-                            {
-                                label: '禁用',
-                                value: 0,
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                type: 'component',
-                Component: PermissionTree,
-                names: ['data', 'page_tree'], // 不收集参数
-            },
-        ] as FormField<any>[];
-    }, []);
-
-    useEffect(() => {
-        if (visible) {
-            formRef.current?.resetFields();
-        }
-        switch (type) {
-            case 'edit':
-            case 'view':
-                const { detail } = visible as VisibleProps;
-                console.log(detail);
-                formRef.current?.setFieldsValue({
-                    name: detail?.name,
-                    description: detail?.description,
-                    status: Number(detail?.status),
-                });
-                // 查询选中权限
-                queryRolePermission([detail?.id!]).then(() => {});
-                break;
-            default:
-                break;
-        }
-    }, [visible]);
 
     return useMemo(() => {
         return (
@@ -148,13 +176,13 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
                 onCancel={onClose}
                 confirmLoading={submitting}
                 onOk={onOKey}
-                footer={footerRef.current}
+                footer={_visible.type === 'view' ? null : undefined}
+                destroyOnClose={true}
             >
-                <JsonForm
-                    ref={formRef}
-                    layout="horizontal"
-                    labelClassName={styles.formModalLabel}
-                    fieldList={formFields}
+                <AddRoleModalContent
+                    type={(visible as VisibleProps).type}
+                    detail={(visible as VisibleProps).detail}
+                    originFormRef={formRef}
                 />
             </Modal>
         );

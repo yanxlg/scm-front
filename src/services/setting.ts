@@ -376,43 +376,59 @@ export function addRole(data: { name: string; description: string; role_auths: n
         data,
     });
 }
+export function editRole(
+    id: string,
+    data: { name: string; description: string; role_auths: number[] },
+) {
+    return request.put(SettingApiPath.editRole.replace('{id}', id), {
+        data,
+    });
+}
 
 export const queryAccountCreator = singlePromiseWrap(() => {
     return request
-        .get<
-            IResponse<
-                Array<{
-                    id: string;
-                    name: string;
-                }>
-            >
-        >(SettingApiPath.queryAccountCreator.replace('{type}', '1'))
+        .get<IResponse<Array<string>>>(SettingApiPath.queryAccountCreator.replace('{type}', '1'))
         .then(({ data }) => {
-            return data.map(({ id, name }) => ({
+            return data.map(name => ({
                 name: name,
-                value: id,
+                value: name,
             }));
         });
 });
 
 export const queryRoleCreator = singlePromiseWrap(() => {
     return request
-        .get<
-            IResponse<
-                Array<{
-                    id: string;
-                    name: string;
-                }>
-            >
-        >(SettingApiPath.queryAccountCreator.replace('{type}', '2'))
+        .get<IResponse<Array<string>>>(SettingApiPath.queryAccountCreator.replace('{type}', '2'))
         .then(({ data }) => {
-            return data.map(({ id, name }) => ({
+            return data.map(name => ({
                 name: name,
-                value: id,
+                value: name,
             }));
         });
 });
 
 export const queryRolePermission = (roles: (number | string)[]) => {
-    return request.get(SettingApiPath.queryRolePermission.replace('{role_ids}', roles.join(',')));
+    return request.get<IResponse<Array<IPermissionItem['data']>>>(
+        SettingApiPath.queryRolePermission.replace('{role_ids}', roles.join(',')),
+    );
 };
+
+export function deleteRole(id: string) {
+    return request.delete(SettingApiPath.deleteRole.replace('{id}', id));
+}
+
+export function updateRoleStatus(id: string, status: number) {
+    return request.delete(SettingApiPath.updateRoleStatus.replace('{id}', id), {
+        data: {
+            status,
+        },
+    });
+}
+
+export function updateAccountStatus(id: string, status: number) {
+    return request.delete(SettingApiPath.updateAccountStatus.replace('{id}', id), {
+        data: {
+            status,
+        },
+    });
+}

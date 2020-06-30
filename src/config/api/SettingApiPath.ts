@@ -36,6 +36,10 @@ export enum SettingApiPath {
     queryAccount = '/api/v1/users/{id}',
     queryRoleList = '/api/v1/roles/list',
     addRole = '/api/v1/roles',
+    editRole = '/api/v1/roles/modify/{id}',
     queryAccountCreator = '/api/v1/users/get_create_user/{type}',
     queryRolePermission = '/api/v1/roles/auth/{role_ids}',
+    deleteRole = '/api/v1/roles/delete/{id}',
+    updateRoleStatus = '/api/v1/roles/freeze/{id}',
+    updateAccountStatus = '/api/v1/users/{id}',
 }

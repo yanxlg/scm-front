@@ -216,7 +216,7 @@ export interface IAccount {
     real_name: string;
     create_user: string;
     create_time: string;
-    status: '0' | '1';
+    status: '1' | '2';
     roles: string[];
 }
 
@@ -241,7 +241,7 @@ export interface IRole {
     description: string;
     id: string;
     name: string;
-    status: '0' | '1';
+    status: '1' | '2';
     users: string[];
 }
 
@@ -251,6 +251,6 @@ export interface IAccountDetail {
     id: string;
     real_name: string;
     role_ids: string[];
-    status: '0' | '1';
+    status: '1' | '2';
     username: string;
 }

@@ -2,7 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { FitTable, JsonForm, LoadingButton, useList, useModal2 } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { queryAccountCreator, queryAccountList } from '@/services/setting';
+import {
+    queryAccountCreator,
+    queryAccountList,
+    updateAccountStatus,
+    updateRoleStatus,
+} from '@/services/setting';
 import { Button, Switch } from 'antd';
 import { scroll } from '@/config/global';
 import { PlusOutlined } from '@ant-design/icons';
@@ -13,6 +18,7 @@ import { IAccount } from '@/interface/ISetting';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { useDispatch } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
+import LoadingSwitch from '@/pages/setting/_role/components/LoadingSwitch';
 
 const fieldsList: FormField[] = [
     {
@@ -69,7 +75,7 @@ const fieldsList: FormField[] = [
             },
             {
                 name: '禁用',
-                value: 0,
+                value: 2,
             },
         ],
     },
@@ -122,6 +128,13 @@ const Account = () => {
                 </LoadingButton>
             </JsonForm>
         );
+    }, []);
+
+    const updateStatus = useCallback((id: string, status: number, row: IAccount) => {
+        return updateAccountStatus(id, status).then(() => {
+            row.status = String(status) as '1' | '2';
+            return status === 1;
+        });
     }, []);
 
     const columns = useMemo<ColumnType<IAccount>[]>(() => {
@@ -198,12 +211,16 @@ const Account = () => {
                 dataIndex: 'status',
                 width: '130px',
                 align: 'center',
-                render: (value, row) => {
-                    const active = Boolean(Number(value));
+                render: (_, row) => {
+                    const value = Number(_);
+                    const active = value === 1;
                     return (
                         <>
-                            {active ? '启用' : '禁用'}
-                            <Switch checked={active} />
+                            <span className={styles.statusLabel}>{active ? '启用' : '禁用'}</span>
+                            <LoadingSwitch
+                                checked={active}
+                                onChange={() => updateStatus(row.id, active ? 2 : 1, row)}
+                            />
                         </>
                     );
                 },
@@ -261,7 +278,12 @@ const Account = () => {
             <>
                 {form}
                 {table}
-                <AddAccountModal visible={addModal} onClose={closeAddModal} />
+                <AddAccountModal
+                    visible={addModal}
+                    onClose={closeAddModal}
+                    onSearch={onSearch}
+                    onReload={onReload}
+                />
             </>
         );
     }, [loading, addModal]);
