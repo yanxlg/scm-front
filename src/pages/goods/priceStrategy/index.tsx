@@ -7,7 +7,8 @@ import PaneFreightCalc from './components/PaneFreightCalc';
 import PaneWeight from './components/PaneWeight';
 
 import styles from './_index.less';
-import { PermissionRouterWrap } from 'rc-permission';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 
@@ -23,22 +24,42 @@ const PriceStrategyPage: React.FC = props => {
             <Tabs type="card" defaultActiveKey="1" onChange={onChange}>
                 <TabPane tab="售价调整" key="1">
                     <div className={styles.paneContent}>
-                        <PaneSellPrice />
+                        <PermissionComponent
+                            pid="goods/price_strategy/sale"
+                            fallback={() => <ForbiddenComponent />}
+                        >
+                            <PaneSellPrice />
+                        </PermissionComponent>
                     </div>
                 </TabPane>
                 <TabPane tab="运费调整" key="2">
                     <div className={styles.paneContent}>
-                        <PaneFreight type={key} />
+                        <PermissionComponent
+                            pid="goods/price_strategy/shipping"
+                            fallback={() => <ForbiddenComponent />}
+                        >
+                            <PaneFreight type={key} />
+                        </PermissionComponent>
                     </div>
                 </TabPane>
                 <TabPane tab="运费价卡" key="3">
                     <div className={styles.paneContent}>
-                        <PaneFreightCalc />
+                        <PermissionComponent
+                            pid="goods/price_strategy/shipping_card"
+                            fallback={() => <ForbiddenComponent />}
+                        >
+                            <PaneFreightCalc />
+                        </PermissionComponent>
                     </div>
                 </TabPane>
                 <TabPane tab="品类预估重量调整" key="4">
                     <div className={styles.paneContent}>
-                        <PaneWeight />
+                        <PermissionComponent
+                            pid="goods/price_strategy/weight"
+                            fallback={() => <ForbiddenComponent />}
+                        >
+                            <PaneWeight />
+                        </PermissionComponent>
                     </div>
                 </TabPane>
             </Tabs>

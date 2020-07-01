@@ -2,7 +2,7 @@ import formatter from 'react-components/es/utils/formatter';
 import { arrayNumber, firstNumber, multipleToArray } from '@/utils/formatter';
 import 'nprogress/nprogress.css';
 import NProgress from 'nprogress';
-import { Modal } from 'antd';
+import { Modal, Tooltip } from 'antd';
 import { loadingConfig } from '@/loading';
 import React from 'react';
 import { PermissionProvider } from 'rc-permission';
@@ -132,6 +132,8 @@ export function rootContainer(container: any) {
             history: history,
             Page_403: <Page />,
             pTree: User.pData, // 缓存权限列表
+            toolTipWrap: <Tooltip title="" trigger={'click'} />,
+            defaultToolTip: '您无权限执行此操作！',
         },
         container,
     );

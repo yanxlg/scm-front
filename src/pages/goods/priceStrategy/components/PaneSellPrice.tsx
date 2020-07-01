@@ -14,6 +14,7 @@ import useSellChannel from '../hooks/useSellChannel';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
+import { PermissionComponent } from 'rc-permission';
 
 const formFields: FormField[] = [
     {
@@ -111,15 +112,20 @@ const PaneSellPrice: React.FC = props => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button
-                ghost
+            <PermissionComponent
                 key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => setUpdateRangeStatus(true)}
+                pid="goods/price_strategy/sale/update_price"
+                control="tooltip"
             >
-                更新商品售价
-            </Button>,
+                <Button
+                    ghost={true}
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => setUpdateRangeStatus(true)}
+                >
+                    更新商品售价
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 
@@ -134,13 +140,18 @@ const PaneSellPrice: React.FC = props => {
                 render: (_: any, record: ISellItem) => {
                     const { id } = record;
                     return (
-                        <Button
-                            type="link"
-                            className={styles.hover}
-                            onClick={() => handleUpdate(id)}
+                        <PermissionComponent
+                            pid="goods/price_strategy/sale/update_role"
+                            control="tooltip"
                         >
-                            更新
-                        </Button>
+                            <Button
+                                type="link"
+                                className={styles.hover}
+                                onClick={() => handleUpdate(id)}
+                            >
+                                更新
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -240,13 +251,18 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
                 render: (val: string) => {
                     return (
-                        <Button
-                            type="link"
-                            className={styles.hover}
-                            onClick={() => showLogModal(val)}
+                        <PermissionComponent
+                            pid={'goods/price_strategy/sale/log'}
+                            control="tooltip"
                         >
-                            查看
-                        </Button>
+                            <Button
+                                type="link"
+                                className={styles.hover}
+                                onClick={() => showLogModal(val)}
+                            >
+                                查看
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -275,7 +291,7 @@ const PaneSellPrice: React.FC = props => {
                         查询
                     </LoadingButton>
                     <Button
-                        ghost
+                        ghost={true}
                         type="primary"
                         className={formStyles.formBtn}
                         onClick={() => setEditType(EditEnum.ADD)}
@@ -290,7 +306,7 @@ const PaneSellPrice: React.FC = props => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 rowKey="id"
                 columnsSettingRender={true}
                 loading={loading}
