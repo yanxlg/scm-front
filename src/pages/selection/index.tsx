@@ -331,6 +331,7 @@ const Selection: React.FC = () => {
                         sale_price_change,
                         sale_platform_commodity_id,
                         is_vova_old,
+                        product_link,
                     } = item;
                     return (
                         <Col
@@ -462,7 +463,14 @@ const Selection: React.FC = () => {
                                     ))}
                                 </div>
                                 <div className={styles.back}>
-                                    <div className={styles.title}>{title}</div>
+                                    <div
+                                        className={styles.title}
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <a target="_blank" href={product_link}>
+                                            {title}
+                                        </a>
+                                    </div>
                                     <div className={styles.item}>
                                         <div>爬虫价</div>
                                         <div>¥{origin_price}</div>
