@@ -26,7 +26,6 @@ import CountryFreightModal from '../CountryFreightModal/CountryFreightModal';
 
 import styles from './_GoodsTable.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
-import { GoodsSourceEnum } from '@/enums/GlobalEnum';
 import { PaginationConfig } from 'react-components/es/FitTable';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
 import useCountryFreightModal from '../../hooks/useCountryFreightModal';
