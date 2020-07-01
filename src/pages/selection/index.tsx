@@ -49,10 +49,7 @@ const Selection: React.FC = () => {
     const [modelType, setModelType] = useState<string[]>(['explosion']);
     const [channelList, setChannelList] = useState<IOptionItem[]>([]);
     const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([
-        getUTCDate().add(-1, 'day'),
-        getUTCDate().add(-1, 'day'),
-    ]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate().add(-1, 'day'), getUTCDate()]);
     const [goodsList, setGoodsList] = useState<ISelectionGoodsItem[]>([]);
 
     const getQueryData = useCallback(

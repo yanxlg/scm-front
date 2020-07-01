@@ -66,6 +66,15 @@ const GoodsDetailModal: React.FC<IProps> = ({
             profitList.push(Number(profit));
             saleOrderList.push(Number(sale_order));
         });
+        let saleMax: number = Math.ceil(Math.max(...salePriceList, ...profitList) * 1.5);
+        let orderMax: number = Math.max(...saleOrderList);
+        // 向上取5的倍数
+        while (saleMax % 5 !== 0) {
+            saleMax++;
+        }
+        while (orderMax % 5 !== 0) {
+            orderMax++;
+        }
         // 绘制图表
         const colors = ['#26DAD0', '#5584FF', '#C95FF2'];
         chartRef.current?.setOption({
@@ -137,6 +146,9 @@ const GoodsDetailModal: React.FC<IProps> = ({
                     axisLabel: {
                         formatter: '{value} ',
                     },
+                    // splitNumber: 5,
+                    max: saleMax,
+                    interval: saleMax / 5,
                 },
                 {
                     type: 'value',
@@ -156,6 +168,9 @@ const GoodsDetailModal: React.FC<IProps> = ({
                     axisLabel: {
                         formatter: '{value} ',
                     },
+                    // splitNumber: 5,
+                    max: orderMax,
+                    interval: orderMax / 5,
                 },
             ],
             series: [
