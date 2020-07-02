@@ -444,7 +444,7 @@ const Selection: React.FC = () => {
                                                     : styles.decrease,
                                             )}
                                         >
-                                            {(lat_day_sale_order_change > 0 ? '+' : '') +
+                                            {(lat_day_sale_order_change >= 0 ? '+' : '') +
                                                 lat_day_sale_order_change}
                                         </span>
                                         <span>{last_day_sale_order}</span>
