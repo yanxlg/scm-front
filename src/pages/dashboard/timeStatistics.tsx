@@ -3,6 +3,7 @@ import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { queryShopFilterList } from '@/services/global';
 import OutStock, { IOutStockRef } from './components/TimeStatistics/OutStock';
+import Cancel, { ICancelRef } from './components/TimeStatistics/Cancel';
 
 import styles from './_timeStatistics.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -40,10 +41,14 @@ const formFields: FormField[] = [
 const TimeStatistics: React.FC = () => {
     const searchRef = useRef<JsonFormRef>(null);
     const outStockRef = useRef<IOutStockRef>(null);
+    const cancelRef = useRef<ICancelRef>(null);
 
     const onSearch = useCallback(() => {
-        console.log(1111111, outStockRef.current?.onSearch());
-        return Promise.resolve();
+        return Promise.all([
+            (outStockRef.current as IOutStockRef).onSearch(),
+            // (cancelRef.current as ICancelRef).onSearch(),
+            (cancelRef.current as ICancelRef).onSearch(),
+        ]);
     }, []);
 
     return useMemo(() => {
@@ -62,7 +67,7 @@ const TimeStatistics: React.FC = () => {
                             <LoadingButton
                                 type="primary"
                                 className={formStyles.formBtn}
-                                onClick={onSearch}
+                                onClick={() => onSearch()}
                             >
                                 查询
                             </LoadingButton>
@@ -71,6 +76,9 @@ const TimeStatistics: React.FC = () => {
                 </div>
                 <div className={styles.dataSection}>
                     <OutStock ref={outStockRef} searchRef={searchRef} />
+                </div>
+                <div className={styles.dataSection}>
+                    <Cancel ref={cancelRef} searchRef={searchRef} />
                 </div>
             </div>
         );

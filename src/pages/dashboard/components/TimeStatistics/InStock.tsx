@@ -26,7 +26,7 @@ import { JsonFormRef } from 'react-components/es/JsonForm';
 
 import styles from '../../_timeStatistics.less';
 import { ColumnsType } from 'antd/es/table';
-import { getMonitorOrder } from '@/services/dashboard';
+import { getMonitorPurchaseOrder } from '@/services/dashboard';
 import { IMonitorOrderReq, IMonitorOrderItem } from '@/interface/IDashboard';
 
 const { RangePicker } = DatePicker;
@@ -34,15 +34,11 @@ const { RangePicker } = DatePicker;
 const timeFormat = 'YYYY-MM-DD';
 const colors = ['#aaa', '#73A0FA', '#73DEB3', '#FFB761'];
 
-export interface IOutStockRef {
+export interface IInStockRef {
     onSearch(): Promise<any>;
 }
 
-interface IOutStockProps {
-    searchRef: React.RefObject<JsonFormRef>;
-}
-
-const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ searchRef }, ref) => {
+const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
     const chartRef = useRef<ECharts | null>(null);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState<[Dayjs, Dayjs]>([
@@ -76,11 +72,9 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
         return currentDate.valueOf() > getUTCDate().valueOf();
     }, []);
 
-    const _getMonitorOrder = useCallback(
-        async (params?: IMonitorOrderReq) => {
-            const data = await searchRef.current?.getFieldsValue();
+    const _getMonitorPurchaseOrder = useCallback(
+        (params?: IMonitorOrderReq) => {
             const postData = {
-                ...data,
                 confirm_time_start: startDateToUnixWithUTC(dates[0]),
                 confirm_time_end:
                     getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
@@ -90,10 +84,10 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 ...(params || {}),
             };
             setLoading(true);
-            return getMonitorOrder(postData)
+            return getMonitorPurchaseOrder(postData)
                 .then(({ data }) => {
                     const { confirm_time_start: startTime, confirm_time_end: endTime } = postData;
-                    // console.log('getMonitorOrder', data);
+                    // console.log('getMonitorPurchaseOrder', data);
                     renderChart(startTime, endTime, data);
 
                     data.monitorOrder && setDataSource(getDataSource(data.monitorOrder));
@@ -121,7 +115,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                     align: 'center',
                 })),
             ] as ColumnsType<object>);
-            _getMonitorOrder({
+            _getMonitorPurchaseOrder({
                 confirm_time_start: startDateToUnixWithUTC(values[0]),
                 confirm_time_end:
                     getUTCDate().format(timeFormat) === values[1].format(timeFormat)
@@ -129,7 +123,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                         : endDateToUnixWithUTC(values[1]),
             });
         },
-        [_getMonitorOrder],
+        [_getMonitorPurchaseOrder],
     );
 
     const getDataSource = useCallback(data => {
@@ -211,8 +205,8 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     }, []);
 
     const onSearch = useCallback(() => {
-        return _getMonitorOrder();
-    }, [_getMonitorOrder]);
+        return _getMonitorPurchaseOrder();
+    }, [_getMonitorPurchaseOrder]);
 
     useImperativeHandle(
         ref,
@@ -250,13 +244,13 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
 
         dayKeys.forEach(day => {
             switch (day) {
-                case '7':
+                case '4':
                     colorIndex = 1;
                     break;
-                case '8':
+                case '5':
                     colorIndex = 2;
                     break;
-                case '9':
+                case '6':
                     colorIndex = 3;
                     break;
                 default:
@@ -387,7 +381,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     useEffect(() => {
         !chartRef.current &&
             (chartRef.current = echarts.init(
-                document.getElementById('out-stock') as HTMLDivElement,
+                document.getElementById('in-stock') as HTMLDivElement,
             ));
         // if (loading) {
         //     chartRef.current.showLoading();
@@ -396,7 +390,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
         //     renderChart(orderInfo);
         // }
         // renderChart();
-        _getMonitorOrder();
+        _getMonitorPurchaseOrder();
     }, []);
 
     return useMemo(() => {
@@ -411,7 +405,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                         onChange={handleRangePicker}
                     />
                 </div>
-                <div id="out-stock" className={styles.chartSection}></div>
+                <div id="in-stock" className={styles.chartSection}></div>
                 <Table
                     bordered
                     key="label"
@@ -424,4 +418,4 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     }, [columns, dataSource, loading, handleRangePicker]);
 };
 
-export default forwardRef(OutStock);
+export default forwardRef(InStock);

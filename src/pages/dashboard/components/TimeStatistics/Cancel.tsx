@@ -32,17 +32,16 @@ import { IMonitorOrderReq, IMonitorOrderItem } from '@/interface/IDashboard';
 const { RangePicker } = DatePicker;
 
 const timeFormat = 'YYYY-MM-DD';
-const colors = ['#aaa', '#73A0FA', '#73DEB3', '#FFB761'];
 
-export interface IOutStockRef {
+export interface ICancelRef {
     onSearch(): Promise<any>;
 }
 
-interface IOutStockProps {
+interface ICancelProps {
     searchRef: React.RefObject<JsonFormRef>;
 }
 
-const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ searchRef }, ref) => {
+const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef }, ref) => {
     const chartRef = useRef<ECharts | null>(null);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState<[Dayjs, Dayjs]>([
@@ -138,9 +137,8 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             const {
                 confirmTime,
                 totalNum = 0,
-                outboundNum = 0,
-                cancelNumBeforeOutbound = 0,
-                cancelNumAfterOutbound = 0,
+                cancelNumMiddle = 0,
+                cancelNumChannel = 0,
                 ...rest
             } = item;
             const date = confirmTime.substr(0, 10);
@@ -148,17 +146,12 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             dateMap[date].push({
                 confirmTime: date,
                 totalNum,
-                outboundNum,
-                cancelNumBeforeOutbound,
-                cancelNumAfterOutbound,
+                cancelNumMiddle,
+                cancelNumChannel,
                 percentage:
-                    totalNum - cancelNumBeforeOutbound === 0
+                    cancelNumMiddle === 0
                         ? '0%'
-                        : Number(
-                              ((outboundNum / (totalNum - cancelNumBeforeOutbound)) * 100).toFixed(
-                                  2,
-                              ),
-                          ) + '%',
+                        : Number(((cancelNumMiddle / totalNum) * 100).toFixed(2)) + '%',
                 ...rest,
             });
         });
@@ -166,10 +159,8 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
         const needDateMap: { [key: string]: IMonitorOrderItem } = {};
         dateKeys.forEach(date => {
             const list = dateMap[date];
-            const i = dateMap[date].findIndex(({ dayNum }) => dayNum === 8);
             needDateMap[date] = {
                 ...list[list.length - 1],
-                ...(i > -1 ? { specialPercentage: list[i].percentage } : {}),
             };
         });
         // console.log(1111111, needDateMap);
@@ -178,33 +169,22 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 label: '总订单',
             },
             {
-                label: '已出库',
+                label: '中台取消订单',
             },
             {
-                label: '已取消',
+                label: '非中台取消',
             },
             {
-                label: '8天出库率',
-            },
-            {
-                label: '当前出库率',
+                label: '中台取消率',
             },
         ];
 
         Object.keys(needDateMap).map(date => {
-            const {
-                totalNum,
-                outboundNum,
-                cancelNumBeforeOutbound,
-                cancelNumAfterOutbound,
-                percentage,
-                specialPercentage,
-            } = needDateMap[date];
+            const { totalNum, cancelNumMiddle, cancelNumChannel, percentage } = needDateMap[date];
             ret[0][date] = totalNum;
-            ret[1][date] = outboundNum;
-            ret[2][date] = cancelNumBeforeOutbound + cancelNumAfterOutbound;
-            ret[3][date] = specialPercentage || '0%';
-            ret[4][date] = percentage || '0%';
+            ret[1][date] = cancelNumMiddle;
+            ret[2][date] = cancelNumChannel;
+            ret[3][date] = percentage || '0%';
         });
         // console.log(11111111, ret);
         return ret;
@@ -223,7 +203,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     );
 
     const renderChart = useCallback((startTime, endTime, data) => {
-        console.log('renderChart', startTime, endTime, data);
+        // console.log('renderChart', startTime, endTime, data);
         const { lastUpdateTime, monitorOrder } = data;
 
         const formatDateList = getRangeFormatDate(startTime, endTime);
@@ -246,22 +226,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
 
         const series: any[] = [];
 
-        let colorIndex = 0;
-
         dayKeys.forEach(day => {
-            switch (day) {
-                case '7':
-                    colorIndex = 1;
-                    break;
-                case '8':
-                    colorIndex = 2;
-                    break;
-                case '9':
-                    colorIndex = 3;
-                    break;
-                default:
-                    colorIndex = 0;
-            }
             const orderList = dayMap[day];
             orderList.sort((a, b) => {
                 return new Date(a.confirmTime).getTime() - new Date(b.confirmTime).getTime()
@@ -284,45 +249,34 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                     if (index > -1) {
                         const {
                             totalNum = 0,
-                            outboundNum = 0,
-                            cancelNumBeforeOutbound = 0,
-                            cancelNumAfterOutbound = 0,
+                            cancelNumMiddle = 0,
+                            cancelNumChannel = 0,
                         } = orderList[index];
                         return {
                             totalNum,
-                            outboundNum,
-                            cancelNumBeforeOutbound,
-                            cancelNumAfterOutbound,
+                            cancelNumMiddle,
+                            cancelNumChannel,
                             value:
-                                totalNum - cancelNumBeforeOutbound === 0
+                                cancelNumMiddle === 0
                                     ? 0
-                                    : Number(
-                                          (
-                                              (outboundNum / (totalNum - cancelNumBeforeOutbound)) *
-                                              100
-                                          ).toFixed(2),
-                                      ),
+                                    : Number(((cancelNumMiddle / totalNum) * 100).toFixed(2)),
                         };
                     }
                     return {
                         // value: 0,
                         totalNum: 0,
-                        outboundNum: 0,
-                        cancelNumBeforeOutbound: 0,
-                        cancelNumAfterOutbound: 0,
+                        cancelNumMiddle: 0,
+                        cancelNumChannel: 0,
                         value: 0,
                     };
                     // return index > -1 ? {} : {};
                 }),
-                lineStyle: {
-                    color: colors[colorIndex],
-                },
             });
         });
 
         chartRef.current?.setOption({
             title: {
-                text: '出库率',
+                text: '取消率',
                 subtext: `（最近更新时间：${lastUpdateTime}）`,
                 left: 'center',
                 bottom: 0,
@@ -332,30 +286,20 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 formatter: info => {
                     // console.log('formatter', info);
                     const data = Array.isArray(info) ? info[info.length - 1].data : info.data;
-                    const {
-                        totalNum,
-                        outboundNum,
-                        cancelNumBeforeOutbound,
-                        cancelNumAfterOutbound,
-                        value,
-                    } = data;
+                    const { totalNum, cancelNumMiddle, cancelNumChannel, value } = data;
                     return `
                         <div style="padding: 8px 20px 8px 10px;">
                             <div style="margin-bottom: 4px;">
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
                                 总订单: ${totalNum}
                             </div>
-                            <div style="margin-bottom: 4px;">
-                                <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
-                                已出库: ${outboundNum}
-                            </div>
                             <div>
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: red; vertical-align: 2px;"></span>
-                                已取消: ${cancelNumBeforeOutbound} + ${cancelNumAfterOutbound}
+                                已取消: ${cancelNumMiddle} + ${cancelNumChannel}
                             </div>
                             <div style="margin-bottom: 4px;">
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: yellow; vertical-align: 2px;"></span>
-                                出库率: ${value}%
+                                中台取消率: ${value}%
                             </div>
                         </div>
                     `;
@@ -378,7 +322,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             },
             yAxis: {
                 type: 'value',
-                name: '出库率（%）',
+                name: '取消率（%）',
             },
             series: series,
         });
@@ -387,15 +331,8 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     useEffect(() => {
         !chartRef.current &&
             (chartRef.current = echarts.init(
-                document.getElementById('out-stock') as HTMLDivElement,
+                document.getElementById('cancel-chart') as HTMLDivElement,
             ));
-        // if (loading) {
-        //     chartRef.current.showLoading();
-        // } else {
-        //     chartRef.current.hideLoading();
-        //     renderChart(orderInfo);
-        // }
-        // renderChart();
         _getMonitorOrder();
     }, []);
 
@@ -411,7 +348,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                         onChange={handleRangePicker}
                     />
                 </div>
-                <div id="out-stock" className={styles.chartSection}></div>
+                <div id="cancel-chart" className={styles.chartSection}></div>
                 <Table
                     bordered
                     key="label"
@@ -424,4 +361,4 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     }, [columns, dataSource, loading, handleRangePicker]);
 };
 
-export default forwardRef(OutStock);
+export default forwardRef(Cancel);

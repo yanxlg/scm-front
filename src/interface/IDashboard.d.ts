@@ -81,10 +81,16 @@ export interface IMonitorPurchaseOrderReq {
 }
 
 export interface IMonitorOrderItem {
-    cancelNumBeforeOutbound: number;
-    cancelNumChannel: number;
-    confirmTime: number;
+    channelSource: string;
+    channelMerchantName: string;
+    confirmTime: string;
     dayNum: number;
-    outboundNum: number;
     totalNum: number;
+    outboundNum: number;
+    cancelNumBeforeOutbound: number;
+    cancelNumAfterOutbound: number;
+    cancelNumMiddle: number;
+    cancelNumChannel: number;
+    percentage?: string;
+    specialPercentage?: string;
 }
