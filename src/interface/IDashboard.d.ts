@@ -79,3 +79,12 @@ export interface IMonitorPurchaseOrderReq {
     order_time_start: number;
     order_time_end: number;
 }
+
+export interface IMonitorOrderItem {
+    cancelNumBeforeOutbound: number;
+    cancelNumChannel: number;
+    confirmTime: number;
+    dayNum: number;
+    outboundNum: number;
+    totalNum: number;
+}

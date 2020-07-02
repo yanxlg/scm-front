@@ -22,7 +22,7 @@ import { JsonFormRef } from 'react-components/es/JsonForm';
 import styles from '../../_timeStatistics.less';
 import { ColumnsType } from 'antd/es/table';
 import { getMonitorOrder } from '@/services/dashboard';
-import { IMonitorOrderReq } from '@/interface/IDashboard';
+import { IMonitorOrderReq, IMonitorOrderItem } from '@/interface/IDashboard';
 
 const { RangePicker } = DatePicker;
 
@@ -104,17 +104,29 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             formatDateList.push(currentFormatDate);
             i++;
         }
+
+        return formatDateList;
         // console.log(111111, endFormatDate, formatDateList);
     }, []);
 
     const renderChart = useCallback((startTime, endTime, data) => {
         console.log('renderChart', startTime, endTime, data);
-        getRangeFormatDate(startTime, endTime);
+        const { lastUpdateTime, monitorOrder } = data;
+
+        const formatDateList = getRangeFormatDate(startTime, endTime);
+
+        const dayMap: { [key: string]: IMonitorOrderItem[] } = {};
+
+        monitorOrder?.forEach((item: IMonitorOrderItem) => {
+            const { dayNum } = item;
+            !dayMap[dayNum] && (dayMap[dayNum] = []);
+            dayMap[dayNum].push(item);
+        });
 
         chartRef.current?.setOption({
             title: {
                 text: '出库率',
-                subtext: '（最近更新时间：2020-6-12 06：00）',
+                subtext: `（最近更新时间：${formatDateList}）`,
                 left: 'center',
                 bottom: 0,
             },
@@ -153,11 +165,6 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 bottom: '10%',
                 containLabel: true,
             },
-            // toolbox: {
-            //     feature: {
-            //         saveAsImage: {}
-            //     }
-            // },
             xAxis: {
                 type: 'category',
                 name: '确认订单时间',
