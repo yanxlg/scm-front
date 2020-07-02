@@ -16,7 +16,12 @@ export function queryGoodsSelectionList(data: IQueryGoodsSelectionListReq) {
     );
 }
 
-export function deleteGoodsSelection(data: { commodity_id: string; merchant_id: string }) {
+export function deleteGoodsSelection(data: {
+    commodity_id: string;
+    merchant_id: string;
+    start_date: number;
+    end_date: number;
+}) {
     return request.post(SelectionApiPath.DeleteGoodsSelection, {
         data,
     });
