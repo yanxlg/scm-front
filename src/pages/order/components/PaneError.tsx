@@ -30,6 +30,7 @@ import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyl
 import { Button } from 'antd';
 import Export from '@/components/Export';
 import { queryGoodsSourceList } from '@/services/global';
+import { PermissionComponent } from 'rc-permission';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -237,42 +238,57 @@ const PaneErrTab = () => {
                             {value === 12 ? (
                                 <div>
                                     {status === 0 ? (
-                                        <Button
-                                            type="link"
-                                            onClick={() =>
-                                                setVisibleProps({
-                                                    order_goods_id: row.orderGoodsId,
-                                                    purchase_plan_id: row.purchasePlanId as string,
-                                                })
-                                            }
+                                        <PermissionComponent
+                                            pid="order/similar_pay"
+                                            control="tooltip"
                                         >
-                                            相似款代拍
-                                        </Button>
+                                            <Button
+                                                type="link"
+                                                onClick={() =>
+                                                    setVisibleProps({
+                                                        order_goods_id: row.orderGoodsId,
+                                                        purchase_plan_id: row.purchasePlanId as string,
+                                                    })
+                                                }
+                                            >
+                                                相似款代拍
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : status === 1 || status === 5 ? (
-                                        <Button
-                                            type="link"
-                                            onClick={() =>
-                                                setVisibleProps({
-                                                    order_goods_id: row.orderGoodsId,
-                                                    purchase_plan_id: row.purchasePlanId as string,
-                                                })
-                                            }
+                                        <PermissionComponent
+                                            pid="order/similar_pay"
+                                            control="tooltip"
                                         >
-                                            代拍详情-爬取中
-                                        </Button>
+                                            <Button
+                                                type="link"
+                                                onClick={() =>
+                                                    setVisibleProps({
+                                                        order_goods_id: row.orderGoodsId,
+                                                        purchase_plan_id: row.purchasePlanId as string,
+                                                    })
+                                                }
+                                            >
+                                                代拍详情-爬取中
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : status === 3 ? (
-                                        <Button
-                                            type="link"
-                                            danger={true}
-                                            onClick={() =>
-                                                setVisibleProps({
-                                                    order_goods_id: row.orderGoodsId,
-                                                    purchase_plan_id: row.purchasePlanId as string,
-                                                })
-                                            }
+                                        <PermissionComponent
+                                            pid="order/similar_pay"
+                                            control="tooltip"
                                         >
-                                            代拍详情-爬取失败
-                                        </Button>
+                                            <Button
+                                                type="link"
+                                                danger={true}
+                                                onClick={() =>
+                                                    setVisibleProps({
+                                                        order_goods_id: row.orderGoodsId,
+                                                        purchase_plan_id: row.purchasePlanId as string,
+                                                    })
+                                                }
+                                            >
+                                                代拍详情-爬取失败
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : null}
                                 </div>
                             ) : null}
@@ -702,7 +718,7 @@ const PaneErrTab = () => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 rowKey={record => {
                     return record.purchasePlanId || record.orderGoodsId;
                 }}

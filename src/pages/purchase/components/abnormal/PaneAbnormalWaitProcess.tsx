@@ -249,12 +249,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
 
     const toolBarRender = useCallback(() => {
         return [
-            <JsonForm
-                key="1"
-                containerClassName=""
-                fieldList={fieldCheckboxList}
-                ref={formRef2}
-            ></JsonForm>,
+            <JsonForm key="1" containerClassName="" fieldList={fieldCheckboxList} ref={formRef2} />,
         ];
     }, [fieldCheckboxList]);
 
@@ -301,7 +296,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     </div>
                 </JsonForm>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="waybillExceptionSn"
                     // className="order-table"
                     loading={loading}

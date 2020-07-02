@@ -20,6 +20,7 @@ import { ConnectState } from '@/models/connect';
 import { IRole } from '@/interface/ISetting';
 import { utcToLocal } from 'react-components/es/utils/date';
 import LoadingSwitch from '@/pages/setting/_role/components/LoadingSwitch';
+import { PermissionComponent } from 'rc-permission';
 
 const fieldsList: FormField[] = [
     {
@@ -163,27 +164,37 @@ const Role = () => {
                             >
                                 查看
                             </Button>
-                            <Button
-                                type="link"
-                                onClick={() =>
-                                    showAddModal({
-                                        type: 'edit',
-                                        detail: item,
-                                    })
-                                }
+                            <PermissionComponent
+                                pid={'setting/permission/role/edit'}
+                                control="tooltip"
                             >
-                                修改
-                            </Button>
-                            <PopConfirmLoadingButton
-                                popConfirmProps={{
-                                    title: '确定要阐述改角色吗？',
-                                    onConfirm: () => rmRole(item.id),
-                                }}
-                                buttonProps={{
-                                    type: 'link',
-                                    children: '删除',
-                                }}
-                            />
+                                <Button
+                                    type="link"
+                                    onClick={() =>
+                                        showAddModal({
+                                            type: 'edit',
+                                            detail: item,
+                                        })
+                                    }
+                                >
+                                    修改
+                                </Button>
+                            </PermissionComponent>
+                            <PermissionComponent
+                                pid={'setting/permission/role/delete'}
+                                control="tooltip"
+                            >
+                                <PopConfirmLoadingButton
+                                    popConfirmProps={{
+                                        title: '确定要阐述改角色吗？',
+                                        onConfirm: () => rmRole(item.id),
+                                    }}
+                                    buttonProps={{
+                                        type: 'link',
+                                        children: '删除',
+                                    }}
+                                />
+                            </PermissionComponent>
                         </>
                     );
                 },
@@ -231,10 +242,15 @@ const Role = () => {
                     return (
                         <>
                             <span className={styles.statusLabel}>{active ? '启用' : '禁用'}</span>
-                            <LoadingSwitch
-                                checked={active}
-                                onChange={() => updateStatus(row.id, active ? 2 : 1, row)}
-                            />
+                            <PermissionComponent
+                                pid="setting/permission/role/update_status"
+                                control="tooltip"
+                            >
+                                <LoadingSwitch
+                                    checked={active}
+                                    onClick={() => updateStatus(row.id, active ? 2 : 1, row)}
+                                />
+                            </PermissionComponent>
                         </>
                     );
                 },
@@ -254,18 +270,19 @@ const Role = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button
-                type="primary"
-                key="1"
-                onClick={() => {
-                    showAddModal({
-                        type: 'add',
-                    });
-                }}
-            >
-                <PlusOutlined />
-                添加角色
-            </Button>,
+            <PermissionComponent key="1" pid="setting/permission/role/add" control="tooltip">
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        showAddModal({
+                            type: 'add',
+                        });
+                    }}
+                >
+                    <PlusOutlined />
+                    添加角色
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 

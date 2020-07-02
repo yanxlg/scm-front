@@ -1,12 +1,15 @@
 import React from 'react';
 import CookieSetting from '@/pages/setting/components/account/CookieSetting';
 import Container from '@/components/Container';
-import { PermissionRouterWrap } from 'rc-permission';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const AccountPage: React.FC = () => {
     return (
         <Container>
-            <CookieSetting />
+            <PermissionComponent pid="setting/account/list" fallback={() => <ForbiddenComponent />}>
+                <CookieSetting />
+            </PermissionComponent>
         </Container>
     );
 };

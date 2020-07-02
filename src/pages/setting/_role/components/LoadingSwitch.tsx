@@ -3,10 +3,10 @@ import { Switch } from 'antd';
 import { SwitchProps } from 'antd/lib/switch';
 
 declare interface LoadingSwitchProps extends SwitchProps {
-    onChange: (checked: boolean, event: MouseEvent) => Promise<boolean>;
+    onClick: (checked: boolean, event: MouseEvent) => Promise<boolean>;
 }
 
-const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onChange, checked, ...props }) => {
+const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onClick, checked, ...props }) => {
     const checkedRef = useRef<boolean | undefined>(checked);
     useMemo(() => {
         checkedRef.current = checked;
@@ -15,7 +15,7 @@ const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onChange, checked, ...pro
     const [loading, setLoading] = useState(false);
     const onRealChange = useCallback((checked: boolean, event: MouseEvent) => {
         setLoading(true);
-        onChange?.(checked, event)
+        onClick?.(checked, event)
             .then((checked: boolean) => {
                 checkedRef.current = checked;
             })

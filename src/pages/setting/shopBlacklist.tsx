@@ -14,7 +14,7 @@ import { ISaveBlackStoreReq } from '@/interface/ISetting';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getStatusDesc } from '@/utils/transform';
 import { utcToLocal } from 'react-components/es/utils/date';
-import { PermissionRouterWrap } from 'rc-permission';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 
 const formFields1: FormField[] = [
     {
@@ -122,15 +122,17 @@ const ShopBlacklist: React.FC = props => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <LoadingButton
-                        ghost
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={delShop}
-                        disabled={selectedRowKeys.length === 0}
-                    >
-                        删除
-                    </LoadingButton>
+                    <PermissionComponent pid="setting/shop_black_list/delete" control="tooltip">
+                        <LoadingButton
+                            ghost
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={delShop}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            删除
+                        </LoadingButton>
+                    </PermissionComponent>
                     <LoadingButton
                         ghost
                         type="primary"
@@ -234,10 +236,12 @@ const ShopBlacklist: React.FC = props => {
         <Container>
             {searchNode}
             <div>
-                <Button type="link" onClick={showAddConfig} disabled={addStatus}>
-                    <PlusCircleOutlined />
-                    添加采购店铺黑名单
-                </Button>
+                <PermissionComponent pid="setting/shop_black_list/add" control="tooltip">
+                    <Button type="link" onClick={showAddConfig} disabled={addStatus}>
+                        <PlusCircleOutlined />
+                        添加采购店铺黑名单
+                    </Button>
+                </PermissionComponent>
             </div>
             {addStatus ? addNode : null}
             <FitTable

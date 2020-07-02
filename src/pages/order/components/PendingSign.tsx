@@ -41,6 +41,7 @@ import { filterFieldsList } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 import { IChildOrderItem } from '@/pages/order/components/PaneAll';
+import { PermissionComponent } from 'rc-permission';
 
 const configFields = [
     'order_goods_status1',
@@ -111,27 +112,33 @@ const PendingSign = ({ updateCount }: PendingSign) => {
                 render: (value: string, item) => {
                     return (
                         <>
-                            <PopConfirmLoadingButton
-                                popConfirmProps={{
-                                    title: '确定要取消该采购订单吗？',
-                                    onConfirm: () => cancelSingle([item.orderGoodsId!]),
-                                }}
-                                buttonProps={{
-                                    type: 'link',
-                                    children: '取消采购订单',
-                                }}
-                            />
+                            <PermissionComponent pid="order/cancel_purchase" control="tooltip">
+                                <PopConfirmLoadingButton
+                                    popConfirmProps={{
+                                        title: '确定要取消该采购订单吗？',
+                                        onConfirm: () => cancelSingle([item.orderGoodsId!]),
+                                    }}
+                                    buttonProps={{
+                                        type: 'link',
+                                        children: '取消采购订单',
+                                    }}
+                                />
+                            </PermissionComponent>
                             <CancelOrder
                                 key={'2'}
                                 orderGoodsIds={[item.orderGoodsId!]}
                                 onReload={onSearch}
                                 getAllTabCount={updateCount}
                             >
-                                <Button type="link">取消销售订单</Button>
+                                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                                    <Button type="link">取消销售订单</Button>
+                                </PermissionComponent>
                             </CancelOrder>
-                            <Button type="link" onClick={() => showTrackModal(item)}>
-                                查看物流轨迹
-                            </Button>
+                            <PermissionComponent pid="order/track" control="tooltip">
+                                <Button type="link" onClick={() => showTrackModal(item)}>
+                                    查看物流轨迹
+                                </Button>
+                            </PermissionComponent>
                         </>
                     );
                 },
@@ -419,29 +426,36 @@ const PendingSign = ({ updateCount }: PendingSign) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedKeys.length === 0;
         return [
-            <LoadingButton
-                key="purchase_order"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={cancelList}
-            >
-                取消采购订单
-            </LoadingButton>,
+            <PermissionComponent key="purchase_order" pid="order/cancel_purchase" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={cancelList}
+                >
+                    取消采购订单
+                </LoadingButton>
+            </PermissionComponent>,
             <CancelOrder
                 key="2"
                 orderGoodsIds={selectedKeys}
                 onReload={onReload}
                 getAllTabCount={updateCount}
             >
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={disabled}
+                <PermissionComponent
+                    key="purchase_order"
+                    pid="order/cancel_order"
+                    control="tooltip"
                 >
-                    取消销售订单
-                </Button>
+                    <Button
+                        key="channel_order"
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={disabled}
+                    >
+                        取消销售订单
+                    </Button>
+                </PermissionComponent>
             </CancelOrder>,
         ];
     }, [selectedKeys]);

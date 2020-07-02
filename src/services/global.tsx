@@ -171,7 +171,7 @@ export function queryRoleSimpleList() {
 }
 
 export function loginUser(data: { username: string; password: string }) {
-    return request.post(GlobalApiPath.login, {
+    return request.post<IResponse<string>>(GlobalApiPath.login, {
         data: data,
     });
 }

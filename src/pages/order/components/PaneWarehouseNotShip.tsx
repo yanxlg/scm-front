@@ -19,6 +19,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -514,15 +515,21 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const list = getOrderGoodsIdList();
         return [
-            <CancelOrder orderGoodsIds={list} onReload={onSearch} getAllTabCount={getAllTabCount}>
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={list.length ? false : true}
-                >
-                    取消渠道订单
-                </Button>
+            <CancelOrder
+                key="purchase_order"
+                orderGoodsIds={list}
+                onReload={onSearch}
+                getAllTabCount={getAllTabCount}
+            >
+                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={list.length ? false : true}
+                    >
+                        取消渠道订单
+                    </Button>
+                </PermissionComponent>
             </CancelOrder>,
         ];
     }, [getOrderGoodsIdList]);

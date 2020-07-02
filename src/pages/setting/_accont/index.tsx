@@ -19,6 +19,7 @@ import { utcToLocal } from 'react-components/es/utils/date';
 import { useDispatch } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
 import LoadingSwitch from '@/pages/setting/_role/components/LoadingSwitch';
+import { PermissionComponent } from 'rc-permission';
 
 const fieldsList: FormField[] = [
     {
@@ -154,28 +155,38 @@ const Account = () => {
                 render: (_, item) => {
                     return (
                         <>
-                            <Button
-                                type="link"
-                                onClick={() => {
-                                    showAddModal({
-                                        type: 'view',
-                                        id: item.id,
-                                    });
-                                }}
+                            <PermissionComponent
+                                pid={'setting/permission/user/view'}
+                                control={'tooltip'}
                             >
-                                查看
-                            </Button>
-                            <Button
-                                type="link"
-                                onClick={() => {
-                                    showAddModal({
-                                        type: 'edit',
-                                        id: item.id,
-                                    });
-                                }}
+                                <Button
+                                    type="link"
+                                    onClick={() => {
+                                        showAddModal({
+                                            type: 'view',
+                                            id: item.id,
+                                        });
+                                    }}
+                                >
+                                    查看
+                                </Button>
+                            </PermissionComponent>
+                            <PermissionComponent
+                                pid={'setting/permission/user/update'}
+                                control={'tooltip'}
                             >
-                                修改
-                            </Button>
+                                <Button
+                                    type="link"
+                                    onClick={() => {
+                                        showAddModal({
+                                            type: 'edit',
+                                            id: item.id,
+                                        });
+                                    }}
+                                >
+                                    修改
+                                </Button>
+                            </PermissionComponent>
                         </>
                     );
                 },
@@ -217,10 +228,15 @@ const Account = () => {
                     return (
                         <>
                             <span className={styles.statusLabel}>{active ? '启用' : '禁用'}</span>
-                            <LoadingSwitch
-                                checked={active}
-                                onChange={() => updateStatus(row.id, active ? 2 : 1, row)}
-                            />
+                            <PermissionComponent
+                                pid="setting/permission/user/update_status"
+                                control="tooltip"
+                            >
+                                <LoadingSwitch
+                                    checked={active}
+                                    onClick={() => updateStatus(row.id, active ? 2 : 1, row)}
+                                />
+                            </PermissionComponent>
                         </>
                     );
                 },
@@ -240,18 +256,19 @@ const Account = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button
-                type="primary"
-                key="1"
-                onClick={() => {
-                    showAddModal({
-                        type: 'add',
-                    });
-                }}
-            >
-                <PlusOutlined />
-                添加账号
-            </Button>,
+            <PermissionComponent key="1" pid="setting/permission/user/add" control="tooltip">
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        showAddModal({
+                            type: 'add',
+                        });
+                    }}
+                >
+                    <PlusOutlined />
+                    添加账号
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 

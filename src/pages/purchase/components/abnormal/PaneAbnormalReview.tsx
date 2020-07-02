@@ -31,6 +31,7 @@ import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import useReview from '../../hooks/useReview';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { PermissionComponent } from 'rc-permission';
 
 const { Option } = Select;
 
@@ -96,24 +97,26 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0;
         return [
-            <LoadingButton
-                key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={batchReviewPass}
-            >
-                审核通过
-            </LoadingButton>,
-            <LoadingButton
-                key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={batchReviewReject}
-            >
-                审核驳回
-            </LoadingButton>,
+            <PermissionComponent key="1" pid="purchase/abnormal/verify" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={batchReviewPass}
+                >
+                    审核通过
+                </LoadingButton>
+            </PermissionComponent>,
+            <PermissionComponent key="2" pid="purchase/abnormal/verify" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={batchReviewReject}
+                >
+                    审核驳回
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys]);
 
@@ -329,7 +332,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 </JsonForm>
                 <Form form={form}>
                     <FitTable
-                        bordered
+                        bordered={true}
                         rowKey="waybillExceptionSn"
                         // className="order-table"
                         loading={loading}

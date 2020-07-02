@@ -3,7 +3,8 @@ import { Tabs } from 'antd';
 import Container from '@/components/Container';
 import { Account } from './_accont';
 import { Role } from './_role';
-import { PermissionRouterWrap } from 'rc-permission';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 
@@ -17,10 +18,20 @@ const Page = () => {
                     type="card"
                     children={[
                         <TabPane tab="账号列表" key="1">
-                            <Account />
+                            <PermissionComponent
+                                pid="setting/permission/user"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <Account />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab="角色列表" key="2">
-                            <Role />
+                            <PermissionComponent
+                                pid="setting/permission/role"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <Role />
+                            </PermissionComponent>
                         </TabPane>,
                     ]}
                 />

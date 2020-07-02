@@ -75,6 +75,11 @@ const Login = () => {
         })
             .then(({ data: token }) => {
                 // 获取权限数组
+                User.setUser({
+                    password,
+                    userName,
+                    token: token,
+                });
                 queryUserPermission().then(({ data }) => {
                     const pData: IPermissionTree = {};
                     data.forEach(item => {

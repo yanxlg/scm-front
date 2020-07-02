@@ -430,15 +430,6 @@ const ChannelList: React.FC = props => {
                                     key="on"
                                     pid="goods/channel/sales"
                                     control="tooltip"
-                                    fallback={() => (
-                                        <Button
-                                            {...{
-                                                disabled: canUpper,
-                                                children: '上架',
-                                                type: 'link',
-                                            }}
-                                        />
-                                    )}
                                 >
                                     <PopConfirmLoadingButton
                                         buttonProps={{
@@ -460,15 +451,6 @@ const ChannelList: React.FC = props => {
                                     key="on"
                                     pid="goods/channel/sales"
                                     control="tooltip"
-                                    fallback={() => (
-                                        <Button
-                                            {...{
-                                                disabled: canDown,
-                                                children: '下架',
-                                                type: 'link',
-                                            }}
-                                        />
-                                    )}
                                 >
                                     <PopConfirmLoadingButton
                                         buttonProps={{

@@ -24,7 +24,7 @@
         "query-string": "^6.11.1",
         "react": "^16.13.0",
         "react-dom": "^16.13.0",
-        "rc-permission": "^0.0.14"
+        "rc-permission": "^0.0.15"
     },
     "devDependencies": {
         "dva-logger": "^1.0.0",

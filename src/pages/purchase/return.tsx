@@ -7,7 +7,8 @@ import PendingOut from '@/pages/purchase/components/return/pendingOut';
 import Over from '@/pages/purchase/components/return/over';
 import { queryReturnStatic } from '@/services/purchase';
 import { IReturnStatics } from '@/interface/IPurchase';
-import { PermissionRouterWrap } from 'rc-permission';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 const TabPane = Tabs.TabPane;
 
 const List = () => {
@@ -41,16 +42,36 @@ const List = () => {
                     type="card"
                     children={[
                         <TabPane tab={`全部${getStaticsNumber(total)}`} key="1">
-                            <AllList reloadStatics={getStatics} />
+                            <PermissionComponent
+                                pid="purchase/return/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <AllList reloadStatics={getStatics} />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`待出库${getStaticsNumber(wait_outbound_total)}`} key="2">
-                            <PendingOut />
+                            <PermissionComponent
+                                pid="purchase/return/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PendingOut />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`待收货${getStaticsNumber(wait_delivery_total)}`} key="3">
-                            <PendingSigned />
+                            <PermissionComponent
+                                pid="purchase/return/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PendingSigned />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`已完结${getStaticsNumber(finished_total)}`} key="4">
-                            <Over />
+                            <PermissionComponent
+                                pid="purchase/return/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <Over />
+                            </PermissionComponent>
                         </TabPane>,
                     ]}
                 />

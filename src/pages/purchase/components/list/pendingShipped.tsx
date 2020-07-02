@@ -34,6 +34,7 @@ import ConnectModal from './connectModal';
 import Export from '@/components/Export';
 import { FormInstance } from 'antd/es/form';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 
 const { Paragraph } = Typography;
 
@@ -214,13 +215,17 @@ const PendingShipped = () => {
                     const { origin = PurchaseCreateType.Auto, purchaseOrderGoodsId } = item;
                     return (
                         <>
-                            <Button type="link" onClick={() => showConnect(item)}>
-                                关联运单号
-                            </Button>
-                            {origin === PurchaseCreateType.Auto ? (
-                                <Button type="link" onClick={() => applyReturnService(item)}>
-                                    申请退款
+                            <PermissionComponent pid="purchase/list/connect" control="tooltip">
+                                <Button type="link" onClick={() => showConnect(item)}>
+                                    关联运单号
                                 </Button>
+                            </PermissionComponent>
+                            {origin === PurchaseCreateType.Auto ? (
+                                <PermissionComponent pid="purchase/list/refund" control="tooltip">
+                                    <Button type="link" onClick={() => applyReturnService(item)}>
+                                        申请退款
+                                    </Button>
+                                </PermissionComponent>
                             ) : (
                                 <PopConfirmLoadingButton
                                     popConfirmProps={{

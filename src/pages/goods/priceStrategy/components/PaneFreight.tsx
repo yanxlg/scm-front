@@ -85,7 +85,7 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
                     const { id } = record;
                     return (
                         <PermissionComponent
-                            pid="goods/price_strategy/shipping/update_rule"
+                            pid="goods/price_strategy/shipping/view_rule"
                             control="tooltip"
                         >
                             <Button
