@@ -17,6 +17,24 @@
     margin: 20px 0;
     padding: 16px 12px;
     background: #fafafa;
+
+    :global {
+        .ant-checkbox-wrapper-disabled {
+
+            .ant-checkbox-inner {
+                background-color: #1890ff !important;
+                border-color: #1890ff !important;
+
+                &:after {
+                    border-color: #fff !important;
+                }
+            }
+
+            span {
+                color: rgba(0, 0, 0, 0.65) !important;
+            }
+        }
+    }
 }
 
 .goods-container {
