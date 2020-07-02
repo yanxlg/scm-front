@@ -38,6 +38,7 @@ const timeFormat = 'YYYY-MM-DD';
 
 const Selection: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
+    const queryRef = useRef<IQueryGoodsSelectionListReq | null>(null);
     const [loading, setLoading] = useState(true);
     const [goodsDetailStatus, setGoodsDetailStatus] = useState(false);
     const [page, setPage] = useState(1);
@@ -49,10 +50,7 @@ const Selection: React.FC = () => {
     const [modelType, setModelType] = useState<string[]>(['explosion']);
     const [channelList, setChannelList] = useState<IOptionItem[]>([]);
     const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
-    const [dates, setDates] = useState<[Dayjs, Dayjs]>([
-        getUTCDate().add(-1, 'day'),
-        getUTCDate().add(-1, 'day'),
-    ]);
+    const [dates, setDates] = useState<[Dayjs, Dayjs]>([getUTCDate().add(-1, 'day'), getUTCDate()]);
     const [goodsList, setGoodsList] = useState<ISelectionGoodsItem[]>([]);
 
     const getQueryData = useCallback(
@@ -133,6 +131,7 @@ const Selection: React.FC = () => {
     const onSearch = useCallback(
         async (data: IQueryGoodsSelectionListReq = {}) => {
             const postData = await getQueryData(data);
+            queryRef.current = postData;
             return _queryGoodsSelectionList(postData);
         },
         [getQueryData],
@@ -194,6 +193,8 @@ const Selection: React.FC = () => {
             deleteGoodsSelection({
                 commodity_id,
                 merchant_id,
+                start_date: queryRef.current?.start_date as number,
+                end_date: queryRef.current?.end_date as number,
             }).then(() => {
                 message.success('删除成功！');
                 onSearch();
@@ -359,22 +360,7 @@ const Selection: React.FC = () => {
                                         >
                                             已下架
                                         </div>
-                                        <div
-                                            className={classnames(styles.arc, styles.arcShow)}
-                                            onClick={e => e.stopPropagation()}
-                                        >
-                                            <Popconfirm
-                                                placement="bottom"
-                                                title="确定要从选品模型中剔除此商品吗？"
-                                                onConfirm={() =>
-                                                    _deleteGoodsSelection(commodity_id, merchant_id)
-                                                }
-                                                okText="确定"
-                                                cancelText="取消"
-                                            >
-                                                <DeleteOutlined className={styles.del} />
-                                            </Popconfirm>
-                                        </div>
+
                                         {is_vova_old !== 1 ? (
                                             <div onClick={e => e.stopPropagation()}>
                                                 <Popconfirm
@@ -404,6 +390,22 @@ const Selection: React.FC = () => {
                                         ) : null}
                                     </>
                                 ) : null}
+                                <div
+                                    className={classnames(styles.arc, styles.arcShow)}
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <Popconfirm
+                                        placement="bottom"
+                                        title="确定要从选品模型中剔除此商品吗？"
+                                        onConfirm={() =>
+                                            _deleteGoodsSelection(commodity_id, merchant_id)
+                                        }
+                                        okText="确定"
+                                        cancelText="取消"
+                                    >
+                                        <DeleteOutlined className={styles.del} />
+                                    </Popconfirm>
+                                </div>
                                 <div className={styles.typeList}>
                                     <div className={styles.type}>
                                         {model}
@@ -442,7 +444,8 @@ const Selection: React.FC = () => {
                                                     : styles.decrease,
                                             )}
                                         >
-                                            {lat_day_sale_order_change}
+                                            {(lat_day_sale_order_change >= 0 ? '+' : '') +
+                                                lat_day_sale_order_change}
                                         </span>
                                         <span>{last_day_sale_order}</span>
                                     </div>

@@ -157,8 +157,9 @@ const PaneFreightCalc: React.FC = props => {
                             {WeightConfig?.map(({ param_add, param_devide, param_multiply }) => {
                                 return (
                                     <div className={styles.calc}>
-                                        {param_add.toFixed(4)} + (m/{param_devide.toFixed(4)}) *
-                                        {param_multiply.toFixed(4)}
+                                        {Number(param_add).toFixed(4)} + (m/
+                                        {Number(param_devide).toFixed(4)}) *
+                                        {Number(param_multiply).toFixed(4)}
                                     </div>
                                 );
                             })}
