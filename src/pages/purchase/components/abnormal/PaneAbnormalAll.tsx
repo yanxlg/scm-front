@@ -41,6 +41,7 @@ import useWaitProcess from '../../hooks/useWaitProcess';
 import useReview from '../../hooks/useReview';
 import PopSetProgress from './PopSetProgress/PopSetProgress';
 import useDetail from '../../hooks/useDetail';
+import { PermissionComponent } from 'rc-permission';
 
 const { Option } = Select;
 
@@ -150,13 +151,30 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                                         const {
                                             exception_operation_name,
                                             show_exception_type,
+                                            exception_operation_id,
                                         } = item;
+                                        let pid = '';
+                                        switch (exception_operation_id) {
+                                            case OperateType.discard:
+                                                pid = 'purchase/abnormal/delete';
+                                                break;
+                                            case OperateType.related:
+                                                pid = 'purchase/abnormal/connect';
+                                                break;
+                                            case OperateType.exceptionHandle:
+                                                pid = 'purchase/abnormal/exception_exec';
+                                                break;
+                                            default:
+                                        }
+
                                         return show_exception_type.indexOf(waybillExceptionType) >
                                             -1 ? (
                                             <div key={exception_operation_name}>
-                                                <a onClick={() => handleOperate(item, row)}>
-                                                    {exception_operation_name}
-                                                </a>
+                                                <PermissionComponent pid={pid} control="tooltip">
+                                                    <a onClick={() => handleOperate(item, row)}>
+                                                        {exception_operation_name}
+                                                    </a>
+                                                </PermissionComponent>
                                             </div>
                                         ) : null;
                                     })}
@@ -166,10 +184,20 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                             return (
                                 <>
                                     <div>
-                                        <a onClick={() => reviewPass(row)}>审核通过</a>
+                                        <PermissionComponent
+                                            pid="purchase/abnormal/verify"
+                                            control="tooltip"
+                                        >
+                                            <a onClick={() => reviewPass(row)}>审核通过</a>
+                                        </PermissionComponent>
                                     </div>
                                     <div>
-                                        <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                        <PermissionComponent
+                                            pid="purchase/abnormal/verify"
+                                            control="tooltip"
+                                        >
+                                            <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                        </PermissionComponent>
                                     </div>
                                 </>
                             );

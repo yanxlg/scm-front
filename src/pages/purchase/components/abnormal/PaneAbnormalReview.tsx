@@ -168,10 +168,22 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                     return (
                         <>
                             <div>
-                                <a onClick={() => reviewPass(row)}>审核通过</a>
+                                <PermissionComponent
+                                    key="1"
+                                    pid="purchase/abnormal/verify"
+                                    control="tooltip"
+                                >
+                                    <a onClick={() => reviewPass(row)}>审核通过</a>
+                                </PermissionComponent>
                             </div>
                             <div>
-                                <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                <PermissionComponent
+                                    key="1"
+                                    pid="purchase/abnormal/verify"
+                                    control="tooltip"
+                                >
+                                    <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                </PermissionComponent>
                             </div>
                         </>
                     );
