@@ -1436,7 +1436,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         onReload={onSearch}
                         getAllTabCount={getAllTabCount}
                     >
-                        {' '}
                         <PermissionComponent
                             key="purchase_order"
                             pid="order/cancel_order"

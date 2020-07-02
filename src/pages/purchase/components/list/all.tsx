@@ -616,9 +616,11 @@ const AllList = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button type="primary" key="1" onClick={() => showCreateModal(true)}>
-                创建采购单
-            </Button>,
+            <PermissionComponent key="1" pid="purchase/create" control="tooltip">
+                <Button type="primary" onClick={() => showCreateModal(true)}>
+                    创建采购单
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 

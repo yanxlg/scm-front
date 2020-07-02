@@ -290,14 +290,19 @@ const PaneSellPrice: React.FC = props => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <Button
-                        ghost={true}
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => setEditType(EditEnum.ADD)}
+                    <PermissionComponent
+                        pid="goods/price_strategy/sale/update_role"
+                        control="tooltip"
                     >
-                        +新增商品售价配置
-                    </Button>
+                        <Button
+                            ghost={true}
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={() => setEditType(EditEnum.ADD)}
+                        >
+                            +新增商品售价配置
+                        </Button>
+                    </PermissionComponent>
                 </div>
             </JsonForm>
         );
