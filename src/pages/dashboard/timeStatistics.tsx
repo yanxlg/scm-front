@@ -70,7 +70,7 @@ const TimeStatistics: React.FC = () => {
                     </JsonForm>
                 </div>
                 <div className={styles.dataSection}>
-                    <OutStock ref={outStockRef} />
+                    <OutStock ref={outStockRef} searchRef={searchRef} />
                 </div>
             </div>
         );

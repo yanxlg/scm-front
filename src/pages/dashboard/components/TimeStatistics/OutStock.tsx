@@ -9,7 +9,7 @@ import React, {
     useImperativeHandle,
 } from 'react';
 import { DatePicker, Table } from 'antd';
-import { getUTCDate } from '@/utils/date';
+import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
 import { ECharts } from 'echarts';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -17,21 +17,27 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import 'echarts/lib/component/legend';
 import dayjs, { Dayjs } from 'dayjs';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 
 import styles from '../../_timeStatistics.less';
 import { ColumnsType } from 'antd/es/table';
+import { getMonitorOrder } from '@/services/dashboard';
+import { IMonitorOrderReq } from '@/interface/IDashboard';
 
 const { RangePicker } = DatePicker;
 
+const timeFormat = 'YYYY-MM-DD';
 const colors = ['#aaa', '#73A0FA', '#73DEB3', '#FFB761'];
 
 export interface IOutStockRef {
     onSearch(): Promise<void>;
 }
 
-interface IOutStockProps {}
+interface IOutStockProps {
+    searchRef: React.RefObject<JsonFormRef>;
+}
 
-const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = (props, ref) => {
+const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ searchRef }, ref) => {
     const chartRef = useRef<ECharts | null>(null);
     const [dates, setDates] = useState<[Dayjs, Dayjs]>([
         getUTCDate().add(-10, 'day'),
@@ -47,9 +53,34 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = (props,
         setDates(values);
     }, []);
 
+    const _getMonitorOrder = useCallback(
+        async (params?: IMonitorOrderReq) => {
+            const data = await searchRef.current?.getFieldsValue();
+            console.log('_getMonitorOrder', data);
+            const postData = {
+                ...data,
+                confirm_time_start: startDateToUnixWithUTC(dates[0]),
+                confirm_time_end:
+                    getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
+                        ? getUTCDate().unix()
+                        : endDateToUnixWithUTC(dates[1]),
+
+                ...(params || {}),
+            };
+            getMonitorOrder(postData).then(({ data }) => {
+                const { confirm_time_start: startTime, confirm_time_end: endTime } = postData;
+                // console.log('getMonitorOrder', data);
+                renderChart(startTime, endTime, data);
+            });
+        },
+        [dates],
+    );
+
     const onSearch = useCallback(() => {
         console.log('出库搜索');
+        _getMonitorOrder();
         return Promise.resolve();
+        // return
     }, []);
 
     useImperativeHandle(
@@ -60,7 +91,26 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = (props,
         [],
     );
 
-    const renderChart = useCallback(() => {
+    const getRangeFormatDate = useCallback((startTime, endTime) => {
+        const endFormatDate = dayjs(endTime * 1000, { utc: true }).format(timeFormat);
+        let currentFormatDate = dayjs(startTime * 1000, { utc: true }).format(timeFormat);
+        let i = 1;
+        const formatDateList = [currentFormatDate];
+
+        while (formatDateList[formatDateList.length - 1] !== endFormatDate) {
+            currentFormatDate = dayjs(startTime * 1000, { utc: true })
+                .add(i, 'day')
+                .format(timeFormat);
+            formatDateList.push(currentFormatDate);
+            i++;
+        }
+        // console.log(111111, endFormatDate, formatDateList);
+    }, []);
+
+    const renderChart = useCallback((startTime, endTime, data) => {
+        console.log('renderChart', startTime, endTime, data);
+        getRangeFormatDate(startTime, endTime);
+
         chartRef.current?.setOption({
             title: {
                 text: '出库率',
@@ -170,7 +220,8 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = (props,
         //     chartRef.current.hideLoading();
         //     renderChart(orderInfo);
         // }
-        renderChart();
+        // renderChart();
+        _getMonitorOrder();
     }, []);
 
     const columns = useMemo<ColumnsType<object>>(() => {

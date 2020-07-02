@@ -47,14 +47,14 @@ export function getDashboardTradeData(data: IDashboardOverviewReq) {
     });
 }
 
-export function getMonitorOrder(data: IMonitorOrderReq) {
-    return request.post(DashboardApiPath.getMonitorOrder, {
-        data,
+export function getMonitorOrder(params: IMonitorOrderReq) {
+    return request.get(DashboardApiPath.getMonitorOrder, {
+        params,
     });
 }
 
-export function getMonitorPurchaseOrder(data: IMonitorPurchaseOrderReq) {
-    return request.post(DashboardApiPath.getMonitorPurchaseOrder, {
-        data,
+export function getMonitorPurchaseOrder(params: IMonitorPurchaseOrderReq) {
+    return request.get(DashboardApiPath.getMonitorPurchaseOrder, {
+        params,
     });
 }
