@@ -1,6 +1,12 @@
 import request from '@/utils/request';
 import { DashboardApiPath } from '@/config/api/DashboardApiPath';
-import { IOrderDashboardReq, IPlatformItem, IDashboardOverviewReq } from '@/interface/IDashboard';
+import {
+    IOrderDashboardReq,
+    IPlatformItem,
+    IDashboardOverviewReq,
+    IMonitorOrderReq,
+    IMonitorPurchaseOrderReq,
+} from '@/interface/IDashboard';
 import { singlePromiseWrap } from '@/utils/utils';
 
 // IOrderDashboardReq
@@ -37,6 +43,18 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
 
 export function getDashboardTradeData(data: IDashboardOverviewReq) {
     return request.post(DashboardApiPath.getDashboardTradeData, {
+        data,
+    });
+}
+
+export function getMonitorOrder(data: IMonitorOrderReq) {
+    return request.post(DashboardApiPath.getMonitorOrder, {
+        data,
+    });
+}
+
+export function getMonitorPurchaseOrder(data: IMonitorPurchaseOrderReq) {
+    return request.post(DashboardApiPath.getMonitorPurchaseOrder, {
         data,
     });
 }

@@ -10,7 +10,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 const formFields: FormField[] = [
     {
         type: 'select',
-        name: 'a1',
+        name: 'channel_source',
         label: '销售平台',
         syncDefaultOption: {
             value: '',
@@ -18,15 +18,15 @@ const formFields: FormField[] = [
         },
         optionList: () => queryShopFilterList(),
         onChange: (_, form) => {
-            form.resetFields(['a2']);
+            form.resetFields(['channel_merchant_name']);
         },
     },
     {
         type: 'select',
-        name: 'a2',
+        name: 'channel_merchant_name',
         label: '店铺名',
         optionListDependence: {
-            name: 'platform',
+            name: 'channel_source',
             key: 'children',
         },
         syncDefaultOption: {
@@ -54,8 +54,8 @@ const TimeStatistics: React.FC = () => {
                         ref={searchRef}
                         fieldList={formFields}
                         initialValues={{
-                            a1: '',
-                            a2: '',
+                            channel_source: '',
+                            channel_merchant_name: '',
                         }}
                     >
                         <div>

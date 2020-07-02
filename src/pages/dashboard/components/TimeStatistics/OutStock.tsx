@@ -23,6 +23,8 @@ import { ColumnsType } from 'antd/es/table';
 
 const { RangePicker } = DatePicker;
 
+const colors = ['#aaa', '#73A0FA', '#73DEB3', '#FFB761'];
+
 export interface IOutStockRef {
     onSearch(): Promise<void>;
 }
@@ -129,6 +131,9 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = (props,
                     name: '1天',
                     type: 'line',
                     data: [120, 132, 101, 134, 90, 230, 210],
+                    lineStyle: {
+                        color: colors[0],
+                    },
                 },
                 {
                     name: '2天',
