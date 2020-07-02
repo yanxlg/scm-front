@@ -130,7 +130,7 @@ const GoodsDetailModal: React.FC<IProps> = ({
             yAxis: [
                 {
                     type: 'value',
-                    name: '金额',
+                    name: '金额($)',
                     position: 'left',
                     axisLine: {
                         show: false,

@@ -430,9 +430,11 @@ const Selection: React.FC = () => {
                                         (利润 {lower_profit}-{upper_profit})
                                     </div>
                                 </div>
-                                <div className={styles.time}>
-                                    售价更新时间 {last_price_change_day}
-                                </div>
+                                {last_price_change_day ? (
+                                    <div className={styles.time}>
+                                        售价更新时间 {last_price_change_day}
+                                    </div>
+                                ) : null}
                                 <div className={styles.item}>
                                     <div>昨日销量</div>
                                     <div>
@@ -643,7 +645,7 @@ const Selection: React.FC = () => {
                     <Checkbox.Group
                         onChange={onChangeGoodsType}
                         value={modelType}
-                        disabled={loading}
+                        // disabled={loading}
                     >
                         <Checkbox
                             value="explosion"
