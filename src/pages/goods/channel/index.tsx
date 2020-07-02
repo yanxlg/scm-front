@@ -1,4 +1,4 @@
-import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
@@ -175,6 +175,7 @@ const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowO
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
+    const urlQueryRef = useRef<any>(null);
     const [exportDialog, setExportDialog] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
@@ -194,6 +195,7 @@ const ChannelList: React.FC = props => {
         const { query, url } = queryString.parseUrl(window.location.href);
         if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
+            urlQueryRef.current = query;
         }
         const {
             pageNumber = defaultPageNumber,
@@ -721,6 +723,22 @@ const ChannelList: React.FC = props => {
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;
     }, [visible]);
+
+    useEffect(() => {
+        if (urlQueryRef.current && urlQueryRef.current?.from === 'selection') {
+            const { commodity_id, merchant_ids, vova_virtual_id } = urlQueryRef.current;
+            if (
+                commodity_id &&
+                merchant_ids &&
+                vova_virtual_id &&
+                dataSource &&
+                dataSource.length
+            ) {
+                showSkuDialog(dataSource[0].id, merchant_ids as string, commodity_id as string);
+                urlQueryRef.current = null;
+            }
+        }
+    }, [dataSource]);
 
     return (
         <>

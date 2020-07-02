@@ -81,6 +81,12 @@ export default [
             },
         ],
     },
+
+    {
+        path: '/selection',
+        name: '选品中心',
+        icon: <Icons type="scm-selection" className="menu-icon" />,
+    },
     {
         path: '/order',
         name: '订单管理',
