@@ -3,7 +3,7 @@ import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
-import { Modal, message, Button } from 'antd';
+import { Modal, message, Button, Tooltip, Popconfirm } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { PopConfirmLoadingButton, FitTable } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';

@@ -6,7 +6,7 @@
 import User from '@/storage/User';
 import { request } from 'react-components';
 import { history } from '@@/core/history';
-import { RequestOptionsInit } from 'umi-request';
+import { RequestOptionsInit, ResponseError } from 'umi-request';
 
 // 全局拦截器
 request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
@@ -30,7 +30,11 @@ request.interceptors.response.use((response, options) => {
     if (status === 401) {
         User.clearToken();
         history.replace(`/login?redirect=${window.location.href}`);
-        throw response;
+        // 原来应该有问题
+        throw {
+            type: 'AuthorizationError',
+            data: response.body,
+        };
     }
     return response;
 });
