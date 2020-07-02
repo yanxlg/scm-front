@@ -35,7 +35,7 @@
         }
 
         .back {
-            transition: transform 0.4s;
+            // transition: transform 0.4s;
             transform: translateY(0);
         }
 
@@ -123,10 +123,12 @@
 
         .price {
             display: flex;
-            // align-items: center;
+            align-items: center;
+            font-size: 18px;
         }
 
         .profit {
+            flex: 1;
             margin-left: 6px;
             font-size: 14px;
             color: #1890ff;
@@ -200,6 +202,10 @@
 
             a {
                 color: #000;
+
+                &:hover {
+                    text-decoration: underline;
+                }
             }
         }
     }
