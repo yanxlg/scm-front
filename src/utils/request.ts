@@ -21,21 +21,18 @@ request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
     };
 });
 
-request.interceptors.response.use((response, options) => {
-    const { status } = response;
-    if (status === 401) {
-        User.clear();
-        history.replace('/login');
-        throw response;
-    }
-    if (status === 403) {
-        // 前端有权限，api没权限，刷新前端权限数据
-    }
-    return response;
-});
-
 if (!User.token && !/^\/login/.test(window.location.pathname)) {
     history.replace('/login');
 }
+
+request.interceptors.response.use((response, options) => {
+    const { status } = response;
+    if (status === 401) {
+        User.clearToken();
+        history.replace(`/login?redirect=${window.location.href}`);
+        throw response;
+    }
+    return response;
+});
 
 export default request;

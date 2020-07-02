@@ -625,6 +625,7 @@ const AllList = () => {
     const table = useMemo(() => {
         // 处理合并单元格
         const dataSet = colSpanDataSource(dataSource);
+        console.log(dataSource);
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"

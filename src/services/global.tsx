@@ -11,6 +11,7 @@ import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
 import { IGood } from '@/interface/ILocalGoods';
 import { ISimpleRole } from '@/models/account';
+import User from '@/storage/User';
 
 // 1--品类预估模板下载，2---运费价卡模板下载
 type IDownloadFileType = '1' | '2';
@@ -202,5 +203,7 @@ export function queryUserPermission() {
 }
 
 export function logout() {
-    return request.post(GlobalApiPath.logout);
+    return request.post(GlobalApiPath.logout).then(() => {
+        User.clearToken();
+    });
 }

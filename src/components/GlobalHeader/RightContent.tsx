@@ -62,9 +62,9 @@ const GlobalHeaderRight: React.FC<GlobalHeaderRightProps> = props => {
                                 修改密码
                             </Menu.Item>
                             <Menu.Item
-                                key="1"
+                                key="2"
                                 onClick={onLogout}
-                                icon={<Icons type="scm-pwd" />}
+                                icon={<Icons type="scm-logout" />}
                                 className={styles.menu}
                             >
                                 退出登陆

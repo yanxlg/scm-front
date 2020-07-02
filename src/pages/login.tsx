@@ -86,12 +86,7 @@ const Login = () => {
                         pData[item.data] = {};
                     });
                     updateTree(pData);
-                    User.setUser({
-                        password,
-                        userName,
-                        token: token,
-                        pData: pData,
-                    });
+                    User.updatePData(pData);
                     history.replace('/');
                 });
             })
@@ -103,7 +98,7 @@ const Login = () => {
     return useMemo(() => {
         return (
             <main className="main login-bg">
-                <div className="login-logo">供应链管理中台</div>
+                <div className="login-logo">供应链中台</div>
                 <div className="login-box">
                     <div className="login-title">登录</div>
                     <div className={`login-item ${userNameError ? 'login-error' : ''}`}>
@@ -114,6 +109,7 @@ const Login = () => {
                             onFocus={onUserNameFocus}
                             onChange={onInputUserName}
                             onBlur={onUserNameBlur}
+                            autoComplete="off"
                         />
                         <label
                             className={`login-input-label ${
@@ -149,7 +145,7 @@ const Login = () => {
                         className="login-remember"
                         onChange={onRememberChange}
                     >
-                        下次自动登录
+                        记住账号
                     </Checkbox>
                     <Button
                         loading={login}
@@ -163,7 +159,7 @@ const Login = () => {
                 </div>
             </main>
         );
-    }, [password, userName, passwordActive, userNameActive, login]);
+    }, [password, userName, passwordActive, userNameActive, login, remember]);
 };
 
 export default Login;

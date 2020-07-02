@@ -9,6 +9,8 @@ import { PermissionProvider } from 'rc-permission';
 import User from '@/storage/User';
 import { history } from '@@/core/history';
 import Page from '@/pages/403';
+import { queryUserPermission } from '@/services/global';
+import { IPermissionTree } from 'rc-permission/es/Provider';
 
 NProgress.configure({ showSpinner: false });
 
@@ -138,6 +140,17 @@ export function rootContainer(container: any) {
         container,
     );
 }
+
+/*export function render(oldRender: any) {
+    // 使用原有权限，同时刷新权限
+    queryUserPermission().then(({ data }) => {
+        const pData: IPermissionTree = {};
+        data.forEach(item => {
+            pData[item.data] = {};
+        });
+        User.updatePData(pData);
+    });
+}*/
 
 // 动态权限路由配置
 /*let extraRoutes;

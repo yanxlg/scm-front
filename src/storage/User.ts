@@ -26,6 +26,10 @@ class User {
         this._user = user;
         localStorage.setItem('_user', JSON.stringify(this._user));
     }
+    public static updatePData(pData: IPermissionTree) {
+        this._user.pData = pData;
+        this.setUser(this._user);
+    }
     public static get userName() {
         return this.localUser.userName;
     }
@@ -41,6 +45,10 @@ class User {
     public static clear() {
         this._user = (undefined as unknown) as IUser;
         localStorage.removeItem('_user');
+    }
+    public static clearToken() {
+        this._user.token = undefined;
+        this.setUser(this._user);
     }
 }
 

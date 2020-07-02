@@ -4,6 +4,7 @@ import { JsonForm } from 'react-components';
 import { pwdIconRender } from '@/config/global';
 import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import User from '@/storage/User';
 
 declare interface IChangePwdModalProps {
     visible: boolean;
@@ -37,7 +38,7 @@ const ChangePwdModal: React.FC<IChangePwdModalProps> = ({ visible, onClose }) =>
                         {
                             type: 'label',
                             label: '用户名',
-                            content: '张',
+                            content: User.userName,
                             formItemClassName: formStyles.formItemBottom,
                         },
                         {
@@ -46,6 +47,8 @@ const ChangePwdModal: React.FC<IChangePwdModalProps> = ({ visible, onClose }) =>
                             label: '原密码',
                             iconRender: pwdIconRender,
                             className: styles.input,
+                            defaultVisible: true,
+                            autoComplete: 'new-password',
                         },
                         {
                             type: 'password',
@@ -53,6 +56,7 @@ const ChangePwdModal: React.FC<IChangePwdModalProps> = ({ visible, onClose }) =>
                             label: '新密码',
                             iconRender: pwdIconRender,
                             className: styles.input,
+                            autoComplete: 'new-password',
                         },
                         {
                             type: 'password',
@@ -60,6 +64,7 @@ const ChangePwdModal: React.FC<IChangePwdModalProps> = ({ visible, onClose }) =>
                             label: '请重复密码',
                             iconRender: pwdIconRender,
                             className: styles.input,
+                            autoComplete: 'new-password',
                         },
                     ]}
                 />

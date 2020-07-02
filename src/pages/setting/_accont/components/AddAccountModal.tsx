@@ -40,7 +40,7 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
 
     const disabled = visibleType === 'view';
 
-    const treeDisabled = visibleType === 'add';
+    const treeDisabled = true;
 
     useEffect(() => {
         switch (visibleType) {
@@ -75,7 +75,7 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         label: '用户名',
                         name: 'username',
                         className: styles.formInput,
-                        disabled: disabled,
+                        disabled: disabled || visibleType === 'edit',
                     },
                     {
                         type: 'input',
@@ -180,6 +180,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
     const onOKey = useCallback(() => {
         formRef.current!.validateFields().then((values: any) => {
+            console.log(values);
             setSubmitting(true);
             switch (type) {
                 case 'add':

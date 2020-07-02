@@ -15,6 +15,7 @@ import {
     queryRolePermission,
     updateAccount,
 } from '@/services/setting';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 declare interface VisibleProps {
     type: 'add' | 'view' | 'edit';
@@ -121,6 +122,8 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose, onRelo
     const { type } = visible || {};
     const formRef = useRef<JsonFormRef>(null);
     const [submitting, setSubmitting] = useState(false);
+    const dispatch = useDispatch();
+
     const visibleProps = useRef<VisibleProps>({
         type: 'view',
     });
@@ -143,6 +146,10 @@ const AddRoleModal: React.FC<AddAccountModalProps> = ({ visible, onClose, onRelo
                             message.success('添加角色成功');
                             onClose();
                             onSearch();
+                            // 刷新角色列表
+                            dispatch({
+                                type: 'account/queryRoleSimpleList',
+                            });
                         })
                         .finally(() => {
                             setSubmitting(false);

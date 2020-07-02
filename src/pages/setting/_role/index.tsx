@@ -21,6 +21,7 @@ import { IRole } from '@/interface/ISetting';
 import { utcToLocal } from 'react-components/es/utils/date';
 import LoadingSwitch from '@/pages/setting/_role/components/LoadingSwitch';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const fieldsList: FormField[] = [
     {
@@ -99,6 +100,8 @@ const Role = () => {
         queryList: queryRoleList,
     });
 
+    const dispatch = useDispatch();
+
     const [addModal, showAddModal, closeAddModal] = useModal2<{
         type: 'add' | 'view' | 'edit';
         detail?: {
@@ -126,6 +129,10 @@ const Role = () => {
         return deleteRole(id).then(() => {
             message.success('删除成功!');
             onReload();
+            // 刷新角色列表
+            dispatch({
+                type: 'account/queryRoleSimpleList',
+            });
         });
     }, []);
 

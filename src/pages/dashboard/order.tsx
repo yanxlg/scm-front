@@ -14,7 +14,7 @@ import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/util
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_order.less';
-import { PermissionRouterWrap } from 'rc-permission';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 
 const formFields: FormField[] = [
     {
@@ -191,16 +191,23 @@ const OrderAnalysis: React.FC = props => {
                                 <div className={styles.item}>
                                     <div>剩余待拍单</div>
                                     <div>{penddingOrderCount}单</div>
-                                    <Link to="/order?type=2">
-                                        <Button type="primary">去拍单</Button>
-                                    </Link>
+                                    <PermissionComponent
+                                        pid="order/pending_order"
+                                        control="tooltip"
+                                    >
+                                        <Link to="/order?type=2">
+                                            <Button type="primary">去拍单</Button>
+                                        </Link>
+                                    </PermissionComponent>
                                 </div>
                                 <div className={styles.item}>
                                     <div>待发货订单</div>
                                     <div>{penddingPayCount}单</div>
-                                    <Link to="/order?type=3">
-                                        <Button type="primary">去支付</Button>
-                                    </Link>
+                                    <PermissionComponent pid="order/pending_pay" control="tooltip">
+                                        <Link to="/order?type=3">
+                                            <Button type="primary">去支付</Button>
+                                        </Link>
+                                    </PermissionComponent>
                                 </div>
                             </div>
                         </Col>
