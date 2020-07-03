@@ -7,6 +7,7 @@ import User from '@/storage/User';
 import { request } from 'react-components';
 import { history } from '@@/core/history';
 import { RequestOptionsInit, ResponseError } from 'umi-request';
+import { message } from 'antd';
 
 // 全局拦截器
 request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
@@ -35,6 +36,13 @@ request.interceptors.response.use((response, options) => {
             type: 'AuthorizationError',
             data: response.body,
         };
+    }
+    if (status === 403) {
+        let skipResponseInterceptors = options?.skipResponseInterceptors;
+        if (skipResponseInterceptors) {
+            // 需要提示权限问题
+            message.error(`403：用户得到授权，但是访问是被禁止的。`); // 强制提示权限错误
+        }
     }
     return response;
 });
