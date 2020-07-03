@@ -54,6 +54,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                 title: '时间',
                 dataIndex: 'label',
                 align: 'center',
+                width: 150,
             },
             ...getRangeFormatDate(
                 getUTCDate()
@@ -66,6 +67,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                 title: date,
                 dataIndex: date,
                 align: 'center',
+                width: 150,
             })),
         ] as ColumnsType<object>;
     });
@@ -113,11 +115,13 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                     title: '时间',
                     dataIndex: 'label',
                     align: 'center',
+                    width: 150,
                 },
                 ...getRangeFormatDate(values[0].unix(), values[1].unix()).map(date => ({
                     title: date,
                     dataIndex: date,
                     align: 'center',
+                    width: 150,
                 })),
             ] as ColumnsType<object>);
             _getMonitorOrder({
@@ -355,6 +359,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                     columns={columns}
                     dataSource={dataSource}
                     pagination={false}
+                    scroll={{ x: 'max-content' }}
                 />
             </Spin>
         );
