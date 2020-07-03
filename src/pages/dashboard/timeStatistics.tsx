@@ -7,6 +7,7 @@ import Cancel, { ICancelRef } from './components/TimeStatistics/Cancel';
 import styles from './_timeStatistics.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { getPlatformAndStore } from '@/services/dashboard';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const formFields: FormField[] = [
     {
@@ -87,4 +88,7 @@ const TimeStatistics: React.FC = () => {
     }, []);
 };
 
-export default TimeStatistics;
+export default PermissionRouterWrap(TimeStatistics, {
+    login: true,
+    pid: 'dashboard/timeliness',
+});

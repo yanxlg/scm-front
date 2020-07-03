@@ -28,6 +28,7 @@ export default [
             {
                 path: '/dashboard/timeStatistics',
                 name: '时效统计',
+                pid: 'dashboard/timeliness',
             },
         ],
         pid: 'dashboard',
