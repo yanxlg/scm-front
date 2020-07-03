@@ -15,7 +15,7 @@ const config = defineConfig({
         reportFiles: ['!src/.umi/!**', '!node_modules', 'src/!**!/!*.{ts,tsx}'],
     },*/
     hash: true,
-    devtool: dev ? 'source-map' : 'source-map',
+    devtool: dev ? 'source-map' : false,
     antd: {},
     cssModulesTypescriptLoader: {
         mode: 'emit',
