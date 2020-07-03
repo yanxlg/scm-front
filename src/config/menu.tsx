@@ -25,6 +25,10 @@ export default [
                 name: '订单分析',
                 pid: 'dashboard/order',
             },
+            {
+                path: '/dashboard/timeStatistics',
+                name: '时效统计',
+            },
         ],
         pid: 'dashboard',
     },
