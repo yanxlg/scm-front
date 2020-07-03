@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import styles from './_index.less';
 import { Breadcrumb, Button, Dropdown, Menu } from 'antd';
@@ -11,6 +11,7 @@ import { Icons } from '@/components/Icon';
 import { logout } from '@/services/global';
 import { history } from '@@/core/history';
 import User from '@/storage/User';
+import { LoadingOutlined } from '@ant-design/icons/lib';
 
 export type SiderTheme = 'light' | 'dark';
 export interface GlobalHeaderRightProps extends BasicLayoutProps {

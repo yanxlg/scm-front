@@ -43,7 +43,7 @@ const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onClick, checked, ...prop
                 checked={checkedRef.current}
             />
         );
-    }, [props, loading]);
+    }, [props, loading, onClick]);
 };
 
 export default LoadingSwitch;

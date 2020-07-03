@@ -72,7 +72,6 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
     }, []);
 
     useEffect(() => {
-        console.log('--------');
         if (roleIds && queryPermissionTreePromise.current) {
             queryPermissionTreePromise.current.then(() => {
                 queryRolePermission(roleIds).then(({ data }) => {
@@ -98,7 +97,6 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
     }, [roleIds]);
 
     useEffect(() => {
-        console.log('recreate', roleIds);
         if (roleIds) {
             Promise.all([queryTree(), queryRolePermission(roleIds)]).then(([_, { data }]) => {
                 const keyMap = new Map<string | number, true>();
@@ -119,7 +117,6 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
                 });
             });
         } else {
-            console.log('+++++++++');
             queryTree();
         }
     }, []);

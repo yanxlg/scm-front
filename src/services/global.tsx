@@ -207,3 +207,12 @@ export function logout() {
         User.clearToken();
     });
 }
+
+export function updatePwd(oldPassword: string, newPassword: string) {
+    return request.put(GlobalApiPath.updatePwd, {
+        data: {
+            oldPassword,
+            newPassword,
+        },
+    });
+}

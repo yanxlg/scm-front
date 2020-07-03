@@ -54,7 +54,7 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         real_name: real_name,
                         status: status,
                         roles: role_ids,
-                        password: '', // 密码不能显示
+                        password: undefined, // 密码不能显示
                     });
                     setRoleIds(role_ids && role_ids.length ? role_ids : undefined);
                 });
@@ -180,7 +180,6 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
     const onOKey = useCallback(() => {
         formRef.current!.validateFields().then((values: any) => {
-            console.log(values);
             setSubmitting(true);
             switch (type) {
                 case 'add':
@@ -200,6 +199,7 @@ const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     const { password, ...extra } = values;
                     updateAccount(id!, {
                         ...extra,
+                        password,
                     })
                         .then(() => {
                             message.success('修改账号成功');

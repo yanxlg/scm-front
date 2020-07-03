@@ -2,7 +2,7 @@ import ProLayout, {
     MenuDataItem,
     BasicLayoutProps as ProLayoutProps,
 } from '@ant-design/pro-layout';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { Link } from 'umi';
 import { Dispatch } from 'redux';
 import RightContent from '@/components/GlobalHeader/RightContent';
@@ -13,6 +13,8 @@ import '@/styles/menu.less';
 import '@/styles/index.less';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { shallowEqual } from 'react-redux';
+import { PermissionContext } from 'rc-permission';
+import { IPermissionTree } from 'rc-permission/es/Provider';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -21,10 +23,20 @@ export interface BasicLayoutProps extends ProLayoutProps {
     dispatch: Dispatch;
 }
 
-const MenuDataList = MenuData.map(item => {
-    // filter
-    return item as any;
-});
+const filterPermissionMenuList = (menuList: Array<MenuDataItem>, pTree?: IPermissionTree) => {
+    let permissionMenuList: MenuDataItem[] = [];
+    menuList.forEach(({ pid = '', hideInMenu, children, ...extra }) => {
+        // filter
+        if (hideInMenu ? true : pTree && pTree[pid]) {
+            permissionMenuList.push({
+                ...extra,
+                hideInMenu,
+                children: children ? filterPermissionMenuList(children, pTree) : undefined,
+            });
+        }
+    });
+    return permissionMenuList;
+};
 
 const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const dispatch = useDispatch();
@@ -36,6 +48,12 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
             payload,
         });
     }, []);
+
+    const { pTree } = useContext(PermissionContext);
+
+    const MenuDataList = useMemo(() => {
+        return filterPermissionMenuList(MenuData, pTree);
+    }, [pTree]);
 
     return useMemo(() => {
         return (

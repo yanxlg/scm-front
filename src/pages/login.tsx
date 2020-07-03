@@ -80,23 +80,27 @@ const Login = () => {
                     userName,
                     token: token,
                 });
-                queryUserPermission().then(({ data }) => {
-                    const pData: IPermissionTree = {};
-                    const dataPermission: string[] = [];
-                    data.forEach(item => {
-                        if (item.type === '2') {
-                            pData[item.data] = {};
-                        } else if (item.type === '1') {
-                            dataPermission.push(item.data);
-                        }
+                queryUserPermission()
+                    .then(({ data }) => {
+                        const pData: IPermissionTree = {};
+                        const dataPermission: string[] = [];
+                        data.forEach(item => {
+                            if (item.type === '2') {
+                                pData[item.data] = {};
+                            } else if (item.type === '1') {
+                                dataPermission.push(item.data);
+                            }
+                        });
+                        updateTree(pData);
+                        User.updatePData(pData);
+                        User.updateDData(dataPermission); // 数据权限，需要刷新数据权限中所有数据
+                        history.replace('/');
+                    })
+                    .finally(() => {
+                        setLogin(false);
                     });
-                    updateTree(pData);
-                    User.updatePData(pData);
-                    User.updateDData(dataPermission); // 数据权限，需要刷新数据权限中所有数据
-                    history.replace('/');
-                });
             })
-            .finally(() => {
+            .catch(() => {
                 setLogin(false);
             });
     };
