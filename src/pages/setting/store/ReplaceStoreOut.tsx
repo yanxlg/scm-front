@@ -321,24 +321,38 @@ const ReplaceStoreOut = () => {
                                 </React.Fragment>
                             )}
                             {record.id === '' ? (
-                                <Button type="link" danger={true} onClick={() => del(record.id)}>
-                                    删除
-                                </Button>
+                                <PermissionComponent
+                                    pid="setting/store/replace/delete"
+                                    control="tooltip"
+                                >
+                                    <Button
+                                        type="link"
+                                        danger={true}
+                                        onClick={() => del(record.id)}
+                                    >
+                                        删除
+                                    </Button>
+                                </PermissionComponent>
                             ) : (
-                                <PopConfirmLoadingButton
-                                    popConfirmProps={{
-                                        title: '确定要删除该替换出库记录吗？',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        placement: 'topRight',
-                                        onConfirm: () => del(record.id),
-                                    }}
-                                    buttonProps={{
-                                        children: '删除',
-                                        type: 'link',
-                                        danger: true,
-                                    }}
-                                />
+                                <PermissionComponent
+                                    pid="setting/store/replace/delete"
+                                    control="tooltip"
+                                >
+                                    <PopConfirmLoadingButton
+                                        popConfirmProps={{
+                                            title: '确定要删除该替换出库记录吗？',
+                                            okText: '确定',
+                                            cancelText: '取消',
+                                            placement: 'topRight',
+                                            onConfirm: () => del(record.id),
+                                        }}
+                                        buttonProps={{
+                                            children: '删除',
+                                            type: 'link',
+                                            danger: true,
+                                        }}
+                                    />
+                                </PermissionComponent>
                             )}
                         </>
                     );

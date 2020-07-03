@@ -44,6 +44,8 @@ import TakeOrdersRecordModal from '@/pages/order/components/TakeOrdersRecordModa
 import classNames from 'classnames';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -61,6 +63,14 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [orderList, setOrderList] = useState<IPendingOrderItem[]>([]);
     const cacheList = useRef<any[]>([]);
     const [update, setUpdate] = useState(0);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
 
     const [counts, setCounts] = useState({
         penddingFailOrderCount: 0,
@@ -308,16 +318,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         name: 'product_shop',
                         label: '销售店铺名称',
                         syncDefaultOption: defaultOptionItem1,
-                        optionList: () =>
-                            queryShopList().then(({ data = [] }) => {
-                                return data.map((item: any) => {
-                                    const { merchant_name } = item;
-                                    return {
-                                        name: merchant_name,
-                                        value: merchant_name,
-                                    };
-                                });
-                            }),
+                        optionList: {
+                            type: 'select',
+                            selector: (state: ConnectState) => {
+                                return state?.permission?.merchantList;
+                            },
+                        },
                     },
                     {
                         type: 'textarea',
@@ -365,16 +371,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         name: 'product_shop',
                         label: '销售店铺名称',
                         syncDefaultOption: defaultOptionItem1,
-                        optionList: () =>
-                            queryShopList().then(({ data = [] }) => {
-                                return data.map((item: any) => {
-                                    const { merchant_name } = item;
-                                    return {
-                                        name: merchant_name,
-                                        value: merchant_name,
-                                    };
-                                });
-                            }),
+                        optionList: {
+                            type: 'select',
+                            selector: (state: ConnectState) => {
+                                return state?.permission?.merchantList;
+                            },
+                        },
                     },
                     {
                         type: 'select',
@@ -448,16 +450,12 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         name: 'product_shop',
                         label: '销售店铺名称',
                         syncDefaultOption: defaultOptionItem1,
-                        optionList: () =>
-                            queryShopList().then(({ data = [] }) => {
-                                return data.map((item: any) => {
-                                    const { merchant_name } = item;
-                                    return {
-                                        name: merchant_name,
-                                        value: merchant_name,
-                                    };
-                                });
-                            }),
+                        optionList: {
+                            type: 'select',
+                            selector: (state: ConnectState) => {
+                                return state?.permission?.merchantList;
+                            },
+                        },
                     },
                     {
                         type: 'select',

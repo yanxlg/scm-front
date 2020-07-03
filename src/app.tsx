@@ -135,7 +135,7 @@ export function rootContainer(container: any) {
             Page_403: <Page />,
             pTree: User.pData, // 缓存权限列表
             toolTipWrap: <Tooltip title="" trigger={'click'} />,
-            defaultToolTip: '您无权限执行此操作！',
+            defaultToolTip: '账号无此权限，请联系管理员！',
         },
         container,
     );

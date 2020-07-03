@@ -289,9 +289,11 @@ const GoodsAttr: React.FC = props => {
                     align: 'center',
                     render: (_: any, record: ITagItem, index: number) => {
                         return (
-                            <Button type="link" size="small" onClick={() => deleteAttr(index)}>
-                                删除
-                            </Button>
+                            <PermissionComponent pid="setting/goods_attr/batch" control="tooltip">
+                                <Button type="link" size="small" onClick={() => deleteAttr(index)}>
+                                    删除
+                                </Button>
+                            </PermissionComponent>
                         );
                     },
                 },
@@ -352,15 +354,20 @@ const GoodsAttr: React.FC = props => {
                                     />
                                     <div className={styles.paginationContainer}>
                                         {!pending && (
-                                            <Button
-                                                ghost={true}
-                                                type="primary"
-                                                onClick={addAttr}
-                                                className={styles.btnAdd}
+                                            <PermissionComponent
+                                                pid="setting/goods_attr/batch"
+                                                control="tooltip"
                                             >
-                                                <PlusOutlined />
-                                                添加新标签
-                                            </Button>
+                                                <Button
+                                                    ghost={true}
+                                                    type="primary"
+                                                    onClick={addAttr}
+                                                    className={styles.btnAdd}
+                                                >
+                                                    <PlusOutlined />
+                                                    添加新标签
+                                                </Button>
+                                            </PermissionComponent>
                                         )}
                                         <Pagination
                                             current={page}

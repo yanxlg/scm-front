@@ -82,11 +82,17 @@ const Login = () => {
                 });
                 queryUserPermission().then(({ data }) => {
                     const pData: IPermissionTree = {};
+                    const dataPermission: string[] = [];
                     data.forEach(item => {
-                        pData[item.data] = {};
+                        if (item.type === '2') {
+                            pData[item.data] = {};
+                        } else if (item.type === '1') {
+                            dataPermission.push(item.data);
+                        }
                     });
                     updateTree(pData);
                     User.updatePData(pData);
+                    User.updateDData(dataPermission); // 数据权限，需要刷新数据权限中所有数据
                     history.replace('/');
                 });
             })

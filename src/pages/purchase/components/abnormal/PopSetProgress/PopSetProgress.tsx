@@ -5,6 +5,7 @@ import styles from './_PopSetProgress.less';
 import { updateWaybillExceptionPregress } from '@/services/purchase';
 import { IHandleItem } from '@/interface/IPurchase';
 import { refundStatusList, reissueStatusList, returnStatusList } from '@/enums/PurchaseEnum';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface IProps {
     waybillExceptionSn: string;
@@ -132,21 +133,23 @@ const PopSetProgress: React.FC<IProps> = ({ waybillExceptionSn, handle, onReload
 
     return useMemo(() => {
         return (
-            <Popconfirm
-                placement="bottom"
-                okText="确定"
-                cancelText="取消"
-                icon={null}
-                title={progressNode}
-                onConfirm={onConfirm}
-                // onCancel={onCancel}
-                onVisibleChange={onVisibleChange}
-                okButtonProps={{
-                    disabled,
-                }}
-            >
-                <Button type="link">修改</Button>
-            </Popconfirm>
+            <PermissionComponent pid="purchase/abnormal/update_progress" control="tooltip">
+                <Popconfirm
+                    placement="bottom"
+                    okText="确定"
+                    cancelText="取消"
+                    icon={null}
+                    title={progressNode}
+                    onConfirm={onConfirm}
+                    // onCancel={onCancel}
+                    onVisibleChange={onVisibleChange}
+                    okButtonProps={{
+                        disabled,
+                    }}
+                >
+                    <Button type="link">修改</Button>
+                </Popconfirm>
+            </PermissionComponent>
         );
     }, [progressNode, disabled]);
 };

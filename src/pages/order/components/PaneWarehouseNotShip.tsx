@@ -20,6 +20,8 @@ import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -68,12 +70,17 @@ const formFields: FormField[] = [
     },
     {
         type: 'select',
-        name: 'channel_source',
+        name: 'product_shop',
         label: '销售店铺名称',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
         syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
     },
     {
         type: 'dateRanger',
@@ -85,7 +92,7 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: '',
+    product_shop: '',
     warehouse_id: '',
 };
 
@@ -104,6 +111,14 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const _setOrderList = useCallback(list => {
         orderListRef.current = list;
         setOrderList(list);
+    }, []);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
     }, []);
 
     const onSearch = useCallback(

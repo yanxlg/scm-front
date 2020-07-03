@@ -1,4 +1,4 @@
-import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     orderStatusOptionList,
@@ -42,6 +42,7 @@ import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const configFields = [
     'order_goods_status1',
@@ -65,7 +66,13 @@ const PendingShip = ({ updateCount }: PendingShipProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
     const {
         loading,
         pageNumber,

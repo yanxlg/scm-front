@@ -53,6 +53,7 @@ import TrackDialog from '@/pages/order/components/TrackDialog';
 import GoodsDetailDialog from '@/pages/order/components/GoodsDetailDialog';
 import AllColumnsSetting from '@/pages/order/components/AllColumnsSetting';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const configFields = [
     'order_goods_status',
@@ -109,6 +110,13 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
 
     const {
         loading,

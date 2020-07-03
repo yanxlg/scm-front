@@ -3,7 +3,7 @@ import { Switch } from 'antd';
 import { SwitchProps } from 'antd/lib/switch';
 
 declare interface LoadingSwitchProps extends SwitchProps {
-    onClick: (checked: boolean, event: MouseEvent) => Promise<boolean>;
+    onClick: (checked: boolean, event: MouseEvent) => Promise<boolean> | void;
 }
 
 const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onClick, checked, ...props }) => {
@@ -14,14 +14,25 @@ const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onClick, checked, ...prop
 
     const [loading, setLoading] = useState(false);
     const onRealChange = useCallback((checked: boolean, event: MouseEvent) => {
-        setLoading(true);
-        onClick?.(checked, event)
-            .then((checked: boolean) => {
-                checkedRef.current = checked;
-            })
-            .finally(() => {
+        // @ts-ignore
+        if (props['_privateClick']) {
+            // fix with permission component
+            onClick?.(checked, event);
+        } else if (onClick) {
+            setLoading(true);
+            const result = onClick(checked, event);
+            if (result) {
+                result
+                    .then((checked: boolean) => {
+                        checkedRef.current = checked;
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                    });
+            } else {
                 setLoading(false);
-            });
+            }
+        }
     }, []);
     return useMemo(() => {
         return (

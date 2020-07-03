@@ -42,6 +42,8 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import { queryShopList } from '@/services/global';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import { ConnectState } from '@/models/connect';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const salesVolumeList = [
     {
@@ -127,12 +129,12 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map(({ merchant_name, merchant_id }) => {
-                    return { name: merchant_name, value: merchant_id };
-                });
-            }),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
     },
     {
         type: 'select',
@@ -179,7 +181,13 @@ const ChannelList: React.FC = props => {
     const [exportDialog, setExportDialog] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
     const { visible, onClose, setVisibleProps } = useModal<{
         product_ids: string;
         merchant_id: string;

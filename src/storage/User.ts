@@ -5,6 +5,7 @@ declare interface IUser {
     password?: string;
     token?: string;
     pData?: IPermissionTree;
+    dData?: string[];
 }
 /**
  * 用户信息管理类，跟localStorage进行绑定
@@ -30,6 +31,10 @@ class User {
         this._user.pData = pData;
         this.setUser(this._user);
     }
+    public static updateDData(dData: string[]) {
+        this._user.dData = dData;
+        this.setUser(this._user);
+    }
     public static get userName() {
         return this.localUser.userName;
     }
@@ -41,6 +46,9 @@ class User {
     }
     public static get pData() {
         return this.localUser.pData;
+    }
+    public static get dData() {
+        return this.localUser.dData;
     }
     public static clear() {
         this._user = (undefined as unknown) as IUser;

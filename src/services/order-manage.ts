@@ -346,6 +346,7 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
                 value: platform,
                 children: obj[platform],
             };
+
             list.push(item);
         });
         return list;

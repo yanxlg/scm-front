@@ -1,4 +1,4 @@
-import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
 import {
@@ -37,6 +37,7 @@ import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import QRCode from 'qrcode.react';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const configFields = [
     'product_shop1',
@@ -59,7 +60,13 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
     const {
         loading,
         pageNumber,
@@ -187,15 +194,17 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                                     <QRCode value={value} size={40} className="order-qr-small" />
                                 </AutoEnLargeImg>
                                 <div>
-                                    <LoadingButton
-                                        ghost={true}
-                                        size="small"
-                                        type="primary"
-                                        style={{ marginTop: 6 }}
-                                        onClick={() => confirmPay(purchaseParentOrderSn!)}
-                                    >
-                                        确认支付
-                                    </LoadingButton>
+                                    <PermissionComponent pid="order/pay/confirm" control="tooltip">
+                                        <LoadingButton
+                                            ghost={true}
+                                            size="small"
+                                            type="primary"
+                                            style={{ marginTop: 6 }}
+                                            onClick={() => confirmPay(purchaseParentOrderSn!)}
+                                        >
+                                            确认支付
+                                        </LoadingButton>
+                                    </PermissionComponent>
                                 </div>
                             </div>
                         ) : (

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
@@ -15,6 +15,8 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
 import { PermissionComponent } from 'rc-permission';
+import { ConnectState } from '@/models/connect';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const formFields: FormField[] = [
     {
@@ -31,7 +33,12 @@ const formFields: FormField[] = [
         name: 'enable_platform',
         placeholder: '请选择',
         className: styles.select,
-        optionList: () => queryShopFilterList(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.filterList;
+            },
+        },
         onChange: (name, form) => {
             form.resetFields(['enable_merchant']);
         },
@@ -44,7 +51,12 @@ const formFields: FormField[] = [
         optionListDependence: { name: 'enable_platform', key: 'children' },
         placeholder: '请选择',
         className: styles.select,
-        optionList: () => queryShopFilterList(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.filterList;
+            },
+        },
         formatter: 'join',
     },
     {
@@ -72,6 +84,15 @@ const PaneSellPrice: React.FC = props => {
     const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // ADD
     const [updateRangeStatus, setUpdateRangeStatus] = useState(false);
     const [currentId, setCurrentId] = useState('');
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
+
     const {
         loading,
         pageNumber,

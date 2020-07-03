@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback } from 'react';
+import React, { useMemo, useRef, useCallback, useEffect } from 'react';
 import { Button, notification } from 'antd';
 import {
     JsonForm,
@@ -27,6 +27,8 @@ import CancelOrder from './CancelOrder';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { defaultOptionItem1 } from '@/enums/OrderEnum';
 import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -54,16 +56,12 @@ const formFields: FormField[] = [
         label: '销售店铺名称',
         className: 'order-input-review',
         syncDefaultOption: defaultOptionItem1,
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map((item: any) => {
-                    const { merchant_name } = item;
-                    return {
-                        name: merchant_name,
-                        value: merchant_name,
-                    };
-                });
-            }),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
     },
     {
         type: 'textarea',
@@ -98,6 +96,14 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
         formRef: formRef,
     });
     const { visible, setVisibleProps, onClose } = useModal<boolean>();
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
 
     const orderList = useMemo(() => {
         const list: IReviewOrderItem[] = [];
