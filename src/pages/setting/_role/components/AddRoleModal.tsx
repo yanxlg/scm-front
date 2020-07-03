@@ -62,12 +62,34 @@ const AddRoleModalContent: React.FC<AddRoleModalContent> = ({ originFormRef, typ
                         label: '角色名称',
                         name: 'name',
                         disabled: disabled,
+                        formItemClassName: classNames(
+                            formStyles.formItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
+                        ),
+                        rules: [
+                            {
+                                required: true,
+                                message: '请输入姓名',
+                            },
+                        ],
                     },
                     {
                         type: 'input',
                         label: '角色描述',
                         name: 'description',
                         disabled: disabled,
+                        formItemClassName: classNames(
+                            formStyles.formItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
+                        ),
+                        rules: [
+                            {
+                                required: true,
+                                message: '请输入姓名',
+                            },
+                        ],
                     },
                     {
                         type: 'radioGroup',
@@ -113,6 +135,10 @@ const AddRoleModalContent: React.FC<AddRoleModalContent> = ({ originFormRef, typ
                 layout="horizontal"
                 labelClassName={styles.formModalLabel}
                 fieldList={formFields}
+                containerClassName={classNames(
+                    formStyles.formContainer,
+                    formStyles.formHelpAbsolute,
+                )}
             />
         );
     }, []);
