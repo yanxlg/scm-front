@@ -16,6 +16,7 @@ import styles from '../_index.less';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import Export from '@/components/Export';
 import { exportExcel } from '@/services/global';
+import { PermissionComponent } from 'rc-permission';
 
 const _getCatagoryList = () =>
     getCatagoryList()
@@ -201,12 +202,17 @@ const PaneWeight: React.FC = props => {
                 render: (val: number, record: ICatagoryWeightListRes) => {
                     const { thirdCategoryId } = record;
                     return (
-                        <a
-                            className={styles.hover}
-                            onClick={() => showUpdateRecordModal(thirdCategoryId + '')}
+                        <PermissionComponent
+                            pid={'goods/price_strategy/weight/log'}
+                            control="tooltip"
                         >
-                            查看
-                        </a>
+                            <a
+                                className={styles.hover}
+                                onClick={() => showUpdateRecordModal(thirdCategoryId + '')}
+                            >
+                                查看
+                            </a>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -234,16 +240,18 @@ const PaneWeight: React.FC = props => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
+                    <PermissionComponent pid="goods/price_strategy/weight/import" control="tooltip">
+                        <Button
+                            ghost={true}
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={() => setWeightStatus(true)}
+                        >
+                            批量导入
+                        </Button>
+                    </PermissionComponent>
                     <Button
-                        ghost
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => setWeightStatus(true)}
-                    >
-                        批量导入
-                    </Button>
-                    <Button
-                        ghost
+                        ghost={true}
                         type="primary"
                         className={formStyles.formBtn}
                         onClick={() => setExportStatus(true)}
@@ -258,7 +266,7 @@ const PaneWeight: React.FC = props => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 // columnsSettingRender={true}
                 rowKey="thirdCategoryId"
                 loading={loading}

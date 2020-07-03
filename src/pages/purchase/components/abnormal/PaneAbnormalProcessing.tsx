@@ -38,6 +38,7 @@ import useDetail from '../../hooks/useDetail';
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { PermissionComponent } from 'rc-permission';
 
 interface IProps {
     execingCount: number;
@@ -266,15 +267,16 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
 
     const toolBarRender = useCallback(() => {
         return [
-            <LoadingButton
-                key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={_finishPurchaseExceptionOrder}
-                disabled={selectedRowKeys.length === 0}
-            >
-                完结异常单
-            </LoadingButton>,
+            <PermissionComponent key="1" pid="purchase/abnormal/finish" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={_finishPurchaseExceptionOrder}
+                    disabled={selectedRowKeys.length === 0}
+                >
+                    完结异常单
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys]);
 

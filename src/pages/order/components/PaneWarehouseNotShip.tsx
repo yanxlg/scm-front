@@ -19,6 +19,9 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -67,12 +70,17 @@ const formFields: FormField[] = [
     },
     {
         type: 'select',
-        name: 'channel_source',
+        name: 'product_shop',
         label: '销售店铺名称',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
         syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
     },
     {
         type: 'dateRanger',
@@ -84,7 +92,7 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: '',
+    product_shop: '',
     warehouse_id: '',
 };
 
@@ -103,6 +111,14 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const _setOrderList = useCallback(list => {
         orderListRef.current = list;
         setOrderList(list);
+    }, []);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
     }, []);
 
     const onSearch = useCallback(
@@ -514,15 +530,21 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const list = getOrderGoodsIdList();
         return [
-            <CancelOrder orderGoodsIds={list} onReload={onSearch} getAllTabCount={getAllTabCount}>
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={list.length ? false : true}
-                >
-                    取消渠道订单
-                </Button>
+            <CancelOrder
+                key="purchase_order"
+                orderGoodsIds={list}
+                onReload={onSearch}
+                getAllTabCount={getAllTabCount}
+            >
+                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={list.length ? false : true}
+                    >
+                        取消渠道订单
+                    </Button>
+                </PermissionComponent>
             </CancelOrder>,
         ];
     }, [getOrderGoodsIdList]);

@@ -1,11 +1,20 @@
 import formatter from 'react-components/es/utils/formatter';
-import { firstNumber, multipleToArray } from '@/utils/formatter';
+import { arrayNumber, firstNumber, multipleToArray } from '@/utils/formatter';
+import 'nprogress/nprogress.css';
+import NProgress from 'nprogress';
+import { Modal, Tooltip } from 'antd';
+import { loadingConfig } from '@/loading';
+import React from 'react';
+import { PermissionProvider } from 'rc-permission';
+import User from '@/storage/User';
+import { history } from '@@/core/history';
+import Page from '@/pages/403';
+import { queryUserPermission } from '@/services/global';
+import { IPermissionTree } from 'rc-permission/es/Provider';
 
-const logger = require('dva-logger');
+NProgress.configure({ showSpinner: false });
 
-// const _ = require('lodash/lodash.js');
-//
-// console.log(_);
+const develop = process.env.NODE_ENV !== 'production';
 
 export const dva = {
     config: {
@@ -13,7 +22,7 @@ export const dva = {
             err.preventDefault();
         },
     },
-    plugins: [logger()],
+    plugins: develop ? [require('dva-logger')()] : [],
 };
 
 // performance
@@ -82,9 +91,74 @@ declare module 'react-components' {
     interface Formatters {
         multipleToArray: typeof multipleToArray;
         firstNumber: typeof firstNumber;
+        arrayNumber: typeof arrayNumber;
     }
 }
 formatter.extend({
     multipleToArray: multipleToArray,
     firstNumber: firstNumber,
+    arrayNumber: arrayNumber,
 });
+
+// 进度条精度优化
+export function onRouteChange({
+    location,
+    routes,
+    action,
+}: {
+    location: Location;
+    routes: any[];
+    action: string;
+}) {
+    Modal.destroyAll();
+    // 滚动条自动滚动到顶部
+    if (loadingConfig.timer) {
+        clearTimeout(loadingConfig.timer);
+        loadingConfig.timer = undefined;
+        NProgress.remove();
+    }
+    NProgress.start();
+    NProgress.inc();
+    loadingConfig.timer = window.setTimeout(() => {
+        NProgress.done();
+        loadingConfig.timer = undefined;
+    }, 200 + Math.floor(Math.random() * 300));
+}
+
+export function rootContainer(container: any) {
+    return React.createElement(
+        PermissionProvider,
+        {
+            format: 'flat',
+            checkLogin: () => !!User.token,
+            history: history,
+            Page_403: <Page />,
+            pTree: User.pData, // 缓存权限列表
+            toolTipWrap: <Tooltip title="" trigger={'click'} />,
+            defaultToolTip: '账号无此权限，请联系管理员！',
+        },
+        container,
+    );
+}
+
+/*export function render(oldRender: any) {
+    // 使用原有权限，同时刷新权限
+    queryUserPermission().then(({ data }) => {
+        const pData: IPermissionTree = {};
+        data.forEach(item => {
+            pData[item.data] = {};
+        });
+        User.updatePData(pData);
+    });
+}*/
+
+// 动态权限路由配置
+/*let extraRoutes;
+export function patchRoutes({ routes }) {
+    merge(routes, extraRoutes);
+}
+export function render() {
+    fetch('/api/routes').then(res => {
+        extraRoutes = res.routes;
+    });
+}*/

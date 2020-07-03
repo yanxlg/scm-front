@@ -5,6 +5,8 @@ import { StockControl } from './components/StockControl';
 import queryString from 'query-string';
 import { StockType } from '@/config/dictionaries/Stock';
 import Container from '@/components/Container';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 
@@ -20,13 +22,28 @@ const Stock: React.FC = (props: any) => {
                     type="card"
                     children={[
                         <TabPane tab="入库管理" key="1">
-                            <InOutStock type={StockType.In} />
+                            <PermissionComponent
+                                pid="stock/in"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <InOutStock type={StockType.In} />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab="出库管理" key="2">
-                            <InOutStock type={StockType.Out} />
+                            <PermissionComponent
+                                pid="stock/out"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <InOutStock type={StockType.Out} />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab="库存管理" key="3">
-                            <StockControl />
+                            <PermissionComponent
+                                pid="stock/list"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <StockControl />
+                            </PermissionComponent>
                         </TabPane>,
                     ]}
                 />
@@ -35,4 +52,7 @@ const Stock: React.FC = (props: any) => {
     }, []);
 };
 
-export default Stock;
+export default PermissionRouterWrap(Stock, {
+    login: true,
+    pid: 'stock',
+});

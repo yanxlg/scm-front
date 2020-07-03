@@ -1,9 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import '../styles/index.less';
 import '../styles/login.less';
 import { Button, Checkbox, Input } from 'antd';
 import User from '@/storage/User';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
+import { loginUser, queryUserPermission } from '@/services/global';
+import { history } from '@@/core/history';
+import { IPermissionTree } from 'rc-permission/es/Provider';
+import { PermissionContext } from 'rc-permission';
 
 declare interface ILoginState {
     remember: boolean;
@@ -20,12 +24,13 @@ declare interface ILoginState {
 const Login = () => {
     const [userName, setUserName] = useState(User.userName);
     const [password, setPassword] = useState(User.password || '');
-    const [userNameError, setUserNameError] = useState();
-    const [passwordError, setPasswordError] = useState();
+    const [userNameError, setUserNameError] = useState<string>();
+    const [passwordError, setPasswordError] = useState<string>();
     const [userNameActive, setUserNameActive] = useState(!!User.userName);
     const [passwordActive, setPasswordActive] = useState(!!User.password);
     const [login, setLogin] = useState(false);
     const [remember, setRemember] = useState(!!User.password);
+    const { updateTree } = useContext(PermissionContext);
 
     const onUserNameFocus = useCallback(() => {
         setUserNameActive(true);
@@ -55,22 +60,55 @@ const Login = () => {
     }, []);
 
     const onLogin = () => {
+        if (!userName) {
+            setUserNameError('请输入用户名');
+            return;
+        }
+        if (!password) {
+            setPasswordError('请输入密码');
+            return;
+        }
         setLogin(true);
+        loginUser({
+            username: userName,
+            password: password,
+        })
+            .then(({ data: token }) => {
+                // 获取权限数组
+                User.setUser({
+                    password,
+                    userName,
+                    token: token,
+                });
+                queryUserPermission()
+                    .then(({ data }) => {
+                        const pData: IPermissionTree = {};
+                        const dataPermission: string[] = [];
+                        data.forEach(item => {
+                            if (item.type === '2') {
+                                pData[item.data] = {};
+                            } else if (item.type === '1') {
+                                dataPermission.push(item.data);
+                            }
+                        });
+                        updateTree(pData);
+                        User.updatePData(pData);
+                        User.updateDData(dataPermission); // 数据权限，需要刷新数据权限中所有数据
+                        history.replace('/');
+                    })
+                    .finally(() => {
+                        setLogin(false);
+                    });
+            })
+            .catch(() => {
+                setLogin(false);
+            });
     };
 
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const onLoaded = useCallback(e => {
-        // 读取url
-    }, []);
-
-    const iframe = useMemo(() => {
-        // 有可能会直接访问中台页面，如果直接是中台页面说明登陆状态仍然存在，否则才走登陆
-        return null;
-    }, []);
     return useMemo(() => {
         return (
             <main className="main login-bg">
-                <div className="login-logo">供应链管理中台</div>
+                <div className="login-logo">供应链中台</div>
                 <div className="login-box">
                     <div className="login-title">登录</div>
                     <div className={`login-item ${userNameError ? 'login-error' : ''}`}>
@@ -81,6 +119,7 @@ const Login = () => {
                             onFocus={onUserNameFocus}
                             onChange={onInputUserName}
                             onBlur={onUserNameBlur}
+                            autoComplete="off"
                         />
                         <label
                             className={`login-input-label ${
@@ -116,7 +155,7 @@ const Login = () => {
                         className="login-remember"
                         onChange={onRememberChange}
                     >
-                        下次自动登录
+                        记住账号
                     </Checkbox>
                     <Button
                         loading={login}
@@ -128,10 +167,9 @@ const Login = () => {
                         登录
                     </Button>
                 </div>
-                {iframe}
             </main>
         );
-    }, [password, userName]);
+    }, [password, userName, passwordActive, userNameActive, login, remember]);
 };
 
 export default Login;

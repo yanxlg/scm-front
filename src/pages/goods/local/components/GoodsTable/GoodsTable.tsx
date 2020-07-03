@@ -29,6 +29,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { PaginationConfig } from 'react-components/es/FitTable';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
 import useCountryFreightModal from '../../hooks/useCountryFreightModal';
+import { PermissionComponent } from 'rc-permission';
 
 interface IProps {
     loading: boolean;
@@ -178,43 +179,46 @@ const GoodsTable: React.FC<IProps> = ({
         };
         const disabled = selectedRowKeys.length === 0;
         return [
-            <Button
-                key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={handleClickOnsale}
-                disabled={disabled || !sourceChannel}
-            >
-                一键上架
-            </Button>,
-            <Button
-                ghost
-                key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={handleClickAllOnsale}
-                disabled={!sourceChannel}
-            >
-                查询商品一键上架
-            </Button>,
-            <Button
-                key="4"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => showModal(selectedRowKeys)}
-                disabled={disabled}
-            >
-                修改商品属性
-            </Button>,
-
-            <LoadingButton
-                key="3"
-                className={formStyles.formBtn}
-                onClick={_getGoodsDelete}
-                disabled={disabled}
-            >
-                删除
-            </LoadingButton>,
+            <PermissionComponent key="1" pid={'goods/local/onsale'} control="tooltip">
+                <Button
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={handleClickOnsale}
+                    disabled={disabled || !sourceChannel}
+                >
+                    一键上架
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent key="2" pid={'goods/local/super_onsale'} control="tooltip">
+                <Button
+                    ghost={true}
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={handleClickAllOnsale}
+                    disabled={!sourceChannel}
+                >
+                    查询商品一键上架
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent key="3" pid={'goods/local/modify_attr'} control="tooltip">
+                <Button
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => showModal(selectedRowKeys)}
+                    disabled={disabled}
+                >
+                    修改商品属性
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent key="4" pid={'goods/local/delete'} control="tooltip">
+                <LoadingButton
+                    className={formStyles.formBtn}
+                    onClick={_getGoodsDelete}
+                    disabled={disabled}
+                >
+                    删除
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys, sourceChannel, _getGoodsDelete]);
 
@@ -274,15 +278,22 @@ const GoodsTable: React.FC<IProps> = ({
                         <>
                             <div>
                                 {goods_status !== 'FROZEN' && (
-                                    <Button type="link" onClick={() => showEditGoods(product_id)}>
-                                        编辑商品
-                                    </Button>
+                                    <PermissionComponent pid="goods/local/edit" control="tooltip">
+                                        <Button
+                                            type="link"
+                                            onClick={() => showEditGoods(product_id)}
+                                        >
+                                            编辑商品
+                                        </Button>
+                                    </PermissionComponent>
                                 )}
                             </div>
                             <div style={{ marginTop: -6 }}>
-                                <Link to={`/goods/local/${row.commodity_id}`}>
-                                    <Button type="link">查看更多版本</Button>
-                                </Link>
+                                <PermissionComponent pid="goods/local/version" control="tooltip">
+                                    <Link to={`/goods/local/${row.commodity_id}`}>
+                                        <Button type="link">查看更多版本</Button>
+                                    </Link>
+                                </PermissionComponent>
                             </div>
                         </>
                     );

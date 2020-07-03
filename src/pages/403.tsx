@@ -1,9 +1,16 @@
 import React, { useCallback, useMemo } from 'react';
-import { Result, Button } from 'antd';
+import { Result } from 'antd';
 import { history } from 'umi';
+import { logout } from '@/services/global';
+import { LoadingButton } from 'react-components';
 
 const Page: React.FC = () => {
-    const goToHome = useCallback(() => history.replace('/'), []);
+    const onLogout = useCallback(() => {
+        return logout().then(() => {
+            history.replace('/login');
+        });
+    }, []);
+
     return useMemo(() => {
         return (
             <Result
@@ -11,9 +18,9 @@ const Page: React.FC = () => {
                 title="403"
                 subTitle="抱歉，你无权访问该页面。"
                 extra={
-                    <Button type="primary" onClick={goToHome}>
-                        返回首页
-                    </Button>
+                    <LoadingButton type="primary" onClick={onLogout}>
+                        切换账号
+                    </LoadingButton>
                 }
             />
         );
