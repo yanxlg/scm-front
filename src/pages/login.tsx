@@ -82,6 +82,11 @@ const Login = () => {
                 });
                 queryUserPermission()
                     .then(({ data }) => {
+                        if (!data) {
+                            setUserNameError('该用户没有任何权限');
+                            User.clearToken();
+                            return;
+                        }
                         const pData: IPermissionTree = {};
                         const dataPermission: string[] = [];
                         data.forEach(item => {

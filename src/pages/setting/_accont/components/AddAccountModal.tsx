@@ -76,13 +76,35 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         name: 'username',
                         className: styles.formInput,
                         disabled: disabled || visibleType === 'edit',
+                        formItemClassName: classNames(
+                            formStyles.formItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
+                        ),
+                        rules: [
+                            {
+                                required: true,
+                                message: '请输入用户名',
+                            },
+                        ],
                     },
                     {
                         type: 'input',
                         label: '姓名',
                         name: 'real_name',
                         className: styles.formInput,
+                        formItemClassName: classNames(
+                            formStyles.formItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
+                        ),
                         disabled: disabled,
+                        rules: [
+                            {
+                                required: true,
+                                message: '请输入姓名',
+                            },
+                        ],
                     },
                     {
                         type: 'password',
@@ -90,7 +112,26 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         name: 'password',
                         className: styles.formInput,
                         disabled: disabled,
+                        formItemClassName: classNames(
+                            formStyles.formItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
+                        ),
                         defaultVisible: true,
+                        rules: [
+                            ({ getFieldValue }) => ({
+                                validator: (rule, form) => {
+                                    const password = getFieldValue('password');
+                                    if (!password && visibleType === 'add') {
+                                        return Promise.reject('请输入密码');
+                                    }
+                                    if (password && password.length < 8) {
+                                        return Promise.reject('密码必须大于8位');
+                                    }
+                                    return Promise.resolve();
+                                },
+                            }),
+                        ],
                     },
                     {
                         type: 'radioGroup',
@@ -98,6 +139,11 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         label: '状态',
                         initialValue: '1',
                         disabled: disabled,
+                        formItemClassName: classNames(
+                            formStyles.formItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
+                        ),
                         options: [
                             {
                                 label: '启用',
@@ -125,12 +171,20 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                         formItemClassName: classNames(
                             formStyles.formItem,
                             styles.formModalRoleItem,
+                            formStyles.formRequiredHide,
+                            formStyles.formRequiredAbsolute,
                         ),
                         formatter: 'arrayNumber',
                         onChange: (name: string, form: FormInstance) => {
                             const roles = form.getFieldValue('roles');
                             setRoleIds(roles);
                         },
+                        rules: [
+                            {
+                                required: true,
+                                message: '请选择角色',
+                            },
+                        ],
                     },
                 ],
             },
@@ -152,6 +206,10 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                 ref={originFormRef}
                 layout="horizontal"
                 labelClassName={styles.formModalLabel}
+                containerClassName={classNames(
+                    formStyles.formContainer,
+                    formStyles.formHelpAbsolute,
+                )}
                 fieldList={formFields}
             />
         );

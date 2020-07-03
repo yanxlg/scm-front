@@ -70,6 +70,15 @@ const ChangePwdModalContent = ({ originRef }: { originRef: RefObject<JsonFormRef
                                 required: true,
                                 message: '请输入新密码',
                             },
+                            ({ getFieldValue }) => ({
+                                validator: (rule, form) => {
+                                    const newPassword = getFieldValue('newPassword');
+                                    if (newPassword && newPassword.length < 8) {
+                                        return Promise.reject('密码必须大于8位');
+                                    }
+                                    return Promise.resolve();
+                                },
+                            }),
                         ],
                     },
                     {
@@ -94,6 +103,9 @@ const ChangePwdModalContent = ({ originRef }: { originRef: RefObject<JsonFormRef
                                 validator: (rule, form) => {
                                     const newPassword = getFieldValue('newPassword');
                                     const newPassword1 = getFieldValue('newPassword1');
+                                    if (newPassword1 && newPassword1.length < 8) {
+                                        return Promise.reject('密码必须大于8位');
+                                    }
                                     if (!newPassword || newPassword === newPassword1) {
                                         return Promise.resolve();
                                     } else {
