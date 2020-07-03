@@ -13,7 +13,7 @@
     "dependencies": {
         "@ant-design/icons": "^4.0.5",
         "@ant-design/pro-layout": "^5.0.9",
-        "antd": "4.3.4",
+        "antd": "^4.4.0",
         "classnames": "^2.2.6",
         "dayjs": "^1.8.23",
         "dva-logger": "^1.0.0",
