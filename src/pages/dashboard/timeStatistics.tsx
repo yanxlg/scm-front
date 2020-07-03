@@ -1,13 +1,12 @@
 import React, { useMemo, useRef, useCallback } from 'react';
 import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { queryShopFilterList } from '@/services/global';
 import OutStock, { IOutStockRef } from './components/TimeStatistics/OutStock';
-import InStock, { IInStockRef } from './components/TimeStatistics/InStock';
+import InStock from './components/TimeStatistics/InStock';
 import Cancel, { ICancelRef } from './components/TimeStatistics/Cancel';
-
 import styles from './_timeStatistics.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { getPlatformAndStore } from '@/services/dashboard';
 
 const formFields: FormField[] = [
     {
@@ -18,7 +17,7 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
-        optionList: () => queryShopFilterList(),
+        optionList: () => getPlatformAndStore(),
         onChange: (_, form) => {
             form.resetFields(['channel_merchant_name']);
         },
@@ -35,14 +34,13 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
-        optionList: () => queryShopFilterList(),
+        optionList: () => getPlatformAndStore(),
     },
 ];
 
 const TimeStatistics: React.FC = () => {
     const searchRef = useRef<JsonFormRef>(null);
     const outStockRef = useRef<IOutStockRef>(null);
-    const InStockRef = useRef<IInStockRef>(null);
     const cancelRef = useRef<ICancelRef>(null);
 
     const onSearch = useCallback(() => {
@@ -79,7 +77,7 @@ const TimeStatistics: React.FC = () => {
                     <OutStock ref={outStockRef} searchRef={searchRef} />
                 </div>
                 <div className={styles.dataSection}>
-                    <InStock ref={outStockRef} />
+                    <InStock />
                 </div>
                 <div className={styles.dataSection}>
                     <Cancel ref={cancelRef} searchRef={searchRef} />

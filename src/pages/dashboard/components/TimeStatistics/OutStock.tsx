@@ -223,7 +223,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
     );
 
     const renderChart = useCallback((startTime, endTime, data) => {
-        console.log('renderChart', startTime, endTime, data);
+        // console.log('renderChart', startTime, endTime, data);
         const { lastUpdateTime, monitorOrder } = data;
 
         const formatDateList = getRangeFormatDate(startTime, endTime);
@@ -414,7 +414,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 <div id="out-stock" className={styles.chartSection}></div>
                 <Table
                     bordered
-                    key="label"
+                    rowKey="label"
                     columns={columns}
                     dataSource={dataSource}
                     pagination={false}

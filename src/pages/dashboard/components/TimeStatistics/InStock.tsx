@@ -1,13 +1,4 @@
-import React, {
-    useState,
-    useCallback,
-    useMemo,
-    useEffect,
-    useRef,
-    forwardRef,
-    ForwardRefRenderFunction,
-    useImperativeHandle,
-} from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { DatePicker, Table, Spin } from 'antd';
 import {
     getUTCDate,
@@ -26,18 +17,14 @@ import dayjs, { Dayjs } from 'dayjs';
 import styles from '../../_timeStatistics.less';
 import { ColumnsType } from 'antd/es/table';
 import { getMonitorPurchaseOrder } from '@/services/dashboard';
-import { IMonitorOrderReq, IMonitorOrderItem } from '@/interface/IDashboard';
+import { IMonitorOrderReq, IMonitorPurchaseOrderItem } from '@/interface/IDashboard';
 
 const { RangePicker } = DatePicker;
 
 const timeFormat = 'YYYY-MM-DD';
 const colors = ['#aaa', '#73A0FA', '#73DEB3', '#FFB761'];
 
-export interface IInStockRef {
-    onSearch(): Promise<any>;
-}
-
-const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
+const InStock: React.FC = ({}) => {
     const chartRef = useRef<ECharts | null>(null);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState<[Dayjs, Dayjs]>([
@@ -89,7 +76,8 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
                     // console.log('getMonitorPurchaseOrder', data);
                     renderChart(startTime, endTime, data);
 
-                    data.monitorOrder && setDataSource(getDataSource(data.monitorOrder));
+                    data.monitorPurchaseOrder &&
+                        setDataSource(getDataSource(data.monitorPurchaseOrder));
                 })
                 .finally(() => {
                     setLoading(false);
@@ -126,37 +114,26 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
     );
 
     const getDataSource = useCallback(data => {
-        const dateMap: { [key: string]: IMonitorOrderItem[] } = {};
-        data.forEach((item: IMonitorOrderItem) => {
-            const {
-                confirmTime,
-                totalNum = 0,
-                outboundNum = 0,
-                cancelNumBeforeOutbound = 0,
-                cancelNumAfterOutbound = 0,
-                ...rest
-            } = item;
-            const date = confirmTime.substr(0, 10);
+        const dateMap: { [key: string]: IMonitorPurchaseOrderItem[] } = {};
+        data.forEach((item: IMonitorPurchaseOrderItem) => {
+            const { orderTime, totalNum = 0, inboundNum = 0, cancelNumNoPay = 0, ...rest } = item;
+            const date = orderTime.substr(0, 10);
             !dateMap[date] && (dateMap[date] = []);
             dateMap[date].push({
-                confirmTime: date,
+                orderTime: date,
                 totalNum,
-                outboundNum,
-                cancelNumBeforeOutbound,
-                cancelNumAfterOutbound,
+                inboundNum,
+                cancelNumNoPay,
                 percentage:
-                    totalNum - cancelNumBeforeOutbound === 0
+                    inboundNum === 0
                         ? '0%'
-                        : Number(
-                              ((outboundNum / (totalNum - cancelNumBeforeOutbound)) * 100).toFixed(
-                                  2,
-                              ),
-                          ) + '%',
+                        : Number(((inboundNum / (totalNum - cancelNumNoPay)) * 100).toFixed(2)) +
+                          '%',
                 ...rest,
             });
         });
         const dateKeys = Object.keys(dateMap);
-        const needDateMap: { [key: string]: IMonitorOrderItem } = {};
+        const needDateMap: { [key: string]: IMonitorPurchaseOrderItem } = {};
         dateKeys.forEach(date => {
             const list = dateMap[date];
             const i = dateMap[date].findIndex(({ dayNum }) => dayNum === 8);
@@ -185,18 +162,18 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
         ];
 
         Object.keys(needDateMap).map(date => {
-            // const {
-            //     totalNum,
-            //     inboundNum,
-            //     cancelNumNoPay,
-            //     percentage,
-            //     specialPercentage,
-            // } = needDateMap[date];
-            // ret[0][date] = totalNum;
-            // ret[1][date] = outboundNum;
-            // ret[2][date] = cancelNumBeforeOutbound + cancelNumAfterOutbound;
-            // ret[3][date] = specialPercentage || '0%';
-            // ret[4][date] = percentage || '0%';
+            const {
+                totalNum,
+                inboundNum,
+                cancelNumNoPay,
+                percentage,
+                specialPercentage,
+            } = needDateMap[date];
+            ret[0][date] = totalNum;
+            ret[1][date] = inboundNum;
+            ret[2][date] = cancelNumNoPay;
+            ret[3][date] = specialPercentage || '0%';
+            ret[4][date] = percentage || '0%';
         });
         // console.log(11111111, ret);
         return ret;
@@ -206,29 +183,21 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
         return _getMonitorPurchaseOrder();
     }, [_getMonitorPurchaseOrder]);
 
-    useImperativeHandle(
-        ref,
-        () => ({
-            onSearch: onSearch,
-        }),
-        [onSearch],
-    );
-
     const renderChart = useCallback((startTime, endTime, data) => {
-        console.log('renderChart', startTime, endTime, data);
-        const { lastUpdateTime, monitorOrder } = data;
+        // console.log('renderChart', startTime, endTime, data);
+        const { lastUpdateTime, monitorPurchaseOrder } = data;
 
         const formatDateList = getRangeFormatDate(startTime, endTime);
 
-        const dayMap: { [key: string]: IMonitorOrderItem[] } = {};
+        const dayMap: { [key: string]: IMonitorPurchaseOrderItem[] } = {};
 
-        monitorOrder?.forEach((item: IMonitorOrderItem) => {
-            const { dayNum, confirmTime, ...rest } = item;
+        monitorPurchaseOrder?.forEach((item: IMonitorPurchaseOrderItem) => {
+            const { dayNum, orderTime, ...rest } = item;
             !dayMap[dayNum] && (dayMap[dayNum] = []);
             dayMap[dayNum].push({
                 ...rest,
                 dayNum,
-                confirmTime: confirmTime.substr(0, 10),
+                orderTime: orderTime.substr(0, 10),
             });
         });
 
@@ -256,11 +225,9 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
             }
             const orderList = dayMap[day];
             orderList.sort((a, b) => {
-                return new Date(a.confirmTime).getTime() - new Date(b.confirmTime).getTime()
-                    ? 1
-                    : -1;
+                return new Date(a.orderTime).getTime() - new Date(b.orderTime).getTime() ? 1 : -1;
             });
-            const endDate = orderList[orderList.length - 1].confirmTime;
+            const endDate = orderList[orderList.length - 1].orderTime;
             // 找到数据截止的最后一天
             const currentDateList: string[] = [];
             for (let i = 0, len = formatDateList.length; i < len; i++) {
@@ -272,25 +239,21 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
                 name: `${day}天`,
                 type: 'line',
                 data: currentDateList.map(date => {
-                    const index = orderList.findIndex(item => item.confirmTime === date);
+                    const index = orderList.findIndex(item => item.orderTime === date);
                     if (index > -1) {
-                        const {
-                            totalNum = 0,
-                            outboundNum = 0,
-                            cancelNumBeforeOutbound = 0,
-                            cancelNumAfterOutbound = 0,
-                        } = orderList[index];
+                        const { totalNum = 0, inboundNum = 0, cancelNumNoPay = 0 } = orderList[
+                            index
+                        ];
                         return {
                             totalNum,
-                            outboundNum,
-                            cancelNumBeforeOutbound,
-                            cancelNumAfterOutbound,
+                            inboundNum,
+                            cancelNumNoPay,
                             value:
-                                totalNum - cancelNumBeforeOutbound === 0
+                                inboundNum === 0
                                     ? 0
                                     : Number(
                                           (
-                                              (outboundNum / (totalNum - cancelNumBeforeOutbound)) *
+                                              (inboundNum / (totalNum - cancelNumNoPay)) *
                                               100
                                           ).toFixed(2),
                                       ),
@@ -299,8 +262,8 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
                     return {
                         // value: 0,
                         totalNum: 0,
-                        outboundNum: 0,
-                        cancelNumBeforeOutbound: 0,
+                        inboundNum: 0,
+                        cancelNumNoPay: 0,
                         cancelNumAfterOutbound: 0,
                         value: 0,
                     };
@@ -324,26 +287,20 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
                 formatter: info => {
                     // console.log('formatter', info);
                     const data = Array.isArray(info) ? info[info.length - 1].data : info.data;
-                    const {
-                        totalNum,
-                        outboundNum,
-                        cancelNumBeforeOutbound,
-                        cancelNumAfterOutbound,
-                        value,
-                    } = data;
+                    const { totalNum, inboundNum, cancelNumNoPay, value } = data;
                     return `
                         <div style="padding: 8px 20px 8px 10px;">
                             <div style="margin-bottom: 4px;">
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #6395FA; vertical-align: 2px;"></span>
-                                总订单: ${totalNum}
+                                总采购单: ${totalNum}
                             </div>
                             <div style="margin-bottom: 4px;">
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: #63DAAB; vertical-align: 2px;"></span>
-                                已出库: ${outboundNum}
+                                已入库: ${inboundNum}
                             </div>
                             <div>
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: red; vertical-align: 2px;"></span>
-                                已取消: ${cancelNumBeforeOutbound} + ${cancelNumAfterOutbound}
+                                支付前取消订单: ${cancelNumNoPay}
                             </div>
                             <div style="margin-bottom: 4px;">
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: yellow; vertical-align: 2px;"></span>
@@ -381,13 +338,6 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
             (chartRef.current = echarts.init(
                 document.getElementById('in-stock') as HTMLDivElement,
             ));
-        // if (loading) {
-        //     chartRef.current.showLoading();
-        // } else {
-        //     chartRef.current.hideLoading();
-        //     renderChart(orderInfo);
-        // }
-        // renderChart();
         _getMonitorPurchaseOrder();
     }, []);
 
@@ -406,7 +356,7 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
                 <div id="in-stock" className={styles.chartSection}></div>
                 <Table
                     bordered
-                    key="label"
+                    rowKey="label"
                     columns={columns}
                     dataSource={dataSource}
                     pagination={false}
@@ -416,4 +366,4 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
     }, [columns, dataSource, loading, handleRangePicker]);
 };
 
-export default forwardRef(InStock);
+export default InStock;
