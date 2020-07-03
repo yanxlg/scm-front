@@ -94,3 +94,13 @@ export interface IMonitorOrderItem {
     percentage?: string;
     specialPercentage?: string;
 }
+
+export interface IMonitorPurchaseOrderItem {
+    orderTime: string;
+    dayNum: number;
+    totalNum: number;
+    inboundNum: number;
+    cancelNumNoPay: number;
+    percentage?: string;
+    specialPercentage?: string;
+}

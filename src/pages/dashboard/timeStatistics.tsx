@@ -3,6 +3,7 @@ import { JsonForm, LoadingButton } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { queryShopFilterList } from '@/services/global';
 import OutStock, { IOutStockRef } from './components/TimeStatistics/OutStock';
+import InStock, { IInStockRef } from './components/TimeStatistics/InStock';
 import Cancel, { ICancelRef } from './components/TimeStatistics/Cancel';
 
 import styles from './_timeStatistics.less';
@@ -41,12 +42,12 @@ const formFields: FormField[] = [
 const TimeStatistics: React.FC = () => {
     const searchRef = useRef<JsonFormRef>(null);
     const outStockRef = useRef<IOutStockRef>(null);
+    const InStockRef = useRef<IInStockRef>(null);
     const cancelRef = useRef<ICancelRef>(null);
 
     const onSearch = useCallback(() => {
         return Promise.all([
             (outStockRef.current as IOutStockRef).onSearch(),
-            // (cancelRef.current as ICancelRef).onSearch(),
             (cancelRef.current as ICancelRef).onSearch(),
         ]);
     }, []);
@@ -76,6 +77,9 @@ const TimeStatistics: React.FC = () => {
                 </div>
                 <div className={styles.dataSection}>
                     <OutStock ref={outStockRef} searchRef={searchRef} />
+                </div>
+                <div className={styles.dataSection}>
+                    <InStock ref={outStockRef} />
                 </div>
                 <div className={styles.dataSection}>
                     <Cancel ref={cancelRef} searchRef={searchRef} />

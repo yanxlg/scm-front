@@ -22,7 +22,6 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
 import 'echarts/lib/component/legend';
 import dayjs, { Dayjs } from 'dayjs';
-import { JsonFormRef } from 'react-components/es/JsonForm';
 
 import styles from '../../_timeStatistics.less';
 import { ColumnsType } from 'antd/es/table';
@@ -75,8 +74,8 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
     const _getMonitorPurchaseOrder = useCallback(
         (params?: IMonitorOrderReq) => {
             const postData = {
-                confirm_time_start: startDateToUnixWithUTC(dates[0]),
-                confirm_time_end:
+                order_time_start: startDateToUnixWithUTC(dates[0]),
+                order_time_end:
                     getUTCDate().format(timeFormat) === dates[1].format(timeFormat)
                         ? getUTCDate().unix()
                         : endDateToUnixWithUTC(dates[1]),
@@ -86,7 +85,7 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
             setLoading(true);
             return getMonitorPurchaseOrder(postData)
                 .then(({ data }) => {
-                    const { confirm_time_start: startTime, confirm_time_end: endTime } = postData;
+                    const { order_time_start: startTime, order_time_end: endTime } = postData;
                     // console.log('getMonitorPurchaseOrder', data);
                     renderChart(startTime, endTime, data);
 
@@ -169,36 +168,35 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
         // console.log(1111111, needDateMap);
         const ret: { [key: string]: string | number }[] = [
             {
-                label: '总订单',
+                label: '总采购订单',
             },
             {
-                label: '已出库',
+                label: '已入库',
             },
             {
-                label: '已取消',
+                label: '支付前取消采购单',
             },
             {
-                label: '8天出库率',
+                label: '5天入库率',
             },
             {
-                label: '当前出库率',
+                label: '当前入库率',
             },
         ];
 
         Object.keys(needDateMap).map(date => {
-            const {
-                totalNum,
-                outboundNum,
-                cancelNumBeforeOutbound,
-                cancelNumAfterOutbound,
-                percentage,
-                specialPercentage,
-            } = needDateMap[date];
-            ret[0][date] = totalNum;
-            ret[1][date] = outboundNum;
-            ret[2][date] = cancelNumBeforeOutbound + cancelNumAfterOutbound;
-            ret[3][date] = specialPercentage || '0%';
-            ret[4][date] = percentage || '0%';
+            // const {
+            //     totalNum,
+            //     inboundNum,
+            //     cancelNumNoPay,
+            //     percentage,
+            //     specialPercentage,
+            // } = needDateMap[date];
+            // ret[0][date] = totalNum;
+            // ret[1][date] = outboundNum;
+            // ret[2][date] = cancelNumBeforeOutbound + cancelNumAfterOutbound;
+            // ret[3][date] = specialPercentage || '0%';
+            // ret[4][date] = percentage || '0%';
         });
         // console.log(11111111, ret);
         return ret;
@@ -316,7 +314,7 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
 
         chartRef.current?.setOption({
             title: {
-                text: '出库率',
+                text: '入库率',
                 subtext: `（最近更新时间：${lastUpdateTime}）`,
                 left: 'center',
                 bottom: 0,
@@ -349,7 +347,7 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
                             </div>
                             <div style="margin-bottom: 4px;">
                                 <span style="display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: yellow; vertical-align: 2px;"></span>
-                                出库率: ${value}%
+                                入库率: ${value}%
                             </div>
                         </div>
                     `;
@@ -372,7 +370,7 @@ const InStock: ForwardRefRenderFunction<IInStockRef, {}> = ({}, ref) => {
             },
             yAxis: {
                 type: 'value',
-                name: '出库率（%）',
+                name: '入库率（%）',
             },
             series: series,
         });
