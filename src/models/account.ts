@@ -8,6 +8,7 @@ export interface ISimpleRole {
 
 export interface AccountModelState {
     roleSimpleList?: ISimpleRole[];
+    roleSimpleNameList?: ISimpleRole[];
 }
 
 export interface AccountModeType {
@@ -41,7 +42,16 @@ const AccountModel: AccountModeType = {
     },
     reducers: {
         update(state, { roleSimpleList }) {
-            return { ...state, roleSimpleList };
+            return {
+                ...state,
+                roleSimpleList,
+                roleSimpleNameList: roleSimpleList?.map(
+                    ({ name, value }: { name: string; value: string }) => ({
+                        name: name,
+                        value: name,
+                    }),
+                ),
+            };
         },
     },
 };
