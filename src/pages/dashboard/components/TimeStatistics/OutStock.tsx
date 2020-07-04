@@ -283,8 +283,9 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             series.push({
                 name: `${day}天`,
                 type: 'line',
-                data: currentDateList.map(date => {
+                data: currentDateList.map((date, mapIndex) => {
                     const index = orderList.findIndex(item => item.confirmTime === date);
+                    let lineData = {};
                     if (index > -1) {
                         const {
                             totalNum = 0,
@@ -292,7 +293,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                             cancelNumBeforeOutbound = 0,
                             cancelNumAfterOutbound = 0,
                         } = orderList[index];
-                        return {
+                        lineData = {
                             totalNum,
                             outboundNum,
                             cancelNumBeforeOutbound,
@@ -307,16 +308,28 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                                           ).toFixed(2),
                                       ),
                         };
+                    } else {
+                        lineData = {
+                            totalNum: 0,
+                            outboundNum: 0,
+                            cancelNumBeforeOutbound: 0,
+                            cancelNumAfterOutbound: 0,
+                            value: 0,
+                        };
                     }
-                    return {
-                        // value: 0,
-                        totalNum: 0,
-                        outboundNum: 0,
-                        cancelNumBeforeOutbound: 0,
-                        cancelNumAfterOutbound: 0,
-                        value: 0,
-                    };
-                    // return index > -1 ? {} : {};
+                    if (currentDateList.length - 1 === mapIndex) {
+                        return {
+                            ...lineData,
+                            label: {
+                                show: true,
+                                position: 'right',
+                                distance: 10,
+                                formatter: '{a}',
+                                color: '#333',
+                            },
+                        };
+                    }
+                    return lineData;
                 }),
                 lineStyle: {
                     color: colors[colorIndex],
@@ -332,7 +345,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 bottom: 0,
             },
             tooltip: {
-                trigger: 'axis',
+                trigger: 'item',
                 formatter: info => {
                     // console.log('formatter', info);
                     const data = Array.isArray(info) ? info[info.length - 1].data : info.data;
