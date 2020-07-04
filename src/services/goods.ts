@@ -246,13 +246,6 @@ export async function postGoodsMerge(data: { merge_commodity_ids: string[] }) {
     });
 }
 
-// 设置主商品
-export async function putGoodsMergeMain(data: { product_sn: string; main_commodity_id: string }) {
-    return request.put(LocalApiPath.putGoodsMergeMain, {
-        data,
-    });
-}
-
 // 删除关联商品
 export async function delGoodsMergeDelete(data: { product_sn: string; commodity_id: string }) {
     return request.delete(LocalApiPath.delGoodsMergeDelete, {

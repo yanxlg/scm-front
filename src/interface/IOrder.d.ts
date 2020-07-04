@@ -132,6 +132,8 @@ export interface ISimilarInfoResponse {
         orderGoods: {
             commodityId: string;
         };
+        planId: string;
+        failReason: string;
     };
     originOrderInfo: {
         skuImageUrl: string;

@@ -3,7 +3,6 @@ import { Modal, Input, Table, Button, notification } from 'antd';
 import { ColumnType } from 'antd/es/table';
 import {
     postGoodsMerge,
-    putGoodsMergeMain,
     delGoodsMergeDelete,
     getGoodsMergeList,
     putGoodsMergeAdd,
@@ -44,12 +43,23 @@ const GoodsMergeModal: React.FC<IProps> = ({
     const [loading, setLoading] = useState(false);
     const [commodityIds, setCommodityIds] = useState('');
     const [goodsSnList, setGoodsSnList] = useState<IGoodsSnItem[]>([]);
+    const [currentSn, setCurrentSn] = useState('');
 
-    const _getGoodsMergeList = useCallback((productSn: string) => {
+    const handleCancel = useCallback(() => {
+        isChangeRef.current && onReload();
+        setLoading(false);
+        setCommodityIds('');
+        setCurrentSn('');
+        setGoodsSnList([]);
+        isChangeRef.current = false;
+        onCancel();
+    }, []);
+
+    const _getGoodsMergeList = useCallback((currentSn: string) => {
         setLoading(true);
-        getGoodsMergeList(productSn)
+        getGoodsMergeList(currentSn)
             .then(res => {
-                console.log(getGoodsMergeList, res);
+                // console.log(getGoodsMergeList, res);
                 // const { productGroup, mainProductGroup, subProductGroup } = res.data;
                 const { relateCommodity } = res.data;
 
@@ -60,46 +70,33 @@ const GoodsMergeModal: React.FC<IProps> = ({
             });
     }, []);
 
-    const _putGoodsMergeMain = useCallback(
-        (mainCommodityId: string) => {
-            setLoading(true);
-            putGoodsMergeMain({
-                product_sn: productSn,
-                main_commodity_id: mainCommodityId,
-            })
-                .then(() => {
-                    isChangeRef.current = true;
-                    _getGoodsMergeList(productSn);
-                })
-                .catch(() => {
-                    setLoading(false);
-                });
-        },
-        [goodsSnList, productSn],
-    );
-
     const _delGoodsMergeDelete = useCallback(
         (commodityId: string) => {
             setLoading(true);
             delGoodsMergeDelete({
-                product_sn: productSn,
+                product_sn: currentSn,
                 commodity_id: commodityId,
             })
                 .then(() => {
                     isChangeRef.current = true;
-                    setGoodsSnList(goodsSnList.filter(item => item.commodityId !== commodityId));
+                    const list = goodsSnList.filter(item => item.commodityId !== commodityId);
+                    if (list.length === 1) {
+                        handleCancel();
+                    } else {
+                        setGoodsSnList(list);
+                    }
                 })
                 .finally(() => {
                     setLoading(false);
                 });
         },
-        [productSn, goodsSnList],
+        [currentSn, goodsSnList],
     );
 
     // 关联后新增
     const _putGoodsMergeAdd = useCallback(() => {
         putGoodsMergeAdd({
-            product_sn: productSn,
+            product_sn: currentSn,
             commodity_ids: commodityIds.split(','),
         })
             .then(res => {
@@ -108,12 +105,12 @@ const GoodsMergeModal: React.FC<IProps> = ({
                     duration: 3,
                 });
                 isChangeRef.current = true;
-                handleCancel();
+                // handleCancel();
             })
             .finally(() => {
                 setLoading(false);
             });
-    }, [commodityIds, productSn]);
+    }, [commodityIds, currentSn]);
 
     // 首次关联
     const _postGoodsMerge = useCallback(() => {
@@ -121,42 +118,23 @@ const GoodsMergeModal: React.FC<IProps> = ({
             merge_commodity_ids: [commodityId, ...commodityIds.split(',')],
         })
             .then(res => {
-                const { commodityId, productSn } = res.data;
+                isChangeRef.current = true;
                 notification.success({
                     message: '关联商品成功',
                     duration: 3,
                 });
-                // notification.success({
-                //     message: '关联商品成功',
-                //     duration: 8,
-                //     description: (
-                //         <>
-                //             <p>Commodity ID: {commodityId.parts[0]}</p>
-                //             <p>Product SN: {productSn.parts[0]}</p>
-                //         </>
-                //     ),
-                // });
-                isChangeRef.current = true;
-                handleCancel();
+
+                // handleCancel();
             })
             .finally(() => {
                 setLoading(false);
             });
     }, [commodityIds, commodityId]);
 
-    const handleCancel = useCallback(() => {
-        isChangeRef.current && onReload();
-        setLoading(false);
-        setCommodityIds('');
-        setGoodsSnList([]);
-        isChangeRef.current = false;
-        onCancel();
-    }, []);
-
     const handleOk = useCallback(() => {
         setLoading(true);
-        productSn ? _putGoodsMergeAdd() : _postGoodsMerge();
-    }, [productSn, _putGoodsMergeAdd, _postGoodsMerge]);
+        currentSn ? _putGoodsMergeAdd() : _postGoodsMerge();
+    }, [currentSn, _putGoodsMergeAdd, _postGoodsMerge]);
 
     const columns = useMemo<ColumnType<IGoodsSnItem>[]>(() => {
         return [
@@ -195,29 +173,25 @@ const GoodsMergeModal: React.FC<IProps> = ({
                             </Button>
                         </div>
                     );
-                    // return type === '3' ? (
-                    //     <>
-                    //         <div>
-                    //             <Button type="link" onClick={() => _putGoodsMergeMain(commodityId)}>
-                    //                 设为主商品
-                    //             </Button>
-                    //         </div>
-
-                    //     </>
-                    // ) : null;
                 },
             },
         ];
-    }, [_putGoodsMergeMain, _delGoodsMergeDelete]);
+    }, [_delGoodsMergeDelete]);
 
     useEffect(() => {
         if (visible) {
-            productSn && _getGoodsMergeList(productSn);
+            productSn && setCurrentSn(productSn);
         }
     }, [visible]);
 
+    useEffect(() => {
+        if (currentSn) {
+            _getGoodsMergeList(currentSn);
+        }
+    }, [currentSn]);
+
     return useMemo(() => {
-        const title = productSn ? `商品组 Product SN: ${productSn}` : '商品组';
+        const title = currentSn ? `商品组 Product SN: ${currentSn}` : '商品组';
         return (
             <Modal
                 title={title}
@@ -231,7 +205,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
                 }}
             >
                 <div className="text-center">
-                    {productSn ? (
+                    {currentSn ? (
                         <Table
                             bordered
                             rowKey="commodityId"
@@ -251,7 +225,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
                 </div>
             </Modal>
         );
-    }, [visible, loading, commodityIds]);
+    }, [visible, loading, commodityIds, currentSn]);
 };
 
 export default GoodsMergeModal;
