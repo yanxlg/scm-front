@@ -1090,7 +1090,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                         ...orderGods,
                         ...others,
                         __rowspan: 1,
-                        __key: extra.orderGoodsId,
+                        __key: extra.orderGoodsId || others.orderGoodsId,
                     });
                 }
             });
