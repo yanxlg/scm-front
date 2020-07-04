@@ -17,7 +17,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import styles from '../../_timeStatistics.less';
 import { ColumnsType } from 'antd/es/table';
 import { getMonitorPurchaseOrder } from '@/services/dashboard';
-import { IMonitorOrderReq, IMonitorPurchaseOrderItem } from '@/interface/IDashboard';
+import {
+    IMonitorOrderReq,
+    IMonitorPurchaseOrderItem,
+    IMonitorPurchaseOrderReq,
+} from '@/interface/IDashboard';
 
 const { RangePicker } = DatePicker;
 
@@ -61,7 +65,7 @@ const InStock: React.FC = ({}) => {
     }, []);
 
     const _getMonitorPurchaseOrder = useCallback(
-        (params?: IMonitorOrderReq) => {
+        (params?: IMonitorPurchaseOrderReq) => {
             const postData = {
                 order_time_start: startDateToUnixWithUTC(dates[0]),
                 order_time_end:
@@ -107,8 +111,8 @@ const InStock: React.FC = ({}) => {
                 })),
             ] as ColumnsType<object>);
             _getMonitorPurchaseOrder({
-                confirm_time_start: startDateToUnixWithUTC(values[0]),
-                confirm_time_end:
+                order_time_start: startDateToUnixWithUTC(values[0]),
+                order_time_end:
                     getUTCDate().format(timeFormat) === values[1].format(timeFormat)
                         ? getUTCDate().unix()
                         : endDateToUnixWithUTC(values[1]),
@@ -183,12 +187,7 @@ const InStock: React.FC = ({}) => {
         return ret;
     }, []);
 
-    const onSearch = useCallback(() => {
-        return _getMonitorPurchaseOrder();
-    }, [_getMonitorPurchaseOrder]);
-
     const renderChart = useCallback((startTime, endTime, data) => {
-        // console.log('renderChart', startTime, endTime, data);
         const { lastUpdateTime, monitorPurchaseOrder } = data;
 
         const formatDateList = getRangeFormatDate(startTime, endTime);
@@ -242,13 +241,14 @@ const InStock: React.FC = ({}) => {
             series.push({
                 name: `${day}天`,
                 type: 'line',
-                data: currentDateList.map(date => {
+                data: currentDateList.map((date, mapIndex) => {
                     const index = orderList.findIndex(item => item.orderTime === date);
+                    let lineData = {};
                     if (index > -1) {
                         const { totalNum = 0, inboundNum = 0, cancelNumNoPay = 0 } = orderList[
                             index
                         ];
-                        return {
+                        lineData = {
                             totalNum,
                             inboundNum,
                             cancelNumNoPay,
@@ -262,16 +262,28 @@ const InStock: React.FC = ({}) => {
                                           ).toFixed(2),
                                       ),
                         };
+                    } else {
+                        lineData = {
+                            totalNum: 0,
+                            inboundNum: 0,
+                            cancelNumNoPay: 0,
+                            cancelNumAfterOutbound: 0,
+                            value: 0,
+                        };
                     }
-                    return {
-                        // value: 0,
-                        totalNum: 0,
-                        inboundNum: 0,
-                        cancelNumNoPay: 0,
-                        cancelNumAfterOutbound: 0,
-                        value: 0,
-                    };
-                    // return index > -1 ? {} : {};
+                    if (currentDateList.length - 1 === mapIndex) {
+                        return {
+                            ...lineData,
+                            label: {
+                                show: true,
+                                position: 'right',
+                                distance: 10,
+                                formatter: '{a}',
+                                color: '#333',
+                            },
+                        };
+                    }
+                    return lineData;
                 }),
                 lineStyle: {
                     color: colors[colorIndex],
@@ -287,7 +299,7 @@ const InStock: React.FC = ({}) => {
                 bottom: 0,
             },
             tooltip: {
-                trigger: 'axis',
+                trigger: 'item',
                 formatter: info => {
                     // console.log('formatter', info);
                     const data = Array.isArray(info) ? info[info.length - 1].data : info.data;
