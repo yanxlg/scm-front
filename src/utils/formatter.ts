@@ -23,3 +23,7 @@ export const firstNumber = (value?: number[]) => {
 export const arrayNumber = (value?: string[]) => {
     return value ? value.map(_ => Number(_)) : undefined;
 };
+
+export const plainToArr = (value: any) => {
+    return value ? [value] : undefined;
+};

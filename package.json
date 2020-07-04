@@ -13,7 +13,7 @@
     "dependencies": {
         "@ant-design/icons": "^4.0.5",
         "@ant-design/pro-layout": "^5.0.9",
-        "antd": "4.3.4",
+        "antd": "^4.4.0",
         "classnames": "^2.2.6",
         "dayjs": "^1.8.23",
         "echarts": "^4.7.0",
@@ -24,7 +24,8 @@
         "query-string": "^6.11.1",
         "react": "^16.13.0",
         "react-dom": "^16.13.0",
-        "rc-permission": "^0.0.16"
+        "rc-permission": "^0.0.16",
+        "rc-table": "7.8.0"
     },
     "devDependencies": {
         "dva-logger": "^1.0.0",

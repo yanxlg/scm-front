@@ -191,6 +191,7 @@ const allFormFields: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
+        formatter: 'plainToArr',
         optionList: {
             type: 'select',
             selector: (state: ConnectState) => {
