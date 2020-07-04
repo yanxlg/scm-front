@@ -4,12 +4,9 @@ import { JsonForm, FitTable, LoadingButton } from 'react-components';
 import {
     getErrorOrderList,
     postExportErrOrder,
-    queryChannelSource,
     getPlatformAndStore,
 } from '@/services/order-manage';
 import {
-    defaultOptionItem,
-    channelOptionList,
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
