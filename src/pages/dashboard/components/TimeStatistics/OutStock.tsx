@@ -55,6 +55,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 title: '时间',
                 dataIndex: 'label',
                 align: 'center',
+                width: 150,
             },
             ...getRangeFormatDate(
                 getUTCDate()
@@ -67,6 +68,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 title: date,
                 dataIndex: date,
                 align: 'center',
+                width: 150,
             })),
         ] as ColumnsType<object>;
     });
@@ -114,11 +116,13 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                     title: '时间',
                     dataIndex: 'label',
                     align: 'center',
+                    width: 150,
                 },
                 ...getRangeFormatDate(values[0].unix(), values[1].unix()).map(date => ({
                     title: date,
                     dataIndex: date,
                     align: 'center',
+                    width: 150,
                 })),
             ] as ColumnsType<object>);
             _getMonitorOrder({
@@ -418,6 +422,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                     columns={columns}
                     dataSource={dataSource}
                     pagination={false}
+                    scroll={{ x: 'max-content' }}
                 />
             </Spin>
         );

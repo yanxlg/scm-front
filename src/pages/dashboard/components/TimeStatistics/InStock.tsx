@@ -37,6 +37,7 @@ const InStock: React.FC = ({}) => {
                 title: '时间',
                 dataIndex: 'label',
                 align: 'center',
+                width: 150,
             },
             ...getRangeFormatDate(
                 getUTCDate()
@@ -49,6 +50,7 @@ const InStock: React.FC = ({}) => {
                 title: date,
                 dataIndex: date,
                 align: 'center',
+                width: 150,
             })),
         ] as ColumnsType<object>;
     });
@@ -95,11 +97,13 @@ const InStock: React.FC = ({}) => {
                     title: '时间',
                     dataIndex: 'label',
                     align: 'center',
+                    width: 150,
                 },
                 ...getRangeFormatDate(values[0].unix(), values[1].unix()).map(date => ({
                     title: date,
                     dataIndex: date,
                     align: 'center',
+                    width: 150,
                 })),
             ] as ColumnsType<object>);
             _getMonitorPurchaseOrder({
@@ -360,6 +364,7 @@ const InStock: React.FC = ({}) => {
                     columns={columns}
                     dataSource={dataSource}
                     pagination={false}
+                    scroll={{ x: 'max-content' }}
                 />
             </Spin>
         );
