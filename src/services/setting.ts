@@ -338,7 +338,10 @@ export function queryPermissionTree() {
 
             let dataList: IPermissionTree[] = [];
             for (let index in dataTree) {
-                dataList.push(parsePermissionTree(dataTree[index].children[0]));
+                const treeItems = dataTree[index]?.children || [];
+                treeItems.forEach(treeItem => {
+                    dataList.push(parsePermissionTree(treeItem));
+                });
             }
             return { pTree: treeArr, flatKeys, keysArr, dataTree: dataList, parentMap };
         });
