@@ -10,14 +10,14 @@ interface IProps {
     visible: boolean;
     allCategoryList: IOptionItem[];
     hideModal(): void;
-    getCatagoryList(): Promise<IOptionItem[]>;
+    getCategoryList(): Promise<IOptionItem[]>;
 }
 
 const OrderReviewModal: React.FC<IProps> = ({
     visible,
     allCategoryList,
     hideModal,
-    getCatagoryList,
+    getCategoryList,
 }) => {
     const formRef = useRef<JsonFormRef>(null);
 
@@ -42,7 +42,7 @@ const OrderReviewModal: React.FC<IProps> = ({
                     value: '',
                     name: '全部',
                 },
-                optionList: () => getCatagoryList(),
+                optionList: () => getCategoryList(),
                 onChange: (name, form) => {
                     form.resetFields(['second_catagory']);
                     form.resetFields(['third_catagory']);
@@ -61,7 +61,7 @@ const OrderReviewModal: React.FC<IProps> = ({
                     value: '',
                     name: '全部',
                 },
-                optionList: () => getCatagoryList(),
+                optionList: () => getCategoryList(),
                 onChange: (name, form) => {
                     form.resetFields(['third_catagory']);
                 },
@@ -79,7 +79,7 @@ const OrderReviewModal: React.FC<IProps> = ({
                     value: '',
                     name: '全部',
                 },
-                optionList: () => getCatagoryList(),
+                optionList: () => getCategoryList(),
             },
             {
                 type: 'textarea',

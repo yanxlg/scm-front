@@ -1,9 +1,7 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { getGoodsList, getCatagoryList } from '@/services/goods';
-import { EmptyObject } from '@/config/global';
 import { PlusOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/es/table';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
@@ -11,6 +9,63 @@ import OrderReviewModal from './OrderReviewModal';
 
 import styles from './_PaneOrderReview.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
+import { getCategoryList } from '@/services/global';
+import { getOrderConfigList, delOrderConfig } from '@/services/setting';
+import { IOrderConfigItem } from '@/interface/ISetting';
+
+const formFields: FormField[] = [
+    {
+        type: 'select',
+        label: '一级类目',
+        name: 'first_cat_id',
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_cat_id']);
+            form.resetFields(['third_cat_id']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        name: 'second_cat_id',
+        optionListDependence: {
+            name: 'first_cat_id',
+            key: 'children',
+        },
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_catagory']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        name: 'third_cat_id',
+        optionListDependence: {
+            name: ['first_cat_id', 'second_cat_id'],
+            key: 'children',
+        },
+        syncDefaultOption: {
+            value: '',
+            name: '全部',
+        },
+        optionList: () => getCategoryList(),
+    },
+];
+
+const initialValues = {
+    first_cat_id: '',
+    second_cat_id: '',
+    third_cat_id: '',
+};
 
 const PaneOrderReview: React.FC = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -27,7 +82,7 @@ const PaneOrderReview: React.FC = () => {
         onChange,
     } = useList<any>({
         formRef: formRef,
-        queryList: getGoodsList,
+        queryList: getOrderConfigList,
     });
 
     const showOrderReviewModal = useCallback(() => {
@@ -38,106 +93,68 @@ const PaneOrderReview: React.FC = () => {
         setConfigStatus(false);
     }, []);
 
-    const _getCatagoryList = useCallback(() => {
-        return getCatagoryList()
-            .then(({ convertList = [] } = EmptyObject) => {
-                return convertList;
-            })
-            .catch(() => {
-                return [];
-            });
+    const _getCategoryList = useCallback(() => {
+        return getCategoryList();
     }, []);
 
-    const formFields = useMemo<FormField[]>(() => {
-        return [
-            {
-                type: 'select',
-                label: '一级类目',
-                name: 'first_catagory',
-                // className: styles.input,
-                syncDefaultOption: {
-                    value: '',
-                    name: '全部',
-                },
-                optionList: () => _getCatagoryList(),
-                onChange: (name, form) => {
-                    form.resetFields(['second_catagory']);
-                    form.resetFields(['third_catagory']);
-                },
-            },
-            {
-                type: 'select',
-                label: '二级类目',
-                name: 'second_catagory',
-                // className: styles.input,
-                optionListDependence: {
-                    name: 'first_catagory',
-                    key: 'children',
-                },
-                syncDefaultOption: {
-                    value: '',
-                    name: '全部',
-                },
-                optionList: () => _getCatagoryList(),
-                onChange: (name, form) => {
-                    form.resetFields(['third_catagory']);
-                },
-            },
-            {
-                type: 'select',
-                label: '三级类目',
-                name: 'third_catagory',
-                // className: styles.input,
-                optionListDependence: {
-                    name: ['first_catagory', 'second_catagory'],
-                    key: 'children',
-                },
-                syncDefaultOption: {
-                    value: '',
-                    name: '全部',
-                },
-                optionList: () => _getCatagoryList(),
-            },
-        ];
+    // const _addOrderConfig = useCallback(() => {
+
+    // }, []);
+
+    const _delOrderConfig = useCallback(id => {
+        delOrderConfig(id).then(res => {
+            message.success('删除成功！');
+            onReload();
+        });
     }, []);
 
-    const columns = useMemo<ColumnsType<any>>(() => {
+    const columns = useMemo<ColumnsType<IOrderConfigItem>>(() => {
         return [
             {
                 title: '一级类目',
-                dataIndex: 'a1',
+                dataIndex: 'first_cat_id',
                 align: 'center',
-                // width: 140,
+                width: 140,
             },
             {
                 title: '二级类目',
-                dataIndex: 'a2',
+                dataIndex: 'second_cat_id',
                 align: 'center',
-                // width: 140,
+                width: 140,
             },
             {
                 title: '三级类目',
-                dataIndex: 'a3',
+                dataIndex: 'third_cat_id',
                 align: 'center',
-                // width: 140,
+                width: 140,
             },
             {
                 title: '操作时间',
-                dataIndex: 'a4',
+                dataIndex: 'last_update_time',
                 align: 'center',
-                // width: 140,
+                width: 140,
             },
             {
                 title: '操作人',
-                dataIndex: 'a5',
+                dataIndex: 'operator',
                 align: 'center',
-                // width: 140,
+                width: 140,
             },
             {
                 title: '操作',
-                dataIndex: 'a6',
+                dataIndex: 'id',
                 align: 'center',
-                // width: 140,
+                width: 140,
+                render: (id: string, record: IOrderConfigItem) => {
+                    const { status } = record;
+                    return String(status) === '0' ? (
+                        <Button type="link" onClick={() => _delOrderConfig(id)}>
+                            删除
+                        </Button>
+                    ) : (
+                        <span>已失效</span>
+                    );
+                },
             },
         ];
     }, []);
@@ -153,7 +170,7 @@ const PaneOrderReview: React.FC = () => {
     }, [loading]);
 
     useEffect(() => {
-        _getCatagoryList().then(list => setAllCategoryList(list));
+        _getCategoryList().then(list => setAllCategoryList(list));
     }, []);
 
     return useMemo(() => {
@@ -161,7 +178,7 @@ const PaneOrderReview: React.FC = () => {
             <div className={styles.wrapper}>
                 <JsonForm
                     // labelClassName={styles.formLabel}
-                    // initialValues={initialValues}
+                    initialValues={initialValues}
                     ref={formRef}
                     fieldList={formFields}
                 >
@@ -197,7 +214,7 @@ const PaneOrderReview: React.FC = () => {
                     visible={configStatus}
                     allCategoryList={allCategoryList}
                     hideModal={hideOrderReviewModal}
-                    getCatagoryList={_getCatagoryList}
+                    getCategoryList={_getCategoryList}
                 />
             </div>
         );

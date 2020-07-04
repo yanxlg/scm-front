@@ -208,3 +208,28 @@ export interface IDeleteBlackStoreReq {
     purchase_channel: string;
     merchant_id: string[];
 }
+
+export interface IGetOrderConfigListReq {
+    first_cat_id?: string;
+    second_cat_id?: string;
+    third_cat_id?: string;
+}
+
+export interface IOrderConfigItem {
+    id: string;
+    first_cat_id: string;
+    second_cat_id: string;
+    third_cat_id: string;
+    status: string;
+    create_time: string;
+    last_update_time: string;
+    operator: string;
+    remark: string;
+}
+
+export interface IAddOrderConfigReq {
+    first_cat_id: string;
+    second_cat_id?: string;
+    third_cat_id?: string;
+    remark?: string;
+}

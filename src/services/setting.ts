@@ -25,6 +25,9 @@ import {
     IGetStoreBlacklistReq,
     ISaveBlackStoreReq,
     IDeleteBlackStoreReq,
+    IGetOrderConfigListReq,
+    IOrderConfigItem,
+    IAddOrderConfigReq,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -261,5 +264,33 @@ export function saveBlackStore(data: ISaveBlackStoreReq) {
 export function deleteBlackStore(data: IDeleteBlackStoreReq) {
     return request.post(SettingApiPath.deleteBlackStore, {
         data,
+    });
+}
+
+/*** 订单审核配置 ***/
+// QueryOrderConfigList = '/api/v1/orders/config/list',
+//     AddOrderConfig = '/api/v1/orders/config/save_config',
+//     DelOrderConfig = '/api/v1/orders/config/delete_config',
+
+export function getOrderConfigList(data: IGetOrderConfigListReq) {
+    return api.post<IResponse<PaginationResponse<IOrderConfigItem>>>(
+        SettingApiPath.QueryOrderConfigList,
+        {
+            data,
+        },
+    );
+}
+
+export function addOrderConfig(data: IAddOrderConfigReq) {
+    return request.post(SettingApiPath.AddOrderConfig, {
+        data,
+    });
+}
+
+export function delOrderConfig(id: string) {
+    return request.get(SettingApiPath.DelOrderConfig, {
+        params: {
+            id,
+        },
     });
 }
