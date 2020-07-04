@@ -41,7 +41,7 @@ const fieldsList: FormField[] = [
         optionList: {
             type: 'select',
             selector: (state: ConnectState) => {
-                return state?.account?.roleSimpleList;
+                return state?.account?.roleSimpleNameList;
             },
         },
     },
