@@ -102,6 +102,7 @@ const Account = () => {
         onSearch,
     } = useList<IAccount>({
         queryList: queryAccountList,
+        formRef: formRef,
     });
 
     const dispatch = useDispatch();

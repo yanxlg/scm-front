@@ -98,6 +98,7 @@ const Role = () => {
         onSearch,
     } = useList<IRole>({
         queryList: queryRoleList,
+        formRef: formRef,
     });
 
     const dispatch = useDispatch();
