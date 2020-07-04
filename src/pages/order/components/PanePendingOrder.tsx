@@ -608,7 +608,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchForm1 = useMemo(() => {
         return (
             <JsonForm
-                layout={status === 4 ? 'inline' : 'horizontal'}
+                // layout={status === 4 ? 'inline' : 'horizontal'}
                 key={'form1'}
                 ref={searchRef2}
                 containerClassName={status === 4 ? '' : undefined}
@@ -634,9 +634,24 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                   formatter: 'join',
                               },
                               {
+                                  type: 'checkboxGroup',
+                                  name: 'show_similar_orders',
+                                  options: [
+                                      {
+                                          label: '仅展示相似款订单',
+                                          value: 1,
+                                      },
+                                  ],
+                                  onChange: (name: string, form: FormInstance) => {
+                                      handleClickSearch();
+                                  },
+                                  formatter: 'join',
+                              },
+                              {
                                   type: 'radioGroup',
                                   name: 'purchase_fail_filter_type',
                                   label: '处理方式',
+                                  formItemClassName: styles.formItem,
                                   options: [
                                       {
                                           label: '仅重拍',

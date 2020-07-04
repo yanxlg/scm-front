@@ -303,28 +303,28 @@ const GoodsTable: React.FC<IProps> = ({
                     return <div className={row.hasnew_version ? 'red' : ''}>{value}</div>;
                 },
             },
-            // {
-            //     key: 'product_sn',
-            //     title: 'Product SN',
-            //     dataIndex: 'product_sn',
-            //     align: 'center',
-            //     width: 140,
-            //     render: (value: string, row: IGoodsAndSkuItem) => {
-            //         const _value = value !== '0' ? value : '';
-            //         const { commodity_id, product_sn } = row;
-            //         return (
-            //             <>
-            //                 <div>{_value}</div>
-            //                 <Button
-            //                     type="link"
-            //                     onClick={() => showMergeModal(commodity_id, product_sn)}
-            //                 >
-            //                     {_value ? '查看商品组' : '关联商品'}
-            //                 </Button>
-            //             </>
-            //         );
-            //     },
-            // },
+            {
+                key: 'product_sn',
+                title: 'Product SN',
+                dataIndex: 'product_sn',
+                align: 'center',
+                width: 140,
+                render: (value: string, row: IGoodsAndSkuItem) => {
+                    const _value = value !== '0' ? value : '';
+                    const { commodity_id, product_sn } = row;
+                    return (
+                        <>
+                            <div>{_value}</div>
+                            <Button
+                                type="link"
+                                onClick={() => showMergeModal(commodity_id, product_sn)}
+                            >
+                                {_value ? '查看商品组' : '关联商品'}
+                            </Button>
+                        </>
+                    );
+                },
+            },
             {
                 title: '版本状态',
                 dataIndex: 'goods_status',

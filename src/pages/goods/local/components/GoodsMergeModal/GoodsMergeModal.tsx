@@ -10,14 +10,18 @@ import {
 } from '@/services/goods';
 
 const { TextArea } = Input;
-// 1: 合并后生成的product 2: 主关联商品 3: 关联商品
-type IProductType = '1' | '2' | '3';
+
+interface IImageItem {
+    url: string;
+    width: number;
+    height: number;
+}
+
 interface IGoodsSnItem {
     commodityId: string;
     productId: string;
-    image: string;
-    title: string;
-    type: IProductType;
+    productTitle: string;
+    image: IImageItem;
 }
 
 interface IProps {
@@ -35,10 +39,8 @@ const GoodsMergeModal: React.FC<IProps> = ({
     onReload,
     onCancel,
 }) => {
-    const commodityIdRef = useRef('');
     const isChangeRef = useRef(false);
 
-    // console.log(1111111, commodityIdRef, commodityId);
     const [loading, setLoading] = useState(false);
     const [commodityIds, setCommodityIds] = useState('');
     const [goodsSnList, setGoodsSnList] = useState<IGoodsSnItem[]>([]);
@@ -47,22 +49,11 @@ const GoodsMergeModal: React.FC<IProps> = ({
         setLoading(true);
         getGoodsMergeList(productSn)
             .then(res => {
-                const { productGroup, mainProductGroup, subProductGroup } = res.data;
-                commodityIdRef.current = mainProductGroup.commodityId;
-                setGoodsSnList([
-                    {
-                        ...productGroup,
-                        type: '1',
-                    },
-                    {
-                        ...mainProductGroup,
-                        type: '2',
-                    },
-                    ...subProductGroup.map((item: any) => ({
-                        ...item,
-                        type: '3',
-                    })),
-                ]);
+                console.log(getGoodsMergeList, res);
+                // const { productGroup, mainProductGroup, subProductGroup } = res.data;
+                const { relateCommodity } = res.data;
+
+                setGoodsSnList(relateCommodity || []);
             })
             .finally(() => {
                 setLoading(false);
@@ -92,7 +83,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
             setLoading(true);
             delGoodsMergeDelete({
                 product_sn: productSn,
-                commodity_ids: [commodityId],
+                commodity_id: commodityId,
             })
                 .then(() => {
                     isChangeRef.current = true;
@@ -127,28 +118,31 @@ const GoodsMergeModal: React.FC<IProps> = ({
     // 首次关联
     const _postGoodsMerge = useCallback(() => {
         postGoodsMerge({
-            main_commodity_id: commodityIdRef.current,
-            merge_commodity_ids: commodityIds.split(','),
+            merge_commodity_ids: [commodityId, ...commodityIds.split(',')],
         })
             .then(res => {
                 const { commodityId, productSn } = res.data;
                 notification.success({
                     message: '关联商品成功',
-                    duration: 8,
-                    description: (
-                        <>
-                            <p>Commodity ID: {commodityId.parts[0]}</p>
-                            <p>Product SN: {productSn.parts[0]}</p>
-                        </>
-                    ),
+                    duration: 3,
                 });
+                // notification.success({
+                //     message: '关联商品成功',
+                //     duration: 8,
+                //     description: (
+                //         <>
+                //             <p>Commodity ID: {commodityId.parts[0]}</p>
+                //             <p>Product SN: {productSn.parts[0]}</p>
+                //         </>
+                //     ),
+                // });
                 isChangeRef.current = true;
                 handleCancel();
             })
             .finally(() => {
                 setLoading(false);
             });
-    }, [commodityIds]);
+    }, [commodityIds, commodityId]);
 
     const handleCancel = useCallback(() => {
         isChangeRef.current && onReload();
@@ -156,12 +150,10 @@ const GoodsMergeModal: React.FC<IProps> = ({
         setCommodityIds('');
         setGoodsSnList([]);
         isChangeRef.current = false;
-        commodityIdRef.current = '';
         onCancel();
     }, []);
 
     const handleOk = useCallback(() => {
-        // console.log(handleOk, commodityIdRef);
         setLoading(true);
         productSn ? _putGoodsMergeAdd() : _postGoodsMerge();
     }, [productSn, _putGoodsMergeAdd, _postGoodsMerge]);
@@ -169,36 +161,23 @@ const GoodsMergeModal: React.FC<IProps> = ({
     const columns = useMemo<ColumnType<IGoodsSnItem>[]>(() => {
         return [
             {
-                key: 'commodityId',
                 title: 'Commodity ID',
                 dataIndex: 'commodityId',
                 align: 'center',
                 width: 110,
-                render: (value: string, row: IGoodsSnItem) => {
-                    const { type } = row;
-                    const desc = type === '2' ? '主关联商品' : type === '3' ? '关联商品' : '';
-                    return (
-                        <>
-                            {value}
-                            {desc ? <div>({desc})</div> : null}
-                        </>
-                    );
-                },
             },
             {
-                key: 'image',
                 title: '图片',
                 dataIndex: 'image',
                 align: 'center',
                 width: 60,
-                render: (value: string) => {
-                    return <img style={{ width: '100%' }} src={value} />;
+                render: (value: IImageItem) => {
+                    return <img style={{ width: '100%' }} src={value.url} />;
                 },
             },
             {
-                key: 'title',
                 title: '标题',
-                dataIndex: 'title',
+                dataIndex: 'productTitle',
                 align: 'center',
                 width: 200,
             },
@@ -208,24 +187,24 @@ const GoodsMergeModal: React.FC<IProps> = ({
                 align: 'center',
                 width: 110,
                 render: (_: any, row: IGoodsSnItem) => {
-                    const { type, commodityId } = row;
-                    return type === '3' ? (
-                        <>
-                            <div>
-                                <Button type="link" onClick={() => _putGoodsMergeMain(commodityId)}>
-                                    设为主商品
-                                </Button>
-                            </div>
-                            <div style={{ marginTop: -4 }}>
-                                <Button
-                                    type="link"
-                                    onClick={() => _delGoodsMergeDelete(commodityId)}
-                                >
-                                    删除关联
-                                </Button>
-                            </div>
-                        </>
-                    ) : null;
+                    const { commodityId } = row;
+                    return (
+                        <div>
+                            <Button type="link" onClick={() => _delGoodsMergeDelete(commodityId)}>
+                                删除关联
+                            </Button>
+                        </div>
+                    );
+                    // return type === '3' ? (
+                    //     <>
+                    //         <div>
+                    //             <Button type="link" onClick={() => _putGoodsMergeMain(commodityId)}>
+                    //                 设为主商品
+                    //             </Button>
+                    //         </div>
+
+                    //     </>
+                    // ) : null;
                 },
             },
         ];
@@ -236,10 +215,6 @@ const GoodsMergeModal: React.FC<IProps> = ({
             productSn && _getGoodsMergeList(productSn);
         }
     }, [visible]);
-
-    useEffect(() => {
-        commodityId && (commodityIdRef.current = commodityId);
-    }, [commodityId]);
 
     return useMemo(() => {
         const title = productSn ? `商品组 Product SN: ${productSn}` : '商品组';
