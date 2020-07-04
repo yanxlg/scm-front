@@ -25,9 +25,10 @@ import { useDispatch } from '@@/plugin-dva/exports';
 
 const fieldsList: FormField[] = [
     {
-        type: 'input',
+        type: 'positiveInteger',
         label: '角色ID',
         name: 'id',
+        formatter: 'number',
     },
     {
         type: 'select',

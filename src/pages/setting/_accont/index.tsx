@@ -38,6 +38,7 @@ const fieldsList: FormField[] = [
         label: '角色',
         name: 'role_id',
         initialValue: '',
+        formatter: 'number',
         syncDefaultOption: {
             name: '全部',
             value: '',
