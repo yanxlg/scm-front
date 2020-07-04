@@ -194,7 +194,7 @@ const Role = () => {
                             >
                                 <PopConfirmLoadingButton
                                     popConfirmProps={{
-                                        title: '确定要阐述改角色吗？',
+                                        title: '确定要修改角色吗？',
                                         onConfirm: () => rmRole(item.id),
                                     }}
                                     buttonProps={{
