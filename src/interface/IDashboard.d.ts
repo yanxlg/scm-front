@@ -67,3 +67,40 @@ export interface IOverviewDetailItem {
     onsaleGoodsNum: number; // 在架商品数
     saledGoodsNum: number; // 有销量商品数
 }
+
+export interface IMonitorOrderReq {
+    channel_source?: string;
+    channel_merchant_name?: string;
+    confirm_time_start: number;
+    confirm_time_end: number;
+}
+
+export interface IMonitorPurchaseOrderReq {
+    order_time_start: number;
+    order_time_end: number;
+}
+
+export interface IMonitorOrderItem {
+    channelSource: string;
+    channelMerchantName: string;
+    confirmTime: string;
+    dayNum: number;
+    totalNum: number;
+    outboundNum: number;
+    cancelNumBeforeOutbound: number;
+    cancelNumAfterOutbound: number;
+    cancelNumMiddle: number;
+    cancelNumChannel: number;
+    percentage?: string;
+    specialPercentage?: string;
+}
+
+export interface IMonitorPurchaseOrderItem {
+    orderTime: string;
+    dayNum: number;
+    totalNum: number;
+    inboundNum: number;
+    cancelNumNoPay: number;
+    percentage?: string;
+    specialPercentage?: string;
+}
