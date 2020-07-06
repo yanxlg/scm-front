@@ -28,6 +28,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 
 const { Paragraph } = Typography;
 
@@ -185,9 +186,17 @@ const Over = () => {
                         children:
                             String(purchaseGoodsStatus) === '7' ? null : (
                                 <>
-                                    <Button type="link" onClick={() => applyReturnService(item)}>
-                                        申请退款
-                                    </Button>
+                                    <PermissionComponent
+                                        pid="purchase/list/refund"
+                                        control="tooltip"
+                                    >
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    </PermissionComponent>
                                 </>
                             ),
                         props: {

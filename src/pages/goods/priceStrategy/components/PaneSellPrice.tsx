@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
@@ -14,6 +14,9 @@ import useSellChannel from '../hooks/useSellChannel';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
+import { PermissionComponent } from 'rc-permission';
+import { ConnectState } from '@/models/connect';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const formFields: FormField[] = [
     {
@@ -30,7 +33,12 @@ const formFields: FormField[] = [
         name: 'enable_platform',
         placeholder: '请选择',
         className: styles.select,
-        optionList: () => queryShopFilterList(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.filterList;
+            },
+        },
         onChange: (name, form) => {
             form.resetFields(['enable_merchant']);
         },
@@ -43,7 +51,12 @@ const formFields: FormField[] = [
         optionListDependence: { name: 'enable_platform', key: 'children' },
         placeholder: '请选择',
         className: styles.select,
-        optionList: () => queryShopFilterList(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.filterList;
+            },
+        },
         formatter: 'join',
     },
     {
@@ -71,6 +84,15 @@ const PaneSellPrice: React.FC = props => {
     const [editType, setEditType] = useState<IEdiyKey>(EditEnum.DEFAULT); // ADD
     const [updateRangeStatus, setUpdateRangeStatus] = useState(false);
     const [currentId, setCurrentId] = useState('');
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
+
     const {
         loading,
         pageNumber,
@@ -111,15 +133,20 @@ const PaneSellPrice: React.FC = props => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button
-                ghost
+            <PermissionComponent
                 key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => setUpdateRangeStatus(true)}
+                pid="goods/price_strategy/sale/update_price"
+                control="tooltip"
             >
-                更新商品售价
-            </Button>,
+                <Button
+                    ghost={true}
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => setUpdateRangeStatus(true)}
+                >
+                    更新商品售价
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 
@@ -134,13 +161,18 @@ const PaneSellPrice: React.FC = props => {
                 render: (_: any, record: ISellItem) => {
                     const { id } = record;
                     return (
-                        <Button
-                            type="link"
-                            className={styles.hover}
-                            onClick={() => handleUpdate(id)}
+                        <PermissionComponent
+                            pid="goods/price_strategy/sale/update_role"
+                            control="tooltip"
                         >
-                            更新
-                        </Button>
+                            <Button
+                                type="link"
+                                className={styles.hover}
+                                onClick={() => handleUpdate(id)}
+                            >
+                                更新
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -240,13 +272,18 @@ const PaneSellPrice: React.FC = props => {
                 width: 120,
                 render: (val: string) => {
                     return (
-                        <Button
-                            type="link"
-                            className={styles.hover}
-                            onClick={() => showLogModal(val)}
+                        <PermissionComponent
+                            pid={'goods/price_strategy/sale/log'}
+                            control="tooltip"
                         >
-                            查看
-                        </Button>
+                            <Button
+                                type="link"
+                                className={styles.hover}
+                                onClick={() => showLogModal(val)}
+                            >
+                                查看
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -274,14 +311,19 @@ const PaneSellPrice: React.FC = props => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <Button
-                        ghost
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => setEditType(EditEnum.ADD)}
+                    <PermissionComponent
+                        pid="goods/price_strategy/sale/update_role"
+                        control="tooltip"
                     >
-                        +新增商品售价配置
-                    </Button>
+                        <Button
+                            ghost={true}
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={() => setEditType(EditEnum.ADD)}
+                        >
+                            +新增商品售价配置
+                        </Button>
+                    </PermissionComponent>
                 </div>
             </JsonForm>
         );
@@ -290,7 +332,7 @@ const PaneSellPrice: React.FC = props => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 rowKey="id"
                 columnsSettingRender={true}
                 loading={loading}
@@ -310,7 +352,7 @@ const PaneSellPrice: React.FC = props => {
             {table}
             <UpdateRangeModal
                 visible={updateRangeStatus}
-                sellChannelList={sellChannelList}
+                sellChannelList={sellChannelList || []}
                 onCancel={hideUpdateRangeModal}
             />
             <SaleAndShippingLogModal
@@ -324,7 +366,7 @@ const PaneSellPrice: React.FC = props => {
         <SellConfig
             type={editType}
             id={currentId}
-            sellChannelList={sellChannelList}
+            sellChannelList={sellChannelList || []}
             goBack={goBack}
             onReload={onReload}
         />

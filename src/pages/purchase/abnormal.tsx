@@ -8,6 +8,8 @@ import PaneAbnormalEnd from './components/abnormal/PaneAbnormalEnd';
 import { getExceptionCount, queryStrategyException } from '@/services/purchase';
 import PaneAbnormalReview from './components/abnormal/PaneAbnormalReview';
 import { IAbnormalContext } from '@/interface/IPurchase';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 
@@ -64,28 +66,53 @@ const Purchase: React.FC = props => {
                 <AbnormalContext.Provider value={context}>
                     <Tabs defaultActiveKey="1" type="card" className="tabs-margin-none">
                         <TabPane tab="全部" key="1">
-                            <PaneAbnormalAll getExceptionCount={_getExceptionCount} />
+                            <PermissionComponent
+                                pid="purchase/abnormal/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PaneAbnormalAll getExceptionCount={_getExceptionCount} />
+                            </PermissionComponent>
                         </TabPane>
                         <TabPane tab={`待审核（${waitReviewTotal}）`} key="2">
-                            <PaneAbnormalReview
-                                penddingCount={penddingCount}
-                                getExceptionCount={_getExceptionCount}
-                            />
+                            <PermissionComponent
+                                pid="purchase/abnormal/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PaneAbnormalReview
+                                    penddingCount={penddingCount}
+                                    getExceptionCount={_getExceptionCount}
+                                />
+                            </PermissionComponent>
                         </TabPane>
                         <TabPane tab={`待处理（${allPenddingCount}）`} key="3">
-                            <PaneAbnormalWaitProcess
-                                penddingCount={penddingCount}
-                                getExceptionCount={_getExceptionCount}
-                            />
+                            <PermissionComponent
+                                pid="purchase/abnormal/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PaneAbnormalWaitProcess
+                                    penddingCount={penddingCount}
+                                    getExceptionCount={_getExceptionCount}
+                                />
+                            </PermissionComponent>
                         </TabPane>
                         <TabPane tab={`处理中（${allExecingCount}）`} key="4">
-                            <PaneAbnormalProcessing
-                                execingCount={execingCount}
-                                getExceptionCount={_getExceptionCount}
-                            />
+                            <PermissionComponent
+                                pid="purchase/abnormal/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PaneAbnormalProcessing
+                                    execingCount={execingCount}
+                                    getExceptionCount={_getExceptionCount}
+                                />
+                            </PermissionComponent>
                         </TabPane>
                         <TabPane tab="已完结" key="5">
-                            <PaneAbnormalEnd />
+                            <PermissionComponent
+                                pid="purchase/abnormal/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PaneAbnormalEnd />
+                            </PermissionComponent>
                         </TabPane>
                     </Tabs>
                 </AbnormalContext.Provider>
@@ -94,4 +121,7 @@ const Purchase: React.FC = props => {
     }, [countInfo, context]);
 };
 
-export default Purchase;
+export default PermissionRouterWrap(Purchase, {
+    login: true,
+    pid: 'purchase/abnormal',
+});

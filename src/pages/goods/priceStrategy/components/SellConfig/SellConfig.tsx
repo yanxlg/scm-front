@@ -121,27 +121,27 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
         return saveSalePriceRule(postData).then(res => {
             // console.log('saveSalePriceRule', res);
             // goBack();
-
-            message.success(`${EditEnum.ADD === type ? '新增' : '更新'}成功。`);
-            Modal.confirm({
-                content: '是否需要立即执行任务？',
-                okText: '是',
-                cancelText: '否',
-                onOk: () =>
-                    _startPriceStrategyUpdate({
-                        min_origin_price: numberToStr(min_origin_price),
-                        max_origin_price: numberToStr(max_origin_price),
-                        product_tags: checkedGoodsTagList?.join(','),
-                        enable_platform: enable_platform?.join(','),
-                        enable_merchant: enable_merchant?.join(','),
-                        first_cat: first_cat?.join(','),
-                        second_cat: second_cat?.join(','),
-                        third_cat: third_cat?.join(','),
-                    }),
-                onCancel: () => {
-                    goBack();
-                    onReload();
-                },
+            message.success('配置内容保存成功', 2, () => {
+                Modal.confirm({
+                    content: '是否需要立即执行任务？',
+                    okText: '是',
+                    cancelText: '否',
+                    onOk: () =>
+                        _startPriceStrategyUpdate({
+                            min_origin_price: numberToStr(min_origin_price),
+                            max_origin_price: numberToStr(max_origin_price),
+                            product_tags: checkedGoodsTagList?.join(','),
+                            enable_platform: enable_platform?.join(','),
+                            enable_merchant: enable_merchant?.join(','),
+                            first_cat: first_cat?.join(','),
+                            second_cat: second_cat?.join(','),
+                            third_cat: third_cat?.join(','),
+                        }),
+                    onCancel: () => {
+                        goBack();
+                        onReload();
+                    },
+                });
             });
         });
     }, [type, checkedGoodsTagList, id]);
@@ -178,9 +178,9 @@ const SellConfig: React.FC<IProps> = ({ type, id, sellChannelList, goBack, onRel
                 setLoading(false);
                 form.setFieldsValue({
                     ...reset,
-                    enable_source: enable_source?.split(',') ?? [],
-                    enable_platform: enable_platform?.split(',') ?? [],
-                    enable_merchant: enable_merchant?.split(',') ?? [],
+                    enable_source: enable_source ? enable_source.split(',') : [],
+                    enable_platform: enable_platform ? enable_platform.split(',') : [],
+                    enable_merchant: enable_merchant ? enable_merchant.split(',') : [],
                     first_cat: first_cat ? first_cat.split(',') : undefined,
                     second_cat: second_cat ? second_cat.split(',') : undefined,
                     third_cat: third_cat ? third_cat.split(',') : undefined,

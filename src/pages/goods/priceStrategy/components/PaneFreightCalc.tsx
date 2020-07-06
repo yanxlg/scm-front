@@ -16,6 +16,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import Export from '@/components/Export';
 import { exportExcel } from '@/services/global';
+import { PermissionComponent } from 'rc-permission';
 
 const PaneFreightCalc: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -66,23 +67,33 @@ const PaneFreightCalc: React.FC = props => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button
+            <PermissionComponent
                 key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => showFreightModal('add')}
+                pid="goods/price_strategy/shipping_card/update"
+                control="tooltip"
             >
-                + 新增运费价卡
-            </Button>,
-            <Button
-                ghost
+                <Button
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => showFreightModal('add')}
+                >
+                    + 新增运费价卡
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent
                 key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => showFreightModal('update')}
+                pid="goods/price_strategy/shipping_card/update"
+                control="tooltip"
             >
-                更新运费价卡
-            </Button>,
+                <Button
+                    ghost={true}
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => showFreightModal('update')}
+                >
+                    更新运费价卡
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 
@@ -146,8 +157,9 @@ const PaneFreightCalc: React.FC = props => {
                             {WeightConfig?.map(({ param_add, param_devide, param_multiply }) => {
                                 return (
                                     <div className={styles.calc}>
-                                        {param_add.toFixed(4)} + (m/{param_devide.toFixed(4)}) *
-                                        {param_multiply.toFixed(4)}
+                                        {Number(param_add).toFixed(4)} + (m/
+                                        {Number(param_devide).toFixed(4)}) *
+                                        {Number(param_multiply).toFixed(4)}
                                     </div>
                                 );
                             })}
@@ -210,7 +222,7 @@ const PaneFreightCalc: React.FC = props => {
                         查询
                     </LoadingButton>
                     <Button
-                        ghost
+                        ghost={true}
                         type="primary"
                         className={formStyles.formBtn}
                         onClick={() => setExportStatus(true)}
@@ -225,7 +237,7 @@ const PaneFreightCalc: React.FC = props => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 // columnsSettingRender={true}
                 rowKey={({ card_name, country_code }) => card_name + country_code}
                 loading={loading}

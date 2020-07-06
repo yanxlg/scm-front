@@ -65,20 +65,7 @@ data:
             try_files $uri $uri/ /index.html;
         }
         location / {
-            if ($cookie_jsessionid = "")
-            {
-                return 302 https://cas-t.vova.com.hk/cas/login?service=https://${host}/auth/cas_login;
-            }
             try_files $uri $uri/ /index.html;
-        }
-        location /auth/{
-            proxy_set_header   Cookie $http_cookie;
-            proxy_set_header   Host $host;
-            proxy_set_header   Remote_Addr $remote_addr;
-            proxy_set_header   X-Real-IP $remote_addr;
-            proxy_set_header   REMOTE-HOST $remote_addr;
-            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_pass https://scm-api-t@@VID@@.vova.com.hk;
         }
         location /api/{
             proxy_set_header   Cookie $http_cookie;

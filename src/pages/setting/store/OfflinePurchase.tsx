@@ -17,6 +17,7 @@ import {
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '@/styles/_store.less';
 import { IOfflinePurchaseItem } from '@/interface/ISetting';
+import { PermissionComponent } from 'rc-permission';
 
 declare type EditColumnsType<T> = Array<
     ColumnType<T> & {
@@ -281,17 +282,27 @@ const OfflinePurchase: React.FC = ({}) => {
                     return (
                         <>
                             {isEditable ? (
-                                <Button type="link" onClick={() => save(id)}>
-                                    保存
-                                </Button>
+                                <PermissionComponent
+                                    pid="setting/store/offline/update"
+                                    control="tooltip"
+                                >
+                                    <Button type="link" onClick={() => save(id)}>
+                                        保存
+                                    </Button>
+                                </PermissionComponent>
                             ) : (
                                 <>
                                     <Button type="link" onClick={() => showGoodsModal(id)}>
                                         查看商品
                                     </Button>
-                                    <Button type="link" onClick={() => edit(record)}>
-                                        修改
-                                    </Button>
+                                    <PermissionComponent
+                                        pid="setting/store/offline/update"
+                                        control="tooltip"
+                                    >
+                                        <Button type="link" onClick={() => edit(record)}>
+                                            修改
+                                        </Button>
+                                    </PermissionComponent>
                                 </>
                             )}
                             <Button type="link" danger={true} onClick={() => delPurchaseConfig(id)}>
@@ -326,7 +337,7 @@ const OfflinePurchase: React.FC = ({}) => {
         return (
             <Form form={form} component={false}>
                 <FitTable
-                    bordered
+                    bordered={true}
                     loading={loading}
                     rowKey="id"
                     components={{
@@ -360,10 +371,12 @@ const OfflinePurchase: React.FC = ({}) => {
         <>
             {formElement}
             {table}
-            <Button type="link" onClick={addPurchaseConfig} disabled={disabled}>
-                <PlusCircleOutlined />
-                添加线下采购配置
-            </Button>
+            <PermissionComponent pid={'setting/store/offline/update'} control="tooltip">
+                <Button type="link" onClick={addPurchaseConfig} disabled={disabled}>
+                    <PlusCircleOutlined />
+                    添加线下采购配置
+                </Button>
+            </PermissionComponent>
             <GoodsModal visible={goodsModalStatus} id={goodsId} onCancel={hideGoodsModal} />
         </>
     );

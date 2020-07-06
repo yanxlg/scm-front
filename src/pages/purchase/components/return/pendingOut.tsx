@@ -19,6 +19,7 @@ import Export from '@/components/Export';
 import { fieldList } from '@/pages/purchase/components/return/all';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 const { Paragraph } = Typography;
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -135,9 +136,11 @@ const PendingOut = () => {
                     return (
                         <div>
                             {_}
-                            <Button type="link" onClick={() => cancelReturnOrderFn(item)}>
-                                取消退货单
-                            </Button>
+                            <PermissionComponent pid="purchase/return/cancel" control="tooltip">
+                                <Button type="link" onClick={() => cancelReturnOrderFn(item)}>
+                                    取消退货单
+                                </Button>
+                            </PermissionComponent>
                         </div>
                     );
                 },

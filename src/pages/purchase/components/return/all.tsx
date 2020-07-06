@@ -22,6 +22,7 @@ import styles from '@/pages/purchase/_return.less';
 import { PurchaseReturnCode, PurchaseReturnMap } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 const { Paragraph } = Typography;
 
 export const fieldList: FormField[] = [
@@ -253,10 +254,12 @@ const AllList: React.FC<AllListProps> = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button key="extra-btn" type="primary" ghost={true} onClick={onModalShow}>
-                <PlusOutlined />
-                创建退货单
-            </Button>,
+            <PermissionComponent key="extra-btn" pid="purchase/return/create" control="tooltip">
+                <Button type="primary" ghost={true} onClick={onModalShow}>
+                    <PlusOutlined />
+                    创建退货单
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 
