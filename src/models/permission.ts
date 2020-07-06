@@ -6,6 +6,7 @@ interface IMerchantItem {
     name: string;
     value: string;
     disabled?: boolean;
+    id?: string;
 }
 
 type IChannelMerchantTree = IMerchantItem & {

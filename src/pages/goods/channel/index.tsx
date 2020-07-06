@@ -129,10 +129,16 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
+        formatter: 'plainToArr',
         optionList: {
             type: 'select',
             selector: (state: ConnectState) => {
-                return state?.permission?.merchantList;
+                return state?.permission?.merchantList?.map(item => {
+                    return {
+                        ...item,
+                        value: item.id,
+                    };
+                });
             },
         },
     },
