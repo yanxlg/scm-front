@@ -352,7 +352,7 @@ const PaneSellPrice: React.FC = props => {
             {table}
             <UpdateRangeModal
                 visible={updateRangeStatus}
-                sellChannelList={sellChannelList}
+                sellChannelList={sellChannelList || []}
                 onCancel={hideUpdateRangeModal}
             />
             <SaleAndShippingLogModal
@@ -366,7 +366,7 @@ const PaneSellPrice: React.FC = props => {
         <SellConfig
             type={editType}
             id={currentId}
-            sellChannelList={sellChannelList}
+            sellChannelList={sellChannelList || []}
             goBack={goBack}
             onReload={onReload}
         />
