@@ -324,6 +324,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                 return state?.permission?.merchantList;
                             },
                         },
+                        formatter: 'plainToArr',
                     },
                     {
                         type: 'textarea',
@@ -377,6 +378,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                 return state?.permission?.merchantList;
                             },
                         },
+                        formatter: 'plainToArr',
                     },
                     {
                         type: 'select',
@@ -456,6 +458,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                 return state?.permission?.merchantList;
                             },
                         },
+                        formatter: 'plainToArr',
                     },
                     {
                         type: 'select',

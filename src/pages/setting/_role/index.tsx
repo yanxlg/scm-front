@@ -257,7 +257,7 @@ const Role = () => {
                             >
                                 <LoadingSwitch
                                     checked={active}
-                                    onClick={() => updateStatus(row.id, active ? 2 : 1, row)}
+                                    onClick={checked => updateStatus(row.id, checked ? 2 : 1, row)}
                                 />
                             </PermissionComponent>
                         </>

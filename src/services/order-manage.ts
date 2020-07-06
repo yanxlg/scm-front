@@ -22,6 +22,9 @@ import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import Order from '@/pages/order';
 import { IPaginationResponse } from 'react-components/es/hooks/useList';
+import User from '@/storage/User';
+import { ApiService } from 'react-components/es/api';
+import { getFilterShopNames } from '@/services/global';
 
 export declare interface IFilterParams {
     page?: number;
@@ -55,6 +58,7 @@ export declare interface IFilterParams {
     cancel_time_start?: number; // og订单取消时间
     cancel_time_end?: number;
     only_p_order?: number;
+    product_shop?: string[];
 }
 
 export declare interface IErrFilterParams {
@@ -68,6 +72,7 @@ export declare interface IErrFilterParams {
     order_goods_id?: string;
     abnormal_type?: number;
     abnormal_detail_type?: number;
+    product_shop?: string[];
 }
 
 interface IConfirmPayData {
@@ -89,21 +94,31 @@ export async function getAllOrderList(data: IFilterParams) {
 }
 
 export function queryAllOrderList(data: IFilterParams) {
-    return api
-        .post(OrderApiPath.getAllOrderList, {
-            data,
-        })
-        .then(({ data, ...extra }) => {
-            return {
-                ...extra,
-                data: {
-                    ...Object.assign({}, data, {
-                        // @ts-ignore
-                        total: data.all_count || data.total,
-                    }),
-                },
-            };
-        });
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getAllOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export function postExportAll(data: IFilterParams) {
@@ -114,9 +129,14 @@ export function postExportAll(data: IFilterParams) {
 
 // 获取待拍单
 export async function getPendingOrderList(data: IPendingOrderSearch) {
-    return request.post(OrderApiPath.getPendingOrderList, {
-        requestType: 'json',
-        data,
+    const { product_shop } = data;
+    return getFilterShopNames(product_shop).then(product_shop => {
+        return request.post(OrderApiPath.getPendingOrderList, {
+            data: {
+                ...data,
+                product_shop: product_shop,
+            },
+        });
     });
 }
 
@@ -128,21 +148,31 @@ export async function postExportPendingOrder(data: IPendingOrderSearch) {
 
 // 获取待支付
 export function getPayOrderList(data: IWaitPaySearch) {
-    return api
-        .post(OrderApiPath.getPayOrderList, {
-            data,
-        })
-        .then(({ data, ...extra }) => {
-            return {
-                ...extra,
-                data: {
-                    ...Object.assign({}, data, {
-                        // @ts-ignore
-                        total: data.all_count || data.total,
-                    }),
-                },
-            };
-        });
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getPayOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export function postExportPay(data: IWaitPaySearch) {
@@ -153,21 +183,31 @@ export function postExportPay(data: IWaitPaySearch) {
 
 // 获取待发货
 export function getWaitShipList(data: IWaitShipSearch) {
-    return api
-        .post(OrderApiPath.getWaitShipList, {
-            data,
-        })
-        .then(({ data, ...extra }) => {
-            return {
-                ...extra,
-                data: {
-                    ...Object.assign({}, data, {
-                        // @ts-ignore
-                        total: data.all_count || data.total,
-                    }),
-                },
-            };
-        });
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getWaitShipList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export function postExportWaitShip(data: IWaitShipSearch) {
@@ -178,24 +218,31 @@ export function postExportWaitShip(data: IWaitShipSearch) {
 
 // 已采购未入库
 export function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
-    return api
-        .post<IResponse<IPaginationResponse<IOrderItem>>>(
-            OrderApiPath.getPurchasedNotWarehouseList,
-            {
-                data,
-            },
-        )
-        .then(({ data, ...extra }) => {
-            return {
-                ...extra,
-                data: {
-                    ...Object.assign({}, data, {
-                        // @ts-ignore
-                        total: data.all_count || data.total,
-                    }),
-                },
-            };
-        });
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getPurchasedNotWarehouseList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService<IResponse<IPaginationResponse<IOrderItem>>>;
 }
 
 export function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
@@ -206,9 +253,14 @@ export function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
 
 // 仓库未发货
 export async function getWarehouseNotShipList(data: IWarehouseNotShipSearch) {
-    return request.post(OrderApiPath.getWarehouseNotShipList, {
-        requestType: 'json',
-        data,
+    const { product_shop } = data;
+    return getFilterShopNames(product_shop).then(product_shop => {
+        return request.post(OrderApiPath.getWarehouseNotShipList, {
+            data: {
+                ...data,
+                product_shop: product_shop,
+            },
+        });
     });
 }
 
@@ -219,12 +271,21 @@ export async function postExportWarehouseNotShip(data: IWarehouseNotShipSearch) 
 }
 
 export function getErrorOrderList(data: IErrFilterParams) {
-    return api
-        .post(OrderApiPath.getErrorOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getErrorOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(transPaginationResponse);
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -297,12 +358,21 @@ export const queryChannelSource = singlePromiseWrap(() => {
 });
 
 export function getReviewOrderList(data: IReviewSearch) {
-    return api
-        .post(OrderApiPath.getReviewOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getReviewOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(transPaginationResponse);
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export async function postExportReview(data: any) {
@@ -395,21 +465,31 @@ export const getWarehouseList = singlePromiseWrap(() => {
 });
 
 export const queryPendingSignList = (data: any) => {
-    return api
-        .post<IResponse<IPaginationResponse<IOrderItem>>>(OrderApiPath.queryPendingSignList, {
-            data,
-        })
-        .then(({ data, ...extra }) => {
-            return {
-                ...extra,
-                data: {
-                    ...Object.assign({}, data, {
-                        // @ts-ignore
-                        total: data.all_count || data.total,
-                    }),
-                },
-            };
-        });
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.queryPendingSignList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService<IResponse<IPaginationResponse<IOrderItem>>>;
 };
 
 export const exportPendingSignList = (data: any) => {

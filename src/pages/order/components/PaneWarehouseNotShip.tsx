@@ -81,6 +81,7 @@ const formFields: FormField[] = [
                 return state?.permission?.merchantList;
             },
         },
+        formatter: 'plainToArr',
     },
     {
         type: 'dateRanger',
