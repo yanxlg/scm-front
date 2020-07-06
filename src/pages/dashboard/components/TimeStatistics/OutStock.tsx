@@ -268,9 +268,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             }
             const orderList = dayMap[day];
             orderList.sort((a, b) => {
-                return new Date(a.confirmTime).getTime() - new Date(b.confirmTime).getTime()
-                    ? 1
-                    : -1;
+                return new Date(a.confirmTime).getTime() - new Date(b.confirmTime).getTime();
             });
             const endDate = orderList[orderList.length - 1].confirmTime;
             // 找到数据截止的最后一天
