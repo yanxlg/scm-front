@@ -186,3 +186,46 @@ export const getCategoryName = (id: string, allCategoryList: IOptionItem[]) => {
     }
     return '';
 };
+
+/**
+ * 获取选择的最低类目
+ */
+export const getCategoryLowestLevel = (
+    allCategoryList: IOptionItem[],
+    firstId = '',
+    secondId = '',
+    thirdId = '',
+) => {
+    if (!firstId) {
+        return [];
+    } else if (thirdId) {
+        return [thirdId];
+    } else if (secondId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        const secondIndex = secondList.findIndex(({ value }) => value === secondId);
+        const thirdList = secondList[secondIndex].children as IOptionItem[];
+        if (thirdList && thirdList.length > 0) {
+            return thirdList.map(({ value }) => value);
+        }
+        return [secondId];
+    } else if (firstId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        if (secondList && secondList.length > 0) {
+            const retList: (string | number)[] = [];
+            secondList.forEach(({ value: secondValue, children: thirdList }) => {
+                if (thirdList && thirdList.length > 0) {
+                    thirdList.forEach(({ value }: IOptionItem) => {
+                        retList.push(value);
+                    });
+                } else {
+                    retList.push(secondValue);
+                }
+            });
+            return retList;
+        }
+        return [firstId];
+    }
+    return [];
+};

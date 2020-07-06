@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback } from 'react';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { Button, notification } from 'antd';
 import {
     JsonForm,
@@ -26,6 +26,9 @@ import CancelOrder from './CancelOrder';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { defaultOptionItem1 } from '@/enums/OrderEnum';
+import { getCategoryList } from '@/services/global';
+import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -36,7 +39,7 @@ const formFields: FormField[] = [
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
         label: '订单生成时间',
-        className: 'order-all-date-picker',
+        className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
     {
@@ -72,6 +75,51 @@ const formFields: FormField[] = [
         placeholder: '请输入',
         formatter: 'multipleToArray',
     },
+    {
+        type: 'select',
+        label: '一级类目',
+        key: 'first_category',
+        name: 'first_category',
+        className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        key: 'second_category',
+        name: 'second_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: 'first_category',
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        key: 'third_category',
+        name: 'third_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+    },
 ];
 
 const initialValues = {
@@ -80,6 +128,8 @@ const initialValues = {
 
 const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     const formRef = useRef<JsonFormRef>(null);
+    const categoryRef = useRef<IOptionItem[]>([]);
+    const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
     const {
         dataSource,
         loading,
@@ -95,8 +145,33 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     } = useList({
         queryList: getReviewOrderList,
         formRef: formRef,
+        convertQuery: (query: any) => {
+            // console.log('query', query);
+            const {
+                first_category = '',
+                second_category = '',
+                third_category = '',
+                ...rest
+            } = query;
+            return {
+                ...rest,
+                three_level_catogry_code: getCategoryLowestLevel(
+                    categoryRef.current,
+                    first_category,
+                    second_category,
+                    third_category,
+                ),
+            };
+        },
     });
     const { visible, setVisibleProps, onClose } = useModal<boolean>();
+
+    useEffect(() => {
+        getCategoryList().then(list => {
+            categoryRef.current = list;
+            setAllCategoryList(list);
+        });
+    }, []);
 
     const orderList = useMemo(() => {
         const list: IReviewOrderItem[] = [];
@@ -114,6 +189,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 productName,
                 productId,
                 commodityId,
+                threeLevelCatogryCode,
             } = orderGoods;
             // const {
 
@@ -131,6 +207,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 productName,
                 productId,
                 commodityId,
+                threeLevelCatogryCode,
             });
         });
         return list;
@@ -387,8 +464,15 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 align: 'center',
                 width: 120,
             },
+            {
+                title: '商品最低类目',
+                dataIndex: 'threeLevelCatogryCode',
+                align: 'center',
+                width: 140,
+                render: (value: number) => getCategoryName(String(value), allCategoryList),
+            },
         ];
-    }, []);
+    }, [allCategoryList]);
 
     const pagination = useMemo(() => {
         return {
@@ -471,7 +555,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 />
             </>
         );
-    }, [loading, orderList, selectedRowKeys, visible]);
+    }, [loading, orderList, selectedRowKeys, visible, columns]);
 };
 
 export default PanePendingReview;
