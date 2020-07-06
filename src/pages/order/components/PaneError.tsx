@@ -1,15 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, FitTable, LoadingButton } from 'react-components';
+import { getErrorOrderList, postExportErrOrder } from '@/services/order-manage';
 import {
-    getErrorOrderList,
-    postExportErrOrder,
-    queryChannelSource,
-    getPlatformAndStore,
-} from '@/services/order-manage';
-import {
-    defaultOptionItem,
-    channelOptionList,
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
@@ -33,6 +26,7 @@ import { queryGoodsSourceList } from '@/services/global';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
+import { filterFieldsList } from '@/pages/order/components/utils';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -61,6 +55,10 @@ export declare interface IErrorOrderItem {
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
+const configFields = ['order_goods_id', 'channel_source', 'product_shop', 'product_platform'];
+
+const preFieldsList = filterFieldsList(configFields);
+
 const PaneErrTab = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
@@ -82,38 +80,7 @@ const PaneErrTab = () => {
 
     const fieldList: FormField[] = useMemo(() => {
         return [
-            {
-                type: 'textarea',
-                name: 'order_goods_id',
-                label: '订单号',
-                className: 'order-input',
-                placeholder: '请输入',
-                formatter: 'multipleToArray',
-            },
-            {
-                type: 'select',
-                name: 'product_shop',
-                label: '销售店铺名称',
-                className: 'order-input',
-                // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem1,
-                optionList: {
-                    type: 'select',
-                    selector: (state: ConnectState) => {
-                        return state?.permission?.merchantList;
-                    },
-                },
-                formatter: 'plainToArr',
-            },
-            {
-                type: 'select',
-                name: 'product_platform',
-                label: '采购渠道',
-                className: 'order-input',
-                // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem1,
-                optionList: () => queryGoodsSourceList(),
-            },
+            ...preFieldsList,
             {
                 type: 'select',
                 name: 'abnormal_type',

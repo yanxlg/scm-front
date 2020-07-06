@@ -13,7 +13,7 @@ import {
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { getPlatformAndStore, getPurchaseUidList, queryShopList } from '@/services/order-manage';
+import { getPurchaseUidList } from '@/services/order-manage';
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
 import { queryGoodsSourceList } from '@/services/global';
