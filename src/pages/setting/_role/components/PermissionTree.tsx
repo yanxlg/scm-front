@@ -16,9 +16,10 @@ declare interface PermissionTreeProps {
     form: FormInstance;
     roleIds?: (number | string)[];
     disabled?: boolean;
+    setLoading?: (loading: boolean) => void;
 }
 
-const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled }) => {
+const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled, setLoading }) => {
     const flatKeysRef = useRef<string[]>([]);
     const keysArrayRef = useRef<Array<string[]>>([]);
     const pTreeRef = useRef<IPermissionTree[]>([]);
@@ -75,6 +76,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
         if (roleIds && queryPermissionTreePromise.current) {
             if (roleIds.length) {
                 queryPermissionTreePromise.current.then(() => {
+                    setLoading && setLoading(true);
                     queryRolePermission(roleIds).then(({ data }) => {
                         const keyMap = new Map<string | number, true>();
                         data.map((item: IPermissionItem['data']) => {
@@ -92,6 +94,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
                                     return item.key;
                                 }),
                         });
+                        setLoading && setLoading(false);
                     });
                 });
             } else {
@@ -107,6 +110,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
 
     useEffect(() => {
         if (roleIds && roleIds.length) {
+            setLoading && setLoading(true);
             Promise.all([queryTree(), queryRolePermission(roleIds)]).then(([_, { data }]) => {
                 const keyMap = new Map<string | number, true>();
                 data.map((item: IPermissionItem['data']) => {
@@ -124,6 +128,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
                             return item.key;
                         }),
                 });
+                setLoading && setLoading(false);
             });
         } else {
             queryTree();
