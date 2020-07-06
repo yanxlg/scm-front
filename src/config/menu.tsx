@@ -23,6 +23,10 @@ export default [
                 path: '/dashboard/order',
                 name: '订单分析',
             },
+            {
+                path: '/dashboard/timeStatistics',
+                name: '时效统计',
+            },
         ],
     },
     {
@@ -80,6 +84,12 @@ export default [
                 name: '定价策略',
             },
         ],
+    },
+
+    {
+        path: '/selection',
+        name: '选品中心',
+        icon: <Icons type="scm-selection" className="menu-icon" />,
     },
     {
         path: '/order',

@@ -26,9 +26,6 @@ import {
     finalCancelStatusList,
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
-    errorDetailOptionMap,
-    failureReasonMap,
-    failureReasonCode,
 } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
