@@ -73,31 +73,40 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({ form, roleIds, disabled
 
     useEffect(() => {
         if (roleIds && queryPermissionTreePromise.current) {
-            queryPermissionTreePromise.current.then(() => {
-                queryRolePermission(roleIds).then(({ data }) => {
-                    const keyMap = new Map<string | number, true>();
-                    data.map((item: IPermissionItem['data']) => {
-                        keyMap.set(item.id, true);
-                    });
-                    form.setFieldsValue({
-                        page_tree: keysArrayRef.current.map(keys => {
-                            return keys.filter(key => keyMap.get(key));
-                        }),
-                        data: dataTreeRef.current
-                            .filter(item => {
-                                return keyMap.get(item.key);
-                            })
-                            .map(item => {
-                                return item.key;
+            if (roleIds.length) {
+                queryPermissionTreePromise.current.then(() => {
+                    queryRolePermission(roleIds).then(({ data }) => {
+                        const keyMap = new Map<string | number, true>();
+                        data.map((item: IPermissionItem['data']) => {
+                            keyMap.set(item.id, true);
+                        });
+                        form.setFieldsValue({
+                            page_tree: keysArrayRef.current.map(keys => {
+                                return keys.filter(key => keyMap.get(key));
                             }),
+                            data: dataTreeRef.current
+                                .filter(item => {
+                                    return keyMap.get(item.key);
+                                })
+                                .map(item => {
+                                    return item.key;
+                                }),
+                        });
                     });
                 });
-            });
+            } else {
+                queryPermissionTreePromise.current.then(() => {
+                    form.setFieldsValue({
+                        page_tree: [],
+                        data: [],
+                    });
+                });
+            }
         }
     }, [roleIds]);
 
     useEffect(() => {
-        if (roleIds) {
+        if (roleIds && roleIds.length) {
             Promise.all([queryTree(), queryRolePermission(roleIds)]).then(([_, { data }]) => {
                 const keyMap = new Map<string | number, true>();
                 data.map((item: IPermissionItem['data']) => {

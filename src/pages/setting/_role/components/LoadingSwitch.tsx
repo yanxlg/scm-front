@@ -17,10 +17,10 @@ const LoadingSwitch: React.FC<LoadingSwitchProps> = ({ onClick, checked, ...prop
         // @ts-ignore
         if (props['_privateClick']) {
             // fix with permission component
-            onClick?.(checked, event);
+            onClick?.(checkedRef.current!, event);
         } else if (onClick) {
             setLoading(true);
-            const result = onClick(checked, event);
+            const result = onClick(checkedRef.current!, event);
             if (result) {
                 result
                     .then((checked: boolean) => {
