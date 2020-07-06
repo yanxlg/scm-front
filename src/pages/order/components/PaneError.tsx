@@ -59,6 +59,8 @@ const configFields = ['order_goods_id', 'channel_source', 'product_shop', 'produ
 
 const preFieldsList = filterFieldsList(configFields);
 
+const afterFieldList = filterFieldsList(['order_create_time', 'confirm_time']);
+
 const PaneErrTab = () => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
@@ -97,20 +99,7 @@ const PaneErrTab = () => {
                     onSearch(); // 立即查询
                 },
             },
-            {
-                type: 'dateRanger',
-                name: ['order_time_start', 'order_time_end'],
-                label: '订单时间',
-                className: 'order-error-date-picker',
-                formatter: ['start_date', 'end_date'],
-            },
-            {
-                type: 'dateRanger',
-                name: ['confirm_time_start', 'confirm_time_end'],
-                label: '订单确认时间',
-                className: 'order-error-date-picker',
-                formatter: ['start_date', 'end_date'],
-            },
+            ...afterFieldList,
         ];
     }, []);
 
@@ -333,7 +322,7 @@ const PaneErrTab = () => {
             title: '采购订单发货时间',
             dataIndex: 'platformShippingTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -343,7 +332,7 @@ const PaneErrTab = () => {
             title: '采购计划生成时间',
             dataIndex: 'platformSendOrderTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -422,11 +411,12 @@ const PaneErrTab = () => {
         return (
             <>
                 <JsonForm
-                    labelClassName="order-error-label"
+                    labelClassName="order-label"
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
                         product_shop: '',
+                        channel_source: '',
                         product_platform: '',
                         abnormal_type: 1,
                     }}
