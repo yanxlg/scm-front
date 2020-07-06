@@ -12,6 +12,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { getCategoryList } from '@/services/global';
 import { getOrderConfigList, delOrderConfig } from '@/services/setting';
 import { IOrderConfigItem } from '@/interface/ISetting';
+import { getCategoryName } from '@/utils/utils';
 
 const formFields: FormField[] = [
     {
@@ -97,10 +98,6 @@ const PaneOrderReview: React.FC = () => {
         return getCategoryList();
     }, []);
 
-    // const _addOrderConfig = useCallback(() => {
-
-    // }, []);
-
     const _delOrderConfig = useCallback(id => {
         delOrderConfig(id).then(res => {
             message.success('删除成功！');
@@ -115,18 +112,21 @@ const PaneOrderReview: React.FC = () => {
                 dataIndex: 'first_cat_id',
                 align: 'center',
                 width: 140,
+                render: (val: string) => getCategoryName(val, allCategoryList),
             },
             {
                 title: '二级类目',
                 dataIndex: 'second_cat_id',
                 align: 'center',
                 width: 140,
+                render: (val: string) => getCategoryName(val, allCategoryList),
             },
             {
                 title: '三级类目',
                 dataIndex: 'third_cat_id',
                 align: 'center',
                 width: 140,
+                render: (val: string) => getCategoryName(val, allCategoryList),
             },
             {
                 title: '操作时间',
@@ -157,7 +157,7 @@ const PaneOrderReview: React.FC = () => {
                 },
             },
         ];
-    }, []);
+    }, [allCategoryList]);
 
     const pagination = useMemo<any>(() => {
         return {
@@ -201,7 +201,7 @@ const PaneOrderReview: React.FC = () => {
                 </Button>
                 <FitTable
                     bordered
-                    rowKey="product_id"
+                    rowKey="id"
                     loading={loading}
                     columns={columns}
                     dataSource={dataSource}
@@ -215,10 +215,11 @@ const PaneOrderReview: React.FC = () => {
                     allCategoryList={allCategoryList}
                     hideModal={hideOrderReviewModal}
                     getCategoryList={_getCategoryList}
+                    onReload={onReload}
                 />
             </div>
         );
-    }, [loading, configStatus, allCategoryList]);
+    }, [loading, configStatus, allCategoryList, columns]);
 };
 
 export default PaneOrderReview;

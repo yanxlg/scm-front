@@ -313,7 +313,7 @@ const GoodsAttr: React.FC = props => {
         // console.log('attrList', attrList);
         return (
             <Container>
-                <Tabs defaultActiveKey="3" type="card">
+                <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="商品属性配置" key="1">
                         <div className={styles.tableContainer}>
                             {pending && (

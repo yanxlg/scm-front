@@ -127,3 +127,62 @@ export const getCurrentOptionList = (
     }
     return [];
 };
+
+/**
+ * 判断选择的类目是否有未选择的类目 true: 有未选择 false: 没有未选择
+ */
+export const hasNotSelectedCategory = (
+    allCategoryList: IOptionItem[],
+    firstId = '',
+    secondId = '',
+    thirdId = '',
+) => {
+    if (!firstId) {
+        return true;
+    } else if (thirdId) {
+        return false;
+    } else if (secondId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        const secondIndex = secondList.findIndex(({ value }) => value === secondId);
+        const thirdList = secondList[secondIndex].children as IOptionItem[];
+        if (thirdList && thirdList.length > 0) {
+            return true;
+        }
+    } else if (firstId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        if (secondList && secondList.length > 0) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+/**
+ * 通过ID获取类目名称
+ */
+export const getCategoryName = (id: string, allCategoryList: IOptionItem[]) => {
+    for (let i = 0, firstLen = allCategoryList.length; i < firstLen; i++) {
+        const firstItem = allCategoryList[i];
+        if (firstItem.value === id) {
+            return firstItem.name;
+        }
+        const secondList = (firstItem.children || []) as IOptionItem[];
+        for (let j = 0, secondLen = secondList.length; j < secondLen; j++) {
+            const secondItem = secondList[j];
+            if (secondItem.value === id) {
+                return secondItem.name;
+            }
+            const thirdList = (secondItem.children || []) as IOptionItem[];
+            for (let k = 0, thirdLen = thirdList.length; k < thirdLen; k++) {
+                const thirdItem = thirdList[k];
+                if (thirdItem.value === id) {
+                    return thirdItem.name;
+                }
+            }
+        }
+    }
+    return '';
+};
