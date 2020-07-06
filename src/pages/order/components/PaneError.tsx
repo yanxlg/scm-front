@@ -103,6 +103,7 @@ const PaneErrTab = () => {
                         return state?.permission?.merchantList;
                     },
                 },
+                formatter: 'plainToArr',
             },
             {
                 type: 'select',

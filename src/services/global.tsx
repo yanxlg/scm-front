@@ -216,3 +216,20 @@ export function updatePwd(oldPassword: string, newPassword: string) {
         },
     });
 }
+
+export function getFilterShopNames(selected?: string[]) {
+    return new Promise(resolve => {
+        if (!selected || selected.length === 0) {
+            return queryShopList().then(({ data: merchantList }) => {
+                // 做权限过滤
+                const dData = User.dData || [];
+                const list = merchantList.filter((item: any) => {
+                    return dData.indexOf(item.merchant_name) > -1;
+                });
+                resolve(list.map((item: any) => item.merchant_name));
+            });
+        } else {
+            resolve(selected);
+        }
+    });
+}

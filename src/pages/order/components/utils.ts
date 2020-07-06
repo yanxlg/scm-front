@@ -28,6 +28,7 @@ const allFormFields: FormField[] = [
         className: 'order-input',
         initialValue: '',
         syncDefaultOption: defaultOptionItem1,
+        formatter: 'plainToArr',
         optionList: {
             type: 'select',
             selector: (state: ConnectState) => {
@@ -215,6 +216,7 @@ const allFormFields: FormField[] = [
             name: 'channel_source',
             key: 'children',
         },
+        formatter: 'plainToArr',
         optionList: {
             type: 'select',
             selector: (state: ConnectState) => {
