@@ -1,5 +1,5 @@
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { message, Modal } from 'antd';
+import { message, Modal, Spin } from 'antd';
 import { JsonForm } from 'react-components';
 import styles from '../_index.less';
 import classNames from 'classnames';
@@ -37,6 +37,7 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
     const roleList = useSelector((state: ConnectState) => {
         return state?.account?.roleSimpleList;
     });
+    const [loading, setLoading] = useState(false);
 
     const disabled = visibleType === 'view';
 
@@ -179,12 +180,6 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                             const roles = form.getFieldValue('roles');
                             setRoleIds(roles);
                         },
-                        rules: [
-                            {
-                                required: true,
-                                message: '请选择角色',
-                            },
-                        ],
                     },
                 ],
             },
@@ -195,6 +190,7 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
                 props: {
                     roleIds: roleIds,
                     disabled: disabled || treeDisabled,
+                    setLoading: setLoading,
                 },
             },
         ] as FormField<any>[];
@@ -202,18 +198,20 @@ const AddAccountModalContent: React.FC<AddAccountModalContentProps> = ({
 
     return useMemo(() => {
         return (
-            <JsonForm
-                ref={originFormRef}
-                layout="horizontal"
-                labelClassName={styles.formModalLabel}
-                containerClassName={classNames(
-                    formStyles.formContainer,
-                    formStyles.formHelpAbsolute,
-                )}
-                fieldList={formFields}
-            />
+            <Spin spinning={loading}>
+                <JsonForm
+                    ref={originFormRef}
+                    layout="horizontal"
+                    labelClassName={styles.formModalLabel}
+                    containerClassName={classNames(
+                        formStyles.formContainer,
+                        formStyles.formHelpAbsolute,
+                    )}
+                    fieldList={formFields}
+                />
+            </Spin>
         );
-    }, [roleIds, roleList]);
+    }, [roleIds, roleList, loading]);
 };
 
 const AddAccountModal: React.FC<AddAccountModalProps> = ({
