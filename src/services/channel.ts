@@ -24,6 +24,9 @@ import { downloadExcel } from '@/utils/common';
 import { singlePromiseWrap, transPaginationRequest, transPaginationResponse } from '@/utils/utils';
 import { EmptyObject } from '@/config/global';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { getFilterShopIds, getFilterShopNames } from '@/services/global';
+import { OrderApiPath } from '@/config/api/OrderApiPath';
+import { ApiService } from 'react-components/es/api';
 
 export async function queryChannelProductVersion(query?: IChannelProductVersionQuery) {
     return request.get<IResponse<IChannelProductVersionResponse>>(
@@ -55,9 +58,17 @@ export async function cleanChannelChangedProperties() {
 }
 
 export async function queryChannelGoodsList(data: IChannelProductListBody & RequestPagination) {
-    return request.post<IResponse<IChannelProductListResponse>>(ChannelApiPath.QueryProductList, {
-        requestType: 'json',
-        data: transPaginationRequest(data),
+    const { merchant_ids } = data;
+    return getFilterShopIds(merchant_ids).then((merchant_ids?: string[]) => {
+        return request.post<IResponse<IChannelProductListResponse>>(
+            ChannelApiPath.QueryProductList,
+            {
+                data: {
+                    ...transPaginationRequest(data),
+                    merchant_ids: merchant_ids ? merchant_ids.join(',') : merchant_ids,
+                },
+            },
+        );
     });
 }
 

@@ -218,7 +218,7 @@ export function updatePwd(oldPassword: string, newPassword: string) {
 }
 
 export function getFilterShopNames(selected?: string[]) {
-    return new Promise(resolve => {
+    return new Promise<string[] | undefined>(resolve => {
         if (!selected || selected.length === 0) {
             return queryShopList().then(({ data: merchantList }) => {
                 // 做权限过滤
@@ -226,7 +226,24 @@ export function getFilterShopNames(selected?: string[]) {
                 const list = merchantList.filter((item: any) => {
                     return dData.indexOf(item.merchant_name) > -1;
                 });
-                resolve(list.map((item: any) => item.merchant_name));
+                resolve(list.map((item: any) => item.merchant_name) as string[]);
+            });
+        } else {
+            resolve(selected);
+        }
+    });
+}
+
+export function getFilterShopIds(selected?: string[]) {
+    return new Promise<string[] | undefined>(resolve => {
+        if (!selected || selected.length === 0) {
+            return queryShopList().then(({ data: merchantList }) => {
+                // 做权限过滤
+                const dData = User.dData || [];
+                const list = merchantList.filter((item: any) => {
+                    return dData.indexOf(item.merchant_name) > -1;
+                });
+                resolve(list.map((item: any) => item.merchant_id) as string[]);
             });
         } else {
             resolve(selected);
