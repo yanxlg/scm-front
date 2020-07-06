@@ -228,7 +228,7 @@ const InStock: React.FC = ({}) => {
             }
             const orderList = dayMap[day];
             orderList.sort((a, b) => {
-                return new Date(a.orderTime).getTime() - new Date(b.orderTime).getTime() ? 1 : -1;
+                return new Date(a.orderTime).getTime() - new Date(b.orderTime).getTime();
             });
             const endDate = orderList[orderList.length - 1].orderTime;
             // 找到数据截止的最后一天
