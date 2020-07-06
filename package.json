@@ -24,7 +24,7 @@
         "query-string": "^6.11.1",
         "react": "^16.13.0",
         "react-dom": "^16.13.0",
-        "rc-permission": "^0.0.16",
+        "rc-permission": "^0.0.17",
         "rc-table": "7.8.0"
     },
     "devDependencies": {
