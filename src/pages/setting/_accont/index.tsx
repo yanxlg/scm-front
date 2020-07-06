@@ -135,8 +135,7 @@ const Account = () => {
 
     const updateStatus = useCallback((id: string, status: number, row: IAccount) => {
         return updateAccountStatus(id, status).then(() => {
-            row.status = String(status) as '1' | '2';
-            return status === 1;
+            onReload();
         });
     }, []);
 
@@ -236,7 +235,7 @@ const Account = () => {
                             >
                                 <LoadingSwitch
                                     checked={active}
-                                    onClick={checked => updateStatus(row.id, checked ? 2 : 1, row)}
+                                    onClick={checked => updateStatus(row.id, active ? 2 : 1, row)}
                                 />
                             </PermissionComponent>
                         </>
