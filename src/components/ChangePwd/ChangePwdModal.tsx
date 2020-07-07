@@ -129,12 +129,20 @@ const ChangePwdModal: React.FC<IChangePwdModalProps> = ({ visible, onClose }) =>
         formRef.current!.validateFields().then(values => {
             const { oldPassword, newPassword } = values;
             setSubmitting(true);
-            updatePwd(oldPassword, newPassword).then(() => {
-                message.success('密码修改成功，请重新登陆');
-                logout().then(() => {
-                    history.replace('/login');
+            updatePwd(oldPassword, newPassword)
+                .then(() => {
+                    message.success('密码修改成功，请重新登陆');
+                    logout()
+                        .then(() => {
+                            history.replace('/login');
+                        })
+                        .finally(() => {
+                            setSubmitting(false);
+                        });
+                })
+                .finally(() => {
+                    setSubmitting(false);
                 });
-            });
         });
     }, []);
 
