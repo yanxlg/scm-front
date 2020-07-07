@@ -326,12 +326,14 @@ const GoodsTable: React.FC<IProps> = ({
                     return (
                         <>
                             <div>{_value}</div>
-                            <Button
-                                type="link"
-                                onClick={() => showMergeModal(commodity_id, product_sn)}
-                            >
-                                {_value ? '查看商品组' : '关联商品'}
-                            </Button>
+                            <PermissionComponent pid="goods/local/merge" control="tooltip">
+                                <Button
+                                    type="link"
+                                    onClick={() => showMergeModal(commodity_id, product_sn)}
+                                >
+                                    {_value ? '查看商品组' : '关联商品'}
+                                </Button>
+                            </PermissionComponent>
                         </>
                     );
                 },
