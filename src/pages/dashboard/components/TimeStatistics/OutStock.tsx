@@ -335,6 +335,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
             });
         });
 
+        chartRef.current?.clear();
         chartRef.current?.setOption({
             title: {
                 text: '出库率',
