@@ -140,7 +140,7 @@ const ChangePwdModal: React.FC<IChangePwdModalProps> = ({ visible, onClose }) =>
                             setSubmitting(false);
                         });
                 })
-                .finally(() => {
+                .catch(() => {
                     setSubmitting(false);
                 });
         });
