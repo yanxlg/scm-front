@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { queryShopFilterList } from '@/services/global';
-import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import React from 'react';
+import { useSelector } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 export default function useSellChannel() {
-    const [sellChannelList, setSellChannelList] = useState<IOptionItem[]>([]);
-
-    useEffect(() => {
-        queryShopFilterList().then(res => {
-            setSellChannelList(res);
-        });
-    }, []);
+    const sellChannelList = useSelector((state: ConnectState) => state?.permission?.filterList);
 
     return {
         sellChannelList,

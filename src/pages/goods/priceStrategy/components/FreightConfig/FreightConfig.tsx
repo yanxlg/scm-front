@@ -26,6 +26,7 @@ import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { numberToStr } from '@/utils/common';
 import useGoodsCatagory from '../../hooks/useGoodsCatagory';
 import MultipleSelect from '@/components/MultipleSelect/MultipleSelect';
+import { PermissionComponent } from 'rc-permission';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -316,23 +317,32 @@ const FreightConfig: React.FC<IProps> = ({ type, id, cartNameList, goBack, onRel
                         cancelText="取消"
                     >
                         <Button
-                            ghost
+                            ghost={true}
                             type="primary"
                             className={classnames(styles.cancel, formStyles.formBtn)}
                         >
                             返回
                         </Button>
                     </Popconfirm>
-                    <Popconfirm
-                        title="确认保存吗？"
-                        onConfirm={handleSave}
-                        okText="确认"
-                        cancelText="取消"
+                    <PermissionComponent
+                        pid="goods/price_strategy/shipping/update_rule"
+                        control="tooltip"
                     >
-                        <Button type="primary" loading={saveLoading} className={formStyles.formBtn}>
-                            保存
-                        </Button>
-                    </Popconfirm>
+                        <Popconfirm
+                            title="确认保存吗？"
+                            onConfirm={handleSave}
+                            okText="确认"
+                            cancelText="取消"
+                        >
+                            <Button
+                                type="primary"
+                                loading={saveLoading}
+                                className={formStyles.formBtn}
+                            >
+                                保存
+                            </Button>
+                        </Popconfirm>
+                    </PermissionComponent>
                 </div>
             </Spin>
         </div>

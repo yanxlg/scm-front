@@ -4,6 +4,8 @@ import { Tabs } from 'antd';
 import tabStyles from '@/styles/_tabs.less';
 import EditTab from '@/pages/setting/components/info/EditTab';
 import ListTab from '@/pages/setting/components/info/ListTab';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 
@@ -19,10 +21,20 @@ const CustomDeclarationInfoPage: React.FC = () => {
                     type="card"
                     children={[
                         <TabPane tab={'重量报关信息设置'} key="1">
-                            <EditTab />
+                            <PermissionComponent
+                                pid="setting/customs/setting"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <EditTab />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={'重量报关信息查看'} key="2">
-                            <ListTab activeKey={activeKey} />
+                            <PermissionComponent
+                                pid="setting/customs/list"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <ListTab activeKey={activeKey} />
+                            </PermissionComponent>
                         </TabPane>,
                     ]}
                 />
@@ -31,4 +43,7 @@ const CustomDeclarationInfoPage: React.FC = () => {
     }, [activeKey]);
 };
 
-export default CustomDeclarationInfoPage;
+export default PermissionRouterWrap(CustomDeclarationInfoPage, {
+    login: true,
+    pid: 'setting/customs',
+});
