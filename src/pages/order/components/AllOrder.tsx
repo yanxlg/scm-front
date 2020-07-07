@@ -78,6 +78,7 @@ const configFields = [
     'product_id',
     'sku_id',
     'purchase_platform_order_id',
+    'invented_sign_delivery_no',
     'order_create_time',
     'confirm_time',
     'cancel_time',
@@ -647,6 +648,14 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       defaultHide: true,
                       width: 120,
                       render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
+                      key: 'inventedSignDeliveryNo',
+                      title: '虚拟运单ID',
+                      dataIndex: 'inventedSignDeliveryNo',
+                      defaultHide: true,
+                      align: 'center',
+                      width: 136,
                   },
                   {
                       key: 'purchaseCreateTime',
