@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Table, Pagination, Skeleton, Input, InputNumber, message } from 'antd';
+import { Modal, Table, Pagination, Skeleton, Input, InputNumber, message, Button } from 'antd';
 import { ColumnProps } from 'antd/es/table';
 
 // import { getGoodsSkuList } from '@/services/goods';
@@ -10,6 +10,7 @@ import {
     IGoodsSkuItem,
     IEditSkuItem,
 } from '@/interface/IChannel';
+import { PermissionComponent } from 'rc-permission';
 
 const { TextArea } = Input;
 
@@ -307,13 +308,18 @@ class SkuDialog extends React.PureComponent<{}, IState> {
                 width={980}
                 title="sku详情"
                 visible={visible}
-                onCancel={this.handleCancel}
-                onOk={this.handleOk}
                 maskClosable={false}
-                // bodyStyle={{
-                //     maxHeight: 600,
-                //     overflow: 'auto'
-                // }}
+                onCancel={this.handleCancel}
+                footer={
+                    <>
+                        <Button onClick={this.handleCancel}>取消</Button>
+                        <PermissionComponent pid="goods/channel/sku/edit" control="tooltip">
+                            <Button type="primary" onClick={this.handleOk}>
+                                确定
+                            </Button>
+                        </PermissionComponent>
+                    </>
+                }
             >
                 <div className="product-sku-dialog">
                     {goodsDetail ? (

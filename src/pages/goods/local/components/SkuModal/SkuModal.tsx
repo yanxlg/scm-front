@@ -7,6 +7,7 @@ import { getGoodsSkuList, ISkuParams } from '@/services/goods';
 import { ColumnsType } from 'antd/es/table';
 
 import styles from './_SkuModal.less';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface ISkuItem {
     origin_sku_id: string;
@@ -340,17 +341,22 @@ const SkuModal: React.FC<IProps> = ({ visible, channelSource, currentSkuInfo, on
                             {currentSkuInfo?.tags?.map((item: string) => {
                                 const isActive = tags.indexOf(item) > -1;
                                 return (
-                                    <Button
-                                        size="small"
-                                        className={styles.tagBtn}
-                                        type={isActive ? 'primary' : 'default'}
+                                    <PermissionComponent
                                         key={item}
-                                        onClick={() =>
-                                            _setCommoditySkuTag(commodity_sku_id, item, tags)
-                                        }
+                                        pid="goods/local/add_tag"
+                                        control="tooltip"
                                     >
-                                        {item}
-                                    </Button>
+                                        <Button
+                                            size="small"
+                                            className={styles.tagBtn}
+                                            type={isActive ? 'primary' : 'default'}
+                                            onClick={() =>
+                                                _setCommoditySkuTag(commodity_sku_id, item, tags)
+                                            }
+                                        >
+                                            {item}
+                                        </Button>
+                                    </PermissionComponent>
                                 );
                             })}
                         </div>

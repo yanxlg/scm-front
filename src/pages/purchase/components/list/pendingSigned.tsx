@@ -29,6 +29,7 @@ import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
 import { FormInstance } from 'antd/es/form';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 
 const { Paragraph } = Typography;
 
@@ -214,12 +215,16 @@ const PendingSigned = () => {
                     return {
                         children: (
                             <>
-                                <Button type="link" onClick={() => showConnect(item)}>
-                                    关联运单号
-                                </Button>
-                                <Button type="link" onClick={() => applyReturnService(item)}>
-                                    申请退款
-                                </Button>
+                                <PermissionComponent pid="purchase/list/connect" control="tooltip">
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
+                                    </Button>
+                                </PermissionComponent>
+                                <PermissionComponent pid="purchase/list/refund" control="tooltip">
+                                    <Button type="link" onClick={() => applyReturnService(item)}>
+                                        申请退款
+                                    </Button>
+                                </PermissionComponent>
                             </>
                         ),
                         props: {
