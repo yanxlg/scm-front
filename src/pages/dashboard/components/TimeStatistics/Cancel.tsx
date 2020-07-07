@@ -290,6 +290,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
             });
         });
 
+        chartRef.current?.clear();
         chartRef.current?.setOption({
             title: {
                 text: '取消率',
