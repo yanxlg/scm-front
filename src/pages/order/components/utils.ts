@@ -403,6 +403,14 @@ const allFormFields: FormField[] = [
         syncDefaultOption: defaultOptionItem1,
         optionList: () => queryGoodsSourceList(),
     },
+    {
+        type: 'textarea',
+        key: 'invented_sign_delivery_no',
+        name: 'invented_sign_delivery_no',
+        label: '虚拟运单ID',
+        className: 'order-input',
+        formatter: 'multipleToArray',
+    },
 ];
 
 const fieldMap = new Map();
