@@ -176,6 +176,7 @@ export interface IReviewOrderItem {
     productName: string;
     productId: string;
     commodityId: string;
+    threeLevelCatogryCode?: number;
 }
 
 export declare interface IPlatformItem {

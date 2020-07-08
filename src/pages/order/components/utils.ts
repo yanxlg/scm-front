@@ -16,7 +16,7 @@ import {
 import { getPlatformAndStore, getPurchaseUidList, queryShopList } from '@/services/order-manage';
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
-import { queryGoodsSourceList } from '@/services/global';
+import { queryGoodsSourceList, getCategoryList } from '@/services/global';
 import { ConnectState } from '@/models/connect';
 
 const allFormFields: FormField[] = [
@@ -254,6 +254,51 @@ const allFormFields: FormField[] = [
         mode: 'multiple',
         maxTagCount: 2,
         optionList: [...finalCancelStatusList],
+    },
+    {
+        type: 'select',
+        label: '一级类目',
+        key: 'first_category',
+        name: 'first_category',
+        className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        key: 'second_category',
+        name: 'second_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: 'first_category',
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        key: 'third_category',
+        name: 'third_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
     },
     {
         type: 'textarea',

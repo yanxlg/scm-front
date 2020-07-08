@@ -54,7 +54,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingSignListCount: 0,
         };
         // console.log(11111, this.props);
-        this.defaultActiveKey = this.props.location?.query?.type || '1';
+        this.defaultActiveKey = this.props.location?.query?.type || '3';
     }
 
     componentDidMount() {

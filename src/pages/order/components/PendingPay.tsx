@@ -1,4 +1,4 @@
-import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import { purchaseOrderOptionList, purchaseReserveOptionList } from '@/enums/OrderEnum';
 import {
@@ -36,6 +36,9 @@ import { FormInstance } from 'antd/es/form';
 import { filterFieldsList, combineRows } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import QRCode from 'qrcode.react';
+import { getCategoryName, getCategoryLowestLevel } from '@/utils/utils';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { getCategoryList } from '@/services/global';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
 
@@ -46,6 +49,9 @@ const configFields = [
     'commodity_id',
     'purchase_platform_order_id',
     'purchase_parent_order_sn',
+    'first_category',
+    'second_category',
+    'third_category',
     'order_create_time',
     'purchase_order_time',
 ];
@@ -60,13 +66,10 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const categoryRef = useRef<IOptionItem[]>([]);
+    const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        dispatch({
-            type: 'permission/queryMerchantList',
-        });
-    }, []);
     const {
         loading,
         pageNumber,
@@ -81,8 +84,37 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
     } = useList<IOrderItem>({
         formRef: [formRef, formRef1],
         queryList: getPayOrderList, // 获取订单列表
+        convertQuery: (query: any) => {
+            // console.log('query', query);
+            const {
+                first_category = '',
+                second_category = '',
+                third_category = '',
+                ...rest
+            } = query;
+            return {
+                ...rest,
+                three_level_catogry_code: getCategoryLowestLevel(
+                    categoryRef.current,
+                    first_category,
+                    second_category,
+                    third_category,
+                ),
+            };
+        },
     });
     const dataSourceRef = useRef<IOrderItem[]>(dataSource);
+
+    useEffect(() => {
+        getCategoryList().then(list => {
+            categoryRef.current = list;
+            setAllCategoryList(list);
+        });
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
+
     useMemo(() => {
         dataSourceRef.current = dataSource;
     }, [dataSource]);
@@ -325,8 +357,15 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 width: 150,
                 render: (value: number) => getStatusDesc(purchaseReserveOptionList, value),
             },
+            {
+                title: '商品最低类目',
+                dataIndex: 'threeLevelCatogryCode',
+                align: 'center',
+                width: 140,
+                render: (value: number) => getCategoryName(String(value), allCategoryList),
+            },
         ];
-    }, []);
+    }, [allCategoryList]);
 
     const formComponent = useMemo(() => {
         return (
@@ -537,7 +576,7 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 />
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys, exportModal]);
+    }, [update, flatList, loading, selectedRowKeys, exportModal, allCategoryList]);
 };
 
 export default PendingPay;

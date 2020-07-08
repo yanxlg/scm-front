@@ -52,6 +52,9 @@ import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 import GoodsDetailDialog from '@/pages/order/components/GoodsDetailDialog';
 import AllColumnsSetting from '@/pages/order/components/AllColumnsSetting';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { getCategoryList } from '@/services/global';
+import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
 
@@ -68,6 +71,9 @@ const configFields = [
     'product_platform',
     'platform_uid',
     'purchase_fail_code',
+    'first_category',
+    'second_category',
+    'third_category',
     'order_goods_id',
     'purchase_plan_id',
     'channel_order_goods_sn',
@@ -111,6 +117,8 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const categoryRef = useRef<IOptionItem[]>([]);
+    const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -136,6 +144,24 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     } = useList<IOrderItem>({
         formRef: [formRef, formRef1],
         queryList: queryAllOrderList, // 获取订单列表
+        convertQuery: (query: any) => {
+            // console.log('query', query);
+            const {
+                first_category = '',
+                second_category = '',
+                third_category = '',
+                ...rest
+            } = query;
+            return {
+                ...rest,
+                three_level_catogry_code: getCategoryLowestLevel(
+                    categoryRef.current,
+                    first_category,
+                    second_category,
+                    third_category,
+                ),
+            };
+        },
     });
 
     const [onlyParent, setOnlyParent] = useState(false);
@@ -183,6 +209,10 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
 
     useEffect(() => {
         getPurchaseUidList().then(list => setPurchaseUidList(list));
+        getCategoryList().then(list => {
+            categoryRef.current = list;
+            setAllCategoryList(list);
+        });
     }, []);
 
     const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
@@ -876,8 +906,17 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                           );
                       },
                   },
+                  {
+                      key: 'threeLevelCatogryCode',
+                      title: '商品最低类目',
+                      dataIndex: 'threeLevelCatogryCode',
+                      align: 'center',
+                      width: 140,
+                      defaultHide: true,
+                      render: (value: number) => getCategoryName(String(value), allCategoryList),
+                  },
               ];
-    }, [onlyParent, purchaseUidList]);
+    }, [onlyParent, purchaseUidList, allCategoryList]);
 
     const fieldList = onlyParent ? parentFieldsList : fieldsList;
 

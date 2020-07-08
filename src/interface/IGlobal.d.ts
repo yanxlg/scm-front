@@ -56,3 +56,9 @@ export interface IOnsaleInterceptStoreRes {
     purchase_channel: string;
     support_merchant_id: string[];
 }
+
+export interface ICategoryItem {
+    id?: string;
+    name?: string;
+    children?: ICategoryItem[];
+}
