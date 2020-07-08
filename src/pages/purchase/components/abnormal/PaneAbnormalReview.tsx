@@ -1,13 +1,8 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef, useContext } from 'react';
-import { Modal, Input, message, Button, Select, Form } from 'antd';
+import React, { useMemo, useState, useCallback, useRef, useContext } from 'react';
+import { Button, Select, Form } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import {
-    getAbnormalAllList,
-    setDiscardAbnormalOrder,
-    downloadExcel,
-    reviewExceptionOrder,
-} from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -15,15 +10,7 @@ import {
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
-import {
-    waybillExceptionTypeList,
-    defaultOptionItem,
-    waybillExceptionTypeMap,
-    waybillExceptionStatusMap,
-} from '@/enums/PurchaseEnum';
-import TextArea from 'antd/lib/input/TextArea';
-// import { utcToLocal } from 'react-components/es/utils/date';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { defaultOptionItem, waybillExceptionStatusMap } from '@/enums/PurchaseEnum';
 import Export from '@/components/Export';
 import { AbnormalContext } from '../../abnormal';
 
@@ -32,6 +19,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import useReview from '../../hooks/useReview';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { PermissionComponent } from 'rc-permission';
+import { getStatusDesc } from '@/utils/transform';
 
 const { Option } = Select;
 
@@ -209,11 +197,10 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 180,
-                // render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
                 render: (val: IWaybillExceptionTypeKey, record: IPurchaseAbnormalItem) => {
                     const { waybillExceptionSn } = record;
                     return val === '101' ? (
-                        waybillExceptionTypeMap[val]
+                        getStatusDesc(exception_code, val)
                     ) : (
                         <Form.Item
                             name={waybillExceptionSn}
@@ -221,7 +208,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                             className={styles.tableFormItem}
                         >
                             <Select className={styles.select}>
-                                {waybillExceptionTypeList.map(({ name, value }) =>
+                                {exception_code.map(({ name, value }) =>
                                     value === '101' ? null : (
                                         <Option value={value} key={value}>
                                             {name}
@@ -279,7 +266,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 width: 150,
             },
         ];
-    }, []);
+    }, [abnormalContext]);
 
     const pagination = useMemo(() => {
         return {
@@ -362,7 +349,15 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, currentRecord, exportModalComponent, rowSelection, fieldList]);
+    }, [
+        dataSource,
+        loading,
+        currentRecord,
+        exportModalComponent,
+        rowSelection,
+        fieldList,
+        abnormalContext,
+    ]);
 };
 
 export default PaneAbnormalReview;

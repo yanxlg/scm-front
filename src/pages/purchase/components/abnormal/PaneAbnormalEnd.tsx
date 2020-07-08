@@ -11,10 +11,8 @@ import {
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import {
-    waybillExceptionTypeList,
     defaultOptionItem,
     waybillExceptionStatusMap,
-    waybillExceptionTypeMap,
     waybillExceptionHandleMap,
     IExceptionHandle,
 } from '@/enums/PurchaseEnum';
@@ -26,6 +24,7 @@ import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { AbnormalContext } from '../../abnormal';
 import useDetail from '../../hooks/useDetail';
+import { getStatusDesc } from '@/utils/transform';
 
 const PaneAbnormalEnd: React.FC = props => {
     const formRef = useRef<JsonFormRef>(null);
@@ -99,7 +98,7 @@ const PaneAbnormalEnd: React.FC = props => {
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
-                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
+                render: (val: IWaybillExceptionTypeKey) => getStatusDesc(exception_code, val),
             },
             {
                 title: '处理方式',
@@ -188,7 +187,7 @@ const PaneAbnormalEnd: React.FC = props => {
                 render: val => utcToLocal(val),
             },
         ];
-    }, []);
+    }, [abnormalContext]);
 
     const pagination = useMemo(() => {
         return {
@@ -299,7 +298,7 @@ const PaneAbnormalEnd: React.FC = props => {
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, exportModalComponent, detailStatus, currentRecord]);
+    }, [dataSource, loading, exportModalComponent, detailStatus, currentRecord, abnormalContext]);
 };
 
 export default PaneAbnormalEnd;
