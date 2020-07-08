@@ -1,7 +1,11 @@
+import { IPermissionTree } from 'rc-permission/es/Provider';
+
 declare interface IUser {
     userName?: string;
     password?: string;
     token?: string;
+    pData?: IPermissionTree;
+    dData?: string[];
 }
 /**
  * 用户信息管理类，跟localStorage进行绑定
@@ -23,6 +27,14 @@ class User {
         this._user = user;
         localStorage.setItem('_user', JSON.stringify(this._user));
     }
+    public static updatePData(pData: IPermissionTree) {
+        this._user.pData = pData;
+        this.setUser(this._user);
+    }
+    public static updateDData(dData: string[]) {
+        this._user.dData = dData;
+        this.setUser(this._user);
+    }
     public static get userName() {
         return this.localUser.userName;
     }
@@ -31,6 +43,20 @@ class User {
     }
     public static get token() {
         return this.localUser.token;
+    }
+    public static get pData() {
+        return this.localUser.pData;
+    }
+    public static get dData() {
+        return this.localUser.dData;
+    }
+    public static clear() {
+        this._user = (undefined as unknown) as IUser;
+        localStorage.removeItem('_user');
+    }
+    public static clearToken() {
+        this._user.token = undefined;
+        this.setUser(this._user);
     }
 }
 

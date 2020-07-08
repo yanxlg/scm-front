@@ -15,6 +15,7 @@ import { deleteExport, queryDownloadList, retryExport, updateExport } from '@/se
 import { IFileItem } from '@/interface/ISetting';
 import { ExportFileStatus } from '@/enums/SettingEnum';
 import { downloadFile } from '@/services/global';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 
 const fieldList: FormField[] = [
     {
@@ -215,10 +216,15 @@ const Export = () => {
                                     return (
                                         <Col key={id} span={12}>
                                             <Card className={exportStyles.exportCard}>
-                                                <CloseOutlined
-                                                    className={exportStyles.exportClose}
-                                                    onClick={() => deleteFile(id)}
-                                                />
+                                                <PermissionComponent
+                                                    pid="setting/export/delete"
+                                                    control="tooltip"
+                                                >
+                                                    <CloseOutlined
+                                                        className={exportStyles.exportClose}
+                                                        onClick={() => deleteFile(id)}
+                                                    />
+                                                </PermissionComponent>
                                                 <Row
                                                     align="middle"
                                                     className={exportStyles.exportCardContent}
@@ -271,17 +277,22 @@ const Export = () => {
                                                                         10000,
                                                                 ) / 10000}
                                                                 M
-                                                                <Button
-                                                                    type="primary"
-                                                                    className={
-                                                                        exportStyles.exportAction
-                                                                    }
-                                                                    onClick={() =>
-                                                                        downloadFile(object_url)
-                                                                    }
+                                                                <PermissionComponent
+                                                                    pid="setting/export/download"
+                                                                    control="tooltip"
                                                                 >
-                                                                    下载到本地
-                                                                </Button>
+                                                                    <Button
+                                                                        type="primary"
+                                                                        className={
+                                                                            exportStyles.exportAction
+                                                                        }
+                                                                        onClick={() =>
+                                                                            downloadFile(object_url)
+                                                                        }
+                                                                    >
+                                                                        下载到本地
+                                                                    </Button>
+                                                                </PermissionComponent>
                                                             </div>
                                                         ) : status === ExportFileStatus.Failure ? (
                                                             <div
@@ -294,15 +305,20 @@ const Export = () => {
                                                                 >
                                                                     导出失败
                                                                 </span>
-                                                                <LoadingButton
-                                                                    type="primary"
-                                                                    className={
-                                                                        exportStyles.exportAction
-                                                                    }
-                                                                    onClick={() => reTry(id)}
+                                                                <PermissionComponent
+                                                                    pid="setting/export/retry"
+                                                                    control="tooltip"
                                                                 >
-                                                                    重试
-                                                                </LoadingButton>
+                                                                    <LoadingButton
+                                                                        type="primary"
+                                                                        className={
+                                                                            exportStyles.exportAction
+                                                                        }
+                                                                        onClick={() => reTry(id)}
+                                                                    >
+                                                                        重试
+                                                                    </LoadingButton>
+                                                                </PermissionComponent>
                                                             </div>
                                                         ) : null}
                                                     </Col>
@@ -458,4 +474,7 @@ const Export = () => {
     );
 };
 
-export default Export;
+export default PermissionRouterWrap(Export, {
+    login: true,
+    pid: 'setting/export',
+});

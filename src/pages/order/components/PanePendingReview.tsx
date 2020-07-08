@@ -29,6 +29,9 @@ import { defaultOptionItem1 } from '@/enums/OrderEnum';
 import { getCategoryList } from '@/services/global';
 import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -56,16 +59,13 @@ const formFields: FormField[] = [
         label: '销售店铺名称',
         className: 'order-input-review',
         syncDefaultOption: defaultOptionItem1,
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map((item: any) => {
-                    const { merchant_name } = item;
-                    return {
-                        name: merchant_name,
-                        value: merchant_name,
-                    };
-                });
-            }),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
+        formatter: 'plainToArr',
     },
     {
         type: 'textarea',
@@ -166,7 +166,12 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     });
     const { visible, setVisibleProps, onClose } = useModal<boolean>();
 
+    const dispatch = useDispatch();
+
     useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
         getCategoryList().then(list => {
             categoryRef.current = list;
             setAllCategoryList(list);
@@ -346,7 +351,9 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     return (
                         <>
                             <div>
-                                <a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a>
+                                <PermissionComponent pid="order/check" control="tooltip">
+                                    <a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a>
+                                </PermissionComponent>
                             </div>
                             <div style={{ margin: '2px 0' }}>
                                 <CancelOrder
@@ -354,11 +361,17 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                                     onReload={onReload}
                                     getAllTabCount={getAllTabCount}
                                 >
-                                    <a>取消订单</a>
+                                    <PermissionComponent pid="order/cancel_order" control="tooltip">
+                                        <a>取消订单</a>
+                                    </PermissionComponent>
                                 </CancelOrder>
                             </div>
                             <div>
-                                <a onClick={() => _postOrderOffsale([orderGoodsId])}>下架商品</a>
+                                <PermissionComponent pid="order/offsale" control="tooltip">
+                                    <a onClick={() => _postOrderOffsale([orderGoodsId])}>
+                                        下架商品
+                                    </a>
+                                </PermissionComponent>
                             </div>
                         </>
                     );
@@ -487,38 +500,42 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0 ? true : false;
         return [
-            <LoadingButton
-                key="1"
-                type="primary"
-                disabled={disabled}
-                className={formStyles.formBtn}
-                onClick={() => _postReviewPass(selectedRowKeys)}
-            >
-                审核通过
-            </LoadingButton>,
+            <PermissionComponent key="1" pid="order/check" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    disabled={disabled}
+                    className={formStyles.formBtn}
+                    onClick={() => _postReviewPass(selectedRowKeys)}
+                >
+                    审核通过
+                </LoadingButton>
+            </PermissionComponent>,
             <CancelOrder
                 orderGoodsIds={selectedRowKeys}
                 onReload={onReload}
                 getAllTabCount={getAllTabCount}
+                key="2"
             >
-                <Button
-                    key="2"
+                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={selectedRowKeys.length === 0}
+                    >
+                        取消订单
+                    </Button>
+                </PermissionComponent>
+            </CancelOrder>,
+            <PermissionComponent key="3" pid="order/offsale" control="tooltip">
+                <LoadingButton
                     type="primary"
                     className={formStyles.formBtn}
+                    onClick={() => _postOrderOffsale(selectedRowKeys)}
                     disabled={selectedRowKeys.length === 0}
                 >
-                    取消订单
-                </Button>
-            </CancelOrder>,
-            <LoadingButton
-                key="3"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => _postOrderOffsale(selectedRowKeys)}
-                disabled={selectedRowKeys.length === 0}
-            >
-                下架商品
-            </LoadingButton>,
+                    下架商品
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys]);
 

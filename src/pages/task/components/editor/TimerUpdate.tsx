@@ -21,6 +21,7 @@ import { dateToUnix } from 'react-components/es/utils/date';
 import dayjs, { Dayjs } from 'dayjs';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
@@ -480,9 +481,15 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         </Radio.Group>
                     </Form.Item>
                     <div className={formStyles.formNextCard}>
-                        <LoadingButton type="primary" className="btn-default" onClick={onCreate}>
-                            {edit ? '创建新任务' : '创建任务'}
-                        </LoadingButton>
+                        <PermissionComponent pid={'task/config/update'} control={'tooltip'}>
+                            <LoadingButton
+                                type="primary"
+                                className="btn-default"
+                                onClick={onCreate}
+                            >
+                                {edit ? '创建新任务' : '创建任务'}
+                            </LoadingButton>
+                        </PermissionComponent>
                     </div>
                 </Form>
             </Spin>

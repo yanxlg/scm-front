@@ -9,4 +9,9 @@ export enum GlobalApiPath {
     QueryGoodBySkuId = '/api/v1/goods/purchase_sku_info',
     QueryOnsaleInterceptStore = '/api/v1/strategy/onsale_intercept_store',
     QueryCategoryList = '/api/v1/catagory/list',
+    querySimpleRoleList = '/api/v1/roles/all_name',
+    login = '/api/v1/users/login',
+    logout = '/api/v1/users/logout',
+    queryPermissionList = '/api/v1/auth/front/list',
+    updatePwd = '/api/v1/users/modify_password',
 }

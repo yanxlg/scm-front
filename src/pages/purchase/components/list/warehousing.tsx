@@ -34,6 +34,7 @@ import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 const { Paragraph } = Typography;
 const fieldList: FormField[] = [
     {
@@ -194,25 +195,38 @@ const Warehousing = () => {
                     return {
                         children: (
                             <>
-                                <Button type="link" onClick={() => showConnect(item)}>
-                                    关联运单号
-                                </Button>
-                                {origin === PurchaseCreateType.Auto ? (
-                                    <Button type="link" onClick={() => applyReturnService(item)}>
-                                        申请退款
+                                <PermissionComponent pid="purchase/list/connect" control="tooltip">
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
                                     </Button>
+                                </PermissionComponent>
+                                {origin === PurchaseCreateType.Auto ? (
+                                    <PermissionComponent
+                                        pid="purchase/list/refund"
+                                        control="tooltip"
+                                    >
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    </PermissionComponent>
                                 ) : null}
                                 {/*所有部分入库都可以完结*/}
-                                <PopConfirmLoadingButton
-                                    popConfirmProps={{
-                                        title: '确定要完结该采购单？',
-                                        onConfirm: () => onEndPurchaseByUser(purchaseOrderGoodsId),
-                                    }}
-                                    buttonProps={{
-                                        type: 'link',
-                                        children: '完结采购单',
-                                    }}
-                                />
+                                <PermissionComponent pid="purchase/list/finish" control="tooltip">
+                                    <PopConfirmLoadingButton
+                                        popConfirmProps={{
+                                            title: '确定要完结该采购单？',
+                                            onConfirm: () =>
+                                                onEndPurchaseByUser(purchaseOrderGoodsId),
+                                        }}
+                                        buttonProps={{
+                                            type: 'link',
+                                            children: '完结采购单',
+                                        }}
+                                    />
+                                </PermissionComponent>
                             </>
                         ),
                         props: {

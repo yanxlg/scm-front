@@ -31,6 +31,8 @@ import { dateToUnix } from 'react-components/es/utils/date';
 import dayjs from 'dayjs';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
+import { PermissionComponent, PermissionComponentWrap } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 export declare interface IFormData extends IHotTaskBody {
     shopId: number; // 调用接口前需要进行处理 && 编辑数据源需要处理
@@ -449,33 +451,45 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
                     <div className={formStyles.formItem}>
                         {edit ? (
                             isUpperShelf === false ? (
+                                <PermissionComponent pid={'task/config/pdd'} control={'tooltip'}>
+                                    <LoadingButton
+                                        onClick={onGather}
+                                        type="primary"
+                                        className="btn-default"
+                                    >
+                                        {edit ? '创建新采集任务' : '开始采集'}
+                                    </LoadingButton>
+                                </PermissionComponent>
+                            ) : null
+                        ) : (
+                            <PermissionComponent pid={'task/config/pdd'} control={'tooltip'}>
                                 <LoadingButton
                                     onClick={onGather}
                                     type="primary"
                                     className="btn-default"
                                 >
-                                    {edit ? '创建新采集任务' : '开始采集'}
+                                    开始采集
                                 </LoadingButton>
-                            ) : null
-                        ) : (
-                            <LoadingButton
-                                onClick={onGather}
-                                type="primary"
-                                className="btn-default"
-                            >
-                                开始采集
-                            </LoadingButton>
+                            </PermissionComponent>
                         )}
                         {edit ? (
                             isUpperShelf === false ? null : (
-                                <Button onClick={onGatherOn} type="primary" className="btn-default">
-                                    创建新采集上架任务
-                                </Button>
+                                <PermissionComponent pid={'task/config/pdd'} control={'tooltip'}>
+                                    <Button
+                                        onClick={onGatherOn}
+                                        type="primary"
+                                        className="btn-default"
+                                    >
+                                        创建新采集上架任务
+                                    </Button>
+                                </PermissionComponent>
                             )
                         ) : (
-                            <Button type="primary" className="btn-default" onClick={onGatherOn}>
-                                一键采集上架
-                            </Button>
+                            <PermissionComponent pid={'task/config/pdd'} control={'tooltip'}>
+                                <Button type="primary" className="btn-default" onClick={onGatherOn}>
+                                    一键采集上架
+                                </Button>
+                            </PermissionComponent>
                         )}
                     </div>
                 </Form>
@@ -491,4 +505,7 @@ const HotGather: React.FC<IHotGatherProps> = ({ taskId }) => {
     );
 };
 
-export default HotGather;
+export default PermissionComponentWrap(HotGather, {
+    pid: 'task/config/pdd_tab',
+    fallback: () => <ForbiddenComponent />,
+});

@@ -17,6 +17,7 @@ import GoodsTable from './components/GoodsTable/GoodsTable';
 import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryGoodsSourceList } from '@/services/global';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const initialValues = {
     inventory_status: '',
@@ -297,4 +298,7 @@ const LocalPage: React.FC = props => {
     }, [loading, selectedRowKeys, exportStatus, sourceChannel]);
 };
 
-export default LocalPage;
+export default PermissionRouterWrap(LocalPage, {
+    login: true,
+    pid: 'goods/local',
+});
