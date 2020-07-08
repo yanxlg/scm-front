@@ -13,6 +13,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from '../_index.less';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import SaleAndShippingLogModal from './SaleAndShippingLogModal/SaleAndShippingLogModal';
+import { PermissionComponent } from 'rc-permission';
 
 interface IProps {
     type: string;
@@ -83,13 +84,18 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
                 render: (_: any, record: IShippingFeeRuleRes) => {
                     const { id } = record;
                     return (
-                        <Button
-                            type="link"
-                            className={styles.hover}
-                            onClick={() => showFreightConfig(EditEnum.UPDATE, id)}
+                        <PermissionComponent
+                            pid="goods/price_strategy/shipping/view_rule"
+                            control="tooltip"
                         >
-                            更新
-                        </Button>
+                            <Button
+                                type="link"
+                                className={styles.hover}
+                                onClick={() => showFreightConfig(EditEnum.UPDATE, id)}
+                            >
+                                更新
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -192,13 +198,15 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
                 width: 120,
                 render: (id: string) => {
                     return (
-                        <Button
-                            type="link"
-                            className={styles.hover}
-                            onClick={() => showLogModal(id)}
-                        >
-                            查看
-                        </Button>
+                        <PermissionComponent pid="goods/price_strategy/sale/log" control="tooltip">
+                            <Button
+                                type="link"
+                                className={styles.hover}
+                                onClick={() => showLogModal(id)}
+                            >
+                                查看
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -257,14 +265,19 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <Button
-                        ghost
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={() => showFreightConfig(EditEnum.ADD)}
+                    <PermissionComponent
+                        pid="goods/price_strategy/shipping/update_rule"
+                        control="tooltip"
                     >
-                        +新增运费规则
-                    </Button>
+                        <Button
+                            ghost={true}
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={() => showFreightConfig(EditEnum.ADD)}
+                        >
+                            +新增运费规则
+                        </Button>
+                    </PermissionComponent>
                 </div>
             </JsonForm>
         );
@@ -273,7 +286,7 @@ const PaneFreight: React.FC<IProps> = ({ type }) => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 rowKey="id"
                 columnsSettingRender={true}
                 loading={loading}

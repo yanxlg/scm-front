@@ -291,6 +291,7 @@ const InStock: React.FC = ({}) => {
             });
         });
 
+        chartRef.current?.clear();
         chartRef.current?.setOption({
             title: {
                 text: '入库率',

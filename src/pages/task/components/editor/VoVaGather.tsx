@@ -19,6 +19,7 @@ import styles from '@/styles/_task.less';
 import classNames from 'classnames';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
+import { PermissionComponent } from 'rc-permission';
 
 const fdCountries = [
     {
@@ -399,12 +400,16 @@ const VoVaGather = () => {
                     fieldList={fieldList}
                 />
                 <div className={formStyles.formItem}>
-                    <LoadingButton onClick={onGather} type="primary" className="btn-default">
-                        开始采集
-                    </LoadingButton>
-                    <Button type="primary" className="btn-default" onClick={onGatherOn}>
-                        一键采集上架
-                    </Button>
+                    <PermissionComponent pid={'task/config/gather'} control={'tooltip'}>
+                        <LoadingButton onClick={onGather} type="primary" className="btn-default">
+                            开始采集
+                        </LoadingButton>
+                    </PermissionComponent>
+                    <PermissionComponent pid={'task/config/gather'} control={'tooltip'}>
+                        <Button type="primary" className="btn-default" onClick={onGatherOn}>
+                            一键采集上架
+                        </Button>
+                    </PermissionComponent>
                 </div>
                 {modals}
             </>

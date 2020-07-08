@@ -1,3 +1,8 @@
+import { TableProps } from 'antd/es/table';
+import { ITaskListItem } from '@/interface/ITask';
+import { Icons } from '@/components/Icon';
+import React from 'react';
+
 export const EmptyObject: any = {};
 
 export const global = {
@@ -74,3 +79,12 @@ export const carrierList = [
 ];
 
 export const defaultSelectOption = { name: '全部', value: '' };
+
+export const scroll: TableProps<ITaskListItem>['scroll'] = {
+    x: true,
+    scrollToFirstRowOnChange: true,
+};
+
+export const pwdIconRender = (visible: boolean) => (
+    <Icons type={visible ? 'scm-eye1' : 'scm-eye'} />
+);

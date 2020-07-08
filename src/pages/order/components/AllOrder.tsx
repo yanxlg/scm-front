@@ -52,6 +52,8 @@ import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 import GoodsDetailDialog from '@/pages/order/components/GoodsDetailDialog';
 import AllColumnsSetting from '@/pages/order/components/AllColumnsSetting';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const configFields = [
     'order_goods_status',
@@ -108,6 +110,13 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
 
     const {
         loading,
@@ -851,7 +860,11 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: (value, row) => {
-                          return <a onClick={() => showTrackModal(row)}>物流轨迹</a>;
+                          return (
+                              <PermissionComponent pid={'order/track'} control={'tooltip'}>
+                                  <a onClick={() => showTrackModal(row)}>物流轨迹</a>
+                              </PermissionComponent>
+                          );
                       },
                   },
               ];
@@ -1130,38 +1143,46 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedKeys.length === 0;
         return [
-            <LoadingButton
-                key="buy"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={() => postOrdersPlaceCallback(selectedKeys)}
-            >
-                一键拍单
-            </LoadingButton>,
-            <LoadingButton
-                key="purchase_order"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={cancelList}
-            >
-                取消采购订单
-            </LoadingButton>,
+            <PermissionComponent key="buy" pid="order/post_order" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={() => postOrdersPlaceCallback(selectedKeys)}
+                >
+                    一键拍单
+                </LoadingButton>
+            </PermissionComponent>,
+            <PermissionComponent key="purchase_order" pid="order/cancel_purchase" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={cancelList}
+                >
+                    取消采购订单
+                </LoadingButton>
+            </PermissionComponent>,
             <CancelOrder
                 key="2"
                 orderGoodsIds={selectedKeys}
                 onReload={onReload}
                 getAllTabCount={updateCount}
             >
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={disabled}
+                <PermissionComponent
+                    key="purchase_order"
+                    pid="order/cancel_order"
+                    control="tooltip"
                 >
-                    取消销售订单
-                </Button>
+                    <Button
+                        key="channel_order"
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={disabled}
+                    >
+                        取消销售订单
+                    </Button>
+                </PermissionComponent>
             </CancelOrder>,
         ];
     }, [selectedKeys]);
