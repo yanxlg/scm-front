@@ -54,6 +54,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                 title: '时间',
                 dataIndex: 'label',
                 align: 'center',
+                width: 150,
             },
             ...getRangeFormatDate(
                 getUTCDate()
@@ -66,6 +67,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                 title: date,
                 dataIndex: date,
                 align: 'center',
+                width: 150,
             })),
         ] as ColumnsType<object>;
     });
@@ -113,11 +115,13 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                     title: '时间',
                     dataIndex: 'label',
                     align: 'center',
+                    width: 150,
                 },
                 ...getRangeFormatDate(values[0].unix(), values[1].unix()).map(date => ({
                     title: date,
                     dataIndex: date,
                     align: 'center',
+                    width: 150,
                 })),
             ] as ColumnsType<object>);
             _getMonitorOrder({
@@ -229,9 +233,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
         dayKeys.forEach(day => {
             const orderList = dayMap[day];
             orderList.sort((a, b) => {
-                return new Date(a.confirmTime).getTime() - new Date(b.confirmTime).getTime()
-                    ? 1
-                    : -1;
+                return new Date(a.confirmTime).getTime() - new Date(b.confirmTime).getTime();
             });
             const endDate = orderList[orderList.length - 1].confirmTime;
             // 找到数据截止的最后一天
@@ -244,15 +246,16 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
             series.push({
                 name: `${day}天`,
                 type: 'line',
-                data: currentDateList.map(date => {
+                data: currentDateList.map((date, mapIndex) => {
                     const index = orderList.findIndex(item => item.confirmTime === date);
+                    let lineData = {};
                     if (index > -1) {
                         const {
                             totalNum = 0,
                             cancelNumMiddle = 0,
                             cancelNumChannel = 0,
                         } = orderList[index];
-                        return {
+                        lineData = {
                             totalNum,
                             cancelNumMiddle,
                             cancelNumChannel,
@@ -261,19 +264,33 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                                     ? 0
                                     : Number(((cancelNumMiddle / totalNum) * 100).toFixed(2)),
                         };
+                    } else {
+                        lineData = {
+                            // value: 0,
+                            totalNum: 0,
+                            cancelNumMiddle: 0,
+                            cancelNumChannel: 0,
+                            value: 0,
+                        };
                     }
-                    return {
-                        // value: 0,
-                        totalNum: 0,
-                        cancelNumMiddle: 0,
-                        cancelNumChannel: 0,
-                        value: 0,
-                    };
-                    // return index > -1 ? {} : {};
+                    if (currentDateList.length - 1 === mapIndex) {
+                        return {
+                            ...lineData,
+                            label: {
+                                show: true,
+                                position: 'right',
+                                distance: 10,
+                                formatter: '{a}',
+                                color: '#333',
+                            },
+                        };
+                    }
+                    return lineData;
                 }),
             });
         });
 
+        chartRef.current?.clear();
         chartRef.current?.setOption({
             title: {
                 text: '取消率',
@@ -282,7 +299,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                 bottom: 0,
             },
             tooltip: {
-                trigger: 'axis',
+                trigger: 'item',
                 formatter: info => {
                     // console.log('formatter', info);
                     const data = Array.isArray(info) ? info[info.length - 1].data : info.data;
@@ -355,6 +372,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                     columns={columns}
                     dataSource={dataSource}
                     pagination={false}
+                    scroll={{ x: 'max-content' }}
                 />
             </Spin>
         );

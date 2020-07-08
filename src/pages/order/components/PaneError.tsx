@@ -9,7 +9,6 @@ import {
     failureReasonList,
     failureReasonMap,
     failureReasonCode,
-    defaultOptionItem1,
 } from '@/enums/OrderEnum';
 import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -22,10 +21,8 @@ import { ITaskListItem } from '@/interface/ITask';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
 import Export from '@/components/Export';
-import { queryGoodsSourceList } from '@/services/global';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
-import { ConnectState } from '@/models/connect';
 import { filterFieldsList } from '@/pages/order/components/utils';
 
 export declare interface IErrorOrderItem {

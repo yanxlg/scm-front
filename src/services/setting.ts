@@ -435,3 +435,9 @@ export function updateAccountStatus(id: string, status: number) {
         },
     });
 }
+
+export function queryErrorConfigList(data: any) {
+    return api.post('', {
+        data,
+    });
+}
