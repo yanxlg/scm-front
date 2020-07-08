@@ -31,8 +31,8 @@ export type OutStockStateCode = keyof typeof OutStockState;
 
 export const InStockState = {
     1: '未入库',
+    5: '仓库签收',
     10: '已入库',
-    20: '入库失败',
     40: '已取消',
 };
 export type InStockStateCode = keyof typeof InStockState;
