@@ -145,6 +145,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 outboundNum = 0,
                 cancelNumBeforeOutbound = 0,
                 cancelNumAfterOutbound = 0,
+                cancelNumMiddle = 0,
                 ...rest
             } = item;
             const date = confirmTime.substr(0, 10);
@@ -158,11 +159,8 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 percentage:
                     totalNum - cancelNumBeforeOutbound === 0
                         ? '0%'
-                        : Number(
-                              ((outboundNum / (totalNum - cancelNumBeforeOutbound)) * 100).toFixed(
-                                  2,
-                              ),
-                          ) + '%',
+                        : Number(((outboundNum / (totalNum - cancelNumMiddle)) * 100).toFixed(2)) +
+                          '%',
                 ...rest,
             });
         });
@@ -170,7 +168,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
         const needDateMap: { [key: string]: IMonitorOrderItem } = {};
         dateKeys.forEach(date => {
             const list = dateMap[date];
-            const i = dateMap[date].findIndex(({ dayNum }) => dayNum === 8);
+            const i = dateMap[date].findIndex(({ dayNum }) => dayNum === 7);
             needDateMap[date] = {
                 ...list[list.length - 1],
                 ...(i > -1 ? { specialPercentage: list[i].percentage } : {}),
@@ -188,7 +186,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 label: '已取消',
             },
             {
-                label: '8天出库率',
+                label: '7天出库率',
             },
             {
                 label: '当前出库率',
@@ -290,6 +288,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                             outboundNum = 0,
                             cancelNumBeforeOutbound = 0,
                             cancelNumAfterOutbound = 0,
+                            cancelNumMiddle = 0,
                         } = orderList[index];
                         lineData = {
                             totalNum,
@@ -301,7 +300,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                                     ? 0
                                     : Number(
                                           (
-                                              (outboundNum / (totalNum - cancelNumBeforeOutbound)) *
+                                              (outboundNum / (totalNum - cancelNumMiddle)) *
                                               100
                                           ).toFixed(2),
                                       ),

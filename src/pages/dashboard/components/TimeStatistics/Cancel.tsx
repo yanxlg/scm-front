@@ -155,7 +155,9 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                 percentage:
                     cancelNumMiddle === 0
                         ? '0%'
-                        : Number(((cancelNumMiddle / totalNum) * 100).toFixed(2)) + '%',
+                        : Number(
+                              ((cancelNumMiddle / (totalNum - cancelNumChannel)) * 100).toFixed(2),
+                          ) + '%',
                 ...rest,
             });
         });
@@ -262,7 +264,12 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
                             value:
                                 cancelNumMiddle === 0
                                     ? 0
-                                    : Number(((cancelNumMiddle / totalNum) * 100).toFixed(2)),
+                                    : Number(
+                                          (
+                                              (cancelNumMiddle / (totalNum - cancelNumChannel)) *
+                                              100
+                                          ).toFixed(2),
+                                      ),
                         };
                     } else {
                         lineData = {
