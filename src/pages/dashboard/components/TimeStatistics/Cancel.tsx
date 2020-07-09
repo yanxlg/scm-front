@@ -170,7 +170,7 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
             };
         });
         // console.log(1111111, needDateMap);
-        const ret: { [key: string]: string | number }[] = [
+        const ret: { [key: string]: any }[] = [
             {
                 label: '总订单',
             },

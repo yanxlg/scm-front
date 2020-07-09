@@ -89,8 +89,9 @@ export interface IMonitorOrderItem {
     outboundNum: number;
     cancelNumBeforeOutbound: number;
     cancelNumAfterOutbound: number;
-    cancelNumMiddle?: number;
+    cancelNumMiddle: number;
     cancelNumChannel: number;
+    channelCancelNumBeforeOutbound?: number;
     percentage?: string;
     specialPercentage?: string;
 }

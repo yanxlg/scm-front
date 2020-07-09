@@ -145,7 +145,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 outboundNum = 0,
                 cancelNumBeforeOutbound = 0,
                 cancelNumAfterOutbound = 0,
-                cancelNumMiddle = 0,
+                channelCancelNumBeforeOutbound = 0,
                 ...rest
             } = item;
             const date = confirmTime.substr(0, 10);
@@ -157,10 +157,14 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                 cancelNumBeforeOutbound,
                 cancelNumAfterOutbound,
                 percentage:
-                    totalNum - cancelNumBeforeOutbound === 0
+                    totalNum - channelCancelNumBeforeOutbound === 0
                         ? '0%'
-                        : Number(((outboundNum / (totalNum - cancelNumMiddle)) * 100).toFixed(2)) +
-                          '%',
+                        : Number(
+                              (
+                                  (outboundNum / (totalNum - channelCancelNumBeforeOutbound)) *
+                                  100
+                              ).toFixed(2),
+                          ) + '%',
                 ...rest,
             });
         });
@@ -288,7 +292,7 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                             outboundNum = 0,
                             cancelNumBeforeOutbound = 0,
                             cancelNumAfterOutbound = 0,
-                            cancelNumMiddle = 0,
+                            channelCancelNumBeforeOutbound = 0,
                         } = orderList[index];
                         lineData = {
                             totalNum,
@@ -296,11 +300,12 @@ const OutStock: ForwardRefRenderFunction<IOutStockRef, IOutStockProps> = ({ sear
                             cancelNumBeforeOutbound,
                             cancelNumAfterOutbound,
                             value:
-                                totalNum - cancelNumBeforeOutbound === 0
+                                totalNum - channelCancelNumBeforeOutbound === 0
                                     ? 0
                                     : Number(
                                           (
-                                              (outboundNum / (totalNum - cancelNumMiddle)) *
+                                              (outboundNum /
+                                                  (totalNum - channelCancelNumBeforeOutbound)) *
                                               100
                                           ).toFixed(2),
                                       ),
