@@ -41,6 +41,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
     const isChangeRef = useRef(false);
 
     const [loading, setLoading] = useState(false);
+    const [confirmLoading, setConfirmLoading] = useState(false);
     const [commodityIds, setCommodityIds] = useState('');
     const [goodsSnList, setGoodsSnList] = useState<IGoodsSnItem[]>([]);
     const [currentSn, setCurrentSn] = useState('');
@@ -48,6 +49,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
     const handleCancel = useCallback(() => {
         isChangeRef.current && onReload();
         setLoading(false);
+        setConfirmLoading(false);
         setCommodityIds('');
         setCurrentSn('');
         setGoodsSnList([]);
@@ -105,10 +107,12 @@ const GoodsMergeModal: React.FC<IProps> = ({
                     duration: 3,
                 });
                 isChangeRef.current = true;
+                setCommodityIds('');
+                _getGoodsMergeList(currentSn);
                 // handleCancel();
             })
             .finally(() => {
-                setLoading(false);
+                setConfirmLoading(false);
             });
     }, [commodityIds, currentSn]);
 
@@ -123,16 +127,16 @@ const GoodsMergeModal: React.FC<IProps> = ({
                     message: '关联商品成功',
                     duration: 3,
                 });
-
-                // handleCancel();
+                setCurrentSn(res.data);
+                setCommodityIds('');
             })
             .finally(() => {
-                setLoading(false);
+                setConfirmLoading(false);
             });
     }, [commodityIds, commodityId]);
 
     const handleOk = useCallback(() => {
-        setLoading(true);
+        setConfirmLoading(true);
         currentSn ? _putGoodsMergeAdd() : _postGoodsMerge();
     }, [currentSn, _putGoodsMergeAdd, _postGoodsMerge]);
 
@@ -197,7 +201,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
                 title={title}
                 visible={visible}
                 width={860}
-                confirmLoading={loading}
+                confirmLoading={confirmLoading}
                 onCancel={handleCancel}
                 onOk={handleOk}
                 okButtonProps={{
@@ -225,7 +229,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
                 </div>
             </Modal>
         );
-    }, [visible, loading, commodityIds, currentSn]);
+    }, [visible, loading, confirmLoading, commodityIds, currentSn, goodsSnList]);
 };
 
 export default GoodsMergeModal;
