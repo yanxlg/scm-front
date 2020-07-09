@@ -16,9 +16,7 @@ import {
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
 import {
-    waybillExceptionTypeList,
     defaultOptionItem,
-    waybillExceptionTypeMap,
     waybillExceptionStatusMap,
     waybillExceptionHandleMap,
     IExceptionHandle,
@@ -39,6 +37,7 @@ import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { PermissionComponent } from 'rc-permission';
+import { getStatusDesc } from '@/utils/transform';
 
 interface IProps {
     execingCount: number;
@@ -138,7 +137,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
-                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
+                render: (val: IWaybillExceptionTypeKey) => getStatusDesc(exception_code, val),
             },
             {
                 title: '处理方式/进度',
@@ -229,7 +228,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
                 width: 150,
             },
         ];
-    }, []);
+    }, [abnormalContext]);
 
     const rowSelection = useMemo(() => {
         return {
@@ -387,7 +386,7 @@ const PaneAbnormalProcessing: React.FC<IProps> = ({ execingCount, getExceptionCo
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, detailStatus, exportModalComponent, rowSelection]);
+    }, [dataSource, loading, detailStatus, exportModalComponent, rowSelection, abnormalContext]);
 };
 
 export default PaneAbnormalProcessing;
