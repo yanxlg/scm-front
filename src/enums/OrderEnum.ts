@@ -108,6 +108,7 @@ export const errorDetailOptionMap = {
     10: '30天未妥投',
     // 其他异常
     7: '6天未标记发货',
+    13: '72小时物流未更新',
 };
 
 export const failureReasonMap = {

@@ -240,24 +240,14 @@ export async function getGoodsSkuList(params: ISkuParams) {
 }
 
 // 首次合并商品
-export async function postGoodsMerge(data: {
-    main_commodity_id: string;
-    merge_commodity_ids: string[];
-}) {
+export async function postGoodsMerge(data: { merge_commodity_ids: string[] }) {
     return request.post(LocalApiPath.postGoodsMerge, {
         data,
     });
 }
 
-// 设置主商品
-export async function putGoodsMergeMain(data: { product_sn: string; main_commodity_id: string }) {
-    return request.put(LocalApiPath.putGoodsMergeMain, {
-        data,
-    });
-}
-
 // 删除关联商品
-export async function delGoodsMergeDelete(data: { product_sn: string; commodity_ids: string[] }) {
+export async function delGoodsMergeDelete(data: { product_sn: string; commodity_id: string }) {
     return request.delete(LocalApiPath.delGoodsMergeDelete, {
         data,
     });

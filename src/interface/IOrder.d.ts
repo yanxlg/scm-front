@@ -137,6 +137,8 @@ export interface ISimilarInfoResponse {
         orderGoods: {
             commodityId: string;
         };
+        planId: string;
+        failReason: string;
     };
     originOrderInfo: {
         skuImageUrl: string;
@@ -216,6 +218,7 @@ interface IPurchasePlan {
     reserveStatus: number;
     taskId: string;
     cancelType: string;
+    waybillTrail: string;
 }
 
 interface IOrderItemExtend {
