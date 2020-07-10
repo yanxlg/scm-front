@@ -29,6 +29,10 @@ export enum SettingApiPath {
     getStoreBlacklist = '/api/v1/strategy/black_store_list',
     saveBlackStore = '/api/v1/strategy/black_store_save',
     deleteBlackStore = '/api/v1/strategy/black_store_delete',
+    // 订单审核配置
+    QueryOrderConfigList = '/api/v1/orders/config/list',
+    AddOrderConfig = '/api/v1/orders/config/save_config',
+    DelOrderConfig = '/api/v1/orders/config/delete_config',
     queryAccountList = '/api/v1/users/list',
     addAccount = '/api/v1/users',
     queryPermissionTree = '/api/v1/auth/list',

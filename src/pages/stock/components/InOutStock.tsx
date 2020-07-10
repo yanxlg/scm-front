@@ -69,6 +69,7 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     width: '150px',
                     dataIndex: 'createTime',
                     align: 'center',
+                    render: _ => utcToLocal(_),
                 },
                 {
                     title: '中台商品ID',
@@ -143,6 +144,13 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                     title: '入库时间',
                     width: '150px',
                     dataIndex: 'inWarehouseTime',
+                    align: 'center',
+                    render: _ => utcToLocal(_),
+                },
+                {
+                    title: '签收时间',
+                    width: '150px',
+                    dataIndex: 'inboundSignTime',
                     align: 'center',
                     render: _ => utcToLocal(_),
                 },

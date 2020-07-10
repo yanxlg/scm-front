@@ -137,6 +137,8 @@ export interface ISimilarInfoResponse {
         orderGoods: {
             commodityId: string;
         };
+        planId: string;
+        failReason: string;
     };
     originOrderInfo: {
         skuImageUrl: string;
@@ -174,6 +176,7 @@ export interface IReviewOrderItem {
     productName: string;
     productId: string;
     commodityId: string;
+    threeLevelCatogryCode?: number;
 }
 
 export declare interface IPlatformItem {
@@ -215,6 +218,7 @@ interface IPurchasePlan {
     reserveStatus: number;
     taskId: string;
     cancelType: string;
+    waybillTrail: string;
 }
 
 interface IOrderItemExtend {

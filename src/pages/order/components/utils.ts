@@ -16,7 +16,7 @@ import {
 import { getPurchaseUidList } from '@/services/order-manage';
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
-import { queryGoodsSourceList } from '@/services/global';
+import { queryGoodsSourceList, getCategoryList } from '@/services/global';
 import { ConnectState } from '@/models/connect';
 
 const allFormFields: FormField[] = [
@@ -256,6 +256,51 @@ const allFormFields: FormField[] = [
         optionList: [...finalCancelStatusList],
     },
     {
+        type: 'select',
+        label: '一级类目',
+        key: 'first_category',
+        name: 'first_category',
+        className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        key: 'second_category',
+        name: 'second_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: 'first_category',
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        key: 'third_category',
+        name: 'third_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+    },
+    {
         type: 'textarea',
         key: 'purchase_plan_id',
         name: 'purchase_plan_id',
@@ -402,6 +447,14 @@ const allFormFields: FormField[] = [
         className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
         optionList: () => queryGoodsSourceList(),
+    },
+    {
+        type: 'textarea',
+        key: 'invented_sign_delivery_no',
+        name: 'invented_sign_delivery_no',
+        label: '虚拟运单ID',
+        className: 'order-input',
+        formatter: 'multipleToArray',
     },
 ];
 

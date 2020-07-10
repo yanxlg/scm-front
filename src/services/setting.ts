@@ -20,6 +20,9 @@ import {
     IGetStoreBlacklistReq,
     ISaveBlackStoreReq,
     IDeleteBlackStoreReq,
+    IGetOrderConfigListReq,
+    IOrderConfigItem,
+    IAddOrderConfigReq,
     IAccount,
     IPermissionItem,
     IPermissionTree,
@@ -266,6 +269,22 @@ export function deleteBlackStore(data: IDeleteBlackStoreReq) {
     });
 }
 
+/*** 订单审核配置 ***/
+export function getOrderConfigList(data: IGetOrderConfigListReq) {
+    return api.post<IResponse<PaginationResponse<IOrderConfigItem>>>(
+        SettingApiPath.QueryOrderConfigList,
+        {
+            data,
+        },
+    );
+}
+
+export function addOrderConfig(data: IAddOrderConfigReq) {
+    return request.post(SettingApiPath.AddOrderConfig, {
+        data,
+    });
+}
+
 export function queryAccountList(data: {
     user_id?: string;
     username?: string;
@@ -372,6 +391,14 @@ export function queryRoleList(data: {
 }) {
     return api.post<IResponse<PaginationResponse<IRole>>>(SettingApiPath.queryRoleList, {
         data,
+    });
+}
+
+export function delOrderConfig(id: string) {
+    return request.get(SettingApiPath.DelOrderConfig, {
+        params: {
+            id,
+        },
     });
 }
 

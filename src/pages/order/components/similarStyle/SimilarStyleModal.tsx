@@ -107,11 +107,26 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                                     <div className={similarStyles.title}>
                                         <LoadingOutlined className={taskStyles.progressIcon} />
                                         正在爬取商品信息...
+                                        {purchaseInfo.planId ? (
+                                            <div className={similarStyles.desc}>
+                                                任务ID: {purchaseInfo.planId}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 ) : status === 3 ? (
                                     <div className={similarStyles.title}>
                                         <CloseCircleFilled className={taskStyles.errorIcon} />
                                         爬取失败
+                                        {purchaseInfo.planId ? (
+                                            <div className={similarStyles.desc}>
+                                                任务ID: {purchaseInfo.planId}
+                                            </div>
+                                        ) : null}
+                                        {purchaseInfo.failReason ? (
+                                            <div className={similarStyles.desc}>
+                                                失败原因: {purchaseInfo.failReason}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 ) : null}
                                 {status === 0 ? (

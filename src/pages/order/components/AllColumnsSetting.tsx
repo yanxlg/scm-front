@@ -33,6 +33,7 @@ const baseGroupList = [
     { key: '_logisticsTrack', name: '物流轨迹' },
     // { key: 'warehouseId', name: '仓库名称' },
     // { key: 'platformUid', name: '下单账号' },
+    { key: 'threeLevelCatogryCode', name: '商品最低类目' },
 ];
 
 const saleGroupList = [
@@ -48,6 +49,7 @@ const saleGroupList = [
     { key: 'collectTime', name: '销售订单揽收时间' },
     { key: 'lastWaybillNo', name: '销售尾程运单ID' },
     { key: 'receiveTime', name: '妥投时间' },
+    { key: 'inventedSignDeliveryNo', name: '虚拟运单ID' },
 ];
 
 const purchaseGroupList = [

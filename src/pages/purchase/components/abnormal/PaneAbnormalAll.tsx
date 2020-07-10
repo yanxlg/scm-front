@@ -1,13 +1,12 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef, useContext } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { Button, Form, Select } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
     IWaybillExceptionStatusKey,
-    IExceptionStrategyItem,
     IHandleItem,
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
@@ -15,9 +14,7 @@ import { AutoEnLargeImg } from 'react-components';
 import RelatedPurchaseModal from './RelatedPurchaseModal';
 import AbnormalModal from './AbnormalModal';
 import {
-    waybillExceptionTypeList,
     defaultOptionItem,
-    waybillExceptionTypeMap,
     waybillExceptionStatusMap,
     OperateType,
     AbnormalType,
@@ -42,6 +39,7 @@ import useReview from '../../hooks/useReview';
 import PopSetProgress from './PopSetProgress/PopSetProgress';
 import useDetail from '../../hooks/useDetail';
 import { PermissionComponent } from 'rc-permission';
+import { getStatusDesc } from '@/utils/transform';
 
 const { Option } = Select;
 
@@ -236,15 +234,17 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                             className={styles.tableFormItem}
                         >
                             <Select className={styles.select}>
-                                {waybillExceptionTypeList.map(({ name, value }) => (
-                                    <Option value={value} key={value}>
-                                        {name}
-                                    </Option>
-                                ))}
+                                {exception_code.map(({ name, value }) =>
+                                    value === '101' ? null : (
+                                        <Option value={value} key={value}>
+                                            {name}
+                                        </Option>
+                                    ),
+                                )}
                             </Select>
                         </Form.Item>
                     ) : (
-                        waybillExceptionTypeMap[val]
+                        getStatusDesc(exception_code, val)
                     );
                 },
             },
@@ -440,6 +440,7 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
         exportModalComponent,
         detailStatus,
         fieldList,
+        abnormalContext,
     ]);
 };
 
