@@ -421,14 +421,14 @@ const PaneErrTab = () => {
         },
         {
             key: 'purchaseWaybillNo',
-            title: '首程运单号',
+            title: '首程运单ID',
             dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
         },
         {
             key: 'lastWaybillNo',
-            title: '尾程运单号',
+            title: '尾程运单ID',
             dataIndex: 'lastWaybillNo',
             align: 'center',
             width: 120,
