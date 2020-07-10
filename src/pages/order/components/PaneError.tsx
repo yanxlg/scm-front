@@ -191,7 +191,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'orderGoodsId',
-            title: '订单号',
+            title: '中台子订单ID',
             dataIndex: 'orderGoodsId',
             align: 'center',
             width: 120,
@@ -199,7 +199,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'channelOrderGoodsSn',
-            title: '渠道订单号',
+            title: '渠道订单ID',
             dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
