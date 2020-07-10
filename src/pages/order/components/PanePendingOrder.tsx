@@ -40,6 +40,9 @@ import { EmptyObject } from '@/config/global';
 import TakeOrdersRecordModal from '@/pages/order/components/TakeOrdersRecordModal';
 import classNames from 'classnames';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
+import { getCategoryList } from '@/services/global';
+import { getCategoryName, getCategoryLowestLevel } from '@/utils/utils';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
@@ -47,6 +50,54 @@ import { ConnectState } from '@/models/connect';
 declare interface IProps {
     getAllTabCount(): void;
 }
+
+const categoryFieldList: FormField[] = [
+    {
+        type: 'select',
+        label: '一级类目',
+        key: 'first_category',
+        name: 'first_category',
+        // className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        key: 'second_category',
+        name: 'second_category',
+        // className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: 'first_category',
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        key: 'third_category',
+        name: 'third_category',
+        // className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+    },
+];
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -60,6 +111,8 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [orderList, setOrderList] = useState<IPendingOrderItem[]>([]);
     const cacheList = useRef<any[]>([]);
     const [update, setUpdate] = useState(0);
+    const categoryRef = useRef<IOptionItem[]>([]);
+    const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
 
     const dispatch = useDispatch();
 
@@ -94,6 +147,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 });
             },
         );
+        getCategoryList().then(list => {
+            categoryRef.current = list;
+            setAllCategoryList(list);
+        });
     }, []);
 
     const [status, setStatus] = useState(1);
@@ -111,16 +168,31 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
 
     const onSearch = useCallback(
         (paginationParams = { page, page_count: pageSize }) => {
+            const {
+                first_category = '',
+                second_category = '',
+                third_category = '',
+                ...searchData
+            } = searchRef.current?.getFieldsValue() as any;
             const params: IPendingOrderSearch = Object.assign(
                 {
                     page,
                     page_count: pageSize,
                 },
                 paginationParams,
-                searchRef.current?.getFieldsValue(),
+                {
+                    ...searchData,
+                    three_level_catogry_code: getCategoryLowestLevel(
+                        categoryRef.current,
+                        first_category,
+                        second_category,
+                        third_category,
+                    ),
+                },
                 searchRef1.current?.getFieldsValue(),
                 searchRef2.current?.getFieldsValue(),
             );
+
             setLoading(true);
             return getPendingOrderList(params)
                 .then(res => {
@@ -344,6 +416,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         placeholder: '请输入',
                         formatter: 'multipleToArray',
                     },
+                    ...categoryFieldList,
                     {
                         type: 'dateRanger',
                         name: ['order_time_start', 'order_time_end'],
@@ -425,6 +498,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         placeholder: '请输入',
                         formatter: 'multipleToArray',
                     },
+                    ...categoryFieldList,
                     {
                         type: 'dateRanger',
                         name: ['order_time_start', 'order_time_end'],
@@ -484,6 +558,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         placeholder: '请输入',
                         formatter: 'multipleToArray',
                     },
+                    ...categoryFieldList,
                     {
                         type: 'dateRanger',
                         name: ['order_time_start', 'order_time_end'],
@@ -909,6 +984,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                         render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
                     },
+                    {
+                        title: '商品最低类目',
+                        dataIndex: 'threeLevelCatogryCode',
+                        align: 'center',
+                        width: 140,
+                        render: (value: number) => getCategoryName(String(value), allCategoryList),
+                    },
                 ];
             case 3:
                 return [
@@ -1173,6 +1255,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 150,
                         render: value => getStatusDesc(purchasePlanCancelOptionList, value),
                     },
+                    {
+                        title: '商品最低类目',
+                        dataIndex: 'threeLevelCatogryCode',
+                        align: 'center',
+                        width: 140,
+                        render: (value: number) => getCategoryName(String(value), allCategoryList),
+                    },
                 ];
             case 4:
                 return [
@@ -1371,9 +1460,16 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                         render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
                     },
+                    {
+                        title: '商品最低类目',
+                        dataIndex: 'threeLevelCatogryCode',
+                        align: 'center',
+                        width: 140,
+                        render: (value: number) => getCategoryName(String(value), allCategoryList),
+                    },
                 ];
         }
-    }, [status]);
+    }, [status, allCategoryList]);
 
     const pagination = useMemo(() => {
         return {
@@ -1498,6 +1594,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         counts,
         modal,
         similarModal,
+        allCategoryList,
     ]);
 };
 
