@@ -6,9 +6,9 @@ import { getTagsList, putBatchUpdateTags, getBatchUpdateProgress } from '@/servi
 import { ITagItem, IGetTagsListRequest } from '@/interface/IGoodsAttr';
 import { PlusOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import { FitTable } from 'react-components';
-
 import { ColumnsType } from 'antd/lib/table/interface';
 import PublishIntercept from './components/PublishIntercept';
+import PaneOrderReview from './components/goodsAttr/PaneOrderReview';
 
 import styles from './_goodsAttr.less';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
@@ -416,6 +416,14 @@ const GoodsAttr: React.FC = props => {
                             )}
                             <PublishIntercept pending={pending} />
                         </div>
+                    </TabPane>
+                    <TabPane tab="订单审核配置" key="3">
+                        <PermissionComponent
+                            pid="setting/orders/config"
+                            fallback={() => <ForbiddenComponent />}
+                        >
+                            <PaneOrderReview />
+                        </PermissionComponent>
                     </TabPane>
                 </Tabs>
             </Container>

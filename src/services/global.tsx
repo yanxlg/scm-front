@@ -5,11 +5,13 @@ import {
     ISHopList,
     IExportExcelReqData,
     IOnsaleInterceptStoreRes,
+    ICategoryItem,
 } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
 import { IGood } from '@/interface/ILocalGoods';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { ISimpleRole } from '@/models/account';
 import User from '@/storage/User';
 
@@ -153,6 +155,28 @@ export const queryOnsaleInterceptStore = (purchase_channel?: string) => {
         });
 };
 
+function convertCategory(data: ICategoryItem[]): IOptionItem[] {
+    return data.map(({ name, id, children }) => {
+        return {
+            name: name as string,
+            value: id as string,
+            ...(children ? { children: convertCategory(children) } : undefined),
+        };
+    });
+}
+
+// 获取所有
+export const getCategoryList = singlePromiseWrap(() => {
+    return request
+        .get<IResponse<ICategoryItem[]>>(GlobalApiPath.QueryCategoryList)
+        .then(res => {
+            const { data } = res;
+            return convertCategory(data);
+        })
+        .catch(() => {
+            return [];
+        });
+});
 export function queryRoleSimpleList() {
     return request
         .get<
