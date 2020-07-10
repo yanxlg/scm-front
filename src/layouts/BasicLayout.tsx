@@ -25,9 +25,9 @@ export interface BasicLayoutProps extends ProLayoutProps {
 
 const filterPermissionMenuList = (menuList: Array<MenuDataItem>, pTree?: IPermissionTree) => {
     let permissionMenuList: MenuDataItem[] = [];
-    menuList.forEach(({ pid = '', hideInMenu, children, ...extra }) => {
+    menuList.forEach(({ pid, hideInMenu, children, ...extra }) => {
         // filter
-        if (hideInMenu ? true : pTree && pTree[pid]) {
+        if (hideInMenu || pid === void 0 ? true : pTree && pTree[pid]) {
             permissionMenuList.push({
                 ...extra,
                 hideInMenu,

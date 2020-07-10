@@ -172,6 +172,11 @@ export default [
                 name: '账号权限',
                 pid: 'setting/permission',
             },
+            {
+                path: '/setting/falseShipping',
+                name: '虚假发货标记配置',
+                // pid: 'setting/falseShipping',
+            },
         ],
         pid: 'setting',
     },
