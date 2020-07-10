@@ -42,4 +42,7 @@ export enum SettingApiPath {
     deleteRole = '/api/v1/roles/delete/{id}',
     updateRoleStatus = '/api/v1/roles/freeze/{id}',
     updateAccountStatus = '/api/v1/users/{id}',
+    queryPurchaseCodeList = '/api/v1/purchase/code/list',
+    updatePurchaseCode = '/api/v1/purchase/code/save',
+    queryErrorCodeConditions = '/api/v1/purchase/code/condition',
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import Container from '@/components/Container';
 import { JsonForm, LoadingButton, useList, FitTable, useModal2 } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
@@ -6,17 +6,20 @@ import { SettingModeState } from '@/pages/setting/model';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryErrorConfigList } from '@/services/setting';
-import { PaginationConfig } from 'react-components/src/FitTable/index';
+import { PaginationConfig } from 'react-components/es/FitTable';
 import { ColumnType } from 'antd/es/table';
 import { scroll } from '@/config/global';
-import EditPage, { EditPageProps } from '@/pages/setting/components/purchaseErrorCode/EditPage';
+import EditPage, { EditPageProps } from '@/pages/setting/purchase_error_code/components/EditPage';
 import { PlusOutlined } from '@ant-design/icons';
+import styles from './index.module.less';
+import { queryGoodsSourceList } from '@/services/global';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const fieldList: FormField[] = [
     {
         type: 'select',
         label: '中台错误码',
-        name: 'platformCode',
+        name: 'middle_code',
         optionList: {
             type: 'select',
             selector: (state: { setting: SettingModeState }) => {
@@ -27,7 +30,7 @@ const fieldList: FormField[] = [
     {
         type: 'select',
         label: '中台错误文案',
-        name: 'platformLabel',
+        name: 'middle_text',
         optionList: {
             type: 'select',
             selector: (state: { setting: SettingModeState }) => {
@@ -38,7 +41,7 @@ const fieldList: FormField[] = [
     {
         type: 'select',
         label: '订单错误码',
-        name: 'orderCode',
+        name: 'order_code',
         optionList: {
             type: 'select',
             selector: (state: { setting: SettingModeState }) => {
@@ -49,7 +52,7 @@ const fieldList: FormField[] = [
     {
         type: 'select',
         label: '渠道错误码',
-        name: 'channelCode',
+        name: 'channel_code',
         optionList: {
             type: 'select',
             selector: (state: { setting: SettingModeState }) => {
@@ -58,15 +61,19 @@ const fieldList: FormField[] = [
         },
     },
     {
-        type: 'select',
+        type: 'treeSelect',
         label: '采购渠道',
-        name: 'channel',
-        optionList: [],
+        name: 'purchase_channel',
+        optionList: () => queryGoodsSourceList(),
+        showArrow: true,
+        initialValue: 'all',
+        showCheckedStrategy: 'SHOW_PARENT',
+        treeNodeFilterProp: 'title',
     },
     {
         type: 'select',
         label: '渠道错误文案',
-        name: 'channelLabel',
+        name: 'channel_text',
         optionList: {
             type: 'select',
             selector: (state: { setting: SettingModeState }) => {
@@ -78,6 +85,14 @@ const fieldList: FormField[] = [
 
 const PurchaseErrorCode = () => {
     const formRef = useRef<JsonFormRef>(null);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'setting/queryErrorCode',
+        });
+    }, []);
 
     const { dataSource, total, pageNumber, pageSize, loading, onChange, onReload } = useList({
         formRef: formRef,
@@ -107,37 +122,46 @@ const PurchaseErrorCode = () => {
                 title: '中台错误码',
                 width: '150px',
                 align: 'center',
-                dataIndex: 'platformCode',
+                dataIndex: 'middle_code',
             },
             {
                 title: '中台错误文案',
                 width: '150px',
                 align: 'center',
-                dataIndex: 'platformLabel',
+                dataIndex: 'middle_text',
             },
             {
                 title: '订单错误码',
                 width: '150px',
                 align: 'center',
-                dataIndex: 'orderCode',
+                dataIndex: 'order_code',
             },
             {
                 title: '采购渠道',
                 width: '150px',
                 align: 'center',
-                dataIndex: 'channel',
+                dataIndex: 'purchase_channel',
             },
             {
                 title: '渠道错误码',
                 width: '150px',
                 align: 'center',
-                dataIndex: 'channelCode',
+                dataIndex: 'channel_code',
             },
             {
                 title: '渠道错误文案',
                 width: '150px',
                 align: 'center',
-                dataIndex: 'channelLabel',
+                dataIndex: 'channel_text',
+            },
+            {
+                title: '更新记录',
+                width: '120px',
+                align: 'center',
+                dataIndex: 'operation_update',
+                render: () => {
+                    return <Button type="link">查看</Button>;
+                },
             },
         ];
     }, []);
@@ -155,7 +179,7 @@ const PurchaseErrorCode = () => {
     return useMemo(() => {
         return (
             <Container>
-                <JsonForm fieldList={fieldList} ref={formRef}>
+                <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formLabel}>
                     <LoadingButton className={formStyles.formBtn} type="primary" onClick={() => {}}>
                         查询
                     </LoadingButton>

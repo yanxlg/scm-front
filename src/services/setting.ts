@@ -436,8 +436,35 @@ export function updateAccountStatus(id: string, status: number) {
     });
 }
 
-export function queryErrorConfigList(data: any) {
-    return api.post('', {
-        data,
+export function queryErrorConfigList(data: {
+    middle_code?: string;
+    middle_text?: string;
+    order_code?: string;
+    purchase_channel?: string;
+    channel_code?: string;
+    channel_text?: string;
+}) {
+    return api.get(SettingApiPath.queryPurchaseCodeList, {
+        params: data,
     });
+}
+
+export function updateErrorCode(data: {
+    middle_code: string;
+    middle_text: string;
+    purchase_channel: number;
+    channel_code: string;
+    channel_text: string;
+    remark?: string;
+    middle_code_type?: string;
+    save_type: 1 | 2;
+    id?: number;
+}) {
+    return request.post(SettingApiPath.updatePurchaseCode, {
+        data: data,
+    });
+}
+
+export function queryErrorCodeConditions() {
+    return request.get(SettingApiPath.queryErrorCodeConditions);
 }
