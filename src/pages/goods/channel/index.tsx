@@ -44,6 +44,7 @@ import { queryShopList } from '@/services/global';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
+import styles from '@/pages/goods/local/_index.less';
 
 const salesVolumeList = [
     {
@@ -176,6 +177,13 @@ const formFields: FormField[] = [
         optionList: ProductStatusList.map(({ name, id }) => {
             return { name: name, value: id };
         }),
+    },
+    {
+        type: 'inputRange',
+        label: '价格范围（$）',
+        name: ['min_sale_price', 'max_sale_price'],
+        className: 'product-picker',
+        precision: 2,
     },
 ];
 
@@ -591,6 +599,31 @@ const ChannelList: React.FC = props => {
                             </PermissionComponent>
                         </>
                     );
+                },
+            },
+            {
+                title: '在架销售价（$）',
+                dataIndex: 'sale_price',
+                align: 'center',
+                width: 150,
+                render: (_, item: IChannelProductListItem) => {
+                    const {
+                        min_sale_price = '0',
+                        max_sale_price = '0',
+                        min_shipping_fee = '0',
+                        max_shipping_fee = '0',
+                    } = item;
+                    const salePrice = `${
+                        min_sale_price === max_sale_price
+                            ? max_sale_price
+                            : `${min_sale_price}~${max_sale_price}`
+                    }`;
+                    const shipPrice = `${
+                        min_shipping_fee === max_shipping_fee
+                            ? max_shipping_fee
+                            : `${min_shipping_fee}~${max_shipping_fee}`
+                    }`;
+                    return `${salePrice}（含运费${shipPrice}）`;
                 },
             },
             {
