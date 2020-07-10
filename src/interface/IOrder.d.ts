@@ -218,6 +218,7 @@ interface IPurchasePlan {
     reserveStatus: number;
     taskId: string;
     cancelType: string;
+    waybillTrail: string;
 }
 
 interface IOrderItemExtend {
