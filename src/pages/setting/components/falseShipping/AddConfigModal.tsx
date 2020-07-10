@@ -5,25 +5,36 @@ import classnames from 'classnames';
 
 import styles from '../../_falseShipping.less';
 
-const { Option } = Select;
-
 interface IProps {
     visible: boolean;
     onCancel(): void;
 }
 
+const { Option } = Select;
+
+const initialRules = [{ required: true, message: '请输入!' }];
+
 const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [form] = Form.useForm();
-    const [configNum, setConfigNum] = useState(2);
+    const [configNum, setConfigNum] = useState(1);
 
     const handleCancel = useCallback(() => {
         onCancel();
     }, []);
 
-    const handleOk = useCallback(() => {
-        console.log('handleOk');
+    const handleOk = useCallback(async () => {
+        // console.log('handleOk', form.getFieldsValue());
+        const data = form.validateFields();
     }, []);
+
+    const delConfig = useCallback(() => {
+        setConfigNum(configNum - 1);
+    }, [configNum]);
+
+    const addConfig = useCallback(() => {
+        setConfigNum(configNum + 1);
+    }, [configNum]);
 
     return useMemo(() => {
         return (
@@ -60,12 +71,30 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
                                             <Option value="aaa">bbb</Option>
                                         </Select>
                                     </Form.Item>
-                                    <Form.Item name={`label-${index}`} className={styles.input}>
+                                    <Form.Item
+                                        name={`label-${index}`}
+                                        className={styles.input}
+                                        rules={initialRules}
+                                    >
                                         <Input />
                                     </Form.Item>
                                     <div className={styles.operate}>
-                                        <MinusCircleOutlined />
-                                        <PlusCircleOutlined />
+                                        {configNum === index + 1 ? (
+                                            <>
+                                                {index > 0 ? (
+                                                    <MinusCircleOutlined
+                                                        className={styles.icon}
+                                                        onClick={delConfig}
+                                                    />
+                                                ) : null}
+                                                {3 !== index + 1 ? (
+                                                    <PlusCircleOutlined
+                                                        className={styles.icon}
+                                                        onClick={addConfig}
+                                                    />
+                                                ) : null}
+                                            </>
+                                        ) : null}
                                     </div>
                                 </div>
                             </div>
