@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm, FitTable, LoadingButton } from 'react-components';
+import { JsonForm, FitTable, LoadingButton, useModal2 } from 'react-components';
 import {
     getErrorOrderList,
     postExportErrOrder,
@@ -27,6 +27,7 @@ import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyl
 import { Button } from 'antd';
 import Export from '@/components/Export';
 import { queryGoodsSourceList } from '@/services/global';
+import TrackDialog from './TrackDialog';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
@@ -53,6 +54,9 @@ export declare interface IErrorOrderItem {
     purchaseWaybillNo?: string; // 首程运单号
     purchaseFailCode?: failureReasonCode;
     similarGoodsStatus?: number;
+    purchaseOrderGoodsId?: string;
+    waybillTrailUpdateTime?: string;
+    waybillTrail?: string;
     _rowspan?: number;
 }
 
@@ -76,6 +80,7 @@ const PaneErrTab = () => {
     }, []);
 
     const { visible: exportModal, setVisibleProps: setExportModal } = useModal<boolean>();
+    const [trackModal, showTrackModal, closeTRackModal] = useModal2<IErrorOrderItem | undefined>();
 
     const fieldList: FormField[] = useMemo(() => {
         return [
@@ -186,7 +191,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'orderGoodsId',
-            title: '订单号',
+            title: '中台子订单ID',
             dataIndex: 'orderGoodsId',
             align: 'center',
             width: 120,
@@ -194,7 +199,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'channelOrderGoodsSn',
-            title: '渠道订单号',
+            title: '渠道订单ID',
             dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
@@ -399,6 +404,12 @@ const PaneErrTab = () => {
             },
         },
         {
+            title: '采购单ID',
+            dataIndex: 'purchaseOrderGoodsId',
+            align: 'center',
+            width: 120,
+        },
+        {
             key: 'signDeliveryTime',
             title: '标记发货时间',
             dataIndex: 'signDeliveryTime',
@@ -410,17 +421,53 @@ const PaneErrTab = () => {
         },
         {
             key: 'purchaseWaybillNo',
-            title: '首程运单号',
+            title: '首程运单ID',
             dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
         },
         {
             key: 'lastWaybillNo',
-            title: '尾程运单号',
+            title: '尾程运单ID',
             dataIndex: 'lastWaybillNo',
             align: 'center',
             width: 120,
+        },
+        {
+            title: '最后一条轨迹时间',
+            dataIndex: 'waybillTrailUpdateTime',
+            align: 'center',
+            width: 120,
+            render: (value: string) => {
+                return utcToLocal(value, '');
+            },
+        },
+        {
+            title: '物流轨迹',
+            dataIndex: 'waybillTrail',
+            align: 'center',
+            width: 120,
+            render: (value: string, row) => {
+                let desc = '';
+                try {
+                    if (value) {
+                        const list = JSON.parse(value);
+                        let allStr = '';
+                        list?.forEach(({ info, time }: any) => {
+                            allStr += `${info} ${time} `;
+                        });
+                        desc = allStr.length > 20 ? `${allStr.substr(0, 20)}...` : allStr;
+                    }
+                } catch {}
+                return (
+                    <>
+                        {desc ? <div>{desc}</div> : null}
+                        <PermissionComponent pid={'order/track'} control={'tooltip'}>
+                            <a onClick={() => showTrackModal(row)}>物流轨迹</a>
+                        </PermissionComponent>
+                    </>
+                );
+            },
         },
     ];
 
@@ -557,6 +604,10 @@ const PaneErrTab = () => {
                                                     label: errorDetailOptionMap[12],
                                                     value: 12,
                                                 },
+                                                {
+                                                    label: errorDetailOptionMap[13],
+                                                    value: 13,
+                                                },
                                             ],
                                             onChange: () => {
                                                 onSearch(); // 立即查询
@@ -666,6 +717,9 @@ const PaneErrTab = () => {
                             platformSendOrderTime,
                             purchaseFailCode,
                             similarGoodsStatus,
+                            purchaseOrderGoodsId,
+                            waybillTrailUpdateTime,
+                            waybillTrail,
                         } = purchaseItem;
                         const childOrderItem: IErrorOrderItem = {
                             createTime, // 订单时间
@@ -689,6 +743,9 @@ const PaneErrTab = () => {
                             purchaseWaybillNo, // 首程运单号
                             purchaseFailCode,
                             similarGoodsStatus,
+                            purchaseOrderGoodsId,
+                            waybillTrailUpdateTime,
+                            waybillTrail,
                         };
                         if (index === 0) {
                             childOrderItem._rowspan = orderGoodsPurchasePlan.length;
@@ -770,9 +827,15 @@ const PaneErrTab = () => {
                 {table}
                 {similarModal}
                 {exportModalComponent}
+                <TrackDialog
+                    visible={!!trackModal}
+                    orderGoodsId={trackModal ? trackModal.orderGoodsId || '' : ''}
+                    lastWaybillNo={trackModal ? trackModal.lastWaybillNo || '' : ''}
+                    hideTrackDetail={closeTRackModal}
+                />
             </div>
         );
-    }, [loading, visible, exportModal]);
+    }, [loading, visible, exportModal, trackModal]);
 };
 
 export default PaneErrTab;
