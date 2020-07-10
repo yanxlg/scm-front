@@ -1,13 +1,12 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { Row, Col, Radio, Button, Table, Statistic, Spin } from 'antd';
+import { Row, Col, Button, Statistic, Spin } from 'antd';
 import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-// import OrderFunnel from './components/OrderFunnel';
 import DateRange from './components/DateRange';
 import { formatThousands, formatTwodecimal } from '@/utils/transform';
 import { getDashboardTradeData, getPlatformAndStore } from '@/services/dashboard';
 import { ColumnsType } from 'antd/es/table';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import classNames from 'classnames';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
@@ -17,6 +16,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_overview.less';
 import Export from '@/components/Export';
 import { exportExcel } from '@/services/global';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const formFields: FormField[] = [
     {
@@ -575,7 +575,7 @@ const Overview: React.FC = props => {
                         <div className={styles.coreDataTitle}>核心数据明细</div>
                         <div className={styles.tableSection}>
                             <FitTable
-                                bordered
+                                bordered={true}
                                 rowKey="id"
                                 className={styles.table}
                                 loading={loading}
@@ -601,4 +601,7 @@ const Overview: React.FC = props => {
     }, [dates, loading, overviewInfo, detailList, exportStatus]);
 };
 
-export default Overview;
+export default PermissionRouterWrap(Overview, {
+    login: true,
+    pid: 'dashboard/overview',
+});

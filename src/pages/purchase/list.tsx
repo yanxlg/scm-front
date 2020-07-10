@@ -8,8 +8,10 @@ import PendingStorage from './components/list/pendingStorage';
 import Warehousing from './components/list/warehousing';
 import Over from './components/list/over';
 import Return from './components/list/return';
-import { IPurchaseStatics, IReturnStatics } from '@/interface/IPurchase';
-import { queryPurchaseStatic, queryReturnStatic } from '@/services/purchase';
+import { IPurchaseStatics } from '@/interface/IPurchase';
+import { queryPurchaseStatic } from '@/services/purchase';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 const TabPane = Tabs.TabPane;
 
 const List = () => {
@@ -51,25 +53,60 @@ const List = () => {
                     type="card"
                     children={[
                         <TabPane tab={`全部${getStaticsNumber(all_total)}`} key="1">
-                            <AllList />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <AllList />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`待发货${getStaticsNumber(wait_send_total)}`} key="2">
-                            <PendingShipped />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PendingShipped />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`待签收${getStaticsNumber(wait_recieve_total)}`} key="3">
-                            <PendingSigned />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PendingSigned />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`待入库${getStaticsNumber(wait_in_total)}`} key="4">
-                            <PendingStorage />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <PendingStorage />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`部分入库${getStaticsNumber(some_in_total)}`} key="5">
-                            <Warehousing />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <Warehousing />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`已完结${getStaticsNumber(finish_total)}`} key="6">
-                            <Over />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <Over />
+                            </PermissionComponent>
                         </TabPane>,
                         <TabPane tab={`采购退款${getStaticsNumber(purchase_refund_total)}`} key="7">
-                            <Return />
+                            <PermissionComponent
+                                pid="purchase/list/tab"
+                                fallback={() => <ForbiddenComponent />}
+                            >
+                                <Return />
+                            </PermissionComponent>
                         </TabPane>,
                     ]}
                 />
@@ -78,4 +115,7 @@ const List = () => {
     }, [statics]);
 };
 
-export default List;
+export default PermissionRouterWrap(List, {
+    login: true,
+    pid: 'purchase/list',
+});

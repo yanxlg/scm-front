@@ -24,6 +24,7 @@ import {
 } from '@/services/selection';
 import { IQueryGoodsSelectionListReq, ISelectionGoodsItem } from '@/interface/ISelection';
 import { history } from '@@/core/history';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 
 const { RangePicker } = DatePicker;
 
@@ -394,17 +395,19 @@ const Selection: React.FC = () => {
                                     className={classnames(styles.arc, styles.arcShow)}
                                     onClick={e => e.stopPropagation()}
                                 >
-                                    <Popconfirm
-                                        placement="bottom"
-                                        title="确定要从选品模型中剔除此商品吗？"
-                                        onConfirm={() =>
-                                            _deleteGoodsSelection(commodity_id, merchant_id)
-                                        }
-                                        okText="确定"
-                                        cancelText="取消"
-                                    >
-                                        <DeleteOutlined className={styles.del} />
-                                    </Popconfirm>
+                                    <PermissionComponent pid="selection/delete" control="tooltip">
+                                        <Popconfirm
+                                            placement="bottom"
+                                            title="确定要从选品模型中剔除此商品吗？"
+                                            onConfirm={() =>
+                                                _deleteGoodsSelection(commodity_id, merchant_id)
+                                            }
+                                            okText="确定"
+                                            cancelText="取消"
+                                        >
+                                            <DeleteOutlined className={styles.del} />
+                                        </Popconfirm>
+                                    </PermissionComponent>
                                 </div>
                                 <div className={styles.typeList}>
                                     <div className={styles.type}>
@@ -694,6 +697,7 @@ const Selection: React.FC = () => {
     }, [goodsDetailStatus, searchNode, goodsNode, dates, modelType, loading, onSearch]);
 };
 
-// export default React.memo(Selection);
-
-export default Selection;
+export default PermissionRouterWrap(Selection, {
+    login: true,
+    pid: 'selection/list',
+});

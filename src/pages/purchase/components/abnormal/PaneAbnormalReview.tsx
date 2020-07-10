@@ -1,13 +1,8 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef, useContext } from 'react';
-import { Modal, Input, message, Button, Select, Form } from 'antd';
+import React, { useMemo, useState, useCallback, useRef, useContext } from 'react';
+import { Button, Select, Form } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import {
-    getAbnormalAllList,
-    setDiscardAbnormalOrder,
-    downloadExcel,
-    reviewExceptionOrder,
-} from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -15,15 +10,7 @@ import {
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
 import { AutoEnLargeImg } from 'react-components';
-import {
-    waybillExceptionTypeList,
-    defaultOptionItem,
-    waybillExceptionTypeMap,
-    waybillExceptionStatusMap,
-} from '@/enums/PurchaseEnum';
-import TextArea from 'antd/lib/input/TextArea';
-// import { utcToLocal } from 'react-components/es/utils/date';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { defaultOptionItem, waybillExceptionStatusMap } from '@/enums/PurchaseEnum';
 import Export from '@/components/Export';
 import { AbnormalContext } from '../../abnormal';
 
@@ -31,6 +18,8 @@ import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import useReview from '../../hooks/useReview';
 import { utcToLocal } from 'react-components/es/utils/date';
+import { PermissionComponent } from 'rc-permission';
+import { getStatusDesc } from '@/utils/transform';
 
 const { Option } = Select;
 
@@ -96,24 +85,26 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0;
         return [
-            <LoadingButton
-                key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={batchReviewPass}
-            >
-                审核通过
-            </LoadingButton>,
-            <LoadingButton
-                key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={batchReviewReject}
-            >
-                审核驳回
-            </LoadingButton>,
+            <PermissionComponent key="1" pid="purchase/abnormal/verify" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={batchReviewPass}
+                >
+                    审核通过
+                </LoadingButton>
+            </PermissionComponent>,
+            <PermissionComponent key="2" pid="purchase/abnormal/verify" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={batchReviewReject}
+                >
+                    审核驳回
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys]);
 
@@ -165,10 +156,22 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                     return (
                         <>
                             <div>
-                                <a onClick={() => reviewPass(row)}>审核通过</a>
+                                <PermissionComponent
+                                    key="1"
+                                    pid="purchase/abnormal/verify"
+                                    control="tooltip"
+                                >
+                                    <a onClick={() => reviewPass(row)}>审核通过</a>
+                                </PermissionComponent>
                             </div>
                             <div>
-                                <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                <PermissionComponent
+                                    key="1"
+                                    pid="purchase/abnormal/verify"
+                                    control="tooltip"
+                                >
+                                    <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                </PermissionComponent>
                             </div>
                         </>
                     );
@@ -194,11 +197,10 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 180,
-                // render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
                 render: (val: IWaybillExceptionTypeKey, record: IPurchaseAbnormalItem) => {
                     const { waybillExceptionSn } = record;
                     return val === '101' ? (
-                        waybillExceptionTypeMap[val]
+                        getStatusDesc(exception_code, val)
                     ) : (
                         <Form.Item
                             name={waybillExceptionSn}
@@ -206,7 +208,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                             className={styles.tableFormItem}
                         >
                             <Select className={styles.select}>
-                                {waybillExceptionTypeList.map(({ name, value }) =>
+                                {exception_code.map(({ name, value }) =>
                                     value === '101' ? null : (
                                         <Option value={value} key={value}>
                                             {name}
@@ -264,7 +266,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 width: 150,
             },
         ];
-    }, []);
+    }, [abnormalContext]);
 
     const pagination = useMemo(() => {
         return {
@@ -329,7 +331,7 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 </JsonForm>
                 <Form form={form}>
                     <FitTable
-                        bordered
+                        bordered={true}
                         rowKey="waybillExceptionSn"
                         // className="order-table"
                         loading={loading}
@@ -347,7 +349,15 @@ const PaneAbnormalReview: React.FC<IProps> = ({ penddingCount, getExceptionCount
                 {exportModalComponent}
             </>
         );
-    }, [dataSource, loading, currentRecord, exportModalComponent, rowSelection, fieldList]);
+    }, [
+        dataSource,
+        loading,
+        currentRecord,
+        exportModalComponent,
+        rowSelection,
+        fieldList,
+        abnormalContext,
+    ]);
 };
 
 export default PaneAbnormalReview;

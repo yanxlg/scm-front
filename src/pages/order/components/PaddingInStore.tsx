@@ -1,4 +1,4 @@
-import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     orderStatusOptionList,
@@ -41,6 +41,8 @@ import { filterFieldsList } from './utils';
 import { EmptyObject } from 'react-components/es/utils';
 import TrackDialog from '@/pages/order/components/TrackDialog';
 import { IChildOrderItem } from '@/pages/order/components/PaneAll';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
 
 const configFields = [
     'order_goods_status1',
@@ -65,6 +67,13 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
     const formRef = useRef<JsonFormRef>(null);
     const formRef1 = useRef<JsonFormRef>(null);
     const [update, setUpdate] = useState(0);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
 
     const {
         loading,
@@ -110,27 +119,33 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 render: (value: string, item) => {
                     return (
                         <>
-                            <PopConfirmLoadingButton
-                                popConfirmProps={{
-                                    title: '确定要取消该采购订单吗？',
-                                    onConfirm: () => cancelSingle([item.orderGoodsId!]),
-                                }}
-                                buttonProps={{
-                                    type: 'link',
-                                    children: '取消采购订单',
-                                }}
-                            />
+                            <PermissionComponent pid="order/cancel_purchase" control="tooltip">
+                                <PopConfirmLoadingButton
+                                    popConfirmProps={{
+                                        title: '确定要取消该采购订单吗？',
+                                        onConfirm: () => cancelSingle([item.orderGoodsId!]),
+                                    }}
+                                    buttonProps={{
+                                        type: 'link',
+                                        children: '取消采购订单',
+                                    }}
+                                />
+                            </PermissionComponent>
                             <CancelOrder
                                 key={'2'}
                                 orderGoodsIds={[item.orderGoodsId!]}
                                 onReload={onSearch}
                                 getAllTabCount={updateCount}
                             >
-                                <Button type="link">取消销售订单</Button>
+                                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                                    <Button type="link">取消销售订单</Button>
+                                </PermissionComponent>
                             </CancelOrder>
-                            <Button type="link" onClick={() => showTrackModal(item)}>
-                                查看物流轨迹
-                            </Button>
+                            <PermissionComponent pid="order/track" control="tooltip">
+                                <Button type="link" onClick={() => showTrackModal(item)}>
+                                    查看物流轨迹
+                                </Button>
+                            </PermissionComponent>
                         </>
                     );
                 },
@@ -410,29 +425,32 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedKeys.length === 0;
         return [
-            <LoadingButton
-                key="purchase_order"
-                type="primary"
-                className={formStyles.formBtn}
-                disabled={disabled}
-                onClick={cancelList}
-            >
-                取消采购订单
-            </LoadingButton>,
+            <PermissionComponent key="purchase_order" pid="order/cancel_purchase" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    disabled={disabled}
+                    onClick={cancelList}
+                >
+                    取消采购订单
+                </LoadingButton>
+            </PermissionComponent>,
             <CancelOrder
                 key="2"
                 orderGoodsIds={selectedKeys}
                 onReload={onReload}
                 getAllTabCount={updateCount}
             >
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={disabled}
-                >
-                    取消销售订单
-                </Button>
+                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                    <Button
+                        key="channel_order"
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={disabled}
+                    >
+                        取消销售订单
+                    </Button>
+                </PermissionComponent>
             </CancelOrder>,
         ];
     }, [selectedKeys]);

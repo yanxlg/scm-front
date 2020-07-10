@@ -17,6 +17,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 import { LoadingButton } from 'react-components';
 import dayjs, { Dayjs } from 'dayjs';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface IFormData {
     task_name: string;
@@ -338,9 +339,11 @@ const AutoPurchaseTask: React.FC<IAutoPurchaseTaskProps> = ({ taskId }) => {
                     }}
                 </Form.List>
                 <div className={formStyles.formNextCard}>
-                    <LoadingButton type="primary" className="btn-default" onClick={onCreate}>
-                        创建任务
-                    </LoadingButton>
+                    <PermissionComponent pid={'task/config/auto_purchase'} control={'tooltip'}>
+                        <LoadingButton type="primary" className="btn-default" onClick={onCreate}>
+                            创建任务
+                        </LoadingButton>
+                    </PermissionComponent>
                 </div>
             </Form>
         );

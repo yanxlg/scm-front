@@ -1,8 +1,8 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
-import { Modal, Input, message, Button } from 'antd';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
+import { Button } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
@@ -13,21 +13,19 @@ import { AutoEnLargeImg } from 'react-components';
 import RelatedPurchaseModal from './RelatedPurchaseModal';
 import AbnormalModal from './AbnormalModal';
 import {
-    waybillExceptionTypeList,
     defaultOptionItem,
-    waybillExceptionTypeMap,
     waybillExceptionStatusMap,
     AbnormalType,
+    OperateType,
 } from '@/enums/PurchaseEnum';
-import TextArea from 'antd/lib/input/TextArea';
-// import { utcToLocal } from 'react-components/es/utils/date';
-import { QuestionCircleOutlined } from '@ant-design/icons';
 import Export from '@/components/Export';
 
 import styles from '../../_abnormal.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import useWaitProcess from '../../hooks/useWaitProcess';
 import { utcToLocal } from 'react-components/lib/utils/date';
+import { PermissionComponent } from 'rc-permission';
+import { getStatusDesc } from '@/utils/transform';
 
 interface IProps {
     penddingCount: number;
@@ -133,12 +131,31 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     return (
                         <>
                             {exception_strategy.map(item => {
-                                const { exception_operation_name, show_exception_type } = item;
+                                const {
+                                    exception_operation_name,
+                                    show_exception_type,
+                                    exception_operation_id,
+                                } = item;
+                                let pid = '';
+                                switch (exception_operation_id) {
+                                    case OperateType.discard:
+                                        pid = 'purchase/abnormal/delete';
+                                        break;
+                                    case OperateType.related:
+                                        pid = 'purchase/abnormal/connect';
+                                        break;
+                                    case OperateType.exceptionHandle:
+                                        pid = 'purchase/abnormal/exception_exec';
+                                        break;
+                                    default:
+                                }
                                 return show_exception_type.indexOf(waybillExceptionType) > -1 ? (
                                     <div key={exception_operation_name}>
-                                        <a onClick={() => handleOperate(item, row)}>
-                                            {exception_operation_name}
-                                        </a>
+                                        <PermissionComponent pid={pid} control="tooltip">
+                                            <a onClick={() => handleOperate(item, row)}>
+                                                {exception_operation_name}
+                                            </a>
+                                        </PermissionComponent>
                                     </div>
                                 ) : null;
                             })}
@@ -166,7 +183,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                 dataIndex: 'waybillExceptionType',
                 align: 'center',
                 width: 150,
-                render: (val: IWaybillExceptionTypeKey) => waybillExceptionTypeMap[val],
+                render: (val: IWaybillExceptionTypeKey) => getStatusDesc(exception_code, val),
             },
             {
                 title: '异常单状态',
@@ -249,12 +266,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
 
     const toolBarRender = useCallback(() => {
         return [
-            <JsonForm
-                key="1"
-                containerClassName=""
-                fieldList={fieldCheckboxList}
-                ref={formRef2}
-            ></JsonForm>,
+            <JsonForm key="1" containerClassName="" fieldList={fieldCheckboxList} ref={formRef2} />,
         ];
     }, [fieldCheckboxList]);
 
@@ -301,7 +313,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
                     </div>
                 </JsonForm>
                 <FitTable
-                    bordered
+                    bordered={true}
                     rowKey="waybillExceptionSn"
                     // className="order-table"
                     loading={loading}
@@ -335,6 +347,7 @@ const PaneAbnormalPending: React.FC<IProps> = ({ penddingCount, getExceptionCoun
         abnormalStatus,
         currentRecord,
         exportModalComponent,
+        abnormalContext,
     ]);
 };
 

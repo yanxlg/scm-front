@@ -20,6 +20,7 @@ export interface IPendingOrderSearch extends IPagination {
     channel_source?: number;
     order_time_start?: number;
     order_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface IPendingOrderItem {
@@ -32,6 +33,7 @@ export interface IWaitPaySearch extends IPagination {
     purchase_platform?: number;
     purchase_order_stime?: number;
     purchase_order_etime?: number;
+    product_shop?: string[];
 }
 
 export declare interface IWaitPayOrderItem {
@@ -63,6 +65,7 @@ export interface IWaitShipSearch extends IPagination {
     platform_order_time_end?: number;
     order_create_time_start?: number;
     order_create_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface IWaitShipOrderItem {
@@ -91,6 +94,7 @@ export interface INotWarehouseSearch extends IPagination {
     purchase_order_status?: number;
     platform_order_time_start?: number;
     platform_order_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface INotWarehouseOrderItem {
@@ -104,6 +108,7 @@ export interface IWarehouseNotShipSearch extends IPagination {
     channel_source?: number;
     storage_time_start?: number;
     storage_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface IWarehouseNotShipOrderItem {
@@ -152,7 +157,7 @@ export interface IReviewSearch extends IPagination {
     order_time_start?: number;
     order_time_end?: number;
     order_goods_id?: string[];
-    product_shop?: string;
+    product_shop?: string[];
     channel_order_goods_sn?: string;
 }
 

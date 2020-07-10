@@ -5,6 +5,7 @@ import { getInterceptTagList, getTagsList, setInterceptTagList } from '@/service
 import { ITagItem } from '@/interface/IGoodsAttr';
 import { LoadingButton } from 'react-components';
 import { ICheckedBtnItem } from '@/interface/IGlobal';
+import { PermissionComponent } from 'rc-permission';
 
 const PublishIntercept = ({ pending }: { pending: false | any }) => {
     const [loading, setLoading] = useState(true);
@@ -86,19 +87,27 @@ const PublishIntercept = ({ pending }: { pending: false | any }) => {
                 <p>请选择上架拦截的商品属性标签</p>
                 <Spin spinning={loading}>
                     {tagList.map((item, index) => (
-                        <CheckedBtn
-                            disabled={pending}
-                            style={{ margin: '0 10px 10px 0' }}
-                            key={item.name}
-                            item={item}
-                            onClick={() => btnSelected(index)}
-                        />
+                        <PermissionComponent pid="setting/goods_attr/update_tag" control="tooltip">
+                            <CheckedBtn
+                                disabled={pending}
+                                style={{ margin: '0 10px 10px 0' }}
+                                key={item.name}
+                                item={item}
+                                onClick={() => btnSelected(index)}
+                            />
+                        </PermissionComponent>
                     ))}
                 </Spin>
                 <div style={{ marginTop: 10 }}>
-                    <LoadingButton type="primary" disabled={pending} onClick={_setInterceptTagList}>
-                        更改设置
-                    </LoadingButton>
+                    <PermissionComponent pid="setting/goods_attr/update_tag" control="tooltip">
+                        <LoadingButton
+                            type="primary"
+                            disabled={pending}
+                            onClick={_setInterceptTagList}
+                        >
+                            更改设置
+                        </LoadingButton>
+                    </PermissionComponent>
                 </div>
             </>
         );

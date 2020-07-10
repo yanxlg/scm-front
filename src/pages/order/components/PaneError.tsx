@@ -1,15 +1,12 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm, FitTable, LoadingButton, useModal2 } from 'react-components';
 import {
     getErrorOrderList,
     postExportErrOrder,
-    queryChannelSource,
     getPlatformAndStore,
 } from '@/services/order-manage';
 import {
-    defaultOptionItem,
-    channelOptionList,
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
@@ -31,6 +28,9 @@ import { Button } from 'antd';
 import Export from '@/components/Export';
 import { queryGoodsSourceList } from '@/services/global';
 import TrackDialog from './TrackDialog';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -71,6 +71,14 @@ const PaneErrTab = () => {
         purchase_plan_id: string;
     }>();
 
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
+
     const { visible: exportModal, setVisibleProps: setExportModal } = useModal<boolean>();
     const [trackModal, showTrackModal, closeTRackModal] = useModal2<IErrorOrderItem | undefined>();
 
@@ -86,12 +94,18 @@ const PaneErrTab = () => {
             },
             {
                 type: 'select',
-                name: 'channel_source',
+                name: 'product_shop',
                 label: '销售店铺名称',
                 className: 'order-input',
                 // optionList: [defaultOptionItem, ...channelOptionList],
                 syncDefaultOption: defaultOptionItem1,
-                optionList: () => getPlatformAndStore(),
+                optionList: {
+                    type: 'select',
+                    selector: (state: ConnectState) => {
+                        return state?.permission?.merchantList;
+                    },
+                },
+                formatter: 'plainToArr',
             },
             {
                 type: 'select',
@@ -242,42 +256,57 @@ const PaneErrTab = () => {
                             {value === 12 ? (
                                 <div>
                                     {status === 0 ? (
-                                        <Button
-                                            type="link"
-                                            onClick={() =>
-                                                setVisibleProps({
-                                                    order_goods_id: row.orderGoodsId,
-                                                    purchase_plan_id: row.purchasePlanId as string,
-                                                })
-                                            }
+                                        <PermissionComponent
+                                            pid="order/similar_pay"
+                                            control="tooltip"
                                         >
-                                            相似款代拍
-                                        </Button>
+                                            <Button
+                                                type="link"
+                                                onClick={() =>
+                                                    setVisibleProps({
+                                                        order_goods_id: row.orderGoodsId,
+                                                        purchase_plan_id: row.purchasePlanId as string,
+                                                    })
+                                                }
+                                            >
+                                                相似款代拍
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : status === 1 || status === 5 ? (
-                                        <Button
-                                            type="link"
-                                            onClick={() =>
-                                                setVisibleProps({
-                                                    order_goods_id: row.orderGoodsId,
-                                                    purchase_plan_id: row.purchasePlanId as string,
-                                                })
-                                            }
+                                        <PermissionComponent
+                                            pid="order/similar_pay"
+                                            control="tooltip"
                                         >
-                                            代拍详情-爬取中
-                                        </Button>
+                                            <Button
+                                                type="link"
+                                                onClick={() =>
+                                                    setVisibleProps({
+                                                        order_goods_id: row.orderGoodsId,
+                                                        purchase_plan_id: row.purchasePlanId as string,
+                                                    })
+                                                }
+                                            >
+                                                代拍详情-爬取中
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : status === 3 ? (
-                                        <Button
-                                            type="link"
-                                            danger={true}
-                                            onClick={() =>
-                                                setVisibleProps({
-                                                    order_goods_id: row.orderGoodsId,
-                                                    purchase_plan_id: row.purchasePlanId as string,
-                                                })
-                                            }
+                                        <PermissionComponent
+                                            pid="order/similar_pay"
+                                            control="tooltip"
                                         >
-                                            代拍详情-爬取失败
-                                        </Button>
+                                            <Button
+                                                type="link"
+                                                danger={true}
+                                                onClick={() =>
+                                                    setVisibleProps({
+                                                        order_goods_id: row.orderGoodsId,
+                                                        purchase_plan_id: row.purchasePlanId as string,
+                                                    })
+                                                }
+                                            >
+                                                代拍详情-爬取失败
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : null}
                                 </div>
                             ) : null}
@@ -433,7 +462,9 @@ const PaneErrTab = () => {
                 return (
                     <>
                         {desc ? <div>{desc}</div> : null}
-                        <a onClick={() => showTrackModal(row)}>物流轨迹</a>
+                        <PermissionComponent pid={'order/track'} control={'tooltip'}>
+                            <a onClick={() => showTrackModal(row)}>物流轨迹</a>
+                        </PermissionComponent>
                     </>
                 );
             },
@@ -472,7 +503,7 @@ const PaneErrTab = () => {
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
-                        channel_source: '',
+                        product_shop: '',
                         product_platform: '',
                         abnormal_type: 1,
                     }}
@@ -757,7 +788,7 @@ const PaneErrTab = () => {
     const table = useMemo(() => {
         return (
             <FitTable
-                bordered
+                bordered={true}
                 rowKey={record => {
                     return record.purchasePlanId || record.orderGoodsId;
                 }}

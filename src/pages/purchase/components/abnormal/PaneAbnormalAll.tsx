@@ -1,13 +1,12 @@
-import React, { useMemo, useEffect, useState, useCallback, useRef, useContext } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { Button, Form, Select } from 'antd';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { useList, FitTable, JsonForm, LoadingButton } from 'react-components';
-import { getAbnormalAllList, setDiscardAbnormalOrder, downloadExcel } from '@/services/purchase';
+import { getAbnormalAllList, downloadExcel } from '@/services/purchase';
 import {
     IPurchaseAbnormalItem,
     IWaybillExceptionTypeKey,
     IWaybillExceptionStatusKey,
-    IExceptionStrategyItem,
     IHandleItem,
 } from '@/interface/IPurchase';
 import { ColumnProps } from 'antd/es/table';
@@ -15,9 +14,7 @@ import { AutoEnLargeImg } from 'react-components';
 import RelatedPurchaseModal from './RelatedPurchaseModal';
 import AbnormalModal from './AbnormalModal';
 import {
-    waybillExceptionTypeList,
     defaultOptionItem,
-    waybillExceptionTypeMap,
     waybillExceptionStatusMap,
     OperateType,
     AbnormalType,
@@ -41,6 +38,8 @@ import useWaitProcess from '../../hooks/useWaitProcess';
 import useReview from '../../hooks/useReview';
 import PopSetProgress from './PopSetProgress/PopSetProgress';
 import useDetail from '../../hooks/useDetail';
+import { PermissionComponent } from 'rc-permission';
+import { getStatusDesc } from '@/utils/transform';
 
 const { Option } = Select;
 
@@ -150,13 +149,30 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                                         const {
                                             exception_operation_name,
                                             show_exception_type,
+                                            exception_operation_id,
                                         } = item;
+                                        let pid = '';
+                                        switch (exception_operation_id) {
+                                            case OperateType.discard:
+                                                pid = 'purchase/abnormal/delete';
+                                                break;
+                                            case OperateType.related:
+                                                pid = 'purchase/abnormal/connect';
+                                                break;
+                                            case OperateType.exceptionHandle:
+                                                pid = 'purchase/abnormal/exception_exec';
+                                                break;
+                                            default:
+                                        }
+
                                         return show_exception_type.indexOf(waybillExceptionType) >
                                             -1 ? (
                                             <div key={exception_operation_name}>
-                                                <a onClick={() => handleOperate(item, row)}>
-                                                    {exception_operation_name}
-                                                </a>
+                                                <PermissionComponent pid={pid} control="tooltip">
+                                                    <a onClick={() => handleOperate(item, row)}>
+                                                        {exception_operation_name}
+                                                    </a>
+                                                </PermissionComponent>
                                             </div>
                                         ) : null;
                                     })}
@@ -166,10 +182,20 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                             return (
                                 <>
                                     <div>
-                                        <a onClick={() => reviewPass(row)}>审核通过</a>
+                                        <PermissionComponent
+                                            pid="purchase/abnormal/verify"
+                                            control="tooltip"
+                                        >
+                                            <a onClick={() => reviewPass(row)}>审核通过</a>
+                                        </PermissionComponent>
                                     </div>
                                     <div>
-                                        <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                        <PermissionComponent
+                                            pid="purchase/abnormal/verify"
+                                            control="tooltip"
+                                        >
+                                            <a onClick={() => reviewReject(row)}>审核驳回</a>
+                                        </PermissionComponent>
                                     </div>
                                 </>
                             );
@@ -208,15 +234,17 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
                             className={styles.tableFormItem}
                         >
                             <Select className={styles.select}>
-                                {waybillExceptionTypeList.map(({ name, value }) => (
-                                    <Option value={value} key={value}>
-                                        {name}
-                                    </Option>
-                                ))}
+                                {exception_code.map(({ name, value }) =>
+                                    value === '101' ? null : (
+                                        <Option value={value} key={value}>
+                                            {name}
+                                        </Option>
+                                    ),
+                                )}
                             </Select>
                         </Form.Item>
                     ) : (
-                        waybillExceptionTypeMap[val]
+                        getStatusDesc(exception_code, val)
                     );
                 },
             },
@@ -412,6 +440,7 @@ const PaneAbnormalAll: React.FC<IProps> = ({ getExceptionCount }) => {
         exportModalComponent,
         detailStatus,
         fieldList,
+        abnormalContext,
     ]);
 };
 

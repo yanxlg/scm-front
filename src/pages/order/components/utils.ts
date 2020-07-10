@@ -17,6 +17,7 @@ import { getPlatformAndStore, getPurchaseUidList, queryShopList } from '@/servic
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
 import { queryGoodsSourceList } from '@/services/global';
+import { ConnectState } from '@/models/connect';
 
 const allFormFields: FormField[] = [
     {
@@ -27,16 +28,13 @@ const allFormFields: FormField[] = [
         className: 'order-input',
         initialValue: '',
         syncDefaultOption: defaultOptionItem1,
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map((item: any) => {
-                    const { merchant_name } = item;
-                    return {
-                        name: merchant_name,
-                        value: merchant_name,
-                    };
-                });
-            }),
+        formatter: 'plainToArr',
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
     },
     {
         type: 'select',
@@ -194,7 +192,14 @@ const allFormFields: FormField[] = [
         label: '销售渠道',
         className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
+        formatter: 'plainToArr',
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.channelMerchantTree;
+            },
+        },
+        // optionList: () => getPlatformAndStore(),
         onChange: (_, form) => {
             form.resetFields(['product_shop']);
         },
@@ -211,7 +216,14 @@ const allFormFields: FormField[] = [
             name: 'channel_source',
             key: 'children',
         },
-        optionList: () => getPlatformAndStore(),
+        formatter: 'plainToArr',
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.channelMerchantTree;
+            },
+        },
+        // optionList: () => getPlatformAndStore(),
     },
     {
         type: 'select',
@@ -390,6 +402,14 @@ const allFormFields: FormField[] = [
         className: 'order-input',
         syncDefaultOption: defaultOptionItem1,
         optionList: () => queryGoodsSourceList(),
+    },
+    {
+        type: 'textarea',
+        key: 'invented_sign_delivery_no',
+        name: 'invented_sign_delivery_no',
+        label: '虚拟运单ID',
+        className: 'order-input',
+        formatter: 'multipleToArray',
     },
 ];
 

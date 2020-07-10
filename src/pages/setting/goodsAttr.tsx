@@ -11,6 +11,8 @@ import { ColumnsType } from 'antd/lib/table/interface';
 import PublishIntercept from './components/PublishIntercept';
 
 import styles from './_goodsAttr.less';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
@@ -287,9 +289,11 @@ const GoodsAttr: React.FC = props => {
                     align: 'center',
                     render: (_: any, record: ITagItem, index: number) => {
                         return (
-                            <Button type="link" size="small" onClick={() => deleteAttr(index)}>
-                                删除
-                            </Button>
+                            <PermissionComponent pid="setting/goods_attr/batch" control="tooltip">
+                                <Button type="link" size="small" onClick={() => deleteAttr(index)}>
+                                    删除
+                                </Button>
+                            </PermissionComponent>
                         );
                     },
                 },
@@ -315,7 +319,90 @@ const GoodsAttr: React.FC = props => {
             <Container>
                 <Tabs defaultActiveKey="1" type="card">
                     <TabPane tab="商品属性配置" key="1">
-                        <div className={styles.tableContainer}>
+                        <PermissionComponent
+                            pid="setting/goods_attr/list"
+                            fallback={() => <ForbiddenComponent />}
+                        >
+                            <div>
+                                <div className={styles.tableContainer}>
+                                    {pending && (
+                                        <div className={styles.loadingContainer}>
+                                            <Progress
+                                                style={{ width: 180 }}
+                                                percent={pending.progress / pending.total}
+                                                status="active"
+                                                format={percent =>
+                                                    `${pending.progress}/${pending.total}`
+                                                }
+                                            />
+                                            <div>系统自动打标签中，请稍等...</div>
+                                        </div>
+                                    )}
+                                    <FitTable
+                                        bordered={true}
+                                        // rowKey="tagId"
+                                        loading={loading}
+                                        dataSource={attrList}
+                                        columns={columns}
+                                        scroll={{ y: 400 }}
+                                        // minHeight={100}
+                                        autoFitY={false}
+                                        pagination={false}
+                                        onRow={({ type }) => ({
+                                            hidden: type === 'delete' ? true : false,
+                                        })}
+                                    />
+                                    <div className={styles.paginationContainer}>
+                                        {!pending && (
+                                            <PermissionComponent
+                                                pid="setting/goods_attr/batch"
+                                                control="tooltip"
+                                            >
+                                                <Button
+                                                    ghost={true}
+                                                    type="primary"
+                                                    onClick={addAttr}
+                                                    className={styles.btnAdd}
+                                                >
+                                                    <PlusOutlined />
+                                                    添加新标签
+                                                </Button>
+                                            </PermissionComponent>
+                                        )}
+                                        <Pagination
+                                            current={page}
+                                            pageSize={10}
+                                            total={total}
+                                            className={styles.pagination}
+                                            showTotal={total => `共 ${total} 条`}
+                                            showQuickJumper={true}
+                                            onChange={changePage}
+                                        />
+                                    </div>
+                                </div>
+                                {!pending && (
+                                    <div className={styles.opsContainer}>
+                                        <PermissionComponent
+                                            pid="setting/goods_attr/batch"
+                                            control="tooltip"
+                                        >
+                                            <Button
+                                                type="primary"
+                                                className={styles.btnSave}
+                                                onClick={showConfirm}
+                                                loading={saveLoading}
+                                            >
+                                                保存即应用
+                                            </Button>
+                                        </PermissionComponent>
+                                        <Button onClick={handleReset}>还原</Button>
+                                    </div>
+                                )}
+                            </div>
+                        </PermissionComponent>
+                    </TabPane>
+                    <TabPane tab="上架拦截策略" key="2">
+                        <div>
                             {pending && (
                                 <div className={styles.loadingContainer}>
                                     <Progress
@@ -327,70 +414,8 @@ const GoodsAttr: React.FC = props => {
                                     <div>系统自动打标签中，请稍等...</div>
                                 </div>
                             )}
-                            <FitTable
-                                bordered={true}
-                                // rowKey="tagId"
-                                loading={loading}
-                                dataSource={attrList}
-                                columns={columns}
-                                scroll={{ y: 400 }}
-                                // minHeight={100}
-                                autoFitY={false}
-                                pagination={false}
-                                onRow={({ type }) => ({
-                                    hidden: type === 'delete' ? true : false,
-                                })}
-                            />
-                            <div className={styles.paginationContainer}>
-                                {!pending && (
-                                    <Button
-                                        ghost={true}
-                                        type="primary"
-                                        onClick={addAttr}
-                                        className={styles.btnAdd}
-                                    >
-                                        <PlusOutlined />
-                                        添加新标签
-                                    </Button>
-                                )}
-                                <Pagination
-                                    current={page}
-                                    pageSize={10}
-                                    total={total}
-                                    className={styles.pagination}
-                                    showTotal={total => `共 ${total} 条`}
-                                    showQuickJumper={true}
-                                    onChange={changePage}
-                                />
-                            </div>
+                            <PublishIntercept pending={pending} />
                         </div>
-                        {!pending && (
-                            <div className={styles.opsContainer}>
-                                <Button
-                                    type="primary"
-                                    className={styles.btnSave}
-                                    onClick={showConfirm}
-                                    loading={saveLoading}
-                                >
-                                    保存即应用
-                                </Button>
-                                <Button onClick={handleReset}>还原</Button>
-                            </div>
-                        )}
-                    </TabPane>
-                    <TabPane tab="上架拦截策略" key="2">
-                        {pending && (
-                            <div className={styles.loadingContainer}>
-                                <Progress
-                                    style={{ width: 180 }}
-                                    percent={pending.progress / pending.total}
-                                    status="active"
-                                    format={percent => `${pending.progress}/${pending.total}`}
-                                />
-                                <div>系统自动打标签中，请稍等...</div>
-                            </div>
-                        )}
-                        <PublishIntercept pending={pending} />
                     </TabPane>
                 </Tabs>
             </Container>
@@ -398,4 +423,7 @@ const GoodsAttr: React.FC = props => {
     }, [attrList, columns, page, total, loading, pending, saveLoading]);
 };
 
-export default GoodsAttr;
+export default PermissionRouterWrap(GoodsAttr, {
+    login: true,
+    pid: 'setting/goods_attr',
+});

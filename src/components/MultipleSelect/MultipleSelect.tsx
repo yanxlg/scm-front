@@ -75,9 +75,10 @@ const MultipleSelect: React.FC<IProps> = ({
             {
                 name: '全部',
                 value: 'all',
-                children: optionList.map(({ name, value }) => ({
+                children: optionList.map(({ name, value, disabled }) => ({
                     name,
                     value,
+                    disabled,
                 })),
             },
         ];
