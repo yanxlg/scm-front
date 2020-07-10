@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import Container from '@/components/Container';
 import { JsonForm, LoadingButton, useList, FitTable, useModal2 } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { SettingModeState } from '@/pages/setting/model';
 import { Button } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryErrorConfigList } from '@/services/setting';
@@ -10,75 +9,97 @@ import { PaginationConfig } from 'react-components/es/FitTable';
 import { ColumnType } from 'antd/es/table';
 import { scroll } from '@/config/global';
 import EditPage, { EditPageProps } from '@/pages/setting/purchase_error_code/components/EditPage';
-import { PlusOutlined } from '@ant-design/icons';
 import styles from './index.module.less';
-import { queryGoodsSourceList } from '@/services/global';
 import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
+import { IErrorConfigItem } from '@/interface/ISetting';
+import UpdateLog, {
+    UpdateLogProps,
+} from '@/pages/setting/purchase_error_code/components/UpdateLog';
 
 const fieldList: FormField[] = [
     {
-        type: 'select',
+        type: 'select@2',
         label: '中台错误码',
         name: 'middle_code',
-        optionList: {
-            type: 'select',
-            selector: (state: { setting: SettingModeState }) => {
-                return state.setting.platformErrorCode;
+        initialValue: '',
+        options: {
+            selector: (state: ConnectState) => {
+                return state.options.platformErrorCode;
             },
+        },
+        childrenProps: {
+            mode: 'multiple',
         },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '中台错误文案',
         name: 'middle_text',
-        optionList: {
-            type: 'select',
-            selector: (state: { setting: SettingModeState }) => {
-                return state.setting.platformErrorLabel;
+        initialValue: '',
+        options: {
+            selector: (state: ConnectState) => {
+                return state.options.platformErrorLabel;
             },
+        },
+        childrenProps: {
+            mode: 'multiple',
         },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '订单错误码',
+        initialValue: '',
         name: 'order_code',
-        optionList: {
-            type: 'select',
-            selector: (state: { setting: SettingModeState }) => {
-                return state.setting.orderErrorCode;
+        options: {
+            selector: (state: ConnectState) => {
+                return state.options.orderErrorCode;
             },
+        },
+        childrenProps: {
+            mode: 'multiple',
         },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '渠道错误码',
         name: 'channel_code',
-        optionList: {
-            type: 'select',
-            selector: (state: { setting: SettingModeState }) => {
-                return state.setting.channelErrorCode;
+        initialValue: '',
+        options: {
+            selector: (state: ConnectState) => {
+                return state.options.channelErrorCode;
             },
+        },
+        childrenProps: {
+            mode: 'multiple',
         },
     },
     {
-        type: 'treeSelect',
+        type: 'select@2',
         label: '采购渠道',
         name: 'purchase_channel',
-        optionList: () => queryGoodsSourceList(),
-        showArrow: true,
-        initialValue: 'all',
-        showCheckedStrategy: 'SHOW_PARENT',
-        treeNodeFilterProp: 'title',
+        initialValue: '',
+        options: {
+            selector: (state: ConnectState) => {
+                return state.options.purchaseChannel;
+            },
+        },
+        childrenProps: {
+            mode: 'multiple',
+        },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '渠道错误文案',
         name: 'channel_text',
-        optionList: {
-            type: 'select',
-            selector: (state: { setting: SettingModeState }) => {
-                return state.setting.channelErrorLabel;
+        initialValue: '',
+        options: {
+            selector: (state: ConnectState) => {
+                return state.options.channelErrorLabel;
             },
+        },
+        childrenProps: {
+            mode: 'multiple',
         },
     },
 ];
@@ -90,11 +111,23 @@ const PurchaseErrorCode = () => {
 
     useEffect(() => {
         dispatch({
-            type: 'setting/queryErrorCode',
+            type: 'options/queryErrorCode',
+        });
+        dispatch({
+            type: 'options/channel',
         });
     }, []);
 
-    const { dataSource, total, pageNumber, pageSize, loading, onChange, onReload } = useList({
+    const {
+        dataSource,
+        total,
+        pageNumber,
+        pageSize,
+        loading,
+        onChange,
+        onReload,
+        onSearch,
+    } = useList({
         formRef: formRef,
         queryList: queryErrorConfigList,
     });
@@ -109,7 +142,7 @@ const PurchaseErrorCode = () => {
         } as PaginationConfig;
     }, [total, pageNumber, pageSize]);
 
-    const columns = useMemo<ColumnType<any>[]>(() => {
+    const columns = useMemo<ColumnType<IErrorConfigItem>[]>(() => {
         return [
             {
                 title: '操作',
@@ -117,6 +150,13 @@ const PurchaseErrorCode = () => {
                 width: '150px',
                 align: 'center',
                 dataIndex: 'operation',
+                render: (_, item) => {
+                    return (
+                        <Button type="link" onClick={() => onEditClick(item)}>
+                            更新
+                        </Button>
+                    );
+                },
             },
             {
                 title: '中台错误码',
@@ -159,8 +199,22 @@ const PurchaseErrorCode = () => {
                 width: '120px',
                 align: 'center',
                 dataIndex: 'operation_update',
-                render: () => {
-                    return <Button type="link">查看</Button>;
+                render: (_, row) => {
+                    return (
+                        <Button
+                            type="link"
+                            onClick={() => {
+                                const { record } = row;
+                                let list = [];
+                                try {
+                                    list = JSON.parse(record);
+                                } catch (e) {}
+                                showLogModal(list);
+                            }}
+                        >
+                            查看
+                        </Button>
+                    );
                 },
             },
         ];
@@ -170,9 +224,12 @@ const PurchaseErrorCode = () => {
         Partial<Omit<EditPageProps, 'onClick'>>
     >();
 
-    const onAddClick = useCallback(() => {
+    const [logModal, showLogModal, closeLogModal] = useModal2<UpdateLogProps['list']>();
+
+    const onEditClick = useCallback((data: IErrorConfigItem) => {
         setEditProps({
-            type: 'add',
+            type: 'edit',
+            data: data,
         });
     }, []);
 
@@ -180,28 +237,38 @@ const PurchaseErrorCode = () => {
         return (
             <Container>
                 <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formLabel}>
-                    <LoadingButton className={formStyles.formBtn} type="primary" onClick={() => {}}>
+                    <LoadingButton className={formStyles.formBtn} type="primary" onClick={onSearch}>
                         查询
                     </LoadingButton>
-                    <Button className={formStyles.formBtn} onClick={onAddClick}>
+                    {/*   <Button className={formStyles.formBtn} onClick={onAddClick}>
                         <PlusOutlined />
                         新增采购错误码
-                    </Button>
+                    </Button>*/}
                 </JsonForm>
                 <FitTable
+                    rowKey="id"
+                    bordered={true}
                     dataSource={dataSource}
                     columns={columns}
                     loading={loading}
                     pagination={pagination}
                     scroll={scroll}
-                    bottom={60}
-                    minHeight={500}
+                    bottom={150}
+                    minHeight={450}
                     onChange={onChange}
                 />
-                {editProps && <EditPage type="add" {...editProps} onClose={closeEditPage} />}
+                {editProps && (
+                    <EditPage
+                        type="add"
+                        {...editProps}
+                        onClose={closeEditPage}
+                        onReload={onReload}
+                    />
+                )}
+                <UpdateLog list={logModal} onClose={closeLogModal} />
             </Container>
         );
-    }, [loading, editProps]);
+    }, [loading, editProps, logModal]);
 };
 
 export default PurchaseErrorCode;

@@ -25,6 +25,7 @@ import {
     IPermissionTree,
     IRole,
     IAccountDetail,
+    IErrorConfigItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -437,16 +438,19 @@ export function updateAccountStatus(id: string, status: number) {
 }
 
 export function queryErrorConfigList(data: {
-    middle_code?: string;
-    middle_text?: string;
-    order_code?: string;
-    purchase_channel?: string;
-    channel_code?: string;
-    channel_text?: string;
+    middle_code?: string[];
+    middle_text?: string[];
+    order_code?: string[];
+    purchase_channel?: string[];
+    channel_code?: string[];
+    channel_text?: string[];
 }) {
-    return api.get(SettingApiPath.queryPurchaseCodeList, {
-        params: data,
-    });
+    return api.post<IResponse<PaginationResponse<IErrorConfigItem>>>(
+        SettingApiPath.queryPurchaseCodeList,
+        {
+            data: data,
+        },
+    );
 }
 
 export function updateErrorCode(data: {

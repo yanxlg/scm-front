@@ -117,6 +117,10 @@ export const queryGoodsSourceList = singlePromiseWrap<
     });
 });
 
+export const queryChannels = () => {
+    return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1'));
+};
+
 export const queryWarehourseById = (id: string) => {
     return request.get<
         IResponse<{
