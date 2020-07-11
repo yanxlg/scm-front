@@ -131,7 +131,7 @@ export interface ISimilarInfoResponse {
         goodsId: string;
         skuId: string;
         productSkuStyle: string;
-        purchaseFailCode: string;
+        scmErrorCode: string;
         orderGoods: {
             commodityId: string;
         };

@@ -56,7 +56,7 @@ const purchaseGroupList = [
     { key: 'purchasePlanId', name: '采购计划ID' },
     { key: 'reserveStatus', name: '仓库库存预定状态' },
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
-    { key: 'purchaseFailCode', name: '失败原因' },
+    { key: 'scmErrorCode', name: '失败原因' },
     { key: 'purchasePlatform', name: '采购平台' },
     { key: 'productPlatform', name: '商品渠道' },
     // { key: '', name: '采购店铺名称' },

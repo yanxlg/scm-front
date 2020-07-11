@@ -1103,9 +1103,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         render: mergeCell,
                     },
                     {
-                        key: 'purchaseFailCode',
+                        key: 'scmErrorCode',
                         title: '拍单失败原因',
-                        dataIndex: 'purchaseFailCode',
+                        dataIndex: 'scmErrorCode',
                         align: 'center',
                         width: 200,
                         render: (value, row) => {
