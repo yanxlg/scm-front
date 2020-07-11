@@ -172,6 +172,11 @@ export default [
                 name: '账号权限',
                 pid: 'setting/permission',
             },
+            {
+                path: '/setting/purchase_error_code',
+                name: '采购失败错误码',
+                pid: 'setting/purchase_error_code',
+            },
         ],
         pid: 'setting',
     },

@@ -1,19 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm, FitTable, LoadingButton } from 'react-components';
-import {
-    getErrorOrderList,
-    postExportErrOrder,
-    getPlatformAndStore,
-} from '@/services/order-manage';
+import { getErrorOrderList, postExportErrOrder } from '@/services/order-manage';
+import { JsonForm, FitTable, LoadingButton, useModal2 } from 'react-components';
 import {
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
-    failureReasonList,
-    failureReasonMap,
-    failureReasonCode,
-    defaultOptionItem1,
 } from '@/enums/OrderEnum';
 import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -26,9 +18,10 @@ import { ITaskListItem } from '@/interface/ITask';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
 import Export from '@/components/Export';
-import { queryGoodsSourceList } from '@/services/global';
+import TrackDialog from './TrackDialog';
 import { PermissionComponent } from 'rc-permission';
-import { useDispatch } from '@@/plugin-dva/exports';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
+import { filterFieldsList } from '@/pages/order/components/utils';
 import { ConnectState } from '@/models/connect';
 
 export declare interface IErrorOrderItem {
@@ -51,12 +44,21 @@ export declare interface IErrorOrderItem {
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
     purchaseWaybillNo?: string; // 首程运单号
-    purchaseFailCode?: failureReasonCode;
+    purchaseFailCode?: string;
     similarGoodsStatus?: number;
+    purchaseOrderGoodsId?: string;
+    waybillTrailUpdateTime?: string;
+    waybillTrail?: string;
     _rowspan?: number;
 }
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
+
+const configFields = ['order_goods_id', 'channel_source', 'product_shop', 'product_platform'];
+
+const preFieldsList = filterFieldsList(configFields);
+
+const afterFieldList = filterFieldsList(['order_create_time', 'confirm_time']);
 
 const PaneErrTab = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -67,50 +69,25 @@ const PaneErrTab = () => {
         purchase_plan_id: string;
     }>();
 
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch({
             type: 'permission/queryMerchantList',
         });
+        dispatch({
+            type: 'options/purchaseError',
+        });
     }, []);
 
     const { visible: exportModal, setVisibleProps: setExportModal } = useModal<boolean>();
+    const [trackModal, showTrackModal, closeTRackModal] = useModal2<IErrorOrderItem | undefined>();
 
     const fieldList: FormField[] = useMemo(() => {
         return [
-            {
-                type: 'textarea',
-                name: 'order_goods_id',
-                label: '订单号',
-                className: 'order-input',
-                placeholder: '请输入',
-                formatter: 'multipleToArray',
-            },
-            {
-                type: 'select',
-                name: 'product_shop',
-                label: '销售店铺名称',
-                className: 'order-input',
-                // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem1,
-                optionList: {
-                    type: 'select',
-                    selector: (state: ConnectState) => {
-                        return state?.permission?.merchantList;
-                    },
-                },
-                formatter: 'plainToArr',
-            },
-            {
-                type: 'select',
-                name: 'product_platform',
-                label: '采购渠道',
-                className: 'order-input',
-                // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem1,
-                optionList: () => queryGoodsSourceList(),
-            },
+            ...preFieldsList,
             {
                 type: 'select',
                 name: 'abnormal_type',
@@ -127,20 +104,7 @@ const PaneErrTab = () => {
                     onSearch(); // 立即查询
                 },
             },
-            {
-                type: 'dateRanger',
-                name: ['order_time_start', 'order_time_end'],
-                label: '订单时间',
-                className: 'order-error-date-picker',
-                formatter: ['start_date', 'end_date'],
-            },
-            {
-                type: 'dateRanger',
-                name: ['confirm_time_start', 'confirm_time_end'],
-                label: '订单确认时间',
-                className: 'order-error-date-picker',
-                formatter: ['start_date', 'end_date'],
-            },
+            ...afterFieldList,
         ];
     }, []);
 
@@ -186,7 +150,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'orderGoodsId',
-            title: '订单号',
+            title: '中台子订单ID',
             dataIndex: 'orderGoodsId',
             align: 'center',
             width: 120,
@@ -194,7 +158,7 @@ const PaneErrTab = () => {
         },
         {
             key: 'channelOrderGoodsSn',
-            title: '渠道订单号',
+            title: '渠道订单ID',
             dataIndex: 'channelOrderGoodsSn',
             align: 'center',
             width: 120,
@@ -238,8 +202,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 180,
             render: (value: ErrorDetailOptionCode, row: IErrorOrderItem) => {
-                const reason =
-                    failureReasonMap[(row.purchaseFailCode as unknown) as failureReasonCode];
+                const reason = purchaseErrorMap?.[row.purchaseFailCode as string];
                 const reasonStr = reason ? `（${reason}）` : '';
                 // 0代拍，1爬取中，2爬取成功，3爬取失败
                 const status = Number(row.similarGoodsStatus);
@@ -363,7 +326,7 @@ const PaneErrTab = () => {
             title: '采购订单发货时间',
             dataIndex: 'platformShippingTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -373,7 +336,7 @@ const PaneErrTab = () => {
             title: '采购计划生成时间',
             dataIndex: 'platformSendOrderTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -399,6 +362,12 @@ const PaneErrTab = () => {
             },
         },
         {
+            title: '采购单ID',
+            dataIndex: 'purchaseOrderGoodsId',
+            align: 'center',
+            width: 120,
+        },
+        {
             key: 'signDeliveryTime',
             title: '标记发货时间',
             dataIndex: 'signDeliveryTime',
@@ -410,17 +379,53 @@ const PaneErrTab = () => {
         },
         {
             key: 'purchaseWaybillNo',
-            title: '首程运单号',
+            title: '首程运单ID',
             dataIndex: 'purchaseWaybillNo',
             align: 'center',
             width: 120,
         },
         {
             key: 'lastWaybillNo',
-            title: '尾程运单号',
+            title: '尾程运单ID',
             dataIndex: 'lastWaybillNo',
             align: 'center',
             width: 120,
+        },
+        {
+            title: '最后一条轨迹时间',
+            dataIndex: 'waybillTrailUpdateTime',
+            align: 'center',
+            width: 180,
+            render: (value: string) => {
+                return utcToLocal(value, '');
+            },
+        },
+        {
+            title: '物流轨迹',
+            dataIndex: 'waybillTrail',
+            align: 'center',
+            width: 120,
+            render: (value: string, row) => {
+                let desc = '';
+                try {
+                    if (value) {
+                        const list = JSON.parse(value);
+                        let allStr = '';
+                        list?.forEach(({ info, time }: any) => {
+                            allStr += `${info} ${time} `;
+                        });
+                        desc = allStr.length > 20 ? `${allStr.substr(0, 20)}...` : allStr;
+                    }
+                } catch {}
+                return (
+                    <>
+                        {desc ? <div>{desc}</div> : null}
+                        <PermissionComponent pid={'order/track'} control={'tooltip'}>
+                            <a onClick={() => showTrackModal(row)}>物流轨迹</a>
+                        </PermissionComponent>
+                    </>
+                );
+            },
         },
     ];
 
@@ -452,11 +457,12 @@ const PaneErrTab = () => {
         return (
             <>
                 <JsonForm
-                    labelClassName="order-error-label"
+                    labelClassName="order-label"
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
                         product_shop: '',
+                        channel_source: '',
                         product_platform: '',
                         abnormal_type: 1,
                     }}
@@ -557,6 +563,10 @@ const PaneErrTab = () => {
                                                     label: errorDetailOptionMap[12],
                                                     value: 12,
                                                 },
+                                                {
+                                                    label: errorDetailOptionMap[13],
+                                                    value: 13,
+                                                },
                                             ],
                                             onChange: () => {
                                                 onSearch(); // 立即查询
@@ -594,25 +604,21 @@ const PaneErrTab = () => {
                                 switch (abnormal_type) {
                                     case 12:
                                         return {
-                                            type: 'checkboxGroup',
-                                            name: 'purchase_fail_code',
+                                            type: 'checkboxGroup@2',
+                                            name: 'scm_error_code',
                                             label: '失败原因',
-                                            formatter: 'join',
-                                            options: failureReasonList.map(({ id, name }) => {
-                                                return {
-                                                    label: name,
-                                                    value: id,
-                                                };
-                                            }),
+                                            labelClassName: 'order-error-label-next',
+                                            options: {
+                                                selector: (state: ConnectState) => {
+                                                    return state.options.platformErrorList;
+                                                },
+                                            },
                                             onChange: () => {
                                                 onSearch(); // 立即查询
                                             },
                                         };
                                     default:
-                                        return {
-                                            type: 'hide',
-                                            name: 'none',
-                                        };
+                                        return undefined;
                                 }
                             },
                         },
@@ -666,6 +672,9 @@ const PaneErrTab = () => {
                             platformSendOrderTime,
                             purchaseFailCode,
                             similarGoodsStatus,
+                            purchaseOrderGoodsId,
+                            waybillTrailUpdateTime,
+                            waybillTrail,
                         } = purchaseItem;
                         const childOrderItem: IErrorOrderItem = {
                             createTime, // 订单时间
@@ -689,6 +698,9 @@ const PaneErrTab = () => {
                             purchaseWaybillNo, // 首程运单号
                             purchaseFailCode,
                             similarGoodsStatus,
+                            purchaseOrderGoodsId,
+                            waybillTrailUpdateTime,
+                            waybillTrail,
                         };
                         if (index === 0) {
                             childOrderItem._rowspan = orderGoodsPurchasePlan.length;
@@ -746,7 +758,7 @@ const PaneErrTab = () => {
                 onChange={onChange}
             />
         );
-    }, [loading]);
+    }, [loading, purchaseErrorMap]);
 
     const exportModalComponent = useMemo(() => {
         return (
@@ -770,9 +782,15 @@ const PaneErrTab = () => {
                 {table}
                 {similarModal}
                 {exportModalComponent}
+                <TrackDialog
+                    visible={!!trackModal}
+                    orderGoodsId={trackModal ? trackModal.orderGoodsId || '' : ''}
+                    lastWaybillNo={trackModal ? trackModal.lastWaybillNo || '' : ''}
+                    hideTrackDetail={closeTRackModal}
+                />
             </div>
         );
-    }, [loading, visible, exportModal]);
+    }, [loading, visible, exportModal, trackModal, purchaseErrorMap]);
 };
 
 export default PaneErrTab;

@@ -279,3 +279,17 @@ export interface IAccountDetail {
     status: '1' | '2';
     username: string;
 }
+
+export interface IErrorConfigItem {
+    channel_code: string;
+    channel_text: string;
+    create_time: string;
+    id: string;
+    middle_code: string;
+    middle_text: string;
+    order_code: string;
+    purchase_channel: string;
+    record: string;
+    remark: string;
+    update_time: string;
+}
