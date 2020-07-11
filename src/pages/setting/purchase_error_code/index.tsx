@@ -16,6 +16,7 @@ import { IErrorConfigItem } from '@/interface/ISetting';
 import UpdateLog, {
     UpdateLogProps,
 } from '@/pages/setting/purchase_error_code/components/UpdateLog';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 
 const fieldList: FormField[] = [
     {
@@ -152,9 +153,14 @@ const PurchaseErrorCode = () => {
                 dataIndex: 'operation',
                 render: (_, item) => {
                     return (
-                        <Button type="link" onClick={() => onEditClick(item)}>
-                            更新
-                        </Button>
+                        <PermissionComponent
+                            pid="setting/purchase_error_code/update"
+                            control="tooltip"
+                        >
+                            <Button type="link" onClick={() => onEditClick(item)}>
+                                更新
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -271,4 +277,7 @@ const PurchaseErrorCode = () => {
     }, [loading, editProps, logModal]);
 };
 
-export default PurchaseErrorCode;
+export default PermissionRouterWrap(PurchaseErrorCode, {
+    login: true,
+    pid: 'setting/purchase_error_code',
+});

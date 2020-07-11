@@ -4,6 +4,7 @@ import { IOptionItem } from 'react-components/es/JsonForm/items/v2/Select';
 import { queryChannels } from '@/services/global';
 import { iterator } from 'react-components/es/utils/iterator';
 import { queryErrorCodeConditions } from '@/services/setting';
+import { ConnectState } from '@/models/connect';
 
 export interface OptionsModelState {
     purchaseChannel?: IOptionItem[];
@@ -11,6 +12,7 @@ export interface OptionsModelState {
     platformErrorCode?: Array<IOptionItem>;
     platformErrorLabel?: Array<IOptionItem>;
     platformErrorMap?: { [key: string]: string };
+    platformErrorList?: Array<IOptionItem>;
     orderErrorCode?: Array<IOptionItem>;
     channelErrorCode?: Array<IOptionItem>;
     channelErrorLabel?: Array<IOptionItem>;
@@ -28,6 +30,7 @@ export interface OptionsModelType {
     effects?: {
         channel: Effect;
         queryErrorCode: Effect;
+        purchaseError: Effect;
     };
 }
 
@@ -35,6 +38,12 @@ const OptionsModel: OptionsModelType = {
     namespace: 'options',
     state: {},
     effects: {
+        /**
+         * 采购渠道字典
+         * @param action
+         * @param call
+         * @param put
+         */
         *channel(action, { call, put }) {
             yield put({
                 type: 'update',
@@ -59,16 +68,24 @@ const OptionsModel: OptionsModelType = {
                 });
             }
         },
+        /**
+         * 中台采购错误码配置页面字典
+         * @param action
+         * @param call
+         * @param put
+         */
         *queryErrorCode(action, { call, put }) {
             const {
                 data: { middle_info, order_code, channel_code, channel_text },
-            } = yield call(queryErrorCodeConditions);
+            } = yield call(queryErrorCodeConditions, 1);
             let platformErrorCodeSet = new Set();
             let platformErrorLabelSet = new Set();
             let platformErrorMap: { [key: string]: string } = {};
-            middle_info.forEach(({ middle_code, middle_text }) => {
+            middle_info.forEach(({ middle_code = '', middle_text = '' }) => {
                 platformErrorCodeSet.add(middle_code);
-                platformErrorLabelSet.add(middle_text);
+                if (middle_text) {
+                    platformErrorLabelSet.add(middle_text);
+                }
                 platformErrorMap[middle_code] = middle_text;
             });
             yield put({
@@ -86,10 +103,41 @@ const OptionsModel: OptionsModelType = {
                     label: value,
                     value: value,
                 })),
-                channelErrorLabel: channel_text.map((value: string) => ({
+                channelErrorLabel: channel_text.filter(Boolean).map((value: string) => ({
                     label: value,
                     value: value,
                 })),
+                platformErrorMap,
+            });
+        },
+        /**
+         * 中台采购错误码字典
+         * @param action
+         * @param call
+         * @param put
+         * @param select
+         */
+        *purchaseError(action, { call, put, select }) {
+            // 如果已经存在则不调用接口
+            const oldValue = yield select((state: ConnectState) => state.options.platformErrorList);
+            if (oldValue && oldValue.length) {
+                return;
+            }
+            const {
+                data: { middle_info },
+            } = yield call(queryErrorCodeConditions);
+            let platformErrorList: Array<IOptionItem> = [];
+            let platformErrorMap: { [key: string]: string } = {};
+            middle_info.forEach(({ middle_code = '', middle_text = '' }) => {
+                platformErrorList.push({
+                    label: middle_text,
+                    value: middle_code,
+                });
+                platformErrorMap[middle_code] = middle_text;
+            });
+            yield put({
+                type: 'update',
+                platformErrorList,
                 platformErrorMap,
             });
         },

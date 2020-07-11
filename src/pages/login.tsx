@@ -106,7 +106,8 @@ const Login = () => {
                         setLogin(false);
                     });
             })
-            .catch(() => {
+            .catch(error => {
+                setPasswordError(error.message);
                 setLogin(false);
             });
     };

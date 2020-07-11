@@ -2,8 +2,6 @@ import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } f
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     childrenOrderCancelOptionList,
-    FinalCancelMap,
-    FinalCancelStatus,
     orderShippingOptionList,
     orderStatusOptionList,
     purchaseOrderOptionList,
@@ -12,12 +10,10 @@ import {
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
 import {
-    exportPendingSignList,
     getOrderGoodsDetail,
     getPurchaseUidList,
     postExportAll,
     queryAllOrderList,
-    queryPendingSignList,
     postOrdersPlace,
 } from '@/services/order-manage';
 import {
@@ -25,11 +21,10 @@ import {
     FitTable,
     JsonForm,
     LoadingButton,
-    PopConfirmLoadingButton,
     useList,
     useModal2,
 } from 'react-components';
-import { Button, notification, Typography } from 'antd';
+import { Button, notification } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from '@/pages/order/components/CancelOrder';
@@ -56,7 +51,8 @@ import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 import { getCategoryList } from '@/services/global';
 import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
 import { PermissionComponent } from 'rc-permission';
-import { useDispatch } from '@@/plugin-dva/exports';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 const configFields = [
     'order_goods_status',
@@ -70,7 +66,7 @@ const configFields = [
     'purchase_plan_cancel_type',
     'product_platform',
     'platform_uid',
-    'purchase_fail_code',
+    'scm_error_code',
     'first_category',
     'second_category',
     'third_category',
@@ -121,9 +117,14 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
     const dispatch = useDispatch();
 
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
     useEffect(() => {
         dispatch({
             type: 'permission/queryMerchantList',
+        });
+        dispatch({
+            type: 'options/purchaseError',
         });
     }, []);
 
@@ -746,9 +747,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       defaultHide: true,
                       render: (value: string, row) => {
                           const { purchaseOrderStatus } = row;
-                          return purchaseOrderStatus === 7
-                              ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
-                              : '';
+                          return purchaseOrderStatus === 7 ? purchaseErrorMap?.[value] : '';
                       },
                   },
                   {
@@ -931,7 +930,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       render: (value: number) => getCategoryName(String(value), allCategoryList),
                   },
               ];
-    }, [onlyParent, purchaseUidList, allCategoryList]);
+    }, [onlyParent, purchaseUidList, allCategoryList, purchaseErrorMap]);
 
     const fieldList = onlyParent ? parentFieldsList : fieldsList;
 
@@ -1328,6 +1327,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
         onlyParent,
         detailModal,
         exportModal,
+        purchaseErrorMap,
     ]);
 };
 

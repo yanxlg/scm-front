@@ -6,9 +6,6 @@ import {
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
-    failureReasonList,
-    failureReasonMap,
-    failureReasonCode,
 } from '@/enums/OrderEnum';
 import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -23,8 +20,9 @@ import { Button } from 'antd';
 import Export from '@/components/Export';
 import TrackDialog from './TrackDialog';
 import { PermissionComponent } from 'rc-permission';
-import { useDispatch } from '@@/plugin-dva/exports';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { filterFieldsList } from '@/pages/order/components/utils';
+import { ConnectState } from '@/models/connect';
 
 export declare interface IErrorOrderItem {
     createTime: string; // 订单时间
@@ -46,7 +44,7 @@ export declare interface IErrorOrderItem {
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
     purchaseWaybillNo?: string; // 首程运单号
-    purchaseFailCode?: failureReasonCode;
+    purchaseFailCode?: string;
     similarGoodsStatus?: number;
     purchaseOrderGoodsId?: string;
     waybillTrailUpdateTime?: string;
@@ -71,11 +69,16 @@ const PaneErrTab = () => {
         purchase_plan_id: string;
     }>();
 
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch({
             type: 'permission/queryMerchantList',
+        });
+        dispatch({
+            type: 'options/purchaseError',
         });
     }, []);
 
@@ -199,8 +202,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 180,
             render: (value: ErrorDetailOptionCode, row: IErrorOrderItem) => {
-                const reason =
-                    failureReasonMap[(row.purchaseFailCode as unknown) as failureReasonCode];
+                const reason = purchaseErrorMap?.[row.purchaseFailCode as string];
                 const reasonStr = reason ? `（${reason}）` : '';
                 // 0代拍，1爬取中，2爬取成功，3爬取失败
                 const status = Number(row.similarGoodsStatus);
@@ -393,7 +395,7 @@ const PaneErrTab = () => {
             title: '最后一条轨迹时间',
             dataIndex: 'waybillTrailUpdateTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -602,25 +604,21 @@ const PaneErrTab = () => {
                                 switch (abnormal_type) {
                                     case 12:
                                         return {
-                                            type: 'checkboxGroup',
-                                            name: 'purchase_fail_code',
+                                            type: 'checkboxGroup@2',
+                                            name: 'scm_error_code',
                                             label: '失败原因',
-                                            formatter: 'join',
-                                            options: failureReasonList.map(({ id, name }) => {
-                                                return {
-                                                    label: name,
-                                                    value: id,
-                                                };
-                                            }),
+                                            labelClassName: 'order-error-label-next',
+                                            options: {
+                                                selector: (state: ConnectState) => {
+                                                    return state.options.platformErrorList;
+                                                },
+                                            },
                                             onChange: () => {
                                                 onSearch(); // 立即查询
                                             },
                                         };
                                     default:
-                                        return {
-                                            type: 'hide',
-                                            name: 'none',
-                                        };
+                                        return undefined;
                                 }
                             },
                         },
@@ -760,7 +758,7 @@ const PaneErrTab = () => {
                 onChange={onChange}
             />
         );
-    }, [loading]);
+    }, [loading, purchaseErrorMap]);
 
     const exportModalComponent = useMemo(() => {
         return (
@@ -792,7 +790,7 @@ const PaneErrTab = () => {
                 />
             </div>
         );
-    }, [loading, visible, exportModal, trackModal]);
+    }, [loading, visible, exportModal, trackModal, purchaseErrorMap]);
 };
 
 export default PaneErrTab;
