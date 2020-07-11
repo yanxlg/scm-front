@@ -1116,7 +1116,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                             const purchaseOrderStatus = row.purchaseOrderStatus;
                             return (
                                 <div>
-                                    <div>{reasonStr || '未知原因'}</div>
+                                    <div>{reasonStr}</div>
                                     {purchaseOrderStatus === 7 && (
                                         <div>
                                             {status === 0 ? (
