@@ -44,7 +44,7 @@ export declare interface IErrorOrderItem {
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
     purchaseWaybillNo?: string; // 首程运单号
-    purchaseFailCode?: string;
+    scmErrorCode?: string;
     similarGoodsStatus?: number;
     purchaseOrderGoodsId?: string;
     waybillTrailUpdateTime?: string;
@@ -202,7 +202,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 180,
             render: (value: ErrorDetailOptionCode, row: IErrorOrderItem) => {
-                const reason = purchaseErrorMap?.[row.purchaseFailCode as string];
+                const reason = purchaseErrorMap?.[row.scmErrorCode as string];
                 const reasonStr = reason ? `（${reason}）` : '';
                 // 0代拍，1爬取中，2爬取成功，3爬取失败
                 const status = Number(row.similarGoodsStatus);
@@ -670,7 +670,7 @@ const PaneErrTab = () => {
                             payTime,
                             purchaseWaybillNo,
                             platformSendOrderTime,
-                            purchaseFailCode,
+                            scmErrorCode,
                             similarGoodsStatus,
                             purchaseOrderGoodsId,
                             waybillTrailUpdateTime,
@@ -696,7 +696,7 @@ const PaneErrTab = () => {
                             platformOrderTime, // 拍单时间
                             payTime, // 支付时间
                             purchaseWaybillNo, // 首程运单号
-                            purchaseFailCode,
+                            scmErrorCode,
                             similarGoodsStatus,
                             purchaseOrderGoodsId,
                             waybillTrailUpdateTime,

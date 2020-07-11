@@ -111,7 +111,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                                     <div className={similarStyles.title}>
                                         <CloseCircleFilled className={taskStyles.errorIcon} />
                                         拍单失败-
-                                        {purchaseErrorMap?.[purchaseInfo?.purchaseFailCode]}
+                                        {purchaseErrorMap?.[purchaseInfo?.scmErrorCode]}
                                     </div>
                                 ) : status === 1 || status === 5 ? (
                                     <div className={similarStyles.title}>

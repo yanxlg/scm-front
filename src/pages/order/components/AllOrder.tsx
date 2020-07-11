@@ -739,9 +739,9 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       },
                   },
                   {
-                      key: 'purchaseFailCode',
+                      key: 'scmErrorCode',
                       title: '失败原因',
-                      dataIndex: 'purchaseFailCode',
+                      dataIndex: 'scmErrorCode',
                       align: 'center',
                       width: 140,
                       defaultHide: true,
