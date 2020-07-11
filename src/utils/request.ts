@@ -30,7 +30,7 @@ request.interceptors.response.use((response, options) => {
     const { status } = response;
     if (status === 401) {
         User.clearToken();
-        history.replace(`/login?redirect=${window.location.href}`);
+        history.replace(`/login?redirect=${window.location.pathname}`);
         // 原来应该有问题
         throw {
             type: 'AuthorizationError',
