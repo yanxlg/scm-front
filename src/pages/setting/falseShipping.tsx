@@ -5,73 +5,83 @@ import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { getStoreBlacklist } from '@/services/setting';
-
-import styles from './_shopBlacklist.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ColumnsType } from 'antd/lib/table';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import AddConfigModal from './components/falseShipping/AddConfigModal';
 
+import styles from './_falseShipping.less';
+
 const formFields: FormField[] = [
     {
         type: 'select',
         name: 'a1',
         label: '虚假发货类型',
+        className: styles.input,
         optionList: [],
     },
     {
         type: 'select',
         name: 'a2',
         label: '采购物流商',
+        className: styles.input,
         optionList: [],
     },
     {
         type: 'input',
         name: 'a3',
         label: '采购单运单号结尾为',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a4',
         label: '采购单运单号包含',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a5',
         label: '采购单运单号开头为',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a6',
         label: '采购单运单号等于',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a7',
         label: '采购单运单号不等于',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a8',
         label: '采购单运单号不包含',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a9',
         label: '最后一条轨迹包含',
+        className: styles.input,
         placeholder: '请输入',
     },
     {
         type: 'input',
         name: 'a10',
         label: '物流轨迹包含',
+        className: styles.input,
         placeholder: '请输入',
     },
 ];
@@ -103,7 +113,12 @@ const FalseShipping: React.FC = props => {
 
     const searchNode = useMemo(() => {
         return (
-            <JsonForm ref={form} fieldList={formFields} initialValues={{ purchase_channel: '1' }}>
+            <JsonForm
+                labelClassName={styles.label}
+                ref={form}
+                fieldList={formFields}
+                initialValues={{ purchase_channel: '1' }}
+            >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         查询
@@ -168,7 +183,7 @@ const FalseShipping: React.FC = props => {
     }, []);
 
     return (
-        <Container>
+        <Container className={styles.wrapper}>
             {searchNode}
             <div>
                 {/* <PermissionComponent pid="setting/shop_black_list/add" control="tooltip"> */}
