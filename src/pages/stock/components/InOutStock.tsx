@@ -231,6 +231,20 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 },
             },
             {
+                title: '出库失败原因',
+                width: '150px',
+                dataIndex: 'orderGoodsShippingStatus',
+                align: 'center',
+                render: (value: OutStockStateCode, row) => {
+                    return {
+                        children: OutStockState[value],
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
                 title: '尾程运单ID',
                 width: '150px',
                 dataIndex: 'lastWaybillNo',
@@ -463,6 +477,20 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 type: 'select',
                 label: '出库单状态',
                 name: 'order_goods_shipping_status',
+                formatter: 'number',
+                defaultValue: '',
+                optionList: [
+                    {
+                        name: '全部',
+                        value: '',
+                    },
+                    ...OutStockStateList,
+                ],
+            },
+            {
+                type: 'select',
+                label: '出库失败原因',
+                name: 'xxx',
                 formatter: 'number',
                 defaultValue: '',
                 optionList: [
