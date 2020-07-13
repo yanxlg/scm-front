@@ -899,10 +899,25 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       align: 'center',
                       width: 120,
                       render: (value, row) => {
+                          const { waybillTrail } = row;
+                          let desc = '';
+                          try {
+                              if (waybillTrail) {
+                                  const list = JSON.parse(waybillTrail);
+                                  let allStr = '';
+                                  list?.forEach(({ info, time }: any) => {
+                                      allStr += `${info} ${time} `;
+                                  });
+                                  desc = allStr.length > 20 ? `${allStr.substr(0, 20)}...` : allStr;
+                              }
+                          } catch {}
                           return (
-                              <PermissionComponent pid={'order/track'} control={'tooltip'}>
-                                  <a onClick={() => showTrackModal(row)}>物流轨迹</a>
-                              </PermissionComponent>
+                              <>
+                                  {desc ? <div>{desc}</div> : null}
+                                  <PermissionComponent pid={'order/track'} control={'tooltip'}>
+                                      <a onClick={() => showTrackModal(row)}>物流轨迹</a>
+                                  </PermissionComponent>
+                              </>
                           );
                       },
                   },
