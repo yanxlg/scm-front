@@ -10,7 +10,7 @@ import {
     useModal,
     useModal2,
 } from 'react-components';
-import { Button, message, Modal, Tag, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography, Popconfirm } from 'antd';
 import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -30,6 +30,8 @@ import {
     PurchaseCreateType,
     PurchaseCreateTypeList,
     PurchaseMap,
+    IsFalseShippingList,
+    FalseShippingReviewList,
 } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
@@ -77,6 +79,32 @@ const fieldList: FormField[] = [
                 value: '',
             },
             ...PurchaseCreateTypeList,
+        ],
+    },
+    {
+        label: '是否虚假发货',
+        type: 'select',
+        name: 'a1',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...IsFalseShippingList,
+        ],
+    },
+    {
+        label: '虚假发货审核状态',
+        type: 'select',
+        name: 'a2',
+        formatter: 'number',
+        optionList: [
+            {
+                name: '全部',
+                value: '',
+            },
+            ...FalseShippingReviewList,
         ],
     },
 ];
@@ -581,6 +609,42 @@ const AllList = () => {
                             <div>{code === '1' ? '未入库' : code === '10' ? '已入库' : ''}</div>
                         </>
                     ) : null;
+                },
+            },
+            {
+                title: '是否虚假发货',
+                dataIndex: 'a1',
+                width: '160px',
+                align: 'center',
+            },
+            {
+                title: '审核状态',
+                dataIndex: 'a1',
+                width: '160px',
+                align: 'center',
+                render: () => {
+                    return (
+                        <>
+                            <Popconfirm
+                                placement="top"
+                                title="确认是虚假发货吗？"
+                                onConfirm={() => {}}
+                                okText="确认"
+                                cancelText="取消"
+                            >
+                                <a className={styles.operateItem}>确认</a>
+                            </Popconfirm>
+                            <Popconfirm
+                                placement="top"
+                                title="确认不是虚假发货吗？"
+                                onConfirm={() => {}}
+                                okText="确认"
+                                cancelText="取消"
+                            >
+                                <a className={styles.operateItem}>取消</a>
+                            </Popconfirm>
+                        </>
+                    );
                 },
             },
             {
