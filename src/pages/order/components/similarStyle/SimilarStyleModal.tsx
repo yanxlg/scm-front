@@ -10,9 +10,9 @@ import taskStyles from '@/styles/_task.less';
 import SimilarGoods from './SimilarGoods';
 import OrderGoods from './OrderGoods';
 import GatherInfo from './GatherInfo';
-import StyleForm from './StylesForm';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
+import StyleForm, { getQueryVariable } from './StylesForm';
 
 declare interface SimilarStyleModalProps {
     visible:
@@ -63,12 +63,17 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
 
     const onOKey = useCallback(() => {
         form.validateFields().then(values => {
-            const { type, list, ...extra } = values;
+            const { type, list, goods_link, goods_id, sku_id, ...extra } = values;
             setSubmitting(true);
             patSimilarGoods({
                 ...extra,
                 ...visible,
-                ...(type === 1 ? {} : JSON.parse(list)),
+                ...(type === 1
+                    ? {
+                          goods_id: goods_id || getQueryVariable('goods_id', goods_link),
+                          sku_id: sku_id || getQueryVariable('sku_id', goods_link),
+                      }
+                    : JSON.parse(list)),
                 type,
             } as IPadSimilarBody)
                 .then(() => {
