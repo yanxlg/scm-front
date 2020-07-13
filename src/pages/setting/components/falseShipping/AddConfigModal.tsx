@@ -51,16 +51,9 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
                         return (
                             <div className={styles.item}>
                                 {index > 0 ? (
-                                    <Form.Item
-                                        name={`type-${index}`}
-                                        initialValue="1"
-                                        className={styles.marginNone}
-                                    >
-                                        <Radio.Group>
-                                            <Radio value="1">或(O)</Radio>
-                                            <Radio value="2">与(A)</Radio>
-                                        </Radio.Group>
-                                    </Form.Item>
+                                    <Radio.Group defaultValue="1">
+                                        <Radio value="1">与(A)</Radio>
+                                    </Radio.Group>
                                 ) : null}
                                 <div className={styles.formItem}>
                                     <Form.Item
