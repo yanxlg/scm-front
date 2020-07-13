@@ -43,6 +43,7 @@ import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
 import styles from '@/pages/goods/local/_index.less';
+import classNames from 'classnames';
 
 const salesVolumeList = [
     {
@@ -187,10 +188,9 @@ const formFields: FormField[] = [
         }),
     },
     {
-        type: 'inputRange',
+        type: 'numberRange@2',
         label: '价格范围（$）',
         name: ['min_sale_price', 'max_sale_price'],
-        className: 'product-picker',
         precision: 2,
     },
 ];
@@ -704,6 +704,10 @@ const ChannelList: React.FC = props => {
                 fieldList={formFields}
                 labelClassName="product-form-label"
                 initialValues={defaultInitialValues}
+                containerClassName={classNames(
+                    formStyles.formHelpAbsolute,
+                    formStyles.formContainer,
+                )}
             >
                 {children}
             </JsonForm>
