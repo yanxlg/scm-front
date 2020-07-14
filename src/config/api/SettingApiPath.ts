@@ -46,4 +46,9 @@ export enum SettingApiPath {
     deleteRole = '/api/v1/roles/delete/{id}',
     updateRoleStatus = '/api/v1/roles/freeze/{id}',
     updateAccountStatus = '/api/v1/users/{id}',
+    // 虚拟发货标记配置
+    queryVirtualDeliverySignList = '/api/v1/purchase/virtual_delivery_sign/list',
+    addVirtualDeliverySign = '/api/v1/purchase/virtual_delivery_sign/save',
+    deleteVirtualDeliverySign = '/api/v1/purchase/virtual_delivery_sign/delete',
+    queryVirtualDeliveryCondition = '/api/v1/purchase/virtual_delivery_sign/condition',
 }

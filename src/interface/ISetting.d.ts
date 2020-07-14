@@ -1,5 +1,6 @@
 import { RequestPagination, IRequestPagination } from '@/interface/IGlobal';
 import React from 'react';
+import { IFalseShippingTypeCode } from '@/enums/SettingEnum';
 
 export type ICustomListQuery = {
     one_cat_id?: string;
@@ -278,4 +279,29 @@ export interface IAccountDetail {
     role_ids: string[];
     status: '1' | '2';
     username: string;
+}
+
+export interface IVirtualAbnormalItem {
+    abnormal_type: IFalseShippingTypeCode;
+    abnormal_config_detail: string[];
+}
+
+export interface IVirtualDeliverySignListReq {
+    search_params?: IVirtualAbnormalItem[];
+}
+
+export interface IVirtualDeliverySignItem {
+    content: string;
+    operator: string;
+    update_time: string;
+    status: '1' | '2';
+}
+
+export interface IAddVirtualAbnormalItem {
+    abnormal_type: IFalseShippingTypeCode;
+    abnormal_config_detail: string;
+}
+
+export interface IAddVirtualDeliverySignListReq {
+    virtual_delivery_content?: IAddVirtualAbnormalItem[];
 }

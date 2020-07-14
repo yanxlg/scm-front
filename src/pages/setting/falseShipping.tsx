@@ -4,7 +4,11 @@ import Container from '@/components/Container';
 import { FormField, JsonFormRef } from 'react-components/es/JsonForm';
 import { JsonForm, LoadingButton, useList, FitTable } from 'react-components';
 import { PlusCircleOutlined } from '@ant-design/icons';
-import { getStoreBlacklist } from '@/services/setting';
+import {
+    getStoreBlacklist,
+    queryVirtualDeliverySignList,
+    queryVirtualDeliveryCondition,
+} from '@/services/setting';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ColumnsType } from 'antd/lib/table';
 import { utcToLocal } from 'react-components/es/utils/date';
@@ -100,8 +104,14 @@ const FalseShipping: React.FC = props => {
         onChange,
     } = useList({
         formRef: form,
-        queryList: getStoreBlacklist,
+        queryList: queryVirtualDeliverySignList,
     });
+
+    useEffect(() => {
+        queryVirtualDeliveryCondition().then(res => {
+            console.log('queryVirtualDeliveryCondition', res);
+        });
+    }, []);
 
     const showAddConfig = useCallback(() => {
         setAddStatus(true);

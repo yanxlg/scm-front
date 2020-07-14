@@ -175,7 +175,7 @@ export default [
             {
                 path: '/setting/falseShipping',
                 name: '虚假发货标记配置',
-                // pid: 'setting/falseShipping',
+                pid: 'setting/virtual_delivery_sign',
             },
         ],
         pid: 'setting',

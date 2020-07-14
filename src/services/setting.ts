@@ -28,6 +28,9 @@ import {
     IPermissionTree,
     IRole,
     IAccountDetail,
+    IVirtualDeliverySignListReq,
+    IVirtualDeliverySignItem,
+    IAddVirtualDeliverySignListReq,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -461,4 +464,32 @@ export function updateAccountStatus(id: string, status: number) {
             status,
         },
     });
+}
+
+/*** 虚假发货标记配置 ***/
+export function queryVirtualDeliverySignList(data: IVirtualDeliverySignListReq) {
+    return api.post<IResponse<PaginationResponse<IVirtualDeliverySignItem>>>(
+        SettingApiPath.queryVirtualDeliverySignList,
+        {
+            data,
+        },
+    );
+}
+
+export function addVirtualDeliverySign(data: IAddVirtualDeliverySignListReq) {
+    return request.post(SettingApiPath.addVirtualDeliverySign, {
+        data,
+    });
+}
+
+export function deleteVirtualDeliverySign(id: string) {
+    return request.post(SettingApiPath.deleteVirtualDeliverySign, {
+        data: {
+            abnormal_key: id,
+        },
+    });
+}
+
+export function queryVirtualDeliveryCondition() {
+    return request.get(SettingApiPath.queryVirtualDeliveryCondition);
 }
