@@ -100,6 +100,7 @@ const formFields: FormField[] = [
         name: 'commodity_id',
         childrenProps: {
             placeholder: '支持多个输入',
+            className: 'product-form-input',
         },
         formatter: 'multipleToArrayJoin',
     },
@@ -109,6 +110,7 @@ const formFields: FormField[] = [
         name: 'vova_virtual_id',
         childrenProps: {
             placeholder: '支持多个输入',
+            className: 'product-form-input',
         },
         formatter: 'multipleToArrayJoin',
     },
@@ -118,6 +120,7 @@ const formFields: FormField[] = [
         name: 'product_id',
         childrenProps: {
             placeholder: '支持多个输入',
+            className: 'product-form-input',
         },
         formatter: 'multipleToArrayJoin',
     },
@@ -130,6 +133,9 @@ const formFields: FormField[] = [
         defaultOption: {
             label: '全部',
             value: 'all',
+        },
+        childrenProps: {
+            className: 'product-form-input',
         },
     },
     {
@@ -148,6 +154,9 @@ const formFields: FormField[] = [
                 });
             },
         },
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
         type: 'select@2',
@@ -159,6 +168,9 @@ const formFields: FormField[] = [
         optionKeys: ['platform_cate_name', 'platform_cate_id'],
         onChange: (name, form) => {
             form.resetFields(['level_two_category']);
+        },
+        childrenProps: {
+            className: 'product-form-input',
         },
     },
     {
@@ -173,6 +185,9 @@ const formFields: FormField[] = [
             service: () => queryChannelCategory(),
         },
         optionKeys: ['platform_cate_name', 'platform_cate_id'],
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
         type: 'select@2',
@@ -186,12 +201,18 @@ const formFields: FormField[] = [
         options: ProductStatusList.map(({ name, id }) => {
             return { label: name, value: id };
         }),
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
         type: 'numberRange@2',
         label: '价格范围（$）',
         name: ['min_sale_price', 'max_sale_price'],
         precision: 2,
+        childrenProps: {
+            className: 'product-form-range',
+        },
     },
 ];
 
