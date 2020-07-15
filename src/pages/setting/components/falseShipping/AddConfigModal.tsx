@@ -1,9 +1,12 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { Modal, Form, Radio, Select, Input } from 'antd';
+import { Modal, Form, Radio, Select, Input, message } from 'antd';
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
 
 import styles from '../../_falseShipping.less';
+import { falseShippingTypeList } from '@/enums/SettingEnum';
+import { IAddVirtualAbnormalItem } from '@/interface/ISetting';
+import { addVirtualDeliverySign } from '@/services/setting';
 
 interface IProps {
     visible: boolean;
@@ -23,9 +26,35 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
         onCancel();
     }, []);
 
+    const _addVirtualDeliverySign = useCallback((data: IAddVirtualAbnormalItem[]) => {
+        setConfirmLoading(true);
+        addVirtualDeliverySign({
+            virtual_delivery_content: data,
+        })
+            .then(res => {
+                // console.log('addVirtualDeliverySign', res);
+                message.success('新增配置成功！');
+                handleCancel();
+            })
+            .finally(() => {
+                setConfirmLoading(false);
+            });
+    }, []);
+
     const handleOk = useCallback(async () => {
         // console.log('handleOk', form.getFieldsValue());
-        const data = form.validateFields();
+        const data = await form.validateFields();
+        console.log('handleOk', data);
+        const labelList = Object.keys(data).filter(key => key.indexOf('label') > -1);
+        const params: IAddVirtualAbnormalItem[] = [];
+        labelList.forEach(key => {
+            const i = key[6];
+            params.push({
+                abnormal_type: data[key],
+                abnormal_config_detail: data[`value-${i}`],
+            });
+        });
+        _addVirtualDeliverySign(params);
     }, []);
 
     const delConfig = useCallback(() => {
@@ -57,15 +86,18 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
                                 ) : null}
                                 <div className={styles.formItem}>
                                     <Form.Item
-                                        name={`value-${index}`}
+                                        name={`label-${index}`}
                                         className={classnames(styles.select, styles.marginNone)}
+                                        initialValue={1}
                                     >
                                         <Select>
-                                            <Option value="aaa">bbb</Option>
+                                            {falseShippingTypeList.map(({ name, value }) => {
+                                                return <Option value={value}>{name}</Option>;
+                                            })}
                                         </Select>
                                     </Form.Item>
                                     <Form.Item
-                                        name={`label-${index}`}
+                                        name={`value-${index}`}
                                         className={styles.input}
                                         rules={initialRules}
                                     >
