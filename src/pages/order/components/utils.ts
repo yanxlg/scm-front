@@ -17,6 +17,7 @@ import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
 import { queryGoodsSourceList, getCategoryList } from '@/services/global';
 import { ConnectState } from '@/models/connect';
+import { OutStockFailureList } from '@/config/dictionaries/Stock';
 
 const allFormFields: FormField[] = [
     {
@@ -257,6 +258,18 @@ const allFormFields: FormField[] = [
             placeholder: '请选择失败原因',
             className: 'order-input',
         },
+    },
+    {
+        type: 'treeSelect',
+        key: 'outbound_fail_code',
+        name: 'outbound_fail_code',
+        label: '出库失败原因',
+        className: 'order-input',
+        // formatter: 'join',
+        placeholder: '请选择失败原因',
+        mode: 'multiple',
+        maxTagCount: 2,
+        optionList: [...OutStockFailureList],
     },
     {
         type: 'select',
