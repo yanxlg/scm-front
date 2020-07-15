@@ -68,7 +68,7 @@ const configFields = [
     'product_platform',
     'platform_uid',
     'scm_error_code',
-    'purchase_fail_code',
+    // 'purchase_fail_code',
     'outbound_fail_code',
     'first_category',
     'second_category',
