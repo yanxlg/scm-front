@@ -27,6 +27,9 @@ import {
     WarehouseList,
     WarehouseMap,
     WarehouseMapCode,
+    OutStockFailureList,
+    OutStockFailureCode,
+    OutStockFailureMap,
 } from '@/config/dictionaries/Stock';
 import { isEmptyObject } from '@/utils/utils';
 import { carrierList, defaultPageNumber, defaultPageSize } from '@/config/global';
@@ -233,11 +236,11 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
             {
                 title: '出库失败原因',
                 width: '150px',
-                dataIndex: 'orderGoodsShippingStatus',
+                dataIndex: 'outboundFailCode',
                 align: 'center',
-                render: (value: OutStockStateCode, row) => {
+                render: (value: OutStockFailureCode, row) => {
                     return {
-                        children: OutStockState[value],
+                        children: OutStockFailureMap[value],
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
@@ -488,18 +491,14 @@ const InOutStock: React.FC<IInOutStockProps> = ({ type }) => {
                 ],
             },
             {
-                type: 'select',
+                type: 'treeSelect',
                 label: '出库失败原因',
-                name: 'xxx',
-                formatter: 'number',
-                defaultValue: '',
-                optionList: [
-                    {
-                        name: '全部',
-                        value: '',
-                    },
-                    ...OutStockStateList,
-                ],
+                name: 'outbound_fail_code',
+                // formatter: 'join',
+                placeholder: '请选择失败原因',
+                mode: 'multiple',
+                maxTagCount: 2,
+                optionList: [...OutStockFailureList],
             },
             {
                 type: 'textarea',
