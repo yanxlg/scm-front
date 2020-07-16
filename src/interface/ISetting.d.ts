@@ -282,7 +282,7 @@ export interface IAccountDetail {
 }
 
 export interface IVirtualAbnormalItem {
-    abnormal_type: IFalseShippingTypeCode;
+    abnormal_type: string;
     abnormal_config_detail: string[];
 }
 
@@ -295,6 +295,7 @@ export interface IVirtualDeliverySignItem {
     operator: string;
     update_time: string;
     status: '1' | '2';
+    abnormal_key: string;
 }
 
 export interface IAddVirtualAbnormalItem {

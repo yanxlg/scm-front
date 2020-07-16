@@ -4,26 +4,35 @@ import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
 
 import styles from '../../_falseShipping.less';
-import { falseShippingTypeList } from '@/enums/SettingEnum';
+import {
+    falseShippingTypeList,
+    falseShippingTypeMap,
+    IFalseShippingTypeCode,
+} from '@/enums/SettingEnum';
 import { IAddVirtualAbnormalItem } from '@/interface/ISetting';
 import { addVirtualDeliverySign } from '@/services/setting';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 interface IProps {
     visible: boolean;
+    allShippingList: IOptionItem[];
     onCancel(): void;
+    onReload(): void;
 }
 
 const { Option } = Select;
 
 const initialRules = [{ required: true, message: '请输入!' }];
 
-const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
+const AddConfigModal: React.FC<IProps> = ({ visible, onCancel, onReload, allShippingList }) => {
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [form] = Form.useForm();
     const [configNum, setConfigNum] = useState(1);
 
     const handleCancel = useCallback(() => {
         onCancel();
+        form.resetFields();
+        setConfigNum(1);
     }, []);
 
     const _addVirtualDeliverySign = useCallback((data: IAddVirtualAbnormalItem[]) => {
@@ -35,6 +44,7 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
                 // console.log('addVirtualDeliverySign', res);
                 message.success('新增配置成功！');
                 handleCancel();
+                onReload();
             })
             .finally(() => {
                 setConfirmLoading(false);
@@ -44,16 +54,24 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
     const handleOk = useCallback(async () => {
         // console.log('handleOk', form.getFieldsValue());
         const data = await form.validateFields();
-        console.log('handleOk', data);
         const labelList = Object.keys(data).filter(key => key.indexOf('label') > -1);
         const params: IAddVirtualAbnormalItem[] = [];
+        const abnormalTypeList: IFalseShippingTypeCode[] = [];
         labelList.forEach(key => {
             const i = key[6];
+            abnormalTypeList.push(data[key]);
             params.push({
                 abnormal_type: data[key],
                 abnormal_config_detail: data[`value-${i}`],
             });
         });
+        abnormalTypeList.sort();
+        for (let i = 0; i < abnormalTypeList.length - 1; i++) {
+            if (abnormalTypeList[i] === abnormalTypeList[i + 1]) {
+                return message.error(`${falseShippingTypeMap[abnormalTypeList[i]]}配置项重复`);
+            }
+        }
+        // console.log('handleOk', data, params);
         _addVirtualDeliverySign(params);
     }, []);
 
@@ -97,11 +115,39 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
                                         </Select>
                                     </Form.Item>
                                     <Form.Item
-                                        name={`value-${index}`}
-                                        className={styles.input}
-                                        rules={initialRules}
+                                        noStyle
+                                        shouldUpdate={(prevValues, currentValues) => {
+                                            return (
+                                                prevValues[`label-${index}`] === 1 ||
+                                                currentValues[`label-${index}`] === 1
+                                            );
+                                        }}
                                     >
-                                        <Input />
+                                        {({ getFieldValue }) => {
+                                            const labelValue = getFieldValue(`label-${index}`);
+                                            return labelValue &&
+                                                getFieldValue(`label-${index}`) !== 1 ? (
+                                                <Form.Item
+                                                    name={`value-${index}`}
+                                                    className={styles.input}
+                                                    rules={initialRules}
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                            ) : (
+                                                <Form.Item
+                                                    name={`value-${index}`}
+                                                    className={styles.input}
+                                                    rules={initialRules}
+                                                >
+                                                    <Select>
+                                                        {allShippingList.map(({ name, value }) => (
+                                                            <Option value={value}>{name}</Option>
+                                                        ))}
+                                                    </Select>
+                                                </Form.Item>
+                                            );
+                                        }}
                                     </Form.Item>
                                     <div className={styles.operate}>
                                         {configNum === index + 1 ? (
@@ -128,7 +174,7 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel }) => {
                 </Form>
             </Modal>
         );
-    }, [visible, confirmLoading, configNum]);
+    }, [visible, confirmLoading, configNum, allShippingList]);
 };
 
 export default AddConfigModal;

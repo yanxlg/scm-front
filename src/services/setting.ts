@@ -31,6 +31,7 @@ import {
     IVirtualDeliverySignListReq,
     IVirtualDeliverySignItem,
     IAddVirtualDeliverySignListReq,
+    IVirtualAbnormalItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -491,5 +492,11 @@ export function deleteVirtualDeliverySign(id: string) {
 }
 
 export function queryVirtualDeliveryCondition() {
-    return request.get(SettingApiPath.queryVirtualDeliveryCondition);
+    return request.get<IResponse<IVirtualAbnormalItem[]>>(
+        SettingApiPath.queryVirtualDeliveryCondition,
+    );
 }
+
+export const queryPurchaseWaybillMerchant = singlePromiseWrap(() => {
+    return request.get(SettingApiPath.queryPurchaseWaybillMerchant);
+});

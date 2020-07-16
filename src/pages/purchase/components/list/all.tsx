@@ -21,8 +21,9 @@ import {
     endPurchaseByUser,
     exportPurchaseList,
     queryPurchaseList,
+    reviewVirtualDelivery,
 } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { IPurchaseItem, IReviewVirtualDelivery } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
 import {
@@ -32,6 +33,11 @@ import {
     PurchaseMap,
     IsFalseShippingList,
     FalseShippingReviewList,
+    IsFalseShippingCode,
+    IsFalseShippingMap,
+    FalseShippingReviewCode,
+    FalseShippingReviewMap,
+    falseShippingFieldList,
 } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
@@ -81,32 +87,7 @@ const fieldList: FormField[] = [
             ...PurchaseCreateTypeList,
         ],
     },
-    {
-        label: '是否虚假发货',
-        type: 'select',
-        name: 'a1',
-        formatter: 'number',
-        optionList: [
-            {
-                name: '全部',
-                value: '',
-            },
-            ...IsFalseShippingList,
-        ],
-    },
-    {
-        label: '虚假发货审核状态',
-        type: 'select',
-        name: 'a2',
-        formatter: 'number',
-        optionList: [
-            {
-                name: '全部',
-                value: '',
-            },
-            ...FalseShippingReviewList,
-        ],
-    },
+    ...falseShippingFieldList,
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -158,6 +139,14 @@ const AllList = () => {
     });
 
     const [showExport, setShowExport] = useState(false);
+
+    const _reviewVirtualDelivery = useCallback((data: IReviewVirtualDelivery) => {
+        reviewVirtualDelivery(data).then(() => {
+            // console.log('reviewVirtualDelivery', res);
+            message.success('虚假发货审核成功！');
+            onReload();
+        });
+    }, []);
 
     const showExportFn = useCallback(() => {
         setShowExport(true);
@@ -612,42 +601,6 @@ const AllList = () => {
                 },
             },
             {
-                title: '是否虚假发货',
-                dataIndex: 'a1',
-                width: '160px',
-                align: 'center',
-            },
-            {
-                title: '审核状态',
-                dataIndex: 'a1',
-                width: '160px',
-                align: 'center',
-                render: () => {
-                    return (
-                        <>
-                            <Popconfirm
-                                placement="top"
-                                title="确认是虚假发货吗？"
-                                onConfirm={() => {}}
-                                okText="确认"
-                                cancelText="取消"
-                            >
-                                <a className={styles.operateItem}>确认</a>
-                            </Popconfirm>
-                            <Popconfirm
-                                placement="top"
-                                title="确认不是虚假发货吗？"
-                                onConfirm={() => {}}
-                                okText="确认"
-                                cancelText="取消"
-                            >
-                                <a className={styles.operateItem}>取消</a>
-                            </Popconfirm>
-                        </>
-                    );
-                },
-            },
-            {
                 title: '出入库单号',
                 dataIndex: 'referWaybillNo',
                 width: '223px',
@@ -661,6 +614,61 @@ const AllList = () => {
                 render: (_ = 0) => {
                     const code = String(_);
                     return code === '0' ? '入库' : code === '1' ? '出库' : '';
+                },
+            },
+            {
+                title: '是否虚假发货',
+                dataIndex: 'isRealDelivery',
+                width: '160px',
+                align: 'center',
+                render: (val: IsFalseShippingCode) => IsFalseShippingMap[val] || '',
+            },
+            {
+                title: '虚假发货审核状态',
+                dataIndex: 'auditStatus',
+                width: '160px',
+                align: 'center',
+                render: (val: number, record) => {
+                    const { purchaseOrderGoodsId, referWaybillNo } = record;
+                    if (val === 1) {
+                        return (
+                            <>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 2,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>确认</a>
+                                </Popconfirm>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认不是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 3,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>取消</a>
+                                </Popconfirm>
+                            </>
+                        );
+                    } else if (val === 2 || val === 3) {
+                        return FalseShippingReviewMap[val];
+                    }
+                    return '';
                 },
             },
         ] as ColumnType<IPurchaseItem>[];
@@ -691,7 +699,7 @@ const AllList = () => {
     const table = useMemo(() => {
         // 处理合并单元格
         const dataSet = colSpanDataSource(dataSource);
-        console.log(dataSource);
+        // console.log(dataSource);
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"

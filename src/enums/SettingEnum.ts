@@ -17,6 +17,8 @@ export const falseShippingTypeMap = {
     7: '采购单运单号不等于',
     8: '物流轨迹包含',
     9: '最后一条轨迹包含',
+    10: '最后一条轨迹不包含',
+    11: '物流轨迹不包含',
 };
 
 export const falseShippingTypeList = transOptionList(falseShippingTypeMap, true);

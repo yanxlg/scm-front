@@ -9,7 +9,7 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { Button, message, Modal, Tag, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography, Popconfirm } from 'antd';
 import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -19,8 +19,9 @@ import {
     cancelPurchaseByUser,
     exportPurchaseList,
     queryPurchaseList,
+    reviewVirtualDelivery,
 } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { IPurchaseItem, IReviewVirtualDelivery } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
@@ -29,6 +30,10 @@ import {
     PurchaseCreateType,
     PurchaseCreateTypeList,
     PurchaseMap,
+    falseShippingFieldList,
+    FalseShippingReviewMap,
+    IsFalseShippingCode,
+    IsFalseShippingMap,
 } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
@@ -77,6 +82,7 @@ const fieldList: FormField[] = [
             ...PurchaseCreateTypeList,
         ],
     },
+    ...falseShippingFieldList,
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -128,6 +134,14 @@ const PendingStorage = () => {
     });
 
     const [showExport, setShowExport] = useState(false);
+
+    const _reviewVirtualDelivery = useCallback((data: IReviewVirtualDelivery) => {
+        reviewVirtualDelivery(data).then(() => {
+            // console.log('reviewVirtualDelivery', res);
+            message.success('虚假发货审核成功！');
+            onReload();
+        });
+    }, []);
 
     const showExportFn = useCallback(() => {
         setShowExport(true);
@@ -446,6 +460,61 @@ const PendingStorage = () => {
                 render: (_ = 0) => {
                     const code = String(_);
                     return code === '0' ? '入库' : code === '1' ? '出库' : '';
+                },
+            },
+            {
+                title: '是否虚假发货',
+                dataIndex: 'isRealDelivery',
+                width: '160px',
+                align: 'center',
+                render: (val: IsFalseShippingCode) => IsFalseShippingMap[val] || '',
+            },
+            {
+                title: '虚假发货审核状态',
+                dataIndex: 'auditStatus',
+                width: '160px',
+                align: 'center',
+                render: (val: number, record) => {
+                    const { purchaseOrderGoodsId, referWaybillNo } = record;
+                    if (val === 1) {
+                        return (
+                            <>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 2,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>确认</a>
+                                </Popconfirm>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认不是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 3,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>取消</a>
+                                </Popconfirm>
+                            </>
+                        );
+                    } else if (val === 2 || val === 3) {
+                        return FalseShippingReviewMap[val];
+                    }
+                    return '';
                 },
             },
         ] as ColumnType<IPurchaseItem>[];
