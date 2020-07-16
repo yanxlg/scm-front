@@ -50,6 +50,7 @@ const saleGroupList = [
     { key: 'lastWaybillNo', name: '销售尾程运单ID' },
     { key: 'receiveTime', name: '妥投时间' },
     { key: 'inventedSignDeliveryNo', name: '虚拟运单ID' },
+    { key: 'saleOrderAmount', name: '销售订单金额($)' },
 ];
 
 const purchaseGroupList = [

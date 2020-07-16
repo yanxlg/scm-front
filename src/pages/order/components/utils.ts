@@ -13,7 +13,7 @@ import {
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
-import { getPlatformAndStore, getPurchaseUidList, queryShopList } from '@/services/order-manage';
+import { getPurchaseUidList } from '@/services/order-manage';
 import { CombineRowItem } from '@/interface/IOrder';
 import React from 'react';
 import { queryGoodsSourceList, getCategoryList } from '@/services/global';
@@ -54,6 +54,7 @@ const allFormFields: FormField[] = [
         placeholder: '请输入',
         formatter: 'multipleToArray',
     },
+
     {
         type: 'textarea',
         key: 'commodity_id',
@@ -455,6 +456,149 @@ const allFormFields: FormField[] = [
         label: '虚拟运单ID',
         className: 'order-input',
         formatter: 'multipleToArray',
+    },
+
+    // =================  2.0
+    {
+        type: 'select@2',
+        key: 'product_shop@2',
+        name: 'product_shop',
+        label: '销售店铺名称',
+        childrenProps: {
+            className: 'order-input',
+        },
+        initialValue: '',
+        formatter: 'plainToArr',
+        options: {
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
+    },
+    {
+        type: 'dateRanger@2',
+        key: 'order_create_time@2',
+        name: ['order_time_start', 'order_time_end'],
+        label: '订单生成时间',
+        formatter: ['start_date', 'end_date'],
+        childrenProps: {
+            className: 'order-picker',
+        },
+    },
+    {
+        type: 'textarea@2',
+        key: 'order_goods_id@2',
+        name: 'order_goods_id',
+        label: '子订单ID',
+        formatter: 'multipleToArray',
+        childrenProps: {
+            className: 'order-input',
+            placeholder: '请输入',
+        },
+    },
+    {
+        type: 'textarea@2',
+        key: 'channel_order_goods_sn@2',
+        name: 'channel_order_goods_sn',
+        label: '销售订单ID',
+        childrenProps: {
+            className: 'order-input',
+            placeholder: '请输入',
+        },
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'select@2',
+        label: '一级类目',
+        key: 'first_category@2',
+        name: 'first_category',
+        childrenProps: {
+            className: 'order-input',
+        },
+        initialValue: '',
+        options: {
+            service: () => getCategoryList(),
+            dataPath: null,
+        },
+        optionKeys: ['name', 'value'],
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select@2',
+        label: '二级类目',
+        key: 'second_category@2',
+        name: 'second_category',
+        childrenProps: {
+            className: 'order-input',
+        },
+        initialValue: '',
+        relation: {
+            name: 'first_category',
+            key: 'children',
+        },
+        options: {
+            service: () => getCategoryList(),
+            dataPath: null,
+        },
+        optionKeys: ['name', 'value'],
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select@2',
+        label: '三级类目',
+        key: 'third_category@2',
+        name: 'third_category',
+        childrenProps: {
+            className: 'order-input',
+        },
+        initialValue: '',
+        relation: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        options: {
+            service: () => getCategoryList(),
+            dataPath: null,
+        },
+        optionKeys: ['name', 'value'],
+    },
+    {
+        type: 'numberRange@2',
+        key: 'freight@2',
+        name: ['freight_min', 'freight_max'],
+        label: '销售商品运费',
+        childrenProps: {
+            className: 'order-range',
+        },
+        formatter: 'number',
+        precision: 2,
+    },
+    {
+        type: 'numberRange@2',
+        key: 'goods_amount@2',
+        name: ['goods_amount_min', 'goods_amount_max'],
+        label: '销售商品总金额',
+        childrenProps: {
+            className: 'order-range',
+        },
+        formatter: 'number',
+        precision: 2,
+    },
+    {
+        type: 'numberRange@2',
+        key: 'total_amount@2',
+        name: ['total_amount_min', 'total_amount_max'],
+        label: '销售订单金额',
+        childrenProps: {
+            className: 'order-range',
+        },
+        formatter: 'number',
+        precision: 2,
     },
 ];
 

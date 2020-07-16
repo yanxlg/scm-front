@@ -213,6 +213,7 @@ const formFields: FormField[] = [
         childrenProps: {
             className: 'product-form-range',
         },
+        formatter: 'number',
     },
 ];
 
