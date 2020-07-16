@@ -31,6 +31,7 @@ import Export from '@/components/Export';
 import classNames from 'classnames';
 import { PermissionComponent } from 'rc-permission';
 import { filterFieldsList } from './form';
+import { utcToLocal } from 'react-components/es/utils/date';
 const { Paragraph } = Typography;
 const fieldKeys = [
     'purchase_order_goods_id',
@@ -218,12 +219,12 @@ const Warehousing = () => {
             },
             {
                 title: '采购单生成时间',
-                dataIndex: 'purchaseCreateTime',
+                dataIndex: 'createTime',
                 align: 'center',
                 width: '150px',
                 render: (value, row) => {
                     return {
-                        children: value,
+                        children: utcToLocal(value),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
