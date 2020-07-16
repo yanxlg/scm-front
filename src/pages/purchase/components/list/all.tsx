@@ -33,6 +33,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import { PermissionComponent } from 'rc-permission';
 import { filterFieldsList } from './form';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const { Paragraph } = Typography;
 
@@ -390,12 +391,12 @@ const AllList = () => {
             },
             {
                 title: '采购单生成时间',
-                dataIndex: 'purchaseCreateTime',
+                dataIndex: 'createTime',
                 align: 'center',
                 width: '150px',
                 render: (value, row) => {
                     return {
-                        children: value,
+                        children: utcToLocal(value),
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },

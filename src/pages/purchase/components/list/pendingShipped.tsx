@@ -31,6 +31,7 @@ import { FormInstance } from 'antd/es/form';
 import classNames from 'classnames';
 import { PermissionComponent } from 'rc-permission';
 import { filterFieldsList } from './form';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const { Paragraph } = Typography;
 
@@ -221,9 +222,10 @@ const PendingShipped = () => {
             },
             {
                 title: '采购单生成时间',
-                dataIndex: 'purchaseCreateTime',
+                dataIndex: 'createTime',
                 align: 'center',
                 width: '150px',
+                render: value => utcToLocal(value),
             },
             {
                 title: '采购单状态',
