@@ -83,6 +83,12 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel, onReload, allShip
         setConfigNum(configNum + 1);
     }, [configNum]);
 
+    const onChange = useCallback(name => {
+        form.setFieldsValue({
+            [name]: '',
+        });
+    }, []);
+
     return useMemo(() => {
         return (
             <Modal
@@ -108,7 +114,7 @@ const AddConfigModal: React.FC<IProps> = ({ visible, onCancel, onReload, allShip
                                         className={classnames(styles.select, styles.marginNone)}
                                         initialValue={1}
                                     >
-                                        <Select>
+                                        <Select onChange={() => onChange(`value-${index}`)}>
                                             {falseShippingTypeList.map(({ name, value }) => {
                                                 return <Option value={value}>{name}</Option>;
                                             })}

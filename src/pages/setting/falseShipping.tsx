@@ -53,7 +53,7 @@ const FalseShipping: React.FC = props => {
             const searchParams: IVirtualAbnormalItem[] = [];
             keys.forEach(key => {
                 const val = restParams[key];
-                if (val) {
+                if (val && val.length > 0) {
                     searchParams.push({
                         abnormal_type: key,
                         abnormal_config_detail: val,
