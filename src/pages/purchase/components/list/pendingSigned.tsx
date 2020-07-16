@@ -9,7 +9,7 @@ import {
     useModal,
 } from 'react-components';
 import { Button, message, Modal, Tag, Typography } from 'antd';
-import { FormField } from 'react-components/es/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -18,61 +18,28 @@ import { IPurchaseItem } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import { colSpanDataSource } from '@/pages/purchase/components/list/all';
-import {
-    PurchaseCode,
-    PurchaseCreateType,
-    PurchaseCreateTypeList,
-    PurchaseMap,
-} from '@/config/dictionaries/Purchase';
+import { PurchaseCode, PurchaseCreateType, PurchaseMap } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
 import { FormInstance } from 'antd/es/form';
 import classNames from 'classnames';
 import { PermissionComponent } from 'rc-permission';
+import { filterFieldsList } from './form';
 
 const { Paragraph } = Typography;
 
-const fieldList: FormField[] = [
-    {
-        label: '采购单ID',
-        type: 'positiveInteger',
-        name: 'purchase_order_goods_id',
-    },
-    {
-        label: '采购平台',
-        type: 'input',
-        name: 'purchase_platform',
-    },
-    {
-        label: '采购店铺',
-        type: 'input',
-        name: 'purchase_merchant_name',
-    },
-    {
-        label: '供应商订单号',
-        type: 'input',
-        name: 'purchase_order_goods_sn',
-    },
-    {
-        label: '商品名称',
-        type: 'input',
-        name: 'purchase_goods_name',
-    },
-    {
-        label: '采购单类型',
-        type: 'select',
-        name: 'origin',
-        formatter: 'number',
-        optionList: [
-            {
-                name: '全部',
-                value: '',
-            },
-            ...PurchaseCreateTypeList,
-        ],
-    },
+const fieldKeys = [
+    'purchase_order_goods_id',
+    'purchase_platform',
+    'purchase_merchant_name',
+    'purchase_order_goods_sn',
+    'purchase_goods_name',
+    'origin',
+    'purchase_waybill_no',
+    'create_time',
 ];
+const fieldList: FormField[] = filterFieldsList(fieldKeys);
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
@@ -154,14 +121,7 @@ const PendingSigned = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm
-                fieldList={fieldList}
-                initialValues={{
-                    origin: '',
-                }}
-                ref={formRef}
-                labelClassName={styles.formItem}
-            >
+            <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formItem}>
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
@@ -248,6 +208,20 @@ const PendingSigned = () => {
                                 {value}
                             </>
                         ),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '采购单生成时间',
+                dataIndex: 'purchaseCreateTime',
+                align: 'center',
+                width: '150px',
+                render: (value, row) => {
+                    return {
+                        children: value,
                         props: {
                             rowSpan: row.rowSpan || 0,
                         },
