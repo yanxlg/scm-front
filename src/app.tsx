@@ -166,10 +166,9 @@ export function render() {
 // service worker
 window.addEventListener('load', function() {
     // tslint:disable-next-line:no-console
-    console.log('222');
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
-            .register('sw.js')
+            .register('/sw.js')
             .then(function(reg) {
                 reg.onupdatefound = function() {
                     const installingWorker = reg.installing;
