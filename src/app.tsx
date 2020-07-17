@@ -166,7 +166,7 @@ export function render() {
 // service worker
 window.addEventListener('load', function() {
     // tslint:disable-next-line:no-console
-    console.log('111');
+    console.log('222');
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
             .register('sw.js')
