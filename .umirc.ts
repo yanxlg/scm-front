@@ -3,9 +3,12 @@
  *  - @ant-design/icons
  */
 import { defineConfig } from 'umi';
+import * as path from 'path';
 const shajs = require('sha.js');
 
 const dev = process.env.NODE_ENV !== 'production';
+
+const useComponentByLocal = false;
 
 const config = defineConfig({
     /*    forkTSCheker: {
@@ -70,6 +73,15 @@ const config = defineConfig({
                 libraryName: 'react-components',
                 camel2DashComponentName: false,
                 customName: (name: string) => {
+                    /*  if (useComponentByLocal) {
+                        if (/^use/.test(name)) {
+                            return path.resolve(
+                                process.cwd(),
+                                `../react-components/src/hooks/${name}`,
+                            );
+                        }
+                        return path.resolve(process.cwd(), `../react-components/src/${name}`);
+                    }*/
                     if (/^use/.test(name)) {
                         return `react-components/es/hooks/${name}`;
                     }
@@ -82,7 +94,7 @@ const config = defineConfig({
     cssLoader: {
         localsConvention: 'camelCaseOnly',
         modules: {
-            auto: /_[a-zA-Z\.\-_0-9]+\.less$/, // 仅符合要求的文件生成module，减少code体积
+            auto: /(_[a-zA-Z\.\-_0-9]+\.less$)|([a-zA-Z\.\-_0-9]+\.module\.less$)/, // 仅符合要求的文件生成module，减少code体积
             getLocalIdent: (
                 context: {
                     resourcePath: string;
@@ -92,7 +104,10 @@ const config = defineConfig({
             ) => {
                 const { resourcePath } = context;
 
-                if (/_[a-zA-Z\.\-_0-9]+\.less$/.test(resourcePath)) {
+                if (
+                    /_[a-zA-Z\.\-_0-9]+\.less$/.test(resourcePath) ||
+                    /[a-zA-Z\.\-_0-9]+\.module\.less$/.test(resourcePath)
+                ) {
                     const match =
                         resourcePath.match(/src(.*)/) || resourcePath.match(/node_modules(.*)/);
                     if (match && match[1]) {
@@ -105,6 +120,7 @@ const config = defineConfig({
                     }
                     // support node_modules
                 }
+
                 return localName;
             },
         },
@@ -120,7 +136,20 @@ const config = defineConfig({
     chainWebpack(config, { webpack }) {
         config.plugin('lodash-webpack-plugin').use(require('lodash-webpack-plugin')); // lodash 简化，实际可能并没有作用，如果babel-plugin-lodash已经极尽简化
         config.plugin('antd-dayjs-webpack-plugin').use(require('antd-dayjs-webpack-plugin')); // dayjs代替moment
-        // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
+        /* if (useComponentByLocal) {
+            const babelOptions = config.module
+                .rule('js')
+                .use('babel-loader')
+                .get('options');
+            config.module
+                .rule('react-components')
+                .test(/\.(js|mjs|jsx|ts|tsx)$/)
+                .include.add(path.join(process.cwd(), '../react-components/src'))
+                .end()
+                .use('babel-loader')
+                .loader(require.resolve('babel-loader'))
+                .options(babelOptions);
+        }*/
         if (dev) {
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
                 {

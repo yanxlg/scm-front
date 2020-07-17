@@ -32,6 +32,7 @@ import {
     IVirtualDeliverySignItem,
     IAddVirtualDeliverySignListReq,
     IVirtualAbnormalItem,
+    IErrorConfigItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
 import { EmptyObject } from '@/config/global';
@@ -500,3 +501,43 @@ export function queryVirtualDeliveryCondition() {
 export const queryPurchaseWaybillMerchant = singlePromiseWrap(() => {
     return request.get(SettingApiPath.queryPurchaseWaybillMerchant);
 });
+
+export function queryErrorConfigList(data: {
+    middle_code?: string[];
+    middle_text?: string[];
+    order_code?: string[];
+    purchase_channel?: string[];
+    channel_code?: string[];
+    channel_text?: string[];
+}) {
+    return api.post<IResponse<PaginationResponse<IErrorConfigItem>>>(
+        SettingApiPath.queryPurchaseCodeList,
+        {
+            data: data,
+        },
+    );
+}
+
+export function updateErrorCode(data: {
+    middle_code?: string;
+    middle_text?: string;
+    purchase_channel?: number;
+    channel_code?: string;
+    channel_text?: string;
+    remark?: string;
+    middle_code_type?: string;
+    save_type: 1 | 2;
+    id?: string;
+}) {
+    return request.post(SettingApiPath.updatePurchaseCode, {
+        data: data,
+    });
+}
+
+export function queryErrorCodeConditions(condition_type?: 1) {
+    return request.get(SettingApiPath.queryErrorCodeConditions, {
+        params: {
+            condition_type,
+        },
+    });
+}

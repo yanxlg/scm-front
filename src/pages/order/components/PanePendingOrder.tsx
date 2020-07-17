@@ -9,21 +9,19 @@ import {
     useModal2,
 } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { IPendingOrderSearch, IPendingOrderItem, IReviewOrderItem } from '@/interface/IOrder';
+import { IPendingOrderSearch, IPendingOrderItem } from '@/interface/IOrder';
 import {
     getOrderGoodsDetail,
     getPendingOrderList,
     postExportPendingOrder,
     postOrdersPlace,
     queryPendingCount,
-    queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import {
     defaultOptionItem,
     purchaseOrderOptionList,
     defaultOptionItem1,
-    finalCancelStatusList,
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
 } from '@/enums/OrderEnum';
@@ -44,7 +42,7 @@ import { getCategoryList } from '@/services/global';
 import { getCategoryName, getCategoryLowestLevel } from '@/utils/utils';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { PermissionComponent } from 'rc-permission';
-import { useDispatch } from '@@/plugin-dva/exports';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
@@ -116,9 +114,14 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
 
     const dispatch = useDispatch();
 
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
     useEffect(() => {
         dispatch({
             type: 'permission/queryMerchantList',
+        });
+        dispatch({
+            type: 'options/purchaseError',
         });
     }, []);
 
@@ -463,13 +466,18 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
                     },
                     {
-                        type: 'select',
-                        name: 'purchase_fail_code',
+                        type: 'select@2',
+                        name: 'scm_error_code',
                         label: '失败原因',
-                        mode: 'multiple',
-                        maxTagCount: 2,
-                        formatter: 'join',
-                        optionList: [...finalCancelStatusList],
+                        labelClassName: 'order-label-next1',
+                        options: {
+                            selector: (state: ConnectState) => state.options.platformErrorList,
+                        },
+                        childrenProps: {
+                            mode: 'multiple',
+                            maxTagCount: 2,
+                            placeholder: '请选择失败原因',
+                        },
                     },
                     {
                         type: 'select',
@@ -1095,20 +1103,20 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         render: mergeCell,
                     },
                     {
-                        key: 'purchaseFailCode',
+                        key: 'scmErrorCode',
                         title: '拍单失败原因',
-                        dataIndex: 'purchaseFailCode',
+                        dataIndex: 'scmErrorCode',
                         align: 'center',
                         width: 200,
                         render: (value, row) => {
-                            const reason = getStatusDesc(finalCancelStatusList, value);
+                            const reason = purchaseErrorMap?.[value];
                             const reasonStr = reason ? `${reason}` : '';
                             // 0代拍，1爬取中，2爬取成功，3爬取失败
                             const status = Number(row.similarGoodsStatus);
                             const purchaseOrderStatus = row.purchaseOrderStatus;
                             return (
                                 <div>
-                                    <div>{reasonStr || '未知原因'}</div>
+                                    <div>{reasonStr}</div>
                                     {purchaseOrderStatus === 7 && (
                                         <div>
                                             {status === 0 ? (
@@ -1484,7 +1492,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     },
                 ];
         }
-    }, [status, allCategoryList]);
+    }, [status, allCategoryList, purchaseErrorMap]);
 
     const pagination = useMemo(() => {
         return {
@@ -1610,6 +1618,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         modal,
         similarModal,
         allCategoryList,
+        purchaseErrorMap,
     ]);
 };
 

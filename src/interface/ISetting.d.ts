@@ -1,5 +1,4 @@
 import { RequestPagination, IRequestPagination } from '@/interface/IGlobal';
-import React from 'react';
 import { IFalseShippingTypeCode } from '@/enums/SettingEnum';
 
 export type ICustomListQuery = {
@@ -305,4 +304,18 @@ export interface IAddVirtualAbnormalItem {
 
 export interface IAddVirtualDeliverySignListReq {
     virtual_delivery_content?: IAddVirtualAbnormalItem[];
+}
+
+export interface IErrorConfigItem {
+    channel_code: string;
+    channel_text: string;
+    create_time: string;
+    id: string;
+    middle_code: string;
+    middle_text: string;
+    order_code: string;
+    purchase_channel: string;
+    record: string;
+    remark: string;
+    update_time: string;
 }

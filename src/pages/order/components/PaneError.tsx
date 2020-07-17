@@ -1,19 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
+import { getErrorOrderList, postExportErrOrder } from '@/services/order-manage';
 import { JsonForm, FitTable, LoadingButton, useModal2 } from 'react-components';
-import {
-    getErrorOrderList,
-    postExportErrOrder,
-    getPlatformAndStore,
-} from '@/services/order-manage';
 import {
     errorTypeOptionList,
     errorDetailOptionMap,
     ErrorDetailOptionCode,
-    failureReasonList,
-    failureReasonMap,
-    failureReasonCode,
-    defaultOptionItem1,
 } from '@/enums/OrderEnum';
 import { useList, useModal } from 'react-components';
 import { ColumnProps, TableProps } from 'antd/es/table';
@@ -26,10 +18,10 @@ import { ITaskListItem } from '@/interface/ITask';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
 import { Button } from 'antd';
 import Export from '@/components/Export';
-import { queryGoodsSourceList } from '@/services/global';
 import TrackDialog from './TrackDialog';
 import { PermissionComponent } from 'rc-permission';
-import { useDispatch } from '@@/plugin-dva/exports';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
+import { filterFieldsList } from '@/pages/order/components/utils';
 import { ConnectState } from '@/models/connect';
 
 export declare interface IErrorOrderItem {
@@ -52,7 +44,7 @@ export declare interface IErrorOrderItem {
     platformOrderTime?: string; // 拍单时间
     payTime?: string; // 支付时间
     purchaseWaybillNo?: string; // 首程运单号
-    purchaseFailCode?: failureReasonCode;
+    scmErrorCode?: string;
     similarGoodsStatus?: number;
     purchaseOrderGoodsId?: string;
     waybillTrailUpdateTime?: string;
@@ -61,6 +53,12 @@ export declare interface IErrorOrderItem {
 }
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
+
+const configFields = ['order_goods_id', 'channel_source', 'product_shop', 'product_platform'];
+
+const preFieldsList = filterFieldsList(configFields);
+
+const afterFieldList = filterFieldsList(['order_create_time', 'confirm_time']);
 
 const PaneErrTab = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -71,11 +69,16 @@ const PaneErrTab = () => {
         purchase_plan_id: string;
     }>();
 
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch({
             type: 'permission/queryMerchantList',
+        });
+        dispatch({
+            type: 'options/purchaseError',
         });
     }, []);
 
@@ -84,38 +87,7 @@ const PaneErrTab = () => {
 
     const fieldList: FormField[] = useMemo(() => {
         return [
-            {
-                type: 'textarea',
-                name: 'order_goods_id',
-                label: '订单号',
-                className: 'order-input',
-                placeholder: '请输入',
-                formatter: 'multipleToArray',
-            },
-            {
-                type: 'select',
-                name: 'product_shop',
-                label: '销售店铺名称',
-                className: 'order-input',
-                // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem1,
-                optionList: {
-                    type: 'select',
-                    selector: (state: ConnectState) => {
-                        return state?.permission?.merchantList;
-                    },
-                },
-                formatter: 'plainToArr',
-            },
-            {
-                type: 'select',
-                name: 'product_platform',
-                label: '采购渠道',
-                className: 'order-input',
-                // optionList: [defaultOptionItem, ...channelOptionList],
-                syncDefaultOption: defaultOptionItem1,
-                optionList: () => queryGoodsSourceList(),
-            },
+            ...preFieldsList,
             {
                 type: 'select',
                 name: 'abnormal_type',
@@ -132,20 +104,7 @@ const PaneErrTab = () => {
                     onSearch(); // 立即查询
                 },
             },
-            {
-                type: 'dateRanger',
-                name: ['order_time_start', 'order_time_end'],
-                label: '订单时间',
-                className: 'order-error-date-picker',
-                formatter: ['start_date', 'end_date'],
-            },
-            {
-                type: 'dateRanger',
-                name: ['confirm_time_start', 'confirm_time_end'],
-                label: '订单确认时间',
-                className: 'order-error-date-picker',
-                formatter: ['start_date', 'end_date'],
-            },
+            ...afterFieldList,
         ];
     }, []);
 
@@ -243,8 +202,7 @@ const PaneErrTab = () => {
             align: 'center',
             width: 180,
             render: (value: ErrorDetailOptionCode, row: IErrorOrderItem) => {
-                const reason =
-                    failureReasonMap[(row.purchaseFailCode as unknown) as failureReasonCode];
+                const reason = purchaseErrorMap?.[row.scmErrorCode as string];
                 const reasonStr = reason ? `（${reason}）` : '';
                 // 0代拍，1爬取中，2爬取成功，3爬取失败
                 const status = Number(row.similarGoodsStatus);
@@ -368,7 +326,7 @@ const PaneErrTab = () => {
             title: '采购订单发货时间',
             dataIndex: 'platformShippingTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -378,7 +336,7 @@ const PaneErrTab = () => {
             title: '采购计划生成时间',
             dataIndex: 'platformSendOrderTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -437,7 +395,7 @@ const PaneErrTab = () => {
             title: '最后一条轨迹时间',
             dataIndex: 'waybillTrailUpdateTime',
             align: 'center',
-            width: 120,
+            width: 180,
             render: (value: string) => {
                 return utcToLocal(value, '');
             },
@@ -499,11 +457,12 @@ const PaneErrTab = () => {
         return (
             <>
                 <JsonForm
-                    labelClassName="order-error-label"
+                    labelClassName="order-label"
                     fieldList={fieldList}
                     ref={formRef}
                     initialValues={{
                         product_shop: '',
+                        channel_source: '',
                         product_platform: '',
                         abnormal_type: 1,
                     }}
@@ -645,25 +604,21 @@ const PaneErrTab = () => {
                                 switch (abnormal_type) {
                                     case 12:
                                         return {
-                                            type: 'checkboxGroup',
-                                            name: 'purchase_fail_code',
+                                            type: 'checkboxGroup@2',
+                                            name: 'scm_error_code',
                                             label: '失败原因',
-                                            formatter: 'join',
-                                            options: failureReasonList.map(({ id, name }) => {
-                                                return {
-                                                    label: name,
-                                                    value: id,
-                                                };
-                                            }),
+                                            labelClassName: 'order-error-label-next',
+                                            options: {
+                                                selector: (state: ConnectState) => {
+                                                    return state.options.platformErrorList;
+                                                },
+                                            },
                                             onChange: () => {
                                                 onSearch(); // 立即查询
                                             },
                                         };
                                     default:
-                                        return {
-                                            type: 'hide',
-                                            name: 'none',
-                                        };
+                                        return undefined;
                                 }
                             },
                         },
@@ -715,7 +670,7 @@ const PaneErrTab = () => {
                             payTime,
                             purchaseWaybillNo,
                             platformSendOrderTime,
-                            purchaseFailCode,
+                            scmErrorCode,
                             similarGoodsStatus,
                             purchaseOrderGoodsId,
                             waybillTrailUpdateTime,
@@ -741,7 +696,7 @@ const PaneErrTab = () => {
                             platformOrderTime, // 拍单时间
                             payTime, // 支付时间
                             purchaseWaybillNo, // 首程运单号
-                            purchaseFailCode,
+                            scmErrorCode,
                             similarGoodsStatus,
                             purchaseOrderGoodsId,
                             waybillTrailUpdateTime,
@@ -803,7 +758,7 @@ const PaneErrTab = () => {
                 onChange={onChange}
             />
         );
-    }, [loading]);
+    }, [loading, purchaseErrorMap]);
 
     const exportModalComponent = useMemo(() => {
         return (
@@ -835,7 +790,7 @@ const PaneErrTab = () => {
                 />
             </div>
         );
-    }, [loading, visible, exportModal, trackModal]);
+    }, [loading, visible, exportModal, trackModal, purchaseErrorMap]);
 };
 
 export default PaneErrTab;

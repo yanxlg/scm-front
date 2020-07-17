@@ -52,4 +52,7 @@ export enum SettingApiPath {
     deleteVirtualDeliverySign = '/api/v1/purchase/virtual_delivery_sign/delete',
     queryVirtualDeliveryCondition = '/api/v1/purchase/virtual_delivery_sign/condition',
     queryPurchaseWaybillMerchant = '/api/v1/purchase/waybill_merchant',
+    queryPurchaseCodeList = '/api/v1/purchase/code/list',
+    updatePurchaseCode = '/api/v1/purchase/code/save',
+    queryErrorCodeConditions = '/api/v1/purchase/code/condition',
 }
