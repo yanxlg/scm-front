@@ -497,3 +497,53 @@ export const exportPendingSignList = (data: any) => {
         data,
     });
 };
+
+export const querySimilarGoodsList = (params: {
+    page: number;
+    page_count: number;
+    commodity_id: string;
+}) => {
+    return request
+        .get(OrderApiPath.querySimilarGoodsList, {
+            params,
+        })
+        .then(({ data }) => {
+            // console.log('querySimilarGoodsInfo', res);
+            const { list, total } = data;
+            return {
+                list: list.map((item: any) => {
+                    const {
+                        commodityId,
+                        defaultImage,
+                        productTitle,
+                        priceMin,
+                        priceMax,
+                        shippingFeeMin,
+                        shippingFeeMax,
+                        productMetadatas,
+                        similar,
+                        isOnSale,
+                    } = item;
+                    let productUrl = '';
+                    productMetadatas?.forEach(({ name, value }: any) => {
+                        if (name === 'product_link') {
+                            productUrl = value;
+                        }
+                    });
+                    return {
+                        commodityId,
+                        defaultImage: defaultImage[0].url,
+                        productTitle,
+                        priceMin,
+                        priceMax,
+                        shippingFeeMin,
+                        shippingFeeMax,
+                        productUrl,
+                        similar,
+                        isOnSale,
+                    };
+                }),
+                total,
+            };
+        });
+};
