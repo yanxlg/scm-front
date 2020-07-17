@@ -5,6 +5,8 @@
 import { defineConfig } from 'umi';
 const shajs = require('sha.js');
 
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
+
 const dev = process.env.NODE_ENV !== 'production';
 
 const config = defineConfig({
@@ -120,6 +122,15 @@ const config = defineConfig({
     chainWebpack(config, { webpack }) {
         config.plugin('lodash-webpack-plugin').use(require('lodash-webpack-plugin')); // lodash 简化，实际可能并没有作用，如果babel-plugin-lodash已经极尽简化
         config.plugin('antd-dayjs-webpack-plugin').use(require('antd-dayjs-webpack-plugin')); // dayjs代替moment
+        config.plugin('service-worker').use(SWPrecacheWebpackPlugin, [
+            {
+                cacheId: 'scm-frontend',
+                filename: 'sw.js',
+                staticFileGlobs: ['dist/**/*.{js,css}'],
+                minify: true,
+                stripPrefix: 'dist/',
+            },
+        ]);
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         if (dev) {
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
