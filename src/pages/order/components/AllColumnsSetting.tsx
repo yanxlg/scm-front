@@ -3,18 +3,16 @@ import { Row, Col, Checkbox } from 'antd';
 import { CheckboxValueType } from 'antd/es/checkbox/Group';
 
 const baseGroupList = [
-    { key: 'createTime', name: '订单生成时间' },
+    { key: 'orderCreateTime', name: '订单生成时间' },
     { key: 'orderGoodsStatus', name: '订单状态' },
+    { key: 'cancelType', name: '子订单取消类型' },
     { key: 'orderGoodsShippingStatusShow', name: '配送状态' },
     { key: 'orderId', name: '父订单ID' },
     { key: 'orderGoodsId', name: '子订单ID' },
     { key: 'commodityId', name: 'Commodity ID' },
     { key: 'productId', name: 'Product ID' },
     { key: 'skuId', name: '中台SKU ID' },
-    // { key: '', name: '采购渠道' },
-    // { key: '', name: '采购渠道Goods ID' },
-    // { key: '', name: '采购渠道SKU ID' },
-    // { key: '', name: '商品名称' },
+    { key: 'productName', name: '商品名称' },
     { key: 'productImage', name: 'SKU图片' },
     { key: 'productStyle', name: '商品规格' },
     { key: 'goodsAmount', name: '销售商品单价' },
@@ -22,15 +20,21 @@ const baseGroupList = [
     { key: 'freight', name: '销售商品运费' },
     { key: '_goodsTotalAmount', name: '销售商品总金额' },
     { key: 'currency', name: '销售金额货币' },
-    { key: 'purchaseNumber', name: '采购商品数量' },
+    { key: 'platformUid', name: '下单账号' },
     { key: 'purchaseAmount', name: '采购商品单价' },
+    { key: 'purchaseNumber', name: '采购商品数量' },
     { key: '_purchaseTotalAmount', name: '采购商品总金额' },
+    { key: 'saleMinusPurchaseNormalPrice', name: '销售-采购价差' },
+
     // { key: '', name: '商品属性标签' },
     // { key: 'cancelType', name: '中台订单取消原因' }, // 带补充
-    { key: '_logisticsTrack', name: '物流轨迹' },
-    { key: 'saleMinusPurchaseNormalPrice', name: '销售-采购价差' },
-    { key: 'cancelType', name: '子订单取消类型' },
     { key: 'orderAddress', name: '用户地址信息' },
+
+    { key: '_logisticsTrack', name: '物流轨迹' },
+    // { key: 'warehouseId', name: '仓库名称' },
+    // { key: 'platformUid', name: '下单账号' },
+    { key: 'threeLevelCatogryCode', name: '商品最低类目' },
+    { key: 'outboundFailCode', name: '出库失败原因' },
 ];
 
 const saleGroupList = [
@@ -46,23 +50,27 @@ const saleGroupList = [
     { key: 'collectTime', name: '销售订单揽收时间' },
     { key: 'lastWaybillNo', name: '销售尾程运单ID' },
     { key: 'receiveTime', name: '妥投时间' },
+    { key: 'inventedSignDeliveryNo', name: '虚拟运单ID' },
 ];
 
 const purchaseGroupList = [
+    { key: 'purchaseCreateTime', name: '采购计划生成时间' },
     { key: 'purchasePlanId', name: '采购计划ID' },
     { key: 'reserveStatus', name: '仓库库存预定状态' },
     // { key: '', name: '采购店铺名称' },
     { key: 'purchaseOrderStatus', name: '采购计划状态' },
     { key: 'purchaseFailCode', name: '失败原因' },
-    { key: 'purchaseCreateTime', name: '采购计划生成时间' },
+    { key: 'purchasePlatform', name: '采购平台' },
+    { key: 'productPlatform', name: '商品渠道' },
+    // { key: '', name: '采购店铺名称' },
     { key: 'purchasePlatformParentOrderId', name: '采购父订单ID' },
-    { key: 'purchasePlatformOrderId', name: '采购订单ID' },
+    { key: 'purchasePlatformOrderId', name: '供应商订单ID' },
     // { key: '', name: '采购渠道订单ID' },
-    { key: 'purchaseOrderPayStatus', name: '采购支付状态' },
     { key: 'payTime', name: '采购支付时间' },
+    { key: 'purchaseOrderPayStatus', name: '采购支付状态' },
     { key: 'purchaseWaybillNo', name: '采购运单ID' },
     { key: 'purchaseCancelReason', name: '采购取消原因' },
-    { key: 'purchaseTime', name: '采购签收时间' },
+    // { key: 'purchaseTime', name: '采购签收时间' },
     { key: 'storageTime', name: '采购入库时间' },
     { key: 'purchaseCancelType', name: '采购单取消类型' },
 ];

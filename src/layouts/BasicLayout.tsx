@@ -2,21 +2,19 @@ import ProLayout, {
     MenuDataItem,
     BasicLayoutProps as ProLayoutProps,
 } from '@ant-design/pro-layout';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { Link } from 'umi';
 import { Dispatch } from 'redux';
-import { connect } from 'umi';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import { ConnectState } from '@/models/connect';
 import logo from '../assets/logo.png';
 import MenuData from '@/config/menu';
-import 'nprogress/nprogress.css';
 import '@/styles/menu.less';
 import '@/styles/index.less';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
-import { Modal } from 'antd';
-import NProgress from 'nprogress';
 import { shallowEqual } from 'react-redux';
+import { PermissionContext } from 'rc-permission';
+import { IPermissionTree } from 'rc-permission/es/Provider';
 
 export interface BasicLayoutProps extends ProLayoutProps {
     breadcrumbNameMap: {
@@ -25,14 +23,20 @@ export interface BasicLayoutProps extends ProLayoutProps {
     dispatch: Dispatch;
 }
 
-const MenuDataList = MenuData.map(item => {
-    // filter
-    return item as any;
-});
-
-NProgress.configure({ showSpinner: false });
-
-let timer: number | undefined = undefined;
+const filterPermissionMenuList = (menuList: Array<MenuDataItem>, pTree?: IPermissionTree) => {
+    let permissionMenuList: MenuDataItem[] = [];
+    menuList.forEach(({ pid, hideInMenu, children, ...extra }) => {
+        // filter
+        if (hideInMenu || pid === void 0 ? true : pTree && pTree[pid]) {
+            permissionMenuList.push({
+                ...extra,
+                hideInMenu,
+                children: children ? filterPermissionMenuList(children, pTree) : undefined,
+            });
+        }
+    });
+    return permissionMenuList;
+};
 
 const BasicLayout: React.FC<BasicLayoutProps> = props => {
     const dispatch = useDispatch();
@@ -45,26 +49,15 @@ const BasicLayout: React.FC<BasicLayoutProps> = props => {
         });
     }, []);
 
-    const onPageChange = useCallback(() => {
-        Modal.destroyAll();
-        // 滚动条自动滚动到顶部
-        if (timer) {
-            clearTimeout(timer);
-            timer = undefined;
-            NProgress.remove();
-        }
-        NProgress.start();
-        NProgress.inc();
-        timer = window.setTimeout(() => {
-            NProgress.done();
-            timer = undefined;
-        }, 200 + Math.floor(Math.random() * 300));
-    }, []);
+    const { pTree } = useContext(PermissionContext);
+
+    const MenuDataList = useMemo(() => {
+        return filterPermissionMenuList(MenuData, pTree);
+    }, [pTree]);
 
     return useMemo(() => {
         return (
             <ProLayout
-                onPageChange={onPageChange}
                 collapsed={collapsed}
                 multiple={false}
                 menu={{ locale: false }}

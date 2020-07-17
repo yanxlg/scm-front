@@ -1,15 +1,14 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { notification, Checkbox, Button } from 'antd';
+import { Checkbox, Button } from 'antd';
 import { JsonForm, LoadingButton, FitTable, useModal } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { defaultOptionItem, channelOptionList, defaultOptionItem1 } from '@/enums/OrderEnum';
+import { defaultOptionItem1 } from '@/enums/OrderEnum';
 import { IWarehouseNotShipSearch, IWarehouseNotShipOrderItem } from '@/interface/IOrder';
 import {
     getWarehouseNotShipList,
-    delChannelOrders,
     postExportWarehouseNotShip,
-    queryChannelSource,
     getPlatformAndStore,
+    getWarehouseList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { getStatusDesc } from '@/utils/transform';
@@ -19,6 +18,10 @@ import { TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -26,37 +29,59 @@ declare interface IProps {
 
 const formFields: FormField[] = [
     {
-        type: 'input',
+        type: 'textarea',
         name: 'order_goods_id',
         label: '中台订单子ID',
         className: 'order-input',
-        placeholder: '请输入中台订单子ID',
-        formatter: 'number_str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'product_id',
         label: '中台商品ID',
         className: 'order-input',
-        placeholder: '请输入中台商品ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'purchase_waybill_no',
         label: '采购运单号',
         className: 'order-input',
-        placeholder: '请输入采购运单号',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'textarea',
+        name: 'refer_waybill_no',
+        label: '参考订单号',
+        className: 'order-input',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
         type: 'select',
-        name: 'channel_source',
-        label: '销售渠道',
+        name: 'warehouse_id',
+        label: '仓库名称',
+        className: 'order-input',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getWarehouseList(),
+    },
+    {
+        type: 'select',
+        name: 'product_shop',
+        label: '销售店铺名称',
         className: 'order-input',
         // optionList: [defaultOptionItem, ...channelOptionList],
         syncDefaultOption: defaultOptionItem1,
-        optionList: () => getPlatformAndStore(),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
+        formatter: 'plainToArr',
     },
     {
         type: 'dateRanger',
@@ -68,7 +93,8 @@ const formFields: FormField[] = [
 ];
 
 const defaultInitialValues = {
-    channel_source: '',
+    product_shop: '',
+    warehouse_id: '',
 };
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
@@ -79,12 +105,21 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
     const [orderList, setOrderList] = useState<IWarehouseNotShipOrderItem[]>([]);
+    const [warehouseList, setWarehouseList] = useState<IOptionItem[]>([]);
 
     let currentSearchParams: IWarehouseNotShipSearch | null = null;
 
     const _setOrderList = useCallback(list => {
         orderListRef.current = list;
         setOrderList(list);
+    }, []);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
     }, []);
 
     const onSearch = useCallback(
@@ -224,6 +259,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         });
     }, []);
 
+    const _getWarehouseList = useCallback(() => {
+        getWarehouseList().then(list => setWarehouseList(list));
+    }, []);
+
     const search = useMemo(() => {
         return (
             <JsonForm
@@ -250,7 +289,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     >
                         导出
                     </Button>
-                    ,
                 </div>
             </JsonForm>
         );
@@ -431,7 +469,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             },
             {
                 key: 'channelSource',
-                title: '销售渠道',
+                title: '销售店铺名称',
                 dataIndex: 'channelSource',
                 align: 'center',
                 width: 120,
@@ -452,8 +490,31 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                     };
                 },
             },
+            {
+                key: 'referWaybillNo',
+                title: '参考订单号',
+                dataIndex: 'referWaybillNo',
+                align: 'center',
+                width: 120,
+                render: mergeCell,
+            },
+            {
+                key: 'warehouseId',
+                title: '仓库名称',
+                dataIndex: 'warehouseId',
+                align: 'center',
+                width: 120,
+                render: (value: string, row: IWarehouseNotShipOrderItem) => {
+                    return {
+                        children: getStatusDesc(warehouseList, value),
+                        props: {
+                            rowSpan: row._rowspan || 0,
+                        },
+                    };
+                },
+            },
         ];
-    }, []);
+    }, [warehouseList]);
 
     const pagination = useMemo(() => {
         return {
@@ -470,21 +531,28 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const list = getOrderGoodsIdList();
         return [
-            <CancelOrder orderGoodsIds={list} onReload={onSearch} getAllTabCount={getAllTabCount}>
-                <Button
-                    key="channel_order"
-                    type="primary"
-                    className={formStyles.formBtn}
-                    disabled={list.length ? false : true}
-                >
-                    取消渠道订单
-                </Button>
+            <CancelOrder
+                key="purchase_order"
+                orderGoodsIds={list}
+                onReload={onSearch}
+                getAllTabCount={getAllTabCount}
+            >
+                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={list.length ? false : true}
+                    >
+                        取消渠道订单
+                    </Button>
+                </PermissionComponent>
             </CancelOrder>,
         ];
     }, [getOrderGoodsIdList]);
 
     useEffect(() => {
         onSearch();
+        _getWarehouseList();
     }, []);
 
     return useMemo(() => {

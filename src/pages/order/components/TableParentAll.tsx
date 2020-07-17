@@ -327,13 +327,15 @@ class TableParentAll extends React.PureComponent<IProps, IState> {
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
-                    pagination={{
-                        current: page,
-                        pageSize: pageSize,
-                        total: total,
-                        showSizeChanger: true,
-                        position: ['topRight', 'bottomRight'],
-                    }}
+                    pagination={
+                        {
+                            current: page,
+                            pageSize: pageSize,
+                            total: total,
+                            showSizeChanger: true,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
                     columnsSettingRender={true}
                     toolBarRender={this.toolBarRender}
                     onChange={this.onChange}

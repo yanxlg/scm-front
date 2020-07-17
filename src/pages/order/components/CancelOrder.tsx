@@ -6,15 +6,22 @@ import { postOrderOffsale, delChannelOrders } from '@/services/order-manage';
 const { confirm } = Modal;
 
 interface IProps {
+    offShelfChecked?: boolean;
     orderGoodsIds: string[];
     children: any;
     onReload(): Promise<void>;
     getAllTabCount(): void;
 }
 
-const CancelOrder: React.FC<IProps> = ({ children, orderGoodsIds, onReload, getAllTabCount }) => {
+const CancelOrder: React.FC<IProps> = ({
+    offShelfChecked = false,
+    children,
+    orderGoodsIds,
+    onReload,
+    getAllTabCount,
+}) => {
     // console.log('children', children);
-    const checkRef = useRef(true);
+    const checkRef = useRef(offShelfChecked);
 
     const batchOperateSuccess = useCallback((name: string = '', list: string[]) => {
         notification.success({
@@ -70,7 +77,7 @@ const CancelOrder: React.FC<IProps> = ({ children, orderGoodsIds, onReload, getA
         return delChannelOrders({
             order_goods_ids: orderGoodsIds,
         }).then(res => {
-            checkRef.current = true;
+            checkRef.current = offShelfChecked;
             onReload();
             getAllTabCount();
             const { success, failed } = res.data;
@@ -95,7 +102,7 @@ const CancelOrder: React.FC<IProps> = ({ children, orderGoodsIds, onReload, getA
     }, []);
 
     const handleOk = useCallback(() => {
-        console.log(111111, checkRef.current);
+        // console.log(111111, checkRef.current);
         // return Promise.reject();
         return checkRef.current
             ? offsaleAndChannelOrders(orderGoodsIds)
@@ -110,7 +117,7 @@ const CancelOrder: React.FC<IProps> = ({ children, orderGoodsIds, onReload, getA
                 <div>
                     <p>是否确认取消销售单?</p>
                     <Checkbox
-                        defaultChecked={true}
+                        defaultChecked={offShelfChecked}
                         onChange={e => (checkRef.current = e.target.checked)}
                     >
                         <strong>同时下架商品</strong>
@@ -119,7 +126,8 @@ const CancelOrder: React.FC<IProps> = ({ children, orderGoodsIds, onReload, getA
             ),
             onOk: handleOk,
             onCancel: () => {
-                checkRef.current = true;
+                checkRef.current = offShelfChecked;
+                // console.log('onCancel', checkRef.current);
             },
         });
     };

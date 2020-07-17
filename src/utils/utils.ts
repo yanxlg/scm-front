@@ -2,7 +2,7 @@
 import { EmptyObject } from '@/config/global';
 import { IResponse } from '@/interface/IGlobal';
 import { parse, stringify } from 'querystring';
-import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 
 function singlePromiseWrap<T, P = any>(promise: (params?: P) => Promise<T>) {
     let syncPromise: Promise<T>;
@@ -124,6 +124,108 @@ export const getCurrentOptionList = (
                 }
             }
         }
+    }
+    return [];
+};
+
+/**
+ * 判断选择的类目是否有未选择的类目 true: 有未选择 false: 没有未选择
+ */
+export const hasNotSelectedCategory = (
+    allCategoryList: IOptionItem[],
+    firstId = '',
+    secondId = '',
+    thirdId = '',
+) => {
+    if (!firstId) {
+        return true;
+    } else if (thirdId) {
+        return false;
+    } else if (secondId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        const secondIndex = secondList.findIndex(({ value }) => value === secondId);
+        const thirdList = secondList[secondIndex].children as IOptionItem[];
+        if (thirdList && thirdList.length > 0) {
+            return true;
+        }
+    } else if (firstId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        if (secondList && secondList.length > 0) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+/**
+ * 通过ID获取类目名称
+ */
+export const getCategoryName = (id: string, allCategoryList: IOptionItem[]) => {
+    for (let i = 0, firstLen = allCategoryList.length; i < firstLen; i++) {
+        const firstItem = allCategoryList[i];
+        if (firstItem.value === id) {
+            return firstItem.name;
+        }
+        const secondList = (firstItem.children || []) as IOptionItem[];
+        for (let j = 0, secondLen = secondList.length; j < secondLen; j++) {
+            const secondItem = secondList[j];
+            if (secondItem.value === id) {
+                return secondItem.name;
+            }
+            const thirdList = (secondItem.children || []) as IOptionItem[];
+            for (let k = 0, thirdLen = thirdList.length; k < thirdLen; k++) {
+                const thirdItem = thirdList[k];
+                if (thirdItem.value === id) {
+                    return thirdItem.name;
+                }
+            }
+        }
+    }
+    return '';
+};
+
+/**
+ * 获取选择的最低类目
+ */
+export const getCategoryLowestLevel = (
+    allCategoryList: IOptionItem[],
+    firstId = '',
+    secondId = '',
+    thirdId = '',
+) => {
+    if (!firstId) {
+        return [];
+    } else if (thirdId) {
+        return [thirdId];
+    } else if (secondId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        const secondIndex = secondList.findIndex(({ value }) => value === secondId);
+        const thirdList = secondList[secondIndex].children as IOptionItem[];
+        if (thirdList && thirdList.length > 0) {
+            return thirdList.map(({ value }) => value);
+        }
+        return [secondId];
+    } else if (firstId) {
+        const firstIndex = allCategoryList.findIndex(({ value }) => value === firstId);
+        const secondList = allCategoryList[firstIndex].children as IOptionItem[];
+        if (secondList && secondList.length > 0) {
+            const retList: (string | number)[] = [];
+            secondList.forEach(({ value: secondValue, children: thirdList }) => {
+                if (thirdList && thirdList.length > 0) {
+                    thirdList.forEach(({ value }: IOptionItem) => {
+                        retList.push(value);
+                    });
+                } else {
+                    retList.push(secondValue);
+                }
+            });
+            return retList;
+        }
+        return [firstId];
     }
     return [];
 };

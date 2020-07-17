@@ -26,9 +26,6 @@ import {
     finalCancelStatusList,
     purchasePlanCancelOptionList,
     purchaseReserveOptionList,
-    errorDetailOptionMap,
-    failureReasonMap,
-    failureReasonCode,
 } from '@/enums/OrderEnum';
 import { TableProps } from 'antd/es/table';
 
@@ -43,10 +40,64 @@ import { EmptyObject } from '@/config/global';
 import TakeOrdersRecordModal from '@/pages/order/components/TakeOrdersRecordModal';
 import classNames from 'classnames';
 import SimilarStyleModal from '@/pages/order/components/similarStyle/SimilarStyleModal';
+import { getCategoryList } from '@/services/global';
+import { getCategoryName, getCategoryLowestLevel } from '@/utils/utils';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
 }
+
+const categoryFieldList: FormField[] = [
+    {
+        type: 'select',
+        label: '一级类目',
+        key: 'first_category',
+        name: 'first_category',
+        // className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        key: 'second_category',
+        name: 'second_category',
+        // className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: 'first_category',
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        key: 'third_category',
+        name: 'third_category',
+        // className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+    },
+];
 
 const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -60,6 +111,16 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [orderList, setOrderList] = useState<IPendingOrderItem[]>([]);
     const cacheList = useRef<any[]>([]);
     const [update, setUpdate] = useState(0);
+    const categoryRef = useRef<IOptionItem[]>([]);
+    const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
 
     const [counts, setCounts] = useState({
         penddingFailOrderCount: 0,
@@ -86,6 +147,10 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                 });
             },
         );
+        getCategoryList().then(list => {
+            categoryRef.current = list;
+            setAllCategoryList(list);
+        });
     }, []);
 
     const [status, setStatus] = useState(1);
@@ -103,16 +168,31 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
 
     const onSearch = useCallback(
         (paginationParams = { page, page_count: pageSize }) => {
+            const {
+                first_category = '',
+                second_category = '',
+                third_category = '',
+                ...searchData
+            } = searchRef.current?.getFieldsValue() as any;
             const params: IPendingOrderSearch = Object.assign(
                 {
                     page,
                     page_count: pageSize,
                 },
                 paginationParams,
-                searchRef.current?.getFieldsValue(),
+                {
+                    ...searchData,
+                    three_level_catogry_code: getCategoryLowestLevel(
+                        categoryRef.current,
+                        first_category,
+                        second_category,
+                        third_category,
+                    ),
+                },
                 searchRef1.current?.getFieldsValue(),
                 searchRef2.current?.getFieldsValue(),
             );
+
             setLoading(true);
             return getPendingOrderList(params)
                 .then(res => {
@@ -307,38 +387,36 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         name: 'product_shop',
                         label: '销售店铺名称',
                         syncDefaultOption: defaultOptionItem1,
-                        optionList: () =>
-                            queryShopList().then(({ data = [] }) => {
-                                return data.map((item: any) => {
-                                    const { merchant_name } = item;
-                                    return {
-                                        name: merchant_name,
-                                        value: merchant_name,
-                                    };
-                                });
-                            }),
+                        optionList: {
+                            type: 'select',
+                            selector: (state: ConnectState) => {
+                                return state?.permission?.merchantList;
+                            },
+                        },
+                        formatter: 'plainToArr',
                     },
                     {
-                        type: 'input',
+                        type: 'textarea',
                         name: 'order_goods_id',
                         label: '子订单ID',
-                        placeholder: '请输入中台订单ID',
-                        formatter: 'number_str_arr',
-                    },
-                    {
-                        type: 'input',
-                        name: 'commodity_id',
-                        label: 'Commodity ID',
-                        placeholder: 'Commodity ID',
+                        placeholder: '请输入',
                         formatter: 'multipleToArray',
                     },
                     {
-                        type: 'input',
+                        type: 'textarea',
+                        name: 'commodity_id',
+                        label: 'Commodity ID',
+                        placeholder: '请输入',
+                        formatter: 'multipleToArray',
+                    },
+                    {
+                        type: 'textarea',
                         name: 'purchase_plan_id',
                         label: '采购计划ID',
-                        placeholder: '请输入中台商品ID',
-                        formatter: 'str_arr',
+                        placeholder: '请输入',
+                        formatter: 'multipleToArray',
                     },
+                    ...categoryFieldList,
                     {
                         type: 'dateRanger',
                         name: ['order_time_start', 'order_time_end'],
@@ -364,16 +442,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         name: 'product_shop',
                         label: '销售店铺名称',
                         syncDefaultOption: defaultOptionItem1,
-                        optionList: () =>
-                            queryShopList().then(({ data = [] }) => {
-                                return data.map((item: any) => {
-                                    const { merchant_name } = item;
-                                    return {
-                                        name: merchant_name,
-                                        value: merchant_name,
-                                    };
-                                });
-                            }),
+                        optionList: {
+                            type: 'select',
+                            selector: (state: ConnectState) => {
+                                return state?.permission?.merchantList;
+                            },
+                        },
+                        formatter: 'plainToArr',
                     },
                     {
                         type: 'select',
@@ -403,26 +478,27 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         optionList: [defaultOptionItem, ...purchasePlanCancelOptionList],
                     },
                     {
-                        type: 'input',
+                        type: 'textarea',
                         name: 'order_goods_id',
                         label: '子订单ID',
-                        placeholder: '请输入子订单ID',
-                        formatter: 'number_str_arr',
-                    },
-                    {
-                        type: 'input',
-                        name: 'commodity_id',
-                        label: 'Commodity ID',
-                        placeholder: 'Commodity ID',
+                        placeholder: '请输入',
                         formatter: 'multipleToArray',
                     },
                     {
-                        type: 'input',
+                        type: 'textarea',
+                        name: 'commodity_id',
+                        label: 'Commodity ID',
+                        placeholder: '请输入',
+                        formatter: 'multipleToArray',
+                    },
+                    {
+                        type: 'textarea',
                         name: 'purchase_plan_id',
                         label: '采购计划ID',
-                        placeholder: '请输入中台商品ID',
-                        formatter: 'str_arr',
+                        placeholder: '请输入',
+                        formatter: 'multipleToArray',
                     },
+                    ...categoryFieldList,
                     {
                         type: 'dateRanger',
                         name: ['order_time_start', 'order_time_end'],
@@ -447,16 +523,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         name: 'product_shop',
                         label: '销售店铺名称',
                         syncDefaultOption: defaultOptionItem1,
-                        optionList: () =>
-                            queryShopList().then(({ data = [] }) => {
-                                return data.map((item: any) => {
-                                    const { merchant_name } = item;
-                                    return {
-                                        name: merchant_name,
-                                        value: merchant_name,
-                                    };
-                                });
-                            }),
+                        optionList: {
+                            type: 'select',
+                            selector: (state: ConnectState) => {
+                                return state?.permission?.merchantList;
+                            },
+                        },
+                        formatter: 'plainToArr',
                     },
                     {
                         type: 'select',
@@ -465,26 +538,27 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         optionList: [defaultOptionItem, ...purchaseOrderOptionList],
                     },
                     {
-                        type: 'input',
+                        type: 'textarea',
                         name: 'order_goods_id',
                         label: '子订单ID',
-                        placeholder: '请输入子订单ID',
-                        formatter: 'number_str_arr',
-                    },
-                    {
-                        type: 'input',
-                        name: 'commodity_id',
-                        label: 'Commodity ID',
-                        placeholder: 'Commodity ID',
+                        placeholder: '请输入',
                         formatter: 'multipleToArray',
                     },
                     {
-                        type: 'input',
+                        type: 'textarea',
+                        name: 'commodity_id',
+                        label: 'Commodity ID',
+                        placeholder: '请输入',
+                        formatter: 'multipleToArray',
+                    },
+                    {
+                        type: 'textarea',
                         name: 'purchase_plan_id',
                         label: '采购计划ID',
-                        placeholder: '请输入中台商品ID',
-                        formatter: 'str_arr',
+                        placeholder: '请输入',
+                        formatter: 'multipleToArray',
                     },
+                    ...categoryFieldList,
                     {
                         type: 'dateRanger',
                         name: ['order_time_start', 'order_time_end'],
@@ -569,7 +643,6 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         purchase_order_combine_status: 1,
                     }}
                     fieldList={statusFormFields}
-                    enableCollapse={false}
                 />
                 <JsonForm
                     ref={searchRef}
@@ -609,10 +682,9 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const searchForm1 = useMemo(() => {
         return (
             <JsonForm
-                layout={status === 4 ? 'inline' : 'horizontal'}
+                // layout={status === 4 ? 'inline' : 'horizontal'}
                 key={'form1'}
                 ref={searchRef2}
-                enableCollapse={false}
                 containerClassName={status === 4 ? '' : undefined}
                 initialValues={{
                     purchase_fail_filter_type: 3,
@@ -636,9 +708,24 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                   formatter: 'join',
                               },
                               {
+                                  type: 'checkboxGroup',
+                                  name: 'show_similar_orders',
+                                  options: [
+                                      {
+                                          label: '仅展示相似款订单',
+                                          value: 1,
+                                      },
+                                  ],
+                                  onChange: (name: string, form: FormInstance) => {
+                                      handleClickSearch();
+                                  },
+                                  formatter: 'join',
+                              },
+                              {
                                   type: 'radioGroup',
                                   name: 'purchase_fail_filter_type',
                                   label: '处理方式',
+                                  formItemClassName: styles.formItem,
                                   options: [
                                       {
                                           label: '仅重拍',
@@ -912,6 +999,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                         render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
                     },
+                    {
+                        title: '商品最低类目',
+                        dataIndex: 'threeLevelCatogryCode',
+                        align: 'center',
+                        width: 140,
+                        render: (value: number) => getCategoryName(String(value), allCategoryList),
+                    },
                 ];
             case 3:
                 return [
@@ -1018,42 +1112,57 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                     {purchaseOrderStatus === 7 && (
                                         <div>
                                             {status === 0 ? (
-                                                <Button
-                                                    type="link"
-                                                    onClick={() =>
-                                                        showSimilarModal({
-                                                            order_goods_id: row.orderGoodsId,
-                                                            purchase_plan_id: row.purchasePlanId as string,
-                                                        })
-                                                    }
+                                                <PermissionComponent
+                                                    pid="order/similar_pay"
+                                                    control="tooltip"
                                                 >
-                                                    相似款代拍
-                                                </Button>
+                                                    <Button
+                                                        type="link"
+                                                        onClick={() =>
+                                                            showSimilarModal({
+                                                                order_goods_id: row.orderGoodsId,
+                                                                purchase_plan_id: row.purchasePlanId as string,
+                                                            })
+                                                        }
+                                                    >
+                                                        相似款代拍
+                                                    </Button>
+                                                </PermissionComponent>
                                             ) : status === 1 || status === 5 ? (
-                                                <Button
-                                                    type="link"
-                                                    onClick={() =>
-                                                        showSimilarModal({
-                                                            order_goods_id: row.orderGoodsId,
-                                                            purchase_plan_id: row.purchasePlanId as string,
-                                                        })
-                                                    }
+                                                <PermissionComponent
+                                                    pid="order/similar_pay"
+                                                    control="tooltip"
                                                 >
-                                                    代拍详情-爬取中
-                                                </Button>
+                                                    <Button
+                                                        type="link"
+                                                        onClick={() =>
+                                                            showSimilarModal({
+                                                                order_goods_id: row.orderGoodsId,
+                                                                purchase_plan_id: row.purchasePlanId as string,
+                                                            })
+                                                        }
+                                                    >
+                                                        代拍详情-爬取中
+                                                    </Button>
+                                                </PermissionComponent>
                                             ) : status === 3 ? (
-                                                <Button
-                                                    type="link"
-                                                    danger={true}
-                                                    onClick={() =>
-                                                        showSimilarModal({
-                                                            order_goods_id: row.orderGoodsId,
-                                                            purchase_plan_id: row.purchasePlanId as string,
-                                                        })
-                                                    }
+                                                <PermissionComponent
+                                                    pid="order/similar_pay"
+                                                    control="tooltip"
                                                 >
-                                                    代拍详情-爬取失败
-                                                </Button>
+                                                    <Button
+                                                        type="link"
+                                                        danger={true}
+                                                        onClick={() =>
+                                                            showSimilarModal({
+                                                                order_goods_id: row.orderGoodsId,
+                                                                purchase_plan_id: row.purchasePlanId as string,
+                                                            })
+                                                        }
+                                                    >
+                                                        代拍详情-爬取失败
+                                                    </Button>
+                                                </PermissionComponent>
                                             ) : null}
                                         </div>
                                     )}
@@ -1160,6 +1269,13 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         align: 'center',
                         width: 150,
                         render: value => getStatusDesc(purchasePlanCancelOptionList, value),
+                    },
+                    {
+                        title: '商品最低类目',
+                        dataIndex: 'threeLevelCatogryCode',
+                        align: 'center',
+                        width: 140,
+                        render: (value: number) => getCategoryName(String(value), allCategoryList),
                     },
                 ];
             case 4:
@@ -1359,9 +1475,16 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         width: 120,
                         render: (value: number) => getStatusDesc(purchaseOrderOptionList, value),
                     },
+                    {
+                        title: '商品最低类目',
+                        dataIndex: 'threeLevelCatogryCode',
+                        align: 'center',
+                        width: 140,
+                        render: (value: number) => getCategoryName(String(value), allCategoryList),
+                    },
                 ];
         }
-    }, [status]);
+    }, [status, allCategoryList]);
 
     const pagination = useMemo(() => {
         return {
@@ -1382,29 +1505,36 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
             case 1:
             case 3:
                 return [
-                    <LoadingButton
-                        key="place_order"
-                        type="primary"
-                        className={formStyles.formBtn}
-                        onClick={_postOrdersPlace}
-                        disabled={disabled}
-                    >
-                        一键拍单
-                    </LoadingButton>,
+                    <PermissionComponent key="place_order" pid="order/post_order" control="tooltip">
+                        <LoadingButton
+                            type="primary"
+                            className={formStyles.formBtn}
+                            onClick={_postOrdersPlace}
+                            disabled={disabled}
+                        >
+                            一键拍单
+                        </LoadingButton>
+                    </PermissionComponent>,
                     <CancelOrder
                         key={'cancel'}
                         orderGoodsIds={selectedOrderGoodsIdList}
                         onReload={onSearch}
                         getAllTabCount={getAllTabCount}
                     >
-                        <Button
-                            key="channel_order"
-                            type="primary"
-                            className={formStyles.formBtn}
-                            disabled={disabled}
+                        <PermissionComponent
+                            key="purchase_order"
+                            pid="order/cancel_order"
+                            control="tooltip"
                         >
-                            取消订单
-                        </Button>
+                            <Button
+                                key="channel_order"
+                                type="primary"
+                                className={formStyles.formBtn}
+                                disabled={disabled}
+                            >
+                                取消订单
+                            </Button>
+                        </PermissionComponent>
                     </CancelOrder>,
                 ];
             case 2:
@@ -1415,14 +1545,20 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         onReload={onSearch}
                         getAllTabCount={getAllTabCount}
                     >
-                        <Button
-                            key="channel_order"
-                            type="primary"
-                            className={formStyles.formBtn}
-                            disabled={disabled}
+                        <PermissionComponent
+                            key="purchase_order"
+                            pid="order/cancel_order"
+                            control="tooltip"
                         >
-                            取消订单
-                        </Button>
+                            <Button
+                                key="channel_order"
+                                type="primary"
+                                className={formStyles.formBtn}
+                                disabled={disabled}
+                            >
+                                取消订单
+                            </Button>
+                        </PermissionComponent>
                     </CancelOrder>,
                 ];
             case 4:
@@ -1473,6 +1609,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
         counts,
         modal,
         similarModal,
+        allCategoryList,
     ]);
 };
 

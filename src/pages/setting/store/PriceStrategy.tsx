@@ -11,6 +11,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 import { IPriceStrategy } from '@/interface/ISetting';
 import PriceStrategyModal from '../components/PriceStrategyModal';
+import { PermissionComponent } from 'rc-permission';
 
 const PriceStrategy = () => {
     const formRef = useRef<JsonFormRef>(null);
@@ -396,26 +397,30 @@ const PriceStrategy = () => {
                             </div>
                         ) : (
                             <div className={formStyles.formItem}>
-                                <Button
-                                    type="primary"
-                                    className={formStyles.formBtn}
-                                    onClick={startEdit}
-                                >
-                                    编辑
-                                </Button>
+                                <PermissionComponent pid="setting/store/update" control="tooltip">
+                                    <Button
+                                        type="primary"
+                                        className={formStyles.formBtn}
+                                        onClick={startEdit}
+                                    >
+                                        编辑
+                                    </Button>
+                                </PermissionComponent>
                             </div>
                         )}
                     </Form>
                 ) : (
-                    <Button
-                        type="primary"
-                        ghost={true}
-                        size="small"
-                        onClick={initPriceStrategy}
-                        icon={<PlusOutlined />}
-                    >
-                        添加价格判断公式
-                    </Button>
+                    <PermissionComponent pid="setting/store/update" control="tooltip">
+                        <Button
+                            type="primary"
+                            ghost={true}
+                            size="small"
+                            onClick={initPriceStrategy}
+                            icon={<PlusOutlined />}
+                        >
+                            添加价格判断公式
+                        </Button>
+                    </PermissionComponent>
                 )}
             </Spin>
         );

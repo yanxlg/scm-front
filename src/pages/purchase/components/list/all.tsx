@@ -10,8 +10,8 @@ import {
     useModal,
     useModal2,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal, Tag, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography, Popconfirm } from 'antd';
+import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -21,8 +21,9 @@ import {
     endPurchaseByUser,
     exportPurchaseList,
     queryPurchaseList,
+    reviewVirtualDelivery,
 } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { IPurchaseItem, IReviewVirtualDelivery } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
 import {
@@ -30,12 +31,20 @@ import {
     PurchaseCreateType,
     PurchaseCreateTypeList,
     PurchaseMap,
+    IsFalseShippingList,
+    FalseShippingReviewList,
+    IsFalseShippingCode,
+    IsFalseShippingMap,
+    FalseShippingReviewCode,
+    FalseShippingReviewMap,
+    falseShippingFieldList,
 } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
 import CreatePurchaseModal from '@/pages/purchase/components/list/createPurchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
+import { PermissionComponent } from 'rc-permission';
 
 const { Paragraph } = Typography;
 
@@ -78,6 +87,7 @@ const fieldList: FormField[] = [
             ...PurchaseCreateTypeList,
         ],
     },
+    ...falseShippingFieldList,
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -130,6 +140,14 @@ const AllList = () => {
 
     const [showExport, setShowExport] = useState(false);
 
+    const _reviewVirtualDelivery = useCallback((data: IReviewVirtualDelivery) => {
+        reviewVirtualDelivery(data).then(() => {
+            // console.log('reviewVirtualDelivery', res);
+            message.success('虚假发货审核成功！');
+            onReload();
+        });
+    }, []);
+
     const showExportFn = useCallback(() => {
         setShowExport(true);
     }, []);
@@ -153,7 +171,6 @@ const AllList = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
@@ -234,16 +251,26 @@ const AllList = () => {
                         case '1': // 待发货
                             child = (
                                 <>
-                                    <Button type="link" onClick={() => showConnect(item)}>
-                                        关联运单号
-                                    </Button>
-                                    {origin === PurchaseCreateType.Auto ? (
-                                        <Button
-                                            type="link"
-                                            onClick={() => applyReturnService(item)}
-                                        >
-                                            申请退款
+                                    <PermissionComponent
+                                        pid="purchase/list/connect"
+                                        control="tooltip"
+                                    >
+                                        <Button type="link" onClick={() => showConnect(item)}>
+                                            关联运单号
                                         </Button>
+                                    </PermissionComponent>
+                                    {origin === PurchaseCreateType.Auto ? (
+                                        <PermissionComponent
+                                            pid="purchase/list/refund"
+                                            control="tooltip"
+                                        >
+                                            <Button
+                                                type="link"
+                                                onClick={() => applyReturnService(item)}
+                                            >
+                                                申请退款
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : (
                                         <PopConfirmLoadingButton
                                             popConfirmProps={{
@@ -263,28 +290,51 @@ const AllList = () => {
                         case '2':
                             child = (
                                 <>
-                                    <Button type="link" onClick={() => showConnect(item)}>
-                                        关联运单号
-                                    </Button>
-                                    <Button type="link" onClick={() => applyReturnService(item)}>
-                                        申请退款
-                                    </Button>
-                                </>
-                            );
-                            break;
-                        case '3':
-                            child = (
-                                <>
-                                    <Button type="link" onClick={() => showConnect(item)}>
-                                        关联运单号
-                                    </Button>
-                                    {origin === PurchaseCreateType.Auto ? (
+                                    <PermissionComponent
+                                        pid="purchase/list/connect"
+                                        control="tooltip"
+                                    >
+                                        <Button type="link" onClick={() => showConnect(item)}>
+                                            关联运单号
+                                        </Button>
+                                    </PermissionComponent>
+                                    <PermissionComponent
+                                        pid="purchase/list/refund"
+                                        control="tooltip"
+                                    >
                                         <Button
                                             type="link"
                                             onClick={() => applyReturnService(item)}
                                         >
                                             申请退款
                                         </Button>
+                                    </PermissionComponent>
+                                </>
+                            );
+                            break;
+                        case '3':
+                            child = (
+                                <>
+                                    <PermissionComponent
+                                        pid="purchase/list/connect"
+                                        control="tooltip"
+                                    >
+                                        <Button type="link" onClick={() => showConnect(item)}>
+                                            关联运单号
+                                        </Button>
+                                    </PermissionComponent>
+                                    {origin === PurchaseCreateType.Auto ? (
+                                        <PermissionComponent
+                                            pid="purchase/list/refund"
+                                            control="tooltip"
+                                        >
+                                            <Button
+                                                type="link"
+                                                onClick={() => applyReturnService(item)}
+                                            >
+                                                申请退款
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : null /*(
                                         <PopConfirmLoadingButton
                                             popConfirmProps={{
@@ -304,37 +354,60 @@ const AllList = () => {
                         case '4':
                             child = (
                                 <>
-                                    <Button type="link" onClick={() => showConnect(item)}>
-                                        关联运单号
-                                    </Button>
-                                    {origin === PurchaseCreateType.Auto ? (
-                                        <Button
-                                            type="link"
-                                            onClick={() => applyReturnService(item)}
-                                        >
-                                            申请退款
+                                    <PermissionComponent
+                                        pid="purchase/list/connect"
+                                        control="tooltip"
+                                    >
+                                        <Button type="link" onClick={() => showConnect(item)}>
+                                            关联运单号
                                         </Button>
+                                    </PermissionComponent>
+                                    {origin === PurchaseCreateType.Auto ? (
+                                        <PermissionComponent
+                                            pid="purchase/list/refund"
+                                            control="tooltip"
+                                        >
+                                            <Button
+                                                type="link"
+                                                onClick={() => applyReturnService(item)}
+                                            >
+                                                申请退款
+                                            </Button>
+                                        </PermissionComponent>
                                     ) : null}
-                                    <PopConfirmLoadingButton
-                                        popConfirmProps={{
-                                            title: '确定要完结该采购单？',
-                                            onConfirm: () =>
-                                                onEndPurchaseByUser(purchaseOrderGoodsId),
-                                        }}
-                                        buttonProps={{
-                                            type: 'link',
-                                            children: '完结采购单',
-                                        }}
-                                    />
+                                    <PermissionComponent
+                                        pid="purchase/list/finish"
+                                        control="tooltip"
+                                    >
+                                        <PopConfirmLoadingButton
+                                            popConfirmProps={{
+                                                title: '确定要完结该采购单？',
+                                                onConfirm: () =>
+                                                    onEndPurchaseByUser(purchaseOrderGoodsId),
+                                            }}
+                                            buttonProps={{
+                                                type: 'link',
+                                                children: '完结采购单',
+                                            }}
+                                        />
+                                    </PermissionComponent>
                                 </>
                             );
                             break;
                         case '5': // 已完结 + 已取消
                             child = (
                                 <>
-                                    <Button type="link" onClick={() => applyReturnService(item)}>
-                                        申请退款
-                                    </Button>
+                                    <PermissionComponent
+                                        pid="purchase/list/refund"
+                                        control="tooltip"
+                                    >
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    </PermissionComponent>
                                 </>
                             );
                             break;
@@ -543,6 +616,61 @@ const AllList = () => {
                     return code === '0' ? '入库' : code === '1' ? '出库' : '';
                 },
             },
+            {
+                title: '是否虚假发货',
+                dataIndex: 'isRealDelivery',
+                width: '160px',
+                align: 'center',
+                render: (val: IsFalseShippingCode) => IsFalseShippingMap[val] || '',
+            },
+            {
+                title: '虚假发货审核状态',
+                dataIndex: 'auditStatus',
+                width: '160px',
+                align: 'center',
+                render: (val: number, record) => {
+                    const { purchaseOrderGoodsId, referWaybillNo } = record;
+                    if (val === 1) {
+                        return (
+                            <>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 2,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>确认</a>
+                                </Popconfirm>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认不是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 3,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>取消</a>
+                                </Popconfirm>
+                            </>
+                        );
+                    } else if (val === 2 || val === 3) {
+                        return FalseShippingReviewMap[val];
+                    }
+                    return '';
+                },
+            },
         ] as ColumnType<IPurchaseItem>[];
     }, []);
 
@@ -560,15 +688,18 @@ const AllList = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button type="primary" key="1" onClick={() => showCreateModal(true)}>
-                创建采购单
-            </Button>,
+            <PermissionComponent key="1" pid="purchase/create" control="tooltip">
+                <Button type="primary" onClick={() => showCreateModal(true)}>
+                    创建采购单
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 
     const table = useMemo(() => {
         // 处理合并单元格
         const dataSet = colSpanDataSource(dataSource);
+        // console.log(dataSource);
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"

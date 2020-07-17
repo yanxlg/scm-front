@@ -21,8 +21,12 @@ export enum PurchaseApiPath {
     ApplyReturn = '/api/v1/purchase/refund',
     QueryReturnInfo = '/api/v1/purchase/refund_info',
     AddWaybill = '/api/v1/purchase/waybill',
-    setPurchaseException = '/api/v1/purchase/exception/exec',
     CreatePurchase = '/api/v1/purchase/purchase_order',
     CancelPurchaseByUser = '/api/v1/purchase/purchase_order',
     EndPurchaseByUser = '/api/v1/purchase/finish_purchase_order',
+    QueryStrategyException = '/api/v1/strategy/waybill_exception',
+    FinishPurchaseExceptionOrder = '/api/v1/purchase/finish_waybill_exception_order',
+    UpdateWaybillExceptionPregress = '/api/v1/purchase/update_waybill_exception_order',
+    ReviewExceptionOrder = '/api/v1/purchase/review_waybill_exception_order',
+    ReviewVirtualDelivery = '/api/v1/purchase/check_virtual_delivery',
 }

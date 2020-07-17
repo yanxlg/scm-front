@@ -15,6 +15,7 @@ export type IChannelProductListBody = {
     sales_volume?: number;
     shop_name?: string;
     product_status?: string;
+    merchant_ids?: string[];
 };
 
 export interface IChannelProductListItem {
@@ -35,6 +36,10 @@ export interface IChannelProductListItem {
     non_shipping_refund_rate: number;
     vova_product_link: string;
     sku_count: number;
+    min_sale_price: string;
+    max_sale_price: string;
+    min_shipping_fee: string;
+    max_shipping_fee: string;
 }
 
 export interface IChannelProductListResponse {

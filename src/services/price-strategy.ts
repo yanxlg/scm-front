@@ -19,8 +19,12 @@ import {
     ISalePriceListReq,
 } from '@/interface/IPriceStrategy';
 import { api } from 'react-components';
-import { IResponse, IPaginationResponse } from 'react-components/lib/hooks/useList';
+import { IResponse, IPaginationResponse } from 'react-components/es/hooks/useList';
 import { getCatagoryList } from './goods';
+import { getFilterShopIds, getFilterShopNames } from '@/services/global';
+import { OrderApiPath } from '@/config/api/OrderApiPath';
+import { ApiService } from 'react-components/es/api';
+import { IOrderItem } from '@/interface/IOrder';
 
 // 获取所有的商品标签
 export function getAllGoodsTagList() {
@@ -70,12 +74,19 @@ export function getSaleAndShippingOperateLog(params: ISaleAndShippingOperateReq)
 
 // 获取运费规则列表
 export function getSalePriceList(params: ISalePriceListReq) {
-    return api.get<IResponse<IPaginationResponse<ISellItem>>>(
-        PriceStrategyApiPath.getSalePriceList,
-        {
-            params,
-        },
-    );
+    const { enable_merchant } = params;
+    return {
+        request: () =>
+            getFilterShopIds(enable_merchant?.split(',')).then(enable_merchant => {
+                return request.get(PriceStrategyApiPath.getSalePriceList, {
+                    params: {
+                        ...params,
+                        enable_merchant: enable_merchant?.join(','),
+                    },
+                });
+            }),
+        cancel: () => {},
+    } as ApiService<IResponse<IPaginationResponse<ISellItem>>>;
 }
 
 // 保存售价调整规则

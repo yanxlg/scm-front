@@ -1,11 +1,8 @@
 import React from 'react';
 import { Tabs } from 'antd';
-import PaneAll from './components/PaneAll';
 import PanePendingOrder from './components/PanePendingOrder';
-import PanePay from './components/PanePay';
-import PaneWaitShip from './components/PaneWaitShip';
 import PaneError from './components/PaneError';
-import PaneNotWarehouse from './components/PaneNotWarehouse';
+import PaddingInStore from './components/PaddingInStore';
 import PaneWarehouseNotShip from './components/PaneWarehouseNotShip';
 import Container from '@/components/Container';
 import PanePendingReview from './components/PanePendingReview';
@@ -13,6 +10,12 @@ import PanePendingReview from './components/PanePendingReview';
 import { getAllTabCount } from '@/services/order-manage';
 
 import '@/styles/order.less';
+import PendingSign from '@/pages/order/components/PendingSign';
+import PendingPay from '@/pages/order/components/PendingPay';
+import PendingShip from './components/PendingShip';
+import AllOrder from '@/pages/order/components/AllOrder';
+import { Permission, PermissionComponent } from 'rc-permission';
+import ForbiddenComponent from '@/components/ForbiddenComponent';
 
 const { TabPane } = Tabs;
 
@@ -29,11 +32,14 @@ declare interface IOrderState {
     penddingWarehousingListCount: number;
     errorOrderCount: number;
     penddingCheckListCount: number;
+    penddingSignListCount: number;
 }
 
+@Permission({ pid: 'order', login: true, router: true })
 class Order extends React.PureComponent<IProps, IOrderState> {
     private type: number = 2;
     private defaultActiveKey: string = '1';
+
     constructor(props: IProps) {
         super(props);
         this.state = {
@@ -45,6 +51,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingWarehousingListCount: 0,
             errorOrderCount: 0,
             penddingCheckListCount: 0,
+            penddingSignListCount: 0,
         };
         // console.log(11111, this.props);
         this.defaultActiveKey = this.props.location?.query?.type || '1';
@@ -79,6 +86,7 @@ class Order extends React.PureComponent<IProps, IOrderState> {
             penddingPurchaseListCount,
             penddingWarehousingListCount,
             penddingCheckListCount,
+            penddingSignListCount,
         } = this.state;
         return (
             <Container>
@@ -90,42 +98,92 @@ class Order extends React.PureComponent<IProps, IOrderState> {
                     >
                         <TabPane tab={`全部（${allListCount}）`} key="1">
                             <div className="order-tab-content">
-                                <PaneAll getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/all"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <AllOrder updateCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                         <TabPane tab={`待审核（${penddingCheckListCount}）`} key="8">
                             <div className="order-tab-content">
-                                <PanePendingReview getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/pending_review"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PanePendingReview getAllTabCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                         <TabPane tab={`待拍单（${penddingOrderCount}）`} key="2">
                             <div className="order-tab-content">
-                                <PanePendingOrder getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/pending_order"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PanePendingOrder getAllTabCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                         <TabPane tab={`待支付（${penddingPayCount}）`} key="3">
                             <div className="order-tab-content">
-                                <PanePay getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/pending_pay"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PendingPay updateCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                         <TabPane tab={`待发货（${penddingShipingOrderCount}）`} key="4">
                             <div className="order-tab-content">
-                                <PaneWaitShip getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/pending_ship"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PendingShip updateCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
-                        <TabPane tab={`已采购未入库（${penddingPurchaseListCount}）`} key="5">
+                        <TabPane tab={`待签收（${penddingSignListCount}）`} key="9">
                             <div className="order-tab-content">
-                                <PaneNotWarehouse getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/pending_sign"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PendingSign updateCount={this.getAllTabCount} />
+                                </PermissionComponent>
+                            </div>
+                        </TabPane>
+                        <TabPane tab={`待入库（${penddingPurchaseListCount}）`} key="5">
+                            <div className="order-tab-content">
+                                <PermissionComponent
+                                    pid="order/pending_in"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PaddingInStore updateCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                         <TabPane tab={`仓库未发货（${penddingWarehousingListCount}）`} key="6">
                             <div className="order-tab-content">
-                                <PaneWarehouseNotShip getAllTabCount={this.getAllTabCount} />
+                                <PermissionComponent
+                                    pid="order/no_ship"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PaneWarehouseNotShip getAllTabCount={this.getAllTabCount} />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                         <TabPane tab={`异常订单`} key="7">
                             <div className="order-tab-content">
-                                <PaneError />
+                                <PermissionComponent
+                                    pid="order/error"
+                                    fallback={() => <ForbiddenComponent />}
+                                >
+                                    <PaneError />
+                                </PermissionComponent>
                             </div>
                         </TabPane>
                     </Tabs>

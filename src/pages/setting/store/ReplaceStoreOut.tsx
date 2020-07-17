@@ -8,7 +8,7 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { FormInstance } from 'antd/es/form';
 import styles from '@/styles/_store.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
@@ -27,6 +27,7 @@ import { PlusCircleOutlined, QuestionCircleFilled } from '@ant-design/icons';
 import { IReplaceStoreOutItem } from '@/interface/ISetting';
 import { ITaskListItem } from '@/interface/ITask';
 import ModalWrap from '@/pages/setting/store/ReplaceModal';
+import { PermissionComponent } from 'rc-permission';
 
 const fieldList: Array<FormField> = [
     {
@@ -296,38 +297,62 @@ const ReplaceStoreOut = () => {
                     return (
                         <>
                             {isEditable ? (
-                                <LoadingButton type="link" onClick={() => save(record.id)}>
-                                    保存
-                                </LoadingButton>
+                                <PermissionComponent
+                                    pid="setting/store/replace/update"
+                                    control="tooltip"
+                                >
+                                    <LoadingButton type="link" onClick={() => save(record.id)}>
+                                        保存
+                                    </LoadingButton>
+                                </PermissionComponent>
                             ) : (
                                 <React.Fragment>
                                     <Button type="link" onClick={() => setVisibleProps(record.id)}>
                                         查看商品
                                     </Button>
-                                    <Button type="link" onClick={() => edit(record)}>
-                                        修改
-                                    </Button>
+                                    <PermissionComponent
+                                        pid="setting/store/replace/update"
+                                        control="tooltip"
+                                    >
+                                        <Button type="link" onClick={() => edit(record)}>
+                                            修改
+                                        </Button>
+                                    </PermissionComponent>
                                 </React.Fragment>
                             )}
                             {record.id === '' ? (
-                                <Button type="link" danger={true} onClick={() => del(record.id)}>
-                                    删除
-                                </Button>
+                                <PermissionComponent
+                                    pid="setting/store/replace/delete"
+                                    control="tooltip"
+                                >
+                                    <Button
+                                        type="link"
+                                        danger={true}
+                                        onClick={() => del(record.id)}
+                                    >
+                                        删除
+                                    </Button>
+                                </PermissionComponent>
                             ) : (
-                                <PopConfirmLoadingButton
-                                    popConfirmProps={{
-                                        title: '确定要删除该替换出库记录吗？',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        placement: 'topRight',
-                                        onConfirm: () => del(record.id),
-                                    }}
-                                    buttonProps={{
-                                        children: '删除',
-                                        type: 'link',
-                                        danger: true,
-                                    }}
-                                />
+                                <PermissionComponent
+                                    pid="setting/store/replace/delete"
+                                    control="tooltip"
+                                >
+                                    <PopConfirmLoadingButton
+                                        popConfirmProps={{
+                                            title: '确定要删除该替换出库记录吗？',
+                                            okText: '确定',
+                                            cancelText: '取消',
+                                            placement: 'topRight',
+                                            onConfirm: () => del(record.id),
+                                        }}
+                                        buttonProps={{
+                                            children: '删除',
+                                            type: 'link',
+                                            danger: true,
+                                        }}
+                                    />
+                                </PermissionComponent>
                             )}
                         </>
                     );
@@ -368,13 +393,15 @@ const ReplaceStoreOut = () => {
                     columns={mergedColumns}
                     dataSource={dataSource}
                     onChange={onChange}
-                    pagination={{
-                        total: total,
-                        current: pageNumber,
-                        pageSize: pageSize,
-                        showSizeChanger: true,
-                        position: ['topRight', 'bottomRight'],
-                    }}
+                    pagination={
+                        {
+                            total: total,
+                            current: pageNumber,
+                            pageSize: pageSize,
+                            showSizeChanger: true,
+                            position: ['topRight', 'bottomRight'],
+                        } as any
+                    }
                 />
             </Form>
         );
@@ -385,14 +412,16 @@ const ReplaceStoreOut = () => {
             <div>
                 {formElement}
                 {table}
-                <Button
-                    className={styles.absBtn}
-                    type="link"
-                    icon={<PlusCircleOutlined />}
-                    onClick={add}
-                >
-                    添加替换出库配置
-                </Button>
+                <PermissionComponent pid="setting/store/replace/update" control="tooltip">
+                    <Button
+                        className={styles.absBtn}
+                        type="link"
+                        icon={<PlusCircleOutlined />}
+                        onClick={add}
+                    >
+                        添加替换出库配置
+                    </Button>
+                </PermissionComponent>
                 <ModalWrap visible={visible} onClose={onClose} />
             </div>
         );

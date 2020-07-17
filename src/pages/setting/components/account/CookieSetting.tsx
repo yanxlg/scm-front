@@ -7,6 +7,7 @@ import settingStyles from '@/styles/_setting.less';
 import { ColumnType } from 'antd/es/table/interface';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { EmptyObject } from '@/config/global';
+import { PermissionComponent } from 'rc-permission';
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
     editing: boolean;
@@ -128,9 +129,11 @@ const CookieSetting: React.FC = () => {
                             </Button>
                         </>
                     ) : (
-                        <Button type="link" onClick={() => edit(record)}>
-                            修改
-                        </Button>
+                        <PermissionComponent pid="setting/account/update" control="tooltip">
+                            <Button type="link" onClick={() => edit(record)}>
+                                修改
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },

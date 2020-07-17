@@ -13,6 +13,7 @@ import {
     IReviewSearch,
     IPlatformItem,
     IPurchaseLog,
+    IOrderItem,
 } from '@/interface/IOrder';
 import { transPaginationResponse, singlePromiseWrap } from '@/utils/utils';
 import { api } from 'react-components';
@@ -20,6 +21,10 @@ import { IRequestPagination1, IResponse } from '@/interface/IGlobal';
 // import { ISHopList } from '@/interface/IChannel';
 import { ChannelApiPath } from '@/config/api/ChannelApiPath';
 import Order from '@/pages/order';
+import { IPaginationResponse } from 'react-components/es/hooks/useList';
+import User from '@/storage/User';
+import { ApiService } from 'react-components/es/api';
+import { getFilterShopNames } from '@/services/global';
 
 export declare interface IFilterParams {
     page?: number;
@@ -53,6 +58,7 @@ export declare interface IFilterParams {
     cancel_time_start?: number; // og订单取消时间
     cancel_time_end?: number;
     only_p_order?: number;
+    product_shop?: string[];
 }
 
 export declare interface IErrFilterParams {
@@ -66,6 +72,7 @@ export declare interface IErrFilterParams {
     order_goods_id?: string;
     abnormal_type?: number;
     abnormal_detail_type?: number;
+    product_shop?: string[];
 }
 
 interface IConfirmPayData {
@@ -86,17 +93,50 @@ export async function getAllOrderList(data: IFilterParams) {
     });
 }
 
-export async function postExportAll(data: IFilterParams) {
-    return request.post(OrderApiPath.postExportAll, {
+export function queryAllOrderList(data: IFilterParams) {
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getAllOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService;
+}
+
+export function postExportAll(data: IFilterParams) {
+    return api.post(OrderApiPath.postExportAll, {
         data,
     });
 }
 
 // 获取待拍单
 export async function getPendingOrderList(data: IPendingOrderSearch) {
-    return request.post(OrderApiPath.getPendingOrderList, {
-        requestType: 'json',
-        data,
+    const { product_shop } = data;
+    return getFilterShopNames(product_shop).then(product_shop => {
+        return request.post(OrderApiPath.getPendingOrderList, {
+            data: {
+                ...data,
+                product_shop: product_shop,
+            },
+        });
     });
 }
 
@@ -107,52 +147,120 @@ export async function postExportPendingOrder(data: IPendingOrderSearch) {
 }
 
 // 获取待支付
-export async function getPayOrderList(data: IWaitPaySearch) {
-    return request.post(OrderApiPath.getPayOrderList, {
-        requestType: 'json',
-        data,
-    });
+export function getPayOrderList(data: IWaitPaySearch) {
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getPayOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
-export async function postExportPay(data: IWaitPaySearch) {
-    return request.post(OrderApiPath.postExportPay, {
+export function postExportPay(data: IWaitPaySearch) {
+    return api.post(OrderApiPath.postExportPay, {
         data,
     });
 }
 
 // 获取待发货
-export async function getWaitShipList(data: IWaitShipSearch) {
-    return request.post(OrderApiPath.getWaitShipList, {
-        requestType: 'json',
-        data,
-    });
+export function getWaitShipList(data: IWaitShipSearch) {
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getWaitShipList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
-export async function postExportWaitShip(data: IWaitShipSearch) {
-    return request.post(OrderApiPath.postExportWaitShip, {
+export function postExportWaitShip(data: IWaitShipSearch) {
+    return api.post(OrderApiPath.postExportWaitShip, {
         data,
     });
 }
 
 // 已采购未入库
-export async function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
-    return request.post(OrderApiPath.getPurchasedNotWarehouseList, {
-        requestType: 'json',
-        data,
-    });
+export function getPurchasedNotWarehouseList(data: INotWarehouseSearch) {
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getPurchasedNotWarehouseList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService<IResponse<IPaginationResponse<IOrderItem>>>;
 }
 
-export async function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
-    return request.post(OrderApiPath.postExportPurchasedNotWarehouse, {
+export function postExportPurchasedNotWarehouse(data: INotWarehouseSearch) {
+    return api.post(OrderApiPath.postExportPurchasedNotWarehouse, {
         data,
     });
 }
 
 // 仓库未发货
 export async function getWarehouseNotShipList(data: IWarehouseNotShipSearch) {
-    return request.post(OrderApiPath.getWarehouseNotShipList, {
-        requestType: 'json',
-        data,
+    const { product_shop } = data;
+    return getFilterShopNames(product_shop).then(product_shop => {
+        return request.post(OrderApiPath.getWarehouseNotShipList, {
+            data: {
+                ...data,
+                product_shop: product_shop,
+            },
+        });
     });
 }
 
@@ -163,12 +271,21 @@ export async function postExportWarehouseNotShip(data: IWarehouseNotShipSearch) 
 }
 
 export function getErrorOrderList(data: IErrFilterParams) {
-    return api
-        .post(OrderApiPath.getErrorOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getErrorOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(transPaginationResponse);
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export async function postExportErrOrder(data: IErrFilterParams) {
@@ -241,12 +358,21 @@ export const queryChannelSource = singlePromiseWrap(() => {
 });
 
 export function getReviewOrderList(data: IReviewSearch) {
-    return api
-        .post(OrderApiPath.getReviewOrderList, {
-            requestType: 'json',
-            data: data,
-        })
-        .then(transPaginationResponse);
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.getReviewOrderList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(transPaginationResponse);
+            }),
+        cancel: () => {},
+    } as ApiService;
 }
 
 export async function postExportReview(data: any) {
@@ -290,6 +416,7 @@ export const getPlatformAndStore = singlePromiseWrap(() => {
                 value: platform,
                 children: obj[platform],
             };
+
             list.push(item);
         });
         return list;
@@ -313,4 +440,60 @@ export const queryTakeOrders = () => {
             data: Array<IPurchaseLog>;
         }>
     >(OrderApiPath.QueryTakeOrders);
+};
+
+export const getPurchaseUidList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.getPurchaseUidList).then(({ data: { data } }) => {
+        if (data && data.length) {
+            return data.map(({ name, platform_uid }: any) => ({
+                name,
+                value: platform_uid,
+            }));
+        }
+
+        return [];
+    });
+});
+
+export const getWarehouseList = singlePromiseWrap(() => {
+    return request.get(OrderApiPath.getWarehouseList).then(({ data }) => {
+        return Object.keys(data).map(key => ({
+            name: data[key],
+            value: key,
+        }));
+    });
+});
+
+export const queryPendingSignList = (data: any) => {
+    const { product_shop } = data;
+    return {
+        request: () =>
+            getFilterShopNames(product_shop).then(product_shop => {
+                return request
+                    .post(OrderApiPath.queryPendingSignList, {
+                        data: {
+                            ...data,
+                            product_shop: product_shop,
+                        },
+                    })
+                    .then(({ data, ...extra }) => {
+                        return {
+                            ...extra,
+                            data: {
+                                ...Object.assign({}, data, {
+                                    // @ts-ignore
+                                    total: data.all_count || data.total,
+                                }),
+                            },
+                        };
+                    });
+            }),
+        cancel: () => {},
+    } as ApiService<IResponse<IPaginationResponse<IOrderItem>>>;
+};
+
+export const exportPendingSignList = (data: any) => {
+    return api.post(OrderApiPath.exportPendingSignList, {
+        data,
+    });
 };

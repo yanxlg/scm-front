@@ -40,6 +40,7 @@ import { ColumnType, TableProps } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -190,24 +191,30 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                                 </Button>
                             ) : null}
                             {statusCode === TaskStatusEnum.ToBeExecuted ? (
-                                <LoadingButton type="link" onClick={() => activeTask(task_id)}>
-                                    立即执行
-                                </LoadingButton>
+                                <PermissionComponent pid="task/active" control="tooltip">
+                                    <LoadingButton type="link" onClick={() => activeTask(task_id)}>
+                                        立即执行
+                                    </LoadingButton>
+                                </PermissionComponent>
                             ) : null}
                             {statusCode === TaskStatusEnum.Failed && onceTask ? (
-                                <LoadingButton type="link" onClick={() => reTryTask(task_id)}>
-                                    重试任务
-                                </LoadingButton>
+                                <PermissionComponent pid="task/retry" control="tooltip">
+                                    <LoadingButton type="link" onClick={() => reTryTask(task_id)}>
+                                        重试任务
+                                    </LoadingButton>
+                                </PermissionComponent>
                             ) : null}
                             {statusCode === TaskStatusEnum.ToBeExecuted ||
                             statusCode === TaskStatusEnum.Executing ? (
-                                <LoadingButton
-                                    onClick={() => abortTask(task_id)}
-                                    type="link"
-                                    className={btnStyle.btnSilver}
-                                >
-                                    终止任务
-                                </LoadingButton>
+                                <PermissionComponent pid="task/termination" control="tooltip">
+                                    <LoadingButton
+                                        onClick={() => abortTask(task_id)}
+                                        type="link"
+                                        className={btnStyle.btnSilver}
+                                    >
+                                        终止任务
+                                    </LoadingButton>
+                                </PermissionComponent>
                             ) : null}
                         </>
                     );
@@ -278,8 +285,11 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 width: '182px',
                 align: 'center',
                 render: (text: TaskRangeCode, record) => {
+                    const _range = record.range;
                     const range = isGoodsUpdateType(text)
                         ? record.update_type?.map(code => PUTaskRangeTypeMap[code])?.join(';')
+                        : _range === 'all'
+                        ? '全部店铺'
                         : TaskRangeMap[text];
                     return range || '--';
                 },
@@ -554,22 +564,23 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
     const toolBarRender = useCallback(() => {
         const size = selectedRowKeys.length;
         return [
-            <PopConfirmLoadingButton
-                key="delete"
-                buttonProps={{
-                    danger: true,
-                    disabled: size === 0,
-                    children: '删除任务',
-                    className: formStyles.formBtn,
-                }}
-                popConfirmProps={{
-                    title: '确定要删除选中的任务吗?',
-                    okText: '确定',
-                    cancelText: '取消',
-                    disabled: size === 0,
-                    onConfirm: deleteTaskList,
-                }}
-            />,
+            <PermissionComponent pid="task/delete" key="delete" control="tooltip">
+                <PopConfirmLoadingButton
+                    buttonProps={{
+                        danger: true,
+                        disabled: size === 0,
+                        children: '删除任务',
+                        className: formStyles.formBtn,
+                    }}
+                    popConfirmProps={{
+                        title: '确定要删除选中的任务吗?',
+                        okText: '确定',
+                        cancelText: '取消',
+                        disabled: size === 0,
+                        onConfirm: deleteTaskList,
+                    }}
+                />
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys]);
 

@@ -6,6 +6,7 @@ import TimerUpdate from '@/pages/task/components/editor/TimerUpdate';
 import AutoPurchaseTask from '@/pages/task/components/editor/AutoPurchaseTask';
 import Container from '@/components/Container';
 import { VoVaGather } from '@/pages/task/components/editor/VoVaGather';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const { TabPane } = Tabs;
 
@@ -40,4 +41,7 @@ const Config: React.FC = () => {
     }, []);
 };
 
-export default Config;
+export default PermissionRouterWrap(Config, {
+    login: true,
+    pid: 'task/config',
+});

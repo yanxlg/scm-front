@@ -1,4 +1,10 @@
-import { PurchaseCode, PurchaseCreateTypeCode } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateTypeCode,
+    IsFalseShippingCode,
+    FalseShippingReviewCode,
+} from '@/config/dictionaries/Purchase';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 export interface IWaybillExceptionType {
     '101': string;
@@ -18,6 +24,11 @@ export interface IWaybillExceptionStatus {
 
 export type IWaybillExceptionStatusKey = keyof IWaybillExceptionStatus;
 
+export interface IHandleItem {
+    handleType: number;
+    handleStatus?: number;
+}
+
 export interface IPurchaseAbnormalItem {
     waybillExceptionSn: string; // 异常订单编号
     waybillExceptionType: IWaybillExceptionTypeKey; // 异常类型 101扫码失败，102拒收 103多发货 104货不对版 105货品不合规
@@ -34,6 +45,10 @@ export interface IPurchaseAbnormalItem {
     // platformUid: string;
     // purchasePlatform: string;
     remark: string;
+    remarkTime: string;
+    packageImageUrl?: string;
+    waybillExceptionHandle?: IHandleItem[];
+    createTime: string;
 }
 
 export interface IPurchaseAbnormalReq {
@@ -65,10 +80,23 @@ export interface IRejectAbnormalOrderReq {
     remarks: string;
 }
 
+// 2：退款；3：退货；4：补发；5：废弃
+export type IExceptionHandleType = '2' | '3' | '4' | '5';
+
 export interface IDiscardAbnormalOrderReq {
     waybill_exception_sn: string;
-    abnormal_operate_type: '废弃';
+    handle_type: IExceptionHandleType[];
     remarks: string;
+    reject_count?: string;
+    receive_name?: string;
+    receive_tel?: string;
+    receive_address?: string;
+    receive_address_detail?: string;
+    zip_code?: string;
+    waybill_no?: string;
+    in_storage_count?: string;
+    purchase_order_goods_id?: string;
+    purchase_shipping_name?: string;
 }
 
 export interface IApplyPurchaseRefundReq {
@@ -95,6 +123,8 @@ export declare interface IPurchaseItem {
         type: string;
         waybillNumber: string;
         boundStatus: string;
+        isRealDelivery: IsFalseShippingCode;
+        auditStatus: FalseShippingReviewCode;
     }>;
     productImageUrl: string;
     productSkuStyle: string;
@@ -107,6 +137,17 @@ export declare interface IPurchaseItem {
     boundStatus?: string;
     realInStorageNumber?: number;
     origin: PurchaseCreateTypeCode;
+    inventory?: {
+        availableInventory: number;
+        commodityId: string;
+        lastUpdateTime: string;
+        productImage: string;
+        productStyle: string;
+        sku: string;
+        transportationInventory: number;
+        warehouseId: string;
+    };
+    returnNumber?: number;
 }
 
 export declare interface IReturnItem {
@@ -194,4 +235,55 @@ export declare interface IReturnInfo {
     receiverAddress: string;
     receiverName: string;
     receiverTel: string;
+}
+
+export interface IExceptionCodeItem {
+    code: string;
+    name: string;
+}
+
+export interface IExceptionOperationDetailItem {
+    second_exception_operation_id: number;
+    second_exception_operation_name: string;
+    second_show_exception_type: string[];
+}
+
+export interface IExceptionStrategyItem {
+    exception_operation_id: number;
+    exception_operation_name: string;
+    show_exception_type: string[];
+    exception_operation_detail?: IExceptionOperationDetailItem[];
+}
+
+export interface IAbnormalContext {
+    exception_code?: IOptionItem[];
+    exception_strategy?: IExceptionStrategyItem[];
+}
+
+export interface IQueryStrategyExceptionRes {
+    exception_code?: IExceptionCodeItem[];
+    exception_strategy?: IExceptionStrategyItem[];
+}
+
+export interface IUpdateWaybillExceptionPregressReq {
+    waybill_exception_sn: string;
+    handle_status: number[];
+}
+
+export interface IReviewExceptionOrderItem {
+    waybill_exception_sn: string;
+    review_result: 1 | 2; // 1--通过，2--驳回
+    waybill_exception_type: string;
+}
+
+export interface IReviewExceptionOrderResItem {
+    code: number;
+    msg: string;
+    waybillExceptionSn: string;
+}
+
+export interface IReviewVirtualDelivery {
+    refer_waybill_no?: string;
+    audit_status: 2 | 3; // 1--审核通过，2--驳回
+    purchase_order_goods_id?: string;
 }

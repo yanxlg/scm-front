@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import { AutoEnLargeImg, FitTable, JsonForm, LoadingButton, useList } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { Button, message, Modal, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -19,6 +19,7 @@ import Export from '@/components/Export';
 import { fieldList } from '@/pages/purchase/components/return/all';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 const { Paragraph } = Typography;
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -89,7 +90,6 @@ const PendingOut = () => {
             <JsonForm
                 fieldList={fieldList.slice(0, 4)}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
             >
                 <div>
@@ -136,9 +136,11 @@ const PendingOut = () => {
                     return (
                         <div>
                             {_}
-                            <Button type="link" onClick={() => cancelReturnOrderFn(item)}>
-                                取消退货单
-                            </Button>
+                            <PermissionComponent pid="purchase/return/cancel" control="tooltip">
+                                <Button type="link" onClick={() => cancelReturnOrderFn(item)}>
+                                    取消退货单
+                                </Button>
+                            </PermissionComponent>
                         </div>
                     );
                 },
@@ -256,7 +258,6 @@ const PendingOut = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);

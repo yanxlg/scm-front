@@ -1,4 +1,6 @@
 import { RequestPagination, IRequestPagination } from '@/interface/IGlobal';
+import React from 'react';
+import { IFalseShippingTypeCode } from '@/enums/SettingEnum';
 
 export type ICustomListQuery = {
     one_cat_id?: string;
@@ -183,4 +185,124 @@ export interface ReplaceItem {
         sku_style: string;
         sku_inventory: string;
     };
+}
+
+export interface IGetStoreBlacklistReq {
+    purchase_channel: string;
+    merchant_id?: string[];
+}
+
+export interface IStoreBlacklistItem {
+    merchant_id: string;
+    purchase_channel: string;
+    operator: string;
+    created_time: string;
+    black_store_reason: string;
+}
+
+export interface ISaveBlackStoreReq {
+    purchase_channel: string;
+    merchant_id: string[];
+    black_store_reason: string;
+}
+
+export interface IDeleteBlackStoreReq {
+    purchase_channel: string;
+    merchant_id: string[];
+}
+
+export interface IGetOrderConfigListReq {
+    first_cat_id?: string;
+    second_cat_id?: string;
+    third_cat_id?: string;
+}
+
+export interface IOrderConfigItem {
+    id: string;
+    first_cat_id: string;
+    second_cat_id: string;
+    third_cat_id: string;
+    status: string;
+    create_time: string;
+    last_update_time: string;
+    operator: string;
+    remark: string;
+}
+
+export interface IAddOrderConfigReq {
+    first_cat_id: string;
+    second_cat_id?: string;
+    third_cat_id?: string;
+    remark?: string;
+}
+
+export interface IAccount {
+    id: string;
+    username: string;
+    real_name: string;
+    create_user: string;
+    create_time: string;
+    status: '1' | '2';
+    roles: string[];
+}
+
+export interface IPermissionItem {
+    data: {
+        id: string;
+        name: string;
+        pid: string;
+    };
+    children: Array<IPermissionItem>;
+}
+
+export interface IPermissionTree {
+    title: string;
+    key: string;
+    children: IPermissionTree[];
+}
+
+export interface IRole {
+    create_time: string;
+    create_user: string;
+    description: string;
+    id: string;
+    name: string;
+    status: '1' | '2';
+    users: string[];
+}
+
+export interface IAccountDetail {
+    create_time: string;
+    create_user: string;
+    id: string;
+    real_name: string;
+    role_ids: string[];
+    status: '1' | '2';
+    username: string;
+}
+
+export interface IVirtualAbnormalItem {
+    abnormal_type: string;
+    abnormal_config_detail: string[];
+}
+
+export interface IVirtualDeliverySignListReq {
+    search_params?: IVirtualAbnormalItem[];
+}
+
+export interface IVirtualDeliverySignItem {
+    content: string;
+    operator: string;
+    update_time: string;
+    status: '1' | '2';
+    abnormal_key: string;
+}
+
+export interface IAddVirtualAbnormalItem {
+    abnormal_type: IFalseShippingTypeCode;
+    abnormal_config_detail: string;
+}
+
+export interface IAddVirtualDeliverySignListReq {
+    virtual_delivery_content?: IAddVirtualAbnormalItem[];
 }

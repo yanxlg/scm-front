@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback } from 'react';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { Button, notification } from 'antd';
 import {
     JsonForm,
@@ -26,6 +26,12 @@ import CancelOrder from './CancelOrder';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { defaultOptionItem1 } from '@/enums/OrderEnum';
+import { getCategoryList } from '@/services/global';
+import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { PermissionComponent } from 'rc-permission';
+import { useDispatch } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 
 declare interface IProps {
     getAllTabCount(): void;
@@ -36,16 +42,16 @@ const formFields: FormField[] = [
         type: 'dateRanger',
         name: ['order_time_start', 'order_time_end'],
         label: '订单生成时间',
-        className: 'order-all-date-picker',
+        className: 'order-date-picker',
         formatter: ['start_date', 'end_date'],
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'order_goods_id',
         label: '子订单ID',
         className: 'order-input-review',
-        placeholder: '请输入子订单ID',
-        formatter: 'number_str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
     },
     {
         type: 'select',
@@ -53,24 +59,66 @@ const formFields: FormField[] = [
         label: '销售店铺名称',
         className: 'order-input-review',
         syncDefaultOption: defaultOptionItem1,
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map((item: any) => {
-                    const { merchant_name } = item;
-                    return {
-                        name: merchant_name,
-                        value: merchant_name,
-                    };
-                });
-            }),
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList;
+            },
+        },
+        formatter: 'plainToArr',
     },
     {
-        type: 'input',
+        type: 'textarea',
         name: 'channel_order_goods_sn',
         label: '销售订单ID',
         className: 'order-input-review',
-        placeholder: '请输入销售订单ID',
-        formatter: 'str_arr',
+        placeholder: '请输入',
+        formatter: 'multipleToArray',
+    },
+    {
+        type: 'select',
+        label: '一级类目',
+        key: 'first_category',
+        name: 'first_category',
+        className: 'order-input',
+        initialValue: '',
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['second_category']);
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '二级类目',
+        key: 'second_category',
+        name: 'second_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: 'first_category',
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
+        onChange: (name, form) => {
+            form.resetFields(['third_category']);
+        },
+    },
+    {
+        type: 'select',
+        label: '三级类目',
+        key: 'third_category',
+        name: 'third_category',
+        className: 'order-input',
+        initialValue: '',
+        optionListDependence: {
+            name: ['first_category', 'second_category'],
+            key: 'children',
+        },
+        syncDefaultOption: defaultOptionItem1,
+        optionList: () => getCategoryList(),
     },
 ];
 
@@ -80,6 +128,8 @@ const initialValues = {
 
 const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     const formRef = useRef<JsonFormRef>(null);
+    const categoryRef = useRef<IOptionItem[]>([]);
+    const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
     const {
         dataSource,
         loading,
@@ -95,8 +145,38 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     } = useList({
         queryList: getReviewOrderList,
         formRef: formRef,
+        convertQuery: (query: any) => {
+            // console.log('query', query);
+            const {
+                first_category = '',
+                second_category = '',
+                third_category = '',
+                ...rest
+            } = query;
+            return {
+                ...rest,
+                three_level_catogry_code: getCategoryLowestLevel(
+                    categoryRef.current,
+                    first_category,
+                    second_category,
+                    third_category,
+                ),
+            };
+        },
     });
     const { visible, setVisibleProps, onClose } = useModal<boolean>();
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+        getCategoryList().then(list => {
+            categoryRef.current = list;
+            setAllCategoryList(list);
+        });
+    }, []);
 
     const orderList = useMemo(() => {
         const list: IReviewOrderItem[] = [];
@@ -114,6 +194,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 productName,
                 productId,
                 commodityId,
+                threeLevelCatogryCode,
             } = orderGoods;
             // const {
 
@@ -131,6 +212,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 productName,
                 productId,
                 commodityId,
+                threeLevelCatogryCode,
             });
         });
         return list;
@@ -269,7 +351,9 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                     return (
                         <>
                             <div>
-                                <a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a>
+                                <PermissionComponent pid="order/check" control="tooltip">
+                                    <a onClick={() => _postReviewPass([orderGoodsId])}>审核通过</a>
+                                </PermissionComponent>
                             </div>
                             <div style={{ margin: '2px 0' }}>
                                 <CancelOrder
@@ -277,11 +361,17 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                                     onReload={onReload}
                                     getAllTabCount={getAllTabCount}
                                 >
-                                    <a>取消订单</a>
+                                    <PermissionComponent pid="order/cancel_order" control="tooltip">
+                                        <a>取消订单</a>
+                                    </PermissionComponent>
                                 </CancelOrder>
                             </div>
                             <div>
-                                <a onClick={() => _postOrderOffsale([orderGoodsId])}>下架商品</a>
+                                <PermissionComponent pid="order/offsale" control="tooltip">
+                                    <a onClick={() => _postOrderOffsale([orderGoodsId])}>
+                                        下架商品
+                                    </a>
+                                </PermissionComponent>
                             </div>
                         </>
                     );
@@ -387,8 +477,15 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 align: 'center',
                 width: 120,
             },
+            {
+                title: '商品最低类目',
+                dataIndex: 'threeLevelCatogryCode',
+                align: 'center',
+                width: 140,
+                render: (value: number) => getCategoryName(String(value), allCategoryList),
+            },
         ];
-    }, []);
+    }, [allCategoryList]);
 
     const pagination = useMemo(() => {
         return {
@@ -403,38 +500,42 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     const toolBarRender = useCallback(() => {
         const disabled = selectedRowKeys.length === 0 ? true : false;
         return [
-            <LoadingButton
-                key="1"
-                type="primary"
-                disabled={disabled}
-                className={formStyles.formBtn}
-                onClick={() => _postReviewPass(selectedRowKeys)}
-            >
-                审核通过
-            </LoadingButton>,
+            <PermissionComponent key="1" pid="order/check" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    disabled={disabled}
+                    className={formStyles.formBtn}
+                    onClick={() => _postReviewPass(selectedRowKeys)}
+                >
+                    审核通过
+                </LoadingButton>
+            </PermissionComponent>,
             <CancelOrder
                 orderGoodsIds={selectedRowKeys}
                 onReload={onReload}
                 getAllTabCount={getAllTabCount}
+                key="2"
             >
-                <Button
-                    key="2"
+                <PermissionComponent pid="order/cancel_order" control="tooltip">
+                    <Button
+                        type="primary"
+                        className={formStyles.formBtn}
+                        disabled={selectedRowKeys.length === 0}
+                    >
+                        取消订单
+                    </Button>
+                </PermissionComponent>
+            </CancelOrder>,
+            <PermissionComponent key="3" pid="order/offsale" control="tooltip">
+                <LoadingButton
                     type="primary"
                     className={formStyles.formBtn}
+                    onClick={() => _postOrderOffsale(selectedRowKeys)}
                     disabled={selectedRowKeys.length === 0}
                 >
-                    取消订单
-                </Button>
-            </CancelOrder>,
-            <LoadingButton
-                key="3"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => _postOrderOffsale(selectedRowKeys)}
-                disabled={selectedRowKeys.length === 0}
-            >
-                下架商品
-            </LoadingButton>,
+                    下架商品
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys]);
 
@@ -471,7 +572,7 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 />
             </>
         );
-    }, [loading, orderList, selectedRowKeys, visible]);
+    }, [loading, orderList, selectedRowKeys, visible, columns]);
 };
 
 export default PanePendingReview;

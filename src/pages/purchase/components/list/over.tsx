@@ -8,8 +8,8 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
 import { Button, message, Modal, Tag, Typography } from 'antd';
+import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -28,6 +28,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 
 const { Paragraph } = Typography;
 
@@ -124,7 +125,6 @@ const Over = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
@@ -186,9 +186,17 @@ const Over = () => {
                         children:
                             String(purchaseGoodsStatus) === '7' ? null : (
                                 <>
-                                    <Button type="link" onClick={() => applyReturnService(item)}>
-                                        申请退款
-                                    </Button>
+                                    <PermissionComponent
+                                        pid="purchase/list/refund"
+                                        control="tooltip"
+                                    >
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    </PermissionComponent>
                                 </>
                             ),
                         props: {

@@ -5,7 +5,7 @@ import { IGoodsAndSkuItem, ICatagoryItem, IPublishItem } from '@/interface/ILoca
 import { Link } from 'umi';
 import PopConfirmSetAttr from '../PopConfirmSetAttr/PopConfirmSetAttr';
 import { publishStatusCode, publishStatusMap } from '@/enums/LocalGoodsEnum';
-import { utcToLocal } from 'react-components/lib/utils/date';
+import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
 import MerchantListModal from '@/pages/goods/components/MerchantListModal';
 import {
@@ -15,7 +15,7 @@ import {
     postAllGoodsOnsale,
 } from '@/services/goods';
 import Export from '@/components/Export';
-import { JsonFormRef } from 'react-components/lib/JsonForm';
+import { JsonFormRef } from 'react-components/es/JsonForm';
 import ShelvesModal from '../ShelvesModal/ShelvesModal';
 import SkuModal from '../SkuModal/SkuModal';
 import GoodsMergeModal from '../GoodsMergeModal/GoodsMergeModal';
@@ -29,6 +29,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import GoodsTagsModal from '@/pages/goods/local/components/GoodsTagsModal';
 import { PaginationConfig } from 'react-components/es/FitTable';
 import useCountryFreightModal from '../../hooks/useCountryFreightModal';
+import { PermissionComponent } from 'rc-permission';
 
 interface IProps {
     loading: boolean;
@@ -178,43 +179,46 @@ const GoodsTable: React.FC<IProps> = ({
         };
         const disabled = selectedRowKeys.length === 0;
         return [
-            <Button
-                key="1"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={handleClickOnsale}
-                disabled={disabled || !sourceChannel}
-            >
-                一键上架
-            </Button>,
-            <Button
-                ghost
-                key="2"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={handleClickAllOnsale}
-                disabled={!sourceChannel}
-            >
-                查询商品一键上架
-            </Button>,
-            <Button
-                key="4"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => showModal(selectedRowKeys)}
-                disabled={disabled}
-            >
-                修改商品属性
-            </Button>,
-
-            <LoadingButton
-                key="3"
-                className={formStyles.formBtn}
-                onClick={_getGoodsDelete}
-                disabled={disabled}
-            >
-                删除
-            </LoadingButton>,
+            <PermissionComponent key="1" pid={'goods/local/onsale'} control="tooltip">
+                <Button
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={handleClickOnsale}
+                    disabled={disabled || !sourceChannel}
+                >
+                    一键上架
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent key="2" pid={'goods/local/super_onsale'} control="tooltip">
+                <Button
+                    ghost={true}
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={handleClickAllOnsale}
+                    disabled={!sourceChannel}
+                >
+                    查询商品一键上架
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent key="3" pid={'goods/local/modify_attr'} control="tooltip">
+                <Button
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => showModal(selectedRowKeys)}
+                    disabled={disabled}
+                >
+                    修改商品属性
+                </Button>
+            </PermissionComponent>,
+            <PermissionComponent key="4" pid={'goods/local/delete'} control="tooltip">
+                <LoadingButton
+                    className={formStyles.formBtn}
+                    onClick={_getGoodsDelete}
+                    disabled={disabled}
+                >
+                    删除
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys, sourceChannel, _getGoodsDelete]);
 
@@ -274,15 +278,22 @@ const GoodsTable: React.FC<IProps> = ({
                         <>
                             <div>
                                 {goods_status !== 'FROZEN' && (
-                                    <Button type="link" onClick={() => showEditGoods(product_id)}>
-                                        编辑商品
-                                    </Button>
+                                    <PermissionComponent pid="goods/local/edit" control="tooltip">
+                                        <Button
+                                            type="link"
+                                            onClick={() => showEditGoods(product_id)}
+                                        >
+                                            编辑商品
+                                        </Button>
+                                    </PermissionComponent>
                                 )}
                             </div>
                             <div style={{ marginTop: -6 }}>
-                                <Link to={`/goods/local/${row.commodity_id}`}>
-                                    <Button type="link">查看更多版本</Button>
-                                </Link>
+                                <PermissionComponent pid="goods/local/version" control="tooltip">
+                                    <Link to={`/goods/local/${row.commodity_id}`}>
+                                        <Button type="link">查看更多版本</Button>
+                                    </Link>
+                                </PermissionComponent>
                             </div>
                         </>
                     );
@@ -303,28 +314,30 @@ const GoodsTable: React.FC<IProps> = ({
                     return <div className={row.hasnew_version ? 'red' : ''}>{value}</div>;
                 },
             },
-            // {
-            //     key: 'product_sn',
-            //     title: 'Product SN',
-            //     dataIndex: 'product_sn',
-            //     align: 'center',
-            //     width: 140,
-            //     render: (value: string, row: IGoodsAndSkuItem) => {
-            //         const _value = value !== '0' ? value : '';
-            //         const { commodity_id, product_sn } = row;
-            //         return (
-            //             <>
-            //                 <div>{_value}</div>
-            //                 <Button
-            //                     type="link"
-            //                     onClick={() => showMergeModal(commodity_id, product_sn)}
-            //                 >
-            //                     {_value ? '查看商品组' : '关联商品'}
-            //                 </Button>
-            //             </>
-            //         );
-            //     },
-            // },
+            {
+                key: 'product_sn',
+                title: 'Product SN',
+                dataIndex: 'product_sn',
+                align: 'center',
+                width: 140,
+                render: (value: string, row: IGoodsAndSkuItem) => {
+                    const _value = value !== '0' ? value : '';
+                    const { commodity_id, product_sn } = row;
+                    return (
+                        <>
+                            <div>{_value}</div>
+                            <PermissionComponent pid="goods/local/merge" control="tooltip">
+                                <Button
+                                    type="link"
+                                    onClick={() => showMergeModal(commodity_id, product_sn)}
+                                >
+                                    {_value ? '查看商品组' : '关联商品'}
+                                </Button>
+                            </PermissionComponent>
+                        </>
+                    );
+                },
+            },
             {
                 title: '版本状态',
                 dataIndex: 'goods_status',

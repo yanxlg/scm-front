@@ -9,8 +9,8 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
-import { Button, message, Modal, Typography, Tag } from 'antd';
+import { Button, message, Modal, Typography, Tag, Popconfirm } from 'antd';
+import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -19,8 +19,9 @@ import {
     cancelPurchaseByUser,
     exportPurchaseList,
     queryPurchaseList,
+    reviewVirtualDelivery,
 } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { IPurchaseItem, IReviewVirtualDelivery } from '@/interface/IPurchase';
 import styles from '@/pages/purchase/_list.less';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import {
@@ -28,12 +29,18 @@ import {
     PurchaseCreateType,
     PurchaseCreateTypeList,
     PurchaseMap,
+    falseShippingFieldList,
+    FalseShippingReviewMap,
+    IsFalseShippingCode,
+    IsFalseShippingMap,
 } from '@/config/dictionaries/Purchase';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from './connectModal';
 import Export from '@/components/Export';
 import { FormInstance } from 'antd/es/form';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
+import { colSpanDataSource } from './all';
 
 const { Paragraph } = Typography;
 
@@ -76,6 +83,7 @@ const fieldList: FormField[] = [
             ...PurchaseCreateTypeList,
         ],
     },
+    ...falseShippingFieldList,
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -128,6 +136,14 @@ const PendingShipped = () => {
 
     const [showExport, setShowExport] = useState(false);
 
+    const _reviewVirtualDelivery = useCallback((data: IReviewVirtualDelivery) => {
+        reviewVirtualDelivery(data).then(() => {
+            // console.log('reviewVirtualDelivery', res);
+            message.success('虚假发货审核成功！');
+            onReload();
+        });
+    }, []);
+
     const showExportFn = useCallback(() => {
         setShowExport(true);
     }, []);
@@ -151,7 +167,6 @@ const PendingShipped = () => {
             <JsonForm
                 fieldList={fieldList}
                 ref={formRef}
-                enableCollapse={false}
                 labelClassName={styles.formItem}
                 initialValues={{
                     origin: '',
@@ -213,30 +228,45 @@ const PendingShipped = () => {
                 align: 'center',
                 render: (_, item) => {
                     const { origin = PurchaseCreateType.Auto, purchaseOrderGoodsId } = item;
-                    return (
-                        <>
-                            <Button type="link" onClick={() => showConnect(item)}>
-                                关联运单号
-                            </Button>
-                            {origin === PurchaseCreateType.Auto ? (
-                                <Button type="link" onClick={() => applyReturnService(item)}>
-                                    申请退款
-                                </Button>
-                            ) : (
-                                <PopConfirmLoadingButton
-                                    popConfirmProps={{
-                                        title: '确定要取消该采购单？',
-                                        onConfirm: () =>
-                                            onCancelPurchaseByUser(purchaseOrderGoodsId),
-                                    }}
-                                    buttonProps={{
-                                        type: 'link',
-                                        children: '取消采购单',
-                                    }}
-                                />
-                            )}
-                        </>
-                    );
+                    return {
+                        children: (
+                            <>
+                                <PermissionComponent pid="purchase/list/connect" control="tooltip">
+                                    <Button type="link" onClick={() => showConnect(item)}>
+                                        关联运单号
+                                    </Button>
+                                </PermissionComponent>
+                                {origin === PurchaseCreateType.Auto ? (
+                                    <PermissionComponent
+                                        pid="purchase/list/refund"
+                                        control="tooltip"
+                                    >
+                                        <Button
+                                            type="link"
+                                            onClick={() => applyReturnService(item)}
+                                        >
+                                            申请退款
+                                        </Button>
+                                    </PermissionComponent>
+                                ) : (
+                                    <PopConfirmLoadingButton
+                                        popConfirmProps={{
+                                            title: '确定要取消该采购单？',
+                                            onConfirm: () =>
+                                                onCancelPurchaseByUser(purchaseOrderGoodsId),
+                                        }}
+                                        buttonProps={{
+                                            type: 'link',
+                                            children: '取消采购单',
+                                        }}
+                                    />
+                                )}
+                            </>
+                        ),
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
                 },
             },
             {
@@ -247,12 +277,17 @@ const PendingShipped = () => {
                 className: 'break-all',
                 render: (_, item) => {
                     const { origin = PurchaseCreateType.Auto } = item;
-                    return (
-                        <>
-                            {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
-                            {_}
-                        </>
-                    );
+                    return {
+                        children: (
+                            <>
+                                {origin === PurchaseCreateType.Manually && <Tag>手动</Tag>}
+                                {_}
+                            </>
+                        ),
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
                 },
             },
             {
@@ -260,8 +295,13 @@ const PendingShipped = () => {
                 width: '140px',
                 dataIndex: 'purchaseGoodsStatus',
                 align: 'center',
-                render: (value: PurchaseCode, row) => {
-                    return PurchaseMap[value];
+                render: (value: PurchaseCode, item) => {
+                    return {
+                        children: PurchaseMap[value],
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
                 },
             },
             {
@@ -269,8 +309,13 @@ const PendingShipped = () => {
                 width: '150px',
                 dataIndex: 'purchaseTotalAmount',
                 align: 'center',
-                render: value => {
-                    return value ? `¥${value}` : value;
+                render: (value, item) => {
+                    return {
+                        children: value ? `¥${value}` : value,
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
                 },
             },
             {
@@ -296,26 +341,34 @@ const PendingShipped = () => {
                             );
                         }
                     } catch (e) {}
-                    return (
-                        <div
-                            className={classNames(
-                                formStyles.flex,
-                                formStyles.flexRow,
-                                formStyles.flexAlign,
-                            )}
-                        >
-                            <AutoEnLargeImg src={productImageUrl} className={styles.image} />
-                            <div className={classNames(formStyles.flex1, styles.productDesc)}>
-                                <div title={purchaseGoodsName}>
-                                    <Paragraph ellipsis={{ rows: 2 }} className={styles.paragraph}>
-                                        {purchaseGoodsName}
-                                    </Paragraph>
+                    return {
+                        children: (
+                            <div
+                                className={classNames(
+                                    formStyles.flex,
+                                    formStyles.flexRow,
+                                    formStyles.flexAlign,
+                                )}
+                            >
+                                <AutoEnLargeImg src={productImageUrl} className={styles.image} />
+                                <div className={classNames(formStyles.flex1, styles.productDesc)}>
+                                    <div title={purchaseGoodsName}>
+                                        <Paragraph
+                                            ellipsis={{ rows: 2 }}
+                                            className={styles.paragraph}
+                                        >
+                                            {purchaseGoodsName}
+                                        </Paragraph>
+                                    </div>
+                                    <div>{skus}</div>
+                                    <div>数量：x{purchaseGoodsNumber}</div>
                                 </div>
-                                <div>{skus}</div>
-                                <div>数量：x{purchaseGoodsNumber}</div>
                             </div>
-                        </div>
-                    );
+                        ),
+                        props: {
+                            rowSpan: item.rowSpan || 0,
+                        },
+                    };
                 },
             },
             {
@@ -323,32 +376,116 @@ const PendingShipped = () => {
                 dataIndex: 'purchasePlatform',
                 width: '130px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购店铺',
                 dataIndex: 'purchaseMerchantName',
                 width: '130px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '供应商订单号',
                 dataIndex: 'purchaseOrderGoodsSn',
                 width: '223px',
                 align: 'center',
+                render: (value, row) => {
+                    return {
+                        children: value,
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
             },
             {
                 title: '采购计划',
                 width: '223px',
                 align: 'center',
                 render: (value, row) => {
-                    return (
-                        <Button
-                            type="link"
-                            onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
-                        >
-                            查看详情
-                        </Button>
-                    );
+                    return {
+                        children: (
+                            <Button
+                                type="link"
+                                onClick={() => showDetailModal(row.purchaseOrderGoodsId)}
+                            >
+                                查看详情
+                            </Button>
+                        ),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
+                title: '是否虚假发货',
+                dataIndex: 'isRealDelivery',
+                width: '160px',
+                align: 'center',
+                render: (val: IsFalseShippingCode) => IsFalseShippingMap[val] || '',
+            },
+            {
+                title: '虚假发货审核状态',
+                dataIndex: 'auditStatus',
+                width: '160px',
+                align: 'center',
+                render: (val: number, record) => {
+                    const { purchaseOrderGoodsId, referWaybillNo } = record;
+                    if (val === 1) {
+                        return (
+                            <>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 2,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>确认</a>
+                                </Popconfirm>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认不是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 3,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>取消</a>
+                                </Popconfirm>
+                            </>
+                        );
+                    } else if (val === 2 || val === 3) {
+                        return FalseShippingReviewMap[val];
+                    }
+                    return '';
                 },
             },
         ] as ColumnType<IPurchaseItem>[];
@@ -371,12 +508,13 @@ const PendingShipped = () => {
                 key="extra-form"
                 fieldList={fieldList1}
                 ref={formRef1}
-                enableCollapse={false}
             />,
         ];
     }, []);
 
     const table = useMemo(() => {
+        // 处理合并单元格
+        const dataSet = colSpanDataSource(dataSource);
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"
@@ -386,7 +524,7 @@ const PendingShipped = () => {
                 minHeight={500}
                 pagination={pagination}
                 columns={columns}
-                dataSource={dataSource}
+                dataSource={dataSet}
                 loading={loading}
                 onChange={onChange}
                 toolBarRender={toolBarRender}

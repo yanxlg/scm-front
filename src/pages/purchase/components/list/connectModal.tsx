@@ -101,7 +101,6 @@ const ConnectModal: React.FC<IConnectModalProps> = ({ visible, onCancel }) => {
                     fieldList={fieldList}
                     layout="horizontal"
                     ref={formRef}
-                    enableCollapse={false}
                 />
             </Modal>
         );

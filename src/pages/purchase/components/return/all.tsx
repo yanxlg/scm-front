@@ -8,7 +8,7 @@ import {
     useList,
     useModal,
 } from 'react-components';
-import { FormField } from 'react-components/src/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm/index';
 import { Button, Typography } from 'antd';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -22,6 +22,7 @@ import styles from '@/pages/purchase/_return.less';
 import { PurchaseReturnCode, PurchaseReturnMap } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
+import { PermissionComponent } from 'rc-permission';
 const { Paragraph } = Typography;
 
 export const fieldList: FormField[] = [
@@ -100,12 +101,7 @@ const AllList: React.FC<AllListProps> = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm
-                fieldList={fieldList}
-                ref={formRef}
-                enableCollapse={false}
-                labelClassName={styles.formItem}
-            >
+            <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formItem}>
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
                         搜索
@@ -258,10 +254,12 @@ const AllList: React.FC<AllListProps> = () => {
 
     const toolBarRender = useCallback(() => {
         return [
-            <Button key="extra-btn" type="primary" ghost={true} onClick={onModalShow}>
-                <PlusOutlined />
-                创建退货单
-            </Button>,
+            <PermissionComponent key="extra-btn" pid="purchase/return/create" control="tooltip">
+                <Button type="primary" ghost={true} onClick={onModalShow}>
+                    <PlusOutlined />
+                    创建退货单
+                </Button>
+            </PermissionComponent>,
         ];
     }, []);
 

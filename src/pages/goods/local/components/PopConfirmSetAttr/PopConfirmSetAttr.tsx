@@ -4,6 +4,7 @@ import { getEnabledTagsList, setCommodityTag } from '@/services/goods-attr';
 import { ITagItem } from '@/interface/IGoodsAttr';
 
 import './PopConfirmSetAttr.less';
+import { PermissionComponent } from 'rc-permission';
 
 declare interface IProps {
     commodityId: string;
@@ -88,16 +89,18 @@ const SetAttr: React.FC<IProps> = ({ tags, commodityId, productId, onReload }) =
 
     return useMemo(() => {
         return (
-            <Popconfirm
-                placement="bottom"
-                okText="确定"
-                cancelText="取消"
-                icon={null}
-                title={attrTag}
-                onConfirm={confirm}
-            >
-                <Button type="link">编辑</Button>
-            </Popconfirm>
+            <PermissionComponent pid="goods/local/modify_attr" control="tooltip">
+                <Popconfirm
+                    placement="bottom"
+                    okText="确定"
+                    cancelText="取消"
+                    icon={null}
+                    title={attrTag}
+                    onConfirm={confirm}
+                >
+                    <Button type="link">编辑</Button>
+                </Popconfirm>
+            </PermissionComponent>
         );
     }, [attrTag]);
 };

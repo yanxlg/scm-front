@@ -21,18 +21,22 @@ body {
 }
 
 .ant-pro-table .ant-popover-inner-content {
-  max-height: 400px;
-  overflow: auto;
+    max-height: 400px;
+    overflow: auto;
 }
 
 .break-all {
     word-break: break-all;
 }
 
-.form-hide-label .ant-form-item-label{
+.form-hide-label .ant-form-item-label {
     visibility: hidden;
 }
 
-.ant-tabs-tab{
-    font-weight: 400!important;
+.form-hide-label .ant-form-item-label {
+    visibility: hidden;
+}
+
+.ant-tabs-tab {
+    font-weight: 400 !important;
 }

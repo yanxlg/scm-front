@@ -31,6 +31,7 @@ export type OutStockStateCode = keyof typeof OutStockState;
 
 export const InStockState = {
     1: '未入库',
+    5: '仓库签收',
     10: '已入库',
     40: '已取消',
 };
@@ -45,3 +46,16 @@ export const WarehouseMap = {
 export type WarehouseMapCode = keyof typeof WarehouseMap;
 
 export const WarehouseList = transStatusList(WarehouseMap);
+
+export const OutStockFailureMap = {
+    401: '飞鱼库存不足',
+    402: '仓库无库存出库失败',
+    403: '仓内丢货',
+    404: '尾程退件换单',
+    405: '无法发货',
+    406: '出库单异常',
+};
+
+export type OutStockFailureCode = keyof typeof OutStockFailureMap;
+
+export const OutStockFailureList = transStatusList(OutStockFailureMap);

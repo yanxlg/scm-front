@@ -1,13 +1,12 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
-import { Row, Col, Radio, Button, Table, Statistic, Spin } from 'antd';
+import { Row, Col, Button, Statistic, Spin } from 'antd';
 import { JsonForm, LoadingButton, FitTable } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-// import OrderFunnel from './components/OrderFunnel';
 import DateRange from './components/DateRange';
 import { formatThousands, formatTwodecimal } from '@/utils/transform';
 import { getDashboardTradeData, getPlatformAndStore } from '@/services/dashboard';
 import { ColumnsType } from 'antd/es/table';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import classNames from 'classnames';
 import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { getUTCDate, startDateToUnixWithUTC, endDateToUnixWithUTC } from '@/utils/date';
@@ -17,6 +16,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import styles from './_overview.less';
 import Export from '@/components/Export';
 import { exportExcel } from '@/services/global';
+import { PermissionRouterWrap } from 'rc-permission';
 
 const formFields: FormField[] = [
     {
@@ -95,7 +95,7 @@ const columns: ColumnsType<object> = [
     },
     {
         width: 120,
-        title: '实际采购成本',
+        title: '当日采购成本',
         dataIndex: 'actualPurchaseCost',
         align: 'center',
     },
@@ -164,7 +164,7 @@ const columns: ColumnsType<object> = [
         title: '动销率',
         dataIndex: 'pinRate',
         align: 'center',
-        render: (val: string) => `${Number(val) * 100}%`,
+        render: (val: string) => `${formatTwodecimal(val)}%`,
     },
     {
         width: 120,
@@ -206,7 +206,7 @@ const Overview: React.FC = props => {
         saledGoodsNumRatio: 0,
         onsaleGoodsNum: '0',
         onsaleGoodsNumRatio: 0,
-        pinRate: '0',
+        pinRate: 0,
         pinRateRatio: 0,
     });
 
@@ -265,7 +265,7 @@ const Overview: React.FC = props => {
                         saledGoodsNumRatio: formatTwodecimal(saledGoodsNumRatio),
                         onsaleGoodsNum,
                         onsaleGoodsNumRatio: formatTwodecimal(onsaleGoodsNumRatio),
-                        pinRate,
+                        pinRate: formatTwodecimal(pinRate),
                         pinRateRatio: formatTwodecimal(pinRateRatio),
                     });
                     setDetailList(detail);
@@ -479,7 +479,7 @@ const Overview: React.FC = props => {
                                     </Col>
                                     <Col span={6}>
                                         <Statistic
-                                            title="实际采购成本"
+                                            title="当日采购成本"
                                             value={actualPurchaseCost}
                                             valueStyle={{
                                                 fontWeight: 'bold',
@@ -504,28 +504,6 @@ const Overview: React.FC = props => {
                                     <Col span={6}>
                                         <Statistic
                                             title="平均在售商品数"
-                                            value={saledGoodsNum}
-                                            valueStyle={{
-                                                fontWeight: 'bold',
-                                                color: '#333',
-                                            }}
-                                        />
-                                        <div className={styles.affix}>
-                                            环比
-                                            {saledGoodsNumRatio >= 0 ? (
-                                                <span className={styles.increase}>
-                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
-                                                </span>
-                                            ) : (
-                                                <span className={styles.decrease}>
-                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
-                                                </span>
-                                            )}
-                                        </div>
-                                    </Col>
-                                    <Col span={6}>
-                                        <Statistic
-                                            title="平均有销量商品数"
                                             value={onsaleGoodsNum}
                                             valueStyle={{
                                                 // fontSize: '44px',
@@ -542,6 +520,28 @@ const Overview: React.FC = props => {
                                             ) : (
                                                 <span className={styles.decrease}>
                                                     {onsaleGoodsNumRatio}% <CaretDownOutlined />
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <Statistic
+                                            title="平均有销量商品数"
+                                            value={saledGoodsNum}
+                                            valueStyle={{
+                                                fontWeight: 'bold',
+                                                color: '#333',
+                                            }}
+                                        />
+                                        <div className={styles.affix}>
+                                            环比
+                                            {saledGoodsNumRatio >= 0 ? (
+                                                <span className={styles.increase}>
+                                                    {saledGoodsNumRatio}% <CaretUpOutlined />
+                                                </span>
+                                            ) : (
+                                                <span className={styles.decrease}>
+                                                    {saledGoodsNumRatio}% <CaretDownOutlined />
                                                 </span>
                                             )}
                                         </div>
@@ -575,7 +575,7 @@ const Overview: React.FC = props => {
                         <div className={styles.coreDataTitle}>核心数据明细</div>
                         <div className={styles.tableSection}>
                             <FitTable
-                                bordered
+                                bordered={true}
                                 rowKey="id"
                                 className={styles.table}
                                 loading={loading}
@@ -601,4 +601,7 @@ const Overview: React.FC = props => {
     }, [dates, loading, overviewInfo, detailList, exportStatus]);
 };
 
-export default Overview;
+export default PermissionRouterWrap(Overview, {
+    login: true,
+    pid: 'dashboard/overview',
+});

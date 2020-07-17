@@ -20,6 +20,7 @@ export interface IPendingOrderSearch extends IPagination {
     channel_source?: number;
     order_time_start?: number;
     order_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface IPendingOrderItem {
@@ -32,6 +33,7 @@ export interface IWaitPaySearch extends IPagination {
     purchase_platform?: number;
     purchase_order_stime?: number;
     purchase_order_etime?: number;
+    product_shop?: string[];
 }
 
 export declare interface IWaitPayOrderItem {
@@ -49,6 +51,7 @@ export declare interface IWaitPayOrderItem {
     order_goods_id: string;
     _rowspan?: number;
     _checked?: boolean;
+    _childIds?: string[];
 }
 
 export interface IWaitShipSearch extends IPagination {
@@ -62,6 +65,7 @@ export interface IWaitShipSearch extends IPagination {
     platform_order_time_end?: number;
     order_create_time_start?: number;
     order_create_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface IWaitShipOrderItem {
@@ -77,6 +81,7 @@ export interface IWaitShipOrderItem {
     productId: string;
     // purchasewaybillNo: string;
     channelSource: string;
+    purchasePlatform: string;
 }
 
 export interface INotWarehouseSearch extends IPagination {
@@ -89,6 +94,7 @@ export interface INotWarehouseSearch extends IPagination {
     purchase_order_status?: number;
     platform_order_time_start?: number;
     platform_order_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface INotWarehouseOrderItem {
@@ -102,6 +108,7 @@ export interface IWarehouseNotShipSearch extends IPagination {
     channel_source?: number;
     storage_time_start?: number;
     storage_time_end?: number;
+    product_shop?: string[];
 }
 
 export interface IWarehouseNotShipOrderItem {
@@ -130,6 +137,8 @@ export interface ISimilarInfoResponse {
         orderGoods: {
             commodityId: string;
         };
+        planId: string;
+        failReason: string;
     };
     originOrderInfo: {
         skuImageUrl: string;
@@ -150,7 +159,7 @@ export interface IReviewSearch extends IPagination {
     order_time_start?: number;
     order_time_end?: number;
     order_goods_id?: string[];
-    product_shop?: string;
+    product_shop?: string[];
     channel_order_goods_sn?: string;
 }
 
@@ -167,6 +176,7 @@ export interface IReviewOrderItem {
     productName: string;
     productId: string;
     commodityId: string;
+    threeLevelCatogryCode?: number;
 }
 
 export declare interface IPlatformItem {
@@ -183,4 +193,180 @@ export interface IPurchaseLog {
     effePurchase: string;
     succPurchase: string;
     failPurchase: string;
+}
+
+interface IPurchasePlan {
+    commoditySkuId: string;
+    createTime: string;
+    lastUpdateTime: string;
+    orderGoodsId: string;
+    payUrl: string;
+    platformOrderTime: string;
+    productPrice: string;
+    purchaseAmount: string;
+    purchaseFailCode: string;
+    purchaseFailReason: string;
+    purchaseNormalPrice: string;
+    purchaseNumber: number;
+    purchaseOrderPayStatus: number;
+    purchaseOrderShippingStatus: number;
+    purchaseOrderStatus: number;
+    purchasePlanId: string;
+    purchasePlatform: string;
+    purchasePlatformOrderId: string;
+    purchasePlatformParentOrderId: string;
+    reserveStatus: number;
+    taskId: string;
+    cancelType: string;
+    waybillTrail: string;
+}
+
+interface IOrderItemExtend {
+    commoditySkuId?: string;
+    createTime?: string;
+    inInventoryStatus?: number;
+    orderGoodsId?: string;
+    payTime?: string;
+    platformOrderTime?: string;
+    platformSendOrderTime?: string;
+    productCatId?: string;
+    productId?: string;
+    productImageUrl?: string;
+    productName?: string;
+    productPddMerchantName?: string;
+    productPrice?: string;
+    productSkuStyle?: string;
+    purchaseAmount?: string;
+    purchaseCancelStatus?: number;
+    purchaseFailCode?: string;
+    purchaseFailReason?: string;
+    purchaseNumber?: number;
+    purchaseOrderPayStatus?: number;
+    purchaseOrderShippingStatus?: number;
+    purchaseOrderStatus?: number;
+    purchasePlanId?: string;
+    purchasePlatform?: string;
+    purchasePlatformGoodsId?: string;
+    purchasePlatformGoodsName?: string;
+    purchasePlatformGroupId?: string;
+    purchasePlatformMerchantId?: string;
+    purchasePlatformOrderId?: string;
+    purchasePlatformSku?: string;
+    reserveStatus?: number;
+
+    // 待支付中新增属性
+    purchaseOrderTime?: string;
+    purchaseParentOrderSn?: string;
+    purchasePayStatusDesc?: string;
+    purchasePayUrl?: string;
+    purchaseTotalAmount?: string;
+}
+
+interface PayOrderPurchase {
+    purchasePlanId: string;
+    purchaseOrderSn: string;
+    purchaseOrderStatus: number;
+    purchaseOrderStatusDesc: string;
+    purchasePayStatusDesc: string;
+    purchasePayStatus: number;
+    orderCreateTime: string;
+    commodityId: string;
+    productName: string;
+    saleGoodsNumber: number;
+    freight: string;
+    saleGoodsAmount: string;
+    purchaseGoodsNumber: number;
+    purchaseGoodsAmount: string;
+    productShop: string;
+    reserveStatus: number;
+    purchasePlanStatus: number;
+    orderGoodsId: string;
+    lastWaybillNo: string;
+    createTime: string;
+    lastUpdateTime: string;
+    cancelType: string;
+}
+
+export interface IOrderGood {
+    channelMerchantId: string;
+    channelOrderGoodsSn: string;
+    commodityId: string;
+    createTime: string;
+    freight: string;
+    goodsAmount: string;
+    goodsNumber: number;
+    lastUpdateTime: string;
+    orderAddressUpdatedStatus: number;
+    orderGoodsId: string;
+    orderGoodsShippingStatus: number;
+    orderGoodsPurchasePlan?: Array<IPurchasePlan>;
+    orderGoodsStatus: number;
+    orderId: string;
+    productId: string;
+    productImage: string;
+    productName: string;
+    productPlatform: string;
+    productShop: string;
+    productStyle: string;
+    skuId: string;
+}
+
+export interface IOrderItem extends IOrderItemExtend {
+    orderGods: {
+        isOfflinePurchase: 0 | 1;
+        isReplaceDelivery: 0 | 1;
+    };
+    orderGoods: IOrderGood | IOrderGood[]; // 父订单时是数组
+    orderInfo: {
+        channelMerchantId: string;
+        channelMerchantName: string;
+        channelOrderSn: string;
+        channelSource: string;
+        confirmTime: string;
+        createTime: string;
+        currency: string;
+        freight: string;
+        lastUpdateTime: string;
+        orderAddress: {
+            orderId: string;
+            consignee: string;
+            country: string;
+            province: string;
+            tel: string;
+            zipCode: string;
+        };
+        orderAmount: string;
+        orderId: string;
+        orderStatus: number;
+        orderTime: string;
+    };
+
+    // 待支付
+    unpaidPurchaseOrderGoodsResult?: Array<PayOrderPurchase>;
+}
+
+export type IFlatOrderItem = IOrderItem['orderGods'] &
+    Partial<IOrderGood> &
+    Partial<IOrderItem['orderInfo']> &
+    Partial<IPurchasePlan> &
+    Partial<PayOrderPurchase> &
+    IOrderItemExtend;
+
+export type CombineRowItem = {
+    __rowspan: number;
+    __key?: any;
+};
+
+export declare interface ISkuStyle {
+    [key: string]: string;
+}
+
+export declare interface IGoodsDetail {
+    product_id: string;
+    goods_img: string;
+    title: string;
+    sku_style?: ISkuStyle[];
+    sku_sn?: string;
+    sku_img?: string;
+    commodity_sku_id?: string;
 }

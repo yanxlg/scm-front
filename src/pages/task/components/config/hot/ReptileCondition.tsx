@@ -367,7 +367,7 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                             <Select onChange={filterChange} className="picker-default">
                                 <Select.Option
                                     value={HotTaskFilterType.ByCategory}
-                                    disabled={range === HotTaskRange.store}
+                                    disabled={range !== HotTaskRange.fullStack}
                                 >
                                     指定分类
                                 </Select.Option>

@@ -5,11 +5,15 @@ import {
     ISHopList,
     IExportExcelReqData,
     IOnsaleInterceptStoreRes,
+    ICategoryItem,
 } from '@/interface/IGlobal';
 import { GlobalApiPath } from '@/config/api/Global';
 import { downloadExcel } from '@/utils/common';
 import { message } from 'antd';
 import { IGood } from '@/interface/ILocalGoods';
+import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
+import { ISimpleRole } from '@/models/account';
+import User from '@/storage/User';
 
 // 1--品类预估模板下载，2---运费价卡模板下载
 type IDownloadFileType = '1' | '2';
@@ -150,3 +154,123 @@ export const queryOnsaleInterceptStore = (purchase_channel?: string) => {
             return (data[0]?.support_merchant_id ?? []).map(val => String(val));
         });
 };
+
+function convertCategory(data: ICategoryItem[]): IOptionItem[] {
+    return data.map(({ name, id, children }) => {
+        return {
+            name: name as string,
+            value: id as string,
+            ...(children ? { children: convertCategory(children) } : undefined),
+        };
+    });
+}
+
+// 获取所有
+export const getCategoryList = singlePromiseWrap(() => {
+    return request
+        .get<IResponse<ICategoryItem[]>>(GlobalApiPath.QueryCategoryList)
+        .then(res => {
+            const { data } = res;
+            return convertCategory(data);
+        })
+        .catch(() => {
+            return [];
+        });
+});
+export function queryRoleSimpleList() {
+    return request
+        .get<
+            IResponse<
+                Array<{
+                    id: string;
+                    name: string;
+                }>
+            >
+        >(GlobalApiPath.querySimpleRoleList)
+        .then(({ data }) => {
+            return data.map(({ id, name }) => ({
+                name: name,
+                value: id,
+            }));
+        });
+}
+
+export function loginUser(data: { username: string; password: string }) {
+    return request.post<IResponse<string>>(GlobalApiPath.login, {
+        data: data,
+    });
+}
+
+declare interface IItem {
+    data: string;
+    id: string;
+    method: string;
+    name: string;
+    pid: string;
+    type: string; // 1:数据权限，2：页面权限
+    children?: IItem[];
+}
+
+export function queryUserPermission() {
+    return request.get<
+        IResponse<
+            Array<{
+                data: string;
+                id: string;
+                method: string;
+                name: string;
+                pid: string;
+                type: string; // 1:数据权限，2：页面权限
+            }>
+        >
+    >(GlobalApiPath.queryPermissionList);
+}
+
+export function logout() {
+    return request.post(GlobalApiPath.logout).then(() => {
+        User.clearToken();
+    });
+}
+
+export function updatePwd(oldPassword: string, newPassword: string) {
+    return request.put(GlobalApiPath.updatePwd, {
+        data: {
+            oldPassword,
+            newPassword,
+        },
+    });
+}
+
+export function getFilterShopNames(selected?: string[]) {
+    return new Promise<string[] | undefined>(resolve => {
+        if (!selected || selected.length === 0) {
+            return queryShopList().then(({ data: merchantList }) => {
+                // 做权限过滤
+                const dData = User.dData || [];
+                const list = merchantList.filter((item: any) => {
+                    return dData.indexOf(item.merchant_name) > -1;
+                });
+                resolve(list.map((item: any) => item.merchant_name) as string[]);
+            });
+        } else {
+            resolve(selected);
+        }
+    });
+}
+
+export function getFilterShopIds(selected?: string[]) {
+    return new Promise<string[] | undefined>(resolve => {
+        if (!selected || selected.length === 0) {
+            return queryShopList().then(({ data: merchantList }) => {
+                // 做权限过滤
+                const dData = User.dData || [];
+                const list = merchantList.filter((item: any) => {
+                    return dData.indexOf(item.merchant_name) > -1;
+                });
+                resolve(list.map((item: any) => item.merchant_id) as string[]);
+            });
+        } else {
+            resolve(selected);
+        }
+    });
+}

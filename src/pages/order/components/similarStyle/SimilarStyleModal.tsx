@@ -11,7 +11,7 @@ import { failureReasonMap } from '@/enums/OrderEnum';
 import SimilarGoods from './SimilarGoods';
 import OrderGoods from './OrderGoods';
 import GatherInfo from './GatherInfo';
-import StyleForm from './StylesForm';
+import StyleForm, { getQueryVariable } from './StylesForm';
 
 declare interface SimilarStyleModalProps {
     visible:
@@ -54,12 +54,17 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
 
     const onOKey = useCallback(() => {
         form.validateFields().then(values => {
-            const { type, list, ...extra } = values;
+            const { type, list, goods_link, goods_id, sku_id, ...extra } = values;
             setSubmitting(true);
             patSimilarGoods({
                 ...extra,
                 ...visible,
-                ...(type === 1 ? {} : JSON.parse(list)),
+                ...(type === 1
+                    ? {
+                          goods_id: goods_id || getQueryVariable('goods_id', goods_link),
+                          sku_id: sku_id || getQueryVariable('sku_id', goods_link),
+                      }
+                    : JSON.parse(list)),
                 type,
             } as IPadSimilarBody)
                 .then(() => {
@@ -107,11 +112,26 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                                     <div className={similarStyles.title}>
                                         <LoadingOutlined className={taskStyles.progressIcon} />
                                         正在爬取商品信息...
+                                        {purchaseInfo.planId ? (
+                                            <div className={similarStyles.desc}>
+                                                任务ID: {purchaseInfo.planId}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 ) : status === 3 ? (
                                     <div className={similarStyles.title}>
                                         <CloseCircleFilled className={taskStyles.errorIcon} />
                                         爬取失败
+                                        {purchaseInfo.planId ? (
+                                            <div className={similarStyles.desc}>
+                                                任务ID: {purchaseInfo.planId}
+                                            </div>
+                                        ) : null}
+                                        {purchaseInfo.failReason ? (
+                                            <div className={similarStyles.desc}>
+                                                失败原因: {purchaseInfo.failReason}
+                                            </div>
+                                        ) : null}
                                     </div>
                                 ) : null}
                                 {status === 0 ? (

@@ -1,9 +1,9 @@
-import React, { ReactText, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ReactText, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
-import { Modal, message, Button } from 'antd';
+import { Modal, message, Button, Tooltip, Popconfirm } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { PopConfirmLoadingButton, FitTable } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
@@ -41,6 +41,10 @@ import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
 import { queryShopList } from '@/services/global';
+import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
+import { ConnectState } from '@/models/connect';
+import { useDispatch } from '@@/plugin-dva/exports';
+import styles from '@/pages/goods/local/_index.less';
 
 const salesVolumeList = [
     {
@@ -126,12 +130,18 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
-        optionList: () =>
-            queryShopList().then(({ data = [] }) => {
-                return data.map(({ merchant_name, merchant_id }) => {
-                    return { name: merchant_name, value: merchant_id };
+        formatter: 'plainToArr',
+        optionList: {
+            type: 'select',
+            selector: (state: ConnectState) => {
+                return state?.permission?.merchantList?.map(item => {
+                    return {
+                        ...item,
+                        value: item.id,
+                    };
                 });
-            }),
+            },
+        },
     },
     {
         type: 'select',
@@ -168,19 +178,34 @@ const formFields: FormField[] = [
             return { name: name, value: id };
         }),
     },
+    {
+        type: 'inputRange',
+        label: '价格范围（$）',
+        name: ['min_sale_price', 'max_sale_price'],
+        className: 'product-picker',
+        precision: 2,
+    },
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
+    const urlQueryRef = useRef<any>(null);
     const [exportDialog, setExportDialog] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch({
+            type: 'permission/queryMerchantList',
+        });
+    }, []);
     const { visible, onClose, setVisibleProps } = useModal<{
         product_ids: string;
         merchant_id: string;
+        commodity_ids: string;
     }>();
 
     const {
@@ -192,6 +217,7 @@ const ChannelList: React.FC = props => {
         const { query, url } = queryString.parseUrl(window.location.href);
         if (!isEmptyObject(query)) {
             window.history.replaceState({}, '', url);
+            urlQueryRef.current = query;
         }
         const {
             pageNumber = defaultPageNumber,
@@ -398,12 +424,16 @@ const ChannelList: React.FC = props => {
         [dataSource],
     );
 
-    const showLog = useCallback((record: IChannelProductListItem) => {
-        setVisibleProps({
-            product_ids: record.product_id,
-            merchant_id: record.merchant_id,
-        });
-    }, []);
+    const showLog = useCallback(
+        ({ product_id, merchant_id, commodity_id }: IChannelProductListItem) => {
+            setVisibleProps({
+                product_ids: product_id,
+                merchant_id: merchant_id,
+                commodity_ids: commodity_id,
+            });
+        },
+        [],
+    );
 
     const columns = useMemo<TableProps<IChannelProductListItem>['columns']>(() => {
         return [
@@ -420,36 +450,48 @@ const ChannelList: React.FC = props => {
                     return {
                         children: (
                             <>
-                                <PopConfirmLoadingButton
-                                    buttonProps={{
-                                        disabled: canUpper,
-                                        children: '上架',
-                                        type: 'link',
-                                    }}
-                                    popConfirmProps={{
-                                        title: '确定需要上架该商品吗?',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        disabled: canUpper,
-                                        placement: 'topRight',
-                                        onConfirm: () => onShelves(item),
-                                    }}
-                                />
-                                <PopConfirmLoadingButton
-                                    buttonProps={{
-                                        disabled: canDown,
-                                        children: '下架',
-                                        type: 'link',
-                                    }}
-                                    popConfirmProps={{
-                                        title: '确定需要下架该商品吗?',
-                                        okText: '确定',
-                                        cancelText: '取消',
-                                        disabled: canDown,
-                                        placement: 'topRight',
-                                        onConfirm: () => offShelves(item),
-                                    }}
-                                />
+                                <PermissionComponent
+                                    key="on"
+                                    pid="goods/channel/sales"
+                                    control="tooltip"
+                                >
+                                    <PopConfirmLoadingButton
+                                        buttonProps={{
+                                            disabled: canUpper,
+                                            children: '上架',
+                                            type: 'link',
+                                        }}
+                                        popConfirmProps={{
+                                            title: '确定需要上架该商品吗?',
+                                            okText: '确定',
+                                            cancelText: '取消',
+                                            disabled: canUpper,
+                                            placement: 'topRight',
+                                            onConfirm: () => onShelves(item),
+                                        }}
+                                    />
+                                </PermissionComponent>
+                                <PermissionComponent
+                                    key="on"
+                                    pid="goods/channel/sales"
+                                    control="tooltip"
+                                >
+                                    <PopConfirmLoadingButton
+                                        buttonProps={{
+                                            disabled: canDown,
+                                            children: '下架',
+                                            type: 'link',
+                                        }}
+                                        popConfirmProps={{
+                                            title: '确定需要下架该商品吗?',
+                                            okText: '确定',
+                                            cancelText: '取消',
+                                            disabled: canDown,
+                                            placement: 'topRight',
+                                            onConfirm: () => offShelves(item),
+                                        }}
+                                    />
+                                </PermissionComponent>
                             </>
                         ),
                     };
@@ -527,9 +569,11 @@ const ChannelList: React.FC = props => {
                     return (
                         <div>
                             {ProductStatusResponseMap[status]}
-                            <Button type="link" onClick={() => showLog(record)}>
-                                上下架日志
-                            </Button>
+                            <PermissionComponent pid={'goods/channel/sales_log'} control="tooltip">
+                                <Button type="link" onClick={() => showLog(record)}>
+                                    上下架日志
+                                </Button>
+                            </PermissionComponent>
                         </div>
                     );
                 },
@@ -543,16 +587,43 @@ const ChannelList: React.FC = props => {
                     return (
                         <>
                             <div>{value}</div>
-                            <Button
-                                type="link"
-                                onClick={() =>
-                                    showSkuDialog(row.id, row.merchant_id, row.commodity_id)
-                                }
-                            >
-                                查看sku详情
-                            </Button>
+                            <PermissionComponent pid={'goods/channel/sku'} control="tooltip">
+                                <Button
+                                    type="link"
+                                    onClick={() =>
+                                        showSkuDialog(row.id, row.merchant_id, row.commodity_id)
+                                    }
+                                >
+                                    查看sku详情
+                                </Button>
+                            </PermissionComponent>
                         </>
                     );
+                },
+            },
+            {
+                title: '在架销售价（$）',
+                dataIndex: 'sale_price',
+                align: 'center',
+                width: 150,
+                render: (_, item: IChannelProductListItem) => {
+                    const {
+                        min_sale_price = '0',
+                        max_sale_price = '0',
+                        min_shipping_fee = '0',
+                        max_shipping_fee = '0',
+                    } = item;
+                    const salePrice = `${
+                        min_sale_price === max_sale_price
+                            ? max_sale_price
+                            : `${min_sale_price}~${max_sale_price}`
+                    }`;
+                    const shipPrice = `${
+                        min_shipping_fee === max_shipping_fee
+                            ? max_shipping_fee
+                            : `${min_shipping_fee}~${max_shipping_fee}`
+                    }`;
+                    return `${salePrice}（含运费${shipPrice}）`;
                 },
             },
             {
@@ -562,12 +633,14 @@ const ChannelList: React.FC = props => {
                 width: 140,
                 render: (value: number, row: IChannelProductListItem) => {
                     return (
-                        <Button
-                            type="link"
-                            onClick={() => showCountryShipFee(row.product_id, row.merchant_id)}
-                        >
-                            查看国家运费
-                        </Button>
+                        <PermissionComponent pid={'goods/channel/shipping_free'} control="tooltip">
+                            <Button
+                                type="link"
+                                onClick={() => showCountryShipFee(row.product_id, row.merchant_id)}
+                            >
+                                查看国家运费
+                            </Button>
+                        </PermissionComponent>
                     );
                 },
             },
@@ -634,30 +707,33 @@ const ChannelList: React.FC = props => {
     const toolBarRender = useCallback(() => {
         const size = selectedRowKeys.length;
         return [
-            <LoadingButton
-                key="on"
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => onShelveList(selectedRowKeys)}
-                disabled={size === 0}
-            >
-                一键上架
-            </LoadingButton>,
-            <LoadingButton
-                key={'of'}
-                type="primary"
-                className={formStyles.formBtn}
-                onClick={() => offShelveList(selectedRowKeys)}
-                disabled={size === 0}
-            >
-                一键下架
-            </LoadingButton>,
+            <PermissionComponent key="on" pid="goods/channel/sales" control="tooltip">
+                <LoadingButton
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => onShelveList(selectedRowKeys)}
+                    disabled={size === 0}
+                >
+                    一键上架
+                </LoadingButton>
+            </PermissionComponent>,
+            <PermissionComponent key="of" pid="goods/channel/sales" control="tooltip">
+                <LoadingButton
+                    key={'of'}
+                    type="primary"
+                    className={formStyles.formBtn}
+                    onClick={() => offShelveList(selectedRowKeys)}
+                    disabled={size === 0}
+                >
+                    一键下架
+                </LoadingButton>
+            </PermissionComponent>,
         ];
     }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
             <FitTable<IChannelProductListItem>
-                bordered
+                bordered={true}
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}
@@ -695,6 +771,22 @@ const ChannelList: React.FC = props => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;
     }, [visible]);
 
+    useEffect(() => {
+        if (urlQueryRef.current && urlQueryRef.current?.from === 'selection') {
+            const { commodity_id, merchant_ids, vova_virtual_id } = urlQueryRef.current;
+            if (
+                commodity_id &&
+                merchant_ids &&
+                vova_virtual_id &&
+                dataSource &&
+                dataSource.length
+            ) {
+                showSkuDialog(dataSource[0].id, merchant_ids as string, commodity_id as string);
+                urlQueryRef.current = null;
+            }
+        }
+    }, [dataSource]);
+
     return (
         <>
             {body}
@@ -703,4 +795,7 @@ const ChannelList: React.FC = props => {
     );
 };
 
-export default ChannelList;
+export default PermissionRouterWrap(ChannelList, {
+    login: true,
+    pid: 'goods/channel',
+});

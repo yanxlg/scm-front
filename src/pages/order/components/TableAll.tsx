@@ -20,10 +20,11 @@ import {
 } from '@/enums/OrderEnum';
 import AllColumnsSetting from './AllColumnsSetting';
 import Export from '@/components/Export';
-import { IFilterParams } from '@/services/order-manage';
+import { IFilterParams, getWarehouseList, getPurchaseUidList } from '@/services/order-manage';
 
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import CancelOrder from './CancelOrder';
+import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 declare interface IProps {
     loading: boolean;
@@ -53,6 +54,8 @@ declare interface IState {
     trackDialogStatus: boolean;
     goodsDetail: IGoodsDetail | null;
     currentOrder: IChildOrderItem | null;
+    warehouseList: IOptionItem[];
+    purchaseUidList: IOptionItem[];
 }
 
 class OrderTableAll extends React.PureComponent<IProps, IState> {
@@ -462,9 +465,8 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             dataIndex: 'purchaseFailCode',
             align: 'center',
             width: 140,
-            render: (value: string, row: IChildOrderItem) => {
-                const { purchaseOrderStatus } = row;
-                return purchaseOrderStatus === 7
+            render: (value: string) => {
+                return value && value !== '0'
                     ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
                     : '';
             },
@@ -492,7 +494,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
         // 勾选展示
         {
             key: 'purchasePlatformOrderId',
-            title: '采购订单ID',
+            title: '供应商订单ID',
             dataIndex: 'purchasePlatformOrderId',
             align: 'center',
             width: 120,
@@ -538,7 +540,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             defaultHide: true,
         },
         // 勾选展示
-        {
+        /*     {
             key: 'purchaseTime',
             title: '采购签收时间',
             dataIndex: 'purchaseTime',
@@ -546,7 +548,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             width: 120,
             render: (value: string) => utcToLocal(value, ''),
             defaultHide: true,
-        },
+        },*/
         // 勾选展示
         {
             key: 'storageTime',
@@ -650,6 +652,39 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             // render: (value: number) => getStatusDesc(purchasePlanCancelOptionList, value),
             // defaultHide: true,
         },
+        {
+            key: 'lastWaybillNo',
+            title: '供应商订单号',
+            dataIndex: 'lastWaybillNo',
+            align: 'center',
+            width: 130,
+        },
+        // 勾选展示
+        {
+            key: 'warehouseId',
+            title: '仓库名称',
+            dataIndex: 'warehouseId',
+            align: 'center',
+            width: 130,
+            render: (value: string) => {
+                const { warehouseList } = this.state;
+                return getStatusDesc(warehouseList, value);
+            },
+            defaultHide: true,
+        },
+        // 勾选展示
+        {
+            key: 'platformUid',
+            title: '下单账号',
+            dataIndex: 'platformUid',
+            align: 'center',
+            width: 130,
+            render: (value: string) => {
+                const { purchaseUidList } = this.state;
+                return getStatusDesc(purchaseUidList, value);
+            },
+            defaultHide: true,
+        },
     ];
 
     constructor(props: IProps) {
@@ -659,8 +694,31 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
             trackDialogStatus: false,
             goodsDetail: null,
             currentOrder: null,
+            warehouseList: [],
+            purchaseUidList: [],
         };
     }
+
+    componentDidMount = () => {
+        this.getWarehouseList();
+        this.getPurchaseUidList();
+    };
+
+    private getWarehouseList = () => {
+        getWarehouseList().then(list =>
+            this.setState({
+                warehouseList: list,
+            }),
+        );
+    };
+
+    private getPurchaseUidList = () => {
+        getPurchaseUidList().then(list =>
+            this.setState({
+                purchaseUidList: list,
+            }),
+        );
+    };
 
     private showLogisticsTrack = (currentOrder: IChildOrderItem) => {
         // console.log('showLogisticsTrack', purchaseWaybillNo);
@@ -775,6 +833,7 @@ class OrderTableAll extends React.PureComponent<IProps, IState> {
                     dataSource={orderList}
                     scroll={{ x: 'max-content' }}
                     autoFitY={true}
+                    minHeight={600}
                     pagination={
                         {
                             current: page,

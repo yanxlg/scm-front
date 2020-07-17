@@ -42,7 +42,7 @@ export interface IOverviewInfo {
     saledGoodsNumRatio: number; // 有销量商品数量环比
     onsaleGoodsNum: string; // 在架商品数量
     onsaleGoodsNumRatio: number; // 在架商品数量环比
-    pinRate: string; // 动销率
+    pinRate: number; // 动销率
     pinRateRatio: number; // 动销率环比
 }
 
@@ -66,4 +66,42 @@ export interface IOverviewDetailItem {
     storageBacklogCost: string; // 仓库积压成本
     onsaleGoodsNum: number; // 在架商品数
     saledGoodsNum: number; // 有销量商品数
+}
+
+export interface IMonitorOrderReq {
+    channel_source?: string;
+    channel_merchant_name?: string;
+    confirm_time_start: number;
+    confirm_time_end: number;
+}
+
+export interface IMonitorPurchaseOrderReq {
+    order_time_start: number;
+    order_time_end: number;
+}
+
+export interface IMonitorOrderItem {
+    channelSource: string;
+    channelMerchantName: string;
+    confirmTime: string;
+    dayNum: number;
+    totalNum: number;
+    outboundNum: number;
+    cancelNumBeforeOutbound: number;
+    cancelNumAfterOutbound: number;
+    cancelNumMiddle: number;
+    cancelNumChannel: number;
+    channelCancelNumBeforeOutbound?: number;
+    percentage?: string;
+    specialPercentage?: string;
+}
+
+export interface IMonitorPurchaseOrderItem {
+    orderTime: string;
+    dayNum: number;
+    totalNum: number;
+    inboundNum: number;
+    cancelNumNoPay: number;
+    percentage?: string;
+    specialPercentage?: string;
 }

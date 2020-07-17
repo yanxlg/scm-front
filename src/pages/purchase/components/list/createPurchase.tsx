@@ -107,7 +107,6 @@ const CreatePurchase: ForwardRefRenderFunction<CreatePurchaseRef, CreatePurchase
             <div>
                 <JsonForm
                     ref={formRef1}
-                    enableCollapse={false}
                     layout={'horizontal'}
                     initialValues={{
                         purchase_platform: 'pdd',
