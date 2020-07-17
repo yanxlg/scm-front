@@ -164,35 +164,41 @@ export function render() {
 }*/
 
 // service worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-        .register('sw.js')
-        .then(function(reg) {
-            reg.onupdatefound = function() {
-                const installingWorker = reg.installing;
-                if (installingWorker) {
-                    installingWorker.onstatechange = function() {
-                        switch (installingWorker.state) {
-                            case 'installed':
-                                if (navigator.serviceWorker.controller) {
+window.addEventListener('load', function() {
+    // tslint:disable-next-line:no-console
+    console.log('111');
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register('sw.js')
+            .then(function(reg) {
+                reg.onupdatefound = function() {
+                    const installingWorker = reg.installing;
+                    if (installingWorker) {
+                        installingWorker.onstatechange = function() {
+                            switch (installingWorker.state) {
+                                case 'installed':
+                                    if (navigator.serviceWorker.controller) {
+                                        // tslint:disable-next-line:no-console
+                                        console.log('New or updated content is available.');
+                                    } else {
+                                        // tslint:disable-next-line:no-console
+                                        console.log('Content is now available offline!');
+                                    }
+                                    break;
+                                case 'redundant':
                                     // tslint:disable-next-line:no-console
-                                    console.log('New or updated content is available.');
-                                } else {
-                                    // tslint:disable-next-line:no-console
-                                    console.log('Content is now available offline!');
-                                }
-                                break;
-                            case 'redundant':
-                                // tslint:disable-next-line:no-console
-                                console.error('The installing service worker became redundant.');
-                                break;
-                        }
-                    };
-                }
-            };
-        })
-        .catch(function(e) {
-            // tslint:disable-next-line:no-console
-            console.error('Error during service worker registration:', e);
-        });
-}
+                                    console.error(
+                                        'The installing service worker became redundant.',
+                                    );
+                                    break;
+                            }
+                        };
+                    }
+                };
+            })
+            .catch(function(e) {
+                // tslint:disable-next-line:no-console
+                console.error('Error during service worker registration:', e);
+            });
+    }
+});
