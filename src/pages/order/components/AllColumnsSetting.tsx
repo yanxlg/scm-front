@@ -34,6 +34,7 @@ const baseGroupList = [
     // { key: 'warehouseId', name: '仓库名称' },
     // { key: 'platformUid', name: '下单账号' },
     { key: 'threeLevelCatogryCode', name: '商品最低类目' },
+    { key: 'outboundFailCode', name: '出库失败原因' },
 ];
 
 const saleGroupList = [

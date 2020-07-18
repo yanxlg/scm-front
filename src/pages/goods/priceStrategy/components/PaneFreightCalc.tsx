@@ -17,6 +17,7 @@ import styles from '../_index.less';
 import Export from '@/components/Export';
 import { exportExcel } from '@/services/global';
 import { PermissionComponent } from 'rc-permission';
+import { FormInstance } from 'antd/es/form';
 
 const PaneFreightCalc: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -191,7 +192,7 @@ const PaneFreightCalc: React.FC = props => {
                 className: styles.select,
                 optionList: nameList,
                 formatter: 'join',
-                onChange: (name, form) => {
+                onChange: (name: string, form: FormInstance) => {
                     // console.log(11111, );
                     const val = form.getFieldValue(name)?.join(',') ?? '';
                     val ? _getShippingCardCountry(val) : setCountryCodeList([]);

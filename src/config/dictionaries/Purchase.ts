@@ -1,4 +1,5 @@
 import { transOptionList, transOptionList2 } from '@/utils/transform';
+import { FormField } from 'react-components/es/JsonForm';
 
 export enum PurchaseReturnType {
     PendingOut = '1',
@@ -45,3 +46,20 @@ export const PurchaseCreateTypeMap = {
 
 export type PurchaseCreateTypeCode = keyof typeof PurchaseCreateTypeMap;
 export const PurchaseCreateTypeList = transOptionList2(PurchaseCreateTypeMap);
+
+export const IsFalseShippingMap = {
+    '1': '是',
+    '2': '否',
+};
+
+export type IsFalseShippingCode = keyof typeof IsFalseShippingMap;
+export const IsFalseShippingList = transOptionList2(IsFalseShippingMap);
+
+export const FalseShippingReviewMap = {
+    '1': '待审核',
+    '2': '审核通过',
+    '3': '审核驳回',
+};
+
+export type FalseShippingReviewCode = keyof typeof FalseShippingReviewMap;
+export const FalseShippingReviewList = transOptionList2(FalseShippingReviewMap);

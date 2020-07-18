@@ -54,6 +54,7 @@ import { getCategoryList } from '@/services/global';
 import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
+import { OutStockFailureCode, OutStockFailureMap } from '@/config/dictionaries/Stock';
 
 const configFields = [
     'order_goods_status',
@@ -68,6 +69,7 @@ const configFields = [
     'product_platform',
     'platform_uid',
     'purchase_fail_code',
+    'outbound_fail_code',
     'first_category',
     'second_category',
     'third_category',
@@ -934,6 +936,15 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       width: 140,
                       defaultHide: true,
                       render: (value: number) => getCategoryName(String(value), allCategoryList),
+                  },
+                  {
+                      key: 'outboundFailCode',
+                      title: '出库失败原因',
+                      dataIndex: 'outboundFailCode',
+                      align: 'center',
+                      width: 140,
+                      defaultHide: true,
+                      render: (value: OutStockFailureCode) => OutStockFailureMap[value],
                   },
               ];
     }, [onlyParent, purchaseUidList, allCategoryList]);
