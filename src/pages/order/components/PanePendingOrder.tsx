@@ -785,6 +785,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [similarModal, showSimilarModal, hideSimilarModal] = useModal2<{
         order_goods_id: string;
         purchase_plan_id: string;
+        commodity_id: string;
     }>();
 
     const similarModalComponent = useMemo(() => {
@@ -1137,6 +1138,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                                             showSimilarModal({
                                                                 order_goods_id: row.orderGoodsId,
                                                                 purchase_plan_id: row.purchasePlanId as string,
+                                                                commodity_id: row.commodityId,
                                                             })
                                                         }
                                                     >
@@ -1154,6 +1156,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                                             showSimilarModal({
                                                                 order_goods_id: row.orderGoodsId,
                                                                 purchase_plan_id: row.purchasePlanId as string,
+                                                                commodity_id: row.commodityId,
                                                             })
                                                         }
                                                     >
@@ -1172,6 +1175,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                                             showSimilarModal({
                                                                 order_goods_id: row.orderGoodsId,
                                                                 purchase_plan_id: row.purchasePlanId as string,
+                                                                commodity_id: row.commodityId,
                                                             })
                                                         }
                                                     >
