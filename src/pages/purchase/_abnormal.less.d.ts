@@ -5,9 +5,10 @@ interface CssExports {
     cascaderBox: string;
     checkbox: string;
     desc: string;
-    descItem: string;
     detailModal: string;
     disabled: string;
+    edit: string;
+    form: string;
     goodsInfo: string;
     icon1: string;
     icon2: string;
@@ -30,9 +31,10 @@ interface CssExports {
     relatedBox: string;
     remark: string;
     sectionBox: string;
+    select: string;
     stepOne: string;
     styleItem: string;
-    text: string;
+    tableFormItem: string;
     title: string;
     two: string;
 }

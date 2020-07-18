@@ -7,9 +7,11 @@ interface CssExports {
     connectLabel: string;
     formItem: string;
     formItemMl: string;
+    formItemPicker: string;
     formLabel: string;
     formRight: string;
     image: string;
+    operateItem: string;
     paragraph: string;
     productDesc: string;
     title: string;

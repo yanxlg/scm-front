@@ -4,6 +4,7 @@ interface CssExports {
     block: string;
     clip: string;
     container: string;
+    containerAbs: string;
     fill: string;
     hide: string;
     inlineBlock: string;

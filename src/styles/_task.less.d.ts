@@ -8,6 +8,7 @@ interface CssExports {
     progressText: string;
     successIcon: string;
     successText: string;
+    taskCheckAll: string;
     taskDetailCard: string;
     taskDetailContent: string;
     taskIdsSelect: string;

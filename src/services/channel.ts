@@ -59,17 +59,19 @@ export async function cleanChannelChangedProperties() {
 
 export async function queryChannelGoodsList(data: IChannelProductListBody & RequestPagination) {
     const { merchant_ids } = data;
-    return getFilterShopIds(merchant_ids).then((merchant_ids?: string[]) => {
-        return request.post<IResponse<IChannelProductListResponse>>(
-            ChannelApiPath.QueryProductList,
-            {
-                data: {
-                    ...transPaginationRequest(data),
-                    merchant_ids: merchant_ids ? merchant_ids.join(',') : merchant_ids,
+    return getFilterShopIds(merchant_ids ? [merchant_ids] : undefined).then(
+        (merchant_ids?: string[]) => {
+            return request.post<IResponse<IChannelProductListResponse>>(
+                ChannelApiPath.QueryProductList,
+                {
+                    data: {
+                        ...transPaginationRequest(data),
+                        merchant_ids: merchant_ids ? merchant_ids.join(',') : merchant_ids,
+                    },
                 },
-            },
-        );
-    });
+            );
+        },
+    );
 }
 
 export const queryChannelCategory = singlePromiseWrap(() => {
