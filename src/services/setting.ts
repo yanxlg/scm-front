@@ -28,6 +28,10 @@ import {
     IPermissionTree,
     IRole,
     IAccountDetail,
+    IVirtualDeliverySignListReq,
+    IVirtualDeliverySignItem,
+    IAddVirtualDeliverySignListReq,
+    IVirtualAbnormalItem,
     IErrorConfigItem,
 } from '@/interface/ISetting';
 import { SettingApiPath } from '@/config/api/SettingApiPath';
@@ -463,6 +467,40 @@ export function updateAccountStatus(id: string, status: number) {
         },
     });
 }
+
+/*** 虚假发货标记配置 ***/
+export function queryVirtualDeliverySignList(data: IVirtualDeliverySignListReq) {
+    return api.post<IResponse<PaginationResponse<IVirtualDeliverySignItem>>>(
+        SettingApiPath.queryVirtualDeliverySignList,
+        {
+            data,
+        },
+    );
+}
+
+export function addVirtualDeliverySign(data: IAddVirtualDeliverySignListReq) {
+    return request.post(SettingApiPath.addVirtualDeliverySign, {
+        data,
+    });
+}
+
+export function deleteVirtualDeliverySign(id: string) {
+    return request.post(SettingApiPath.deleteVirtualDeliverySign, {
+        data: {
+            abnormal_key: id,
+        },
+    });
+}
+
+export function queryVirtualDeliveryCondition() {
+    return request.get<IResponse<IVirtualAbnormalItem[]>>(
+        SettingApiPath.queryVirtualDeliveryCondition,
+    );
+}
+
+export const queryPurchaseWaybillMerchant = singlePromiseWrap(() => {
+    return request.get(SettingApiPath.queryPurchaseWaybillMerchant);
+});
 
 export function queryErrorConfigList(data: {
     middle_code?: string[];

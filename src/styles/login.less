@@ -12,6 +12,7 @@
         min-height: 680px;
         height: 100%;
     }
+
     &-box {
         width: 560px;
         height: 500px;
@@ -23,6 +24,7 @@
         display: flex;
         flex-direction: column;
     }
+
     &-title {
         font-size: 36px;
         font-weight: 400;
@@ -31,22 +33,28 @@
         margin-top: 40px;
         text-align: center;
     }
+
     &-item {
         position: relative;
     }
+
     &-item &-input {
         margin-top: 48px;
     }
+
     &-item ~ &-item &-input {
         margin-top: 25px;
     }
+
     &-error &-input {
         border-bottom-color: #eb474a;
     }
+
     &-error &-error-label {
         opacity: 1;
         transform: translateX(0);
     }
+
     &-error-label {
         font-size: 14px;
         font-weight: 400;
@@ -59,23 +67,28 @@
         transform: translateX(20px);
         transition: opacity 240ms ease, transform 240ms ease;
     }
+
     &-input {
-        width: 400px;
-        height: 54px;
-        border-radius: 0;
-        border-top: none;
-        border-left: none;
-        border-right: none;
-        border-bottom-color: #979797;
-        box-shadow: none !important;
-        padding-left: 0;
-        line-height: 22px;
-        font-size: 20px;
-        font-weight: 400;
-        color: rgba(0, 0, 0, 1);
-        &:-webkit-autofill {
-            -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+        &.ant-input {
+            width: 400px;
+            height: 54px;
+            border-radius: 0;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            border-bottom-color: #979797;
+            box-shadow: none !important;
+            padding-left: 0;
+            line-height: 22px;
+            font-size: 20px;
+            font-weight: 400;
+            color: rgba(0, 0, 0, 1);
+
+            &:-webkit-autofill {
+                -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+            }
         }
+
         &-label {
             position: absolute;
             font-size: 20px;
@@ -86,6 +99,7 @@
             left: 0;
             pointer-events: none;
             transition: opacity 300ms ease, font-size 300ms ease, bottom 300ms ease;
+
             &-value {
                 font-size: 14px;
                 opacity: 0.5;
@@ -93,6 +107,7 @@
             }
         }
     }
+
     &-btn {
         width: 400px;
         height: 64px;
@@ -102,10 +117,12 @@
         font-weight: 400;
         color: rgba(255, 255, 255, 1);
         margin-top: 50px;
+
         &[disabled] {
             background-color: rgba(0, 0, 0, 1);
             color: rgba(255, 255, 255, 1);
             opacity: 0.25;
+
             &:hover {
                 background-color: rgba(0, 0, 0, 1);
                 color: rgba(255, 255, 255, 1);
@@ -113,6 +130,7 @@
             }
         }
     }
+
     &-remember {
         margin-top: 31px !important;
         font-size: 16px !important;
@@ -134,6 +152,7 @@
         left: 40px;
         display: flex;
         align-items: center;
+
         &:before {
             content: '';
             display: inline-block;

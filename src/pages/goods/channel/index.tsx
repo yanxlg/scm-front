@@ -142,7 +142,6 @@ const formFields: FormField[] = [
         type: 'select@2',
         label: '销售店铺名称',
         name: 'merchant_ids',
-        formatter: 'plainToArr',
         optionKeys: ['name', 'value'],
         options: {
             selector: (state: ConnectState) => {
