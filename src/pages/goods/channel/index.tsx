@@ -130,7 +130,6 @@ const formFields: FormField[] = [
             value: '',
             name: '全部',
         },
-        formatter: 'plainToArr',
         optionList: {
             type: 'select',
             selector: (state: ConnectState) => {
