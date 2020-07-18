@@ -10,7 +10,7 @@ import {
     useModal,
     useModal2,
 } from 'react-components';
-import { Button, message, Modal, Tag, Typography } from 'antd';
+import { Button, message, Modal, Tag, Typography, Popconfirm } from 'antd';
 import { FormField } from 'react-components/es/JsonForm/index';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
@@ -21,8 +21,9 @@ import {
     endPurchaseByUser,
     exportPurchaseList,
     queryPurchaseList,
+    reviewVirtualDelivery,
 } from '@/services/purchase';
-import { IPurchaseItem } from '@/interface/IPurchase';
+import { IPurchaseItem, IReviewVirtualDelivery } from '@/interface/IPurchase';
 import PurchaseDetailModal from '@/pages/purchase/components/list/purchaseDetailModal';
 import styles from '@/pages/purchase/_list.less';
 import {
@@ -30,6 +31,13 @@ import {
     PurchaseCreateType,
     PurchaseCreateTypeList,
     PurchaseMap,
+    IsFalseShippingList,
+    FalseShippingReviewList,
+    IsFalseShippingCode,
+    IsFalseShippingMap,
+    FalseShippingReviewCode,
+    FalseShippingReviewMap,
+    falseShippingFieldList,
 } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
@@ -79,6 +87,7 @@ const fieldList: FormField[] = [
             ...PurchaseCreateTypeList,
         ],
     },
+    ...falseShippingFieldList,
 ];
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
@@ -130,6 +139,14 @@ const AllList = () => {
     });
 
     const [showExport, setShowExport] = useState(false);
+
+    const _reviewVirtualDelivery = useCallback((data: IReviewVirtualDelivery) => {
+        reviewVirtualDelivery(data).then(() => {
+            // console.log('reviewVirtualDelivery', res);
+            message.success('虚假发货审核成功！');
+            onReload();
+        });
+    }, []);
 
     const showExportFn = useCallback(() => {
         setShowExport(true);
@@ -599,6 +616,61 @@ const AllList = () => {
                     return code === '0' ? '入库' : code === '1' ? '出库' : '';
                 },
             },
+            {
+                title: '是否虚假发货',
+                dataIndex: 'isRealDelivery',
+                width: '160px',
+                align: 'center',
+                render: (val: IsFalseShippingCode) => IsFalseShippingMap[val] || '',
+            },
+            {
+                title: '虚假发货审核状态',
+                dataIndex: 'auditStatus',
+                width: '160px',
+                align: 'center',
+                render: (val: number, record) => {
+                    const { purchaseOrderGoodsId, referWaybillNo } = record;
+                    if (val === 1) {
+                        return (
+                            <>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 2,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>确认</a>
+                                </Popconfirm>
+                                <Popconfirm
+                                    placement="top"
+                                    title="确认不是虚假发货吗？"
+                                    onConfirm={() =>
+                                        _reviewVirtualDelivery({
+                                            refer_waybill_no: referWaybillNo,
+                                            audit_status: 3,
+                                            purchase_order_goods_id: purchaseOrderGoodsId,
+                                        })
+                                    }
+                                    okText="确认"
+                                    cancelText="取消"
+                                >
+                                    <a className={styles.operateItem}>取消</a>
+                                </Popconfirm>
+                            </>
+                        );
+                    } else if (val === 2 || val === 3) {
+                        return FalseShippingReviewMap[val];
+                    }
+                    return '';
+                },
+            },
         ] as ColumnType<IPurchaseItem>[];
     }, []);
 
@@ -627,7 +699,7 @@ const AllList = () => {
     const table = useMemo(() => {
         // 处理合并单元格
         const dataSet = colSpanDataSource(dataSource);
-        console.log(dataSource);
+        // console.log(dataSource);
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"
