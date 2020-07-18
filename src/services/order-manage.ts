@@ -532,7 +532,7 @@ export const querySimilarGoodsList = (params: {
                     });
                     return {
                         commodityId,
-                        defaultImage: defaultImage[0].url,
+                        defaultImage: defaultImage.url,
                         productTitle,
                         priceMin,
                         priceMax,

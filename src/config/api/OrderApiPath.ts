@@ -67,5 +67,5 @@ export enum OrderApiPath {
 
     queryPendingSignList = '/api/v1/orders/list/10',
     exportPendingSignList = '/api/v1/orders/exports/10',
-    querySimilarGoodsList = '/v1/goods/similar_goods/list',
+    querySimilarGoodsList = '/api/v1/goods/similar_goods/list',
 }
