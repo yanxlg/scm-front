@@ -3,6 +3,7 @@
  *  - @ant-design/icons
  */
 import { defineConfig } from 'umi';
+import path from 'path';
 const shajs = require('sha.js');
 
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
@@ -131,6 +132,18 @@ const config = defineConfig({
                 stripPrefix: 'dist/',
             },
         ]);
+        const babelOptions = config.module
+            .rule('js')
+            .use('babel-loader')
+            .get('options');
+        config.module
+            .rule('components')
+            .test(/\.(js|mjs|jsx|ts|tsx)$/)
+            .include.add(path.join(process.cwd(), '../react-components/src'))
+            .end()
+            .use('babel-loader')
+            .loader(require.resolve('babel-loader'))
+            .options(babelOptions);
         // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         if (dev) {
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
