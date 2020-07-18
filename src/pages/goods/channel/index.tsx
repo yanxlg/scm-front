@@ -40,11 +40,12 @@ import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
-import { queryShopList } from '@/services/global';
+import { queryShopList, queryGoodsSourceList } from '@/services/global';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
 import styles from '@/pages/goods/local/_index.less';
+import { defaultOption } from '@/enums/LocalGoodsEnum';
 
 const salesVolumeList = [
     {
@@ -126,10 +127,7 @@ const formFields: FormField[] = [
         label: '销售店铺名称',
         name: 'merchant_ids',
         // placeholder: '请选择',
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
+        syncDefaultOption: defaultOption,
         formatter: 'plainToArr',
         optionList: {
             type: 'select',
@@ -147,10 +145,7 @@ const formFields: FormField[] = [
         type: 'select',
         label: '一级类目',
         name: 'level_one_category',
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
+        syncDefaultOption: defaultOption,
         optionList: () => queryChannelCategory(),
         onChange: (name, form) => {
             form.resetFields(['level_two_category']);
@@ -164,10 +159,7 @@ const formFields: FormField[] = [
             name: 'level_one_category',
             key: 'children',
         },
-        syncDefaultOption: {
-            value: '',
-            name: '全部',
-        },
+        syncDefaultOption: defaultOption,
         optionList: () => queryChannelCategory(),
     },
     {
@@ -177,6 +169,14 @@ const formFields: FormField[] = [
         optionList: ProductStatusList.map(({ name, id }) => {
             return { name: name, value: id };
         }),
+    },
+    {
+        type: 'select',
+        label: '商品渠道',
+        name: 'source_channel',
+        // className: styles.input,
+        syncDefaultOption: defaultOption,
+        optionList: () => queryGoodsSourceList(),
     },
     {
         type: 'inputRange',
@@ -193,6 +193,8 @@ const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
     const urlQueryRef = useRef<any>(null);
     const [exportDialog, setExportDialog] = useState(false);
+    const [onShelfLoading, setOnShelfLoading] = useState(false);
+    const [offShelfLoading, setOffShelfLoading] = useState(false);
 
     const skuRef = useRef<SkuDialog>(null);
     const dispatch = useDispatch();
@@ -728,8 +730,27 @@ const ChannelList: React.FC = props => {
                     一键下架
                 </LoadingButton>
             </PermissionComponent>,
+            <Popconfirm
+                placement="top"
+                title="确定要立即上架全部商品吗？"
+                onConfirm={() => {}}
+                okText="确定"
+                cancelText="取消"
+            >
+                <Button className={formStyles.formBtn}>查询商品一键上架</Button>
+            </Popconfirm>,
+            <Popconfirm
+                placement="top"
+                title="确定要立即下架架全部商品吗？"
+                onConfirm={() => {}}
+                okText="确定"
+                cancelText="取消"
+            >
+                <Button className={formStyles.formBtn}>查询商品一键下架</Button>
+            </Popconfirm>,
         ];
     }, [selectedRowKeys, loading]);
+
     const table = useMemo(() => {
         return (
             <FitTable<IChannelProductListItem>
