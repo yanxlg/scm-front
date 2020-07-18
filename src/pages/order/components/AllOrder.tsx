@@ -382,6 +382,14 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       render: (value: string, item) => utcToLocal(item.createTime, ''),
                   },
                   {
+                      key: 'confirmTime',
+                      title: '销售订单确认时间',
+                      dataIndex: 'confirmTime',
+                      align: 'center',
+                      width: 146,
+                      render: (value: string) => utcToLocal(value, ''),
+                  },
+                  {
                       key: 'orderGoodsStatus',
                       title: '订单状态',
                       dataIndex: 'orderGoodsStatus',
@@ -531,15 +539,23 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       width: 180,
                   },
                   {
-                      key: '_goodsTotalAmount',
-                      title: '销售商品总金额',
-                      dataIndex: '_goodsTotalAmount',
+                      key: 'goodsAmount',
+                      title: '销售商品总金额($)',
+                      dataIndex: 'goodsAmount',
                       align: 'center',
-                      width: 140,
+                      width: 180,
+                  },
+                  {
+                      key: 'saleOrderAmount',
+                      title: '销售订单金额($)',
+                      dataIndex: 'saleOrderAmount',
+                      align: 'center',
+                      width: 150,
                       render: (_, row) => {
                           const { goodsAmount, freight } = row;
-                          const total = (Number(goodsAmount) || 0) + (Number(freight) || 0);
-                          return isNaN(total) ? '' : total.toFixed(2);
+                          const total =
+                              (Number(goodsAmount) || 0) * 100 + (Number(freight) || 0) * 100;
+                          return isNaN(total) ? '' : (total / 100).toFixed(2);
                       },
                   },
                   {
@@ -622,15 +638,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       width: 120,
                       // defaultHide: true,
                   },
-                  {
-                      key: 'confirmTime',
-                      title: '销售订单确认时间',
-                      dataIndex: 'confirmTime',
-                      defaultHide: true,
-                      align: 'center',
-                      width: 146,
-                      render: (value: string) => utcToLocal(value, ''),
-                  },
+
                   {
                       key: 'channelOrderGoodsSn',
                       title: '销售订单ID',

@@ -40,6 +40,25 @@ export function transOptionList(
     return statusList;
 }
 
+export function transOptionList2(
+    statusMap: { [key: number]: string; [key: string]: string },
+    isNumberKey: boolean = false,
+) {
+    let statusList: Array<{
+        label: string;
+        value: string | number;
+    }> = [];
+    for (let key in statusMap) {
+        if (statusMap.hasOwnProperty(key)) {
+            statusList.push({
+                value: isNumberKey ? Number(key) : key,
+                label: statusMap[key],
+            });
+        }
+    }
+    return statusList;
+}
+
 export function formatThousands(num: string | number, str = ',') {
     const reg = /\d{1,3}(?=(\d{3})+$)/g;
     const numStr = num + '';

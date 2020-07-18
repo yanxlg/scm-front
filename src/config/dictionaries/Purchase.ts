@@ -1,4 +1,4 @@
-import { transOptionList } from '@/utils/transform';
+import { transOptionList, transOptionList2 } from '@/utils/transform';
 import { FormField } from 'react-components/es/JsonForm';
 
 export enum PurchaseReturnType {
@@ -20,7 +20,6 @@ export const PurchaseReturnMap = {
 export type PurchaseReturnCode = keyof typeof PurchaseReturnMap;
 
 export const PurchaseMap = {
-    '0': '全部',
     '1': '待发货',
     '2': '待签收',
     '3': '等待入库',
@@ -33,6 +32,8 @@ export const PurchaseMap = {
 
 export type PurchaseCode = keyof typeof PurchaseMap;
 
+export const PurchaseStatusList = transOptionList2(PurchaseMap);
+
 //////////////////////////////////////////////
 export enum PurchaseCreateType {
     Auto = '1',
@@ -44,7 +45,7 @@ export const PurchaseCreateTypeMap = {
 };
 
 export type PurchaseCreateTypeCode = keyof typeof PurchaseCreateTypeMap;
-export const PurchaseCreateTypeList = transOptionList(PurchaseCreateTypeMap);
+export const PurchaseCreateTypeList = transOptionList2(PurchaseCreateTypeMap);
 
 export const IsFalseShippingMap = {
     '1': '是',
@@ -52,7 +53,7 @@ export const IsFalseShippingMap = {
 };
 
 export type IsFalseShippingCode = keyof typeof IsFalseShippingMap;
-export const IsFalseShippingList = transOptionList(IsFalseShippingMap);
+export const IsFalseShippingList = transOptionList2(IsFalseShippingMap);
 
 export const FalseShippingReviewMap = {
     '1': '待审核',
@@ -61,33 +62,4 @@ export const FalseShippingReviewMap = {
 };
 
 export type FalseShippingReviewCode = keyof typeof FalseShippingReviewMap;
-export const FalseShippingReviewList = transOptionList(FalseShippingReviewMap);
-
-export const falseShippingFieldList: FormField[] = [
-    {
-        label: '是否虚假发货',
-        type: 'select',
-        name: 'is_real_delivery',
-        initialValue: '',
-        optionList: [
-            {
-                name: '全部',
-                value: '',
-            },
-            ...IsFalseShippingList,
-        ],
-    },
-    {
-        label: '虚假发货审核状态',
-        type: 'select',
-        name: 'audit_status',
-        initialValue: '',
-        optionList: [
-            {
-                name: '全部',
-                value: '',
-            },
-            ...FalseShippingReviewList,
-        ],
-    },
-];
+export const FalseShippingReviewList = transOptionList2(FalseShippingReviewMap);
