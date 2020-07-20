@@ -17,6 +17,8 @@ const OrderGoods = (props: ISimilarInfoResponse['originOrderInfo']) => {
             skuId,
             productTitle,
             commodityId,
+            skuPrice,
+            goodsNumber,
         } = props;
         const productStyle = parseJson(productOptionValue);
 
@@ -61,6 +63,18 @@ const OrderGoods = (props: ISimilarInfoResponse['originOrderInfo']) => {
                                 {styleString}
                             </Col>
                         </Row>
+                        <div>
+                            <div
+                                className={classNames(styles.inlineBlock, similarStyles.goodsInfo)}
+                            >
+                                采购单价(￥): {skuPrice}
+                            </div>
+                            <div
+                                className={classNames(styles.inlineBlock, similarStyles.goodsInfo)}
+                            >
+                                采购数量: {goodsNumber}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
