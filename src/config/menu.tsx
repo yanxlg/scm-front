@@ -173,6 +173,11 @@ export default [
                 pid: 'setting/permission',
             },
             {
+                path: '/setting/falseShipping',
+                name: '虚假发货标记配置',
+                pid: 'setting/virtual_delivery_sign',
+            },
+            {
                 path: '/setting/purchase_error_code',
                 name: '采购失败错误码',
                 pid: 'setting/purchase_error_code',

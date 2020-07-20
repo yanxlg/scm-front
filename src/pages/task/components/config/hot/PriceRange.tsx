@@ -8,11 +8,17 @@ import classNames from 'classnames';
 
 declare interface PriceRangeProps {
     form: FormInstance;
+    label?: string;
+    name?: [string, string];
 }
 
-const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
+const PriceRange: React.FC<PriceRangeProps> = ({
+    form,
+    label = '价格区间(￥)',
+    name: [name1, name2] = ['price_min', 'price_max'],
+}) => {
     const checkMinPrice = useCallback((rule: any, value: any) => {
-        const price_max = form.getFieldValue('price_max');
+        const price_max = form.getFieldValue(name2);
         if (!isNull(price_max) && !isNull(value) && Number(value) > Number(price_max)) {
             return Promise.reject('最小价格不能大于最大价格');
         }
@@ -20,7 +26,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
     }, []);
 
     const checkMaxPrice = useCallback((rule: any, value: any) => {
-        const price_min = form.getFieldValue('price_min');
+        const price_min = form.getFieldValue(name1);
         if (!isNull(price_min) && !isNull(value) && Number(value) < Number(price_min)) {
             return Promise.reject('最大价格不能小于最小价格');
         }
@@ -37,7 +43,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                 )}
             >
                 <Form.Item
-                    label="价格区间(￥)"
+                    label={label}
                     required={true}
                     className={classNames(
                         formStyles.flexInline,
@@ -52,7 +58,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                             formStyles.verticalMiddle,
                         )}
                         validateTrigger={'onBlur'}
-                        name="price_min"
+                        name={name1}
                         rules={[
                             {
                                 validator: checkMinPrice,
@@ -69,7 +75,7 @@ const PriceRange: React.FC<PriceRangeProps> = ({ form }) => {
                             formStyles.verticalMiddle,
                         )}
                         validateTrigger={'onBlur'}
-                        name="price_max"
+                        name={name2}
                         rules={[
                             {
                                 validator: checkMaxPrice,

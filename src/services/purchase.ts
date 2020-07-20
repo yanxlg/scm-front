@@ -18,6 +18,7 @@ import {
     IUpdateWaybillExceptionPregressReq,
     IReviewExceptionOrderItem,
     IReviewExceptionOrderResItem,
+    IReviewVirtualDelivery,
 } from '@/interface/IPurchase';
 import { PurchaseApiPath } from '@/config/api/PurchaseApiPath';
 import { IPurchaseItem, IPurchasePlain } from '@/interface/IPurchase';
@@ -237,4 +238,10 @@ export function reviewExceptionOrder(data: IReviewExceptionOrderItem[]) {
             data,
         },
     );
+}
+
+export function reviewVirtualDelivery(data: IReviewVirtualDelivery) {
+    return request.post(PurchaseApiPath.ReviewVirtualDelivery, {
+        data,
+    });
 }

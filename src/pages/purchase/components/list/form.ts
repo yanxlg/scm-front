@@ -1,5 +1,10 @@
 import { FormField } from 'react-components/es/JsonForm';
-import { PurchaseCreateTypeList, PurchaseStatusList } from '@/config/dictionaries/Purchase';
+import {
+    FalseShippingReviewList,
+    IsFalseShippingList,
+    PurchaseCreateTypeList,
+    PurchaseStatusList,
+} from '@/config/dictionaries/Purchase';
 import styles from '../../_list.less';
 const allFormFields: FormField[] = [
     {
@@ -99,6 +104,22 @@ const allFormFields: FormField[] = [
         key: 'purchase_order_status',
         initialValue: '',
         options: PurchaseStatusList,
+    },
+    {
+        label: '是否虚假发货',
+        type: 'select@2',
+        name: 'is_real_delivery',
+        key: 'is_real_delivery',
+        initialValue: '',
+        options: IsFalseShippingList,
+    },
+    {
+        label: '虚假发货审核状态',
+        type: 'select@2',
+        name: 'audit_status',
+        key: 'audit_status',
+        initialValue: '',
+        options: FalseShippingReviewList,
     },
 ];
 

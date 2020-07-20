@@ -229,3 +229,7 @@ export const getCategoryLowestLevel = (
     }
     return [];
 };
+
+export const toNumber = (value?: string | null) => {
+    return value === void 0 || value === null ? undefined : Number(value);
+};

@@ -8,10 +8,16 @@ import classNames from 'classnames';
 
 declare interface SalesRangeProps {
     form: FormInstance;
+    label?: string;
+    name?: [string, string];
 }
-const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
+const SalesRange: React.FC<SalesRangeProps> = ({
+    form,
+    label = '销量区间',
+    name: [name1, name2] = ['sales_volume_min', 'sales_volume_max'],
+}) => {
     const checkMinSaleNum = useCallback((rule: any, value: any) => {
-        const sales_volume_max = form.getFieldValue('sales_volume_max');
+        const sales_volume_max = form.getFieldValue(name2);
         if (
             !isNull(sales_volume_max) &&
             !isNull(value) &&
@@ -23,7 +29,7 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
     }, []);
 
     const checkMaxSaleNum = useCallback((rule: any, value: any) => {
-        const sales_volume_min = form.getFieldValue('sales_volume_min');
+        const sales_volume_min = form.getFieldValue(name1);
         if (
             !isNull(sales_volume_min) &&
             !isNull(value) &&
@@ -44,7 +50,7 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
                 )}
             >
                 <Form.Item
-                    label="销量区间"
+                    label={label}
                     required={true}
                     className={classNames(
                         formStyles.flexInline,
@@ -60,7 +66,7 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
                             formStyles.verticalMiddle,
                         )}
                         validateTrigger={'onBlur'}
-                        name="sales_volume_min"
+                        name={name1}
                         rules={[
                             {
                                 validator: checkMinSaleNum,
@@ -77,7 +83,7 @@ const SalesRange: React.FC<SalesRangeProps> = ({ form }) => {
                             formStyles.verticalMiddle,
                         )}
                         validateTrigger={'onBlur'}
-                        name="sales_volume_max"
+                        name={name2}
                         rules={[
                             {
                                 validator: checkMaxSaleNum,

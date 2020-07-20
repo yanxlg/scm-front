@@ -51,9 +51,9 @@ import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 import { getCategoryList } from '@/services/global';
 import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
 import { PermissionComponent } from 'rc-permission';
+import { OutStockFailureCode, OutStockFailureMap } from '@/config/dictionaries/Stock';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
-import { OutStockFailureCode, OutStockFailureMap } from '@/config/dictionaries/Stock';
 
 const configFields = [
     'order_goods_status',
@@ -67,9 +67,8 @@ const configFields = [
     'purchase_plan_cancel_type',
     'product_platform',
     'platform_uid',
-    'scm_error_code',
-    // 'purchase_fail_code',
     'outbound_fail_code',
+    'scm_error_code',
     'first_category',
     'second_category',
     'third_category',
