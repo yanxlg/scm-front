@@ -37,6 +37,7 @@ export declare interface IErrorOrderItem {
     abnormalType: number;
     productShop: string;
     productPlatform: string;
+    commodityId: string;
 
     purchasePlanId?: string;
     platformSendOrderTime?: string; // 采购订单生成时间
@@ -67,6 +68,7 @@ const PaneErrTab = () => {
     const { visible, setVisibleProps, onClose } = useModal<{
         order_goods_id: string;
         purchase_plan_id: string;
+        commodity_id: string;
     }>();
 
     const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
@@ -224,6 +226,7 @@ const PaneErrTab = () => {
                                                     setVisibleProps({
                                                         order_goods_id: row.orderGoodsId,
                                                         purchase_plan_id: row.purchasePlanId as string,
+                                                        commodity_id: row.commodityId,
                                                     })
                                                 }
                                             >
@@ -241,6 +244,7 @@ const PaneErrTab = () => {
                                                     setVisibleProps({
                                                         order_goods_id: row.orderGoodsId,
                                                         purchase_plan_id: row.purchasePlanId as string,
+                                                        commodity_id: row.commodityId,
                                                     })
                                                 }
                                             >
@@ -259,6 +263,7 @@ const PaneErrTab = () => {
                                                     setVisibleProps({
                                                         order_goods_id: row.orderGoodsId,
                                                         purchase_plan_id: row.purchasePlanId as string,
+                                                        commodity_id: row.commodityId,
                                                     })
                                                 }
                                             >
@@ -652,6 +657,7 @@ const PaneErrTab = () => {
                     orderGoodsPurchasePlan,
                     productShop,
                     productPlatform,
+                    commodityId,
                 } = orderGoods;
                 const { confirmTime } = orderInfo;
                 if (orderGoodsPurchasePlan) {
@@ -689,6 +695,7 @@ const PaneErrTab = () => {
                             abnormalType,
                             productShop,
                             productPlatform,
+                            commodityId,
 
                             purchasePlanId,
                             platformSendOrderTime,
@@ -723,6 +730,7 @@ const PaneErrTab = () => {
                         _rowspan: 1,
                         productShop,
                         productPlatform,
+                        commodityId,
                     });
                 }
             });

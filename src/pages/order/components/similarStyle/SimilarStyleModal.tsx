@@ -13,6 +13,7 @@ import GatherInfo from './GatherInfo';
 import StyleForm, { getQueryVariable } from './StylesForm';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
+import SimilarTable from './SimilarTable';
 
 declare interface SimilarStyleModalProps {
     visible:
@@ -20,6 +21,7 @@ declare interface SimilarStyleModalProps {
         | {
               order_goods_id: string;
               purchase_plan_id: string;
+              commodity_id: string;
           };
     onClose: () => void;
     onReload: () => void;
@@ -29,6 +31,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
     const [loading, setLoading] = useState(false);
     const [info, setInfo] = useState<ISimilarInfoResponse>(EmptyObject);
     const [submitting, setSubmitting] = useState(false);
+    const [commodityId, setCommodityId] = useState('');
     const [form] = Form.useForm();
     const dispatch = useDispatch();
     const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
@@ -45,6 +48,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
             setInfo(EmptyObject);
             form.resetFields();
             setLoading(true);
+            setCommodityId(visible.commodity_id);
             querySimilarInfo(visible)
                 .then(({ data }) => {
                     if (Number(data.status) === 4) {
@@ -159,6 +163,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                                         <StyleForm form={form} list={historySimilarGoodsInfo} />
                                     </>
                                 )}
+                                <SimilarTable commodityId={commodityId} />
                                 <OrderGoods {...originOrderInfo} />
                             </>
                         )}
@@ -166,7 +171,7 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                 </Spin>
             </Modal>
         );
-    }, [visible, loading, submitting]);
+    }, [visible, loading, submitting, commodityId]);
 };
 
 export default SimilarStyleModal;
