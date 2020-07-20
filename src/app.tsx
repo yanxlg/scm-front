@@ -9,7 +9,7 @@ import { PermissionProvider } from 'rc-permission';
 import User from '@/storage/User';
 import { history } from '@@/core/history';
 import Page from '@/pages/403';
-
+import DragAndDrop from '../../react-components/src/FitTable/DragDropProvider';
 NProgress.configure({ showSpinner: false });
 
 const develop = process.env.NODE_ENV !== 'production';
@@ -125,7 +125,7 @@ export function onRouteChange({
     }, 200 + Math.floor(Math.random() * 300));
 }
 
-export function rootContainer(container: any) {
+export const rootContainer = (container: any) => {
     return React.createElement(
         PermissionProvider,
         {
@@ -139,7 +139,7 @@ export function rootContainer(container: any) {
         },
         container,
     );
-}
+};
 
 /*export function render(oldRender: any) {
     // 使用原有权限，同时刷新权限

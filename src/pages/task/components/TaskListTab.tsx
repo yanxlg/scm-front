@@ -41,6 +41,7 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
 import { PermissionComponent } from 'rc-permission';
+import useTableSetting from '../../../hooks/useTableSetting';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
@@ -584,10 +585,17 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         ];
     }, [selectedRowKeys]);
 
+    const { hideKeys, sortKeys, updateHideKeys, updateSortKeys } = useTableSetting('/task/all');
+
     const table = useMemo(() => {
         return (
             <FitTable<ITaskListItem>
+                bordered={true}
                 rowKey="task_id"
+                hideKeys={hideKeys}
+                sortKeys={sortKeys}
+                onHideKeysChange={updateHideKeys}
+                onSortKeysChange={updateSortKeys}
                 rowSelection={rowSelection}
                 scroll={scroll}
                 bottom={60}
@@ -598,9 +606,10 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 loading={loading}
                 onChange={onChange}
                 toolBarRender={toolBarRender}
+                columnsSettingRender={true}
             />
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading, selectedRowKeys, hideKeys, sortKeys]);
 
     const search = useMemo(() => {
         return (
@@ -625,7 +634,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading, selectedRowKeys, hideKeys, sortKeys]);
 };
 
 export default TaskListTab;

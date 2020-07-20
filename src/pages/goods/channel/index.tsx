@@ -3,9 +3,10 @@ import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
-import { Modal, message, Button, Tooltip, Popconfirm } from 'antd';
+import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { PopConfirmLoadingButton, FitTable } from 'react-components';
+import { PopConfirmLoadingButton } from 'react-components';
+import FitTable from 'react-components/es/FitTable2';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
@@ -14,7 +15,6 @@ import {
     exportChannelProductList,
 } from '@/services/channel';
 import {
-    ProductStatusMap,
     ProductStatusCode,
     ProductStatusList,
     checkLowerShelf,
@@ -40,11 +40,10 @@ import OnOffLogModal from '@/pages/goods/channel/components/OnOffLogModal';
 import { useModal } from 'react-components';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import Export from '@/components/Export';
-import { queryShopList } from '@/services/global';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
-import styles from '@/pages/goods/local/_index.less';
+import useTableSetting from '../../../hooks/useTableSetting';
 
 const salesVolumeList = [
     {
@@ -729,10 +728,19 @@ const ChannelList: React.FC = props => {
             </PermissionComponent>,
         ];
     }, [selectedRowKeys, loading]);
+
+    const { hideKeys, sortKeys, updateHideKeys, updateSortKeys } = useTableSetting(
+        '/channel/goods',
+    );
+
     const table = useMemo(() => {
         return (
             <FitTable<IChannelProductListItem>
                 bordered={true}
+                hideKeys={hideKeys}
+                sortKeys={sortKeys}
+                onHideKeysChange={updateHideKeys}
+                onSortKeysChange={updateSortKeys}
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}
@@ -747,7 +755,7 @@ const ChannelList: React.FC = props => {
                 toolBarRender={toolBarRender}
             />
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading, selectedRowKeys, hideKeys, sortKeys]);
 
     const body = useMemo(() => {
         return (
@@ -764,7 +772,7 @@ const ChannelList: React.FC = props => {
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog, selectedRowKeys]);
+    }, [loading, exportDialog, selectedRowKeys, hideKeys, sortKeys]);
 
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;
