@@ -222,6 +222,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 },
             },
             {
+                title: '我是新增列',
+                dataIndex: 'new',
+                fixed: 'left',
+                width: '100px',
+            },
+            {
                 title: '任务ID',
                 width: '100px',
                 fixed: 'left',
