@@ -5,7 +5,7 @@ import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { PopConfirmLoadingButton, FitTable } from 'react-components';
+import { PopConfirmLoadingButton } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
@@ -23,7 +23,7 @@ import {
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
+import { JsonForm, SettingTable } from 'react-components';
 import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
@@ -31,7 +31,6 @@ import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
 import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
-import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
@@ -42,7 +41,6 @@ import Export from '@/components/Export';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
-import styles from '@/pages/goods/local/_index.less';
 import classNames from 'classnames';
 
 const salesVolumeList = [
@@ -215,8 +213,6 @@ const formFields: FormField[] = [
         formatter: 'number',
     },
 ];
-
-const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -761,12 +757,12 @@ const ChannelList: React.FC = props => {
             </PermissionComponent>,
         ];
     }, [selectedRowKeys, loading]);
+
     const table = useMemo(() => {
         return (
-            <FitTable<IChannelProductListItem>
-                bordered={true}
+            <SettingTable<IChannelProductListItem>
+                settingKey={'/channel/goods'}
                 rowKey="id"
-                scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 rowSelection={rowSelection}
@@ -775,7 +771,6 @@ const ChannelList: React.FC = props => {
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                columnsSettingRender={true}
                 toolBarRender={toolBarRender}
             />
         );

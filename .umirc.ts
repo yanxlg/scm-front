@@ -3,12 +3,13 @@
  *  - @ant-design/icons
  */
 import { defineConfig } from 'umi';
-import * as path from 'path';
+import path from 'path';
+
 const shajs = require('sha.js');
 
-const dev = process.env.NODE_ENV !== 'production';
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 
-const useComponentByLocal = false;
+const dev = process.env.NODE_ENV !== 'production';
 
 const config = defineConfig({
     /*    forkTSCheker: {
@@ -136,20 +137,28 @@ const config = defineConfig({
     chainWebpack(config, { webpack }) {
         config.plugin('lodash-webpack-plugin').use(require('lodash-webpack-plugin')); // lodash 简化，实际可能并没有作用，如果babel-plugin-lodash已经极尽简化
         config.plugin('antd-dayjs-webpack-plugin').use(require('antd-dayjs-webpack-plugin')); // dayjs代替moment
-        /* if (useComponentByLocal) {
-            const babelOptions = config.module
-                .rule('js')
-                .use('babel-loader')
-                .get('options');
-            config.module
-                .rule('react-components')
-                .test(/\.(js|mjs|jsx|ts|tsx)$/)
-                .include.add(path.join(process.cwd(), '../react-components/src'))
-                .end()
-                .use('babel-loader')
-                .loader(require.resolve('babel-loader'))
-                .options(babelOptions);
-        }*/
+        config.plugin('service-worker').use(SWPrecacheWebpackPlugin, [
+            {
+                cacheId: 'scm-frontend',
+                filename: 'sw.js',
+                staticFileGlobs: ['dist/**/*.{js,css}'],
+                minify: true,
+                stripPrefix: 'dist/',
+            },
+        ]);
+        const babelOptions = config.module
+            .rule('js')
+            .use('babel-loader')
+            .get('options');
+        config.module
+            .rule('components')
+            .test(/\.(js|mjs|jsx|ts|tsx)$/)
+            .include.add(path.join(process.cwd(), '../react-components/src'))
+            .end()
+            .use('babel-loader')
+            .loader(require.resolve('babel-loader'))
+            .options(babelOptions);
+        // forkTSCheker 配置未传到fork-ts-checker-webpack-plugin中，暂时外部实现
         if (dev) {
             config.plugin('fork-ts-checker').use(require('fork-ts-checker-webpack-plugin'), [
                 {
