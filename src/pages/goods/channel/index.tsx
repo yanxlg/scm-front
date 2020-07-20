@@ -6,7 +6,6 @@ import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { PopConfirmLoadingButton } from 'react-components';
-import FitTable from 'react-components/es/FitTable2';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
@@ -24,7 +23,7 @@ import {
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
+import { JsonForm, SettingTable } from 'react-components';
 import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
@@ -32,7 +31,6 @@ import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
 import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
-import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
@@ -43,7 +41,6 @@ import Export from '@/components/Export';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
-import useTableSetting from '../../../hooks/useTableSetting';
 
 const salesVolumeList = [
     {
@@ -184,8 +181,6 @@ const formFields: FormField[] = [
         precision: 2,
     },
 ];
-
-const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -729,20 +724,11 @@ const ChannelList: React.FC = props => {
         ];
     }, [selectedRowKeys, loading]);
 
-    const { hideKeys, sortKeys, updateHideKeys, updateSortKeys } = useTableSetting(
-        '/channel/goods',
-    );
-
     const table = useMemo(() => {
         return (
-            <FitTable<IChannelProductListItem>
-                bordered={true}
-                hideKeys={hideKeys}
-                sortKeys={sortKeys}
-                onHideKeysChange={updateHideKeys}
-                onSortKeysChange={updateSortKeys}
+            <SettingTable<IChannelProductListItem>
+                settingKey={'/channel/goods'}
                 rowKey="id"
-                scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 rowSelection={rowSelection}
@@ -751,11 +737,10 @@ const ChannelList: React.FC = props => {
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                columnsSettingRender={true}
                 toolBarRender={toolBarRender}
             />
         );
-    }, [loading, selectedRowKeys, hideKeys, sortKeys]);
+    }, [loading, selectedRowKeys]);
 
     const body = useMemo(() => {
         return (
@@ -772,7 +757,7 @@ const ChannelList: React.FC = props => {
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog, selectedRowKeys, hideKeys, sortKeys]);
+    }, [loading, exportDialog, selectedRowKeys]);
 
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;

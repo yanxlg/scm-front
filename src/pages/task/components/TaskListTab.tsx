@@ -16,9 +16,8 @@ import {
 } from '@/enums/StatusEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { unixToEndDate, unixToStartDate } from 'react-components/es/utils/date';
-import FitTable from '../../../../../react-components/src/FitTable2';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
+import { JsonForm, SettingTable } from 'react-components';
 import { useList } from '@/utils/hooks';
 import { getTaskList, deleteTasks, activeTasks, reTryTasks, abortTasks } from '@/services/task';
 import { history } from '@@/core/history';
@@ -36,20 +35,17 @@ import {
     TaskChannelMap,
 } from '@/config/dictionaries/Task';
 import { isEmptyObject } from '@/utils/utils';
-import { ColumnType, TableProps } from 'antd/es/table';
+import { ColumnType } from 'antd/es/table';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
 import { PermissionComponent } from 'rc-permission';
-import useTableSetting from '../../../hooks/useTableSetting';
 
 declare interface TaskListTabProps {
     task_status?: TaskStatusEnum;
     initialValues?: Partial<ITaskListQuery>;
     setCountArr: (count: number[]) => void;
 }
-
-const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, setCountArr }) => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -220,12 +216,6 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                         </>
                     );
                 },
-            },
-            {
-                title: '我是新增列',
-                dataIndex: 'new',
-                fixed: 'left',
-                width: '100px',
             },
             {
                 title: '任务ID',
@@ -591,19 +581,12 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
         ];
     }, [selectedRowKeys]);
 
-    const { hideKeys, sortKeys, updateHideKeys, updateSortKeys } = useTableSetting('/task/all');
-
     const table = useMemo(() => {
         return (
-            <FitTable<ITaskListItem>
-                bordered={true}
+            <SettingTable<ITaskListItem>
+                settingKey={`task/list/${task_status === void 0 ? 'all' : task_status}`}
                 rowKey="task_id"
-                hideKeys={hideKeys}
-                sortKeys={sortKeys}
-                onHideKeysChange={updateHideKeys}
-                onSortKeysChange={updateSortKeys}
                 rowSelection={rowSelection}
-                scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 pagination={pagination}
@@ -612,10 +595,9 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 loading={loading}
                 onChange={onChange}
                 toolBarRender={toolBarRender}
-                columnsSettingRender={true}
             />
         );
-    }, [loading, selectedRowKeys, hideKeys, sortKeys]);
+    }, [loading, selectedRowKeys]);
 
     const search = useMemo(() => {
         return (
@@ -640,7 +622,7 @@ const TaskListTab: React.FC<TaskListTabProps> = ({ task_status, initialValues, s
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </div>
         );
-    }, [loading, selectedRowKeys, hideKeys, sortKeys]);
+    }, [loading, selectedRowKeys]);
 };
 
 export default TaskListTab;
