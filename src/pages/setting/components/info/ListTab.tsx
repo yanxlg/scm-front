@@ -5,7 +5,6 @@ import formStyles from 'react-components/es/JsonForm/_form.less';
 import { useList } from '@/utils/hooks';
 import { queryCustomList } from '@/services/setting';
 import { ICustomItem, ICustomListQuery } from '@/interface/ISetting';
-import { ProColumns } from 'react-components/es/ProTable';
 import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { getCatagoryList } from '@/services/goods';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
