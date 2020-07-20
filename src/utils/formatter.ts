@@ -16,6 +16,11 @@ export const multipleToArray = (value?: string) => {
     return arr;
 };
 
+export const multipleToArrayJoin = (value?: string) => {
+    const arr = multipleToArray(value);
+    return arr?.join(',');
+};
+
 export const firstNumber = (value?: number[]) => {
     return value ? value[0] : undefined;
 };

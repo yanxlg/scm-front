@@ -1,5 +1,11 @@
 import formatter from 'react-components/es/utils/formatter';
-import { arrayNumber, firstNumber, multipleToArray, plainToArr } from '@/utils/formatter';
+import {
+    arrayNumber,
+    firstNumber,
+    multipleToArray,
+    plainToArr,
+    multipleToArrayJoin,
+} from '@/utils/formatter';
 import 'nprogress/nprogress.css';
 import NProgress from 'nprogress';
 import { Modal, Tooltip } from 'antd';
@@ -90,6 +96,7 @@ window.addEventListener('load', function() {
 declare module 'react-components' {
     interface Formatters {
         multipleToArray: typeof multipleToArray;
+        multipleToArrayJoin: typeof multipleToArrayJoin;
         firstNumber: typeof firstNumber;
         arrayNumber: typeof arrayNumber;
         plainToArr: typeof plainToArr;
@@ -97,6 +104,7 @@ declare module 'react-components' {
 }
 formatter.extend({
     multipleToArray: multipleToArray,
+    multipleToArrayJoin: multipleToArrayJoin,
     firstNumber: firstNumber,
     arrayNumber: arrayNumber,
     plainToArr: plainToArr,

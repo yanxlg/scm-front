@@ -74,25 +74,8 @@ export async function queryChannelGoodsList(data: IChannelProductListBody & Requ
     );
 }
 
-function convertChannelCategory(data: IChannelCategoryResponse): IOptionItem[] {
-    return data.map(({ platform_cate_id, platform_cate_name, children }) => {
-        return {
-            value: String(platform_cate_id),
-            name: platform_cate_name,
-            ...(children ? { children: convertChannelCategory(children) } : undefined),
-        };
-    });
-}
-
 export const queryChannelCategory = singlePromiseWrap(() => {
-    return request
-        .get<IResponse<IChannelCategoryResponse>>(ChannelApiPath.QueryCategory)
-        .then(({ data = [] } = EmptyObject) => {
-            return convertChannelCategory(data);
-        })
-        .catch(() => {
-            return [];
-        });
+    return request.get<IResponse<IChannelCategoryResponse>>(ChannelApiPath.QueryCategory);
 });
 
 // 获取数据/状态更新数据

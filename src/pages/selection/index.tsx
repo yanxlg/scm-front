@@ -507,11 +507,14 @@ const Selection: React.FC = () => {
     const formFields = useMemo<FormField[]>(() => {
         return [
             {
-                type: 'input',
+                type: 'textarea@2',
                 label: 'Commodity ID',
                 name: 'commodity_id',
-                placeholder: '请输入',
-                className: styles.input,
+                childrenProps: {
+                    placeholder: '请输入',
+                    className: styles.input,
+                },
+                formatter: 'multipleToArrayJoin',
             },
             {
                 type: 'treeSelect',

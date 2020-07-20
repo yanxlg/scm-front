@@ -11,7 +11,7 @@ import {
     useModal2,
 } from 'react-components';
 import { Button, message, Modal, Tag, Typography, Popconfirm } from 'antd';
-import { FormField } from 'react-components/es/JsonForm/index';
+import { FormField } from 'react-components/es/JsonForm';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { ITaskListItem } from '@/interface/ITask';
 import { ColumnType, TableProps } from 'antd/es/table';
@@ -29,15 +29,10 @@ import styles from '@/pages/purchase/_list.less';
 import {
     PurchaseCode,
     PurchaseCreateType,
-    PurchaseCreateTypeList,
     PurchaseMap,
-    IsFalseShippingList,
-    FalseShippingReviewList,
     IsFalseShippingCode,
     IsFalseShippingMap,
-    FalseShippingReviewCode,
     FalseShippingReviewMap,
-    falseShippingFieldList,
 } from '@/config/dictionaries/Purchase';
 import Export from '@/components/Export';
 import classNames from 'classnames';
@@ -45,50 +40,25 @@ import CreatePurchaseModal from '@/pages/purchase/components/list/createPurchase
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ConnectModal from '@/pages/purchase/components/list/connectModal';
 import { PermissionComponent } from 'rc-permission';
+import { filterFieldsList } from './form';
+import { utcToLocal } from 'react-components/es/utils/date';
 
 const { Paragraph } = Typography;
 
-const fieldList: FormField[] = [
-    {
-        label: '采购单ID',
-        type: 'positiveInteger',
-        name: 'purchase_order_goods_id',
-    },
-    {
-        label: '采购平台',
-        type: 'input',
-        name: 'purchase_platform',
-    },
-    {
-        label: '采购店铺',
-        type: 'input',
-        name: 'purchase_merchant_name',
-    },
-    {
-        label: '供应商订单号',
-        type: 'input',
-        name: 'purchase_order_goods_sn',
-    },
-    {
-        label: '商品名称',
-        type: 'input',
-        name: 'purchase_goods_name',
-    },
-    {
-        label: '采购单类型',
-        type: 'select',
-        name: 'origin',
-        formatter: 'number',
-        optionList: [
-            {
-                name: '全部',
-                value: '',
-            },
-            ...PurchaseCreateTypeList,
-        ],
-    },
-    ...falseShippingFieldList,
+const fieldKeys = [
+    'purchase_order_goods_id',
+    'purchase_platform',
+    'purchase_merchant_name',
+    'purchase_order_goods_sn',
+    'purchase_goods_name',
+    'origin',
+    'purchase_waybill_no',
+    'purchase_order_status',
+    'is_real_delivery',
+    'audit_status',
+    'create_time',
 ];
+const fieldList: FormField[] = filterFieldsList(fieldKeys);
 
 const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
@@ -168,14 +138,7 @@ const AllList = () => {
 
     const searchForm = useMemo(() => {
         return (
-            <JsonForm
-                fieldList={fieldList}
-                ref={formRef}
-                labelClassName={styles.formItem}
-                initialValues={{
-                    origin: '',
-                }}
-            >
+            <JsonForm fieldList={fieldList} ref={formRef} labelClassName={styles.formItem}>
                 <div>
                     <LoadingButton onClick={onSearch} type="primary" className={formStyles.formBtn}>
                         搜索
@@ -445,6 +408,20 @@ const AllList = () => {
                 },
             },
             {
+                title: '采购单生成时间',
+                dataIndex: 'createTime',
+                align: 'center',
+                width: '150px',
+                render: (value, row) => {
+                    return {
+                        children: utcToLocal(value),
+                        props: {
+                            rowSpan: row.rowSpan || 0,
+                        },
+                    };
+                },
+            },
+            {
                 title: '采购单状态',
                 width: '140px',
                 dataIndex: 'purchaseGoodsStatus',
@@ -699,7 +676,6 @@ const AllList = () => {
     const table = useMemo(() => {
         // 处理合并单元格
         const dataSet = colSpanDataSource(dataSource);
-        // console.log(dataSource);
         return (
             <FitTable
                 rowKey="purchaseOrderGoodsId"

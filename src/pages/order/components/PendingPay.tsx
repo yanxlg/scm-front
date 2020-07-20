@@ -315,6 +315,19 @@ const PendingPay = ({ updateCount }: PendingPayProps) => {
                 width: 180,
             },
             {
+                key: 'saleOrderAmount',
+                title: '销售订单金额($)',
+                dataIndex: 'saleOrderAmount',
+                align: 'center',
+                width: 140,
+                render: (_, row) => {
+                    const { saleGoodsAmount, freight } = row;
+                    const total =
+                        (Number(saleGoodsAmount) || 0) * 100 + (Number(freight) || 0) * 100;
+                    return isNaN(total) ? '' : (total / 100).toFixed(2);
+                },
+            },
+            {
                 key: 'purchaseGoodsNumber',
                 title: '采购商品数量',
                 dataIndex: 'purchaseGoodsNumber',

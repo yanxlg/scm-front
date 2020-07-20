@@ -9,15 +9,13 @@ import {
     AutoEnLargeImg,
 } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { IReviewSearch, IReviewOrderItem } from '@/interface/IOrder';
+import { IReviewOrderItem } from '@/interface/IOrder';
 import {
     getReviewOrderList,
     postExportReview,
-    delChannelOrders,
     postReviewPass,
     postOrderOffsale,
     getOrderGoodsDetail,
-    queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { ColumnsType } from 'antd/es/table';
@@ -32,11 +30,14 @@ import { IOptionItem } from 'react-components/es/JsonForm/items/Select';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
+import { filterFieldsList } from '@/pages/order/components/utils';
+import classNames from 'classnames';
 
 declare interface IProps {
     getAllTabCount(): void;
 }
 
+/*
 const formFields: FormField[] = [
     {
         type: 'dateRanger',
@@ -121,10 +122,22 @@ const formFields: FormField[] = [
         optionList: () => getCategoryList(),
     },
 ];
+*/
 
-const initialValues = {
-    product_shop: '',
-};
+const configFields = [
+    'order_create_time@2',
+    'order_goods_id@2',
+    'product_shop@2',
+    'channel_order_goods_sn@2',
+    'first_category@2',
+    'second_category@2',
+    'third_category@2',
+    'freight@2',
+    'goods_amount@2',
+    'total_amount@2',
+];
+
+const formFields = filterFieldsList(configFields);
 
 const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
     const formRef = useRef<JsonFormRef>(null);
@@ -318,7 +331,10 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 ref={formRef}
                 fieldList={formFields}
                 labelClassName="order-label"
-                initialValues={initialValues}
+                containerClassName={classNames(
+                    formStyles.formContainer,
+                    formStyles.formHelpAbsolute,
+                )}
             >
                 <div>
                     <LoadingButton type="primary" className={formStyles.formBtn} onClick={onSearch}>
@@ -463,7 +479,19 @@ const PanePendingReview: React.FC<IProps> = ({ getAllTabCount }) => {
                 title: '销售商品总金额($)',
                 dataIndex: 'goodsAmount',
                 align: 'center',
-                width: 150,
+                width: 180,
+            },
+            {
+                key: 'saleOrderAmount',
+                title: '销售订单金额($)',
+                dataIndex: 'saleOrderAmount',
+                align: 'center',
+                width: 140,
+                render: (_, row) => {
+                    const { goodsAmount, freight } = row;
+                    const total = (Number(goodsAmount) || 0) * 100 + (Number(freight) || 0) * 100;
+                    return isNaN(total) ? '' : (total / 100).toFixed(2);
+                },
             },
             {
                 title: '销售店铺名称',
