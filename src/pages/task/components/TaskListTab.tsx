@@ -16,7 +16,7 @@ import {
 } from '@/enums/StatusEnum';
 import { utcToLocal } from 'react-components/es/utils/date';
 import { unixToEndDate, unixToStartDate } from 'react-components/es/utils/date';
-import FitTable from '../../../../../react-components/src/FitTable';
+import FitTable from '../../../../../react-components/src/FitTable2';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { useList } from '@/utils/hooks';
