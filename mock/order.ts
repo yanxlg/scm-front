@@ -33,6 +33,40 @@ const list = Mock.mock({
 });
 
 export default {
+    'GET /v1/goods/similar_goods/list': (req: Request, res: Response) => {
+        res.status(200).send({
+            code: 'success',
+            data: {
+                list: [
+                    {
+                        commodityId: '62b68fa95f167b3f2b00904980ea6d1e',
+                        productId: 'productId',
+                        defaultImage: [
+                            {
+                                url:
+                                    'https://supply-img-t.vova.com.hk/spider/images/item/34/a4/ead6e8d9c67105853604ca71d13434a4.jpg',
+                            },
+                        ],
+                        topCatId: 'topCatId',
+                        productTitle: 'productTitle',
+                        productMetadatas: [
+                            {
+                                name: 'product_link',
+                                value: 'https://www.baidu.com',
+                            },
+                        ],
+                        similar: '90',
+                        priceMin: '100',
+                        priceMax: '200',
+                        shippingFeeMin: '1',
+                        shippingFeeMax: '2',
+                        isOnSale: '0',
+                    },
+                ],
+                total: 50,
+            },
+        });
+    },
     'POST /order/filter': (req: Request, res: Response) => {
         const { page, size } = req.body;
         res.status(200).send({

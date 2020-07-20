@@ -9,7 +9,15 @@ import styles from '@/styles/_index.less';
 import { Col, Row } from 'antd';
 
 const SimilarGoods = (props: ISimilarInfoResponse['purchaseInfo']) => {
-    const { productImageUrl, productName, orderGoods, commoditySkuId, productSkuStyle } = props;
+    const {
+        productImageUrl,
+        productName,
+        orderGoods,
+        commoditySkuId,
+        productSkuStyle,
+        purchaseNumber,
+        purchaseAmount,
+    } = props;
     const productStyle = parseJson(productSkuStyle);
 
     let styleArray: string[] = [];
@@ -50,6 +58,17 @@ const SimilarGoods = (props: ISimilarInfoResponse['purchaseInfo']) => {
                             {styleString}
                         </Col>
                     </Row>
+                    <div>
+                        <div className={classNames(styles.inlineBlock, similarStyles.goodsInfo)}>
+                            采购单价(￥):{' '}
+                            {purchaseNumber
+                                ? (Number(purchaseAmount) / Number(purchaseNumber)).toFixed(2)
+                                : ''}
+                        </div>
+                        <div className={classNames(styles.inlineBlock, similarStyles.goodsInfo)}>
+                            采购数量: {purchaseNumber}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
