@@ -86,6 +86,7 @@ const allFormFields: FormField[] = [
         type: 'textarea@2',
         name: 'purchase_waybill_no',
         key: 'purchase_waybill_no',
+        formatter: 'multipleToArrayJoin',
     },
     {
         label: '采购单生成时间',
