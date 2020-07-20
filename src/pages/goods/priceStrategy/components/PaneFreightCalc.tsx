@@ -17,6 +17,7 @@ import styles from '../_index.less';
 import Export from '@/components/Export';
 import { exportExcel } from '@/services/global';
 import { PermissionComponent } from 'rc-permission';
+import { FormInstance } from 'antd/es/form';
 
 const PaneFreightCalc: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -134,7 +135,7 @@ const PaneFreightCalc: React.FC = props => {
                             {WeightConfig?.map((item, index) => {
                                 const { min_weight, max_weight } = item;
                                 return (
-                                    <div className={styles.calc}>
+                                    <div className={styles.calc} key={index}>
                                         {index === WeightConfig.length - 1 && max_weight === 0
                                             ? `${min_weight}g以上`
                                             : `[${min_weight}, ${max_weight})`}
@@ -154,15 +155,17 @@ const PaneFreightCalc: React.FC = props => {
                     const { WeightConfig } = record;
                     return (
                         <div className={styles.calcContainer}>
-                            {WeightConfig?.map(({ param_add, param_devide, param_multiply }) => {
-                                return (
-                                    <div className={styles.calc}>
-                                        {Number(param_add).toFixed(4)} + (m/
-                                        {Number(param_devide).toFixed(4)}) *
-                                        {Number(param_multiply).toFixed(4)}
-                                    </div>
-                                );
-                            })}
+                            {WeightConfig?.map(
+                                ({ param_add, param_devide, param_multiply }, index) => {
+                                    return (
+                                        <div className={styles.calc} key={index}>
+                                            {Number(param_add).toFixed(4)} + (m/
+                                            {Number(param_devide).toFixed(4)}) *
+                                            {Number(param_multiply).toFixed(4)}
+                                        </div>
+                                    );
+                                },
+                            )}
                         </div>
                     );
                 },
@@ -191,7 +194,7 @@ const PaneFreightCalc: React.FC = props => {
                 className: styles.select,
                 optionList: nameList,
                 formatter: 'join',
-                onChange: (name, form) => {
+                onChange: (name: string, form: FormInstance) => {
                     // console.log(11111, );
                     const val = form.getFieldValue(name)?.join(',') ?? '';
                     val ? _getShippingCardCountry(val) : setCountryCodeList([]);

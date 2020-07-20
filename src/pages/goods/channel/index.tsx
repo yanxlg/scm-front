@@ -3,7 +3,7 @@ import '@/styles/index.less';
 import '@/styles/product.less';
 import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
-import { Modal, message, Button, Tooltip, Popconfirm } from 'antd';
+import { Modal, message, Button, Popconfirm } from 'antd';
 import { TableProps } from 'antd/es/table';
 import { PopConfirmLoadingButton, FitTable } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
@@ -16,7 +16,6 @@ import {
     queryGoodsBatchOffsale,
 } from '@/services/channel';
 import {
-    ProductStatusMap,
     ProductStatusCode,
     ProductStatusList,
     checkLowerShelf,
@@ -48,91 +47,108 @@ import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
 import styles from '@/pages/goods/local/_index.less';
 import { defaultOption } from '@/enums/LocalGoodsEnum';
+import classNames from 'classnames';
 
 const salesVolumeList = [
     {
-        value: 'all',
-        name: '全部',
-    },
-    {
         value: 'day_10',
-        name: '日销量大于10',
+        label: '日销量大于10',
     },
     {
         value: 'day_50',
-        name: '日销量大于50',
+        label: '日销量大于50',
     },
     {
         value: 'day_100',
-        name: '日销量大于100',
+        label: '日销量大于100',
     },
     {
         value: 'week_100',
-        name: '周销量大于100',
+        label: '周销量大于100',
     },
     {
         value: 'week_200',
-        name: '周销量大于200',
+        label: '周销量大于200',
     },
     {
         value: 'week_500',
-        name: '周销量大于500',
+        label: '周销量大于500',
     },
     {
         value: 'month_100',
-        name: '月销量大于100',
+        label: '月销量大于100',
     },
     {
         value: 'month_500',
-        name: '月销量大于500',
+        label: '月销量大于500',
     },
     {
         value: 'month_1000',
-        name: '月销量大于1000',
+        label: '月销量大于1000',
     },
 ];
 
 const formFields: FormField[] = [
     {
-        type: 'dateRanger',
+        type: 'dateRanger@2',
         name: ['onshelf_time_start', 'onshelf_time_end'],
-        label: <span>时&emsp;&emsp;&emsp;间</span>,
-        className: 'product-picker',
+        label: '时间',
         formatter: ['start_date', 'end_date'],
+        childrenProps: {
+            className: 'product-picker',
+        },
     },
     {
-        type: 'input',
+        type: 'textarea@2',
         label: 'Commodity ID',
         name: 'commodity_id',
-        placeholder: '多个逗号隔开',
+        childrenProps: {
+            placeholder: '支持多个输入',
+            className: 'product-form-input',
+        },
+        formatter: 'multipleToArrayJoin',
     },
     {
-        type: 'input',
-        label: <span>虚拟&emsp;ID</span>,
+        type: 'textarea@2',
+        label: '虚拟ID',
         name: 'vova_virtual_id',
-        placeholder: '多个逗号隔开',
+        childrenProps: {
+            placeholder: '支持多个输入',
+            className: 'product-form-input',
+        },
+        formatter: 'multipleToArrayJoin',
     },
     {
-        type: 'input',
+        type: 'textarea@2',
         label: 'Product ID',
         name: 'product_id',
-        placeholder: '多个逗号隔开',
+        childrenProps: {
+            placeholder: '支持多个输入',
+            className: 'product-form-input',
+        },
+        formatter: 'multipleToArrayJoin',
     },
     {
-        type: 'select',
-        label: <span>销&emsp;&emsp;&emsp;量</span>,
+        type: 'select@2',
+        label: '销量',
         name: 'sales_volume',
-        optionList: salesVolumeList,
+        options: salesVolumeList,
+        initialValue: 'all',
+        defaultOption: {
+            label: '全部',
+            value: 'all',
+        },
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '销售店铺名称',
         name: 'merchant_ids',
-        // placeholder: '请选择',
-        syncDefaultOption: defaultOption,
         formatter: 'plainToArr',
-        optionList: {
-            type: 'select',
+        optionKeys: ['name', 'value'],
+        options: {
             selector: (state: ConnectState) => {
                 return state?.permission?.merchantList?.map(item => {
                     return {
@@ -142,50 +158,85 @@ const formFields: FormField[] = [
                 });
             },
         },
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '一级类目',
         name: 'level_one_category',
-        syncDefaultOption: defaultOption,
-        optionList: () => queryChannelCategory(),
+        options: {
+            service: () => queryChannelCategory(),
+        },
+        optionKeys: ['platform_cate_name', 'platform_cate_id'],
         onChange: (name, form) => {
             form.resetFields(['level_two_category']);
         },
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
-        type: 'select',
+        type: 'select@2',
         label: '二级类目',
         name: 'level_two_category',
-        optionListDependence: {
+        relation: {
             name: 'level_one_category',
             key: 'children',
         },
-        syncDefaultOption: defaultOption,
-        optionList: () => queryChannelCategory(),
+        options: {
+            service: () => queryChannelCategory(),
+        },
+        optionKeys: ['platform_cate_name', 'platform_cate_id'],
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
-        type: 'select',
-        label: '商品状态',
-        name: 'product_status',
-        optionList: ProductStatusList.map(({ name, id }) => {
-            return { name: name, value: id };
-        }),
-    },
-    {
-        type: 'select',
+        type: 'select@2',
         label: '商品渠道',
         name: 'origin_platform',
-        // className: styles.input,
-        syncDefaultOption: defaultOption,
-        optionList: () => queryGoodsSourceList(),
+        defaultOption: {
+            label: '全部',
+            value: '',
+        },
+        initialValue: '',
+        options: {
+            service: () => queryGoodsSourceList(),
+            dataPath: null,
+        },
+        optionKeys: ['name', 'value'],
+        childrenProps: {
+            className: 'product-form-input',
+        },
     },
     {
-        type: 'inputRange',
+        type: 'select@2',
+        label: '商品状态',
+        name: 'product_status',
+        defaultOption: {
+            label: '全部',
+            value: '0',
+        },
+        initialValue: '0',
+        options: ProductStatusList.map(({ name, id }) => {
+            return { label: name, value: id };
+        }),
+        childrenProps: {
+            className: 'product-form-input',
+        },
+    },
+
+    {
+        type: 'numberRange@2',
         label: '价格范围（$）',
         name: ['min_sale_price', 'max_sale_price'],
-        className: 'product-picker',
         precision: 2,
+        childrenProps: {
+            className: 'product-form-range',
+        },
+        formatter: 'number',
     },
 ];
 
@@ -231,13 +282,12 @@ const ChannelList: React.FC = props => {
             commodity_id = '',
             vova_virtual_id = '',
             product_id = '',
-            sales_volume = salesVolumeList[0].value,
-            product_status = ProductStatusList[0].id,
             shop_name = '',
             level_one_category = '',
             level_two_category = '',
             merchant_ids = '',
             origin_platform = '',
+            ...others
         } = query;
         return {
             pageNumber: Number(pageNumber),
@@ -247,13 +297,12 @@ const ChannelList: React.FC = props => {
             commodity_id,
             vova_virtual_id,
             product_id,
-            sales_volume,
             shop_name,
             level_one_category,
             level_two_category,
-            product_status,
             merchant_ids,
             origin_platform,
+            ...others,
         };
     }, []);
 
@@ -605,7 +654,7 @@ const ChannelList: React.FC = props => {
                 dataIndex: 'product_status',
                 align: 'center',
                 width: 150,
-                render: (status: ProductStatusCode = 0, record) => {
+                render: (status: ProductStatusCode, record) => {
                     return (
                         <div>
                             {ProductStatusResponseMap[status]}
@@ -738,6 +787,10 @@ const ChannelList: React.FC = props => {
                 fieldList={formFields}
                 labelClassName="product-form-label"
                 initialValues={defaultInitialValues}
+                containerClassName={classNames(
+                    formStyles.formHelpAbsolute,
+                    formStyles.formContainer,
+                )}
             >
                 {children}
             </JsonForm>
@@ -815,7 +868,7 @@ const ChannelList: React.FC = props => {
                 toolBarRender={toolBarRender}
             />
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading, selectedRowKeys, onShelfLoading, offShelfLoading]);
 
     const body = useMemo(() => {
         return (
@@ -832,7 +885,7 @@ const ChannelList: React.FC = props => {
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog, selectedRowKeys]);
+    }, [loading, exportDialog, selectedRowKeys, onShelfLoading, offShelfLoading]);
 
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;

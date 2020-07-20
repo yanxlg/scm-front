@@ -83,6 +83,13 @@ const LocalPage: React.FC = props => {
             },
             {
                 type: 'input',
+                label: '店铺名称',
+                name: 'merchant_name',
+                className: styles.input,
+                placeholder: '请输入店铺名称',
+            },
+            {
+                type: 'input',
                 label: 'Commodity ID',
                 name: 'commodity_id',
                 placeholder: '多个逗号隔开',

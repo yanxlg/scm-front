@@ -28,4 +28,5 @@ export enum PurchaseApiPath {
     FinishPurchaseExceptionOrder = '/api/v1/purchase/finish_waybill_exception_order',
     UpdateWaybillExceptionPregress = '/api/v1/purchase/update_waybill_exception_order',
     ReviewExceptionOrder = '/api/v1/purchase/review_waybill_exception_order',
+    ReviewVirtualDelivery = '/api/v1/purchase/check_virtual_delivery',
 }

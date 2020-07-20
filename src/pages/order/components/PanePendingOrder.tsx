@@ -9,14 +9,13 @@ import {
     useModal2,
 } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { IPendingOrderSearch, IPendingOrderItem, IReviewOrderItem } from '@/interface/IOrder';
+import { IPendingOrderSearch, IPendingOrderItem } from '@/interface/IOrder';
 import {
     getOrderGoodsDetail,
     getPendingOrderList,
     postExportPendingOrder,
     postOrdersPlace,
     queryPendingCount,
-    queryShopList,
 } from '@/services/order-manage';
 import { utcToLocal } from 'react-components/es/utils/date';
 import {
@@ -35,7 +34,6 @@ import Export from '@/components/Export';
 import CancelOrder from './CancelOrder';
 import { FormInstance } from 'antd/es/form';
 import styles from './_pending.less';
-import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 import { EmptyObject } from '@/config/global';
 import TakeOrdersRecordModal from '@/pages/order/components/TakeOrdersRecordModal';
 import classNames from 'classnames';
@@ -778,6 +776,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
     const [similarModal, showSimilarModal, hideSimilarModal] = useModal2<{
         order_goods_id: string;
         purchase_plan_id: string;
+        commodity_id: string;
     }>();
 
     const similarModalComponent = useMemo(() => {
@@ -947,13 +946,21 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '销售商品总金额($)',
                         dataIndex: 'goodsAmount',
                         align: 'center',
-                        width: 160,
-                        render: (_, row: IChildOrderItem) => {
-                            const { goodsAmount, goodsNumber, freight } = row;
+                        width: 180,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'saleOrderAmount',
+                        title: '销售订单金额($)',
+                        dataIndex: 'saleOrderAmount',
+                        align: 'center',
+                        width: 140,
+                        render: (_, row) => {
+                            const { goodsAmount, freight } = row;
                             const total =
-                                Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                                (Number(goodsAmount) || 0) * 100 + (Number(freight) || 0) * 100;
                             return {
-                                children: isNaN(total) ? '' : total.toFixed(2),
+                                children: isNaN(total) ? '' : (total / 100).toFixed(2),
                                 props: {
                                     rowSpan: row._rowspan || 0,
                                 },
@@ -1122,6 +1129,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                                             showSimilarModal({
                                                                 order_goods_id: row.orderGoodsId,
                                                                 purchase_plan_id: row.purchasePlanId as string,
+                                                                commodity_id: row.commodityId,
                                                             })
                                                         }
                                                     >
@@ -1139,6 +1147,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                                             showSimilarModal({
                                                                 order_goods_id: row.orderGoodsId,
                                                                 purchase_plan_id: row.purchasePlanId as string,
+                                                                commodity_id: row.commodityId,
                                                             })
                                                         }
                                                     >
@@ -1157,6 +1166,7 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                                                             showSimilarModal({
                                                                 order_goods_id: row.orderGoodsId,
                                                                 purchase_plan_id: row.purchasePlanId as string,
+                                                                commodity_id: row.commodityId,
                                                             })
                                                         }
                                                     >
@@ -1431,13 +1441,21 @@ const PaneWarehouseNotShip: React.FC<IProps> = ({ getAllTabCount }) => {
                         title: '销售商品总金额($)',
                         dataIndex: 'goodsAmount',
                         align: 'center',
-                        width: 160,
-                        render: (_, row: IChildOrderItem) => {
-                            const { goodsAmount, goodsNumber, freight } = row;
+                        width: 180,
+                        render: mergeCell,
+                    },
+                    {
+                        key: 'saleOrderAmount',
+                        title: '销售订单金额($)',
+                        dataIndex: 'saleOrderAmount',
+                        align: 'center',
+                        width: 140,
+                        render: (_, row) => {
+                            const { goodsAmount, freight } = row;
                             const total =
-                                Number(goodsAmount) * goodsNumber + (Number(freight) || 0);
+                                (Number(goodsAmount) || 0) * 100 + (Number(freight) || 0) * 100;
                             return {
-                                children: isNaN(total) ? '' : total.toFixed(2),
+                                children: isNaN(total) ? '' : (total / 100).toFixed(2),
                                 props: {
                                     rowSpan: row._rowspan || 0,
                                 },

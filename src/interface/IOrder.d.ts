@@ -139,6 +139,8 @@ export interface ISimilarInfoResponse {
         };
         planId: string;
         failReason: string;
+        purchaseNumber: string;
+        purchaseAmount: string;
     };
     originOrderInfo: {
         skuImageUrl: string;
@@ -147,6 +149,8 @@ export interface ISimilarInfoResponse {
         productTitle: string;
         productOptionValue: string;
         commodityId: string;
+        skuPrice: string;
+        goodsNumber: string;
     };
     historySimilarGoodsInfo: Array<IHistorySimilar>;
 }
@@ -369,4 +373,17 @@ export declare interface IGoodsDetail {
     sku_sn?: string;
     sku_img?: string;
     commodity_sku_id?: string;
+}
+
+export declare interface ISimilarGoodsItem {
+    commodityId: string;
+    defaultImage: string;
+    productTitle: string;
+    priceMin: string;
+    priceMax: string;
+    shippingFeeMin: string;
+    shippingFeeMax: string;
+    productUrl: string;
+    similar: string;
+    isOnSale: '0' | '1';
 }
