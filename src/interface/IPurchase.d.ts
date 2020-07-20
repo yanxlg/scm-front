@@ -1,4 +1,9 @@
-import { PurchaseCode, PurchaseCreateTypeCode } from '@/config/dictionaries/Purchase';
+import {
+    PurchaseCode,
+    PurchaseCreateTypeCode,
+    IsFalseShippingCode,
+    FalseShippingReviewCode,
+} from '@/config/dictionaries/Purchase';
 import { IOptionItem } from 'react-components/lib/JsonForm/items/Select';
 
 export interface IWaybillExceptionType {
@@ -118,6 +123,8 @@ export declare interface IPurchaseItem {
         type: string;
         waybillNumber: string;
         boundStatus: string;
+        isRealDelivery: IsFalseShippingCode;
+        auditStatus: FalseShippingReviewCode;
     }>;
     productImageUrl: string;
     productSkuStyle: string;
@@ -273,4 +280,10 @@ export interface IReviewExceptionOrderResItem {
     code: number;
     msg: string;
     waybillExceptionSn: string;
+}
+
+export interface IReviewVirtualDelivery {
+    refer_waybill_no?: string;
+    audit_status: 2 | 3; // 1--审核通过，2--驳回
+    purchase_order_goods_id?: string;
 }
