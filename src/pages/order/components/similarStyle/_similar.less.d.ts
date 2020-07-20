@@ -4,6 +4,7 @@ interface CssExports {
     content: string;
     desc: string;
     gather: string;
+    goodsInfo: string;
     header: string;
     image: string;
     key: string;
@@ -11,6 +12,8 @@ interface CssExports {
     modalContent: string;
     name: string;
     order: string;
+    pagination: string;
+    similarList: string;
     title: string;
     title1: string;
     typeError: string;
