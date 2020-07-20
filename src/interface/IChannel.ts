@@ -16,6 +16,7 @@ export type IChannelProductListBody = {
     shop_name?: string;
     product_status?: string;
     merchant_ids?: string[];
+    origin_platform?: string;
 };
 
 export interface IChannelProductListItem {

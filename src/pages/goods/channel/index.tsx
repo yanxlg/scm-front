@@ -12,6 +12,8 @@ import {
     updateChannelShelveState,
     queryChannelCategory,
     exportChannelProductList,
+    queryGoodsBatchOnsale,
+    queryGoodsBatchOffsale,
 } from '@/services/channel';
 import {
     ProductStatusMap,
@@ -22,7 +24,7 @@ import {
     ProductStatusResponseMap,
 } from '@/config/dictionaries/Product';
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
-import { IChannelProductListItem } from '@/interface/IChannel';
+import { IChannelProductListItem, IChannelProductListBody } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import { JsonForm } from 'react-components';
 import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
@@ -173,7 +175,7 @@ const formFields: FormField[] = [
     {
         type: 'select',
         label: '商品渠道',
-        name: 'source_channel',
+        name: 'origin_platform',
         // className: styles.input,
         syncDefaultOption: defaultOption,
         optionList: () => queryGoodsSourceList(),
@@ -235,6 +237,7 @@ const ChannelList: React.FC = props => {
             level_one_category = '',
             level_two_category = '',
             merchant_ids = '',
+            origin_platform = '',
         } = query;
         return {
             pageNumber: Number(pageNumber),
@@ -250,6 +253,7 @@ const ChannelList: React.FC = props => {
             level_two_category,
             product_status,
             merchant_ids,
+            origin_platform,
         };
     }, []);
 
@@ -426,6 +430,34 @@ const ChannelList: React.FC = props => {
         [dataSource],
     );
 
+    const _queryGoodsBatchOnsale = useCallback(() => {
+        const data: IChannelProductListBody = searchRef.current!.getFieldsValue();
+        setOnShelfLoading(true);
+        queryGoodsBatchOnsale(data)
+            .then(res => {
+                // console.log('queryGoodsBatchOnsale', res);
+                message.success('查询商品一键上架成功');
+                onReload();
+            })
+            .finally(() => {
+                setOnShelfLoading(false);
+            });
+    }, []);
+
+    const _queryGoodsBatchOffsale = useCallback(() => {
+        const data: IChannelProductListBody = searchRef.current!.getFieldsValue();
+        setOffShelfLoading(true);
+        queryGoodsBatchOffsale(data)
+            .then(res => {
+                // console.log('queryGoodsBatchOffsale', res);
+                message.success('查询商品一键下架成功');
+                onReload();
+            })
+            .finally(() => {
+                setOffShelfLoading(false);
+            });
+    }, []);
+
     const showLog = useCallback(
         ({ product_id, merchant_id, commodity_id }: IChannelProductListItem) => {
             setVisibleProps({
@@ -559,6 +591,12 @@ const ChannelList: React.FC = props => {
             {
                 title: '二级类目',
                 dataIndex: 'level_two_category',
+                align: 'center',
+                width: 120,
+            },
+            {
+                title: '商品渠道',
+                dataIndex: 'origin_platform',
                 align: 'center',
                 width: 120,
             },
@@ -730,26 +768,34 @@ const ChannelList: React.FC = props => {
                     一键下架
                 </LoadingButton>
             </PermissionComponent>,
-            <Popconfirm
-                placement="top"
-                title="确定要立即上架全部商品吗？"
-                onConfirm={() => {}}
-                okText="确定"
-                cancelText="取消"
-            >
-                <Button className={formStyles.formBtn}>查询商品一键上架</Button>
-            </Popconfirm>,
-            <Popconfirm
-                placement="top"
-                title="确定要立即下架架全部商品吗？"
-                onConfirm={() => {}}
-                okText="确定"
-                cancelText="取消"
-            >
-                <Button className={formStyles.formBtn}>查询商品一键下架</Button>
-            </Popconfirm>,
+            <PermissionComponent key="batchon" pid="/v1/vova_goods/batch_onsale" control="tooltip">
+                <Popconfirm
+                    placement="top"
+                    title="确定要立即上架全部商品吗？"
+                    onConfirm={_queryGoodsBatchOnsale}
+                    okText="确定"
+                    cancelText="取消"
+                >
+                    <Button loading={onShelfLoading} className={formStyles.formBtn}>
+                        查询商品一键上架
+                    </Button>
+                </Popconfirm>
+            </PermissionComponent>,
+            <PermissionComponent key="batchoff" pid="/v1/vova_goods/batch_onsale" control="tooltip">
+                <Popconfirm
+                    placement="top"
+                    title="确定要立即下架架全部商品吗？"
+                    onConfirm={_queryGoodsBatchOffsale}
+                    okText="确定"
+                    cancelText="取消"
+                >
+                    <Button loading={offShelfLoading} className={formStyles.formBtn}>
+                        查询商品一键下架
+                    </Button>
+                </Popconfirm>
+            </PermissionComponent>,
         ];
-    }, [selectedRowKeys, loading]);
+    }, [selectedRowKeys, loading, onShelfLoading, offShelfLoading]);
 
     const table = useMemo(() => {
         return (
