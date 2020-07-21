@@ -10,7 +10,7 @@ import taskStyles from '@/styles/_task.less';
 import SimilarGoods from './SimilarGoods';
 import OrderGoods from './OrderGoods';
 import GatherInfo from './GatherInfo';
-import StyleForm from './StylesForm';
+import StyleForm, { getQueryVariable } from './StylesForm';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
 import SimilarTable from './SimilarTable';
