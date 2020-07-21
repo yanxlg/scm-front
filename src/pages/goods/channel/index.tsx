@@ -198,7 +198,7 @@ const formFields: FormField[] = [
             label: '全部',
             value: '',
         },
-        initialValue: '',
+        // initialValue: '',
         options: {
             service: () => queryGoodsSourceList(),
             dataPath: null,
@@ -206,6 +206,7 @@ const formFields: FormField[] = [
         optionKeys: ['name', 'value'],
         childrenProps: {
             className: 'product-form-input',
+            mode: 'multiple',
         },
     },
     {
