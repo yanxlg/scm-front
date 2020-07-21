@@ -14,6 +14,7 @@ interface CssExports {
     taskIdsSelect: string;
     taskModal: string;
     taskStatusText: string;
+    treeSelect: string;
     waitIcon: string;
     warnIcon: string;
 }

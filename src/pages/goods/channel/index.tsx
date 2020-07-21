@@ -197,6 +197,7 @@ const formFields: FormField[] = [
             label: '全部',
             value: '',
         },
+        // initialValue: '',
         options: {
             service: () => queryGoodsSourceList(),
             dataPath: null,
@@ -204,6 +205,7 @@ const formFields: FormField[] = [
         optionKeys: ['name', 'value'],
         childrenProps: {
             className: 'product-form-input',
+            mode: 'multiple',
         },
     },
     {
@@ -222,6 +224,7 @@ const formFields: FormField[] = [
             className: 'product-form-input',
         },
     },
+
     {
         type: 'numberRange@2',
         label: '价格范围（$）',
@@ -858,7 +861,7 @@ const ChannelList: React.FC = props => {
                 toolBarRender={toolBarRender}
             />
         );
-    }, [loading, selectedRowKeys]);
+    }, [loading, selectedRowKeys, onShelfLoading, offShelfLoading]);
 
     const body = useMemo(() => {
         return (
@@ -875,7 +878,7 @@ const ChannelList: React.FC = props => {
                 <CopyLink getCopiedLinkQuery={getCopiedLinkQuery} />
             </Container>
         );
-    }, [loading, exportDialog, selectedRowKeys]);
+    }, [loading, exportDialog, selectedRowKeys, onShelfLoading, offShelfLoading]);
 
     const logModal = useMemo(() => {
         return <OnOffLogModal visible={visible} onClose={onClose} />;
