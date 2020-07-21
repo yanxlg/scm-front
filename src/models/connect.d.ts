@@ -4,6 +4,7 @@ import { GlobalModelState } from './global';
 import { RouterTypes } from '@ant-design/pro-layout/es/typings';
 import { AccountModelState } from '@/models/account';
 import { PermissionModelState } from '@/models/permission';
+import { SettingModelState } from './setting';
 
 export { GlobalModelState };
 
@@ -11,6 +12,7 @@ export interface ConnectState {
     global: GlobalModelState;
     account: AccountModelState;
     permission: PermissionModelState;
+    setting: SettingModelState;
 }
 
 export interface Route extends MenuDataItem {

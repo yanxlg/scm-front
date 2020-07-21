@@ -5,7 +5,7 @@ import '@/styles/modal.less';
 import channelStyles from '@/styles/_channel.less';
 import { Modal, message, Button } from 'antd';
 import { TableProps } from 'antd/es/table';
-import { PopConfirmLoadingButton, FitTable } from 'react-components';
+import { PopConfirmLoadingButton } from 'react-components';
 import { AutoEnLargeImg } from 'react-components';
 import {
     queryChannelGoodsList,
@@ -23,7 +23,7 @@ import {
 import { defaultPageNumber, defaultPageSize } from '@/config/global';
 import { IChannelProductListItem } from '@/interface/IChannel';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
-import { JsonForm } from 'react-components';
+import { JsonForm, SettingTable } from 'react-components';
 import { unixToStartDate, unixToEndDate } from 'react-components/es/utils/date';
 import queryString from 'query-string';
 import CopyLink from '@/components/copyLink';
@@ -763,8 +763,8 @@ const ChannelList: React.FC = props => {
     }, [selectedRowKeys, loading]);
     const table = useMemo(() => {
         return (
-            <FitTable<IChannelProductListItem>
-                bordered={true}
+            <SettingTable<IChannelProductListItem>
+                settingKey={'/channel/goods'}
                 rowKey="id"
                 scroll={scroll}
                 bottom={60}
@@ -775,7 +775,6 @@ const ChannelList: React.FC = props => {
                 dataSource={dataSource}
                 loading={loading}
                 onChange={onChange}
-                columnsSettingRender={true}
                 toolBarRender={toolBarRender}
             />
         );
