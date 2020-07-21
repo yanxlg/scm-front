@@ -275,33 +275,38 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                         <Radio value="sale_channel">爬虫商品条件</Radio>
                     </Radio.Group>
                 </Form.Item>
-                <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', display: 'inline-flex' }}>
-                    <Form.Item
-                        noStyle={true}
-                        shouldUpdate={(prevValues, currentValues) => {
-                            return prevValues['channel_type'] !== currentValues['channel_type'];
-                        }}
-                    >
-                        {({ getFieldValue }) => {
-                            const type = getFieldValue('channel_type');
-                            if (type === 'sale_channel') {
-                                return (
-                                    <>
-                                        <PriceRange
-                                            form={form}
-                                            label="爬虫价格"
-                                            name={['source_price_min', 'source_price_max']}
-                                        />
-                                        <SalesRange
-                                            form={form}
-                                            label="爬虫销量"
-                                            name={['source_sales_min', 'source_sales_max']}
-                                        />
-                                    </>
-                                );
-                            } else {
-                                return (
-                                    <>
+                <Form.Item
+                    noStyle={true}
+                    shouldUpdate={(prevValues, currentValues) => {
+                        return prevValues['channel_type'] !== currentValues['channel_type'];
+                    }}
+                >
+                    {({ getFieldValue }) => {
+                        const type = getFieldValue('channel_type');
+                        if (type === 'sale_channel') {
+                            return (
+                                <div
+                                    style={{
+                                        backgroundColor: 'rgba(0,0,0,0.1)',
+                                        display: 'inline-flex',
+                                    }}
+                                >
+                                    <PriceRange
+                                        form={form}
+                                        label="爬虫价格"
+                                        name={['source_price_min', 'source_price_max']}
+                                    />
+                                    <SalesRange
+                                        form={form}
+                                        label="爬虫销量"
+                                        name={['source_sales_min', 'source_sales_max']}
+                                    />
+                                </div>
+                            );
+                        } else {
+                            return (
+                                <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', width: 400 }}>
+                                    <div style={{ paddingLeft: 6 }}>
                                         <Form.Item
                                             validateTrigger={'onBlur'}
                                             name="ranges"
@@ -326,38 +331,37 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                                                 </Radio>
                                             </Radio.Group>
                                         </Form.Item>
-                                        <Form.Item
-                                            noStyle={true}
-                                            shouldUpdate={(prevValues, currentValues) => {
+                                    </div>
+
+                                    <Form.Item
+                                        noStyle={true}
+                                        shouldUpdate={(prevValues, currentValues) => {
+                                            return prevValues['ranges'] !== currentValues['ranges'];
+                                        }}
+                                    >
+                                        {({ getFieldValue }) => {
+                                            const ranges = getFieldValue('ranges');
+                                            if (ranges === PUTaskRangeType.HasSales) {
                                                 return (
-                                                    prevValues['ranges'] !== currentValues['ranges']
+                                                    <SalesRange
+                                                        form={form}
+                                                        label="渠道销量"
+                                                        name={[
+                                                            'channel_sales_min',
+                                                            'channel_sales_max',
+                                                        ]}
+                                                    />
                                                 );
-                                            }}
-                                        >
-                                            {({ getFieldValue }) => {
-                                                const ranges = getFieldValue('ranges');
-                                                if (ranges === PUTaskRangeType.HasSales) {
-                                                    return (
-                                                        <SalesRange
-                                                            form={form}
-                                                            label="渠道销量"
-                                                            name={[
-                                                                'channel_sales_min',
-                                                                'channel_sales_max',
-                                                            ]}
-                                                        />
-                                                    );
-                                                } else {
-                                                    return null;
-                                                }
-                                            }}
-                                        </Form.Item>
-                                    </>
-                                );
-                            }
-                        }}
-                    </Form.Item>
-                </div>
+                                            } else {
+                                                return null;
+                                            }
+                                        }}
+                                    </Form.Item>
+                                </div>
+                            );
+                        }
+                    }}
+                </Form.Item>
 
                 <Form.Item
                     validateTrigger={'onBlur'}
