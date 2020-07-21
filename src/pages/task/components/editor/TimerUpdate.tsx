@@ -268,11 +268,11 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                             message: '请选择商品条件',
                         },
                     ]}
-                    initialValue="source_channel"
+                    initialValue="sale_channel"
                 >
                     <Radio.Group>
-                        <Radio value="source_channel">渠道商品条件</Radio>
-                        <Radio value="sale_channel">爬虫商品条件</Radio>
+                        <Radio value="sale_channel">渠道商品条件</Radio>
+                        <Radio value="source_channel">爬虫商品条件</Radio>
                     </Radio.Group>
                 </Form.Item>
                 <Form.Item
@@ -283,7 +283,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                 >
                     {({ getFieldValue }) => {
                         const type = getFieldValue('channel_type');
-                        if (type === 'sale_channel') {
+                        if (type === 'source_channel') {
                             return (
                                 <div
                                     style={{
