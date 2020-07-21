@@ -287,7 +287,7 @@ const ChannelList: React.FC = props => {
             level_one_category = '',
             level_two_category = '',
             merchant_ids = '',
-            origin_platform,
+            origin_platform = '',
             ...others
         } = query;
         return {
