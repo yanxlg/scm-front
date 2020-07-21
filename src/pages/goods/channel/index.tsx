@@ -42,7 +42,6 @@ import Export from '@/components/Export';
 import { PermissionRouterWrap, PermissionComponent } from 'rc-permission';
 import { ConnectState } from '@/models/connect';
 import { useDispatch } from '@@/plugin-dva/exports';
-import styles from '@/pages/goods/local/_index.less';
 import classNames from 'classnames';
 
 const salesVolumeList = [
