@@ -9,16 +9,16 @@ import { history } from '@@/core/history';
 import { IPermissionTree } from 'rc-permission/es/Provider';
 import { PermissionContext } from 'rc-permission';
 
-declare interface ILoginState {
-    remember: boolean;
-    userName?: string;
-    password?: string; // 真实密码
-    showPassword?: string; // 显示密码，防止浏览器记住密码
-    userNameActive: boolean;
-    passwordActive: boolean;
-    userNameError?: string;
-    passwordError?: string;
-    login: boolean;
+function getQueryVariable(key: string) {
+    const query = window.location.search.substring(1);
+    const vars = query.split('&');
+    for (let i = 0; i < vars.length; i++) {
+        const pair = vars[i].split('=');
+        if (pair[0] === key) {
+            return pair[1];
+        }
+    }
+    return false;
 }
 
 const Login = () => {
@@ -99,13 +99,15 @@ const Login = () => {
                         updateTree(pData);
                         User.updatePData(pData);
                         User.updateDData(dataPermission); // 数据权限，需要刷新数据权限中所有数据
-                        history.replace('/');
+                        const redirect = getQueryVariable('redirect');
+                        history.replace(redirect ? redirect : '/');
                     })
                     .finally(() => {
                         setLogin(false);
                     });
             })
-            .catch(() => {
+            .catch(error => {
+                setPasswordError(error.message);
                 setLogin(false);
             });
     };

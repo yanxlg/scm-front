@@ -2,8 +2,6 @@ import React, { ReactText, useCallback, useEffect, useMemo, useRef, useState } f
 import { JsonFormRef } from 'react-components/es/JsonForm';
 import {
     childrenOrderCancelOptionList,
-    FinalCancelMap,
-    FinalCancelStatus,
     orderShippingOptionList,
     orderStatusOptionList,
     purchaseOrderOptionList,
@@ -54,7 +52,6 @@ import { getCategoryList } from '@/services/global';
 import { getCategoryLowestLevel, getCategoryName } from '@/utils/utils';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
-import { OutStockFailureCode, OutStockFailureMap } from '@/config/dictionaries/Stock';
 
 const configFields = [
     'order_goods_status',
@@ -68,7 +65,7 @@ const configFields = [
     'purchase_plan_cancel_type',
     'product_platform',
     'platform_uid',
-    'purchase_fail_code',
+    'scm_error_code',
     'outbound_fail_code',
     'first_category',
     'second_category',
@@ -120,9 +117,14 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
     const [allCategoryList, setAllCategoryList] = useState<IOptionItem[]>([]);
     const dispatch = useDispatch();
 
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
     useEffect(() => {
         dispatch({
             type: 'permission/queryMerchantList',
+        });
+        dispatch({
+            type: 'options/purchaseError',
         });
     }, []);
 
@@ -745,17 +747,14 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       },
                   },
                   {
-                      key: 'purchaseFailCode',
+                      key: 'scmErrorCode',
                       title: '失败原因',
-                      dataIndex: 'purchaseFailCode',
+                      dataIndex: 'scmErrorCode',
                       align: 'center',
                       width: 140,
                       defaultHide: true,
                       render: (value: string, row) => {
-                          const { purchaseOrderStatus } = row;
-                          return purchaseOrderStatus === 7
-                              ? FinalCancelMap[value as FinalCancelStatus] || '未知原因'
-                              : '';
+                          return purchaseErrorMap?.[value] || '';
                       },
                   },
                   {
@@ -947,7 +946,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       render: (value: OutStockFailureCode) => OutStockFailureMap[value],
                   },
               ];
-    }, [onlyParent, purchaseUidList, allCategoryList]);
+    }, [onlyParent, purchaseUidList, allCategoryList, purchaseErrorMap]);
 
     const fieldList = onlyParent ? parentFieldsList : fieldsList;
 
@@ -1344,6 +1343,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
         onlyParent,
         detailModal,
         exportModal,
+        purchaseErrorMap,
     ]);
 };
 

@@ -1,27 +1,11 @@
-import { AnyAction, Dispatch } from 'redux';
-import { MenuDataItem } from '@ant-design/pro-layout';
 import { GlobalModelState } from './global';
-import { RouterTypes } from '@ant-design/pro-layout/es/typings';
 import { AccountModelState } from '@/models/account';
 import { PermissionModelState } from '@/models/permission';
-import { SettingModelState } from './setting';
-
-export { GlobalModelState };
+import { OptionsModelState } from '@/models/options';
 
 export interface ConnectState {
     global: GlobalModelState;
     account: AccountModelState;
     permission: PermissionModelState;
-    setting: SettingModelState;
-}
-
-export interface Route extends MenuDataItem {
-    routes?: Route[];
-}
-
-/**
- * @type T: Params matched in dynamic routing
- */
-export interface ConnectProps<T = {}> extends Partial<RouterTypes<T>> {
-    dispatch?: Dispatch<AnyAction>;
+    options: OptionsModelState;
 }

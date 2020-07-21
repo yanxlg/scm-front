@@ -17,6 +17,9 @@ const Page: React.FC = () => {
                 status="403"
                 title="403"
                 subTitle="抱歉，你无权访问该页面。"
+                style={{
+                    height: 'calc(100vh - 110px)',
+                }}
                 extra={
                     <LoadingButton type="primary" onClick={onLogout}>
                         切换账号

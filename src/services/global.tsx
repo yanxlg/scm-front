@@ -119,6 +119,10 @@ export const queryGoodsSourceList = singlePromiseWrap<
     });
 });
 
+export const queryChannels = () => {
+    return request.get(GlobalApiPath.QuerySelectList.replace(':id', '1'));
+};
+
 export const queryWarehourseById = (id: string) => {
     return request.get<
         IResponse<{
@@ -198,6 +202,7 @@ export function queryRoleSimpleList() {
 export function loginUser(data: { username: string; password: string }) {
     return request.post<IResponse<string>>(GlobalApiPath.login, {
         data: data,
+        skipResponseInterceptors: true,
     });
 }
 
