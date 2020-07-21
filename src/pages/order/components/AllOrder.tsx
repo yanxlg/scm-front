@@ -756,8 +756,7 @@ const AllOrder = ({ updateCount }: AllOrderProps) => {
                       width: 140,
                       defaultHide: true,
                       render: (value: string, row) => {
-                          const { purchaseOrderStatus } = row;
-                          return purchaseOrderStatus === 7 ? purchaseErrorMap?.[value] : '';
+                          return purchaseErrorMap?.[value] || '';
                       },
                   },
                   {
