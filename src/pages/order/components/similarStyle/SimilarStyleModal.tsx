@@ -12,7 +12,7 @@ import SimilarGoods from './SimilarGoods';
 import OrderGoods from './OrderGoods';
 import GatherInfo from './GatherInfo';
 import StyleForm, { getQueryVariable } from './StylesForm';
-import SimilarTable from './SimilarTable';
+import SimilarTable from '@/components/SimilarTable/SimilarTable';
 
 declare interface SimilarStyleModalProps {
     visible:
