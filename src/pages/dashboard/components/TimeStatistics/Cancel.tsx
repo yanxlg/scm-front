@@ -218,15 +218,17 @@ const Cancel: ForwardRefRenderFunction<ICancelRef, ICancelProps> = ({ searchRef 
 
         monitorOrder?.forEach((item: IMonitorOrderItem) => {
             const { dayNum, confirmTime, ...rest } = item;
-            !dayMap[dayNum] && (dayMap[dayNum] = []);
-            dayMap[dayNum].push({
-                ...rest,
-                dayNum,
-                confirmTime: confirmTime.substr(0, 10),
-            });
+            if (Number(dayNum) <= 15) {
+                !dayMap[dayNum] && (dayMap[dayNum] = []);
+                dayMap[dayNum].push({
+                    ...rest,
+                    dayNum,
+                    confirmTime: confirmTime.substr(0, 10),
+                });
+            }
         });
 
-        const dayKeys = Object.keys(dayMap);
+        const dayKeys = Object.keys(dayMap).filter(num => Number(num) <= 15);
 
         const legendData = dayKeys.map(item => `${item}天`);
 
