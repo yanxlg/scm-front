@@ -117,13 +117,63 @@ const LocalPage: React.FC = props => {
                     setSourceChannel(form.getFieldValue(name));
                 },
             },
+            // {
+            //     type: 'select',
+            //     label: '销售状态',
+            //     name: 'inventory_status',
+            //     className: styles.input,
+            //     formatter: 'number',
+            // optionList: [defaultOption, ...inventoryStatusList],
+            // },
             {
-                type: 'select',
                 label: '销售状态',
+                type: 'cascader',
                 name: 'inventory_status',
+                // rules: [
+                //     { required: true, message: '请选择收货地址' },
+                //     {
+                //         validator: (_, value) => {
+                //             return value.length === 3
+                //                 ? Promise.resolve()
+                //                 : Promise.reject('请选择到区');
+                //         },
+                //     },
+                // ],
                 className: styles.input,
-                formatter: 'number',
-                optionList: [defaultOption, ...inventoryStatusList],
+                // disabled,
+                options: [
+                    {
+                        label: '不可销售',
+                        value: 1,
+                        children: [
+                            {
+                                label: '商品售罄',
+                                value: 11,
+                            },
+                            {
+                                label: '海淘',
+                                value: 12,
+                            },
+                            {
+                                label: '预售',
+                                value: 13,
+                            },
+                            {
+                                label: '不可合并',
+                                value: 14,
+                            },
+                        ],
+                    },
+                    {
+                        label: '可销售',
+                        value: 2,
+                    },
+                ],
+                // fieldNames: {
+                //     label: 'label',
+                //     value: 'label',
+                //     children: 'children',
+                // },
             },
             {
                 type: 'select',
