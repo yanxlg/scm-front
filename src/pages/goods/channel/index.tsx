@@ -201,7 +201,7 @@ const formFields: FormField[] = [
             label: '全部',
             value: '',
         },
-        initialValue: '',
+        // initialValue: '',
         options: {
             service: () => queryGoodsSourceList(),
             dataPath: null,
@@ -209,6 +209,7 @@ const formFields: FormField[] = [
         optionKeys: ['name', 'value'],
         childrenProps: {
             className: 'product-form-input',
+            mode: 'multiple',
         },
     },
     {
@@ -286,7 +287,7 @@ const ChannelList: React.FC = props => {
             level_one_category = '',
             level_two_category = '',
             merchant_ids = '',
-            origin_platform = '',
+            origin_platform,
             ...others
         } = query;
         return {
