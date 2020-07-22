@@ -805,7 +805,7 @@ const ChannelList: React.FC = props => {
                     onClick={() => onShelveList(selectedRowKeys)}
                     disabled={size === 0}
                 >
-                    一键上架
+                    上架
                 </LoadingButton>
             </PermissionComponent>,
             <PermissionComponent key="of" pid="goods/channel/sales" control="tooltip">
@@ -816,7 +816,7 @@ const ChannelList: React.FC = props => {
                     onClick={() => offShelveList(selectedRowKeys)}
                     disabled={size === 0}
                 >
-                    一键下架
+                    下架
                 </LoadingButton>
             </PermissionComponent>,
             <PermissionComponent key="batchon" pid="/v1/vova_goods/batch_onsale" control="tooltip">
