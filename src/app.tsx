@@ -15,9 +15,7 @@ import { PermissionProvider } from 'rc-permission';
 import User from '@/storage/User';
 import { history } from '@@/core/history';
 import Page from '@/pages/403';
-import { queryUserPermission } from '@/services/global';
-import { IPermissionTree } from 'rc-permission/es/Provider';
-
+import DragAndDrop from '../../react-components/src/FitTable/DragDropProvider';
 NProgress.configure({ showSpinner: false });
 
 const develop = process.env.NODE_ENV !== 'production';
@@ -135,7 +133,7 @@ export function onRouteChange({
     }, 200 + Math.floor(Math.random() * 300));
 }
 
-export function rootContainer(container: any) {
+export const rootContainer = (container: any) => {
     return React.createElement(
         PermissionProvider,
         {
@@ -149,7 +147,7 @@ export function rootContainer(container: any) {
         },
         container,
     );
-}
+};
 
 /*export function render(oldRender: any) {
     // 使用原有权限，同时刷新权限
@@ -172,3 +170,42 @@ export function render() {
         extraRoutes = res.routes;
     });
 }*/
+
+// service worker
+window.addEventListener('load', function() {
+    // tslint:disable-next-line:no-console
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then(function(reg) {
+                reg.onupdatefound = function() {
+                    const installingWorker = reg.installing;
+                    if (installingWorker) {
+                        installingWorker.onstatechange = function() {
+                            switch (installingWorker.state) {
+                                case 'installed':
+                                    if (navigator.serviceWorker.controller) {
+                                        // tslint:disable-next-line:no-console
+                                        console.log('New or updated content is available.');
+                                    } else {
+                                        // tslint:disable-next-line:no-console
+                                        console.log('Content is now available offline!');
+                                    }
+                                    break;
+                                case 'redundant':
+                                    // tslint:disable-next-line:no-console
+                                    console.error(
+                                        'The installing service worker became redundant.',
+                                    );
+                                    break;
+                            }
+                        };
+                    }
+                };
+            })
+            .catch(function(e) {
+                // tslint:disable-next-line:no-console
+                console.error('Error during service worker registration:', e);
+            });
+    }
+});

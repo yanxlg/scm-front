@@ -146,3 +146,15 @@ export async function queryOnOffLog({
         },
     });
 }
+
+export function queryGoodsBatchOnsale(data: IChannelProductListBody) {
+    return request.post<IResponse<any>>(ChannelApiPath.QueryGoodsBatchOnsale, {
+        data,
+    });
+}
+
+export function queryGoodsBatchOffsale(data: IChannelProductListBody) {
+    return request.post<IResponse<any>>(ChannelApiPath.QueryGoodsBatchOffsale, {
+        data,
+    });
+}

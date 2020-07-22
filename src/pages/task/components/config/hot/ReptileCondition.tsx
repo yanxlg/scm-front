@@ -16,6 +16,7 @@ import { TreeNodeNormal } from 'antd/es/tree/Tree';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import classNames from 'classnames';
 import '@/styles/config.less';
+import styles from '@/styles/_task.less';
 
 declare interface ReptileConditionProps {
     form: FormInstance;
@@ -433,6 +434,7 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                     treeDefaultExpandAll={true}
                     treeCheckable={true}
                     treeData={firstTreeData}
+                    dropdownClassName={styles.treeSelect}
                     // maxTagCount={10}
                 />
             </Form.Item>
@@ -472,6 +474,7 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                     treeData={middleTreeData}
                     maxTagCount={loading ? 0 : 10}
                     maxTagPlaceholder={loading ? () => <span>全选</span> : undefined}
+                    dropdownClassName={styles.treeSelect}
                 />
             </Form.Item>
         );
@@ -508,6 +511,7 @@ const ReptileCondition: ForwardRefRenderFunction<ReptileConditionRef, ReptileCon
                     treeData={lastTreeData}
                     maxTagCount={loading ? 0 : 10}
                     maxTagPlaceholder={loading ? () => <span>全选</span> : undefined}
+                    dropdownClassName={styles.treeSelect}
                 />
             </Form.Item>
         );

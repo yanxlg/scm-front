@@ -7,11 +7,12 @@ import { EmptyObject } from '@/config/global';
 import { LoadingOutlined, CloseCircleFilled } from '@ant-design/icons';
 import similarStyles from './_similar.less';
 import taskStyles from '@/styles/_task.less';
-import { failureReasonMap } from '@/enums/OrderEnum';
 import SimilarGoods from './SimilarGoods';
 import OrderGoods from './OrderGoods';
 import GatherInfo from './GatherInfo';
 import StyleForm, { getQueryVariable } from './StylesForm';
+import { useDispatch, useSelector } from '@@/plugin-dva/exports';
+import { ConnectState } from '@/models/connect';
 import SimilarTable from './SimilarTable';
 
 declare interface SimilarStyleModalProps {
@@ -32,6 +33,14 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
     const [submitting, setSubmitting] = useState(false);
     const [commodityId, setCommodityId] = useState('');
     const [form] = Form.useForm();
+    const dispatch = useDispatch();
+    const purchaseErrorMap = useSelector((state: ConnectState) => state.options.platformErrorMap);
+
+    useEffect(() => {
+        dispatch({
+            type: 'options/purchaseError',
+        });
+    }, []);
 
     useEffect(() => {
         // 获取当前状态
@@ -110,7 +119,8 @@ const SimilarStyleModal = ({ visible, onClose, onReload }: SimilarStyleModalProp
                                 {status === 0 ? (
                                     <div className={similarStyles.title}>
                                         <CloseCircleFilled className={taskStyles.errorIcon} />
-                                        拍单失败-{failureReasonMap[purchaseInfo?.purchaseFailCode]}
+                                        拍单失败-
+                                        {purchaseErrorMap?.[purchaseInfo?.scmErrorCode]}
                                     </div>
                                 ) : status === 1 || status === 5 ? (
                                     <div className={similarStyles.title}>
