@@ -34,15 +34,6 @@ export const versionStatusMap = {
 
 export const versionStatusList = transOptionList(versionStatusMap);
 
-// 上架渠道
-export const publishChannelStatusMap = {
-    1: 'VOVA',
-    2: 'FD',
-    3: 'AZ',
-};
-
-export const publishChannelStatusList = transOptionList(publishChannelStatusMap);
-
 // 上架状态
 export const publishStatusMap = {
     0: '上架中',
