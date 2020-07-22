@@ -33,6 +33,7 @@ import ShipFeeModal from './components/ShipFeeModal';
 import SkuEditModal from './components/SkuEditModal';
 import Container from '@/components/Container';
 import { useList } from '@/utils/hooks';
+import { ITaskListItem } from '@/interface/ITask';
 import { LoadingButton } from 'react-components';
 import SkuDialog from './components/SkuEditModal';
 import { isEmptyObject } from '@/utils/utils';
@@ -236,6 +237,8 @@ const formFields: FormField[] = [
         formatter: 'number',
     },
 ];
+
+const scroll: TableProps<ITaskListItem>['scroll'] = { x: true, scrollToFirstRowOnChange: true };
 
 const ChannelList: React.FC = props => {
     const searchRef = useRef<JsonFormRef>(null);
@@ -850,6 +853,7 @@ const ChannelList: React.FC = props => {
             <SettingTable<IChannelProductListItem>
                 settingKey={'/channel/goods'}
                 rowKey="id"
+                scroll={scroll}
                 bottom={60}
                 minHeight={500}
                 rowSelection={rowSelection}

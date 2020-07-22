@@ -3,12 +3,7 @@ import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import Container from '@/components/Container';
-import {
-    defaultOption,
-    inventoryStatusList,
-    versionStatusList,
-    publishChannelStatusList,
-} from '@/enums/LocalGoodsEnum';
+import { defaultOption, inventoryStatusList, versionStatusList } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 import { getGoodsList, getCatagoryList, getGoodsStatusList } from '@/services/goods';
 import { IGoodsList, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
@@ -18,6 +13,7 @@ import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryGoodsSourceList } from '@/services/global';
 import { PermissionRouterWrap } from 'rc-permission';
+import { getPlatformAndStore } from '@/services/dashboard';
 
 const initialValues = {
     inventory_status: '',
@@ -109,8 +105,9 @@ const LocalPage: React.FC = props => {
                 label: '上架渠道',
                 name: 'publish_channel',
                 className: styles.input,
-                formatter: 'number',
-                optionList: [defaultOption, ...publishChannelStatusList],
+                // formatter: 'number',
+                syncDefaultOption: defaultOption,
+                optionList: () => getPlatformAndStore(),
             },
             {
                 type: 'select',

@@ -31,7 +31,6 @@
     },
     "devDependencies": {
         "dva-logger": "^1.0.0",
-        "@types/redux-persist": "^4.3.1",
         "@types/classnames": "^2.2.9",
         "@types/echarts": "^4.6.0",
         "@types/express": "^4.17.0",
