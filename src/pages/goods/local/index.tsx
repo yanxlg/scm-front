@@ -48,6 +48,21 @@ const LocalPage: React.FC = props => {
     } = useList({
         formRef: formRef,
         queryList: getGoodsList,
+        convertQuery: (params: any) => {
+            // console.log(11111111, params);
+            const { inventory_status, ...rest } = params;
+            let status = '';
+            let reason = '';
+            if (inventory_status) {
+                status = inventory_status[0];
+                reason = inventory_status[1] || '';
+            }
+            return {
+                ...rest,
+                inventory_status: status,
+                not_sale_reason: reason,
+            };
+        },
     });
 
     const goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
@@ -117,35 +132,20 @@ const LocalPage: React.FC = props => {
                     setSourceChannel(form.getFieldValue(name));
                 },
             },
-            // {
-            //     type: 'select',
-            //     label: '销售状态',
-            //     name: 'inventory_status',
-            //     className: styles.input,
-            //     formatter: 'number',
-            // optionList: [defaultOption, ...inventoryStatusList],
-            // },
             {
                 label: '销售状态',
                 type: 'cascader',
                 name: 'inventory_status',
-                // rules: [
-                //     { required: true, message: '请选择收货地址' },
-                //     {
-                //         validator: (_, value) => {
-                //             return value.length === 3
-                //                 ? Promise.resolve()
-                //                 : Promise.reject('请选择到区');
-                //         },
-                //     },
-                // ],
                 className: styles.input,
-                // disabled,
                 options: [
                     {
                         label: '不可销售',
                         value: 1,
                         children: [
+                            {
+                                label: '全部',
+                                value: '',
+                            },
                             {
                                 label: '商品售罄',
                                 value: 11,
@@ -162,6 +162,10 @@ const LocalPage: React.FC = props => {
                                 label: '不可合并',
                                 value: 14,
                             },
+                            {
+                                label: '黑名单店铺',
+                                value: 15,
+                            },
                         ],
                     },
                     {
@@ -169,11 +173,6 @@ const LocalPage: React.FC = props => {
                         value: 2,
                     },
                 ],
-                // fieldNames: {
-                //     label: 'label',
-                //     value: 'label',
-                //     children: 'children',
-                // },
             },
             {
                 type: 'select',
