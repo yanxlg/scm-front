@@ -348,7 +348,7 @@ const GoodsTable: React.FC<IProps> = ({
                 title: '销售状态',
                 dataIndex: 'inventory_status',
                 align: 'center',
-                width: 100,
+                width: 140,
                 render: (value: number, record) => {
                     const reasonList: string[] = [];
                     const {
@@ -368,7 +368,7 @@ const GoodsTable: React.FC<IProps> = ({
                     ) : (
                         <>
                             不可销售
-                            <div>{reasonList.join(',')}</div>
+                            {reasonList.length > 0 ? <div>({reasonList.join(', ')})</div> : null}
                         </>
                     );
                 },
