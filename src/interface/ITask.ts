@@ -92,7 +92,7 @@ export interface IHotTaskBody {
 
 export interface IPUTaskBody {
     task_name: string;
-    ranges: UpdateItemType[];
+    ranges?: UpdateItemType[];
     task_start_time: number;
     task_end_time: number;
     task_interval_seconds: number;

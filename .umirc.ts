@@ -114,7 +114,7 @@ const config = defineConfig({
     },
     proxy: {
         '/api': {
-            target: 'https://scm-api-t2.vova.com.hk/',
+            target: 'https://scm-api-t4.vova.com.hk/',
             // target: 'http://172.16.51.8:3026',
             changeOrigin: true,
             pathRewrite: { '^/api': '' },

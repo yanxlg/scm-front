@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DatePicker, Input, Radio, Form, Spin, Checkbox, Select } from 'antd';
+import { DatePicker, Input, Radio, Form, Spin, TreeSelect } from 'antd';
 import '@/styles/config.less';
 import { addPDDTimerUpdateTask, queryTaskDetail } from '@/services/task';
 import { showSuccessModal } from '@/pages/task/components/modal/GatherSuccessModal';
@@ -22,6 +22,10 @@ import dayjs, { Dayjs } from 'dayjs';
 import { queryGoodsSourceList } from '@/services/global';
 import { EmptyArray } from 'react-components/es/utils';
 import { PermissionComponent } from 'rc-permission';
+import { StoreValue, Store } from 'antd/es/form/interface';
+import SalesRange from '../config/hot/SalesRange';
+import PriceRange from '../config/hot/PriceRange';
+import { toNumber } from '@/utils/utils';
 
 declare interface IFormData extends IPUTaskBody {
     taskIntervalType?: TaskIntervalConfigType;
@@ -29,35 +33,18 @@ declare interface IFormData extends IPUTaskBody {
     second: number;
     update_item: UpdateItemType;
     channel: string;
+    channel_type: string;
+    source_price_min?: string;
+    source_price_max?: string;
+    source_sales_max?: string;
+    source_sales_min?: string;
+    channel_sales_min?: string;
+    channel_sales_max?: string;
 }
 
 declare interface ITimerUpdateProps {
     taskId?: number;
 }
-
-const convertDetail = (info: ITaskDetailInfo) => {
-    const {
-        update_type = [PUTaskRangeType.AllOnShelves],
-        task_end_time,
-        task_start_time,
-        time_interval,
-        ...extra
-    } = info;
-    const isDay = time_interval && time_interval % 86400 === 0;
-    return {
-        ranges: update_type,
-        taskIntervalType: time_interval
-            ? isDay
-                ? TaskIntervalConfigType.day
-                : TaskIntervalConfigType.second
-            : TaskIntervalConfigType.day,
-        task_start_time: task_start_time ? dayjs(task_start_time * 1000) : undefined,
-        task_end_time: task_end_time ? dayjs(task_end_time * 1000) : undefined,
-        day: isDay ? time_interval! / 86400 : undefined,
-        second: time_interval && !isDay ? time_interval : undefined,
-        ...extra,
-    };
-};
 
 const convertFormData = (values: IFormData) => {
     const {
@@ -70,11 +57,25 @@ const convertFormData = (values: IFormData) => {
         task_name,
         update_item,
         channel,
+        channel_type,
+        source_price_min,
+        source_price_max,
+        source_sales_max,
+        source_sales_min,
+        channel_sales_min,
+        channel_sales_max,
     } = values;
     return {
-        channel,
+        platform: channel,
         task_name,
-        ranges: ranges,
+        channel_type,
+        source_price_min: toNumber(source_price_min),
+        source_price_max: toNumber(source_price_max),
+        source_sales_max: toNumber(source_sales_max),
+        source_sales_min: toNumber(source_sales_min),
+        channel_sales_min: toNumber(channel_sales_min),
+        channel_sales_max: toNumber(channel_sales_max),
+        ranges: ranges ? (Array.isArray(ranges) ? ranges : [ranges]) : undefined,
         update_item,
         task_start_time: dateToUnix(task_start_time),
         task_end_time: dateToUnix(task_end_time),
@@ -87,10 +88,6 @@ const convertFormData = (values: IFormData) => {
 
 const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
     const [form] = Form.useForm();
-    const [queryLoading, setQueryLoading] = useState(taskId !== void 0);
-    const [status, setStatus] = useState<TaskStatusCode>(); // 详情保留字段
-    const [successTimes, setSuccessTimes] = useState<number>(); // 详情保留字段
-    const [failTimes, setFailTimes] = useState<number>(); // 详情保留字段
 
     const [channelList, setChannelList] = useState<
         Array<{
@@ -102,29 +99,7 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
     useEffect(() => {
         queryGoodsSourceList().then((list = EmptyArray) => {
             setChannelList(list);
-            form.setFieldsValue({
-                channel: list[0].value,
-            }); // 初始值
         });
-    }, []);
-
-    useEffect(() => {
-        if (taskId !== void 0) {
-            queryTaskDetail(taskId)
-                .then(({ data: { task_detail_info = {} } = {} } = EmptyObject) => {
-                    const initValues = convertDetail(task_detail_info as ITaskDetailInfo);
-                    const { success, fail, status } = initValues;
-                    form.setFieldsValue({
-                        ...initValues,
-                    });
-                    setStatus(status);
-                    setSuccessTimes(success);
-                    setFailTimes(fail);
-                })
-                .finally(() => {
-                    setQueryLoading(false);
-                });
-        }
     }, []);
 
     const onCreate = useCallback(() => {
@@ -135,9 +110,6 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
                 return addPDDTimerUpdateTask(params)
                     .then(({ data = EmptyObject } = EmptyObject) => {
                         form.resetFields();
-                        form.setFieldsValue({
-                            channel: channelList[0]?.value,
-                        });
                         showSuccessModal(data);
                     })
                     .catch(() => {
@@ -208,293 +180,393 @@ const TimerUpdate: React.FC<ITimerUpdateProps> = ({ taskId }) => {
     }, []);
     const edit = taskId !== void 0;
 
+    const g_normalise = useCallback((list: Array<{ name: string; value: string }>) => {
+        return (value: StoreValue, prevValue: StoreValue, prevValues: Store) => {
+            const defaultValue = '';
+            if (
+                value === defaultValue ||
+                (Array.isArray(value) && value.indexOf(defaultValue) > -1)
+            ) {
+                return list.map(({ value }) => value);
+            } else {
+                return value;
+            }
+        };
+    }, []);
+
     return useMemo(() => {
         return (
-            <Spin spinning={queryLoading} tip="Loading...">
-                <Form
-                    form={form}
-                    className={classNames(formStyles.formHelpAbsolute, formStyles.formContainer)}
-                    layout="horizontal"
-                    autoComplete={'off'}
-                    initialValues={{
-                        ranges: [PUTaskRangeType.HasSales],
-                        taskIntervalType: TaskIntervalConfigType.day,
-                        day: 1,
-                        update_item: UpdateItemType.All,
+            <Form
+                form={form}
+                className={classNames(formStyles.formHelpAbsolute, formStyles.formContainer)}
+                layout="horizontal"
+                autoComplete={'off'}
+                initialValues={{
+                    taskIntervalType: TaskIntervalConfigType.day,
+                    day: 1,
+                    update_item: UpdateItemType.All,
+                }}
+            >
+                <Form.Item
+                    className={formStyles.formItem}
+                    validateTrigger={'onBlur'}
+                    name="task_name"
+                    label="任务名称"
+                    validateFirst={true}
+                    rules={[
+                        {
+                            required: true,
+                            message: '请输入任务名称',
+                        },
+                    ]}
+                >
+                    <Input className="picker-default" />
+                </Form.Item>
+                <Form.Item
+                    className={formStyles.formItem}
+                    validateTrigger={'onBlur'}
+                    name="channel"
+                    label="商品渠道"
+                    validateFirst={true}
+                    rules={[
+                        {
+                            required: true,
+                            message: '请选择商品渠道',
+                        },
+                    ]}
+                    normalize={g_normalise(channelList)}
+                >
+                    <TreeSelect
+                        className="picker-default"
+                        treeNodeLabelProp="name"
+                        treeCheckable={true}
+                        treeDefaultExpandAll={true}
+                        showArrow={true}
+                        showCheckedStrategy={'SHOW_PARENT'}
+                        treeNodeFilterProp={'title'}
+                        dropdownClassName={formStyles.customTreeSelect}
+                        choiceTransitionName={''} //禁用动画
+                        loading={!channelList.length}
+                        placeholder="请选择"
+                        treeData={[
+                            {
+                                name: '全部',
+                                value: '',
+                                children: channelList,
+                            },
+                        ]}
+                    />
+                </Form.Item>
+                <Form.Item
+                    validateTrigger={'onBlur'}
+                    name="channel_type"
+                    label="商品条件"
+                    className={formStyles.formItem}
+                    rules={[
+                        {
+                            required: true,
+                            message: '请选择商品条件',
+                        },
+                    ]}
+                    initialValue="sale_channel"
+                >
+                    <Radio.Group>
+                        <Radio value="sale_channel">渠道商品条件</Radio>
+                        <Radio value="source_channel">爬虫商品条件</Radio>
+                    </Radio.Group>
+                </Form.Item>
+                <Form.Item
+                    noStyle={true}
+                    shouldUpdate={(prevValues, currentValues) => {
+                        return prevValues['channel_type'] !== currentValues['channel_type'];
                     }}
                 >
-                    <Form.Item
-                        className={formStyles.formItem}
-                        validateTrigger={'onBlur'}
-                        name="task_name"
-                        label="任务名称"
-                        validateFirst={true}
-                        rules={[
-                            {
-                                required: true,
-                                message: '请输入任务名称',
-                            },
-                        ]}
-                    >
-                        <Input className="picker-default" />
-                    </Form.Item>
-                    <Form.Item
-                        className={formStyles.formItem}
-                        validateTrigger={'onBlur'}
-                        name="channel"
-                        label="商品渠道"
-                        validateFirst={true}
-                        rules={[
-                            {
-                                required: true,
-                                message: '请选择商品渠道',
-                            },
-                        ]}
-                    >
-                        <Select className="picker-default">
-                            {channelList.map(({ name, value }) => (
-                                <Select.Option key={value} value={value}>
-                                    {name}
-                                </Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        name="ranges"
-                        label="商品条件"
-                        className={formStyles.formItem}
-                        rules={[
-                            {
-                                required: true,
-                                message: '请选择商品条件',
-                            },
-                        ]}
-                    >
-                        <Checkbox.Group>
-                            <Checkbox value={PUTaskRangeType.HasSales}>有销量商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.AllOnShelves}>在架商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.NoSalesOff}>未在架商品</Checkbox>
-                            {/*
-                            <Checkbox value={PUTaskRangeType.HasSalesOn}>有销量在架商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.NoSalesOn}>无销量在架商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.HasSalesOff}>有销量下架商品</Checkbox>
-                            <Checkbox value={PUTaskRangeType.NoSalesOff}>无销量下架商品</Checkbox>*/}
-                        </Checkbox.Group>
-                    </Form.Item>
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        name="update_item"
-                        label="更新字段"
-                        required={true}
-                        className={formStyles.formItem}
-                    >
-                        <Radio.Group>
-                            <Radio value={UpdateItemType.All}>全部</Radio>
-                            <Radio value={UpdateItemType.IgnoreImage}>不含图片</Radio>
-                        </Radio.Group>
-                    </Form.Item>
-                    <div>
-                        <Form.Item
-                            label="开始时间"
-                            validateTrigger={'onChange'}
-                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
-                            name="task_start_time"
-                            dependencies={['task_end_time']}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: '请选择开始时间',
-                                },
-                                {
-                                    validator: checkStartDate,
-                                },
-                            ]}
-                        >
-                            <DatePicker
-                                className="picker-default"
-                                locale={locale}
-                                showTime={true}
-                                disabledDate={disabledStartDate}
-                            />
-                        </Form.Item>
-                        <Form.Item
-                            validateTrigger={'onChange'}
-                            label="结束时间"
-                            name="task_end_time"
-                            dependencies={['task_start_time']}
-                            className={classNames(formStyles.formItem, formStyles.formHorizon)}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: '请选择结束时间',
-                                },
-                                {
-                                    validator: checkEndDate,
-                                },
-                            ]}
-                        >
-                            <DatePicker
-                                className="picker-default"
-                                locale={locale}
-                                showTime={true}
-                                disabledDate={disabledEndDate}
-                            />
-                        </Form.Item>
-                    </div>
-                    <Form.Item
-                        validateTrigger={'onBlur'}
-                        label="任务间隔"
-                        name="taskIntervalType"
-                        className={formStyles.formItem}
-                        required={true}
-                    >
-                        <Radio.Group>
-                            <Radio value={TaskIntervalConfigType.day}>
+                    {({ getFieldValue }) => {
+                        const type = getFieldValue('channel_type');
+                        if (type === 'source_channel') {
+                            return (
                                 <div
-                                    className={classNames(
-                                        formStyles.inlineBlock,
-                                        formStyles.verticalMiddle,
-                                    )}
+                                    style={{
+                                        backgroundColor: 'rgba(0,0,0,0.1)',
+                                        display: 'inline-flex',
+                                    }}
                                 >
+                                    <PriceRange
+                                        form={form}
+                                        label="爬虫价格"
+                                        name={['source_price_min', 'source_price_max']}
+                                    />
+                                    <SalesRange
+                                        form={form}
+                                        label="爬虫销量"
+                                        name={['source_sales_min', 'source_sales_max']}
+                                    />
+                                </div>
+                            );
+                        } else {
+                            return (
+                                <div style={{ backgroundColor: 'rgba(0,0,0,0.1)', width: 400 }}>
+                                    <div style={{ paddingLeft: 6 }}>
+                                        <Form.Item
+                                            validateTrigger={'onBlur'}
+                                            name="ranges"
+                                            className={formStyles.formItem}
+                                            initialValue={PUTaskRangeType.HasSales}
+                                            rules={[
+                                                {
+                                                    required: true,
+                                                    message: '请选择商品条件',
+                                                },
+                                            ]}
+                                        >
+                                            <Radio.Group>
+                                                <Radio value={PUTaskRangeType.HasSales}>
+                                                    有销量商品
+                                                </Radio>
+                                                <Radio value={PUTaskRangeType.AllOnShelves}>
+                                                    在架商品
+                                                </Radio>
+                                                <Radio value={PUTaskRangeType.NoSalesOff}>
+                                                    未在架商品
+                                                </Radio>
+                                            </Radio.Group>
+                                        </Form.Item>
+                                    </div>
+
                                     <Form.Item
-                                        className={classNames(
-                                            formStyles.formItemClean,
-                                            formStyles.flexInline,
-                                        )}
-                                        shouldUpdate={(prevValues, currentValues) =>
-                                            prevValues.taskIntervalType !==
-                                            currentValues.taskIntervalType
-                                        }
+                                        noStyle={true}
+                                        shouldUpdate={(prevValues, currentValues) => {
+                                            return prevValues['ranges'] !== currentValues['ranges'];
+                                        }}
                                     >
                                         {({ getFieldValue }) => {
-                                            const taskIntervalType = getFieldValue(
-                                                'taskIntervalType',
-                                            );
-                                            return (
-                                                <React.Fragment>
-                                                    <Form.Item
-                                                        validateTrigger={'onBlur'}
-                                                        name="day"
-                                                        className={classNames(
-                                                            formStyles.formItemClean,
-                                                            formStyles.inlineBlock,
-                                                            formStyles.verticalMiddle,
-                                                        )}
-                                                        rules={[
-                                                            {
-                                                                required:
-                                                                    taskIntervalType ===
-                                                                    TaskIntervalConfigType.day,
-                                                                message: '请输入间隔天数',
-                                                            },
+                                            const ranges = getFieldValue('ranges');
+                                            if (ranges === PUTaskRangeType.HasSales) {
+                                                return (
+                                                    <SalesRange
+                                                        form={form}
+                                                        label="渠道销量"
+                                                        name={[
+                                                            'channel_sales_min',
+                                                            'channel_sales_max',
                                                         ]}
-                                                    >
-                                                        <RichInput
-                                                            richType="positiveInteger"
-                                                            className="input-small"
-                                                            disabled={
-                                                                taskIntervalType !==
-                                                                TaskIntervalConfigType.day
-                                                            }
-                                                        />
-                                                    </Form.Item>
-                                                    <span
-                                                        className={classNames(
-                                                            formStyles.formUnit,
-                                                            formStyles.inlineBlock,
-                                                            formStyles.verticalMiddle,
-                                                        )}
-                                                    >
-                                                        天
-                                                    </span>
-                                                </React.Fragment>
-                                            );
+                                                    />
+                                                );
+                                            } else {
+                                                return null;
+                                            }
                                         }}
                                     </Form.Item>
                                 </div>
-                            </Radio>
-                            <Radio value={TaskIntervalConfigType.second}>
-                                <div
-                                    className={classNames(
-                                        formStyles.inlineBlock,
-                                        formStyles.verticalMiddle,
-                                    )}
-                                >
-                                    <Form.Item
-                                        className={classNames(
-                                            formStyles.formItemClean,
-                                            formStyles.flexInline,
-                                        )}
-                                        shouldUpdate={(prevValues, currentValues) =>
-                                            prevValues.taskIntervalType !==
-                                            currentValues.taskIntervalType
-                                        }
-                                    >
-                                        {({ getFieldValue }) => {
-                                            const taskIntervalType = getFieldValue(
-                                                'taskIntervalType',
-                                            );
-                                            return (
-                                                <React.Fragment>
-                                                    <Form.Item
-                                                        validateTrigger={'onBlur'}
-                                                        name="second"
-                                                        rules={[
-                                                            {
-                                                                required:
-                                                                    taskIntervalType ===
-                                                                    TaskIntervalConfigType.second,
-                                                                message: '请输入间隔秒数',
-                                                            },
-                                                        ]}
-                                                        className={classNames(
-                                                            formStyles.formItemClean,
-                                                            formStyles.inlineBlock,
-                                                            formStyles.verticalMiddle,
-                                                        )}
-                                                    >
-                                                        <RichInput
-                                                            richType="positiveInteger"
-                                                            className="input-small"
-                                                            disabled={
-                                                                taskIntervalType !==
-                                                                TaskIntervalConfigType.second
-                                                            }
-                                                        />
-                                                    </Form.Item>
-                                                    <span
-                                                        className={classNames(
-                                                            formStyles.formUnit,
-                                                            formStyles.inlineBlock,
-                                                            formStyles.verticalMiddle,
-                                                        )}
-                                                    >
-                                                        秒
-                                                    </span>
-                                                </React.Fragment>
-                                            );
-                                        }}
-                                    </Form.Item>
-                                </div>
-                            </Radio>
-                        </Radio.Group>
+                            );
+                        }
+                    }}
+                </Form.Item>
+
+                <Form.Item
+                    validateTrigger={'onBlur'}
+                    name="update_item"
+                    label="更新字段"
+                    required={true}
+                    className={formStyles.formItem}
+                >
+                    <Radio.Group>
+                        <Radio value={UpdateItemType.All}>全部</Radio>
+                        <Radio value={UpdateItemType.IgnoreImage}>不含图片</Radio>
+                    </Radio.Group>
+                </Form.Item>
+                <div>
+                    <Form.Item
+                        label="开始时间"
+                        validateTrigger={'onChange'}
+                        className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                        name="task_start_time"
+                        dependencies={['task_end_time']}
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择开始时间',
+                            },
+                            {
+                                validator: checkStartDate,
+                            },
+                        ]}
+                    >
+                        <DatePicker
+                            className="picker-default"
+                            locale={locale}
+                            showTime={true}
+                            disabledDate={disabledStartDate}
+                        />
                     </Form.Item>
-                    <div className={formStyles.formNextCard}>
-                        <PermissionComponent pid={'task/config/update'} control={'tooltip'}>
-                            <LoadingButton
-                                type="primary"
-                                className="btn-default"
-                                onClick={onCreate}
+                    <Form.Item
+                        validateTrigger={'onChange'}
+                        label="结束时间"
+                        name="task_end_time"
+                        dependencies={['task_start_time']}
+                        className={classNames(formStyles.formItem, formStyles.formHorizon)}
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择结束时间',
+                            },
+                            {
+                                validator: checkEndDate,
+                            },
+                        ]}
+                    >
+                        <DatePicker
+                            className="picker-default"
+                            locale={locale}
+                            showTime={true}
+                            disabledDate={disabledEndDate}
+                        />
+                    </Form.Item>
+                </div>
+                <Form.Item
+                    validateTrigger={'onBlur'}
+                    label="任务间隔"
+                    name="taskIntervalType"
+                    className={formStyles.formItem}
+                    required={true}
+                >
+                    <Radio.Group>
+                        <Radio value={TaskIntervalConfigType.day}>
+                            <div
+                                className={classNames(
+                                    formStyles.inlineBlock,
+                                    formStyles.verticalMiddle,
+                                )}
                             >
-                                {edit ? '创建新任务' : '创建任务'}
-                            </LoadingButton>
-                        </PermissionComponent>
-                    </div>
-                </Form>
-            </Spin>
+                                <Form.Item
+                                    className={classNames(
+                                        formStyles.formItemClean,
+                                        formStyles.flexInline,
+                                    )}
+                                    shouldUpdate={(prevValues, currentValues) =>
+                                        prevValues.taskIntervalType !==
+                                        currentValues.taskIntervalType
+                                    }
+                                >
+                                    {({ getFieldValue }) => {
+                                        const taskIntervalType = getFieldValue('taskIntervalType');
+                                        return (
+                                            <React.Fragment>
+                                                <Form.Item
+                                                    validateTrigger={'onBlur'}
+                                                    name="day"
+                                                    className={classNames(
+                                                        formStyles.formItemClean,
+                                                        formStyles.inlineBlock,
+                                                        formStyles.verticalMiddle,
+                                                    )}
+                                                    rules={[
+                                                        {
+                                                            required:
+                                                                taskIntervalType ===
+                                                                TaskIntervalConfigType.day,
+                                                            message: '请输入间隔天数',
+                                                        },
+                                                    ]}
+                                                >
+                                                    <RichInput
+                                                        richType="positiveInteger"
+                                                        className="input-small"
+                                                        disabled={
+                                                            taskIntervalType !==
+                                                            TaskIntervalConfigType.day
+                                                        }
+                                                    />
+                                                </Form.Item>
+                                                <span
+                                                    className={classNames(
+                                                        formStyles.formUnit,
+                                                        formStyles.inlineBlock,
+                                                        formStyles.verticalMiddle,
+                                                    )}
+                                                >
+                                                    天
+                                                </span>
+                                            </React.Fragment>
+                                        );
+                                    }}
+                                </Form.Item>
+                            </div>
+                        </Radio>
+                        <Radio value={TaskIntervalConfigType.second}>
+                            <div
+                                className={classNames(
+                                    formStyles.inlineBlock,
+                                    formStyles.verticalMiddle,
+                                )}
+                            >
+                                <Form.Item
+                                    className={classNames(
+                                        formStyles.formItemClean,
+                                        formStyles.flexInline,
+                                    )}
+                                    shouldUpdate={(prevValues, currentValues) =>
+                                        prevValues.taskIntervalType !==
+                                        currentValues.taskIntervalType
+                                    }
+                                >
+                                    {({ getFieldValue }) => {
+                                        const taskIntervalType = getFieldValue('taskIntervalType');
+                                        return (
+                                            <React.Fragment>
+                                                <Form.Item
+                                                    validateTrigger={'onBlur'}
+                                                    name="second"
+                                                    rules={[
+                                                        {
+                                                            required:
+                                                                taskIntervalType ===
+                                                                TaskIntervalConfigType.second,
+                                                            message: '请输入间隔秒数',
+                                                        },
+                                                    ]}
+                                                    className={classNames(
+                                                        formStyles.formItemClean,
+                                                        formStyles.inlineBlock,
+                                                        formStyles.verticalMiddle,
+                                                    )}
+                                                >
+                                                    <RichInput
+                                                        richType="positiveInteger"
+                                                        className="input-small"
+                                                        disabled={
+                                                            taskIntervalType !==
+                                                            TaskIntervalConfigType.second
+                                                        }
+                                                    />
+                                                </Form.Item>
+                                                <span
+                                                    className={classNames(
+                                                        formStyles.formUnit,
+                                                        formStyles.inlineBlock,
+                                                        formStyles.verticalMiddle,
+                                                    )}
+                                                >
+                                                    秒
+                                                </span>
+                                            </React.Fragment>
+                                        );
+                                    }}
+                                </Form.Item>
+                            </div>
+                        </Radio>
+                    </Radio.Group>
+                </Form.Item>
+                <div className={formStyles.formNextCard}>
+                    <PermissionComponent pid={'task/config/update'} control={'tooltip'}>
+                        <LoadingButton type="primary" className="btn-default" onClick={onCreate}>
+                            {edit ? '创建新任务' : '创建任务'}
+                        </LoadingButton>
+                    </PermissionComponent>
+                </div>
+            </Form>
         );
-    }, [queryLoading, edit, channelList]);
+    }, [edit, channelList]);
 };
 
 export default TimerUpdate;
