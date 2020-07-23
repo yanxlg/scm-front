@@ -13,7 +13,7 @@ import GatherInfo from './GatherInfo';
 import StyleForm, { getQueryVariable } from './StylesForm';
 import { useDispatch, useSelector } from '@@/plugin-dva/exports';
 import { ConnectState } from '@/models/connect';
-import SimilarTable from './SimilarTable';
+import SimilarTable from '@/components/SimilarTable/SimilarTable';
 
 declare interface SimilarStyleModalProps {
     visible:

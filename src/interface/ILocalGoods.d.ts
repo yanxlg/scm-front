@@ -93,6 +93,11 @@ export interface IGoodsList {
     source_channel: string;
     _type?: string;
     origin?: string;
+    is_sell_out?: string;
+    is_presale?: string;
+    is_oversea?: string;
+    is_not_mergepay?: string;
+    is_blacklist_shop?: string;
 }
 
 export type IGoodsAndSkuItem = IGoodsList & ISkuItem;

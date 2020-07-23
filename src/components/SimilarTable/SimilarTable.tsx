@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Table, Pagination } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 
-import similarStyles from './_similar.less';
+import similarStyles from './_SimilarTable.less';
 import { querySimilarGoodsList } from '@/services/order-manage';
 import { ISimilarGoodsItem } from '@/interface/IOrder';
 import { AutoEnLargeImg } from 'react-components';
