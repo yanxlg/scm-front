@@ -71,6 +71,7 @@ const SimilarTable: React.FC<IProps> = ({ commodityId }) => {
                 dataIndex: 'similar',
                 width: 130,
                 align: 'center',
+                render: val => (Number(val) * 100).toFixed(2) + '%',
             },
             {
                 title: '销售状态',
