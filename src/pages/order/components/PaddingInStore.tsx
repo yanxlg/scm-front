@@ -43,6 +43,7 @@ import TrackDialog from '@/pages/order/components/TrackDialog';
 import { IChildOrderItem } from '@/pages/order/components/PaneAll';
 import { PermissionComponent } from 'rc-permission';
 import { useDispatch } from '@@/plugin-dva/exports';
+import SimilarStyleModal from './similarStyle/SimilarStyleModal';
 
 const configFields = [
     'order_goods_status1',
@@ -107,6 +108,22 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
         });
     }, []);
 
+    const [similarModal, showSimilarModal, hideSimilarModal] = useModal2<{
+        order_goods_id: string;
+        purchase_plan_id: string;
+        commodity_id: string;
+    }>();
+
+    const similarModalComponent = useMemo(() => {
+        return (
+            <SimilarStyleModal
+                visible={similarModal}
+                onClose={hideSimilarModal}
+                onReload={onSearch}
+            />
+        );
+    }, [similarModal]);
+
     const columns = useMemo<ColumnType<IFlatOrderItem & CombineRowItem>[]>(() => {
         return [
             {
@@ -117,6 +134,8 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 width: 150,
                 fixed: 'left',
                 render: (value: string, item) => {
+                    const status = Number(item.similarGoodsStatus);
+                    const isRealDelivery = Number(item.isRealDelivery);
                     return (
                         <>
                             <PermissionComponent pid="order/cancel_purchase" control="tooltip">
@@ -146,6 +165,55 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                                     查看物流轨迹
                                 </Button>
                             </PermissionComponent>
+                            {isRealDelivery === 1 ? (
+                                status === 0 ? (
+                                    <PermissionComponent pid="order/similar_pay" control="tooltip">
+                                        <Button
+                                            type="link"
+                                            onClick={() =>
+                                                showSimilarModal({
+                                                    order_goods_id: item.orderGoodsId as string,
+                                                    purchase_plan_id: item.purchasePlanId as string,
+                                                    commodity_id: item.commodityId as string,
+                                                })
+                                            }
+                                        >
+                                            相似款代拍
+                                        </Button>
+                                    </PermissionComponent>
+                                ) : status === 1 || status === 5 ? (
+                                    <PermissionComponent pid="order/similar_pay" control="tooltip">
+                                        <Button
+                                            type="link"
+                                            onClick={() =>
+                                                showSimilarModal({
+                                                    order_goods_id: item.orderGoodsId as string,
+                                                    purchase_plan_id: item.purchasePlanId as string,
+                                                    commodity_id: item.commodityId as string,
+                                                })
+                                            }
+                                        >
+                                            代拍详情-爬取中
+                                        </Button>
+                                    </PermissionComponent>
+                                ) : status === 3 ? (
+                                    <PermissionComponent pid="order/similar_pay" control="tooltip">
+                                        <Button
+                                            type="link"
+                                            danger={true}
+                                            onClick={() =>
+                                                showSimilarModal({
+                                                    order_goods_id: item.orderGoodsId as string,
+                                                    purchase_plan_id: item.purchasePlanId as string,
+                                                    commodity_id: item.commodityId as string,
+                                                })
+                                            }
+                                        >
+                                            代拍详情-爬取失败
+                                        </Button>
+                                    </PermissionComponent>
+                                ) : null
+                            ) : null}
                         </>
                     );
                 },
@@ -231,6 +299,17 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                 dataIndex: 'purchasePlatformOrderId',
                 align: 'center',
                 width: 150,
+                render: (_, item) => {
+                    const isRealDelivery = Number(item.isRealDelivery);
+                    return (
+                        <>
+                            {_}
+                            {isRealDelivery === 1 ? (
+                                <div style={{ color: 'red' }}>虚假发货</div>
+                            ) : null}
+                        </>
+                    );
+                },
             },
             {
                 key: 'payTime',
@@ -333,20 +412,20 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                         },
                         formatter: 'join',
                     },
-                    /*   {
+                    {
                         type: 'checkboxGroup',
-                        name: 'more_shipping_time',
+                        name: 'is_real_delivery',
                         options: [
                             {
-                                label: '72小时无状态更新',
-                                value: 72,
+                                label: '虚假发货',
+                                value: 1,
                             },
                         ],
                         onChange: (name: string, form: FormInstance) => {
                             onSearch();
                         },
                         formatter: 'firstNumber',
-                    },*/
+                    },
                 ]}
                 labelClassName="order-label"
             />
@@ -517,9 +596,10 @@ const PendingInStore = ({ updateCount }: PendingInStoreProps) => {
                     lastWaybillNo={trackModal ? trackModal.lastWaybillNo || '' : ''}
                     hideTrackDetail={closeTRackModal}
                 />
+                {similarModalComponent}
             </div>
         );
-    }, [update, flatList, loading, selectedRowKeys, trackModal, exportModal]);
+    }, [update, flatList, loading, selectedRowKeys, trackModal, exportModal, similarModal]);
 };
 
 export default PendingInStore;
