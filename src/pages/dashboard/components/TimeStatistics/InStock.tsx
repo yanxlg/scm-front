@@ -196,15 +196,17 @@ const InStock: React.FC = ({}) => {
 
         monitorPurchaseOrder?.forEach((item: IMonitorPurchaseOrderItem) => {
             const { dayNum, orderTime, ...rest } = item;
-            !dayMap[dayNum] && (dayMap[dayNum] = []);
-            dayMap[dayNum].push({
-                ...rest,
-                dayNum,
-                orderTime: orderTime.substr(0, 10),
-            });
+            if (Number(dayNum) <= 15) {
+                !dayMap[dayNum] && (dayMap[dayNum] = []);
+                dayMap[dayNum].push({
+                    ...rest,
+                    dayNum,
+                    orderTime: orderTime.substr(0, 10),
+                });
+            }
         });
 
-        const dayKeys = Object.keys(dayMap);
+        const dayKeys = Object.keys(dayMap).filter(num => Number(num) <= 15);
 
         const legendData = dayKeys.map(item => `${item}天`);
 

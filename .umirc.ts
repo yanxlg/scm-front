@@ -4,7 +4,6 @@
  */
 import { defineConfig } from 'umi';
 import path from 'path';
-
 const shajs = require('sha.js');
 
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
@@ -74,15 +73,6 @@ const config = defineConfig({
                 libraryName: 'react-components',
                 camel2DashComponentName: false,
                 customName: (name: string) => {
-                    /*  if (useComponentByLocal) {
-                        if (/^use/.test(name)) {
-                            return path.resolve(
-                                process.cwd(),
-                                `../react-components/src/hooks/${name}`,
-                            );
-                        }
-                        return path.resolve(process.cwd(), `../react-components/src/${name}`);
-                    }*/
                     if (/^use/.test(name)) {
                         return `react-components/es/hooks/${name}`;
                     }
@@ -95,7 +85,7 @@ const config = defineConfig({
     cssLoader: {
         localsConvention: 'camelCaseOnly',
         modules: {
-            auto: /(_[a-zA-Z\.\-_0-9]+\.less$)|([a-zA-Z\.\-_0-9]+\.module\.less$)/, // 仅符合要求的文件生成module，减少code体积
+            auto: /_[a-zA-Z\.\-_0-9]+\.less$/, // 仅符合要求的文件生成module，减少code体积
             getLocalIdent: (
                 context: {
                     resourcePath: string;
@@ -105,10 +95,7 @@ const config = defineConfig({
             ) => {
                 const { resourcePath } = context;
 
-                if (
-                    /_[a-zA-Z\.\-_0-9]+\.less$/.test(resourcePath) ||
-                    /[a-zA-Z\.\-_0-9]+\.module\.less$/.test(resourcePath)
-                ) {
+                if (/_[a-zA-Z\.\-_0-9]+\.less$/.test(resourcePath)) {
                     const match =
                         resourcePath.match(/src(.*)/) || resourcePath.match(/node_modules(.*)/);
                     if (match && match[1]) {
@@ -121,7 +108,6 @@ const config = defineConfig({
                     }
                     // support node_modules
                 }
-
                 return localName;
             },
         },

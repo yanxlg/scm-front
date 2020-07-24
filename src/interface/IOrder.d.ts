@@ -221,6 +221,8 @@ interface IPurchasePlan {
     taskId: string;
     cancelType: string;
     waybillTrail: string;
+    similarGoodsStatus: number;
+    isRealDelivery: number;
 }
 
 interface IOrderItemExtend {
