@@ -7,6 +7,7 @@ import {
     getGoodsMergeList,
     putGoodsMergeAdd,
 } from '@/services/goods';
+import SimilarTable from '@/components/SimilarTable/SimilarTable';
 
 const { TextArea } = Input;
 
@@ -208,7 +209,8 @@ const GoodsMergeModal: React.FC<IProps> = ({
                     disabled: !commodityIds || loading,
                 }}
             >
-                <div className="text-center">
+                {/* className="text-center" */}
+                <div>
                     {currentSn ? (
                         <Table
                             bordered
@@ -226,6 +228,7 @@ const GoodsMergeModal: React.FC<IProps> = ({
                         value={commodityIds}
                         onChange={e => setCommodityIds(e.target.value.replace(/\s+/g, ''))}
                     />
+                    <SimilarTable commodityId={commodityId} />
                 </div>
             </Modal>
         );

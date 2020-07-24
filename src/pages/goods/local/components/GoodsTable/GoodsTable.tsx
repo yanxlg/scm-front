@@ -348,9 +348,29 @@ const GoodsTable: React.FC<IProps> = ({
                 title: '销售状态',
                 dataIndex: 'inventory_status',
                 align: 'center',
-                width: 100,
-                render: (value: number) => {
-                    return value === 1 ? '可销售' : '不可销售';
+                width: 140,
+                render: (value: number, record) => {
+                    const reasonList: string[] = [];
+                    const {
+                        is_sell_out,
+                        is_presale,
+                        is_oversea,
+                        is_not_mergepay,
+                        is_blacklist_shop,
+                    } = record;
+                    String(is_sell_out) === '1' && reasonList.push('商品售罄');
+                    String(is_presale) === '1' && reasonList.push('海淘');
+                    String(is_oversea) === '1' && reasonList.push('预售');
+                    String(is_not_mergepay) === '1' && reasonList.push('不可合并');
+                    String(is_blacklist_shop) === '1' && reasonList.push('黑名单店铺');
+                    return value === 1 ? (
+                        '可销售'
+                    ) : (
+                        <>
+                            不可销售
+                            {reasonList.length > 0 ? <div>({reasonList.join(', ')})</div> : null}
+                        </>
+                    );
                 },
             },
             {

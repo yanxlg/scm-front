@@ -3,12 +3,7 @@ import { Button } from 'antd';
 import { JsonForm, LoadingButton, useList } from 'react-components';
 import { JsonFormRef, FormField } from 'react-components/es/JsonForm';
 import Container from '@/components/Container';
-import {
-    defaultOption,
-    inventoryStatusList,
-    versionStatusList,
-    publishChannelStatusList,
-} from '@/enums/LocalGoodsEnum';
+import { defaultOption, inventoryStatusList, versionStatusList } from '@/enums/LocalGoodsEnum';
 import { EmptyObject } from '@/config/global';
 import { getGoodsList, getCatagoryList, getGoodsStatusList } from '@/services/goods';
 import { IGoodsList, IGoodsAndSkuItem } from '@/interface/ILocalGoods';
@@ -18,6 +13,7 @@ import styles from './_index.less';
 import formStyles from 'react-components/es/JsonForm/_form.less';
 import { queryGoodsSourceList } from '@/services/global';
 import { PermissionRouterWrap } from 'rc-permission';
+import { getPlatformAndStore } from '@/services/dashboard';
 
 const initialValues = {
     inventory_status: '',
@@ -48,6 +44,21 @@ const LocalPage: React.FC = props => {
     } = useList({
         formRef: formRef,
         queryList: getGoodsList,
+        convertQuery: (params: any) => {
+            // console.log(11111111, params);
+            const { inventory_status, ...rest } = params;
+            let status = '';
+            let reason = '';
+            if (inventory_status) {
+                status = inventory_status[0];
+                reason = inventory_status[1] || '';
+            }
+            return {
+                ...rest,
+                inventory_status: status,
+                not_sale_reason: reason,
+            };
+        },
     });
 
     const goodsList = useMemo<IGoodsAndSkuItem[]>(() => {
@@ -109,8 +120,9 @@ const LocalPage: React.FC = props => {
                 label: '上架渠道',
                 name: 'publish_channel',
                 className: styles.input,
-                formatter: 'number',
-                optionList: [defaultOption, ...publishChannelStatusList],
+                // formatter: 'number',
+                syncDefaultOption: defaultOption,
+                optionList: () => getPlatformAndStore(),
             },
             {
                 type: 'select',
@@ -125,12 +137,46 @@ const LocalPage: React.FC = props => {
                 },
             },
             {
-                type: 'select',
                 label: '销售状态',
+                type: 'cascader',
                 name: 'inventory_status',
                 className: styles.input,
-                formatter: 'number',
-                optionList: [defaultOption, ...inventoryStatusList],
+                options: [
+                    {
+                        label: '不可销售',
+                        value: 1,
+                        children: [
+                            {
+                                label: '全部',
+                                value: '',
+                            },
+                            {
+                                label: '商品售罄',
+                                value: 11,
+                            },
+                            {
+                                label: '海淘',
+                                value: 12,
+                            },
+                            {
+                                label: '预售',
+                                value: 13,
+                            },
+                            {
+                                label: '不可合并',
+                                value: 14,
+                            },
+                            {
+                                label: '黑名单店铺',
+                                value: 15,
+                            },
+                        ],
+                    },
+                    {
+                        label: '可销售',
+                        value: 2,
+                    },
+                ],
             },
             {
                 type: 'select',

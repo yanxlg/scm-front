@@ -16,6 +16,6 @@
             "@@/*": ["src/.umi/*", "src/.umi-production/*"]
         },
         "allowSyntheticDefaultImports": true
-    },
-    "include": ["../react-components/src"]
+    }
+    // "include": ["../react-components/src"]
 }
